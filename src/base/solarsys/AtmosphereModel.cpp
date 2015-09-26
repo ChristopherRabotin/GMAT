@@ -275,8 +275,6 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    for (Integer i = 0; i < 7; i++)
       ap[i] = am.ap[i];
 
-
-
    return *this;
 }
 
@@ -1596,6 +1594,26 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
             (fluxReaderLoaded ? "true" : "false"));
    #endif
 
+   // Process the epoch information
+   Integer iEpoch = (Integer)(epoch);  // Truncate the epoch
+   Integer yearOffset = (Integer)((epoch + 5.5) / GmatTimeConstants::DAYS_PER_YEAR);
+   Integer year   = 1941 + yearOffset;
+   Integer doy = iEpoch - (Integer)(yearOffset * GmatTimeConstants::DAYS_PER_YEAR) + 5;
+
+   sod  = GmatTimeConstants::SECS_PER_DAY * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
+   if (sod < 0.0)
+   {
+      sod += GmatTimeConstants::SECS_PER_DAY;
+      doy -= 1;
+   }
+
+   if (sod > GmatTimeConstants::SECS_PER_DAY)
+   {
+      sod -= GmatTimeConstants::SECS_PER_DAY;
+      doy += 1;
+   }
+   yd = year*1000 + doy;
+
    if (!fluxReaderLoaded)
    {
       std::string theObsFile = "", thePredictFile = "";
@@ -1727,7 +1745,6 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
       MessageInterface::ShowMessage("   Ap:     [%lf %lf %lf %lf %lf %lf %lf]\n", ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
    #endif
 }
-
 
 
 std::string AtmosphereModel::GetCentralBodyName()

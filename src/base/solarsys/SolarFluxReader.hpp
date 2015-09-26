@@ -112,6 +112,11 @@ private:
    /// Flag used to indicate that the "Too late" warning not yet issued
    bool warnEpochAfter;
 
+   /// Epoch reference point for when the F10.7 observations changed location
+   GmatEpoch f107RefEpoch;
+   /// Flag used to toggle interpolation of the f10.7 values
+   bool interpolateFlux;
+
    bool LoadObsData();
    bool LoadPredictData();
    Real ConvertApToKp(Real ap);

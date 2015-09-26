@@ -38,85 +38,10 @@
    Integer refcount = 0;
 #endif
 
-//------------------------------------------------------------------------------
-// Public Methods
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SolarFluxReader()
+// SolarFluxReader::FluxData struct used for holding the records
 //------------------------------------------------------------------------------
-/**
- * Constructor
- */
-//------------------------------------------------------------------------------
-SolarFluxReader::SolarFluxReader():
-   obsFileName       (""),
-   predictFileName   (""),
-   historicStart     (-1.0),
-   historicEnd       (-1.0),
-   predictStart      (-1.0),
-   predictEnd        (-1.0),
-   schattenFluxIndex (0),
-   schattenApIndex   (0),
-   warnEpochBefore   (true),
-   warnEpochAfter    (true)
-{
-   if (!obsFluxData.empty())
-      obsFluxData.clear();
-
-   if (!predictFluxData.empty())
-      predictFluxData.clear();
-
-   beg_ObsTag = "BEGIN OBSERVED";
-   end_ObsTag = "END OBSERVED";
-   begObs = endObs = begData = -1;
-}
-
-
-//------------------------------------------------------------------------------
-// ~SolarFluxReader()
-//------------------------------------------------------------------------------
-/**
- * Destructor
- */
-//------------------------------------------------------------------------------
-SolarFluxReader::~SolarFluxReader(void)
-{
-   #ifdef DEBUG_FIRSTFEW_READS
-      --refcount;
-      MessageInterface::ShowMessage("Deleting Solar Flux Reader %p, leaving %d\n", this, refcount);
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// SolarFluxReader(const SolarFluxReader &)
-//------------------------------------------------------------------------------
-/**
- * copy constructor
- */
-//------------------------------------------------------------------------------
-SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr) :
-   historicStart     (-1.0),
-   historicEnd       (-1.0),
-   predictStart      (-1.0),
-   predictEnd        (-1.0),
-   schattenFluxIndex (1),
-   schattenApIndex   (0),
-   warnEpochBefore   (true),
-   warnEpochAfter    (true)
-{
-   obsFileName = sfr.obsFileName;
-   predictFileName = sfr.predictFileName;
-   obsFluxData = sfr.obsFluxData;
-   predictFluxData = sfr.predictFluxData;
-   beg_ObsTag = sfr.beg_ObsTag;
-   end_ObsTag = sfr.end_ObsTag;
-   begObs = sfr.begObs;
-   endObs = sfr.endObs;
-   begData = sfr.begData;
-}
-
 
 //------------------------------------------------------------------------------
 // FluxData()
@@ -216,6 +141,93 @@ SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const SolarFluxR
 }
 
 
+
+
+
+//------------------------------------------------------------------------------
+// Public Methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SolarFluxReader()
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+//------------------------------------------------------------------------------
+SolarFluxReader::SolarFluxReader():
+   obsFileName       (""),
+   predictFileName   (""),
+   historicStart     (-1.0),
+   historicEnd       (-1.0),
+   predictStart      (-1.0),
+   predictEnd        (-1.0),
+   schattenFluxIndex (0),
+   schattenApIndex   (0),
+   warnEpochBefore   (true),
+   warnEpochAfter    (true),
+   f107RefEpoch      (18408.0),  // 5/31/91, epoch when the station moved (Vallado)
+   interpolateFlux   (true)
+{
+   if (!obsFluxData.empty())
+      obsFluxData.clear();
+
+   if (!predictFluxData.empty())
+      predictFluxData.clear();
+
+   beg_ObsTag = "BEGIN OBSERVED";
+   end_ObsTag = "END OBSERVED";
+   begObs = endObs = begData = -1;
+}
+
+
+//------------------------------------------------------------------------------
+// ~SolarFluxReader()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
+SolarFluxReader::~SolarFluxReader()
+{
+   #ifdef DEBUG_FIRSTFEW_READS
+      --refcount;
+      MessageInterface::ShowMessage("Deleting Solar Flux Reader %p, leaving %d\n", this, refcount);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// SolarFluxReader(const SolarFluxReader &)
+//------------------------------------------------------------------------------
+/**
+ * copy constructor
+ */
+//------------------------------------------------------------------------------
+SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr) :
+   historicStart     (-1.0),
+   historicEnd       (-1.0),
+   predictStart      (-1.0),
+   predictEnd        (-1.0),
+   schattenFluxIndex (1),
+   schattenApIndex   (0),
+   warnEpochBefore   (true),
+   warnEpochAfter    (true),
+   f107RefEpoch      (sfr.f107RefEpoch),
+   interpolateFlux   (sfr.interpolateFlux)
+{
+   obsFileName = sfr.obsFileName;
+   predictFileName = sfr.predictFileName;
+   obsFluxData = sfr.obsFluxData;
+   predictFluxData = sfr.predictFluxData;
+   beg_ObsTag = sfr.beg_ObsTag;
+   end_ObsTag = sfr.end_ObsTag;
+   begObs = sfr.begObs;
+   endObs = sfr.endObs;
+   begData = sfr.begData;
+}
+
+
 //------------------------------------------------------------------------------
 // SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader& sfr)
 //------------------------------------------------------------------------------
@@ -247,6 +259,8 @@ SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
    
    warnEpochBefore = true;
    warnEpochAfter = true;
+   f107RefEpoch = sfr.f107RefEpoch;
+   interpolateFlux = sfr.interpolateFlux;
 
    return *this;
 }
@@ -505,11 +519,13 @@ bool SolarFluxReader::LoadObsData()
          sscanf(s2, format2, s21, s22[0], s22[1], s22[2], s22[3], s22[4]);
 
          FluxData fD;
-         Real mjd = ModifiedJulianDate((YearNumber)atof(s11), (MonthOfYear)atof(s12), (DayOfMonth)atof(s13), hour, minute, sec);
-         // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
-         fD.epoch = mjd - 0.5;
 
-         // The CSSI fole conains Kp * 10, then rouded to an int. Undo that here.
+         // Set ref epoch to midnight for the date on the current line
+         Real mjd = ModifiedJulianDate((YearNumber)atof(s11),
+               (MonthOfYear)atof(s12), (DayOfMonth)atof(s13), hour, minute, sec);
+         fD.epoch = mjd;
+
+         // The CSSI file conains Kp * 10, then rounded to an int. Undo that here.
          for (Integer l = 0; l < 8; l++)
          {
             fD.kp[l] = atof(s6[l]) / 10.0;
@@ -576,8 +592,9 @@ bool SolarFluxReader::LoadObsData()
 
    if (obsFluxData.size() > 0)
    {
-      historicStart = obsFluxData[0].epoch + 0.5;
-      historicEnd = obsFluxData[obsFluxData.size() - 1].epoch  + 0.5;
+      historicStart = obsFluxData[0].epoch;
+      // Note that epoch of last record is at day start; add 1 to reach end!
+      historicEnd = obsFluxData[obsFluxData.size() - 1].epoch + 1.0;
    }
 
    return true;
@@ -626,9 +643,10 @@ bool SolarFluxReader::LoadPredictData()
       FluxData fD;
       fD.isObsData = false;
 
-      Real mjd = ModifiedJulianDate(atoi(tokens[1].c_str()), atoi(tokens[0].c_str()), 0, hour, minute, sec); 
-      // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
-      fD.epoch = mjd - 0.5;
+      // Set ref epoch to midnight for the date on the current line
+      Real mjd = ModifiedJulianDate(atoi(tokens[1].c_str()),
+            atoi(tokens[0].c_str()), 0, hour, minute, sec);
+      fD.epoch = mjd;
 
       // Nominal Timing
       for (Integer l=0; l<3; l++)
@@ -660,16 +678,6 @@ bool SolarFluxReader::LoadPredictData()
       predictFluxData.push_back(fD);
    }
 
-   std::vector<FluxData>::iterator it = predictFluxData.begin();
-   it->index = 0;
-   it->id = 0;
-   for (it = it+1; it != predictFluxData.end(); it++)
-   {
-      it->index = (Integer) (it->epoch - (it-1)->epoch);
-      it->index += (it-1)->index;
-      it->id = (it-1)->id + 1;
-   }
-
    #ifdef DEBUG_GETFLUXINPUTS
       MessageInterface::ShowMessage("Loaded %d flux predict data records\n",
             predictFluxData.size());
@@ -677,8 +685,15 @@ bool SolarFluxReader::LoadPredictData()
 
    if (predictFluxData.size() > 0)
    {
-      predictStart = predictFluxData[0].epoch + 0.5;
-      predictEnd = predictFluxData[predictFluxData.size() - 1].epoch  + 0.5;
+      predictStart = predictFluxData[0].epoch;
+      predictEnd = predictFluxData[predictFluxData.size() - 1].epoch;
+
+      Integer runningDays = 0;
+      for (Integer i = 0; i < predictFluxData.size(); ++i)
+      {
+         predictFluxData[i].index = (Integer)(predictFluxData[i].epoch - predictStart);
+         predictFluxData[i].id = i;
+      }
    }
 
    return true;
@@ -688,7 +703,7 @@ bool SolarFluxReader::LoadPredictData()
 // FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 //------------------------------------------------------------------------------
 /**
- * Gets Observed or Predicted input file data.
+ * Gets raw Observed or Predicted input file data for teh input epoch.
  * 
  * HistoricAndNearTerm source is always given precedence if the requested epoch
  * is in the historic data section.  Otherwise, predicted data is used from the
@@ -709,6 +724,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    // in the struct to be filled.
    FluxData fD;
    Integer index;
+
 
    #ifdef DEBUG_GETFLUXINPUTS
       MessageInterface::ShowMessage("GetInputs(%.12lf): index = %d, using ",
@@ -787,7 +803,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    }
    else
    {
-      index = (Integer) (epoch - 0.5 - historicStart);
+      index = (Integer) (epoch - historicStart);
 
       if (index < 0)
       {
@@ -815,6 +831,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    {
       MessageInterface::ShowMessage("Raw Data from read %d for epoch %.12lf:\n",
             numberReadIndex, epoch);
+      MessageInterface::ShowMessage("   Record epoch:     %lf\n", fD.epoch);
       MessageInterface::ShowMessage("   F107 Obs:         %lf\n", fD.obsF107);
       MessageInterface::ShowMessage("   F107 Adj:         %lf\n", fD.adjF107);
       MessageInterface::ShowMessage("   F107a Obs Ctr:    %lf\n", fD.obsCtrF107a);
@@ -838,7 +855,21 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
  * Prepares the data used by the MSISE models
  *
  * Function that replaces the ap data with data MSISE models need, and the F10.7
- * obs value with the value from the previous day
+ * obs value with the value from the previous da
+ *
+ * On return, the input FluxData object contains the following Ap data:
+ *
+ *     Ap[0]  DAILY AP
+ *     Ap[1]  3 HR AP INDEX FOR CURRENT TIME
+ *     Ap[2]  3 HR AP INDEX FOR 3 HRS BEFORE CURRENT TIME
+ *     Ap[3]  3 HR AP INDEX FOR 6 HRS BEFORE CURRENT TIME
+ *     Ap[4]  3 HR AP INDEX FOR 9 HRS BEFORE CURRENT TIME
+ *     Ap[5]  AVERAGE OF EIGHT 3 HR AP INDICIES FROM 12 TO 33 HRS PRIOR
+ *              TO CURRENT TIME
+ *     Ap[6]  AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR
+ *             TO CURRENT TIME
+ *
+ * per the MSIS specifications.
  *
  * @param fD The data record that contains raw data for the requested epoch
  *
@@ -853,32 +884,21 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
    #endif
    
    Integer f107index = fD.index;
-   
+
    if (fD.isObsData)
    {
-      // Fill in fD.ap so it contains these data:
-      /*  (1) DAILY AP */
-      /*  (2) 3 HR AP INDEX FOR CURRENT TIME */
-      /*  (3) 3 HR AP INDEX FOR 3 HRS BEFORE CURRENT TIME */
-      /*  (4) 3 HR AP INDEX FOR 6 HRS BEFORE CURRENT TIME */
-      /*  (5) 3 HR AP INDEX FOR 9 HRS BEFORE CURRENT TIME */
-      /*  (6) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 12 TO 33 HRS PRIOR */
-      /*        TO CURRENT TIME */
-      /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR */
-      /*        TO CURRENT TIME */
-      Real fracEpoch = (epoch - 0.5) - fD.epoch;
+      Real fracEpoch = epoch - fD.epoch;
       Integer subIndex = (Integer)floor(fracEpoch * 8);
 
-      // F10.7 is measured at 8 pm (5pm before ???), so we use the current row for
-      // data from 8 am on the current day to 8 am the next day.  f107index is
-      // used to track that piece.
-      if (fracEpoch < 8.0/24.0)
+      // F10.7 is measured at 8 pm (5pm before 5/31/91), so we use the current
+      // row for data from 8 am on the current day to 8 am the next day.
+      // f107index is used to track that piece.
+      Real f107Offset = (epoch < f107RefEpoch ? 5.0/24.0 : 8.0/24.0);
+      if (fracEpoch < f107Offset)
          f107index = (f107index > 0 ? f107index - 1 : 0);
 
       if (subIndex >= 8) // Off the end of the array
-      {
          subIndex = 7;
-      }
 
       Real apValues[32];
       Integer i = 0,j = 0;
@@ -947,10 +967,22 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
          }
       }
 
-      // Update the F10.7 data
-      // Daily value from previous day
-      fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 :
-                                    obsFluxData[f107index].obsF107);
+//      // Update the F10.7 data and (if selected) interpolate
+//      if (interpolateFlux)
+//      {
+//         Real vals[2];
+//         Real portion = (f107Offset) + fracEpoch - 1.0/3.0;
+//         vals[1] = obsFluxData[f107index].obsF107;
+//         vals[0] = (f107index > 0 ? obsFluxData[f107index-1].obsF107 : vals[1]);
+//         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
+//      }
+//      else
+      {
+         // Daily value from previous day
+         fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 :
+                                       obsFluxData[f107index].obsF107);
+      }
+
       // Average value from detected day
       fD.obsCtrF107a = obsFluxData[f107index].obsCtrF107a;
    }
@@ -968,6 +1000,7 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
    if (numberReadIndex < howMany)
    {
       MessageInterface::ShowMessage("Data after Ap Prep from read %d:\n", numberReadIndex);
+      MessageInterface::ShowMessage("   Record epoch:     %lf\n", fD.epoch);
       MessageInterface::ShowMessage("   F107 Obs:         %lf\n", fD.obsF107);
       MessageInterface::ShowMessage("   F107 Adj:         %lf\n", fD.adjF107);
       MessageInterface::ShowMessage("   F107a Obs Ctr:    %lf\n", fD.obsCtrF107a);
@@ -1041,6 +1074,7 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
    if (numberReadIndex < howMany)
    {
       MessageInterface::ShowMessage("Data after Kp Prep from read %d:\n", numberReadIndex);
+      MessageInterface::ShowMessage("   Record epoch:     %lf\n", fD.epoch);
       MessageInterface::ShowMessage("   F107 Obs:         %lf\n", fD.obsF107);
       MessageInterface::ShowMessage("   F107 Adj:         %lf\n", fD.adjF107);
       MessageInterface::ShowMessage("   F107a Obs Ctr:    %lf\n", fD.obsCtrF107a);
