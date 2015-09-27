@@ -168,7 +168,7 @@ GmatFunction::GmatFunction(const std::string &name) :
 //------------------------------------------------------------------------------
 GmatFunction::~GmatFunction()
 {
-   #ifdef DEBUG_GMATFUNCTION
+   #ifdef DEBUG_FUNCTION_FINALIZE
    MessageInterface::ShowMessage
       ("GmatFunction() destructor entered, this=<%p> '%s', fcs=<%p>\n", this,
        GetName().c_str(), fcs);
@@ -181,7 +181,7 @@ GmatFunction::~GmatFunction()
    if (unusedGlobalObjectList != NULL)
       delete unusedGlobalObjectList;
    
-   #ifdef DEBUG_GMATFUNCTION
+   #ifdef DEBUG_FUNCTION_FINALIZE
    MessageInterface::ShowMessage("GmatFunction() destructor exiting\n");
    #endif
 }

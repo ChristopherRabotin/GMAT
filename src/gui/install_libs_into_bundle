@@ -3,9 +3,8 @@
 LOC=$1
 BASE_LOC=$2
 BASE_LIB_NAME=$3
-PCRE_LOC=$4
-BIN_LOC=$5
-WX_LIB_LOC=$6
+BIN_LOC=$4
+WX_LIB_LOC=$5
 # copy the wx libraries (maintaining the soft links) into the bundle
 #cp -R $WX_LIB_LOC/libwx*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
 cp -R $WX_LIB_LOC/libwx_baseu-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks

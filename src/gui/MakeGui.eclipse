@@ -365,13 +365,8 @@ endif
 endif
 
 macrez:
-#	@echo "linking Carbon and wx resource files ......."
 	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
 
-# Used to be:
-#	@echo "linking Carbon and wx resource files ......."
-#	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
-#	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
 
 macosx: 
 	@echo "building Mac application bundle ......."
@@ -382,13 +377,10 @@ macosx:
 	mkdir -p $(LIBS_DIR)
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
 	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
-	echo -n "APPL????" > $(MAC_PKGINFO)
-	ln -f $(TOP_DIR)/application/$(GMAT_BIN_DIR)/$(WXTARGET) $(MAC_APP)
-	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
+	mv -f $(TOP_DIR)/application/$(GMAT_BIN_DIR)/$(WXTARGET) $(MAC_APP)
+	cp -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/$(GMAT_LIB_DIR) $(BASELIBNAME) $(PCRE_LIB_LOC) $(GMAT_BIN_DIR) $(WX_LIB_LOC)
-#	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/$(GMAT_LIB_DIR) $(BASELIBNAME) $(PCRE_LIB_LOC) $(GMAT_BIN_DIR) $(WX_LIB_LOC) $(SPICE_LIB_DIR)
-#	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
+	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/$(GMAT_LIB_DIR) $(BASELIBNAME) $(GMAT_BIN_DIR) $(WX_LIB_LOC)
 
 macstacksize:
 	@echo "setting stack size needed for SPICE  ......."

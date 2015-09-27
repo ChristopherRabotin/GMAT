@@ -152,6 +152,13 @@ void MathNode::SetMathWrappers(WrapperMap *wrapperMap)
    // do nothing here
 }
 
+//---------------------------------------------------------------------------
+// GmatBase EvaluateObject()
+//---------------------------------------------------------------------------
+GmatBase* MathNode::EvaluateObject()
+{
+   return NULL;
+}
 
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,

@@ -800,6 +800,9 @@ Integer CallPythonFunction::FillInputList()
          
       if (mapObj->IsOfType(Gmat::PARAMETER))
          mInputList.push_back((Parameter *)mapObj);
+      else
+         throw CommandException("The input field " + (*it) + " was not "
+               "recognized as a valid input to the Python interface.");
    }
       
    return mInputList.size();
@@ -839,6 +842,9 @@ Integer CallPythonFunction::FillOutputList()
 
       if (mapObj->IsOfType(Gmat::PARAMETER))
          mOutputList.push_back((Parameter *)mapObj);
+      else
+         throw CommandException("The output field " + (*it) + " was not "
+               "recognized as a valid output from the Python interface.");
    }
 
    return mOutputList.size();
@@ -898,6 +904,12 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
                inRow = arr->GetRowCount();
                inCol = arr->GetColCount();
                
+               if ((inRow > 1) && (inCol > 1))
+                  throw CommandException("The parameter " + param->GetName() +
+                              " is a two-dimensional array.  GMAT's Python "
+                              "interface does not support input arrays with "
+                              "more than one dimension.");
+
                for (int i = 0; i < inRow; ++i)
                {
                   for (int j = 0; j < inCol; ++j)
@@ -915,7 +927,10 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
          }
 
          default:
-            MessageInterface::ShowMessage("Unkown type: %d\n", type);
+            throw CommandException("The parameter " + param->GetName() +
+                        ", with type " + PARAM_TYPE_STRING[type] +
+                        ", is not a valid input type for GMAT's Python "
+                        "interface.");
             break;
       }
    }

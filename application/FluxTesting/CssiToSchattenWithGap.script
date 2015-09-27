@@ -1,0 +1,121 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2015-09-26 11:23:56
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft BoundaryCrosser;
+GMAT BoundaryCrosser.DateFormat = UTCGregorian;
+GMAT BoundaryCrosser.Epoch = '28 Nov 2014 12:00:00.000';
+GMAT BoundaryCrosser.CoordinateSystem = EarthMJ2000Eq;
+GMAT BoundaryCrosser.DisplayStateType = Keplerian;
+GMAT BoundaryCrosser.SMA = 6700.000000000002;
+GMAT BoundaryCrosser.ECC = 0.001100000000000229;
+GMAT BoundaryCrosser.INC = 25;
+GMAT BoundaryCrosser.RAAN = 300;
+GMAT BoundaryCrosser.AOP = 59.99999999999817;
+GMAT BoundaryCrosser.TA = 8.537736462515939e-07;
+GMAT BoundaryCrosser.DryMass = 850;
+GMAT BoundaryCrosser.Cd = 2.2;
+GMAT BoundaryCrosser.Cr = 1.8;
+GMAT BoundaryCrosser.DragArea = 15;
+GMAT BoundaryCrosser.SRPArea = 1;
+GMAT BoundaryCrosser.NAIFId = -10000001;
+GMAT BoundaryCrosser.NAIFIdReferenceFrame = -9000001;
+GMAT BoundaryCrosser.OrbitColor = Red;
+GMAT BoundaryCrosser.TargetColor = Teal;
+GMAT BoundaryCrosser.Id = 'SatId';
+GMAT BoundaryCrosser.Attitude = CoordinateSystemFixed;
+GMAT BoundaryCrosser.SPADSRPScaleFactor = 1;
+GMAT BoundaryCrosser.ModelFile = 'aura.3ds';
+GMAT BoundaryCrosser.ModelOffsetX = 0;
+GMAT BoundaryCrosser.ModelOffsetY = 0;
+GMAT BoundaryCrosser.ModelOffsetZ = 0;
+GMAT BoundaryCrosser.ModelRotationX = 0;
+GMAT BoundaryCrosser.ModelRotationY = 0;
+GMAT BoundaryCrosser.ModelRotationZ = 0;
+GMAT BoundaryCrosser.ModelScale = 1;
+GMAT BoundaryCrosser.AttitudeDisplayStateType = 'Quaternion';
+GMAT BoundaryCrosser.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT BoundaryCrosser.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT BoundaryCrosser.EulerAngleSequence = '321';
+
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel prop_ForceModel;
+GMAT prop_ForceModel.CentralBody = Earth;
+GMAT prop_ForceModel.PrimaryBodies = {Earth};
+GMAT prop_ForceModel.SRP = Off;
+GMAT prop_ForceModel.RelativisticCorrection = Off;
+GMAT prop_ForceModel.ErrorControl = RSSStep;
+GMAT prop_ForceModel.GravityField.Earth.Degree = 4;
+GMAT prop_ForceModel.GravityField.Earth.Order = 4;
+GMAT prop_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT prop_ForceModel.GravityField.Earth.EarthTideModel = 'None';
+GMAT prop_ForceModel.Drag.AtmosphereModel = NRLMSISE00;
+GMAT prop_ForceModel.Drag.HistoricWeatherSource = 'CSSISpaceWeatherFile';
+GMAT prop_ForceModel.Drag.PredictedWeatherSource = 'SchattenFile';
+GMAT prop_ForceModel.Drag.CSSISpaceWeatherFile = 'CSSI_File_Nov29_2014_end.txt';
+GMAT prop_ForceModel.Drag.SchattenFile = 'SchattenPredict_Dec_2014_start.txt';
+GMAT prop_ForceModel.Drag.F107 = 150;
+GMAT prop_ForceModel.Drag.F107A = 150;
+GMAT prop_ForceModel.Drag.MagneticIndex = 3;
+GMAT prop_ForceModel.Drag.SchattenErrorModel = 'Nominal';
+GMAT prop_ForceModel.Drag.SchattenTimingModel = 'NominalCycle';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator prop;
+GMAT prop.FM = prop_ForceModel;
+GMAT prop.Type = RungeKutta89;
+GMAT prop.InitialStepSize = 60;
+GMAT prop.Accuracy = 9.999999999999999e-12;
+GMAT prop.MinStep = 0.001;
+GMAT prop.MaxStep = 2700;
+GMAT prop.MaxStepAttempts = 50;
+GMAT prop.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile rf;
+GMAT rf.SolverIterations = Current;
+GMAT rf.UpperLeft = [ 0.1462235649546828 0.01482617586912065 ];
+GMAT rf.Size = [ 0.997583081570997 0.9841513292433538 ];
+GMAT rf.RelativeZOrder = 19;
+GMAT rf.Maximized = true;
+GMAT rf.Filename = 'CssiToSchattenWithGap.txt';
+GMAT rf.Precision = 16;
+GMAT rf.WriteHeaders = false;
+GMAT rf.LeftJustify = On;
+GMAT rf.ZeroFill = Off;
+GMAT rf.FixedWidth = true;
+GMAT rf.Delimiter = ' ';
+GMAT rf.ColumnWidth = 23;
+GMAT rf.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable I;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+
+Report rf BoundaryCrosser.UTCModJulian BoundaryCrosser.X BoundaryCrosser.Y BoundaryCrosser.Z BoundaryCrosser.VX BoundaryCrosser.VY BoundaryCrosser.VZ;
+For I = 1:1:8;
+   Propagate prop(BoundaryCrosser) {BoundaryCrosser.ElapsedDays = 0.5};
+   Report rf BoundaryCrosser.UTCModJulian BoundaryCrosser.X BoundaryCrosser.Y BoundaryCrosser.Z BoundaryCrosser.VX BoundaryCrosser.VY BoundaryCrosser.VZ;
+EndFor;

@@ -116,9 +116,9 @@ Planet::Planet(std::string name) :
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
       attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_070425_370426_predict.bpc");
       attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_720101_070426.bpc");
+      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();
@@ -163,9 +163,9 @@ Planet::Planet(std::string name, const std::string &cBody) :
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_070425_370426_predict.bpc");
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_720101_070426.bpc");
+         attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_070425_370426_predict.bpc");
+         attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_720101_070426.bpc");
+         attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();

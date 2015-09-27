@@ -1902,7 +1902,7 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       if (atmosphereType == "Exponential")
          return false;
 
-      if ((value == "CSSISpaceWeatherFile") ||
+      if ( // (value == "CSSISpaceWeatherFile") ||
           (value == "ConstantFluxAndGeoMag") ||
           (value == "SchattenFile"))
       {
@@ -1913,7 +1913,8 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       ODEModelException badVal("");
       badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
             GetParameterText(id).c_str(),
-            "'CSSISpaceWeatherFile', 'ConstantFluxAndGeoMag', 'SchattenFile'");
+//            "'CSSISpaceWeatherFile', 'ConstantFluxAndGeoMag', 'SchattenFile'");
+            "'ConstantFluxAndGeoMag', 'SchattenFile'");
       throw badVal;
    }
 

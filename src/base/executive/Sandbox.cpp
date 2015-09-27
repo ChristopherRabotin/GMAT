@@ -646,7 +646,7 @@ bool Sandbox::Initialize()
       {
          #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage(
-               "Sandbox::Initialie() moving object <%p>'%s' to the Global Object Store\n",
+               "Sandbox::Initialie() Moving object <%p>'%s' to the Global Object Store\n",
                omi->second, (omi->first).c_str());
          #endif
          globalObjectMap.insert(*omi);
@@ -654,21 +654,35 @@ bool Sandbox::Initialize()
          
          // Since CoordinateSystem is an automatic global object the origin also
          // should be in the global object map for GmatFunction.
-         // So if an object is a coordinate system, copy the clone of origin to global
-         // object map if it is not found in the objectMap or in the solar system for
-         // fixing GmatFunction Bug1688 (LOJ: 2015.03.02)
+         // So if an object is a coordinate system, add the clone of origin to global
+         // object map if it is not found in the objectMap or in the solar system. If
+         // it is found in the objectMap just move it to global object map.
+         // Hopefully this will fix DeveloperTests/FUNCTION_Bug1688_UnusedCsInFunction (LOJ: 2015.09.23)
          if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
          {
             std::string originName = obj->GetStringParameter("Origin");
             GmatBase *origin = obj->GetRefObject(Gmat::SPACE_POINT, originName);
+            #ifdef DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage
+               ("==> Object is CoordinateSystem and originName='%s', origin=<%p>[%s]'%s'\n",
+                originName.c_str(), origin, origin ? origin->GetTypeName().c_str() : "NULL",
+                origin ? origin->GetName().c_str() : "NULL");
+            #endif
             if (origin && !origin->IsOfType(Gmat::CELESTIAL_BODY))
             {
-               // Skip adding to globalObjectMap if object is already in the objectMap (LOJ: 2015.03.26)
-               if (objectMap.find(originName) == objectMap.end())
+               // If origin found in the objectMap then move it to globalObjectMap, otherwise
+               // add clone of origin to globalObjectMap (2015.09.22)
+               bool cloneOrigin = false;
+               if (globalObjectMap.find(originName) == globalObjectMap.end())
                {
-                  if (globalObjectMap.find(originName) == globalObjectMap.end())
+                  if (objectMap.find(originName) == objectMap.end())
+                     cloneOrigin = true;
+                  
+                  // If not found in the SolarSystem
+                  if (solarSys->GetBody(originName) == NULL)
                   {
-                     if (solarSys->GetBody(originName) == NULL)
+                     origin->SetIsGlobal(true);
+                     if (cloneOrigin)
                      {
                         #ifdef DEBUG_SANDBOX_INIT
                         MessageInterface::ShowMessage
@@ -676,6 +690,16 @@ bool Sandbox::Initialize()
                             origin, originName.c_str(), obj, obj->GetName().c_str());
                         #endif
                         globalObjectMap.insert(make_pair(originName, origin->Clone()));
+                     }
+                     else
+                     {
+                        #ifdef DEBUG_SANDBOX_INIT
+                        MessageInterface::ShowMessage
+                           ("Sandbox::Initialize() Moving origin <%p>'%s' of CS <%p>'%s' to global object map\n",
+                            origin, originName.c_str(), obj, obj->GetName().c_str());
+                        #endif
+                        globalObjectMap.insert(make_pair(originName, origin));
+                        movedObjects.push_back(originName);
                      }
                   }
                }

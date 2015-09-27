@@ -94,6 +94,7 @@ FunctionManager::FunctionManager() :
    numVarsCreated      (0),
    validator           (NULL),
    realResult          (-999.99),
+   objectResult        (NULL),
    blankResult         (false),
    outputType          (""),
    objInit             (NULL),
@@ -165,6 +166,7 @@ FunctionManager::FunctionManager(const FunctionManager &fm) :
    validator           (NULL),
    realResult          (fm.realResult),
    matResult           (fm.matResult),
+   objectResult        (fm.objectResult),
    blankResult         (fm.blankResult),
    outputType          (fm.outputType),
    objInit             (NULL),
@@ -211,6 +213,7 @@ FunctionManager& FunctionManager::operator=(const FunctionManager &fm)
       outputWrappers      = fm.outputWrappers; // is that right?
       realResult          = fm.realResult;
       matResult           = fm.matResult;
+      objectResult        = fm.objectResult;
       blankResult         = fm.blankResult;
       outputType          = fm.outputType;
       objInit             = NULL;  
@@ -1107,6 +1110,7 @@ Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
    #endif
    
    Execute(callingFM);
+   
    if (outputType != "Rmatrix")
       throw FunctionException("FunctionManager: invalid output type - should be Rmatrix\n");
    
@@ -1116,6 +1120,38 @@ Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
    #endif
    
    return matResult;
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* EvaluateObject(FunctionManager *callingFM)
+//------------------------------------------------------------------------------
+GmatBase* FunctionManager::EvaluateObject(FunctionManager *callingFM)
+{
+   if (currentFunction == NULL)
+   {
+      std::string errMsg = "FunctionManager:: Unable to return object from Function """;
+      errMsg += functionName + """ - pointer is NULL\n";
+      throw FunctionException(errMsg);
+   }
+   
+   #ifdef DEBUG_FM_EVAL
+   MessageInterface::ShowMessage
+      ("Entering FunctionManager::EvaluateObject() f=<%p><%s>\n", currentFunction,
+       currentFunction->GetName().c_str());
+   #endif
+   
+   Execute(callingFM);
+   
+   if (outputType != "Object")
+      throw FunctionException("FunctionManager: invalid output type - should be Object\n");
+   
+   #ifdef DEBUG_FM_EVAL
+   MessageInterface::ShowMessage
+      ("Exiting  FunctionManager::EvaluateObject() with <%p>'%s'\n", objectResult,
+       objectResult ? objectResult->GetName().c_str() : "NULL");
+   #endif
+   
+   return objectResult;
 }
 
 //------------------------------------------------------------------------------
@@ -2149,6 +2185,15 @@ void FunctionManager::SaveLastResult()
       #ifdef DEBUG_FM_RESULT
       MessageInterface::ShowMessage
          ("   saved matResult=%s\n", matResult.ToString().c_str());
+      #endif
+      break;
+   case Gmat::OBJECT_TYPE:
+      objectResult = ew->GetRefObject();
+      outputType = "Object";
+      #ifdef DEBUG_FM_RESULT
+      MessageInterface::ShowMessage
+         ("   saved objectResult=<%p>'%s'\n", objectResult,
+          objectResult ? objectResult->GetName().c_str() : "NULL");
       #endif
       break;
    default:

@@ -1199,6 +1199,7 @@ void Function::ClearFunctionObjects()
        "functionObjectMap.size()=%d, sandboxObjects.size()=%d, "
        "objectsToDelete.size()=%d\n", this, GetName().c_str(),
        functionObjectMap.size(), sandboxObjects.size(), objectsToDelete.size());
+   ShowObjects("In ClearFunctionObjects()");
    #endif
    
    StringArray toDelete;

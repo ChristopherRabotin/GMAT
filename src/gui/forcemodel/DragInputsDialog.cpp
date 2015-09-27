@@ -161,7 +161,9 @@ void DragInputsDialog::Create()
    historicInputsArray.Add("ConstantFluxAndGeoMag");
    historicInputsArray.Add("CSSISpaceWeatherFile");
    predictedInputsArray.Add("ConstantFluxAndGeoMag");
-   predictedInputsArray.Add("CSSISpaceWeatherFile");
+
+   // Turned off for R2015a
+//   predictedInputsArray.Add("CSSISpaceWeatherFile");
    predictedInputsArray.Add("SchattenFile");
    schattentimingArray.Add("NominalCycle");
    schattentimingArray.Add("EarlyCycle");
@@ -324,14 +326,18 @@ void DragInputsDialog::SaveData()
       {
          if (predictedFileComboBox->GetStringSelection().WX_TO_C_STRING == "CSSISpaceWeatherFile")
          {
-            fileToCheck = cssiFileTextCtrl->GetValue().WX_TO_C_STRING;
-            if (theDragForce->CheckFluxFile(fileToCheck, false) == "")
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::ERROR_, "The flux file %s does not contain valid predict data",
-                        fileToCheck.c_str());
-               canClose = false;
-            }
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "CSSI predict data is not supported in GMAT");
+            canClose = false;
+
+//            fileToCheck = cssiFileTextCtrl->GetValue().WX_TO_C_STRING;
+//            if (theDragForce->CheckFluxFile(fileToCheck, false) == "")
+//            {
+//               MessageInterface::PopupMessage
+//                  (Gmat::ERROR_, "The flux file %s does not contain valid predict data",
+//                        fileToCheck.c_str());
+//               canClose = false;
+//            }
          }
          else
          {

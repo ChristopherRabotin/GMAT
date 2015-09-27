@@ -33,7 +33,7 @@
 #include "GmatConstants.hpp"
 #include "GmatBase.hpp"
 
-class GMAT_API SolarFluxReader /*: public GmatBase*/
+class GMAT_API SolarFluxReader
 {
 
 public:
@@ -52,6 +52,8 @@ public:
       Real adjCtrF107a;
       Real obsF107;
       Real obsCtrF107a;
+
+      bool isObsData;
    };
 
    struct FluxData : FluxDataCSSI
@@ -62,8 +64,10 @@ public:
       // the first is NOMINAL, the second is EARLY, and the last is LATE TIMING.
       Real apSchatten[3];
 
-      // Assignment operator
+      FluxData();
+      FluxData(const FluxData &fD);
       FluxData &operator=(const FluxData &fD);
+      
       // Used in Schatten file indexing
       Integer index;
       Integer id;
@@ -79,7 +83,7 @@ private:
    /// offset required to start reading Schatten data
    std::streamoff begData;
    /// each line in the file
-   char * line; 
+   const char *line;
 
    std::string obsFileName;
    std::string predictFileName;
@@ -107,6 +111,11 @@ private:
    bool warnEpochBefore;
    /// Flag used to indicate that the "Too late" warning not yet issued
    bool warnEpochAfter;
+
+   /// Epoch reference point for when the F10.7 observations changed location
+   GmatEpoch f107RefEpoch;
+   /// Flag used to toggle interpolation of the f10.7 values
+   bool interpolateFlux;
 
    bool LoadObsData();
    bool LoadPredictData();
