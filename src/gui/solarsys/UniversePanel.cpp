@@ -582,7 +582,6 @@ void UniversePanel::SaveData()
                (Gmat::ERROR_, mMsgFormat.c_str(),
                 str.c_str(), fieldName.c_str(), "", "File must exist");
             canClose = false;
-            mDEFileNameTextCtrl->SetValue(mPreviousFileTypeNameMap[type]);
             return;
          }
          filename.close();
