@@ -140,6 +140,7 @@ public:
    bool DoesFileExist(const std::string &filename);
    bool RenameFile(const std::string &oldName, const std::string &newName,
                    Integer &retCode, bool overwriteIfExists = false);
+   bool ValidatePaths();
    
    // Methods for startup file
    std::string GetStartupFileDir();

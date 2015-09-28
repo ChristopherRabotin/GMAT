@@ -101,6 +101,7 @@ void MdiTableViewFrame::Create()
    variableGrid = new wxGrid( this, -1, wxDefaultPosition, wxSize(gridWidth, gridHeight) );
    variableGrid->CreateGrid(0, 4);
    variableGrid->EnableEditing(false);
+   variableGrid->EnableDragColMove(true);
    // variable header
    variableGrid->SetColLabelValue(0, "Control Variable");
    variableGrid->SetColLabelValue(1, "Current Value");
@@ -115,6 +116,7 @@ void MdiTableViewFrame::Create()
    constraintGrid = new wxGrid( this, -1, wxDefaultPosition, wxSize(gridWidth, gridHeight) );
    constraintGrid->CreateGrid(0, 4);
    constraintGrid->EnableEditing(false);
+   constraintGrid->EnableDragColMove();
    constraintGrid->SetColSizes(variableGrid->GetColSizes());
    // constraint header
    constraintGrid->SetColLabelValue(0, "Constraints");
@@ -126,6 +128,7 @@ void MdiTableViewFrame::Create()
    objectiveGrid = new wxGrid( this, -1, wxDefaultPosition, wxSize(gridWidth, gridHeight) ); // gridWidth, 80
    objectiveGrid->CreateGrid(0, 4);
    objectiveGrid->EnableEditing(false);
+   objectiveGrid->EnableDragColMove();
    objectiveGrid->SetColSizes(variableGrid->GetColSizes());
    // objective header
    objectiveGrid->SetColLabelValue(0, "Objective Function");
@@ -136,8 +139,7 @@ void MdiTableViewFrame::Create()
    objectiveGrid->Hide();
 
    convergenceText = new wxBannerWindow(this, wxBOTTOM);
-   convergenceText->SetText("Iterating...","");
-   convergenceText->SetGradient(*wxWHITE, *wxBLUE);
+   SetConvergence(ITERATING);
 
    //-----------------------------------------------------------------
    // Add to grid and page sizer
@@ -157,6 +159,7 @@ void MdiTableViewFrame::Create()
    pageSizer->Add(convergenceText, 0, wxGROW|wxALIGN_CENTER|wxALL);
    pageSizer->SetSizeHints(this);
    SetSizer(pageSizer);   
+
    #if DEBUG_PANEL_CREATE
    MessageInterface::ShowMessage("MdiTableViewFrame::Create() exiting...\n");
    #endif
@@ -268,6 +271,27 @@ void MdiTableViewFrame::OnSize(wxSizeEvent& event)
    //            wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
    //            size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
    
+   // resize grids
+   
+   int w;
+   int h;
+   GetClientSize(&w, &h);
+   variableGrid->SetColSize(0, w/4);
+   w = variableGrid->GetColSize(0);
+   variableGrid->SetColSize(1, w);
+   variableGrid->SetColSize(2, w);
+   variableGrid->SetColSize(3, w);
+
+   constraintGrid->SetColSize(0, w);
+   constraintGrid->SetColSize(1, w);
+   constraintGrid->SetColSize(2, w);
+   constraintGrid->SetColSize(3, w);
+
+   objectiveGrid->SetColSize(0, w);
+   objectiveGrid->SetColSize(1, w);
+   objectiveGrid->SetColSize(2, w);
+   objectiveGrid->SetColSize(3, w);
+
    event.Skip();
 }
 
@@ -287,6 +311,7 @@ void MdiTableViewFrame::TakeAction(const std::string &action)
 //------------------------------------------------------------------------------
 void MdiTableViewFrame::ObjectiveChanged(std::string name, Real value)
 {
+   SetConvergence(ITERATING);
    int aRow = -1;
    // find the row
    for (int i=0;i<objectiveGrid->GetNumberRows();i++)
@@ -331,6 +356,7 @@ void MdiTableViewFrame::ObjectiveChanged(std::string name, Real value)
 //------------------------------------------------------------------------------
 void MdiTableViewFrame::VariabledChanged(std::string name, Real value)
 {
+   SetConvergence(ITERATING);
    int aRow = -1;
    // find the row
    for (int i=0;i<variableGrid->GetNumberRows();i++)
@@ -347,6 +373,8 @@ void MdiTableViewFrame::VariabledChanged(std::string name, Real value)
       if (!IsShown() && (GmatGlobal::Instance()->GetGuiMode() != GmatGlobal::MINIMIZED_GUI))
          Show();
       variableGrid->AppendRows();
+      if (!variableGrid->IsEditable())
+         variableGrid->Enable(true);
       aRow = variableGrid->GetNumberRows() - 1;
       variableGrid->SetCellValue(name, aRow, 0);
       variableGrid->SetCellValue(GmatStringUtil::ToString(value), aRow, 1);
@@ -373,6 +401,7 @@ void MdiTableViewFrame::VariabledChanged(std::string name, Real value)
 //------------------------------------------------------------------------------
 void MdiTableViewFrame::VariabledChanged(std::string name, std::string &value)
 {
+   SetConvergence(ITERATING);
    int aRow = -1;
    // find the row
    for (int i=0;i<variableGrid->GetNumberRows();i++)
@@ -413,6 +442,7 @@ void MdiTableViewFrame::VariabledChanged(std::string name, std::string &value)
 void MdiTableViewFrame::ConstraintChanged(std::string name, Real desiredValue, 
    Real value, Integer condition)
 {
+   SetConvergence(ITERATING);
    int aRow = -1;
    switch (condition)
    {
@@ -466,13 +496,11 @@ void MdiTableViewFrame::Convergence(bool value, std::string info)
 {
    if (value)
    {
-      convergenceText->SetText("CONVERGED", info);
-      convergenceText->SetGradient(*wxWHITE, *wxGREEN);
+      SetConvergence(CONVERGENCE, info);
    }
    else
    {
-      convergenceText->SetText("NO CONVERGENCE", info);
-      convergenceText->SetGradient(*wxWHITE, *wxRED);
+      SetConvergence(NO_CONVERGENCE, info);
    }
    if (!convergenceText->IsShown())
    {
@@ -480,5 +508,28 @@ void MdiTableViewFrame::Convergence(bool value, std::string info)
          Show();
       convergenceText->Show();
       gridSizer->Layout();
+   }
+}
+
+
+void MdiTableViewFrame::SetConvergence(ConvergenceType value, std::string info)
+{
+   if ((value == convergence) && (info == "")) return;
+
+   convergence = value;
+   switch (value)
+   {
+      case ITERATING:
+         convergenceText->SetText("Iterating...","");
+         convergenceText->SetGradient(*wxWHITE, *wxBLUE);
+         break;
+      case CONVERGENCE:
+         convergenceText->SetText("CONVERGED", info);
+         convergenceText->SetGradient(*wxWHITE, *wxGREEN);
+         break;
+      case NO_CONVERGENCE:
+         convergenceText->SetText("NO CONVERGENCE", info);
+         convergenceText->SetGradient(*wxWHITE, *wxRED);
+         break;
    }
 }
