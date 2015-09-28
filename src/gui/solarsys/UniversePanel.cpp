@@ -1009,7 +1009,6 @@ void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
          wxString type          = mFileTypeComboBox->GetStringSelection();
          std::string sType      = type.WX_TO_STD_STRING;
          Integer spiceIndex     = theSolarSystem->GetPlanetarySourceId(sType);
-         mSPKFileNameTextCtrl->SetValue(spiceKernelNames[spiceIndex]);
 
          spiceKernelNames[spiceIndex] = mSPKFileNameTextCtrl->GetValue();
       }
