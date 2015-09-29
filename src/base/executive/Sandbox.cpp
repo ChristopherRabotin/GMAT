@@ -84,7 +84,8 @@ Sandbox::Sandbox() :
    pollFrequency     (50),
    objInit           (NULL),
 //   cloneUpdateStyle  (SKIP_UPDATES)
-   cloneUpdateStyle  (PASS_TO_ALL)
+   cloneUpdateStyle  (PASS_TO_ALL),
+   errorInPreviousFcs (false)
 {
 }
 
@@ -524,6 +525,7 @@ bool Sandbox::Initialize()
    #ifdef DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage("\n==================== Sandbox::Initialize() entered\n");
       MessageInterface::ShowMessage("Initializing the Sandbox\n");
+      MessageInterface::ShowMessage("Error in previous FCS = %d\n", errorInPreviousFcs);
       ShowObjectMap(objectMap, "Sandbox::Initialize() at the start, objectMap\n");
       ShowObjectMap(globalObjectMap, "Sandbox::Initialize() at the start, globalObjectMap\n");
       MessageInterface::ShowMessage("........\n");
@@ -1179,7 +1181,8 @@ bool Sandbox::Interrupt()
 void Sandbox::Clear()
 {
    #ifdef DEBUG_SANDBOX_CLEAR
-   MessageInterface::ShowMessage("Sandbox::Clear() entered\n");
+   MessageInterface::ShowMessage
+      ("Sandbox::Clear() entered, errorInPreviousFcs=%d\n", errorInPreviousFcs);
    #endif
    
    sequence  = NULL;
@@ -1189,8 +1192,7 @@ void Sandbox::Clear()
    ObjectMap::iterator omi;
    
    #ifdef DEBUG_SANDBOX_CLEAR
-   ShowObjectMap(objectMap, "Sandbox::Clear() clearing objectMap\n");
-   ShowObjectMap(globalObjectMap, "Sandbox::Clear() clearing globalObjectMap\n");
+   ShowObjectMap(objectMap, "Sandbox::Clear() =====> Before clearing objectMap\n");
    #endif
    
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
@@ -1235,63 +1237,91 @@ void Sandbox::Clear()
          //objectMap.erase(omi++);
       }
    }
+   objectMap.clear();
    
    #ifdef DEBUG_SANDBOX_CLEAR
    MessageInterface::ShowMessage
-      ("--- Sandbox::Clear() deleting objects from objectMap done\n");
-   ShowObjectMap(globalObjectMap, "Sandbox::Clear() clearing globalObjectMap\n");
+      ("=====> Sandbox::Clear() deleting objects from objectMap done\n");
+   ShowObjectMap(objectMap, "Sandbox::Clear() After clearing objectMap\n");
+   ShowObjectMap(globalObjectMap, "Sandbox::Clear() Before clearing globalObjectMap\n");
    #endif
    for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); omi++)
    {
-      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-         MessageInterface::ShowMessage("Sandbox clearing <%p>'%s' from globalObjectMap\n",
+      #ifdef DEBUG_SANDBOX_CLEAR
+         MessageInterface::ShowMessage("Sandbox deleting <%p>'%s' from globalObjectMap\n",
             omi->second, (omi->first).c_str());
       #endif
-
+      
       if (omi->second != NULL)
       {
+         GmatBase *globalObj = omi->second;
+         
+         #ifdef DEBUG_SANDBOX_CLEAR
+         MessageInterface::ShowMessage
+            ("   globalObj=<%p>[%s]'%s'\n", globalObj, globalObj->GetTypeName().c_str(),
+             globalObj->GetName().c_str());
+         #endif
+         
+         // If object is a function and failed to create FCS, skip
+         // So that after function is fixed, it can run without a crash
+         //@todo Need to revisit clearing failed function object here (LOJ: 2015.09.28)
+         if (globalObj->IsOfType(Gmat::FUNCTION) && errorInPreviousFcs)
+         {
+            #ifdef DEBUG_SANDBOX_CLEAR
+            MessageInterface::ShowMessage
+               ("   ==> Skip deleting '%s', since it failed to create FCS\n", globalObj->GetName().c_str());
+            #endif
+            continue;
+         }
+         
+         #ifdef DEBUG_SANDBOX_CLEAR
+         MessageInterface::ShowMessage("   ==> Continue with deleting\n");
+         #endif
+         
          // if object is a SUBSCRIBER, let's unsubscribe it first
-         if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
-            publisher->Unsubscribe((Subscriber*)(omi->second));
+         if ((globalObj)->GetType() == Gmat::SUBSCRIBER)
+            publisher->Unsubscribe((Subscriber*)(globalObj));
          
          // Unsubscribe owned Subscribers too
          // If not PropSetup since PropSetup::GetOwnedObject() starts from count 1
          // @note How should we handle this in other object?
-         //if (!((omi->second)->IsOfType(Gmat::PROP_SETUP)))
-         if ((omi->second)->GetType() != Gmat::PROP_SETUP)
+         //if (!((globalObj)->IsOfType(Gmat::PROP_SETUP)))
+         if ((globalObj)->GetType() != Gmat::PROP_SETUP)
          {
-            Integer count = (omi->second)->GetOwnedObjectCount();
+            Integer count = (globalObj)->GetOwnedObjectCount();
             #ifdef DEBUG_SANDBOX_CLEAR
             MessageInterface::ShowMessage
-               ("   ownedObjectCount of '%s' = %d\n", (omi->second)->GetName().c_str(), count);
+               ("   ownedObjectCount of '%s' = %d\n", (globalObj)->GetName().c_str(), count);
             #endif
             for (Integer i = 0; i < count; ++i)
             {
-               if ((omi->second)->GetOwnedObject(i)->IsOfType(Gmat::SUBSCRIBER))
+               if ((globalObj)->GetOwnedObject(i)->IsOfType(Gmat::SUBSCRIBER))
                   publisher->Unsubscribe((Subscriber*)
-                                         ((omi->second)->GetOwnedObject(i)));
+                                         ((globalObj)->GetOwnedObject(i)));
             }
          }
          
-         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-         MessageInterface::ShowMessage("   Deleting <%p>'%s'\n", omi->second,
-            (omi->second)->GetName().c_str());
+         #ifdef DEBUG_SANDBOX_CLEAR
+         MessageInterface::ShowMessage("   Deleting <%p>'%s'\n", globalObj,
+            (globalObj)->GetName().c_str());
          #endif
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Remove
-            (omi->second, omi->first, "Sandbox::Clear()",
+            (globalObj, omi->first, "Sandbox::Clear()",
              " deleting cloned obj from globalObjectMap");
          #endif
-         delete omi->second;
-         omi->second = NULL;
+         delete globalObj;
+         globalObj = NULL;
          // Commented out since this causes crash when re-run or exit GMAT (LOJ: 2015.03.26)
          //globalObjectMap.erase(omi++);
       }
    }
    
+   globalObjectMap.clear();
    #ifdef DEBUG_SANDBOX_CLEAR
    MessageInterface::ShowMessage
-      ("--- Sandbox::Clear() deleting objects from globalObjectMap done\n");
+      ("=====> Sandbox::Clear() deleting objects from globalObjectMap done\n");
+   ShowObjectMap(globalObjectMap, "Sandbox::Clear() After clearing globalObjectMap\n");
    #endif
    
    // Clear published data
@@ -1379,6 +1409,7 @@ void Sandbox::Clear()
              "Unexpected state transition in the Sandbox\n");
 
    state     = IDLE;
+   errorInPreviousFcs = false;
    
    #ifdef DEBUG_SANDBOX_CLEAR
    MessageInterface::ShowMessage("Sandbox::Clear() leaving\n");
@@ -1649,9 +1680,13 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
          // If FCS not created, throw an exception with Gmat::GENERAL_ so that it will not
          // write error count again for function in Initialize()(Bug 2272 fix)
          if (fcs == NULL)
+         {
+            errorInPreviousFcs = true;
             throw SandboxException("Sandbox::HandleGmatFunction - error creating FCS\n",
                                    Gmat::GENERAL_);
+         }
          
+         errorInPreviousFcs = false;
          f->SetFunctionControlSequence(fcs);
          GmatCommand* fcsCmd = fcs;
          while (fcsCmd)
