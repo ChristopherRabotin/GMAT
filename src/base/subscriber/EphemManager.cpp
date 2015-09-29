@@ -698,7 +698,7 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
    ConstSpiceChar *fframe;
    SpiceDouble    refval            = minElevation * GmatMathConstants::RAD_PER_DEG;
    SpiceDouble    adjust            = 0.0;
-   SpiceInt       nintvls           = 1e6;
+   SpiceInt       nintvls           = (SpiceInt)1e6;
    SpiceDouble    step              = stepSize;
 
    SPICEDOUBLE_CELL(result, 200000);
