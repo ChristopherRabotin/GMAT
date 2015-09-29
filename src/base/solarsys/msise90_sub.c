@@ -666,6 +666,15 @@ static integer c__4 = 4;
     --d__;
     --ap;
 
+    // Adjust the sv flag for hourly Ap is variation is seen
+    for (integer i = 1; i < 7; ++i)
+    if (ap[i] != ap[0])
+    {
+       // If we are using daily/3hr observations, flag 9 should be -1.0
+       sv[8] = -1.0;
+       break;
+    }
+
     /* Function Body */
 /*      SV(1) = 0.0 */
 /*      IF(ISW.NE.64999) CALL TSELEC(SV) */
@@ -1730,6 +1739,15 @@ doublereal globe6_(real *yrd, real *sec, real *lat, real *long__, real *tloc,
     /* Parameter adjustments */
     --p;
     --ap;
+
+    // Adjust the sv flag for hourly Ap is variation is seen
+    for (integer i = 1; i < 7; ++i)
+    if (ap[i] != ap[0])
+    {
+       // If we are using daily/3hr observations, flag 9 should be -1.0
+       sv[8] = -1.0;
+       break;
+    }
 
     /* Function Body */
 /*       3hr Magnetica activity functions */

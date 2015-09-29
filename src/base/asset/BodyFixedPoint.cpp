@@ -375,6 +375,9 @@ bool BodyFixedPoint::Initialize()
       naifIDDetermined = true;
    }
 
+   // Set the initial epoch so that the state is computed at the start
+   SetEpoch(lastStateTime.Get());
+
    #ifdef DEBUG_INIT
       MessageInterface::ShowMessage("...BodyFixedPoint %s Initialized!\n", instanceName.c_str());
    #endif
@@ -1408,6 +1411,7 @@ bool BodyFixedPoint::InitializeForContactLocation(bool deleteFiles)
             instanceName.c_str());
    #endif
    kernelsWritten = true;
+
    return true;
 }
 

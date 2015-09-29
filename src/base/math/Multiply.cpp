@@ -187,6 +187,15 @@ bool Multiply::ValidateInputs()
    Integer type2, row2, col2; // Right node
    bool retval = false;
    
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("   leftNode: isFunction=%d, isFunctionInput=%d, elementType=%d\n",
+       leftNode->IsFunction(), leftNode->IsFunctionInput(), leftNode->GetElementType());
+   MessageInterface::ShowMessage
+      ("   rightNode: isFunction=%d, isFunctionInput=%d, elementType=%d\n",
+       rightNode->IsFunction(), rightNode->IsFunctionInput(), rightNode->GetElementType());
+   #endif
+   
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
