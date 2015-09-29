@@ -53,6 +53,7 @@
 //#define DEBUG_SS_PLANETARY_SRC
 //#define DEBUG_DE_SPK
 //#define DEBUG_SS_CREATE
+//#define DEBUG_UNLOAD
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -871,12 +872,30 @@ SolarSystem::~SolarSystem()
    }
 
 #ifdef __USE_SPICE__
-   #ifdef DEBUG_PLANETARY_SPK
+   #ifdef DEBUG_UNLOAD
       MessageInterface::ShowMessage("in SS destructor, deleting planetarySPK <%p>\n", planetarySPK);
    #endif
    if (planetarySPK->IsLoaded(theSPKFilename))
+   {
       planetarySPK->UnloadKernel(theSPKFilename);
-//   if (planetarySPK->IsLoaded(lastLoadedSPKFile)) planetarySPK->UnloadKernel(lastLoadedSPKFile);
+      #ifdef DEBUG_UNLOAD
+         MessageInterface::ShowMessage("in SS destructor, just UNloaded the file %s\n", theSPKFilename.c_str());
+      #endif
+   }
+   if (planetarySPK->IsLoaded(pckKernelName))
+   {
+      planetarySPK->UnloadKernel(pckKernelName);
+      #ifdef DEBUG_UNLOAD
+         MessageInterface::ShowMessage("in SS destructor, just UNloaded the file %s\n", pckKernelName.c_str());
+      #endif
+   }
+   if (planetarySPK->IsLoaded(lskKernelName))
+   {
+      planetarySPK->UnloadKernel(lskKernelName);
+      #ifdef DEBUG_UNLOAD
+         MessageInterface::ShowMessage("in SS destructor, just UNloaded the file %s\n", lskKernelName.c_str());
+      #endif
+   }
    delete planetarySPK;
 #endif
 }
@@ -1690,18 +1709,15 @@ void SolarSystem::LoadSpiceKernels()
 
    try
    {
-      if (lastLoadedSPKFile != theSPKFilename)
+      // since we may need to add the path, try to load first, then check
+      // for valid kernel type
+      if (!planetarySPK->IsLoaded(theSPKFilename))
       {
-         // since we may need to add the path, try to load first, then check
-         // for valid kernel type
-         if (!planetarySPK->IsLoaded(theSPKFilename))
-         {
-            planetarySPK->LoadKernel(theSPKFilename);
-            #ifdef DEBUG_SS_SPICE
-            MessageInterface::ShowMessage
-               ("   kernelReader has successfully loaded the SPK file %s\n", theSPKFilename.c_str());
-            #endif
-         }
+         planetarySPK->LoadKernel(theSPKFilename);
+         #ifdef DEBUG_SS_SPICE
+         MessageInterface::ShowMessage
+            ("   kernelReader has successfully loaded the SPK file %s\n", theSPKFilename.c_str());
+         #endif
       }
    }
    catch (UtilityException&)
