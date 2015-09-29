@@ -31,7 +31,7 @@
 //#define DEBUG_NAN_CONDITIONS
 //#define DEBUG_FIRSTCALL
 
-#define DUMP_FLUX_DATA
+//#define DUMP_FLUX_DATA
 
 #ifndef __SKIP_MSISE90__
 extern "C" 
