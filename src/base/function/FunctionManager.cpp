@@ -651,6 +651,7 @@ bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAd
              "deleting oldObj passedInput");
          #endif
          delete oldObj;
+         oldObj = NULL;
       }
       inputAdded = false;
       
@@ -679,6 +680,7 @@ bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAd
              "deleting oldObj passedInput");
          #endif
          delete oldObj;
+         oldObj = NULL;
       }
    }
    else
@@ -1973,6 +1975,7 @@ GmatBase* FunctionManager::CreateObject(const std::string &fromString)
              "deleting unused wrapper");
          #endif
          delete ew;
+         ew = NULL;
       }
       if (obj) createdOthers.insert(std::make_pair(str, obj));
    }
@@ -2045,6 +2048,7 @@ void FunctionManager::AssignResult()
              "deleting output wrapper");
          #endif
          delete ew;
+         ew = NULL;
       }
    }
 }
