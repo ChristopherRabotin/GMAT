@@ -378,10 +378,15 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 StringArray GmatObType::GetAvailableMeasurementTypes()
 {
    StringArray typeList;
+
+   // New syntax's measurement types
    typeList.push_back("Range_KM");
    typeList.push_back("DSNRange");
    typeList.push_back("Doppler");
    typeList.push_back("Doppler_RangeRate");
+   typeList.push_back("TDRSDoppler_HZ");              // made changes by TUAN NGUYEN
+
+   // Old syntax's measurement types
    typeList.push_back("DSNTwoWayRange");
    typeList.push_back("DSNTwoWayDoppler");
    typeList.push_back("USNTwoWayRange");
@@ -529,9 +534,9 @@ ObservationData* GmatObType::ReadObservation()
       }
 #endif
 
-      //if ((currentObs.typeName == "Range")||(currentObs.typeName == "DSNRange")              // made changes by TUAN NGUYEN
       if ((currentObs.typeName == "Range_KM")||(currentObs.typeName == "DSNRange")             // made changes by TUAN NGUYEN
-         ||(currentObs.typeName == "Doppler_RangeRate")||(currentObs.typeName == "Doppler"))   // made changes by TUAN NGUYEN
+         ||(currentObs.typeName == "Doppler_RangeRate")||(currentObs.typeName == "Doppler")    // made changes by TUAN NGUYEN
+         ||(currentObs.typeName == "TDRSDoppler_HZ"))                                          // made changes by TUAN NGUYEN
       {
          dataSize = 1;
       }
@@ -575,8 +580,11 @@ ObservationData* GmatObType::ReadObservation()
 //#endif
 
 
-   currentObs.unit = "Km";
-   if (currentObs.typeName == "Doppler")
+   if (currentObs.typeName == "Range_KM")
+   {
+      currentObs.unit = "Km";
+   }
+   else if (currentObs.typeName == "Doppler")
    {
       theLine >> currentObs.uplinkBand;
       theLine >> currentObs.dopplerCountInterval;
@@ -588,6 +596,14 @@ ObservationData* GmatObType::ReadObservation()
       theLine >> currentObs.dopplerCountInterval;                         // made changes by TUAN NGUYEN
       currentObs.unit = "Km/s";                                           // made changes by TUAN NGUYEN
    }                                                                      // made changes by TUAN NGUYEN
+   else if (currentObs.typeName == "TDRSDoppler_HZ")
+   {
+      theLine >> currentObs.tdrsNode4Freq;            // this field is used to received frequency at the return-link TDRS 
+      theLine >> currentObs.tdrsNode4Band;            // this field is used to received frequency band at the return-link TDRS 
+      theLine >> currentObs.tdrsServiceID;            // value of serviceID would be "S1", "S2", or "MA"
+      theLine >> currentObs.tdrsSMARID;               // TDRS SMAR id 
+      currentObs.unit = "Hz";
+   }
 
 
 
