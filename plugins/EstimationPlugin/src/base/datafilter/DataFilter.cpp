@@ -105,6 +105,7 @@ DataFilter::DataFilter(const std::string name) :
    dataTypesMap["Range_RU"]          = "DSNRange";
    dataTypesMap["Doppler_HZ"]        = "Doppler";
    dataTypesMap["Doppler_RangeRate"] = "Doppler_RangeRate";        // made changes by TUAN NGUYEN
+   dataTypesMap["TDRSDoppler_HZ"]    = "TDRSDoppler_HZ";           // made changes by TUAN NGUYEN
 }
 
 
@@ -1223,6 +1224,7 @@ StringArray DataFilter::GetListOfMeasurementTypes()
    typeList.push_back("Range_RU");
    typeList.push_back("Doppler_HZ");
    typeList.push_back("Doppler_RangeRate");
+   typeList.push_back("TDRSDoppler_HZ");           // made changes by TUAN NGUYEN
    return typeList;
 }
 
