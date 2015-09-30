@@ -662,18 +662,21 @@ static integer c__4 = 4;
 /*              To get current values of SW: CALL TRETRV(SW) */
 
     /* Parameter adjustments */
+    // Adjust the sv flag for hourly Ap is variation is seen
+    integer i;
+    for (i = 1; i < 7; ++i)
+    {
+       if (ap[i] != ap[0])
+       {
+          // If we are using daily/3hr observations, flag 9 should be -1.0
+          sv[8] = -1.0;
+          break;
+       }
+    }
+
     --t;
     --d__;
     --ap;
-
-    // Adjust the sv flag for hourly Ap is variation is seen
-    for (integer i = 1; i < 7; ++i)
-    if (ap[i] != ap[0])
-    {
-       // If we are using daily/3hr observations, flag 9 should be -1.0
-       sv[8] = -1.0;
-       break;
-    }
 
     /* Function Body */
 /*      SV(1) = 0.0 */
@@ -1737,17 +1740,20 @@ doublereal globe6_(real *yrd, real *sec, real *lat, real *long__, real *tloc,
 /*       CALCULATE G(L) FUNCTION */
 /*       Upper Thermosphere Parameters */
     /* Parameter adjustments */
+    // Adjust the sv flag for hourly Ap is variation is seen
+    integer i;
+    for (i = 1; i < 7; ++i)
+    {
+       if (ap[i] != ap[0])
+       {
+          // If we are using daily/3hr observations, flag 9 should be -1.0
+          sv[8] = -1.0;
+          break;
+       }
+    }
+
     --p;
     --ap;
-
-    // Adjust the sv flag for hourly Ap is variation is seen
-    for (integer i = 1; i < 7; ++i)
-    if (ap[i] != ap[0])
-    {
-       // If we are using daily/3hr observations, flag 9 should be -1.0
-       sv[8] = -1.0;
-       break;
-    }
 
     /* Function Body */
 /*       3hr Magnetica activity functions */

@@ -957,9 +957,23 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       {
          Real vals[2];
          Real portion = (f107Offset) + fracEpoch - 1.0/3.0;
-         vals[1] = obsFluxData[f107index].obsF107;
-         vals[0] = (f107index > 0 ? obsFluxData[f107index-1].obsF107 : vals[1]);
+         vals[0] = obsFluxData[f107index].obsF107;
+         if (f107index < obsFluxData.size()-1)
+         {
+            vals[1] = obsFluxData[f107index+1].obsF107;
+         }
+         else
+         {
+            // Make it flat
+            vals[1] = vals[0];
+         }
          fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
+
+         #ifdef DEBUG_FLUXINTERPOLATION
+            MessageInterface::ShowMessage("Interpolated from [%lf %lf] to "
+                  "[%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
+                  vals[1], epoch, fD.obsF107);
+         #endif
       }
       else
       {
@@ -973,11 +987,48 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
    }
    else // predict data
    {
-      // For now, use nominal mean Schatten data
-      fD.obsF107     = fD.F107a[schattenFluxIndex];
-      fD.obsCtrF107a = fD.F107a[schattenFluxIndex];
-      for (Integer i = 0; i < 8; i++)
-         fD.ap[i] = fD.apSchatten[schattenApIndex];
+      if (interpolateFlux)
+      {
+         Real vals[2];
+         Real eps[2];
+
+         vals[0] = fD.F107a[schattenFluxIndex];
+         eps[0]  = fD.epoch;
+         if (fD.id < predictFluxData.size()-1)
+         {
+            vals[1] = predictFluxData[fD.id+1].F107a[schattenFluxIndex];
+            eps[1]  = predictFluxData[fD.id+1].epoch;
+         }
+         else
+         {
+            // Make it flat
+            vals[1] = vals[0];
+            eps[1]  = eps[0] + 1.0;
+         }
+
+         Real dt = eps[1] - eps[0];
+         Real delta = epoch - eps[0];
+         Real portion = delta / dt;
+
+         fD.obsF107     = vals[0] + portion * (vals[1] - vals[0]);
+         fD.obsCtrF107a = fD.obsF107;
+
+         #ifdef DEBUG_FLUXINTERPOLATION
+            MessageInterface::ShowMessage("Interpolated from [%lf %lf] to "
+                  "[%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
+                  vals[1], epoch, fD.obsF107);
+         #endif
+
+         for (Integer i = 0; i < 8; i++)
+            fD.ap[i] = fD.apSchatten[schattenApIndex];
+      }
+      else
+      {
+         fD.obsF107     = fD.F107a[schattenFluxIndex];
+         fD.obsCtrF107a = fD.F107a[schattenFluxIndex];
+         for (Integer i = 0; i < 8; i++)
+            fD.ap[i] = fD.apSchatten[schattenApIndex];
+      }
    }
 
 
