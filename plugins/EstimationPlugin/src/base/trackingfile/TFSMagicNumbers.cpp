@@ -664,6 +664,28 @@ TFSMagicNumbers::TFSMagicNumbers() :
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
 
+   // TDRS Two way doppler
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 3;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("S2");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "TDRSDoppler_HZ";
+   lue->multFactor = -1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
    
    // Build the factor map
    factorMap.clear();
