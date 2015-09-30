@@ -441,7 +441,8 @@ void Structure::CalcCenter ()
       Center[i] = (minmax.Min.V[i]+minmax.Max.V[i])/2;
    Rvector3 size;
    for (int i=0;  i<=3-1;  ++i)
-      size[i] = std::max(Center[i]-minmax.Min.V[i],minmax.Max.V[i]-Center[i]);
+      //size[i] = std::max(Center[i]-minmax.Min.V[i],minmax.Max.V[i]-Center[i]);
+      size[i] = GmatMathUtil::Max(Center[i]-minmax.Min.V[i],minmax.Max.V[i]-Center[i]);
    Radius = size.GetMagnitude();
    }
 //--------------------------------------------------------------------
