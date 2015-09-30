@@ -248,6 +248,7 @@
     <ClInclude Include="..\..\src\base\adapter\RangeAdapterKm.hpp" />
     <ClInclude Include="..\..\src\base\adapter\RangeRateAdapterKps.hpp" />
     <ClInclude Include="..\..\src\base\adapter\TrackingDataAdapter.hpp" />
+    <ClInclude Include="..\..\src\base\adapter\TDRSDopplerAdapter.hpp" />
     <ClInclude Include="..\..\src\base\command\RunEstimator.hpp" />
     <ClInclude Include="..\..\src\base\command\RunSimulator.hpp" />
     <ClInclude Include="..\..\src\base\datafilter\DataFilter.hpp" />
@@ -355,6 +356,7 @@
     <ClCompile Include="..\..\src\base\adapter\RangeAdapterKm.cpp" />
     <ClCompile Include="..\..\src\base\adapter\RangeRateAdapterKps.cpp" />
     <ClCompile Include="..\..\src\base\adapter\TrackingDataAdapter.cpp" />
+    <ClCompile Include="..\..\src\base\adapter\TDRSDopplerAdapter.cpp" />
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp" />
     <ClCompile Include="..\..\src\base\command\RunSimulator.cpp" />
     <ClCompile Include="..\..\src\base\datafilter\DataFilter.cpp" />
