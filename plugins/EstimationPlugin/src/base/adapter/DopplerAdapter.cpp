@@ -738,16 +738,17 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       obData = new ObservationData();
    obData->epoch = tm.GetMjd();
    
-   // Set doppler count interval to MeasureModel object due to the Start-path 
-   // is measured earlier by number of seconds shown in doppler count interval   
-   adapterS->GetMeasurementModel()->SetCountInterval(dopplerCountInterval);
+   //// Set doppler count interval to MeasureModel object due to the Start-path                      // made changes by TUAN NGUYEN
+   //// is measured earlier by number of seconds shown in doppler count interval                     // made changes by TUAN NGUYEN
+   //adapterS->GetMeasurementModel()->SetCountInterval(dopplerCountInterval);                        // made changes by TUAN NGUYEN
    // For Start-path, range calculation does not add bias and noise to calculated value
    // Note that: default option is no adding noise
    adapterS->AddBias(false);
    adapterS->AddNoise(false);                                                    // made changes by TUAN NGUYEN
    adapterS->SetRangeOnly(true);                                                 // made changes by TUAN NGUYEN
 
-   adapterS->CalculateMeasurement(withEvents, obData, rampTB);
+   //adapterS->CalculateMeasurement(withEvents, obData, rampTB);                                    // made changes by TUAN NGUYEN
+   adapterS->CalculateMeasurementAtOffset(withEvents, -dopplerCountInterval, obData, rampTB);       // made changes by TUAN NGUYEN
    if (obData)
       delete obData;
 
