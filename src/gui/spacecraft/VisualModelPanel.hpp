@@ -131,10 +131,11 @@ private:
    void LoadData();
    void InitializeCanvas();
 	void ToggleInterface(bool enable);
-   void AutoScaleModel();
    void ResetSliders();
    wxString ToString(Real rval);
    
+   Real GetScaleSlider ();
+   void SetScaleSlider (const Real scale);
    // IDs for the controls and the menu commands
    enum
    {     

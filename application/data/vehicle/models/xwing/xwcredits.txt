@@ -1,0 +1,8 @@
+Mesh:  Dr. Harry Chang <doctor_harry@hotmail.com>
+Basic Textures:  Jose Gonzales Pareja <gpareja@ctv.es>
+Pilot Mesh:  Matt Walton <nixon@gerf.org> ??
+Texture Enhancements:  Matt Allen (WolfPack)
+
+The mesh is for personal use only.  
+Please give credit where it's due in your work.
+If in doubt then you better not use the model.
