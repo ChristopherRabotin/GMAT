@@ -85,7 +85,7 @@ MeasureModel::MeasureModel(const std::string &name) :
    navLog            (NULL),
    logLevel          (0),              // Default to everything
    epochIsAtEnd      (true),
-   countInterval     (0.0),
+//   countInterval     (0.0),                  // made changes by TUAN NGUYEN
    isPhysical        (true),
    solarsys          (NULL)
 {
@@ -180,7 +180,7 @@ MeasureModel::MeasureModel(const MeasureModel& mm) :
    isPhysical        (mm.isPhysical),
    solarsys          (mm.solarsys),
    epochIsAtEnd      (mm.epochIsAtEnd),
-   countInterval     (mm.countInterval),
+//   countInterval     (mm.countInterval),              // made changes by TUAN NGUYEN
    correctionTypeList(mm.correctionTypeList),
    correctionModelList(mm.correctionModelList)
 {
@@ -221,7 +221,7 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       isPhysical          = mm.isPhysical;
       solarsys            = mm.solarsys;
       epochIsAtEnd        = mm.epochIsAtEnd;
-      countInterval       = mm.countInterval;
+//      countInterval       = mm.countInterval;                           // made changes by TUAN NGUYEN
       correctionTypeList  = mm.correctionTypeList;
       correctionModelList = mm.correctionModelList;
 
@@ -1296,18 +1296,18 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       {
          leg->HardwareDelayCalculation();                  // caluclate hardware delay for signal leg
 
-         // Add count time interval to the reveiver's hardware delay of the last participant when measurement time tag is at the end of signal path  
-         // (or to the transmiter's hardware delay of the first participant when measurement time tag is at the begining of signal path)
-         if (epochIsAtEnd)
-         {
-            if ((leg->GetNext() == NULL)&&(countInterval != 0.0))
-               leg->GetSignalDataObject()->rDelay += countInterval;
-         }
-         else
-         {
-            if ((leg == firstleg)&&(countInterval != 0.0))
-               leg->GetSignalDataObject()->tDelay += countInterval;
-         }
+         //// Add count time interval to the reveiver's hardware delay of the last participant when measurement time tag is at the end of signal path    // made changes by TUAN NGUYEN
+         //// (or to the transmiter's hardware delay of the first participant when measurement time tag is at the begining of signal path)               // made changes by TUAN NGUYEN
+         //if (epochIsAtEnd)                                                                                                                             // made changes by TUAN NGUYEN
+         //{                                                                                                                                             // made changes by TUAN NGUYEN
+         //   if ((leg->GetNext() == NULL)&&(countInterval != 0.0))                                                                                      // made changes by TUAN NGUYEN
+         //      leg->GetSignalDataObject()->rDelay += countInterval;                                                                                    // made changes by TUAN NGUYEN
+         //}                                                                                                                                             // made changes by TUAN NGUYEN
+         //else                                                                                                                                          // made changes by TUAN NGUYEN
+         //{                                                                                                                                             // made changes by TUAN NGUYEN
+         //   if ((leg == firstleg)&&(countInterval != 0.0))                                                                                             // made changes by TUAN NGUYEN
+         //      leg->GetSignalDataObject()->tDelay += countInterval;                                                                                    // made changes by TUAN NGUYEN
+         //}                                                                                                                                             // made changes by TUAN NGUYEN
 
          leg = leg->GetNext();
          if (leg != NULL)
@@ -1384,9 +1384,21 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
       }
-      // 4.5.2. Compute media correction and hardware delay (in forward direction of signal path)
+
+      // 4.5.2. Compute signal frequency on each leg(in forward direction of signal path)
       #ifdef DEBUG_TIMING
-         MessageInterface::ShowMessage("4.5.2 Calculate media correction for signal path %d:\n", i);
+         MessageInterface::ShowMessage("4.5.2 Compute signal frequency on each leg for signal path %d:\n", i);
+      #endif
+      leg = signalPaths[i];
+      while(leg != NULL)
+      {
+         leg->SignalFrequencyCalculation(rampTB);          // calculate signal frequency on each signal leg
+         leg = leg->GetNext();
+      }
+
+      // 4.5.3. Compute media correction and hardware delay (in forward direction of signal path)
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("4.5.3 Calculate media correction for signal path %d:\n", i);
       #endif
       leg = signalPaths[i];
       while(leg != NULL)
@@ -1395,25 +1407,25 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          leg = leg->GetNext();
       }
 
-      // 4.6. Reset value of hardware delay
-      leg = firstleg = lastleg = signalPaths[i];
-      while(leg != NULL)
-      {
-         if (epochIsAtEnd)
-         {
-            if ((leg->GetNext() == NULL)&&(countInterval != 0.0))
-               leg->GetSignalDataObject()->rDelay -= countInterval;
-         }
-         else
-         {
-            if ((leg == firstleg)&&(countInterval != 0.0))
-               leg->GetSignalDataObject()->tDelay -= countInterval;
-         }
+      //// 4.6. Reset value of hardware delay                                  // made changes by TUAN NGUYEN
+      //leg = firstleg = lastleg = signalPaths[i];                             // made changes by TUAN NGUYEN
+      //while(leg != NULL)                                                     // made changes by TUAN NGUYEN
+      //{                                                                      // made changes by TUAN NGUYEN
+      //   if (epochIsAtEnd)                                                   // made changes by TUAN NGUYEN
+      //   {                                                                   // made changes by TUAN NGUYEN
+      //      if ((leg->GetNext() == NULL)&&(countInterval != 0.0))            // made changes by TUAN NGUYEN
+      //         leg->GetSignalDataObject()->rDelay -= countInterval;          // made changes by TUAN NGUYEN
+      //   }                                                                   // made changes by TUAN NGUYEN
+      //   else                                                                // made changes by TUAN NGUYEN
+      //   {                                                                   // made changes by TUAN NGUYEN
+      //      if ((leg == firstleg)&&(countInterval != 0.0))                   // made changes by TUAN NGUYEN
+      //         leg->GetSignalDataObject()->tDelay -= countInterval;          // made changes by TUAN NGUYEN
+      //   }                                                                   // made changes by TUAN NGUYEN
 
-         leg = leg->GetNext();
-         if (leg != NULL)
-            lastleg = leg;
-      }
+      //   leg = leg->GetNext();                                               // made changes by TUAN NGUYEN
+      //   if (leg != NULL)                                                    // made changes by TUAN NGUYEN
+      //      lastleg = leg;                                                   // made changes by TUAN NGUYEN
+      //}                                                                      // made changes by TUAN NGUYEN
 
       #ifdef DEBUG_CALCULATE_MEASUREMENT
          SignalData *current  = theData[i];
@@ -1732,10 +1744,10 @@ bool MeasureModel::GetTimeTagFlag()
 }
 
 
-void MeasureModel::SetCountInterval(Real timeInterval)
-{
-   countInterval = timeInterval;
-}
+//void MeasureModel::SetCountInterval(Real timeInterval)         // made changes by TUAN NGUYEN
+//{                                                              // made changes by TUAN NGUYEN
+//   countInterval = timeInterval;                               // made changes by TUAN NGUYEN
+//}                                                              // made changes by TUAN NGUYEN
 
 
 

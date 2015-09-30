@@ -145,8 +145,8 @@ public:
    /// Measurement Model Settings
    virtual bool         SetProgressReporter(ProgressReporter* reporter);
 
-   /// Set value for Doppler count interval. It is used to calculate measurement for Start path
-   void                 SetCountInterval(Real timeInterval);
+   ///// Set value for Doppler count interval. It is used to calculate measurement for Start path          // made changes by TUAN NGUYEN
+   //void                 SetCountInterval(Real timeInterval);                                             // made changes by TUAN NGUYEN
 
    /// Get paticipant objects lists
    virtual const std::vector<ObjectArray*>&
@@ -186,8 +186,8 @@ protected:
    /// Flag to indicate measurerment time tag to be at the end of signal path
    bool epochIsAtEnd;
 
-   /// Count interval is time interval (in seconds) between Start-path and End-path
-   Real countInterval;
+   ///// Count interval is time interval (in seconds) between Start-path and End-path          // made changes by TUAN NGUYEN
+   //Real countInterval;                                                                       // made changes by TUAN NGUYEN
 
    /// The reporter for status information
    ProgressReporter *navLog;
