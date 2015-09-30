@@ -103,15 +103,25 @@ public:
 ///// TBD: Determine if there is a more generic way to add these
 //   std::string dataFormat;			// Flag indicating which data format is used. Its value is either "GMATInternal" or "GMAT_OD"
    /// Uplink band
-   Integer uplinkBand;
+   Integer           uplinkBand;
    /// Uplink frequency
-   Real uplinkFreq;
+   Real              uplinkFreq;
    /// Range modulo
-   Real rangeModulo;
+   Real              rangeModulo;
 
    // This section is added for Gmat_ODDoppler observation data
    /// Time difference between the reception time at station for start path and end path  
-   Real dopplerCountInterval;
+   Real              dopplerCountInterval;
+
+   // This section is added for TDRSS Doppler observation data
+   /// TRDS service Id
+   std::string       tdrsServiceID;   // "SA1", "SA2", or "MA"
+   /// TDRS node 4 frequency
+   Real              tdrsNode4Freq;   // the received frequency at the return-link TDRS  (unit: Hz)
+   /// TDRS node 4 frequency band
+   Integer           tdrsNode4Band;   // the received frequency band at the return-link TDRS. 0: unspecified, 1: S-band, 2: X-band, 3: K-band 
+   /// TDRS SMAR Id
+   Integer           tdrsSMARID;      // SMAR id
 
 };
 
