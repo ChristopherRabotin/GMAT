@@ -252,7 +252,7 @@ protected:
    Covariance                measErrorCovariance;
 
    /// Measurement type
-   std::string               measurementType;  // it's value could be "Range_KM", "DSNRange", "Doppler", "Doppler_RangeRate", etc
+   std::string               measurementType;  // it's value could be "Range_KM", "DSNRange", "Doppler", "Doppler_RangeRate", "TDRSDoppler_HZ", etc
 
    /// A list of all objects used for measurement calculation (specificly it contains solver-for objects and consider objects)    // made changes by TUAN NGUYEN
    ObjectArray               forObjects;                                                                                          // made changes by TUAN NGUYEN
