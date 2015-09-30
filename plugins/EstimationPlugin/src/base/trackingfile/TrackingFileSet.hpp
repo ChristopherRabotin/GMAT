@@ -187,6 +187,9 @@ protected:
    /// Doppler count interval
    Real        dopplerCountInterval;
 
+   /// Service access list. It is used in TDRS doppler measurement to specify a list of serivce access used for measurement (SA1, SA2, or MA)
+   StringArray serviceAccessList;
+
    /// Data filters
    StringArray dataFilterNames;
    ObjectArray dataFilters;
@@ -212,6 +215,7 @@ protected:
       USE_ETMINUSTAI,
       RANGE_MODULO,
       DOPPLER_COUNT_INTERVAL,
+      SERVICE_ACCESS,               // made changes by TUAN NGUYEN
       DATA_FILTERS,
       TrackingFileSetParamCount,
    };

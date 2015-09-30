@@ -29,6 +29,7 @@
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
 #include "GNDopplerAdapter.hpp"                           // made changes by TUAN NGUYEN
+#include "TDRSDopplerAdapter.hpp"                        // made changes by TUAN NGUYEN
 #include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
 
@@ -54,6 +55,7 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "UseETminusTAI",                 // USE_ETMINUSTAI
    "SimRangeModuloConstant",        // RANGE_MODULO
    "SimDopplerCountInterval",       // DOPPLER_COUNT_INTERVAL
+   "SimServiceAccessList",          // SERVICE_ACCESS               // made changes by TUAN NGUYEN
    "DataFilters",                   // DATA_FILTERS
 };
 
@@ -69,6 +71,7 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI
    Gmat::REAL_TYPE,                 // RANGE_MODULO
    Gmat::REAL_TYPE,                 // DOPPLER_COUNT_INTERVAL
+   Gmat::STRINGARRAY_TYPE,          // SERVICE_ACCESS              // made changes by TUAN NGUYEN
    Gmat::OBJECTARRAY_TYPE,          // DATA_FILLTERS
 };
 
@@ -158,6 +161,7 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    useETminusTAICorrection   (tfs.useETminusTAICorrection),
    rangeModulo               (tfs.rangeModulo),
    dopplerCountInterval      (tfs.dopplerCountInterval),
+   serviceAccessList         (tfs.serviceAccessList),             // made changes by TUAN NGUYEN
    dataFilterNames           (tfs.dataFilterNames)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -225,6 +229,7 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       useETminusTAICorrection = tfs.useETminusTAICorrection;
       rangeModulo             = tfs.rangeModulo;
       dopplerCountInterval    = tfs.dopplerCountInterval;
+      serviceAccessList       = tfs.serviceAccessList;                 // made changes by TUAN NGUYEN
       dataFilterNames         = tfs.dataFilterNames;
 
       // Remove all dataFilters
@@ -599,6 +604,15 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
                "a data filter name");
    }
 
+   if (id == SERVICE_ACCESS)                                                       // made changes by TUAN NGUYEN
+   {                                                                               // made changes by TUAN NGUYEN
+      if (((Integer)serviceAccessList.size() > index) && (index >= 0))             // made changes by TUAN NGUYEN
+         return serviceAccessList[index];                                          // made changes by TUAN NGUYEN
+      else                                                                         // made changes by TUAN NGUYEN
+         throw MeasurementException("Index out of bounds when trying to access "   // made changes by TUAN NGUYEN
+               "a service access list");                                           // made changes by TUAN NGUYEN
+   }                                                                               // made changes by TUAN NGUYEN
+
    return MeasurementModelBase::GetStringParameter(id, index);
 }
 
@@ -792,6 +806,33 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       return true;
    }
 
+   if (id == SERVICE_ACCESS)                                                                              // made changes by TUAN NGUYEN
+   {                                                                                                      // made changes by TUAN NGUYEN
+      // return true when it is an empty list                                                             // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                    // made changes by TUAN NGUYEN
+         return true;                                                                                     // made changes by TUAN NGUYEN
+
+      if ((!serviceAccessList.empty())&&                                                                  // made changes by TUAN NGUYEN
+          (find(serviceAccessList.begin(), serviceAccessList.end(), value) != serviceAccessList.end()))   // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: replication of service access name ('" + value + "').\n");    // made changes by TUAN NGUYEN
+      
+      if (((Integer)serviceAccessList.size() > index) && (index >= 0))                                    // made changes by TUAN NGUYEN
+         serviceAccessList[index] = value;                                                                // made changes by TUAN NGUYEN
+      else if ((Integer)serviceAccessList.size() == index)                                                // made changes by TUAN NGUYEN
+         serviceAccessList.push_back(value);                                                              // made changes by TUAN NGUYEN
+      else                                                                                                // made changes by TUAN NGUYEN
+         throw MeasurementException("Index out of bounds when trying to "                                 // made changes by TUAN NGUYEN
+               "set a service access name");                                                              // made changes by TUAN NGUYEN
+
+      #ifdef DEBUG_INITIALIZATION                                                                         // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("%d names in service access list:\n",                              // made changes by TUAN NGUYEN
+               serviceAccessList.size());                                                                 // made changes by TUAN NGUYEN
+         for (UnsignedInt i = 0; i < serviceAccessList.size(); ++i)                                       // made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("   %s\n", serviceAccessList[i].c_str());                       // made changes by TUAN NGUYEN
+      #endif                                                                                              // made changes by TUAN NGUYEN
+      return true;                                                                                        // made changes by TUAN NGUYEN
+   }                                                                                                      // made changes by TUAN NGUYEN
+
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
 
@@ -829,6 +870,9 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
 
    if (id == RAMPED_TABLENAME)
       return rampedTablenames;
+
+   if (id == SERVICE_ACCESS)
+      return serviceAccessList;
 
    if (id == DATA_FILTERS)
       return dataFilterNames;
@@ -1746,12 +1790,19 @@ bool TrackingFileSet::Initialize()
             measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);
          }
 
+         // Set service access for TDRSDoppler
+         if (measType == "TDRSDoppler_HZ")
+         {
+            for (UnsignedInt accIndex = 0; accIndex < serviceAccessList.size(); ++accIndex) 
+               measurements[i]->SetStringParameter("ServiceAccess", serviceAccessList[accIndex], accIndex);
+         }
+
          // Set doppler count interval for Doppler
-         if ((measType == "Doppler")||(measType == "Doppler_RangeRate"))                            // made changes by TUAN NGUYEN
+         if ((measType == "Doppler")||(measType == "Doppler_RangeRate")||(measType == "TDRSDoppler_HZ"))      // made changes by TUAN NGUYEN
          {
             measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);
          }
-         // Set range modulo constant for RangeRate
+         // Set DopplerInterval for RangeRate
          if (measType == "RangeRate")
          {
             //measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
@@ -1936,8 +1987,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    ss << "}_" << type;
    std::string adapterName = ss.str();          // tracking adapter name contains TrackingFileSet name following tracking configuration index and type 
    
-   // if (type == "Range")                             // made changes by TUAN NGUYEN
-   if (type == "Range_KM")                             // made changes by TUAN NGUYEN
+   if (type == "Range_KM")                                    // It is GN (or USN) Range
    {
       retval = new RangeAdapterKm(adapterName);
       if (retval)
@@ -1946,7 +1996,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->SetStringParameter("MeasurementType", type);
       }
    }
-   else if (type == "DSNRange")
+   else if (type == "DSNRange")                               // It is DSN Range
    {
       retval = new DSNRangeAdapter(adapterName);
       if (retval)
@@ -1955,18 +2005,17 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->SetStringParameter("MeasurementType", type);
       }
    }
-   else if (type == "Doppler")
+   else if (type == "Doppler")                               // It is DSN Doppler
    {
       retval = new DopplerAdapter(adapterName);
       if (retval)
       {
-         // ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);            // made changes by TUAN NGUYEN
          ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);            // made changes by TUAN NGUYEN
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
    }                                                                  
-   else if (type == "Doppler_RangeRate")                                                                                  // made changes by TUAN NGUYEN
+   else if (type == "Doppler_RangeRate")                    // It is GN (or USN) Doppler                                  // made changes by TUAN NGUYEN
    {                                                                                                                      // made changes by TUAN NGUYEN
       retval = new GNDopplerAdapter(adapterName);                                                                         // made changes by TUAN NGUYEN
       if (retval)                                                                                                         // made changes by TUAN NGUYEN
@@ -1976,6 +2025,28 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->SetStringParameter("MeasurementType", type);                                                             // made changes by TUAN NGUYEN
       }                                                                                                                   // made changes by TUAN NGUYEN
    }                                                                                                                      // made changes by TUAN NGUYEN
+   else if (type == "TDRSDoppler_HZ")                    // It is 2-ways TDRS Doppler                                     // made changes by TUAN NGUYEN
+   {                                                                                                                      // made changes by TUAN NGUYEN
+      retval = new TDRSDopplerAdapter(adapterName);                                                                       // made changes by TUAN NGUYEN
+      if (retval)                                                                                                         // made changes by TUAN NGUYEN
+      {                                                                                                                   // made changes by TUAN NGUYEN
+         // Add code to specify short strand here                                                                         // made changes by TUAN NGUYEN
+         
+         StringArray shortStrand;                                                                                         // made changes by TUAN NGUYEN
+         if (strand.size() != 5)
+            throw MeasurementException("Error: Signal path does not contain 5 participants.\n");
+         shortStrand.push_back(strand[0]);
+         shortStrand.push_back(strand[3]);
+         shortStrand.push_back(strand[4]);
+
+         ((TDRSDopplerAdapter*)retval)->adapterSL = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);      // made changes by TUAN NGUYEN
+         ((TDRSDopplerAdapter*)retval)->adapterSS = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex); // made changes by TUAN NGUYEN
+         ((TDRSDopplerAdapter*)retval)->adapterES = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex); // made changes by TUAN NGUYEN
+
+         retval->UsesLightTime(useLighttime);                                                                             // made changes by TUAN NGUYEN
+         retval->SetStringParameter("MeasurementType", type);                                                             // made changes by TUAN NGUYEN
+      }                                                                                                                   // made changes by TUAN NGUYEN
+   }
    else if (type == "RangeRate")
    {                                                                  
       retval = new RangeRateAdapterKps(instanceName + type);              
@@ -2034,20 +2105,6 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
       MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString().c_str());
    }
 
-   // This step was removed due to those participants were initialized in sand box
-   //// Initialize all participants
-   //for (UnsignedInt i = 0; i < references.size(); ++i)
-   //{
-   //   if ((references[i]->IsOfType(Gmat::GROUND_STATION))||(references[i]->IsOfType(Gmat::SPACECRAFT)))
-   //   {
-   //      references[i]->SetSolarSystem(solarsystem);
-
-   //      // Initialize paticipants
-   //      references[i]->Initialize();
-   //   }
-   //}
-
-   // Reinitialize
    isInitialized = false;
    
    return Initialize();
