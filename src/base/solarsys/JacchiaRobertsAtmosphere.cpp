@@ -34,6 +34,8 @@
 //#define DEBUG_FIRSTCALL
 //#define DEBUG_SCHATTEN_SETTINGS
 
+//#define DUMP_FLUX_DATA
+
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -538,6 +540,12 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
       geo.xtemp = 379.0 + 3.24 * nominalF107a + 1.3 * (nominalF107 - nominalF107a);
       geo.tkp   = nominalKp;
    }
+
+   #ifdef DUMP_FLUX_DATA
+      MessageInterface::ShowMessage("%.12lf  %lf  %lf  [%lf]\n",
+         a1_time, nominalF107, nominalF107a, geo.tkp);
+   #endif
+
 
    #ifdef DEBUG_JR_DRAG
       MessageInterface::ShowMessage

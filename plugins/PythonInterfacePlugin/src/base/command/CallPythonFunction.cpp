@@ -24,8 +24,8 @@
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
-// #define DEBUG_INITIALIZATION
-// #define DEBUG_EXECUTION
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_EXECUTION
 
 //------------------------------------------------------------------------------
 // Static Data
@@ -598,9 +598,8 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
          dataReturn.push_back(rv);
          retval = true;
       }
-
       // Integers, passed into real number containers
-      if (PyLong_Check(member))
+      else if (PyLong_Check(member))
       {
          PyReturnValue rv;
          rv.toType = Gmat::REAL_TYPE;
@@ -721,7 +720,38 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
             dataReturn.push_back(rv);
             retval = true;
          }
+         else if (PyLong_Check(pyItem))
+         {
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("Python has returned a list of Integers.\n");
+            #endif
+               rv.toType = Gmat::REAL_TYPE;
+            for (Integer i = 0; i < listSz; ++i)
+            {
+               pyItem = PyList_GetItem(member, i);
+               rv.floatData.push_back(PyLong_AsDouble(pyItem));
+            }
+            dataReturn.push_back(rv);
+            retval = true;
+         }
+         else
+         {
+            // The return type is not handled
+            throw CommandException("The list member returned from the Python "
+                  "call is a type not handled by GMAT");
+         }
       }
+      else
+      {
+         // The return type is not handled
+         throw CommandException("The returned value from the Python call is a "
+               "type not handled by GMAT");
+      }
+   }
+   catch (BaseException &ex)
+   {
+      throw CommandException(ex.GetFullMessage() + " on the script line \n   \"" +
+            GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
    }
    catch (...)
    {
@@ -793,9 +823,9 @@ Integer CallPythonFunction::FillInputList()
    {
       if ((mapObj = FindObject(*it)) == NULL)
       {
-         throw CommandException("The CallPythonFunction command cannot find the parameter " +
-                                *it + " in script line\n   \"" +
-                                GetGeneratingString(Gmat::SCRIPTING) + "\"");
+         throw CommandException("The CallPythonFunction command cannot find "
+               "the parameter " + *it + " in script line\n   \"" +
+               GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
       }
          
       if (mapObj->IsOfType(Gmat::PARAMETER))
@@ -892,9 +922,6 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
             break;
          }
 
-         case Gmat::RVECTOR_TYPE:
-            break;
-
          case Gmat::RMATRIX_TYPE:
          {
             Array *arr = (Array *) param;
@@ -921,9 +948,11 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
                }
 
                paramType.push_back(Gmat::RMATRIX_TYPE);
-
-               break;
             }
+            else
+               throw CommandException("The Python input parameter " + param->GetName() +
+                     " should contain an array, but does not");
+            break;
          }
 
          default:

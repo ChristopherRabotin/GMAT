@@ -31,6 +31,8 @@
 //#define DEBUG_NAN_CONDITIONS
 //#define DEBUG_FIRSTCALL
 
+//#define DUMP_FLUX_DATA
+
 #ifndef __SKIP_MSISE90__
 extern "C" 
 { 
@@ -165,6 +167,12 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
 		   TimeConverterUtil::UTCMJD, GmatTimeConstants::JD_JAN_5_1941);
 
    GetInputs(utcEpoch);
+
+
+   #ifdef DUMP_FLUX_DATA
+      MessageInterface::ShowMessage("%.12lf  %lf  %lf  [%lf  %lf  %lf  %lf  %lf  %lf  %lf]\n",
+         epoch, f107, f107a, ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
+   #endif
 
    int xyd    = yd;
    float xsod = (float)sod;
