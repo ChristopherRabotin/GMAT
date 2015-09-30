@@ -1317,6 +1317,10 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
          }
          scard_c(0, &testWindow);   // reset (empty) the test window cell
       }
+      else
+      {
+         copy_c(&cover, &window);
+      }
    }
    else // a window only over the specified time range - no light time etc.
    {
