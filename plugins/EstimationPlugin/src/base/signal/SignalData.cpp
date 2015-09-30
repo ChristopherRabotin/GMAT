@@ -51,6 +51,9 @@ SignalData::SignalData() :
    feasibility          (true),
    feasibilityReason    ("N"),
    feasibilityValue     (90.0),
+   arriveFreq           (-1.0),                  // made changes by TUAN NGUYEN
+   transmitFreq         (0.0),                   // made changes by TUAN NGUYEN
+   receiveFreq          (0.0),                   // made changes by TUAN NGUYEN
    next                 (NULL)
 {
 }
@@ -129,6 +132,9 @@ SignalData::SignalData(const SignalData& sd) :
    feasibility          (sd.feasibility),
    feasibilityReason    (sd.feasibilityReason),
    feasibilityValue     (sd.feasibilityValue),
+   arriveFreq           (sd.arriveFreq),                      // made changes by TUAN NGUYEN
+   transmitFreq         (sd.transmitFreq),                    // made changes by TUAN NGUYEN
+   receiveFreq          (sd.receiveFreq),                     // made changes by TUAN NGUYEN
    next                 (NULL)
 {
 }
@@ -191,6 +197,9 @@ SignalData& SignalData::operator=(const SignalData& sd)
       feasibility          = sd.feasibility;
       feasibilityReason    = sd.feasibilityReason;
       feasibilityValue     = sd.feasibilityValue;
+      arriveFreq           = sd.arriveFreq;                  // made changes by TUAN NGUYEN
+      transmitFreq         = sd.transmitFreq;                // made changes by TUAN NGUYEN
+      receiveFreq          = sd.receiveFreq;                 // made changes by TUAN NGUYEN 
       next                 = NULL;
    }
 
