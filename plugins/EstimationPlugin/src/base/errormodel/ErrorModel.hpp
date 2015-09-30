@@ -98,7 +98,7 @@ public:
 
 protected:
    /// Measurement type 
-   std::string   measurementType;               // Its value to be "Range_KM", "Range_RU", "Doppler_RangeRate", or "Doppler_HZ"
+   std::string   measurementType;               // Its value to be "Range_KM", "Range_RU", "Doppler_RangeRate", "Doppler_HZ", "TDRSDoppler_HZ", etc
    ///// Measurement trip
    //Integer       measurementTrip;               // specify number of ways of a measurement. It would be 1 for one-way, 2 for two-ways, 3 for three-ways, and so on. It is 0 for all trips
    ///// Participant name list
