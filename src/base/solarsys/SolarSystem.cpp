@@ -347,14 +347,16 @@ SolarSystem::SolarSystem(std::string withName) :
 #ifdef __USE_SPICE__
    planetarySPK   = new SpiceOrbitKernelReader();
 
-   // pckKernelName = "../data/planetary_coeff/pck00010.tpc";  // HARD_CODED default for now
+   // pckKernelName = "DATA_PATH/planetary_coeff/pck00010.tpc";  // HARD_CODED default for now
    // @todo add these to planetarySourceNames at some point?  These should be
    // added to the startup file.
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE405
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // DE421
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE424
-//   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE430
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // SPICE
+   std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+
+   theSPKKernelNames.push_back(path+"/DE421AllPlanets.bsp");         // DE405
+   theSPKKernelNames.push_back(path+"/DE421AllPlanets.bsp");  // DE421
+   theSPKKernelNames.push_back(path+"/DE421AllPlanets.bsp");         // DE424
+//   theSPKKernelNames.push_back("PLANETARY_EPHEM_SPK_PATH/DE421AllPlanets.bsp");         // DE430
+   theSPKKernelNames.push_back(path+"/DE421AllPlanets.bsp");  // SPICE
 
    #ifdef DEBUG_SS_CREATE
    MessageInterface::ShowMessage
