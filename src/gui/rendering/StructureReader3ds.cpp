@@ -18,6 +18,7 @@
 #include "StringUtil.hpp"
 #include "FileUtil.hpp"
 #include "MessageInterface.hpp"
+#include "RealUtilities.hpp"
 //====================================================================
 ZIntegerVector::ZIntegerVector ()
 // Constructor
@@ -40,7 +41,7 @@ ZMaterialData::ZMaterialData ()
 // Constructor
    : Name(""),
      FaceIndexesSize(0),
-     FaceIndexes(nullptr)
+     FaceIndexes(NULL)
    {
    }
 //--------------------------------------------------------------------
@@ -71,41 +72,41 @@ StructureReader3ds::StructureReader3ds (const std::string& filename)
 // Constructor
    : StructureReader (filename),
      Filename (filename),
-     S (nullptr),
-     Writer(nullptr),
+     S (NULL),
+     Writer(NULL),
      Dir (""),
 // Utility group
-     Ob001x_Color (nullptr),
-     Ob003x_Percentage (nullptr),
+     Ob001x_Color (NULL),
+     Ob003x_Percentage (NULL),
 // 4100 group for processig meshes
-     Ob4000_Name (nullptr),
+     Ob4000_Name (NULL),
      Ob4110_VectorsSize (0),
-     Ob4110_Vectors (nullptr),
+     Ob4110_Vectors (NULL),
      Ob4111_FlagsSize (0), 
-     Ob4111_Flags (nullptr), // Array
+     Ob4111_Flags (NULL), // Array
      Ob4120_FacesSize (0), 
-     Ob4120_Faces (nullptr),   // 1,2,3,flags   [N][3]
+     Ob4120_Faces (NULL),   // 1,2,3,flags   [N][3]
      Ob4130_MaterialSize (0), 
      Ob4140_TextureMapSize (0), 
-     Ob4140_TextureMap (nullptr),  // [N][2]
+     Ob4140_TextureMap (NULL),  // [N][2]
 // A000 group for processing meshes
-     ObA000_MatName (nullptr),
-     ObA010_Ambient (nullptr),
-     ObA020_Diffuse (nullptr),
-     ObA030_Specular (nullptr),
-     ObA040_Shininess (nullptr),
-     ObA041_Shin2pct (nullptr),
-     ObA042_Shin3pct (nullptr),
-     ObA050_Transparency (nullptr),
-     ObA052_XPFall (nullptr),
-     ObA053_RefBlur (nullptr),
-     ObA087_WireSize (nullptr),
-     ObA100_Shading (nullptr),
-     ObA300_MapName (nullptr),
-     ObA354_UScale (nullptr),
-     ObA356_VScale (nullptr),
-     ObA358_UOffset (nullptr),
-     ObA35A_VOffset (nullptr)
+     ObA000_MatName (NULL),
+     ObA010_Ambient (NULL),
+     ObA020_Diffuse (NULL),
+     ObA030_Specular (NULL),
+     ObA040_Shininess (NULL),
+     ObA041_Shin2pct (NULL),
+     ObA042_Shin3pct (NULL),
+     ObA050_Transparency (NULL),
+     ObA052_XPFall (NULL),
+     ObA053_RefBlur (NULL),
+     ObA087_WireSize (NULL),
+     ObA100_Shading (NULL),
+     ObA300_MapName (NULL),
+     ObA354_UScale (NULL),
+     ObA356_VScale (NULL),
+     ObA358_UOffset (NULL),
+     ObA35A_VOffset (NULL)
    {
    }
 //--------------------------------------------------------------------
@@ -165,76 +166,76 @@ void StructureReader3ds::ClearA000 ()
 void StructureReader3ds::Clear (Integer*& x)
 // Clear an integer 
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete x;
-   x = nullptr;
+   x = NULL;
    }
 //--------------------------------------------------------------------
 void StructureReader3ds::Clear (Real*& x)
 // Clear an Real 
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete x;
-   x = nullptr;
+   x = NULL;
    }
 //--------------------------------------------------------------------
 void StructureReader3ds::Clear (RgbColor*& x)
 // Clear a RgbColor 
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete x;
-   x = nullptr;
+   x = NULL;
    }
 //--------------------------------------------------------------------
 void StructureReader3ds::Clear (Rvector3*& x)
 // Clear a Rvector3 
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete x;
-   x = nullptr;
+   x = NULL;
    }
 //--------------------------------------------------------------------
 void StructureReader3ds::Clear (std::string*& x)
 // Clear a string 
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete x;
-   x = nullptr;
+   x = NULL;
    }
 //--------------------------------------------------------------------
 void StructureReader3ds::ClearVectors (Integer*& x, Integer& size)
 // Clear a variable length interger array
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete[] x;
-   x = nullptr;
+   x = NULL;
    size = 0;
    }
 //--------------------------------------------------------------------
 void StructureReader3ds::ClearVectors (Rvector3*& x, Integer& size)
 // Clear a variable length Rvector3 array
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete[] x;
-   x = nullptr;
+   x = NULL;
    size = 0;
    }
 //--------------------------------------------------------------------
 void StructureReader3ds::ClearVectors (ZIntegerVector*& x, Integer& size)
 // Clear a variable length ZIntegerVector array
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete[] x;
-   x = nullptr;
+   x = NULL;
    size = 0;
    }
 //--------------------------------------------------------------------
 void StructureReader3ds::ClearVectors (ZRealPoint*& x, Integer& size)
 // Clear a variable length ZRealPoint array
    {
-   if (x != nullptr)
+   if (x != NULL)
       delete[] x;
-   x = nullptr;
+   x = NULL;
    size = 0;
    }
 //--------------------------------------------------------------------
@@ -262,7 +263,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x0002:
          {
          int version = ReadLeInt();
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Version= " << version << std::endl;
          }
          break;
@@ -311,35 +312,35 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x0100: // MASTER_SCALE
          {
          double scale = ReadLeFloat();
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Scale= " << scale << std::endl;
          }
          break;
       case 0x1100: // BIT_MAP
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "BIT_MAP Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x1200: // SOLID_BGND
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) <<prefix << "Solid Background Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x1201: // USE_SOLID_BGND 
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "USE_SOLID_BGND Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x1300: // V_GRADIENT
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "V_GRADIENT Chunk -- Unprocessed" << std::endl;
          }
          break;
@@ -349,49 +350,49 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x1460: // RAY_BIAS
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Shadow ? Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x1500: // O_CONSTS
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "O_CONSTS Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x2100: // AMBIENT_LIGHT
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "AMBIENT_LIGHT Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x2200: // FOG
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "FOG Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x2300: // DISTANCE_CUE
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "DISTANCE_CUE Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x2302: // LAYER_FOG
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "LAYER_FOG Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x3000: // DEFAULT_VIEW
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "DEFAULT_VIEW Chunk -- Unprocessed" << std::endl;
          }
          break;
@@ -402,14 +403,14 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x3d3e:
          {
          int version = ReadLeInt();
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Mesh Version= " << version << std::endl;
          }
          break;
       case 0x4000: // NAMED_OBJECT
          {
          Ob4000_Name = new std::string (ReadCstr()); 
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Object name= " << *Ob4000_Name << std::endl;
          diffpos = ReadChunks(level,startpos,length);
 
@@ -423,7 +424,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x4100: // NAMED_TRIANGLE_OBJECT
          {
          diffpos = ReadChunks(level,startpos,length);
-         int count = max (1,Ob4130_MaterialSize);
+         int count = GmatMathUtil::Max (1,Ob4130_MaterialSize);
          for (int i=0;  i<=count-1;  ++i)
             {
             std::string meshname = *Ob4000_Name;
@@ -446,7 +447,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x4110: // POINT_ARRAY
          {
          int count = ReadLeShort();
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Point Count= " << count << std::endl;
          Ob4110_VectorsSize = count;
          Ob4110_Vectors = new Rvector3[Ob4110_VectorsSize];
@@ -462,7 +463,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x4111: // POINT_FLAG_ARRAY
          {
          int count = ReadLeShort();
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Flag Count= " << count << std::endl;
          Ob4111_FlagsSize = count;
          Ob4111_Flags = new Integer[count];
@@ -474,7 +475,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
          {
          Ob4120_FacesSize = ReadLeShort();
          Ob4120_Faces = new ZIntegerVector[Ob4120_FacesSize];
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Face Count= " << Ob4120_FacesSize << std::endl;
          for (int i=0;  i<=Ob4120_FacesSize-1;  ++i)
             {
@@ -489,10 +490,10 @@ void StructureReader3ds::ReadChunk (const Integer& level)
          {
          ZMaterialData* materialdata = new ZMaterialData();
          materialdata->Name = std::string (ReadCstr());   
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Material= " << materialdata->Name << std::endl;
          Integer count = ReadLeShort();
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Mat Group Count= " << count << std::endl;
          materialdata->FaceIndexesSize = count;
          materialdata->FaceIndexes = new Integer[materialdata->FaceIndexesSize];
@@ -505,7 +506,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x4140: // TEX_VERTS
          {
          Integer count = ReadLeShort();
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Texture Coord Count= " << count << std::endl;
          Ob4140_TextureMapSize = count;
          Ob4140_TextureMap = new ZRealPoint[Ob4140_TextureMapSize];
@@ -519,7 +520,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x4150: // SMOOTH_GROUP
          {
          int count = (length-6)/4;
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Smooth Face Count= " << count << std::endl;
          for (int i=0;  i<=count-1;  ++i)
             {
@@ -544,28 +545,28 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0x4170: // MESH_TEXTURE_INFO
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "MESH_TEXTURE_INFO Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x4600: // N_DIRECT_LIGHT
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "N_DIRECT_LIGHT Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x4700: // N_CAMERA
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Camera Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0x7001: // VIEWPORT_LAYOUT
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Viewport Chunk -- Unprocessed" << std::endl;
          }
          break;
@@ -574,12 +575,12 @@ void StructureReader3ds::ReadChunk (const Integer& level)
          diffpos = ReadChunks(level,startpos,length);
          ZMaterial* material = new ZMaterial (*ObA000_MatName);
          Clear (ObA000_MatName);
-         if (ObA020_Diffuse != nullptr)
+         if (ObA020_Diffuse != NULL)
             material->Color = *ObA020_Diffuse;  
          Clear (ObA010_Ambient);
          Clear (ObA020_Diffuse);
          Clear (ObA030_Specular);
-         if (ObA040_Shininess != nullptr)
+         if (ObA040_Shininess != NULL)
             material->Shininess = (Integer)*ObA040_Shininess;
          Clear (ObA040_Shininess);
          Clear (ObA041_Shin2pct);
@@ -589,19 +590,19 @@ void StructureReader3ds::ReadChunk (const Integer& level)
          Clear (ObA053_RefBlur);
          Clear (ObA087_WireSize);
          Clear (ObA100_Shading);
-         if (ObA300_MapName != nullptr)
+         if (ObA300_MapName != NULL)
             material->TextureMap = Dir + *ObA300_MapName;
          Clear (ObA300_MapName);
-         if (ObA354_UScale != nullptr)
+         if (ObA354_UScale != NULL)
             material->UScale = *ObA354_UScale;
          Clear (ObA354_UScale);
-         if (ObA356_VScale != nullptr)
+         if (ObA356_VScale != NULL)
             material->VScale = *ObA356_VScale;
          Clear (ObA356_VScale);
-         if (ObA358_UOffset != nullptr)
+         if (ObA358_UOffset != NULL)
             material->UOffset = *ObA358_UOffset;
          Clear (ObA358_UOffset);
-         if (ObA35A_VOffset != nullptr)
+         if (ObA35A_VOffset != NULL)
             material->VOffset = *ObA35A_VOffset;
          Clear (ObA35A_VOffset);
          TheStructure->AddMaterial (material);
@@ -610,7 +611,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0xA000: // MAT_NAME
          {
          ObA000_MatName = new std::string (ReadCstr ());
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Material Name= " << *ObA000_MatName << std::endl;
          }
          break;
@@ -734,7 +735,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0xA230: // MAT_BUMPMAP
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "MAT_BUMPMAP Chunk -- Unprocessed" << std::endl;
          }
          break;
@@ -746,21 +747,21 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0xA300: // MAT_MAPNAME
          {
          ObA300_MapName = new std::string (ReadCstr ());
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Map Name= " << *ObA300_MapName << std::endl;
          }
          break;
       case 0xA33A: // MAT_TEX2MAP
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "MAT_TEX2MAP Chunk -- Unprocessed" << std::endl;
          }
          break;
       case 0xA33C: // MAT_SHINMAP
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "MAT_SHINMAP Chunk -- Unprocessed" << std::endl;
          }
          break;
@@ -777,28 +778,28 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0xA354: // MAT_MAP_USCALE
          {
          ObA354_UScale = new Real (ReadLeFloat());
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix + "Map UScale= " << *ObA354_UScale << std::endl;
          }
          break;
       case 0xA356: // MAT_MAP_VSCALE
          {
          ObA356_VScale = new Real (ReadLeFloat());
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Map VScale= " << *ObA356_VScale << std::endl;
          }
          break;
       case 0xA358: // MAT_MAP_UOFFSET
          {
          ObA358_UOffset = new Real (ReadLeFloat());
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Map UOffset= " << *ObA358_UOffset << std::endl;
          }
          break;
       case 0xA35A: // MAT_MAP_VOFFSET
          {
          ObA35A_VOffset = new Real (ReadLeFloat());
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Map VOffset= " << *ObA35A_VOffset << std::endl;
          }
          break;
@@ -810,7 +811,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
       case 0xB000: // KFDATA
          {
          fseek (S,startpos+length,SEEK_SET);
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "Lighting Chunk -- Unprocessed" << std::endl;
          }
          break;
@@ -822,7 +823,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
          std::string idstr = s.str();
          MessageInterface::ShowMessage
             ("3DS ERROR!! -- Unprocessed chunk " + idstr + "\n");
-         if (Writer != nullptr)
+         if (Writer != NULL)
             (*Writer) << prefix << "ERROR!! -- Unprocessed chunk" << std::endl;
          }
          break;
@@ -830,7 +831,7 @@ void StructureReader3ds::ReadChunk (const Integer& level)
 
    diffpos = ReadChunks(level,startpos,length);
    if (diffpos != length)
-      if (Writer != nullptr)
+      if (Writer != NULL)
          (*Writer) << prefix << "ERROR!! Id=" << std::hex << id <<
                      " L=" << length << " Diff=" << diffpos << std::endl;
    }
@@ -971,9 +972,9 @@ void StructureReader3ds::Execute ()
       TheStructure = new Structure(name);
       TheStructure->Appendages[0]->BodyCount = 0;
       ReadChunk (1);
-      if (Writer != nullptr)
+      if (Writer != NULL)
          (*Writer) << "3ds load complete" << std::endl;
-      if (Writer != nullptr)
+      if (Writer != NULL)
          Writer->close();
       delete Writer;
       TheStructure->CalcCenter();

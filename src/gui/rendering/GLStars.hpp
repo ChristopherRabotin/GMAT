@@ -64,7 +64,7 @@ private:
    void ReadConstellations();
    void ReadBorders();
    void SetVector (GLfloat v[4], Real ra, Real dec);
-   void GLStars::Correct1875 (GLfloat v[4]);
+   void Correct1875 (GLfloat v[4]);
    
    GLfloat     Stars[MAXSTARS][4];
    GLfloat     CLines[MAXLINES][4];          // Constellation points
