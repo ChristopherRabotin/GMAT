@@ -116,6 +116,8 @@ private:
    GmatEpoch f107RefEpoch;
    /// Flag used to toggle interpolation of the f10.7 values
    bool interpolateFlux;
+   /// Flag used to toggle interpolation for the geomagnetic index (predict only)
+   bool interpolateGeo;
 
    bool LoadObsData();
    bool LoadPredictData();

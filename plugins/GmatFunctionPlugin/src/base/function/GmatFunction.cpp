@@ -179,7 +179,10 @@ GmatFunction::~GmatFunction()
       GmatCommandUtil::ClearCommandSeq(fcs, false);
    
    if (unusedGlobalObjectList != NULL)
+   {
       delete unusedGlobalObjectList;
+      unusedGlobalObjectList = NULL;
+   }
    
    #ifdef DEBUG_FUNCTION_FINALIZE
    MessageInterface::ShowMessage("GmatFunction() destructor exiting\n");

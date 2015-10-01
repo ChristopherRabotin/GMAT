@@ -582,7 +582,6 @@ void UniversePanel::SaveData()
                (Gmat::ERROR_, mMsgFormat.c_str(),
                 str.c_str(), fieldName.c_str(), "", "File must exist");
             canClose = false;
-            mDEFileNameTextCtrl->SetValue(mPreviousFileTypeNameMap[type]);
             return;
          }
          filename.close();
@@ -1009,7 +1008,6 @@ void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
          wxString type          = mFileTypeComboBox->GetStringSelection();
          std::string sType      = type.WX_TO_STD_STRING;
          Integer spiceIndex     = theSolarSystem->GetPlanetarySourceId(sType);
-         mSPKFileNameTextCtrl->SetValue(spiceKernelNames[spiceIndex]);
 
          spiceKernelNames[spiceIndex] = mSPKFileNameTextCtrl->GetValue();
       }

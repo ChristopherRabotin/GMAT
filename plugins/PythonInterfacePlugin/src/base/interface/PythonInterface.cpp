@@ -26,8 +26,8 @@
 #include "Array.hpp"
 #include <iostream>
 
-// #define DEBUG_INITIALIZATION
-// #define DEBUG_EXECUTION
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_EXECUTION
 
 PythonInterface* PythonInterface::instance = NULL;
 
@@ -217,13 +217,13 @@ bool PythonInterface::PyFinalize()
    // close and finalize Python.
    if (--numPyCommands == 0)
    {
-	   Py_Finalize();
+//	   Py_Finalize();
 
       #ifdef DEBUG_EXECUTION
          MessageInterface::ShowMessage("Python was Finalized and Unloaded.\n");
       #endif
-
-	   isPythonInitialized = false;
+///
+//      isPythonInitialized = false;
    }
 	
    #ifdef DEBUG_EXECUTION
@@ -369,7 +369,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName,
       PyErrorMsg(pType, pValue, pTraceback, msg);
       throw InterfaceException(" Python Exception: " + msg + "\n");
    }
- 
+
    // import the python module
    pyPluginModule = PyImport_Import(pyModule);   
    Py_DECREF(pyModule);
@@ -389,7 +389,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName,
       PyErrorMsg(pType, pValue, pTraceback, msg);
       throw InterfaceException(" Python Exception: " + msg + "\n");
    }
-   
+
    /*
     * GMAT supports passing data to Python using the following rules:
     *
@@ -407,7 +407,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName,
       Gmat::ParameterType parType = paramType.at(index);
 
       #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Paramter Type is %d\n", parType);
+         MessageInterface::ShowMessage("Paramater Type is %d\n", parType);
          MessageInterface::ShowMessage("INDEX is %d\n", index);
       #endif
 
@@ -524,13 +524,23 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName,
          i++;
          n++;
       }
+      else
+         throw InterfaceException("The input parameter  is not a supported input type for GMAT's Python interface");
    }
 
    /// @todo: Check to see if this leaks
    // delete[] v;
    
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Executing the function\n", *(Real*)argIn.at(n));
+   #endif
+
    // Call the python function   
    pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Function executed\n", *(Real*)argIn.at(n));
+   #endif
   
    Py_DECREF(pyFuncAttr);
    Py_DECREF(pyTupleObj);

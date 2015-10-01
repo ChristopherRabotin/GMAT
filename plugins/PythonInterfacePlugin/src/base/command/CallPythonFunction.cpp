@@ -24,8 +24,8 @@
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
-// #define DEBUG_INITIALIZATION
-// #define DEBUG_EXECUTION
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_EXECUTION
 
 //------------------------------------------------------------------------------
 // Static Data
@@ -565,6 +565,8 @@ bool CallPythonFunction::Execute()
       #endif
    }
 
+   BuildCommandSummary(true);
+
 	return true;
 }
 
@@ -598,9 +600,8 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
          dataReturn.push_back(rv);
          retval = true;
       }
-
       // Integers, passed into real number containers
-      if (PyLong_Check(member))
+      else if (PyLong_Check(member))
       {
          PyReturnValue rv;
          rv.toType = Gmat::REAL_TYPE;
@@ -667,7 +668,8 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
                   (listSz != outRow) || (elementSz != outCol))
                   throw CommandException("The dimension of the array returned "
                   "from Python does not match the dimension of the "
-                  "receiving array in GMAT.");
+                  "receiving array in GMAT on the script line\n   \"" +
+                  GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
             }
 
             for (Integer i = 0; i < listSz; i++)
@@ -687,7 +689,8 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
                   else
                      throw CommandException("An array member received from Python "
                      "is neither a float nor an integer, so GMAT cannot "
-                     "process the returned value.");
+                     "process the value returned on the script line\n   \"" +
+                     GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
 
                   #ifdef DEBUG_EXECUTION
                      MessageInterface::ShowMessage("Array element [%d, %d] value in "
@@ -721,7 +724,40 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
             dataReturn.push_back(rv);
             retval = true;
          }
+         else if (PyLong_Check(pyItem))
+         {
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("Python has returned a list of Integers.\n");
+            #endif
+               rv.toType = Gmat::REAL_TYPE;
+            for (Integer i = 0; i < listSz; ++i)
+            {
+               pyItem = PyList_GetItem(member, i);
+               rv.floatData.push_back(PyLong_AsDouble(pyItem));
+            }
+            dataReturn.push_back(rv);
+            retval = true;
+         }
+         else
+         {
+            // The return type is not handled
+            throw CommandException("The list member returned from the Python "
+                  "call on the script line\n   \"" +
+                  GetGeneratingString(Gmat::NO_COMMENTS) + "\"\nis a type that "
+                  "GMAT does not handle.");
+         }
       }
+      else
+      {
+         // The return type is not handled
+         throw CommandException("The returned value from the Python call is a "
+               "type not handled by GMAT");
+      }
+   }
+   catch (BaseException &ex)
+   {
+      throw CommandException(ex.GetFullMessage() + " on the script line\n   \"" +
+            GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
    }
    catch (...)
    {
@@ -793,9 +829,9 @@ Integer CallPythonFunction::FillInputList()
    {
       if ((mapObj = FindObject(*it)) == NULL)
       {
-         throw CommandException("The CallPythonFunction command cannot find the parameter " +
-                                *it + " in script line\n   \"" +
-                                GetGeneratingString(Gmat::SCRIPTING) + "\"");
+         throw CommandException("The CallPythonFunction command cannot find "
+               "the parameter " + *it + " in script line\n   \"" +
+               GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
       }
          
       if (mapObj->IsOfType(Gmat::PARAMETER))
@@ -837,14 +873,16 @@ Integer CallPythonFunction::FillOutputList()
       {
          throw CommandException("The CallPythonFunction command cannot find "
                                 "the parameter " + *it + " in script line\n   \"" +
-                                GetGeneratingString(Gmat::SCRIPTING) + "\"");
+                                GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
       }
 
       if (mapObj->IsOfType(Gmat::PARAMETER))
          mOutputList.push_back((Parameter *)mapObj);
       else
          throw CommandException("The output field " + (*it) + " was not "
-               "recognized as a valid output from the Python interface.");
+               "recognized as a valid output from the Python interface on the "
+               "script line\n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) +
+               "\"");
    }
 
    return mOutputList.size();
@@ -868,7 +906,12 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
    {
       Parameter *param = mInputList[i];
       Gmat::ParameterType type = param->GetReturnType();
-      
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Parameter %d, %s, type %d\n", i,
+               param->GetName().c_str(), type);
+      #endif
+
       switch (type)
       {
          case Gmat::REAL_TYPE:
@@ -892,38 +935,91 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
             break;
          }
 
-         case Gmat::RVECTOR_TYPE:
-            break;
-
          case Gmat::RMATRIX_TYPE:
          {
-            Array *arr = (Array *) param;
-            if (arr != NULL)
-            {
-               // Fill in the input array dimension
-               inRow = arr->GetRowCount();
-               inCol = arr->GetColCount();
-               
-               if ((inRow > 1) && (inCol > 1))
-                  throw CommandException("The parameter " + param->GetName() +
-                              " is a two-dimensional array.  GMAT's Python "
-                              "interface does not support input arrays with "
-                              "more than one dimension.");
+            // Array or array element
+            bool entireArray = (mInputNames[i].find("(") == std::string::npos);
 
-               for (int i = 0; i < inRow; ++i)
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("%d: %s, an array%s\n", i,
+                     mInputNames[i].c_str(), (entireArray ? "" : " element"));
+            #endif
+
+            Array *arr = (Array *) param;
+            inRow = arr->GetRowCount();
+            inCol = arr->GetColCount();
+
+            if (entireArray)
+            {
+               if (arr != NULL)
                {
-                  for (int j = 0; j < inCol; ++j)
+                  if ((inRow > 1) && (inCol > 1))
+                     throw CommandException("The parameter " + param->GetName() +
+                                 " is a two-dimensional array.  GMAT's Python "
+                                 "interface does not support input arrays with "
+                                 "more than one dimension.");
+
+                  for (int i = 0; i < inRow; ++i)
                   {
-                     Real *ret = new Real;
-                     *ret = arr->GetRealParameter(std::string("SingleValue"), i, j);
-                     argIn.push_back(ret);
+                     for (int j = 0; j < inCol; ++j)
+                     {
+                        Real *ret = new Real;
+                        *ret = arr->GetRealParameter(std::string("SingleValue"), i, j);
+                        argIn.push_back(ret);
+                     }
                   }
+
+                  paramType.push_back(Gmat::RMATRIX_TYPE);
+               }
+               else
+                  throw CommandException("The Python input parameter " + param->GetName() +
+                        " should contain an array, but does not");
+            }
+            else  // Array element: Passes as a float/Real
+            {
+               std::string elementStr = mInputNames[i].substr(mInputNames[i].find("(")+1);
+               if (elementStr.find(")") == std::string::npos)
+                  throw CommandException("The parameter " + param->GetName() +
+                        " appears to be an array element, but matching "
+                        "parentheses were not found in the scripting \"" +
+                        mInputNames[i] + "\" on line\n   " +
+                        GetGeneratingString(Gmat::NO_COMMENTS));
+               elementStr = elementStr.substr(0, elementStr.find(")"));
+
+               // Scripted row/col values (indexed from 1)
+               UnsignedInt row = 1, col = 1;
+               bool is2D = (elementStr.find(",") != std::string::npos);
+               std::stringstream data(elementStr);
+               data >> row;
+               if (is2D)
+               {
+                  data.str(elementStr.substr(elementStr.find(",")+1));
+                  data >> col;
                }
 
-               paramType.push_back(Gmat::RMATRIX_TYPE);
+               #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage("Row %d, col %d\n", row, col);
+               #endif
 
-               break;
+               // In GMAT, 1D arrays are a single row, and indexed by col number
+               if (inRow == 1)
+               {
+                  col = row;
+                  row = 1;
+               }
+
+               if ((row > inRow) || (col > inCol))
+                  throw CommandException("The input array element " + mInputNames[i] +
+                        " exceeds the dimensions of the specified array on line\n   " +
+                        GetGeneratingString(Gmat::NO_COMMENTS));
+
+               Real *r = new Real;
+               *r = arr->GetRealParameter(std::string("SingleValue"), row-1, col-1);;
+               argIn.push_back(r);
+
+               paramType.push_back(Gmat::REAL_TYPE);
             }
+            break;
          }
 
          default:
@@ -1078,7 +1174,7 @@ void CallPythonFunction::GetOutParams()
                               << i << ": the returned array has "
                               << dataReturn[i].lolData.size()
                               << " columns and GMAT expected "
-                              << rvMatrix.GetNumRows() << " columns.\n";
+                              << rvMatrix.GetNumColumns() << " columns.\n";
                      continue;
                   }
 
@@ -1100,5 +1196,6 @@ void CallPythonFunction::GetOutParams()
    }
 
    if (messages.str() != "")
-      throw CommandException(messages.str());
+      throw CommandException(messages.str() + "See the script line\n   \"" +
+            GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
 }

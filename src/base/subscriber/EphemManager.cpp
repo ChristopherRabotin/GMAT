@@ -522,7 +522,8 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
       SPICEDOUBLE_CELL(window, 200000);
       scard_c(0, &window);   // reset (empty) the cell
 
-      GetRequiredCoverageWindow(&window, s, e, useEntireIntvl);
+      // Get coverage window (no light time corrections needed)
+      GetRequiredCoverageWindow(&window, s, e, useEntireIntvl, abCorrection);
 
       SpiceInt     numInt = wncard_c(&window);
 
@@ -664,68 +665,14 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
    Integer obsID;
    GmatStringUtil::ToInteger(observerID, obsID);
-   GetRequiredCoverageWindow(&initWindow, s, e, useEntireIntvl, true, useLightTime,
+   // NOTE we should find a way to do this once per FindEvents, before the first
+   // call to this method (for the first observer).  Since I can't use SPICE
+   // types in plugins (i.e. ContactLocator), I can't pass a window out of this
+   // class.  The current way of calling this method each time will be a
+   // performance hit if there are lots of observers.
+   GetRequiredCoverageWindow(&window, s, e, useEntireIntvl, abCorrection,
+                             true, useLightTime,
                              transmit, stepSize, obsID);
-   SpiceInt       numInt      = wncard_c(&initWindow);
-
-   // Adjust the epochs in the window so that we pass in an observer window
-   Integer        iVal;
-   GmatStringUtil::ToInteger(observerID, iVal);
-   SpiceDouble    sNew, eNew;
-   std::string    theDir = "->";
-   if (transmit)  theDir = "<-";
-   SpiceInt       tId    = theNAIFId;   // ID for the target
-   SpiceInt       oId    = iVal;
-   ConstSpiceChar *dir   = theDir.c_str();
-   SpiceDouble    elapsed;
-   #ifdef DEBUG_EM_TIME_ADJUST
-      MessageInterface::ShowMessage("Attempting to adjust the times using:\n");
-      MessageInterface::ShowMessage("  theDir      = %s\n", theDir.c_str());
-      MessageInterface::ShowMessage("  target ID   = %d\n", tId);
-      MessageInterface::ShowMessage("  observer ID = %d\n", oId);
-   #endif
-
-   for (Integer ii = 0; ii < numInt; ii++)
-   {
-      SpiceDouble sOrig, eOrig;
-      wnfetd_c(&initWindow, ii, &sOrig, &eOrig);
-      ltime_c(sOrig, tId, dir, oId, &sNew, &elapsed);
-      ltime_c(eOrig, tId, dir, oId, &eNew, &elapsed);
-      #ifdef DEBUG_EM_TIME_ADJUST
-         Real stmp = spice->SpiceTimeToA1(sOrig);
-         Real etmp = spice->SpiceTimeToA1(eOrig);
-         MessageInterface::ShowMessage("Interval %d:\n", ii);
-         MessageInterface::ShowMessage("  sOrig      = %12.10f\n", stmp);
-         MessageInterface::ShowMessage("  eOrig      = %12.10f\n", etmp);
-         Real sNewtmp = spice->SpiceTimeToA1(sNew);
-         Real eNewtmp = spice->SpiceTimeToA1(eNew);
-         Real elapsedtmp = elapsed;
-         MessageInterface::ShowMessage("  sNew       = %12.10f\n", sNewtmp);
-         MessageInterface::ShowMessage("  eNew       = %12.10f\n", eNewtmp);
-         MessageInterface::ShowMessage("  elapsed    = %12.10f\n", elapsedtmp);
-      #endif
-//      wninsd_c(sNew, eNew, &window);  // uncomment this !!!!
-   }
-//   scard_c(numInt, &window);   // size the cell  // uncomment this!!
-
-   #ifdef DEBUG_EM_TIME_ADJUST
-      SpiceInt szNew  = wncard_c(&window);
-      Integer  numNew = (Integer) szNew;
-      MessageInterface::ShowMessage("--- size of new window = %d\n",
-            numNew);
-      for (Integer ii = 0; ii < numNew; ii++)
-      {
-         SpiceDouble sWinNew, eWinNew;
-         wnfetd_c(&window, ii, &sWinNew, &eWinNew);
-         Real ssWinNew = spice->SpiceTimeToA1(sWinNew);
-         Real eeWinNew = spice->SpiceTimeToA1(eWinNew);
-         MessageInterface::ShowMessage("------  start %d = %12.10f\n",
-               ii, ssWinNew);
-         MessageInterface::ShowMessage("------  end %d   = %12.10f\n",
-               ii, eeWinNew);
-      }
-   #endif
-   copy_c(&initWindow, &window);  // TEMPORARY ******?????
 
    std::string    theCrdSys   = "LATITUDINAL";
    std::string    theCoord    = "LATITUDE";
@@ -751,7 +698,7 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
    ConstSpiceChar *fframe;
    SpiceDouble    refval            = minElevation * GmatMathConstants::RAD_PER_DEG;
    SpiceDouble    adjust            = 0.0;
-   SpiceInt       nintvls           = 1e6;
+   SpiceInt       nintvls           = (SpiceInt)1e6;
    SpiceDouble    step              = stepSize;
 
    SPICEDOUBLE_CELL(result, 200000);
@@ -791,8 +738,6 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
       std::string errmsg = "Error calling gfposc_c!!!  ";
       errmsg += "Message received from CSPICE is: ";
       errmsg += errStr + "\n";
-//      MessageInterface::ShowMessage("----- error message = %s\n",
-//            errmsg.c_str());
       reset_c();
       throw SubscriberException(errmsg);
    }
@@ -842,8 +787,6 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
             MessageInterface::ShowMessage("   step            = %12.10f\n", stepSize);
          #endif
 
-   //      gfoclt_c(occultationType, front, fshape, fframe, target, tshape, tframe, abcorr,
-   //               obsrvr, step, &window, &occultResults);
          gfoclt_c(occultationType, front, fshape, fframe, target, tshape, " ", abcorr,
                   obsrvr, step, &obsResults, &occultResults);
          if (failed_c())
@@ -856,8 +799,6 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
             std::string errmsg = "Error calling gfoclt_c!!!  ";
             errmsg += "Message received from CSPICE is: ";
             errmsg += errStr + "\n";
-//            MessageInterface::ShowMessage("----- error message = %s\n",
-//                  errmsg.c_str());
             reset_c();
             throw SubscriberException(errmsg);
          }
@@ -950,7 +891,8 @@ bool EphemManager::GetCoverage(Real s, Real e,
       SPICEDOUBLE_CELL(coverWindow, 200000);
       scard_c(0, &coverWindow);   // reset (empty) the cell
 
-      GetRequiredCoverageWindow(&coverWindow, s, e, useEntireIntvl, includeAll);
+      // Get the coverage for the spacecraft (without light time corrections)
+      GetRequiredCoverageWindow(&coverWindow, s, e, useEntireIntvl, "NONE", includeAll);
 
       // return the start and stop times of the window we are using
       intvlStart = intStart;
@@ -970,7 +912,8 @@ bool EphemManager::GetCoverage(Real s, Real e,
 //------------------------------------------------------------------------------
 // void GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
 //                                bool useEntireIntvl,
-//                                bool includeAll = true,
+//                                const std::string &abCorr     = "NONE",
+//                                bool includeAll          = true,
 //                                bool lightTimeCorrection = false,
 //                                bool transmitDirection = false,
 //                                Real stepSize = 10.0,
@@ -978,6 +921,7 @@ bool EphemManager::GetCoverage(Real s, Real e,
 //------------------------------------------------------------------------------
 void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
                                              bool useEntireIntvl,
+                                             const std::string &abCorr,
                                              bool includeAll,
                                              bool lightTimeCorrection,
                                              bool transmitDirection,
@@ -1182,13 +1126,205 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
       coverStop  = 0.0;
    }
 
+   // Set this initially - it  will be computed later on if necessary
+   intStart   = coverStart;
+   intStop    = coverStop;
+
+   // Figure out the window we want to use
    if (useEntireIntvl)
    {
-      copy_c(&cover, &window);
+      #ifdef DEBUG_SPK_COVERAGE
+         MessageInterface::ShowMessage("Using ENTIRE interval and the size of the window = %d\n",
+               (Integer) wncard_c(&cover));
+         MessageInterface::ShowMessage("   and number of elements in the window = %d\n",
+               (Integer) card_c(&cover));
+         for (Integer ii = 0; ii < (Integer) card_c(&cover); ii++)
+            MessageInterface::ShowMessage("     element %d = %12.10f\n",
+                  ii, (Real) SPICE_CELL_ELEM_D(&cover, (SpiceInt) ii));
+      #endif
+      if (lightTimeCorrection)
+      {
+         ConstSpiceChar   *abcorrection = abCorr.c_str();
+         // Shift entire window by the light time
+         SpiceDouble     pos[3];
+         std::string     targetID = GmatStringUtil::Trim(GmatStringUtil::ToString(forNaifId));
+         std::string     obsrvrID = GmatStringUtil::Trim(GmatStringUtil::ToString(obsID));
+         ConstSpiceChar* tID      = targetID.c_str();
+         ConstSpiceChar* oID      = obsrvrID.c_str();
+         Real            dir      = 1.0; // RECEIVE
+         if (transmitDirection)   // TRANSMIT
+            dir = -1.0;
+
+         // First, get the number of elements (not intervals) in the window
+         SpiceInt    numEl = card_c(&cover);
+//         SpiceDouble lt[numEl];
+         SpiceDouble *lt = new SpiceDouble(numEl);
+         SpiceDouble d     = 0.0;
+         SpiceDouble newD  = 0.0;
+         // Loop over the elements and adjust the time based on the light time
+         // at that time
+         for (Integer ii = 0; ii < (Integer) numEl; ii++)
+         {
+            d = SPICE_CELL_ELEM_D(&cover, (SpiceInt) ii);
+            #ifdef DEBUG_SPK_COVERAGE
+               MessageInterface::ShowMessage("Element of cover (%d) = %12.10f\n",
+                     ii, (Real) d);
+            #endif
+            spkpos_c(oID, d, "J2000", abcorrection, tID, pos, &lt[ii]);
+            if (failed_c())
+            {
+               ConstSpiceChar option[] = "SHORT";
+               SpiceInt       numChar  = MAX_SHORT_MESSAGE_VALUE;
+               SpiceChar      err[MAX_SHORT_MESSAGE_VALUE];
+               getmsg_c(option, numChar, err);
+               std::string errStr(err);
+               std::string errmsg = "Error calling spkpos_c!!!";
+               errmsg += "Message received from CSPICE is: ";
+               errmsg += errStr + "\n";
+               reset_c(); // reset SPICE error flags
+               throw SubscriberException(errmsg);
+            }
+            newD = d + dir * lt[ii];
+            SPICE_CELL_SET_D(newD, (SpiceInt) ii, &cover);
+         }
+         #ifdef DEBUG_SPK_COVERAGE
+            MessageInterface::ShowMessage("After spkpos_c, the array of light time delays:\n");
+            for (Integer ii = 0; ii < numEl; ii++)
+               MessageInterface::ShowMessage("   lt[%d] = %12.10f\n",
+                     ii, lt[ii]);
+         #endif
+         // Truncate the search interval (beginning for transmit, end for
+         // receive)
+         if (transmitDirection)
+            wncond_c(lt[0], 0.0, &cover);
+         else // receive
+            wncond_c(0.0, lt[numEl-1], &cover);
+
+         delete lt;
+
+         // Trim to find valid endpoint
+         Integer     trimIterMax  = 1000;
+         Real        trimMax      = 2.0;
+         Real        trimErrTol   = 1.0e-3;
+
+         Real        trimErr      = (Real) GmatRealConstants::INTEGER_MAX;
+         Real        trim         = 0.0;
+         Real        trimA        = trimMax;
+         Real        trimB        = trim;
+         Integer     trimIter     = 0;
+         Integer     testInterval = 0;
+         SpiceDouble lTime;
+
+         SPICEDOUBLE_CELL(testWindow, 200010);
+         scard_c(0, &testWindow);   // reset (empty) the test window cell
+
+         while (trimIter < trimIterMax)
+         {
+            #ifdef DEBUG_SPK_COVERAGE
+               MessageInterface::ShowMessage("BEFORE copying, the size of the cover = %d\n",
+                     (Integer) wncard_c(&cover));
+               MessageInterface::ShowMessage("   and number of elements in the cover = %d\n",
+                     (Integer) card_c(&cover));
+            #endif
+            copy_c(&cover, &testWindow);
+            #ifdef DEBUG_SPK_COVERAGE
+               MessageInterface::ShowMessage("After copying, the size of the testWindow = %d\n",
+                     (Integer) wncard_c(&testWindow));
+               MessageInterface::ShowMessage("   and number of elements in the testWindow = %d\n",
+                     (Integer) card_c(&testWindow));
+            #endif
+
+            if (transmitDirection)  // transmit
+            {
+               wncond_c(0.0, trim, &testWindow);
+               testInterval = (Integer) card_c(&testWindow) - 1;
+            }
+            else // receive
+            {
+               wncond_c(trim, 0.0, &testWindow);
+               testInterval = 0;
+            }
+            if (failed_c())
+            {
+               ConstSpiceChar option[] = "SHORT";
+               SpiceInt       numChar  = MAX_SHORT_MESSAGE_VALUE;
+               SpiceChar      err[MAX_SHORT_MESSAGE_VALUE];
+               getmsg_c(option, numChar, err);
+               std::string errStr(err);
+               std::string errmsg = "Error calling wncond_c for ";
+               if (transmitDirection)
+                  errmsg += "transmit!!!  ";
+               else
+                  errmsg += "receive!!!  ";
+               errmsg += "Message received from CSPICE is: ";
+               errmsg += errStr + "\n";
+               reset_c(); // reset SPICE error flags
+               throw SubscriberException(errmsg);
+            }
+            SPICE_CELL_GET_D(&testWindow, testInterval, &d);
+            spkpos_c(tID, d, "J2000", abcorrection, oID, pos, &lTime);
+            if (failed_c())
+            {
+               // Instead of throwing an error adjust the numbers if necessary
+
+               ConstSpiceChar option[] = "SHORT";
+               SpiceInt       numChar  = MAX_SHORT_MESSAGE_VALUE;
+               SpiceChar      err[MAX_SHORT_MESSAGE_VALUE];
+               getmsg_c(option, numChar, err);
+               // Search the message for "Insufficient ephemeris data" to indicate that
+               // specific error NOTE: this assumes that this error message text
+               // will not change in the future
+               if (eqstr_c(err, "SPICE(SPKINSUFFDATA)"))
+               {
+                  trimB = trim;
+                  trim  = (trimA + trimB) / 2.0;
+                  trimIter++;
+                  // apply trim
+                  if (transmitDirection)  // transmit
+                  {
+                     wncond_c(0.0, trim, &testWindow);
+                     testInterval = (Integer) card_c(&testWindow) - 1;
+                  }
+                  else // receive
+                  {
+                     wncond_c(trim, 0.0, &testWindow);
+                     testInterval = 0;
+                  }
+                  reset_c(); // reset SPICE error flags
+               }
+               else
+               {
+                  std::string errStr(err);
+                  std::string errmsg = "Error calling spkpos_c!!!  ";
+                  errmsg += "Message received from CSPICE is: ";
+                  errmsg += errStr + "\n";
+                  reset_c(); // reset SPICE error flags
+                  throw SubscriberException(errmsg);
+               }
+            }
+            else
+            {
+               if (trimErr <= trimErrTol)
+               {
+                  // Copy the test window to the window result that we want
+                  copy_c(&testWindow, &window);
+                  break;
+               }
+               trimA   = trim;
+               trim    = (trimA + trimB) / 2;
+               trimErr = GmatMathUtil::Abs(trimA - trimB);
+            }
+         }
+         scard_c(0, &testWindow);   // reset (empty) the test window cell
+      }
+      else
+      {
+         copy_c(&cover, &window);
+      }
    }
-   else // create a window only over the specified time range
+   else // a window only over the specified time range - no light time etc.
    {
-      // create a window of the specified time span
+      // create a window of the specified time span - for
       SpiceDouble s = spice->A1ToSpiceTime(s1);
       SpiceDouble e = spice->A1ToSpiceTime(e1);
       SPICEDOUBLE_CELL(timespan, 200000);
@@ -1229,87 +1365,6 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
       SpiceDouble s01, e01, s02, e02;
       wnfetd_c(&window, 0, &s01, &e01);
       wnfetd_c(&window, szWin-1, &s02, &e02);
-
-      if (lightTimeCorrection) // shrink window by light-time delay
-      {
-         #ifdef DEBUG_SPK_COVERAGE
-            intStart = spice->SpiceTimeToA1(s01);
-            intStop  = spice->SpiceTimeToA1(e02);
-            MessageInterface::ShowMessage("----- intStart (at first) =  %12.10f\n", intStart);
-            MessageInterface::ShowMessage("----- intStop  (at first) =  %12.10f\n", intStop);
-         #endif
-//         std::string    direction;
-//         ConstSpiceChar *dir;
-//         SpiceDouble    elapsed,
-         SpiceDouble    newT;
-
-         SpiceDouble     pos[3];
-         SpiceDouble     lt;
-         std::string     targetID = GmatStringUtil::Trim(GmatStringUtil::ToString(forNaifId));
-         std::string     obsrvrID = GmatStringUtil::Trim(GmatStringUtil::ToString(obsID));
-         ConstSpiceChar* tID      = targetID.c_str();
-         ConstSpiceChar* oID      = obsrvrID.c_str();
-         Rvector3        dgeom;
-
-//         SpiceInt       targ = forNaifId;
-//         SpiceInt       obs  = obsID;
-         if (transmitDirection)
-         {
-//            direction = "->";
-//            dir = direction.c_str();
-//            ltime_c(e02, obs, dir, targ, &newT, &elapsed);
-//            SpiceInt index = szWin * 2 - 1;
-//            SPICE_CELL_SET_D(newT, index, &window);
-            spkpos_c(tID, e02, "J2000", "NONE", oID, pos, &lt);
-            dgeom[0] = pos[0];
-            dgeom[1] = pos[1];
-            dgeom[2] = pos[2];
-            Real mag = GmatMathUtil::Sqrt(pos[0]*pos[0] + (pos[1]*pos[1]) + (pos[2]*pos[2]));
-            Real ltBuffer = (mag / clight_c()) + (stepSize * 0.5);
-            #ifdef DEBUG_SPK_COVERAGE
-               MessageInterface::ShowMessage(" ltBuffer = %12.10f, lt = %12.10f\n",
-                                  ltBuffer, lt);
-               MessageInterface::ShowMessage(" stepSize = %12.10f\n", stepSize);
-               MessageInterface::ShowMessage(" mag = %12.10f\n", mag);
-               MessageInterface::ShowMessage(" cLight = %12.10f\n",
-                                  clight_c());
-               MessageInterface::ShowMessage(" after TRANSMIT, e02 was =  %12.10f  and now = %12.10f\n",
-                                  e02, (e02-ltBuffer));
-            #endif
-            e02 -= ltBuffer;
-            SpiceInt index = szWin * 2 - 1;
-            SPICE_CELL_SET_D(e02, index, &window);
-         }
-         else  // Receive
-         {
-//            direction = "<-";
-//            dir = direction.c_str();
-//            ltime_c(s01, obs, dir, targ, &newT, &elapsed);
-//            SpiceInt index = 0;
-//            SPICE_CELL_SET_D(newT, index, &window);
-            #ifdef DEBUG_SPK_COVERAGE
-//               MessageInterface::ShowMessage("elapsed = %12.10f\n", elapsed);
-//               MessageInterface::ShowMessage(" after RECEIVE, time was =  %12.10f  and now = %12.10f\n",
-//                                  s01, newT);
-            #endif
-               spkpos_c(tID, s01, "J2000", "NONE", oID, pos, &lt);
-               dgeom[0] = pos[0];
-               dgeom[1] = pos[1];
-               dgeom[2] = pos[2];
-               Real ltBuffer = (dgeom.GetMagnitude() / clight_c()) + (stepSize * 0.5);
-               #ifdef DEBUG_SPK_COVERAGE
-                  MessageInterface::ShowMessage(" ltBuffer = %12.10f, lt = %12.10f\n",
-                                     ltBuffer, lt);
-                  MessageInterface::ShowMessage(" cLight = %12.10f\n",
-                                     clight_c());
-                  MessageInterface::ShowMessage(" after TRANSMIT, e02 was =  %12.10f  and now = %12.10f\n",
-                                     e02, (e02-ltBuffer));
-               #endif
-               s01 += ltBuffer;
-               SpiceInt index = 0;
-               SPICE_CELL_SET_D(s01, index, &window);
-         }
-      }
 
       intStart = spice->SpiceTimeToA1(s01);
       intStop  = spice->SpiceTimeToA1(e02);

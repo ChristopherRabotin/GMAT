@@ -88,7 +88,7 @@ SpiceInterface::VALID_FRAMES[12] =
    "NONE",   // TBD
 };
 
-const Integer SpiceInterface::MAX_SHORT_MESSAGE         = 320;
+const Integer SpiceInterface::MAX_SHORT_MESSAGE         = MAX_SHORT_MESSAGE_VALUE;
 const Integer SpiceInterface::MAX_EXPLAIN_MESSAGE       = 320;
 const Integer SpiceInterface::MAX_LONG_MESSAGE          = MAX_LONG_MESSAGE_VALUE;
 const Integer SpiceInterface::MAX_CHAR_COMMENT          = 4000;
@@ -267,7 +267,13 @@ SpiceInterface& SpiceInterface::operator=(const SpiceInterface &copy)
 SpiceInterface::~SpiceInterface()
 {
    numInstances--;
-   if (numInstances <= 0) UnloadAllKernels();
+   if (numInstances <= 0)
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("UNLOADING ALL Kernels!\n");
+      #endif
+      UnloadAllKernels();
+   }
 }
 
 //------------------------------------------------------------------------------
