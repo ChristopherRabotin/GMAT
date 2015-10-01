@@ -503,7 +503,6 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
        modelFileFullPath.c_str());
    #endif
    
-   modelScale = 3.0;
    modelID = NO_MODEL;
 
    #ifdef DEBUG_SPACECRAFT
