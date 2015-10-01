@@ -449,7 +449,7 @@ void Structure::CalcCenter ()
 void Structure::Write (std::string filename) const
 // Write a breigf summary of the object to the specified file
    {
-   std::ofstream s (filename);
+   std::ofstream s (filename.c_str());
    WriteSummary (s,0);
    s.close();
    }
