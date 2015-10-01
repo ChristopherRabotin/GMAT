@@ -30,6 +30,7 @@
 
 //#define DEBUG_FILE_INDEXING
 //#define DEBUG_GETFLUXINPUTS
+//#define DEBUG_FLUXINTERPOLATION
 
 //#define DEBUG_FIRSTFEW_READS
 
@@ -168,7 +169,8 @@ SolarFluxReader::SolarFluxReader():
    warnEpochBefore   (true),
    warnEpochAfter    (true),
    f107RefEpoch      (18408.0),  // 5/31/91, epoch when the station moved (Vallado)
-   interpolateFlux   (false)
+   interpolateFlux   (true),
+   interpolateGeo    (false)
 {
    if (!obsFluxData.empty())
       obsFluxData.clear();
@@ -215,7 +217,8 @@ SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr) :
    warnEpochBefore   (true),
    warnEpochAfter    (true),
    f107RefEpoch      (sfr.f107RefEpoch),
-   interpolateFlux   (sfr.interpolateFlux)
+   interpolateFlux   (sfr.interpolateFlux),
+   interpolateGeo    (sfr.interpolateGeo)
 {
    obsFileName = sfr.obsFileName;
    predictFileName = sfr.predictFileName;
@@ -262,6 +265,7 @@ SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
    warnEpochAfter = true;
    f107RefEpoch = sfr.f107RefEpoch;
    interpolateFlux = sfr.interpolateFlux;
+   interpolateGeo = sfr.interpolateGeo;
 
    return *this;
 }
@@ -589,7 +593,7 @@ bool SolarFluxReader::LoadObsData()
 //------------------------------------------------------------------------------
 bool SolarFluxReader::LoadPredictData()
 { 
-   Integer hour = 0, minute = 0;
+   Integer hour = 0, minute = 0, dom = 1;
    Real sec = 0.0;
    std::string theLine;
 
@@ -628,9 +632,19 @@ bool SolarFluxReader::LoadPredictData()
          fD.isObsData = false;
 
          // Set ref epoch to midnight for the date on the current line
-         Real mjd = ModifiedJulianDate(atoi(tokens[1].c_str()),
-            atoi(tokens[0].c_str()), 1, hour, minute, sec);
-         fD.epoch = mjd;
+         Integer year = atoi(tokens[1].c_str());
+         Integer month = atoi(tokens[0].c_str());
+
+         Real mjd = ModifiedJulianDate(year, month, dom, hour, minute, sec);
+         ++month;
+         if (month == 13)
+         {
+            month = 1;
+            ++year;
+         }
+         Real nextmjd = ModifiedJulianDate(year, month, dom, hour, minute, sec);
+
+         fD.epoch = (mjd + nextmjd) * 0.5 - 0.5;
 
          // Nominal Timing
          for (Integer l = 0; l < 3; l++)
@@ -970,9 +984,9 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
          fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
 
          #ifdef DEBUG_FLUXINTERPOLATION
-            MessageInterface::ShowMessage("Interpolated from [%lf %lf] to "
-                  "[%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
-                  vals[1], epoch, fD.obsF107);
+//            MessageInterface::ShowMessage("F10.7 Interpolated from [%lf %lf] "
+//                  "to [%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
+//                  vals[1], epoch, fD.obsF107);
          #endif
       }
       else
@@ -1014,18 +1028,55 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
          fD.obsCtrF107a = fD.obsF107;
 
          #ifdef DEBUG_FLUXINTERPOLATION
-            MessageInterface::ShowMessage("Interpolated from [%lf %lf] to "
-                  "[%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
-                  vals[1], epoch, fD.obsF107);
+         MessageInterface::ShowMessage("F10.7 Interpolated from [%lf %lf] "
+               "to [%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
+               vals[1], epoch, fD.obsF107);
          #endif
-
-         for (Integer i = 0; i < 8; i++)
-            fD.ap[i] = fD.apSchatten[schattenApIndex];
       }
       else
       {
          fD.obsF107     = fD.F107a[schattenFluxIndex];
          fD.obsCtrF107a = fD.F107a[schattenFluxIndex];
+      }
+
+      if (interpolateGeo)
+      {
+         Real apInterp = fD.apSchatten[schattenApIndex];
+
+         Real vals[2];
+         Real eps[2];
+
+         vals[0] = fD.apSchatten[schattenApIndex];
+         eps[0]  = fD.epoch;
+         if (fD.id < predictFluxData.size()-1)
+         {
+            vals[1] = predictFluxData[fD.id+1].apSchatten[schattenApIndex];
+            eps[1]  = predictFluxData[fD.id+1].epoch;
+         }
+         else
+         {
+            // Make it flat
+            vals[1] = vals[0];
+            eps[1]  = eps[0] + 1.0;
+         }
+
+         Real dt = eps[1] - eps[0];
+         Real delta = epoch - eps[0];
+         Real portion = delta / dt;
+
+         apInterp += portion * (vals[1] - vals[0]);
+
+         #ifdef DEBUG_FLUXINTERPOLATION
+            MessageInterface::ShowMessage("Ap Interpolated from [%lf %lf] to "
+                  "[%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
+                  vals[1], epoch, apInterp);
+         #endif
+
+         for (Integer i = 0; i < 8; i++)
+            fD.ap[i] = apInterp;
+      }
+      else
+      {
          for (Integer i = 0; i < 8; i++)
             fD.ap[i] = fD.apSchatten[schattenApIndex];
       }
