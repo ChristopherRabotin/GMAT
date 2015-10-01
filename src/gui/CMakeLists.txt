@@ -179,7 +179,10 @@ SET(GUI_SRCS
     rendering/ModelManager.cpp
     rendering/ModelObject.cpp
     rendering/Rendering.cpp
-    rendering/ThreeDSLoader.cpp
+    rendering/Structure.cpp
+    rendering/StructureReader.cpp
+    rendering/StructureReader3ds.cpp
+    rendering/Surface.cpp
     solarsys/BarycenterPanel.cpp
     solarsys/CelesBodySelectDialog.cpp
     solarsys/CelestialBodyOrbitPanel.cpp

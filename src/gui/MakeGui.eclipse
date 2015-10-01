@@ -254,10 +254,13 @@ OBJECTS = \
     rendering/GLStars.o \
     rendering/GmatOpenGLSupport.o \
     rendering/Light.o \
-    rendering/ThreeDSLoader.o \
     rendering/ModelManager.o \
     rendering/ModelObject.o \
     rendering/Rendering.o \
+    rendering/Structure.o \
+    rendering/StructureReader.o \
+    rendering/StructureReader3ds.o \
+    rendering/Surface.o \
     solarsys/BarycenterPanel.o \
     solarsys/CelesBodySelectDialog.o \
     solarsys/CelestialBodyOrbitPanel.o \

@@ -182,7 +182,6 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    #endif
    
    mStars = GLStars::Instance();
-   mStars->InitStars();
    mStars->SetDesiredStarCount(mStarCount);
    
    mCamera.Reset();
@@ -2651,9 +2650,10 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    rotation[1] = sc->GetRealParameter(sc->GetParameterID("ModelRotationY"));
    rotation[2] = sc->GetRealParameter(sc->GetParameterID("ModelRotationZ"));
    scale = sc->GetRealParameter(sc->GetParameterID("ModelScale"));
-   scModel->SetBaseOffset(offset[0], offset[1], offset[2]);
-   scModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-   scModel->SetBaseScale(scale, scale, scale);
+   scModel->SetBodyPosition(offset[0], offset[1], offset[2]);
+   scModel->SetRotation(true, rotation[0], rotation[1], rotation[2]);
+   scModel->SetAttitude(true, 0, 0, 0);
+   scModel->SetScale(scale);
    
    #ifdef DEBUG_ATTITUDE_DISPLAY
       MessageInterface::ShowMessage("Model angles: [%lf  %lf  %lf]\n", 
@@ -2663,7 +2663,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    // Dunn's new attitude call.  Need to change to quaternions.  Also need
    // to concatenate with BaseRotation.  Also need this to work for replay
    // animation buttons.
-   scModel->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   scModel->SetAttitude(true, EAng1Deg, EAng2Deg, EAng3Deg);
    
    // The line above is where the object model gets its orientation.  This
    // also seems to be a good place to give the model its ECI position.
@@ -2790,9 +2790,10 @@ void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxStri
    rotation[1] = body->GetRealParameter(body->GetParameterID("3DModelRotationY"));
    rotation[2] = body->GetRealParameter(body->GetParameterID("3DModelRotationZ"));
    scale = body->GetRealParameter(body->GetParameterID("3DModelScale"));
-   bodyModel->SetBaseOffset(offset[0], offset[1], offset[2]);
-   bodyModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-   bodyModel->SetBaseScale(scale, scale, scale);
+   bodyModel->SetBodyPosition(offset[0], offset[1], offset[2]);
+   bodyModel->SetRotation(true, rotation[0], rotation[1], rotation[2]);
+   bodyModel->SetAttitude(true, 0, 0, 0);
+   bodyModel->SetScale(scale);
    
    #ifdef DEBUG_BODY_ATTITUDE
    MessageInterface::ShowMessage
@@ -2802,7 +2803,7 @@ void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxStri
    // Dunn's new attitude call.  Need to change to quaternions.  Also need
    // to concatenate with BaseRotation.  Also need this to work for replay
    // animation buttons.
-   bodyModel->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   bodyModel->SetAttitude(true, EAng1Deg, EAng2Deg, EAng3Deg);
    
    // Set isLit to true
    bodyModel->Draw(true);
