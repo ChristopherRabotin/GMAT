@@ -818,8 +818,6 @@ Optimize NLP {SolveMode = Solve, ExitMode = DiscardAndContinue}
 EndOptimize   </programlisting>
     </informalexample>
 
-    <para>For an example of how a <guilabel>SNOPT</guilabel> resource can be
-    used within an Optimization sequence, see the
-    <guilabel>Optimize</guilabel> command examples.</para>
+    <para/>
   </refsection>
 </refentry>

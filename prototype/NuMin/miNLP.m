@@ -93,12 +93,10 @@ numfEval = 0;                         %  The number of function evaluations
 n        = length(x0);                  %  Number of optimization variables
 
 %----- Evaluate the function and gradient at the initial guess
-[f,gradF,numGEval]     = GetDerivatives(...
-    costFunc,x0,Options,varargin{:});
-numfEval               = numfEval + numGEval;
+[f,gradF,numGEval] = GetDerivatives(costFunc,x0,Options,varargin{:});
+numfEval = numfEval + numGEval;
 if ~isempty(nlconstFunc)
-    [ci,ce,Ji,Je,numGEval] = GetConDerivatives(...
-        nlconstFunc,x0,Options,varargin{:});
+    [ci,ce,Ji,Je,numGEval] = GetConDerivatives(nlconstFunc,x0,Options,varargin{:});
 else
     ci= []; ce = []; Ji =[]; Je = [];
 end

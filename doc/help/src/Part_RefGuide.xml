@@ -51,7 +51,11 @@
       <xi:include href="Resource_Barycenter.xml" />
       <xi:include href="Resource_CelestialBody.xml" />
       <xi:include href="Resource_CoordinateSystem.xml" />
+	  <xi:include href="Resource_ContactLocator.xml" />
       <xi:include href="Resource_DifferentialCorrector.xml" />
+	  <xi:include href="Resource_ElectricTank.xml" />
+	  <xi:include href="Resource_ElectricThruster.xml" />
+	  <xi:include href="Resource_EclipseLocator.xml" />
       <xi:include href="Resource_EphemerisFile.xml" />
       <xi:include href="Resource_FileInterface.xml" />
       <xi:include href="Resource_FiniteBurn.xml" />
@@ -63,10 +67,12 @@
       <xi:include href="Resource_ImpulsiveBurn.xml" />
       <xi:include href="Resource_LibrationPoint.xml" />
       <xi:include href="Resource_MatlabFunction.xml" />
+	  <xi:include href="Resource_NuclearPowerSystem.xml" />
       <xi:include href="Resource_OrbitView.xml" />
       <xi:include href="Resource_Propagator.xml" />
       <xi:include href="Resource_ReportFile.xml" />
 	  <xi:include href="Resource_SNOPTOptimizer.xml" />
+	  <xi:include href="Resource_SolarPowerSystem.xml" />
       <xi:include href="Resource_SolarSystem.xml" />
       <xi:include href="Resource_Spacecraft.xml" />
       <xi:include href="Resource_SpacecraftAttitude.xml"/>
