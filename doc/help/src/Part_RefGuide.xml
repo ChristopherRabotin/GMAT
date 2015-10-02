@@ -62,6 +62,7 @@
       <xi:include href="Resource_FminconOptimizer.xml"/>
       <xi:include href="Resource_Formation.xml" />
       <xi:include href="Resource_FuelTank.xml" />
+	  <xi:include href="Resource_GmatFunction.xml" />
       <xi:include href="Resource_GroundStation.xml" />
       <xi:include href="Resource_GroundTrackPlot.xml" />
       <xi:include href="Resource_ImpulsiveBurn.xml" />
@@ -95,11 +96,13 @@
       <xi:include href="Command_BeginFiniteBurn.xml" />
       <xi:include href="Command_BeginMissionSequence.xml" />
       <xi:include href="Command_BeginScript.xml" />
+	  <xi:include href="Command_CallGmatFunction.xml" />
       <xi:include href="Command_CallMatlabFunction.xml" />
       <xi:include href="Command_CallPythonFunction.xml" />
       <xi:include href="Command_ClearPlot.xml" />
       <xi:include href="Command_EndFiniteBurn.xml" />
       <xi:include href="Command_For.xml" />
+	  <xi:include href="Command_Global.xml" />
       <xi:include href="Command_If.xml" />
       <xi:include href="Command_Maneuver.xml" />
       <xi:include href="Command_MarkPoint.xml" />
@@ -124,6 +127,7 @@
       <xi:include href="System_CommandLineUsage.xml" />
       <xi:include href="System_KeyboardShortcuts.xml" />      
       <xi:include href="System_MatlabInterface.xml" />
+	  <xi:include href="System_PythonInterface.xml" />
       <xi:include href="System_ScriptLanguage.xml" />
       <xi:include href="System_StartupFile.xml" />
     </reference>
