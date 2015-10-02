@@ -854,8 +854,9 @@ bool DragForce::Initialize()
                }
             }
             
-            if ((atmosphereType == "BodyDefault") ||
-                (atmosphereType == modelBodyIsUsing))
+//            if ((atmosphereType == "BodyDefault") ||
+//                (atmosphereType == modelBodyIsUsing))
+            if (atmosphereType == "BodyDefault")
                atmos = centralBody->GetAtmosphereModel();
             else
                atmos = internalAtmos;

@@ -572,6 +572,9 @@ bool SolarFluxReader::LoadObsData()
       historicStart = obsFluxData[0].epoch;
       // Note that epoch of last record is at day start; add 1 to reach end!
       historicEnd = obsFluxData[obsFluxData.size() - 1].epoch + 1.0;
+
+      for (Integer i = 0; i < obsFluxData.size(); ++i)
+         obsFluxData[i].id = i;
    }
 
    return true;
@@ -967,29 +970,55 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       }
 
       // Update the F10.7 data and (if selected) interpolate
-      if (interpolateFlux)
-      {
-         Real vals[2];
-         Real portion = (f107Offset) + fracEpoch - 1.0/3.0;
-         vals[0] = obsFluxData[f107index].obsF107;
-         if (f107index < obsFluxData.size()-1)
-         {
-            vals[1] = obsFluxData[f107index+1].obsF107;
-         }
-         else
-         {
-            // Make it flat
-            vals[1] = vals[0];
-         }
-         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
-
-         #ifdef DEBUG_FLUXINTERPOLATION
+//      if (interpolateFlux)
+//      {
+//         Real vals[2];
+//         Real avals[2];
+//         Real eps[2];
+//         Integer index = fD.id;
+//
+//         // Pick the correct timespan
+//         eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
+//         if (eps[0] > epoch)
+//         {
+//            eps[1] = eps[0];
+//            --index;
+//            if (index >= 0)
+//               eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
+//            else
+//               index = 0;
+//         }
+//         else
+//         {
+//            eps[1] = (index < obsFluxData.size() - 1 ?
+//                  obsFluxData[index+1].epoch + f107Offset + 0.5 : eps[0] + 1.0);
+//         }
+////         vals[0] = obsFluxData[index].obsF107;
+//         vals[0] = obsFluxData[index-1].obsF107;
+//         avals[0] = obsFluxData[index-1].obsCtrF107a;
+//
+//         if (index < obsFluxData.size()-1)
+////            vals[1] = obsFluxData[index+1].obsF107;
+//         {
+//            vals[1] = obsFluxData[index].obsF107;
+//            avals[1] = obsFluxData[index].obsCtrF107a;
+//         }
+//         else
+//            vals[1] = vals[0];
+//
+//         Real dt = eps[1] - eps[0];
+//         Real delta = epoch - eps[0];
+//         Real portion = delta / dt;
+//         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
+//         fD.obsCtrF107a = avals[0] + portion * (avals[1] - avals[0]);
+//
+//         #ifdef DEBUG_FLUXINTERPOLATION
 //            MessageInterface::ShowMessage("F10.7 Interpolated from [%lf %lf] "
 //                  "to [%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
 //                  vals[1], epoch, fD.obsF107);
-         #endif
-      }
-      else
+//         #endif
+//      }
+//      else
       {
          // Daily value from previous day
          fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 :
