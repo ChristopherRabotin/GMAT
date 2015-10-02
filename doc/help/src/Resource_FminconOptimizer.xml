@@ -22,7 +22,7 @@
   <refnamediv>
     <refname>FminconOptimizer</refname>
 
-    <refpurpose>The Sequential Quadratic Processor (SQP) optimizer,
+    <refpurpose>The Sequential Quadratic Programming (SQP) optimizer,
     fmincon</refpurpose>
   </refnamediv>
 
