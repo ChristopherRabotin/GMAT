@@ -1158,7 +1158,7 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
          // First, get the number of elements (not intervals) in the window
          SpiceInt    numEl = card_c(&cover);
 //         SpiceDouble lt[numEl];
-         SpiceDouble *lt = new SpiceDouble(numEl);
+		 SpiceDouble *lt = new SpiceDouble[numEl];
          SpiceDouble d     = 0.0;
          SpiceDouble newD  = 0.0;
          // Loop over the elements and adjust the time based on the light time
