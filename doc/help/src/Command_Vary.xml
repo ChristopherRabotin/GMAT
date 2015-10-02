@@ -659,14 +659,16 @@
       solver.</para>
 
       <informaltable colsep="0" frame="topbot">
-        <tgroup cols="4">
+        <tgroup cols="5">
           <colspec colnum="1" colwidth="2.5*"/>
 
-          <colspec colnum="2" colwidth="3*"/>
+          <colspec colnum="2" colwidth="1*"/>
 
           <colspec colnum="3" colwidth="1*"/>
 
           <colspec colnum="4" colwidth="1*"/>
+		  
+		  <colspec colnum="5" colwidth="1*"/>
 
           <thead>
             <row>
@@ -677,6 +679,8 @@
               <entry>fmincon</entry>
 
               <entry>VF13AD</entry>
+			  
+			  <entry>SNOPT</entry>
             </row>
           </thead>
 
@@ -689,6 +693,8 @@
               <entry><para> X </para></entry>
 
               <entry><para> X </para></entry>
+			  
+			  <entry><para> X </para></entry>
             </row>
 
             <row>
@@ -699,6 +705,8 @@
               <entry><para> X </para></entry>
 
               <entry><para> X </para></entry>
+			  
+			  <entry><para> X </para></entry>
             </row>
 
             <row>
@@ -709,6 +717,8 @@
               <entry><para> X </para></entry>
 
               <entry><para> X </para></entry>
+			  
+			  <entry><para> X </para></entry>
             </row>
 
             <row>
@@ -719,6 +729,8 @@
               <entry><para> X </para></entry>
 
               <entry><para> X </para></entry>
+			  
+			  <entry><para> X </para></entry>
             </row>
 
             <row>
@@ -729,6 +741,8 @@
               <entry><para> X </para></entry>
 
               <entry><para> X </para></entry>
+			  
+			  <entry><para> X </para></entry>
             </row>
 
             <row>
@@ -739,6 +753,8 @@
               <entry><para> X </para></entry>
 
               <entry><para> </para></entry>
+			  
+			  <entry><para> X </para></entry>
             </row>
 
             <row>
@@ -749,6 +765,8 @@
               <entry><para> X </para></entry>
 
               <entry><para> </para></entry>
+			  
+			  <entry><para> X </para></entry>
             </row>
 
             <row>
@@ -759,6 +777,8 @@
               <entry><para> </para></entry>
 
               <entry><para> X </para></entry>
+			  
+			  <entry><para> </para></entry>
             </row>
 
             <row>
@@ -769,6 +789,8 @@
               <entry><para> </para></entry>
 
               <entry><para> X </para></entry>
+			  
+			  <entry><para> </para></entry>
             </row>
           </tbody>
         </tgroup>

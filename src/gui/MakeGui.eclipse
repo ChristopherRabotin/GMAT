@@ -260,7 +260,7 @@ OBJECTS = \
     rendering/Structure.o \
     rendering/StructureReader.o \
     rendering/StructureReader3ds.o \
-    rendering/Surface.o \
+    rendering/SurfaceBase.o \
     solarsys/BarycenterPanel.o \
     solarsys/CelesBodySelectDialog.o \
     solarsys/CelestialBodyOrbitPanel.o \

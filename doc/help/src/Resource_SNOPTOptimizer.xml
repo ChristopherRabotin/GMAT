@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="SNOPT" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="SNOPTOptimizer"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -21,7 +22,7 @@
   <refnamediv>
     <refname>SNOPT</refname>
 
-    <refpurpose>The Sequential Quadratic Processor (SQP) optimizer,
+    <refpurpose>The Sequential Quadratic Programming (SQP) optimizer,
     SNOPT</refpurpose>
   </refnamediv>
 
@@ -179,17 +180,16 @@
               </variablelist></entry>
           </row>
 
-          <row>
-            <entry><guilabel>ReportFile</guilabel></entry>
+		         <row>
+            <entry><guilabel>MajorOptimalityTolerance</guilabel></entry>
 
-            <entry><para> Contains the path and file name of the report file.
-            This report contains data written by GMAT regarding optimization
-            progress and information.</para><variablelist>
+            <entry><para>Specifies the final accuracy of the dual variables. 
+            See the SNOPT user guide for further details.</para> <variablelist>
                 <varlistentry>
-                  <term>data Type</term>
+                  <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -197,7 +197,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any user-defined file name</para>
+                    <para>Real &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -213,7 +213,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para><literal>SNOPTSNOPT1.data</literal></para>
+                    <para>1e-5</para>
                   </listitem>
                 </varlistentry>
 
@@ -221,7 +221,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N/A</para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -229,11 +229,13 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>GUI,script</para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
           </row>
+		  
+ 
 
           <row>
             <entry><guilabel>OutputFileName</guilabel></entry>
@@ -292,20 +294,78 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-
+		  
+		  
           <row>
-            <entry><guilabel>SpecsFileName</guilabel></entry>
+            <entry><guilabel>OverrideSpecsFileValues</guilabel></entry>
 
-            <entry><para> File read by SNOPT to configure all settings of the
-            optimizer. The GMAT script/gui interface only supportsa small
-            subset of the SNOPT configuration options. This file allows you to
-            set any options supported by SNOPT. This file is only loaded if it
-            is found during initialization and selected values set on the file
-            can be overwritten by the GMAT configuration by
-            <guilabel>OverrideSpecsFileValues = true. </guilabel> See the
-            Remarks section for more information.</para> <variablelist>
+            <entry><para>Flag to indicate if options settable in the GMAT
+            script/GUI should override values set in the
+            <guilabel>SNOPT</guilabel> Specs file. Note that if the specs file
+            is not found during initialization, GMAT configurations are
+            applied even if the <guilabel>OverrideSpecsFileValues</guilabel>
+            field is set to <guilabel>false</guilabel>.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><literal>true</literal>,
+                    <literal>false</literal></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <literal>true</literal>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+                   <row>
+            <entry><guilabel>ReportFile</guilabel></entry>
+
+            <entry><para> Contains the path and file name of the report file.
+            This report contains data written by GMAT regarding optimization
+            progress and information.</para><variablelist>
+                <varlistentry>
+                  <term>data Type</term>
 
                   <listitem>
                     <para>String</para>
@@ -332,9 +392,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>SNOPT.spec</literal>
-                    </para>
+                    <para><literal>SNOPTSNOPT1.data</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -350,7 +408,7 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>GUI, script</para>
+                    <para>GUI,script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -486,21 +544,24 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+		  
+		  <row>
+            <entry><guilabel>SpecsFileName</guilabel></entry>
 
-          <row>
-            <entry><guilabel>OverrideSpecsFileValues</guilabel></entry>
-
-            <entry><para>Flag to indicate if options settable in the GMAT
-            script/GUI should override values set in the SNOPT Specs file.
-            Note that if the SPECS file is not found during initialization,
-            GMAT configurations are applied even if the
-            <guilabel>OverrideSpecsFileValues</guilabel> field is set to
-            <guilabel>false</guilabel>.</para> <variablelist>
+            <entry><para> File read by SNOPT to configure all settings of the
+            optimizer. The GMAT script/gui interface only supportsa small
+            subset of the SNOPT configuration options. This file allows you to
+            set any options supported by SNOPT. This file is only loaded if it
+            is found during initialization and selected values set on the file
+            can be overwritten by the GMAT configuration by
+            <guilabel>OverrideSpecsFileValues = true. </guilabel> See the
+            <xref linkend="SNOPTOptimizer_Remarks" xrefstyle="select:title"/>
+            section for more information.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Boolean</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -508,8 +569,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><literal>true</literal>,
-                    <literal>false</literal></para>
+                    <para>Any user-defined file name</para>
                   </listitem>
                 </varlistentry>
 
@@ -526,7 +586,7 @@
 
                   <listitem>
                     <para>
-                      <literal>true</literal>
+                      <literal>SNOPT.spec</literal>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -535,7 +595,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>None</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -548,62 +608,7 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-
-          <row>
-            <entry><guilabel>MajorOptimalityTolerance</guilabel></entry>
-
-            <entry><para>Specifies the final accuracy of the dual variables. 
-            See the SNOPT user guide for further details.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real &gt; 0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>1e-5</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>None</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
+		  
           <row>
             <entry><guilabel>TotalIterationsLimit</guilabel></entry>
 
@@ -677,8 +682,9 @@
     <guilabel>Solvers</guilabel> folder, highlight and then right-click on the
     <guilabel>Optimizers</guilabel> sub-folder, point to <guilabel>Add
     </guilabel>and then select <guilabel>SNOPT</guilabel>. This will create a
-    new <guilabel>SNOPT</guilabel> resource, SNOPT1. Double-click on SNOPT1 to
-    bring up the <guilabel>SNOPT</guilabel> dialog box shown below.</para>
+    new <guilabel>SNOPT</guilabel> resource, <guilabel>SNOPT1</guilabel>.
+    Double-click on <guilabel>SNOPT1</guilabel> to bring up the
+    <guilabel>SNOPT</guilabel> dialog box shown below.</para>
 
     <screenshot>
       <mediaobject>
@@ -691,7 +697,7 @@
     </screenshot>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="SNOPTOptimizer_Remarks">
     <title>Remarks</title>
 
     <refsection>
@@ -743,6 +749,9 @@ End options  </programlisting>
       be used to improve readability. A comment begins with an asterisk (*)
       anywhere on a line. All subsequent characters on the line are ignored.
       The Begin line is echoed to the Summary file.</para>
+
+      <para>For a complete list of SNOPT options, see the SNOPT user
+      guide.</para>
     </refsection>
 
     <refsection>
@@ -751,20 +760,34 @@ End options  </programlisting>
       <para>When using <guilabel>SNOPT</guilabel>, the
       <guilabel>Upper</guilabel> and <guilabel>Lower</guilabel> bounds in the
       <guilabel>Vary</guilabel> commands are required fields. By setting these
-      values appropriately for your problem, you ensure that
-      <guilabel>SNOPT</guilabel> does not try values that are unphysical or
-      that can result in numerical singularties in the physical models.
-      </para>
+      values appropriately for your problem, you reduce the likelihood that
+      <guilabel>SNOPT</guilabel> will try values that are unphysical or that
+      can result in numerical singularities in the physical models. It is
+      important to set bounds carefully when using
+      <guilabel>SNOPT</guilabel>.</para>
 
       <para>Aditionally, <guilabel>SNOPT</guilabel> is quite senstive to
       scaling and care must be taken to provide acceptable values of
       <guilabel>AdditiveScaleFactor</guilabel> and
       <guilabel>MultiplicativeScaleFactor</guilabel> in the
-      <guilabel>Vary</guilabel> commands.</para>
+      <guilabel>Vary</guilabel> commands. When using
+      <guilabel>SNOPT</guilabel>, derivatives are computed by
+      <guilabel>SNOPT</guilabel> via the optimizer's built-in finite
+      differencing. If an optimization problem is not appropriately scaled,
+      optimization may fail, or take an un-nesessarily long time.</para>
     </refsection>
 
     <refsection>
       <title>Resource and Command Interactions</title>
+
+      <warning>
+        <para>GMAT's <guilabel>Vary</guilabel> command is a generic interface
+        designed to support many optimizers and not all settings supported by
+        the <guilabel>Vary</guilabel> command are supported by
+        <guilabel>SNOPT</guilabel>. See the <xref linkend="Vary"/> command
+        documentation for details on the which <guilabel>Vary</guilabel>
+        command settings are supported by <guilabel>SNOPT</guilabel>.</para>
+      </warning>
 
       <para>The <guilabel>SNOPT</guilabel> resource can only be used in the
       context of optimization-type commands. Please see the documentation for
@@ -818,8 +841,6 @@ Optimize NLP {SolveMode = Solve, ExitMode = DiscardAndContinue}
 EndOptimize   </programlisting>
     </informalexample>
 
-    <para>For an example of how a <guilabel>SNOPT</guilabel> resource can be
-    used within an Optimization sequence, see the
-    <guilabel>Optimize</guilabel> command examples.</para>
+    <para/>
   </refsection>
 </refentry>

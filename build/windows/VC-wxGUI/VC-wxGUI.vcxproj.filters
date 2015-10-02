@@ -1896,9 +1896,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere\Troposphere.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\measurement\Troposphere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp">
-      <Filter>Source Files\gui\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
@@ -2435,6 +2432,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.cpp">
       <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Structure.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader3ds.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\SurfaceBase.cpp">
+      <Filter>Source Files\gui\rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -4091,9 +4100,6 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere\Troposphere.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\measurement\Troposphere</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp">
-      <Filter>Source Files\gui\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
@@ -4639,6 +4645,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.hpp">
       <Filter>Source Files\gui\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Structure.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader3ds.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\SurfaceBase.hpp">
+      <Filter>Source Files\gui\rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
