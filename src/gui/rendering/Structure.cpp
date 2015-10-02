@@ -160,7 +160,8 @@ Real Joint::GetAngleDeg (const Integer& ix) const
 Rmatrix33 Joint::GetMatrix () const
 // Returns the rotation matrix for all the turns in a joint combined
    {
-   Rmatrix33 out = new Rmatrix33(true);
+   //Rmatrix33 out = new Rmatrix33(true);
+   Rmatrix33 out = Rmatrix33(true);
    for (Integer jx=0;  jx<=3-1;  ++jx)
       if (Use[jx])
          {
@@ -274,7 +275,7 @@ Integer ZAppendage::GetSurfaceCount () const
    return Body.Children.Size();
    }
 //--------------------------------------------------------------------
-Surface* ZAppendage::GetSurface (const Integer& ix) 
+SurfaceBase* ZAppendage::GetSurface (const Integer& ix) 
 // Return a surface
    {
    return Body.Children[ix];

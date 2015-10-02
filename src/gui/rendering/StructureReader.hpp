@@ -19,7 +19,6 @@
 #include "gmatdefs.hpp"
 #include "RgbColor.hpp"
 #include "Rvector3.hpp"
-#include "Surface.hpp"
 #include "Structure.hpp"
 //====================================================================
 class StructureReader
