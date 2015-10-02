@@ -824,7 +824,10 @@
     <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp" />
-    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\Structure.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader3ds.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\SurfaceBase.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
@@ -1551,7 +1554,10 @@
     <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp" />
-    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\Structure.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader3ds.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\SurfaceBase.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />

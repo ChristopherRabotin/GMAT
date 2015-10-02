@@ -19,7 +19,7 @@
 #include "RgbColor.hpp"
 #include "Rvector3.hpp"
 #include "Rmatrix33.hpp"
-#include "Surface.hpp"
+#include "SurfaceBase.hpp"
 //====================================================================
 class ZMaterial
 {
@@ -123,7 +123,7 @@ public:
    ~ZAppendage();
 // --------------------------- Functions
    Integer GetSurfaceCount () const;
-   Surface* GetSurface (const Integer& ix);
+   SurfaceBase* GetSurface (const Integer& ix);
 
    void WriteSummary (std::ostream& s, const Integer level) const;
 // --------------------------- Data Members
