@@ -130,7 +130,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    gmatText->SetOwnForegroundColour(gmatColor);
    
    // Release number
-   wxString releaseNumber = "Version: 2014a";
+   wxString releaseNumber = "Version: 2015a";
    wxStaticText *releaseText = new wxStaticText(this, -1, releaseNumber);
    
    // Build date
@@ -189,6 +189,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    //use = use + " - Uses Perl Compatible Regular Expressions\n";
    use = use + " - Uses JPL SPICE Library\n";
    use = use + " - Uses IAU SOFA Library\n";
+   use = use + " - Uses Apache Xerces 3.1\n";
    use = use + " - Planetary images courtesy of JPL/Caltech/USGS, Celestia \n";
    use = use + "   Motherlode, Bjorn Jonsson, and NASA World Wind";
    wxStaticText *useText = new wxStaticText(this, -1, use);
