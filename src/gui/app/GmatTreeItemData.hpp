@@ -359,6 +359,7 @@ namespace GmatTree
       OUTPUT_CCSDS_OEM_FILE,
       OUTPUT_END_REPORT,
       OUTPUT_COMPARE_REPORT,
+      OUTPUT_SOLVER_WINDOW,
       END_OF_OUTPUT,
 
       //---------- NO panels will be created

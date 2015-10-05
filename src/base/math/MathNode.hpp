@@ -52,6 +52,9 @@ public:
    
    // for math elemement wrappers
    virtual void         SetMathWrappers(WrapperMap *wrapperMap);
+
+   // for function node returning object
+   virtual GmatBase*    EvaluateObject();
    
    // abstract methods
    virtual bool         ValidateInputs() = 0;

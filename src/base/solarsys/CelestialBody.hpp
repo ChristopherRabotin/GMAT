@@ -53,7 +53,7 @@ namespace Gmat
       DE405 = 0,
       DE421,
       DE424,
-      DE430,
+//      DE430,
       SPICE,            // please leave this one at the end
       PosVelSourceCount
    };
@@ -64,7 +64,7 @@ namespace Gmat
       "DE405",
       "DE421",
       "DE424",
-      "DE430",
+//      "DE430",
       "SPICE"             // please leave this one at the end
    };
 
@@ -115,7 +115,7 @@ namespace Gmat
       DE_405_FILE = 0,
       DE_421_FILE,
       DE_424_FILE,
-      DE_430_FILE,
+//      DE_430_FILE,
       IAU_2002,
 //      IAU_FILE,   // TBD
       FK5_IAU_1980,
@@ -128,7 +128,7 @@ namespace Gmat
       "DE405File",
       "DE421File",
       "DE424File",
-      "DE430File",
+//      "DE430File",
       "IAU2002",
 //      "IAUFile",  // TBD
       "FK5IAU1980",

@@ -136,6 +136,25 @@ bool Global::Initialize()
       
    ManageObject::Initialize();
    
+   // Set global flag in Initialize() so that GmatFunction can search global object before
+   // Global command is executed (LOJ: 2015.08.26)
+   Integer sz = objectNames.size();
+   GmatBase *obj = NULL;
+   for (Integer i = 0; i < sz; i++)
+   {
+      obj = FindObject(objectNames.at(i));
+      #ifdef DEBUG_GLOBAL
+      MessageInterface::ShowMessage(WriteObjectInfo("   ", obj));
+      #endif
+      if (obj)
+      {
+         obj->SetIsGlobal(true);
+         #ifdef DEBUG_GLOBAL
+         MessageInterface::ShowMessage(WriteObjectInfo("   ", obj));
+         #endif
+      }
+   }
+   
    return true;
 }
 

@@ -36,6 +36,7 @@
 //#define DEBUG_UPDATE_VAR
 //#define DEBUG_UPDATE_OBJECT
 //#define DEBUG_SHOW_ARRAY
+//#define DEBUG_GMAT_FUNCTION_INIT
 //#define DEBUG_GET_OUTPUT
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_GLOBAL_OBJECT_MAP
@@ -1024,29 +1025,32 @@ bool CallFunction::Initialize()
    isMatlabFunction = false;
    
    bool rv = true;  // Initialization return value
-   if (mFunction == NULL)
-      throw CommandException("CallFunction::Initialize() the function pointer is NULL");
-   
-   if (mFunction->GetTypeName() == "GmatFunction")
-      isGmatFunction = true;
-   else if (mFunction->GetTypeName() == "MatlabFunction")
-      isMatlabFunction = true;
-   
-   if (!isGmatFunction && !isMatlabFunction)
-      throw CommandException
-         ("CallFunction::Initialize() the function is neither GmatFunction nor MatlabFunction");
-   
-   mFunctionPathAndName = mFunction->GetFunctionPathAndName();
-   std::string fname = GmatFileUtil::ParseFileName(mFunctionPathAndName);
-   if (fname == "")
-      mFunctionPathAndName += mFunctionName;
-   
-   #ifdef DEBUG_CALL_FUNCTION_INIT
-   MessageInterface::ShowMessage
-      ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s'\n   "
-       "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
-       mFunctionPathAndName.c_str());
-   #endif
+   if (!IsOfType("CallPythonFunction"))
+   {
+      if (mFunction == NULL)
+         throw CommandException("CallFunction::Initialize() the function pointer is NULL");
+
+      if (mFunction->GetTypeName() == "GmatFunction")
+         isGmatFunction = true;
+      else if (mFunction->GetTypeName() == "MatlabFunction")
+         isMatlabFunction = true;
+
+      if (!isGmatFunction && !isMatlabFunction)
+         throw CommandException
+            ("CallFunction::Initialize() the function is neither GmatFunction nor MatlabFunction");
+
+      mFunctionPathAndName = mFunction->GetFunctionPathAndName();
+      std::string fname = GmatFileUtil::ParseFileName(mFunctionPathAndName);
+      if (fname == "")
+         mFunctionPathAndName += mFunctionName;
+
+      #ifdef DEBUG_CALL_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s', "
+          "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
+          mFunctionPathAndName.c_str());
+      #endif
+   }
    
    return rv;
 }
@@ -1093,7 +1097,7 @@ void CallFunction::RunComplete()
 {
    #ifdef DEBUG_RUN_COMPLETE
    MessageInterface::ShowMessage
-      ("CallFunction::RunComplete() entered for this=<%p> '%s',\n   "
+      ("CallFunction::RunComplete() entered, this=<%p> '%s',\n   "
        "FCS %sfinalized\n", this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
        fm.IsFinalized() ? "already " : "NOT ");
    #endif
@@ -1101,12 +1105,23 @@ void CallFunction::RunComplete()
    if (!fm.IsFinalized())
    {
       #ifdef DEBUG_RUN_COMPLETE
-      MessageInterface::ShowMessage("   calling FunctionManager::Finalize()\n");
+      MessageInterface::ShowMessage("   Calling FunctionManager::Finalize()\n");
       #endif
       fm.Finalize();
    }
    
+   #ifdef DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage("   Calling GmatCommand::RunComplete()\n");
+   #endif
+   
    GmatCommand::RunComplete();
+   
+   #ifdef DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage
+      ("CallFunction::RunComplete() leaving, this=<%p> '%s',\n   "
+       "FCS %sfinalized\n", this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       fm.IsFinalized() ? "already " : "NOT ");
+   #endif
 }
 
 

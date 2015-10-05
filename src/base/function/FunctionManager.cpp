@@ -94,6 +94,7 @@ FunctionManager::FunctionManager() :
    numVarsCreated      (0),
    validator           (NULL),
    realResult          (-999.99),
+   objectResult        (NULL),
    blankResult         (false),
    outputType          (""),
    objInit             (NULL),
@@ -165,6 +166,7 @@ FunctionManager::FunctionManager(const FunctionManager &fm) :
    validator           (NULL),
    realResult          (fm.realResult),
    matResult           (fm.matResult),
+   objectResult        (fm.objectResult),
    blankResult         (fm.blankResult),
    outputType          (fm.outputType),
    objInit             (NULL),
@@ -211,6 +213,7 @@ FunctionManager& FunctionManager::operator=(const FunctionManager &fm)
       outputWrappers      = fm.outputWrappers; // is that right?
       realResult          = fm.realResult;
       matResult           = fm.matResult;
+      objectResult        = fm.objectResult;
       blankResult         = fm.blankResult;
       outputType          = fm.outputType;
       objInit             = NULL;  
@@ -648,6 +651,7 @@ bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAd
              "deleting oldObj passedInput");
          #endif
          delete oldObj;
+         oldObj = NULL;
       }
       inputAdded = false;
       
@@ -676,6 +680,7 @@ bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAd
              "deleting oldObj passedInput");
          #endif
          delete oldObj;
+         oldObj = NULL;
       }
    }
    else
@@ -1014,7 +1019,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
          MessageInterface::ShowMessage
             ("*** ERROR *** FunctionManager \"%s\" finalizing... due to false returned "
              "from currentFunction->Execute()\n", functionName.c_str());
-         currentFunction->Finalize();
+         currentFunction->Finalize(true);
          if (publisher)
             publisher->ClearPublishedData();
          
@@ -1027,7 +1032,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       MessageInterface::ShowMessage
          ("*** ERROR *** FunctionManager \"%s\" finalizing... due to \n%s\n", functionName.c_str(),
           e.GetFullMessage().c_str());
-      currentFunction->Finalize();
+      currentFunction->Finalize(true);
       if (publisher)
          publisher->ClearPublishedData();
       
@@ -1107,6 +1112,7 @@ Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
    #endif
    
    Execute(callingFM);
+   
    if (outputType != "Rmatrix")
       throw FunctionException("FunctionManager: invalid output type - should be Rmatrix\n");
    
@@ -1116,6 +1122,38 @@ Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
    #endif
    
    return matResult;
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* EvaluateObject(FunctionManager *callingFM)
+//------------------------------------------------------------------------------
+GmatBase* FunctionManager::EvaluateObject(FunctionManager *callingFM)
+{
+   if (currentFunction == NULL)
+   {
+      std::string errMsg = "FunctionManager:: Unable to return object from Function """;
+      errMsg += functionName + """ - pointer is NULL\n";
+      throw FunctionException(errMsg);
+   }
+   
+   #ifdef DEBUG_FM_EVAL
+   MessageInterface::ShowMessage
+      ("Entering FunctionManager::EvaluateObject() f=<%p><%s>\n", currentFunction,
+       currentFunction->GetName().c_str());
+   #endif
+   
+   Execute(callingFM);
+   
+   if (outputType != "Object")
+      throw FunctionException("FunctionManager: invalid output type - should be Object\n");
+   
+   #ifdef DEBUG_FM_EVAL
+   MessageInterface::ShowMessage
+      ("Exiting  FunctionManager::EvaluateObject() with <%p>'%s'\n", objectResult,
+       objectResult ? objectResult->GetName().c_str() : "NULL");
+   #endif
+   
+   return objectResult;
 }
 
 //------------------------------------------------------------------------------
@@ -1136,8 +1174,9 @@ void FunctionManager::Finalize()
        " calling FM is <%p> '%s'\n", this, functionName.c_str(), callingFunction,
        callingFunction ? callingFunction->GetFunctionName().c_str() : "NULL");
    MessageInterface::ShowMessage
-       ("   functionObjectStore=<%p>, localObjectStore=<%p>, clonedObjectStores.size()=%d\n",
-        functionObjectStore, localObjectStore, clonedObjectStores.size());
+       ("   functionObjectStore=<%p>, localObjectStore=<%p>, clonedObjectStores.size()=%d, "
+        "isFinalized=%d\n", functionObjectStore, localObjectStore, clonedObjectStores.size(),
+        isFinalized);
    #ifdef DEBUG_OBJECT_MAP
    ShowObjectMap(functionObjectStore, "FOS in Finalize");
    ShowObjectMap(localObjectStore, "LOS in Finalize");
@@ -1936,6 +1975,7 @@ GmatBase* FunctionManager::CreateObject(const std::string &fromString)
              "deleting unused wrapper");
          #endif
          delete ew;
+         ew = NULL;
       }
       if (obj) createdOthers.insert(std::make_pair(str, obj));
    }
@@ -2008,6 +2048,7 @@ void FunctionManager::AssignResult()
              "deleting output wrapper");
          #endif
          delete ew;
+         ew = NULL;
       }
    }
 }
@@ -2148,6 +2189,15 @@ void FunctionManager::SaveLastResult()
       #ifdef DEBUG_FM_RESULT
       MessageInterface::ShowMessage
          ("   saved matResult=%s\n", matResult.ToString().c_str());
+      #endif
+      break;
+   case Gmat::OBJECT_TYPE:
+      objectResult = ew->GetRefObject();
+      outputType = "Object";
+      #ifdef DEBUG_FM_RESULT
+      MessageInterface::ShowMessage
+         ("   saved objectResult=<%p>'%s'\n", objectResult,
+          objectResult ? objectResult->GetName().c_str() : "NULL");
       #endif
       break;
    default:
@@ -2322,10 +2372,11 @@ void FunctionManager::Cleanup()
          ////currentFunction->ClearAutomaticObjects();
          // They are deleted in the Function destructor (LOJ: 2014.12.09)
          #ifdef DEBUG_CLEANUP
-         MessageInterface::ShowMessage("   Calling currentFunction->Finalize()\n");
+         MessageInterface::ShowMessage("   Calling currentFunction->Finalize(true)\n");
          #endif
          
-         currentFunction->Finalize();
+         // Set true for cleanup
+         currentFunction->Finalize(true);
       }
    }
    
@@ -2389,7 +2440,19 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
                ("   Calling <%p>'%s'->TakeAction('Finalize')\n", sub, sub->GetName().c_str());
             #endif
             
-            sub->TakeAction("Finalize");
+            // Catch any error encountered during subscriber finalization and
+            // rethrow if it is fatal else just write error message (Fix for GMT-5204)
+            try
+            {
+               sub->TakeAction("Finalize");
+            }
+            catch (BaseException &be)
+            {
+               if (be.IsFatal())
+                  throw;
+               else
+                  MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+            }
             
             #ifdef DEBUG_SUBSCRIBER
             MessageInterface::ShowMessage
@@ -2504,12 +2567,24 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
             // Unsubscribe subscriber before deleting (LOJ: 2009.04.07)
             Subscriber *sub = (Subscriber*)omi->second;
             
-            // Instead of deleting OpenGL plot from the OpenGlPlot destructor
-            // call TakeAction() to delete it (LOJ:2009.04.22)
-            sub->TakeAction("Finalize");
-            //@todo This causes Func_AssigningWholeObjects crash
-            // in Subscriber::ClearWrappers() due to stale wrapper pointers
-            //sub->ClearWrappers();
+            // Catch any error encountered during subscriber finalization and
+            // rethrow if it is fatal else just write error message (Fix for GMT-5204)
+            try
+            {
+               // Instead of deleting OpenGL plot from the OpenGlPlot destructor
+               // call TakeAction() to delete it (LOJ:2009.04.22)
+               sub->TakeAction("Finalize");
+               //@todo This causes Func_AssigningWholeObjects crash
+               // in Subscriber::ClearWrappers() due to stale wrapper pointers
+               //sub->ClearWrappers();
+            }
+            catch (BaseException &be)
+            {
+               if (be.IsFatal())
+                  throw;
+               else
+                  MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+            }
             
             #ifdef DEBUG_CLEANUP
             MessageInterface::ShowMessage

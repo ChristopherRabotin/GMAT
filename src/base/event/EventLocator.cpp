@@ -157,8 +157,7 @@ EventLocator::EventLocator(const std::string &typeStr,
    occultingBodyNames.clear();
    occultingBodies.clear();
    defaultOccultingBodies.clear();
-   defaultOccultingBodies.push_back("Earth");
-   defaultOccultingBodies.push_back("Luna");
+   // default occulting bodies are set in the leaf classes
 }
 
 
@@ -278,7 +277,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       scStart              = el.scStart;
       scNow                = el.scNow;
       satName              = el.satName;
-      sat                  = NULL;
+      sat                  = el.sat;     // NULL;
       solarSys             = el.solarSys;
       em                   = NULL;
       initialEpochSet      = el.initialEpochSet;

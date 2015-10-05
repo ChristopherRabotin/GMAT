@@ -56,7 +56,8 @@ public:
    ~Sandbox();
    
    // Setup methods
-   GmatBase* AddObject(GmatBase *obj);   
+   GmatBase* AddObject(GmatBase *obj);
+   bool AddFunctionToGlobalObjectMap(Function *func);
    bool AddCommand(GmatCommand *cmd);
    bool AddSolarSystem(SolarSystem *ss);
    bool AddTriggerManagers(const std::vector<TriggerManager*> *trigs);
@@ -123,6 +124,8 @@ private:
    ObjectInitializer                 *objInit;
    /// Update method used for owned clones
    updateMethod                      cloneUpdateStyle;
+   /// Flag indicting error creating FCS
+   bool                              errorInPreviousFcs;
    
    /// List of FiniteThrust objects that are currently available
    std::vector<PhysicalModel *>      transientForces;

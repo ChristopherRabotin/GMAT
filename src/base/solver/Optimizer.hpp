@@ -44,6 +44,13 @@ public:
    virtual void        SetResultValue(Integer id, Real value,
                                       const std::string &resultType = "");
 
+   virtual void        SetConstraintValues(Integer id, Real desiredValue, Real achievedValue,
+                                      Integer condition = 0);
+   virtual void        ReportProgress(const SolverState forState = UNDEFINED_STATE);
+   virtual void        ReportProgress(std::list<ISolverListener*> listeners, const SolverState forState);
+   virtual void        ReportProgress(ISolverListener* listener, const SolverState forState = UNDEFINED_STATE);
+
+
    virtual std::string GetProgressString();
 
    virtual bool         IsParameterReadOnly(const Integer id) const;
@@ -141,8 +148,14 @@ protected:
    StringArray       ineqConstraintNames;
    /// array of equality constraint values
    std::vector<Real> eqConstraintValues;
+   std::vector<Real> eqConstraintDesiredValues;
+   std::vector<Real> eqConstraintAchievedValues;
+   std::vector<Integer> eqConstraintOp;
    /// array of inequality constraint values
    std::vector<Real> ineqConstraintValues;
+   std::vector<Real> ineqConstraintDesiredValues;
+   std::vector<Real> ineqConstraintAchievedValues;
+   std::vector<Integer> ineqConstraintOp;
    /// most recently calculated gradient of the objective function
    std::vector<Real> gradient;   // ********* future ***********
    /// most recently calculated Jacobian of the equality constraints

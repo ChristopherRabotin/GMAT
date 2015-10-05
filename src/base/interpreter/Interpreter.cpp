@@ -1797,8 +1797,29 @@ GmatBase* Interpreter::FindObject(const std::string &name,
             if (theObjectMap->find(name) != theObjectMap->end())
             {
                GmatBase *obj = (*theObjectMap)[name];
-               if (obj && obj->IsOfType("GmatFunction"))
+               if (obj && obj->IsOfType(Gmat::FUNCTION))
                   objFound = obj;
+            }
+            else
+            {
+               // Try internal object map for Function
+               try
+               {
+                  GmatBase *intObj = theModerator->GetInternalObject(name);
+                  #ifdef DEBUG_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("%s\n", (GmatBase::WriteObjectInfo("==> internal Obj=", intObj)).c_str());
+                  #endif
+                  if (intObj && intObj->IsOfType(Gmat::FUNCTION))
+                     objFound = intObj;
+               }
+               catch (BaseException &be)
+               {
+                  #ifdef DEBUG_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("==> Ignoring exception: %s\n", be.GetFullMessage().c_str());
+                  #endif
+               }
             }
          }
       }
@@ -1999,7 +2020,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
 
       type1 = "CallFunction";
       
-      // Figure out if which CallFunction to be created.
+      // Figure out which CallFunction to be created.
       std::string funcName = GmatStringUtil::ParseFunctionName(desc);
       if (funcName != "")
       {
@@ -2092,6 +2113,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    {
       if (type1 == "CallFunction")
       {
+         isPythonFunction = false;
          std::string funcName = GmatStringUtil::ParseFunctionName(desc);
          
          #ifdef DEBUG_CREATE_CALL_FUNCTION
@@ -2124,13 +2146,26 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                   type1 = "CallMatlabFunction";
                else
                {
-                  if (gmatFunctionsAvailable)
-                     type1 = "CallGmatFunction";
+                  // Check to see if it is a Python function
+                  if (funcName.find("Python.") == 0)
+                  {
+                     // Todo: Check to see if Python plugin was activated
+                     type1 = "CallPythonFunction";
+                     isPythonFunction = true;
+//                     throw InterpreterException("The function \"" + funcName +
+//                           "\" is not available; you may need to enable the "
+//                           "PythonInterface plugin (libPythonInterface)");
+                  }
                   else
-                     throw InterpreterException("The function \"" + funcName +
-                           "\" is not available; if it is a GmatFunction, you "
-                           "may need to enable the GmatFunction plugin "
-                           "(libGmatFunction)");
+                  {
+                     if (gmatFunctionsAvailable)
+                        type1 = "CallGmatFunction";
+                     else
+                        throw InterpreterException("The function \"" + funcName +
+                              "\" is not available; if it is a GmatFunction, you "
+                              "may need to enable the GmatFunction plugin "
+                              "(libGmatFunction)");
+                  }
                }
             }
          }
@@ -2511,8 +2546,13 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       MessageInterface::ShowMessage("   rhs=\"%s\"\n", rhs.c_str());
       #endif
       
-      // check if single quote found
-      inArray = GmatStringUtil::SeparateByComma(rhs);
+      // Ignore () without input so that function call can have empty ()
+      // ie, "a = MyFunctionCall();" (LOJ: 2015.08.19)
+      if (rhs != "")
+      {
+         // Parse input parameters
+         inArray = GmatStringUtil::SeparateByComma(rhs);
+      }
       
       #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
       MessageInterface::ShowMessage("   inArray.size()=%d\n", inArray.size());
@@ -2535,42 +2575,66 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       return false;
    }
    
-   // Check for valid name
-   if (!GmatStringUtil::IsValidName(funcName))
+   // Check for valid name if not a Python function
+   if (isPythonFunction)
    {
-      InterpreterException ex("Found invalid function name \"" + funcName + "\"");
-      HandleError(ex);
-      ignoreError = true;
-      return false;
+      if (!cmd->IsOfType("CallPythonFunction"))
+         throw InterpreterException("Attempting to set a Python function but "
+               "the command type is " + cmd->GetTypeName());
+
+      // Python function script in the form "Python.ModuleName.FunctionName"
+      std::string moduleName, functionName;
+      size_t loc1 = funcName.find(".", 0);
+      size_t loc2 = funcName.find(".", loc1+1);
+
+      moduleName = funcName.substr(loc1+1, (loc2 - loc1) - 1);
+      functionName = funcName.substr(loc2 + 1);
+
+      #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+         MessageInterface::ShowMessage("Python module %s, function %s\n",
+               moduleName.c_str(), functionName.c_str());
+      #endif
+      cmd->SetStringParameter("PythonModule", moduleName);
+      cmd->SetStringParameter("PythonFunction", functionName);
    }
-   
-   #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-   MessageInterface::ShowMessage("   Setting funcName '%s'\n", funcName.c_str());
-   #endif
-   
-   // Special case for MatlabFunction
-   // If in functin mode and function name is found from tempObjectNames,
-   // add an extension
-   std::string newFuncName = funcName;
-   
-   if (inFunctionMode)
+   else
    {
-      if (find(tempObjectNames.begin(), tempObjectNames.end(), funcName) !=
-          tempObjectNames.end())
+      if (!GmatStringUtil::IsValidName(funcName))
       {
-         GmatGlobal *global = GmatGlobal::Instance();
-         newFuncName = funcName + global->GetMatlabFuncNameExt();
-         
-         #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-         MessageInterface::ShowMessage
-            ("   '%s' found in tempObjectNames, so setting '%s' as function "
-             "name\n", funcName.c_str(), newFuncName.c_str());
-         #endif
+         InterpreterException ex("Found invalid function name \"" + funcName + "\"");
+         HandleError(ex);
+         ignoreError = true;
+         return false;
       }
+
+      #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+      MessageInterface::ShowMessage("   Setting funcName '%s'\n", funcName.c_str());
+      #endif
+
+      // Special case for MatlabFunction
+      // If in functin mode and function name is found from tempObjectNames,
+      // add an extension
+      std::string newFuncName = funcName;
+
+      if (inFunctionMode)
+      {
+         if (find(tempObjectNames.begin(), tempObjectNames.end(), funcName) !=
+             tempObjectNames.end())
+         {
+            GmatGlobal *global = GmatGlobal::Instance();
+            newFuncName = funcName + global->GetMatlabFuncNameExt();
+
+            #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+            MessageInterface::ShowMessage
+               ("   '%s' found in tempObjectNames, so setting '%s' as function "
+                "name\n", funcName.c_str(), newFuncName.c_str());
+            #endif
+         }
+      }
+
+      // Set function name to CallFunction
+      retval = cmd->SetStringParameter("FunctionName", newFuncName);
    }
-   
-   // Set function name to CallFunction
-   retval = cmd->SetStringParameter("FunctionName", newFuncName);
    
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage("   Setting input\n");
@@ -2635,13 +2699,15 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          // String literal
          if (GmatStringUtil::IsEnclosedWith(inArray[i], "'"))
          {
-            if (cmdTypeName == "CallGmatFunction")
+            if ((cmdTypeName == "CallGmatFunction") ||
+                (cmdTypeName == "CallPythonFunction"))
                validInput = true;
          }
          // Number
          else if (GmatStringUtil::ToReal(inArray[i], rval))
          {
-            if (cmdTypeName == "CallGmatFunction")
+            if ((cmdTypeName == "CallGmatFunction") ||
+                  (cmdTypeName == "CallPythonFunction"))
                validInput = true;
          }
          // Parameter or object property
@@ -2672,7 +2738,8 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
             }
             else
             {
-               if (cmdTypeName == "CallGmatFunction")
+               if ((cmdTypeName == "CallGmatFunction") ||
+                   (cmdTypeName == "CallPythonFunction"))
                   validInput = true;
             }
          }
@@ -2712,7 +2779,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       if (retval && inFunctionMode)
          validInput = true;
       
-      // If not in function mode, throw exception if invalid inputparameter
+      // If not in function mode, throw exception if invalid input parameter
       if (!retval || !validInput)
       {
          InterpreterException ex
@@ -2744,7 +2811,8 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    for (UnsignedInt i=0; i<outArray.size(); i++)
    {
       retval = cmd->SetStringParameter("AddOutput", outArray[i]);
-      if (retval && cmd->GetTypeName() == "CallGmatFunction")
+      if (retval && ((cmd->GetTypeName() == "CallGmatFunction") ||
+          (cmd->GetTypeName() == "CallPythonFunction")))
       {
          validOutput = true;
       }
@@ -2832,7 +2900,12 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    // before mission sequence, if not, create as GmatFunction.
    GmatBase *func = FindObject(funcName);
    if (func == NULL)
-      func = CreateObject("GmatFunction", funcName);
+   {
+      if (!isPythonFunction)
+         func = CreateObject("GmatFunction", funcName);
+      else
+         func = NULL;
+   }
    
    // Set function pointer to CallFunction command
    cmd->SetRefObject(func, Gmat::FUNCTION, funcName);
@@ -3891,10 +3964,12 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
       if (funcName != "")
       {
          GmatBase *func = FindObject(funcName);
+
          #ifdef DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage
             ("   func = <%p>'%s'\n", func, func ? func->GetName().c_str() : "NULL");
          #endif
+
          if (func && func->IsOfType(Gmat::FUNCTION))
          {
             #ifdef DEBUG_CREATE_COMMAND
@@ -3906,16 +3981,26 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
          }
          else
          {
-            // Check FileManager if function is in the GmatFunction path
-            std::string funcPath = FileManager::Instance()->GetGmatFunctionPath(funcName);
-            if (funcPath != "")
-               createCallFunction = true;
+            // May be a Python function, which has no Function object
+            if (func == NULL)
+            {
+               Integer loc = funcName.find("Python.");
+               if (loc == 0)
+                  createCallFunction = true;
+            }
             else
             {
-               #ifdef DEBUG_CREATE_COMMAND
-               MessageInterface::ShowMessage
-                  ("   '%s' is not a function\n", funcName.c_str());
-               #endif
+               // Check FileManager if function is in the GmatFunction path
+               std::string funcPath = FileManager::Instance()->GetGmatFunctionPath(funcName);
+               if (funcPath != "")
+                  createCallFunction = true;
+               else
+               {
+                  #ifdef DEBUG_CREATE_COMMAND
+                  MessageInterface::ShowMessage
+                     ("   '%s' is not a function\n", funcName.c_str());
+                  #endif
+               }
             }
          }
       }
@@ -9923,15 +10008,18 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
    }
    
    // check for no extension of .gmf or wrong extension
-   StringArray parts = GmatStringUtil::SeparateBy(fPath, ".");
-   if ((parts.size() == 1) ||
-       (parts.size() == 2 && parts[1] != "gmf"))
+   if (retval)
    {
-      InterpreterException ex
-         ("The GmatFunction file \"" + fPath + "\" has no or incorrect file "
-          "extension referenced in \"" + fName + "\"\n");
-      HandleError(ex, false);
-      retval = false;
+      StringArray parts = GmatStringUtil::SeparateBy(fPath, ".");
+      if ((parts.size() == 1) ||
+          (parts.size() == 2 && parts[1] != "gmf"))
+      {
+         InterpreterException ex
+            ("The GmatFunction file \"" + fPath + "\" has no or incorrect file "
+             "extension referenced in \"" + fName + "\"\n");
+         HandleError(ex, false);
+         retval = false;
+      }
    }
    
    if (!retval || !fullCheck)
@@ -10185,6 +10273,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
             break;
          }
          
+         // Accept () without arguments (LOJ: 2015.08.19)
+         #if 0
          if (inputArgs.size() == 0)
          {
             InterpreterException ex
@@ -10194,6 +10284,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
             retval = false;
             break;
          }
+         #endif
          
          // check for duplicate input list
          #if DBGLVL_FUNCTION_DEF > 0

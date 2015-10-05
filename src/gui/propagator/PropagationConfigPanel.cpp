@@ -136,6 +136,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
 
    canClose = true;
    EnableUpdate(false);
+
 }
 
 
@@ -729,6 +730,7 @@ void PropagationConfigPanel::LoadData()
 {
    // Enable the "Show Script" button
    mObject = thePropSetup;
+   dragStringBuffer.resize(6);
 
    #ifdef DEBUG_PROP_PANEL_LOAD
    MessageInterface::ShowMessage("PropConfigPanel::LoadData() entered\n");
@@ -1081,12 +1083,18 @@ void PropagationConfigPanel::PopulateForces()
                primaryBodyData->bodyName = wxBodyName;
                primaryBodyData->dragType = atmosModelString;
                primaryBodyData->dragf = theDragForce;
-
+                    
+               // get the info for the drag panel
                dragParameterBuffer[0] = theDragForce->GetRealParameter("F107");
                dragParameterBuffer[1] = theDragForce->GetRealParameter("F107A");
                dragParameterBuffer[2] = theDragForce->GetRealParameter("MagneticIndex");
+               dragStringBuffer[0] = theDragForce->GetStringParameter("PredictedWeatherSource").c_str();
+               dragStringBuffer[1] = theDragForce->GetStringParameter("HistoricWeatherSource").c_str();
+               dragStringBuffer[2]= theDragForce->GetStringParameter("CSSISpaceWeatherFile").c_str();
+               dragStringBuffer[3] = theDragForce->GetStringParameter("SchattenFile").c_str();
+               dragStringBuffer[4] = theDragForce->GetStringParameter("SchattenErrorModel").c_str();
+               dragStringBuffer[5] = theDragForce->GetStringParameter("SchattenTimingModel").c_str();
                dragBufferReady = true;
-
 
                //Warn user about bodies already added as Primary body
                Integer pmSize = (Integer)pointMassBodyList.size();
@@ -1422,12 +1430,22 @@ void PropagationConfigPanel::SaveData()
                   theDragForce->SetStringParameter(paramId,
                         primaryBodyData->dragType.c_str());
                   theDragForce->SetStringParameter("BodyName", bodyName);
-                  // if drag force was previous defined, set previous flux value
+
+                  // Save drag settings, if the user has changed things
                   if (dragBufferReady)
                   {
-                     theDragForce->SetRealParameter("F107", dragParameterBuffer[0]);
-                     theDragForce->SetRealParameter("F107A", dragParameterBuffer[1]);
-                     theDragForce->SetRealParameter("MagneticIndex", dragParameterBuffer[2]);
+                       theDragForce->SetStringParameter("PredictedWeatherSource", dragStringBuffer[0].c_str());
+                       theDragForce->SetStringParameter("HistoricWeatherSource", dragStringBuffer[1].c_str());
+                       theDragForce->SetRealParameter("F107", dragParameterBuffer[0]);
+                       theDragForce->SetRealParameter("F107A", dragParameterBuffer[1]);
+                       theDragForce->SetRealParameter("MagneticIndex", dragParameterBuffer[2]);
+                       theDragForce->SetStringParameter("CSSISpaceWeatherFile", dragStringBuffer[2].c_str());
+                       theDragForce->SetStringParameter("SchattenFile", dragStringBuffer[3].c_str());
+                       theDragForce->SetStringParameter("SchattenErrorModel", dragStringBuffer[4].c_str());
+                       theDragForce->SetStringParameter("SchattenTimingModel", dragStringBuffer[5].c_str());
+
+                       dragBufferReady = false;
+
                   }
 
 //                  primaryBodyList[i]->dragf = theDragForce;
@@ -3804,29 +3822,66 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
    // Per S. Hughes:
    std::string title = "Space Weather Setup";
 
+
    if ((dragForce != NULL) && !dragBufferReady)
    {
       dragParameterBuffer[0] = dragForce->GetRealParameter("F107");
       dragParameterBuffer[1] = dragForce->GetRealParameter("F107A");
       dragParameterBuffer[2] = dragForce->GetRealParameter("MagneticIndex");
+
+      dragStringBuffer[0] = dragForce->GetStringParameter("PredictedWeatherSource");
+      dragStringBuffer[1] = dragForce->GetStringParameter("HistoricWeatherSource");
+      dragStringBuffer[2] = dragForce->GetStringParameter("CSSISpaceWeatherFile");
+      dragStringBuffer[3] = dragForce->GetStringParameter("SchattenFile");
+      dragStringBuffer[4] = dragForce->GetStringParameter("SchattenErrorModel");
+      dragStringBuffer[5] = dragForce->GetStringParameter("SchattenTimingModel");
+
       dragBufferReady = true;
    }
+   else if ( dragForce==NULL && !dragBufferReady)
+   {
+      dragStringBuffer[0] = "ConstantFluxAndGeoMag";
+      dragStringBuffer[1] = "ConstantFluxAndGeoMag";
 
-   // Buffer the settings -- this is temporary, and will need to be more
-   // robust when more settings are added
+      // Default values
+      FileManager *fm = FileManager::Instance();
+      dragStringBuffer[2] = fm->GetFilename("CSSI_FLUX_FILE");
+      dragStringBuffer[3] = fm->GetFilename("SCHATTEN_FILE");
+      dragStringBuffer[4] = "Nominal";
+      dragStringBuffer[5] = "NominalCycle";
+   }
+
+   // Buffer the settings 
    Real dragSettings[3];
    dragSettings[0] = dragParameterBuffer[0];
    dragSettings[1] = dragParameterBuffer[1];
    dragSettings[2] = dragParameterBuffer[2];
 
-   DragInputsDialog dragDlg(this, dragParameterBuffer, title.c_str());
+   // Buffer the string values
+   std::vector<std::string> dragStringSettings;
+   dragStringSettings = dragStringBuffer;
+
+   DragInputsDialog dragDlg(this, dragForce, dragParameterBuffer,
+         &dragStringBuffer, title.c_str());
    dragDlg.ShowModal();
+   
+   int numSettings =  dragStringBuffer.size();
+   for (int i=0; i<numSettings; i++)
+   {
+       if (strcmp(dragStringSettings[i].c_str(),dragStringBuffer[i].c_str()))
+       {
+            dragBufferReady = true;
+            EnableUpdate(true);
+            isForceModelChanged=true;
+       }
+   } 
 
    if ((dragSettings[0] != dragParameterBuffer[0]) ||
        (dragSettings[1] != dragParameterBuffer[1]) ||
        (dragSettings[2] != dragParameterBuffer[2]) )
    {
       dragBufferReady = true;
+      isForceModelChanged=true;
       EnableUpdate(true);
    }
 }

@@ -33,7 +33,7 @@
 #include "GmatConstants.hpp"
 #include "GmatBase.hpp"
 
-class GMAT_API SolarFluxReader /*: public GmatBase*/
+class GMAT_API SolarFluxReader
 {
 
 public:
@@ -52,6 +52,8 @@ public:
       Real adjCtrF107a;
       Real obsF107;
       Real obsCtrF107a;
+
+      bool isObsData;
    };
 
    struct FluxData : FluxDataCSSI
@@ -62,8 +64,10 @@ public:
       // the first is NOMINAL, the second is EARLY, and the last is LATE TIMING.
       Real apSchatten[3];
 
-      // Assignment operator
+      FluxData();
+      FluxData(const FluxData &fD);
       FluxData &operator=(const FluxData &fD);
+      
       // Used in Schatten file indexing
       Integer index;
       Integer id;
@@ -79,7 +83,7 @@ private:
    /// offset required to start reading Schatten data
    std::streamoff begData;
    /// each line in the file
-   char * line; 
+   const char *line;
 
    std::string obsFileName;
    std::string predictFileName;
@@ -92,14 +96,32 @@ private:
    std::vector<FluxData> obsFluxData;
    /// Schatten data array
    std::vector<FluxData> predictFluxData;
+
+   GmatEpoch historicStart;
+   GmatEpoch historicEnd;
+   GmatEpoch predictStart;
+   GmatEpoch predictEnd;
+
+   /// Index for Schatten flux setting
+   Integer schattenFluxIndex;
+   /// Index for Schatten Ap value
+   Integer schattenApIndex;
       
    /// Flag used to indicate that the "Too early" warning not yet issued
    bool warnEpochBefore;
    /// Flag used to indicate that the "Too late" warning not yet issued
    bool warnEpochAfter;
 
+   /// Epoch reference point for when the F10.7 observations changed location
+   GmatEpoch f107RefEpoch;
+   /// Flag used to toggle interpolation of the f10.7 values
+   bool interpolateFlux;
+   /// Flag used to toggle interpolation for the geomagnetic index (predict only)
+   bool interpolateGeo;
+
    bool LoadObsData();
    bool LoadPredictData();
+   Real ConvertApToKp(Real ap);
 
 public:
    /// Open CSSI and Schatten files if opened
@@ -110,9 +132,14 @@ public:
    bool LoadFluxData(const std::string &obsFile = "", const std::string &predictFile = "");
    /// Get Flux data from either of two vectors filled in during LoadFluxData
    FluxData GetInputs(GmatEpoch epoch);
+
+   void GetEpochs(GmatEpoch &hStart, GmatEpoch &hEnd, GmatEpoch &pStart,
+                  GmatEpoch &pEnd);
+
    /// Change Ap data for MSISE model
    void PrepareApData(FluxData &fD, GmatEpoch epoch);
    void PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epoch);
+   void SetSchattenFlags(Integer timingSet, Integer magnitudeSet);
 };
 
 

@@ -51,6 +51,7 @@ extern "C"
 }
 
 #define MAX_LONG_MESSAGE_VALUE 1840
+#define MAX_SHORT_MESSAGE_VALUE 320
 
 class GMAT_API SpiceInterface
 {

@@ -86,6 +86,10 @@ EclipseLocator::EclipseLocator(const std::string &name) :
 
    TakeAction("Clear", "Events");
 
+   // Set default occulting bodies
+   defaultOccultingBodies.push_back("Earth");
+   defaultOccultingBodies.push_back("Luna");
+
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Creating Eclipse locator %s at <%p>\n",
             name.c_str(), this);
@@ -868,7 +872,7 @@ void EclipseLocator::FindEvents()
       Integer bodyNaifId  = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
       theFront  = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
       bodyName  = body->GetName();
-      theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
+      theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameId"));
 
       for (Integer jj = 0; jj < eclipseTypes.size(); jj++)
       {

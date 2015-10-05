@@ -23,6 +23,7 @@
 
 #include "CelestialBodyPropertiesPanel.hpp"
 #include "GmatColorPanel.hpp"
+#include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 #include "bitmaps/OpenFolder.xpm"
 #include <wx/config.h>
@@ -40,6 +41,9 @@ BEGIN_EVENT_TABLE(CelestialBodyPropertiesPanel, wxPanel)
    EVT_TEXT(ID_TEXT_CTRL_MU, CelestialBodyPropertiesPanel::OnMuTextCtrlChange)
    EVT_TEXT(ID_TEXT_CTRL_EQRAD, CelestialBodyPropertiesPanel::OnEqRadTextCtrlChange)
    EVT_TEXT(ID_TEXT_CTRL_FLAT, CelestialBodyPropertiesPanel::OnFlatTextCtrlChange)
+   EVT_BUTTON(ID_BROWSE_BUTTON_PCK_FILE, CelestialBodyPropertiesPanel::OnPckFileBrowseButton)
+   EVT_BUTTON(ID_REMOVE_BUTTON_PCK_FILE, CelestialBodyPropertiesPanel::OnPckFileRemoveButton)
+   EVT_LISTBOX(ID_LIST_BOX_PCK_FILE, CelestialBodyPropertiesPanel::OnPckFileListBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -60,20 +64,33 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 CelestialBodyPropertiesPanel::CelestialBodyPropertiesPanel(GmatPanel *cbPanel, 
                               wxWindow *parent, CelestialBody *body) :
-   wxPanel        (parent),
-   dataChanged    (false),
-   canClose       (true),
-   theBody        (body),
-   mu             (0.0),
-   eqRad          (0.0),
-   flat           (0.0),
-   muChanged      (false),
-   eqRadChanged   (false),
-   flatChanged    (false),
-   theCBPanel     (cbPanel)
+   wxPanel                    (parent),
+   userDef                    (false),
+   allowSpiceForDefaultBodies (false),
+   spiceAvailable             (false),
+   dataChanged                (false),
+   canClose                   (true),
+   pckFilesDeleted            (false),
+   theBody                    (body),
+   mu                         (0.0),
+   eqRad                      (0.0),
+   flat                       (0.0),
+   muChanged                  (false),
+   eqRadChanged               (false),
+   flatChanged                (false),
+   pckChanged                 (false),
+   theCBPanel                 (cbPanel)
 {
    guiManager     = GuiItemManager::GetInstance();
-   
+   guiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
+   ss             = guiInterpreter->GetSolarSystemInUse();
+
+#ifdef __USE_SPICE__
+   spiceAvailable = true;
+#else
+   spiceAvailable = false;
+#endif
+
    Create();
 }
 
@@ -110,80 +127,143 @@ void CelestialBodyPropertiesPanel::SaveData()
    #ifdef DEBUG_CB_PROP_SAVE
       MessageInterface::ShowMessage("Entering CBPropPanel::SaveData, dataChanged = %s\n",
          (dataChanged? "true" : "false"));
-      MessageInterface::ShowMessage("    muChanged = %s\n",
+      MessageInterface::ShowMessage("    muChanged    = %s\n",
          (muChanged? "true" : "false"));
       MessageInterface::ShowMessage("    eqRadChanged = %s\n",
          (eqRadChanged? "true" : "false"));
-      MessageInterface::ShowMessage("    flatChanged = %s\n",
+      MessageInterface::ShowMessage("    flatChanged  = %s\n",
          (flatChanged? "true" : "false"));
+      MessageInterface::ShowMessage("    pckChanged   = %s\n",
+         (pckChanged? "true" : "false"));
+      MessageInterface::ShowMessage("    allowSpiceForDefaultBodies = %s\n",
+         (allowSpiceForDefaultBodies? "true" : "false"));
+      MessageInterface::ShowMessage("    userDef                    = %s\n",
+         (userDef? "true" : "false"));
+      MessageInterface::ShowMessage("    spiceAvailable             = %s\n",
+         (spiceAvailable? "true" : "false"));
    #endif
    if (!dataChanged) return;
    
    canClose    = true;
    
-   if (muChanged)
+   try
    {
-      strval = muTextCtrl->GetValue();
-      if (!theCBPanel->CheckReal(tmpval, strval, "Mu", "Real Number > 0",
-            false, true, true, false))
-         realsOK = false;
-      else 
-      {
-         mu = tmpval;
-      }
-   }
-   if (eqRadChanged)
-   {
-      strval = eqRadTextCtrl->GetValue();
-      if (!theCBPanel->CheckReal(tmpval, strval, "Equatorial Radius", "Real Number > 0",
-            false, true, true, false))
-         realsOK = false;
-      else 
-      {
-         eqRad = tmpval;
-      }
-   }
-   if (flatChanged)
-   {
-      strval = flatTextCtrl->GetValue();
-      if (!theCBPanel->CheckReal(tmpval, strval, "Flattening Coefficient", "Real Number >= 0",
-            false, true, true, true))
-         realsOK = false;
-      else 
-      {
-         flat = tmpval;
-      }
-   }
-   if (!realsOK)
-   {
-      std::string errmsg = "Please enter valid Real values before saving data.\n";
-      MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
-   }
-   
-   if (realsOK)
-   {
-      #ifdef DEBUG_CB_PROP_PANEL
-         MessageInterface::ShowMessage("Reals are OK - setting them\n");
-         MessageInterface::ShowMessage("mu = %12.4f, eqRad = %12.4f, flat = %12.4f\n",
-               mu, eqRad, flat);
-         MessageInterface::ShowMessage("in Properties panel, body pointer is %p\n",
-               theBody);
-      #endif
-
       if (muChanged)
-         theBody->SetGravitationalConstant(mu);
+      {
+         strval = muTextCtrl->GetValue();
+         if (!theCBPanel->CheckReal(tmpval, strval, "Mu", "Real Number > 0",
+               false, true, true, false))
+            realsOK = false;
+         else
+         {
+            mu = tmpval;
+         }
+      }
       if (eqRadChanged)
-         theBody->SetEquatorialRadius(eqRad);
+      {
+         strval = eqRadTextCtrl->GetValue();
+         if (!theCBPanel->CheckReal(tmpval, strval, "Equatorial Radius", "Real Number > 0",
+               false, true, true, false))
+            realsOK = false;
+         else
+         {
+            eqRad = tmpval;
+         }
+      }
       if (flatChanged)
-         theBody->SetFlattening(flat);
-      
-      dataChanged = false;
-      ResetChangeFlags(true);
+      {
+         strval = flatTextCtrl->GetValue();
+         if (!theCBPanel->CheckReal(tmpval, strval, "Flattening Coefficient", "Real Number >= 0",
+               false, true, true, true))
+            realsOK = false;
+         else
+         {
+            flat = tmpval;
+         }
+      }
+
+      if (!realsOK)
+      {
+         std::string errmsg = "Please enter valid Real values before saving data.\n";
+         MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+         return;
+      }
+
+      if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable && pckChanged)
+      {
+
+         unsigned int numKernels = pckFileListBox->GetCount();
+
+         #ifdef DEBUG_CB_PROP_SAVE
+            MessageInterface::ShowMessage("numKernels = %d\n", (Integer) numKernels);
+         #endif
+
+         for (unsigned int ii = 0; ii < numKernels; ii++)
+         {
+            strval = pckFileListBox->GetString(ii);
+            std::ifstream filename(strval.c_str());
+            #ifdef DEBUG_CB_PROP_SAVE
+               MessageInterface::ShowMessage("strval = %s\n",
+                     strval.c_str());
+               MessageInterface::ShowMessage("numKernels = %d\n", (Integer) numKernels);
+            #endif
+
+            if (!filename)
+            {
+               std::string errmsg = "File \"" + strval;
+               errmsg += "\" does not exist.\n";
+               MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+               canClose = false;
+            }
+            else
+            {
+               filename.close();
+               theBody->SetStringParameter(theBody->GetParameterID("PlanetarySpiceKernelName"),
+                     strval);
+            }
+         }
+      }
+      if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable && pckFilesDeleted)
+      {
+         for (unsigned int ii = 0; ii < pckFilesToDelete.size(); ii++)
+         {
+            theBody->RemoveSpiceKernelName("Planetary", pckFilesToDelete.at(ii));
+         }
+      }
+
+      if (realsOK)
+      {
+         #ifdef DEBUG_CB_PROP_SAVE
+            MessageInterface::ShowMessage("Reals are OK - setting them\n");
+            MessageInterface::ShowMessage("mu = %12.4f, eqRad = %12.4f, flat = %12.4f\n",
+                  mu, eqRad, flat);
+            MessageInterface::ShowMessage("in Properties panel, body pointer is %p\n",
+                  theBody);
+         #endif
+
+         if (muChanged)
+            theBody->SetGravitationalConstant(mu);
+         if (eqRadChanged)
+            theBody->SetEquatorialRadius(eqRad);
+         if (flatChanged)
+            theBody->SetFlattening(flat);
+
+         dataChanged = false;
+         ResetChangeFlags(true);
+      }
+      else
+      {
+         canClose = false;
+      }
+
    }
-   else
+   catch (BaseException &ex)
    {
-      canClose = false;
+      canClose    = false;
+      dataChanged = true;
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
+
    #ifdef DEBUG_CB_PROP_SAVE
       MessageInterface::ShowMessage("At end of CBPropPanel::SaveData, canClose = %s\n",
          (canClose? "true" : "false"));
@@ -220,6 +300,22 @@ void CelestialBodyPropertiesPanel::LoadData()
       flatString = guiManager->ToWxString(flat);
       flatTextCtrl->SetValue(flatString);
             
+      if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable)
+      {
+         pckFileArray             = theBody->GetStringArrayParameter(
+                                    theBody->GetParameterID("PlanetarySpiceKernelName"));
+         unsigned int pckListSz   = pckFileArray.size();
+         pckFileArrayWX           = new wxString[pckListSz];
+         pckFiles.clear();
+         for (unsigned int jj = 0; jj < pckListSz; jj++)
+         {
+            pckFiles.push_back(pckFileArray[jj]);
+            pckFileArrayWX[jj] = wxString(pckFileArray[jj].c_str());
+         }
+         pckFileListBox->InsertItems(pckListSz, pckFileArrayWX, 0);
+         pckFileListBox->SetSelection(pckListSz-1); // Select the last item
+      }
+
       ResetChangeFlags();
    }
    catch (BaseException &e)
@@ -257,6 +353,9 @@ void CelestialBodyPropertiesPanel::Create()
    // SetPath() understands ".."
    pConfig->SetPath(wxT("/Celestial Body Properties"));
    
+   userDef                    = theBody->IsUserDefined();
+   allowSpiceForDefaultBodies = ss->IsSpiceAllowedForDefaultBodies();
+
    // empty the temporary value strings
    // muString      = "";
    // eqRadString   = "";
@@ -287,6 +386,28 @@ void CelestialBodyPropertiesPanel::Create()
    flatUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT(""), // unitless
                          wxDefaultPosition, wxSize(-1,-1), 0);   
    
+   wxBoxSizer *pckButtonSizer = NULL;
+   if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable)
+   {
+      // PCK file(s)
+      wxArrayString emptyList;
+      pckStaticText       = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"PCK Files"),
+                            wxDefaultPosition, wxSize(-1,-1), 0);
+      pckFileListBox      = new wxListBox(this, ID_LIST_BOX_PCK_FILE, wxDefaultPosition, wxSize(80, 100),
+                            emptyList, wxLB_EXTENDED|wxLB_NEEDED_SB|wxLB_HSCROLL);
+      pckFileListBox->SetToolTip(pConfig->Read(_T("PCKFileListHint")));
+      pckFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_PCK_FILE, wxString(GUI_ACCEL_KEY"Add"),
+                            wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+      pckFileBrowseButton->SetToolTip(pConfig->Read(_T("AddPCKFileHint")));
+      pckFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_PCK_FILE, wxString(GUI_ACCEL_KEY"Remove"),
+                            wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+      pckFileRemoveButton->SetToolTip(pConfig->Read(_T("RemovePCKFileHint")));
+      pckButtonSizer = new wxBoxSizer(wxHORIZONTAL);
+      pckButtonSizer->Add(pckFileBrowseButton,0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
+      pckButtonSizer->Add(pckFileRemoveButton,0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
+   }
+
+
    // set the min width for one of the labels for each GmatStaticBoxSizer
    int minLabelSize = muStaticText->GetBestSize().x;
    minLabelSize = (minLabelSize < eqRadStaticText->GetBestSize().x) ? eqRadStaticText->GetBestSize().x : minLabelSize;
@@ -304,10 +425,21 @@ void CelestialBodyPropertiesPanel::Create()
    cbPropGridSizer->Add(flatStaticText,0, wxALIGN_LEFT|wxALL, bSize);
    cbPropGridSizer->Add(flatTextCtrl,0, wxALIGN_LEFT|wxALL, bSize);
    cbPropGridSizer->Add(flatUnitsStaticText,0, wxALIGN_LEFT|wxALL, bSize);
-   cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
-   cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
-   cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
+//   cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
+//   cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
+//   cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
    
+   if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable)
+   {
+      cbPropGridSizer->Add(pckStaticText,0, wxGROW|wxALIGN_LEFT|wxALL, bSize);
+      cbPropGridSizer->Add(pckFileListBox,0, wxGROW|wxALIGN_LEFT|wxALL, bSize);
+      cbPropGridSizer->Add(0, 0);
+
+      cbPropGridSizer->Add(0, 0);
+      cbPropGridSizer->Add(pckButtonSizer, 0, wxALIGN_CENTRE|wxALL, bSize);
+      cbPropGridSizer->Add(0, 0);
+   }
+
    GmatStaticBoxSizer *optionsSizer    = new GmatStaticBoxSizer(wxVERTICAL, this, "Options");
    optionsSizer->Add(cbPropGridSizer, 0, wxALIGN_LEFT|wxGROW, bSize); 
    
@@ -335,6 +467,7 @@ void CelestialBodyPropertiesPanel::ResetChangeFlags(bool discardMods)
    muChanged      = false;
    eqRadChanged   = false;
    flatChanged    = false;
+   pckChanged = false;
    if (discardMods)
    {
       muTextCtrl->DiscardEdits();
@@ -409,6 +542,102 @@ void CelestialBodyPropertiesPanel::OnFlatTextCtrlChange(wxCommandEvent &event)
       theCBPanel->EnableUpdate(true);
    }
 }
+
+//------------------------------------------------------------------------------
+// void OnPckFileBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user selects the PCK browse
+ * button.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
+void CelestialBodyPropertiesPanel::OnPckFileBrowseButton(wxCommandEvent &event)
+{
+   wxArrayString oldFiles = pckFileListBox->GetStrings();
+   wxFileDialog dialog(this, _T("Choose a file to add"), _T(""), _T(""), _T("*.*"));
+   Integer foundAt = -99;
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxString fileName = (dialog.GetPath()).c_str();
+      for (Integer ii = 0; ii < (Integer) oldFiles.GetCount(); ii++)
+      {
+         if (fileName.IsSameAs(oldFiles[ii]))
+         {
+            foundAt = ii;
+            break;
+         }
+      }
+      if (foundAt == -99) // not found, so it's new
+      {
+         // Deselect current selections first
+         wxArrayInt selections;
+         int numSelect = pckFileListBox->GetSelections(selections);
+         for (int i = 0; i < numSelect; i++)
+            pckFileListBox->Deselect(selections[i]);
+
+         pckChanged   = true;
+         dataChanged      = true;
+         pckFileListBox->Append(fileName);
+         pckFileListBox->SetStringSelection(fileName);
+         theCBPanel->EnableUpdate(true);
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnPckFileRemoveButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user selects the PCK remove
+ * button.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
+void CelestialBodyPropertiesPanel::OnPckFileRemoveButton(wxCommandEvent &event)
+{
+   wxArrayInt selections;
+   int numSelect = pckFileListBox->GetSelections(selections);
+   // get the string values and delete the selected names from the list
+   wxString    fileSelected;
+   for (int i = numSelect-1; i >= 0; i--)
+   {
+      fileSelected = pckFileListBox->GetString(selections[i]);
+      pckFilesToDelete.push_back(fileSelected.WX_TO_STD_STRING);
+      pckFileListBox->Delete(selections[i]);
+   }
+   pckFilesDeleted = true;
+   dataChanged     = true;
+   theCBPanel->EnableUpdate(true);
+
+   // Select the last item
+   unsigned int count = pckFileListBox->GetCount();
+   if (count > 0)
+      pckFileListBox->SetSelection(count -1);
+}
+
+//------------------------------------------------------------------------------
+// void OnPckFileListBoxChange(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handle the event triggered when the user modifies the value on the PCK
+ * file list box.
+ *
+ * @param <event>    the handled event
+ *
+ */
+//------------------------------------------------------------------------------
+void CelestialBodyPropertiesPanel::OnPckFileListBoxChange(wxCommandEvent &event)
+{
+   pckChanged = true;
+   dataChanged    = true;
+   theCBPanel->EnableUpdate(true);
+}
+
 
 //------------------------------------------------------------------------------
 // wxString ToString(Real rval)

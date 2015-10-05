@@ -77,6 +77,9 @@ ObjectReferencedAxes("GSM",itsName)
    ComputeDipoleEarthFixed();
    objectTypeNames.push_back("GSM");
    parameterCount = GeocentricSolarMagneticAxesParamCount;
+
+   usesPrimary   = GmatCoordinate::REQUIRED_UNMODIFIABLE;
+   usesSecondary = GmatCoordinate::REQUIRED_UNMODIFIABLE;
 }
 
 
@@ -151,32 +154,6 @@ bool GeocentricSolarMagneticAxes::IsParameterReadOnly(const Integer id) const
          return ObjectReferencedAxes::IsParameterReadOnly(id);
    }
 }
-
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesPrimary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesPrimary() const
-{
-   return GmatCoordinate::NOT_USED;
-}
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesSecondary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage GeocentricSolarMagneticAxes::UsesSecondary() const
-{
-   return GmatCoordinate::NOT_USED;
-}
-
 
 //------------------------------------------------------------------------------
 //  GmatCoordinate::ParameterUsage UsesXAxis() const

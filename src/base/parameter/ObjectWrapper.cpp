@@ -169,13 +169,33 @@ GmatBase* ObjectWrapper::GetRefObject(const std::string &name)
 //---------------------------------------------------------------------------
 bool ObjectWrapper::SetRefObject(GmatBase *obj)
 {
+   #ifdef DEBUG_REF_OBJ
+   MessageInterface::ShowMessage
+      ("ObjectWrapper::SetRefObject() entered, obj=<%p>[%s]'%s'\n",
+       obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage("   refObjectNames.size() = %d\n", refObjectNames.size());
+   for (unsigned int i = 0; i < refObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   refObjectNames[%d] = '%s'\n", i, refObjectNames[i].c_str());
+   #endif
+   
+   bool retval = false;
+   
    if (obj->GetName() == refObjectNames[0])
    {
       theObject = obj;
-      return true;
+      retval = true;
    }
    else
-      return false;
+      retval = false;
+   
+   #ifdef DEBUG_REF_OBJ
+   MessageInterface::ShowMessage
+      ("ObjectWrapper::SetRefObject() returning %d, theObject=<%p>\n",
+       retval, theObject);
+   #endif
+   
+   return retval;
 }
 
 

@@ -12,6 +12,7 @@
 //
 // Author: Phillip Silvia, Jr., Derived from Gene Stillman's code for Odyssey
 // Created: 2009/09/21
+// Modified: 2015/08/31:  Added constellation borders and changed colors
 /**
  * This class handles loading the star and constellation information and drawing
  * them in to the scene. 
@@ -32,23 +33,16 @@
 
 const int   MAXSTARS   = 42101;     // Max Number Stars in arrays
 const int   MAXLINES   = 1600;      // Max Number of Constellation line vertices
-const int   MAXCON     = 120;
+const int   MAXCON     = 90;
+const int   MAXBORDERS = 64000;      // Max Number of Constellation line vertices
 const float STARSTEP   = 0.5f;      // Scale into this size groups
 const int   GROUPCOUNT = 18;        // Number of groups
 
-enum StarOrder {
-    CosRAcosDec = 0,                // cos(RA)*cosDec
-    SinRAcosDec,                    // sin(RA)*cosDec
-    SinDec,                         // sin(Dec)
-    Range                           // Set to zero, draw at infinity
-};
-
-
+//------------------------------------------------------------------------------
 class GLStars
 {
 public:
    static GLStars* Instance();
-   void InitStars();                        // Initialize the Stars, including loading from file
    void DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellations);    // Vertex Array Method, with alpha
    void SetDesiredStarCount(int count) {
       if (DesiredStarCount <= MAXSTARS)
@@ -58,37 +52,37 @@ public:
       };
    int  GetDesiredStarCount() { return DesiredStarCount; };
   
-protected:
+private:
    GLStars();
    ~GLStars();
    GLStars(const GLStars&);
    GLStars& operator= (const GLStars&);
 
 private:
-   void ReadBinaryStars();
-   void ReadTextStars();
-   void ReadTextConstellations();
+   void InitStars();                        // Initialize the Stars, including loading from file
+   void ReadStars();
+   void ReadConstellations();
+   void ReadBorders();
+   void SetVector (GLfloat v[4], Real ra, Real dec);
+   void Correct1875 (GLfloat v[4]);
    
-   Real  StarsVA[MAXSTARS][4];              // cos(RA)*cosDec
-                                            // sin(RA)*cosDec
-                                            // sin(Dec)
-                                                                                                                  // 0 (to draw at infinity)
-   GLfloat     CLines[MAXLINES][4];                       // Constellation points
+   GLfloat     Stars[MAXSTARS][4];
+   GLfloat     CLines[MAXLINES][4];          // Constellation points
+   GLfloat     Borders[MAXBORDERS][4];       // Constellation borders
    wxString    ConstellationNames[MAXCON];   // The names of the constellations
    int         ConstellationIndex[MAXCON][2]; // The starting and ending indices for each constellation
    int         GroupIndex[GROUPCOUNT];      // Indexes into the m_StarsVA array
    int         GroupCount[GROUPCOUNT];      // # of stars in this group
+   int         BorderGroup[90];
    Real        PointSize[GROUPCOUNT];       // Group GLpointsize
    int         LastGroupUsed;               // Not all groups may be used
    int         MaxDrawStars;                // Not Array Size
    int         DesiredStarCount;            // DesiredStars, if we want it to be adjustable
    int         NumLines;                    // Number of constellation lines loaded
    int         NumConstellations;           // Number of constellations loaded
-   static      GLStars* theInstance;         // The singleton instance of the Stars
-
-   // Used for parsing the file
-   void GetStarValues(wxString buffer, Real *RightAscension, Real *Declination, Real *VisualMag);
-   void GetConstellationValues(wxString buffer, Real *RightAscension1, 
-      Real *Declination1, Real *RightAscension2, Real *Declination2);
+   int         NumBorders;                  // Number of constellation lines loaded
+   int         BorderGroupCount;
+   static      GLStars* theInstance;        // The singleton instance of the Stars
 };
+//------------------------------------------------------------------------------
 #endif

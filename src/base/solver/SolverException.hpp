@@ -40,7 +40,7 @@ public:
     * @param <message> Initial part of the exception message.
     */
    //---------------------------------------------------------------------------
-   SolverException(const std::string &details,
+   SolverException(const std::string &details = "",
                    const std::string &message = "Solver subsystem exception: "):
       BaseException       (message, details)
    {

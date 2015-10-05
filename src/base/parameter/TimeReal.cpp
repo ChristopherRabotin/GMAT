@@ -353,12 +353,19 @@ bool TimeReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    #endif
    
    if (obj == NULL)
+   {
+      #if DEBUG_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("TimeReal::SetRefObject() <%p>'%s' just returning false, obj is NULL\n",
+          this, this->GetName().c_str());
+      #endif
       return false;
+   }
    
    #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
-      ("   Is%sGlobal=%d, Is%sLocal=%d\n", name.c_str(), obj->IsGlobal(),
-       name.c_str(), obj->IsLocal());
+      ("   mParamOwnerName='%s', Is%sGlobal=%d, Is%sLocal=%d\n", mParamOwnerName.c_str(),
+       name.c_str(), obj->IsGlobal(), name.c_str(), obj->IsLocal());
    #endif
    
    // Set owner object for Parameter here (LOJ: 2015.08.05)
@@ -368,6 +375,8 @@ bool TimeReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    bool setOk = TimeData::SetRefObject(obj, type, name);
    
    #if DEBUG_REF_OBJECT
+   GmatBase *paramOwner = GetOwner();
+   MessageInterface::ShowMessage(WriteObjectInfo("paramOwner=", paramOwner);
    MessageInterface::ShowMessage
       ("TimeReal::SetRefObject() <%p>'%s' returning %d\n", this,
        this->GetName().c_str(), setOk);

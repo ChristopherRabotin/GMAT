@@ -425,6 +425,8 @@
     <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp" />
     <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp" />
     <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\ListenerManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\ListenerManagerInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\Moderator.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotReceiver.cpp" />
@@ -475,6 +477,7 @@
     <ClCompile Include="..\..\..\src\base\foundation\GmatBase.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\GmatBaseException.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\GmatState.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\IChangeListener.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\ObjectInitializer.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\SpacePoint.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\StateManager.cpp" />
@@ -580,6 +583,7 @@
     <ClCompile Include="..\..\..\src\base\solver\ExternalOptimizer.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\Gradient.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\InternalOptimizer.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\ISolverListener.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\Jacobian.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\LineSearch.cpp" />
     <ClCompile Include="..\..\..\src\base\solver\Optimizer.cpp" />
@@ -749,6 +753,7 @@
     <ClCompile Include="..\..\..\src\gui\app\GmatToolBar.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GmatTreeItemData.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiInterpreter.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GuiListenerManager.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiMessageReceiver.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiPlotReceiver.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\InteractiveMatlabDialog.cpp" />
@@ -819,7 +824,10 @@
     <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp" />
-    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\Structure.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader3ds.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\SurfaceBase.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
@@ -833,6 +841,7 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiGlPlotData.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiTsPlotData.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewPanel.cpp" />
@@ -1129,6 +1138,8 @@
     <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp" />
     <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp" />
     <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\ListenerManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\ListenerManagerInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\Moderator.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotReceiver.hpp" />
@@ -1179,6 +1190,7 @@
     <ClInclude Include="..\..\..\src\base\foundation\GmatBase.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\GmatBaseException.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\GmatState.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\IChangeListener.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\ObjectInitializer.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\SpacePoint.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\StateManager.hpp" />
@@ -1284,6 +1296,7 @@
     <ClInclude Include="..\..\..\src\base\solver\ExternalOptimizer.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\Gradient.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\InternalOptimizer.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\ISolverListener.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\Jacobian.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\LineSearch.hpp" />
     <ClInclude Include="..\..\..\src\base\solver\Optimizer.hpp" />
@@ -1470,6 +1483,7 @@
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GmatTreeItemData.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiInterpreter.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GuiListenerManager.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiMessageReceiver.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiPlotReceiver.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\InteractiveMatlabDialog.hpp" />
@@ -1540,7 +1554,10 @@
     <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp" />
-    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\Structure.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader3ds.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\SurfaceBase.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />
@@ -1554,6 +1571,7 @@
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiGlPlotData.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiTsPlotData.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewPanel.hpp" />

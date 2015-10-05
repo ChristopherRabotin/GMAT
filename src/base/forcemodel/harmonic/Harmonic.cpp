@@ -27,6 +27,8 @@
 //#define DEBUG_ALLOCATION
 //#define DEBUG_CALCULATE_FIELD
 
+#define GRADIENT_MAX 100
+
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -250,11 +252,12 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
          // Truncate the gradient at 20x20, if calculated
          if (fillgradient)
          {
-            if ((m < 21) && (n < 21))
+            if ((m < GRADIENT_MAX + 1) && (n < GRADIENT_MAX + 1))
             {
                // Pines Equation 27 (Part of)
-               Real G = m<=2 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
-               Real H = m<=2 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
+               // 2015.09.18 GMT-5295 m<=2  -> m<=1
+               Real G = m<=1 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
+               Real H = m<=1 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
                // Correct for normalization
 
                Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
@@ -306,7 +309,7 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
                   MessageInterface::ShowMessage("*** WARNING *** Gradient data "
                         "for the state transition matrix and A-matrix "
                         "computations are truncated at degree and order "
-                        "<= 20.\n");
+                        "<= %d.\n", GRADIENT_MAX);
                   matrixTruncationWasPosted = true;
                }
             }

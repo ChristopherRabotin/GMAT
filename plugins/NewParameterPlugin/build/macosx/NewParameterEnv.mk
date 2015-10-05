@@ -15,8 +15,8 @@ endif
 
 # Environment settings for the NewParameters plugin; Mac version
 
-GMAT_CODE_LOCATION = ../../../../../gmat_wx3/src
-GMAT_BIN_LOCATION = ../../../../../gmat_wx3/application/$(GMAT_BIN_DIR)
+GMAT_CODE_LOCATION = ../../../../src
+GMAT_BIN_LOCATION = ../../../../application/$(GMAT_BIN_DIR)
 
 # Select the base library
 BASE_LIBRARY = GmatBase

@@ -503,7 +503,6 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
        modelFileFullPath.c_str());
    #endif
    
-   modelScale = 3.0;
    modelID = NO_MODEL;
 
    #ifdef DEBUG_SPACECRAFT
@@ -679,6 +678,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
       ("Spacecraft::Spacecraft(=) <%p>'%s' entered\n", this, GetName().c_str());
    #endif
 
+   // Preserve teh maneuvering state through the cloning
+   bool iAmManeuvering = isManeuvering;
+
    SpaceObject::operator=(a);
 
    ownedObjectCount     = a.ownedObjectCount;
@@ -753,7 +755,16 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to delete all owned objects\n");
-      #endif
+   #endif
+
+   // Preserve thrusters that are "turned on"
+   StringArray activeThrusters;
+   for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+   {
+      if (thrusters[i]->GetBooleanParameter("IsFiring"))
+         activeThrusters.push_back(thrusters[i]->GetName());
+   }
+
    DeleteOwnedObjects(true, true, true, true, true);
 
    // then cloned owned objects
@@ -763,6 +774,18 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    #endif
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
    
+   for (UnsignedInt i = 0; i < activeThrusters.size(); ++i)
+   {
+      for (UnsignedInt j = 0; j < thrusters.size(); ++j)
+      {
+         if (thrusters[j]->GetName() == activeThrusters[i])
+            thrusters[j]->SetBooleanParameter("IsFiring", true);
+      }
+   }
+   
+   // Restore the maneuving state
+   isManeuvering = iAmManeuvering ;
+
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
    
@@ -1614,7 +1637,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
-   refObjectTypes.push_back(Gmat::HARDWARE);
+   refObjectTypes.push_back(Gmat::HARDWARE);  // includes PowerSystem
    if (attitude)
    {
       ObjectTypeArray attRefObjTypes = attitude->GetRefObjectTypeArray();
@@ -1768,7 +1791,8 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
                      powerSystemName.c_str());
          #endif
          // Add Spacecraft Power System name
-         fullList.push_back(powerSystemName);  // need to check power system for ref object names
+         if (powerSystemName != "")
+            fullList.push_back(powerSystemName);  // need to check power system for ref object names
          return fullList;
       }
 
@@ -1777,6 +1801,8 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
          fullList = tankNames;
          fullList.insert(fullList.end(), thrusterNames.begin(), thrusterNames.end());
          fullList.insert(fullList.end(), hardwareNames.begin(), hardwareNames.end());
+         if (powerSystemName != "")
+            fullList.push_back(powerSystemName);
          return fullList;
       }
 

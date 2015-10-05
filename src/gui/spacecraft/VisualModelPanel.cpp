@@ -23,19 +23,13 @@
 #include "VisualModelPanel.hpp"
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
-#include "LoadPOV.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "GmatColorPanel.hpp"
 #include "RgbColor.hpp"             // for RgbColor
 #include <wx/clrpicker.h>           // for wxColorPickerCtrl
-
-//#define DEBUG_PANEL_CREATE
-//#define DEBUG_PANEL_LOAD
-//#define DEBUG_PANEL_SAVE
-
-//------------------------------
+//------------------------------------------------------------------------------
 // event tables for wxWindows
-//------------------------------
+//------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(VisualModelPanel, wxPanel)
    EVT_TEXT_ENTER(ID_MODELFILE_TEXT, VisualModelPanel::OnTextCtrlEnter)
    EVT_TEXT_ENTER(ID_ROT_TEXT, VisualModelPanel::OnTextCtrlEnter)
@@ -117,7 +111,6 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
 VisualModelPanel::~VisualModelPanel()
 {
 }
-
 //------------------------------------------------------------------------------
 // bool CanvasOn(bool onOrOff)
 //------------------------------------------------------------------------------
@@ -299,7 +292,7 @@ void VisualModelPanel::Create()
    wxStaticText *yTranText =
       new wxStaticText(this, ID_TEXT, wxT("Y"), wxDefaultPosition, wxDefaultSize, 0);
    yTranSlider =
-      new wxSlider(this, ID_TRAN_SLIDER, 0, -350, 350, wxDefaultPosition, wxSize(120, -1),
+      new wxSlider(this, ID_TRAN_SLIDER, 0, -350, 350, wxDefaultPosition, wxSize(120,-1),
       wxSL_HORIZONTAL);
    wxStaticText *yTranMax =
       new wxStaticText(this, ID_TEXT, wxT("3.5"), wxDefaultPosition, wxDefaultSize, 0);
@@ -325,7 +318,7 @@ void VisualModelPanel::Create()
    wxStaticText *scaleMinLabel =
       new wxStaticText(this, ID_TEXT, wxT("0.001"), wxDefaultPosition, wxDefaultSize, 0);
    scaleSlider =
-      new wxSlider(this, ID_SCALE_SLIDER, 0, -999, 1000, wxDefaultPosition, wxSize(120, -1),
+      new wxSlider(this, ID_SCALE_SLIDER, 0, 0, 540, wxDefaultPosition, wxSize(120, -1),
       wxSL_HORIZONTAL);
    wxStaticText *scaleMaxLabel =
       new wxStaticText(this, ID_TEXT, wxT("1000.0"), wxDefaultPosition, wxDefaultSize, 0);
@@ -423,7 +416,6 @@ void VisualModelPanel::Create()
       MessageInterface::ShowMessage("VisualModelPanel::Create() leaving\n");
    #endif
 }
-
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
@@ -462,12 +454,7 @@ void VisualModelPanel::LoadData()
    
    x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelScale"));
    scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
-   if (x < 1)
-   {
-      int m = scaleSlider->GetMax();
-      x = (float)(m*x)-m;
-   }
-   scaleSlider->SetValue(x);
+   SetScaleSlider(x);
    
    InitializeCanvas();
 	if (currentSpacecraft->GetModelFile() == "")
@@ -482,8 +469,6 @@ void VisualModelPanel::LoadData()
    MessageInterface::ShowMessage("VisualModelPanel::LoadData() exiting.\n");
    #endif
 }
-
-
 //------------------------------------------------------------------------------
 // void ToggleInterface(bool enable)
 //------------------------------------------------------------------------------
@@ -538,7 +523,6 @@ void VisualModelPanel::ToggleInterface(bool enable)
 		recenterButton->Disable();	
 	}
 }
-
 //------------------------------------------------------------------------------
 // void InitializeCanvas()
 //------------------------------------------------------------------------------
@@ -562,7 +546,6 @@ void VisualModelPanel::InitializeCanvas()
    MessageInterface::ShowMessage("VisualModelPanel::InitializeCanvas() leaving\n");
    #endif
 }
-
 //------------------------------------------------------------------------------
 // void ResetSliders()
 //------------------------------------------------------------------------------
@@ -592,34 +575,10 @@ void VisualModelPanel::ResetSliders()
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), 0);
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"), 0);
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"), 0);
-   scaleSlider->SetValue(3);
-   scaleValueText->SetLabel(wxT("3"));
-   currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), 3);
+   SetScaleSlider(1);
+   scaleValueText->SetLabel(wxT("1"));
+   currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), 3);
 }
-
-//------------------------------------------------------------------------------
-// void AutoScaleModel()
-//------------------------------------------------------------------------------
-/**
- * Calls VisualModelCanvas::AutoscaleModel() to rescale model based on
- * radius of the Earth and the model.
- */
-//------------------------------------------------------------------------------
-void VisualModelPanel::AutoScaleModel()
-{
-	float scale = modelCanvas->AutoscaleModel();
-   #ifdef DEBUG_AUTO_SCALE
-   MessageInterface::ShowMessage
-      ("VisualModelPanel::AutoScaleModel() After call to modelCanvas->AutoscaleModel(), scale=%f\n", scale);
-   #endif
-	scaleSlider->SetValue(scale);
-	scaleValueText->SetLabel(wxString::Format(wxT("%f"), scale));
-	currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), scale);
-	modelCanvas->Refresh(false);
-	dataChanged = true;
- 	theScPanel->EnableUpdate(true);
-}
-
 //------------------------------------------------------------------------------
 // void OnSlide(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -659,24 +618,16 @@ void VisualModelPanel::OnSlide(wxCommandEvent &event)
 			modelCanvas->Refresh(false);
          break;
       case ID_SCALE_SLIDER:
-         x = (float)scaleSlider->GetValue();
-         // We want to scale down if the value is negative, not invert
-         if (x < 0)
-         {
-            int m = scaleSlider->GetMax();
-            x = (float)(m+x)/m;
-         }
-         else if (x == 0)
-            break;
+         x = GetScaleSlider();
 			scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
-			currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), x);
+			currentSpacecraft->SetRealParameter 
+            (currentSpacecraft->GetParameterID("ModelScale"), x);
 			modelCanvas->Refresh(false);
 			break;
    }
    dataChanged = true;
 	theScPanel->EnableUpdate(true);
 }
-
 //------------------------------------------------------------------------------
 // void OnTextCtrlChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -690,7 +641,6 @@ void VisualModelPanel::OnTextCtrlChange(wxCommandEvent& event)
 	dataChanged = true;
 	theScPanel->EnableUpdate(true);
 }
-
 //------------------------------------------------------------------------------
 // void OnTextCtrlEnter(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -803,12 +753,7 @@ void VisualModelPanel::UpdateTextCtrl(int id)
       scaleValueText->GetValue().ToDouble(&x);
       x = currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), x);
       scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
-      if (x < 1)
-      {
-         int m = scaleSlider->GetMax();
-         x = x*m-m;
-      }
-      scaleSlider->SetValue(x);
+      SetScaleSlider (x);
       modelCanvas->Refresh(false);
       break;
 	}
@@ -826,12 +771,10 @@ void VisualModelPanel::OnBrowseButton(wxCommandEvent& event)
 {
    wxString filename, path;
    // Open up a file dialog
-// Temporarily disable POV support
 //   wxFileDialog fileDialog(this, wxT("Please select a model."), modelPath, wxEmptyString,
-//      wxT("3DS and POV files (*.3ds;*.pov)|*.3ds;*.pov"), wxOPEN);
+//      wxT("3ds and obj files (*.3ds;*.obj)|*.3ds;*.obj"), gmatFD_OPEN);
    wxFileDialog fileDialog(this, wxT("Please select a model."), modelPath, wxEmptyString,
-                           wxT("3DS files (*.3ds)|*.3ds"),
-                           gmatFD_OPEN);
+      wxT("3DS files (*.3ds)|*.3ds"),gmatFD_OPEN);
 
    // If it succeeded...
    if (fileDialog.ShowModal() == wxID_OK)
@@ -855,8 +798,6 @@ void VisualModelPanel::OnBrowseButton(wxCommandEvent& event)
          // Save to cloned base spacecraft
          currentSpacecraft->SetStringParameter("ModelFile", path.c_str());     
          // Auto scale model so that model can be shown
-         AutoScaleModel();
-         
          dataChanged = true;
          theScPanel->EnableUpdate(true);
          ToggleInterface(true);
@@ -877,21 +818,16 @@ void VisualModelPanel::OnRecenterButton(wxCommandEvent& event)
 {
    float offset[3];
    offset[0] = 0.0, offset[1] = 0.0, offset[2] = 0.0;
-
-   // @note - Why calling this?
-   // I'm getting offset=[-12.500000, -237.250000, -118.500000] which is
-   // out of bounds of -3.5 and 3.5. So commented out (LOJ: 2012.07.30)
-   //modelCanvas->RecenterModel(offset);
-   
-   xTranSlider->SetValue(offset[0]*100);
-   yTranSlider->SetValue(offset[1]*100);
-   zTranSlider->SetValue(offset[2]*100);
-   xTranValueText->SetLabel(wxString::Format(wxT("%f"), offset[0]));
-   yTranValueText->SetLabel(wxString::Format(wxT("%f"), offset[1]));
-   zTranValueText->SetLabel(wxString::Format(wxT("%f"), offset[2]));
+   xTranSlider->SetValue(0);
+   yTranSlider->SetValue(0);
+   zTranSlider->SetValue(0);
+   xTranValueText->SetLabel(wxString::Format(wxT("%f"), 0));
+   yTranValueText->SetLabel(wxString::Format(wxT("%f"), 0));
+   zTranValueText->SetLabel(wxString::Format(wxT("%f"), 0));
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"), offset[0]);
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"), offset[1]);
    currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"), offset[2]);
+   modelCanvas->loadedModel->SetBodyPosition(0,0,0);
    modelCanvas->Refresh(false);
    dataChanged = true;
    
@@ -906,10 +842,16 @@ void VisualModelPanel::OnRecenterButton(wxCommandEvent& event)
  */
 //------------------------------------------------------------------------------
 void VisualModelPanel::OnAutoscaleButton(wxCommandEvent& event)
-{
-   AutoScaleModel();
-}
-
+   {
+   float scale = 1;
+	SetScaleSlider(scale);
+	scaleValueText->SetLabel(wxString::Format(wxT("%f"), scale));
+	currentSpacecraft->SetRealParameter(currentSpacecraft->GetParameterID("ModelScale"), scale);
+   modelCanvas->loadedModel->SetScale(scale);
+	modelCanvas->Refresh(false);
+	dataChanged = true;
+ 	theScPanel->EnableUpdate(true);
+   }
 //------------------------------------------------------------------------------
 // void OnEarthButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -972,7 +914,7 @@ void VisualModelPanel::SaveData()
    catch (BaseException &ex)
    {
       canClose = false;
-      dataChanged = true;
+     dataChanged = true;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
    
@@ -985,4 +927,51 @@ void VisualModelPanel::SaveData()
        mTextChanged, dataChanged, canClose);
    #endif
 }
-
+//------------------------------------------------------------------------------
+Real VisualModelPanel::GetScaleSlider ()
+   {
+   Integer v = scaleSlider->GetValue();
+   Integer decade = v/90;
+   Integer mantissa = v%90;
+   Real out = std::pow (10.0,decade-4) * (mantissa+10);
+   return out;
+   }
+//------------------------------------------------------------------------------
+void VisualModelPanel::SetScaleSlider (const Real scale)
+   {
+   int decade = 0;
+   int mantissa = 0;
+   if (scale > 100.0)
+      {
+      decade = 5;
+      mantissa = scale/10.0-10;
+      }
+   else if (scale > 10.0)
+      {
+      decade = 4;
+      mantissa = scale/1.0-10;
+      }
+   else if (scale > 1.0)
+      {
+      decade = 3;
+      mantissa = scale/0.1-10;
+      }
+   else if (scale > 0.1)
+      {
+      decade = 2;
+      mantissa = scale/0.01-10;
+      }
+   else if (scale > 0.01)
+      {
+      decade = 1;
+      mantissa = scale/0.001-10;
+      }
+   else
+      {
+      decade = 0;
+      mantissa = scale/0.0001-10;
+      }
+   int value = decade*90+mantissa;
+   scaleSlider->SetValue(value);
+   }
+//------------------------------------------------------------------------------

@@ -624,8 +624,9 @@ bool Optimize::Execute()
       #endif
 
       if ((theSolver->IsSolverInternal()) || (startMode == RUN_AND_SOLVE))
-      {
+      { 
          theSolver->AdvanceState();
+         theSolver->ReportProgress(listeners, Solver::UNDEFINED_STATE);
       }
 
       if ((theSolver->GetState() == Solver::FINISHED) || 
@@ -637,7 +638,9 @@ bool Optimize::Execute()
          {
             commandComplete    = true;
             theSolver->ReportProgress(Solver::CHECKINGRUN);
+            theSolver->ReportProgress(listeners, Solver::CHECKINGRUN);
             theSolver->ReportProgress(Solver::FINISHED);
+            theSolver->ReportProgress(listeners, Solver::FINISHED);
          }
       }
    }

@@ -21,7 +21,7 @@
   <refnamediv>
     <refname>VF13ad</refname>
 
-    <refpurpose>The Sequential Quadratic Processor (SQP) optimizer,
+    <refpurpose>The Sequential Quadratic Programming (SQP) optimizer,
     VF13ad</refpurpose>
   </refnamediv>
 

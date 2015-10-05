@@ -84,6 +84,10 @@ ContactLocator::ContactLocator(const std::string &name) :
    stationNames.clear();
    stations.clear();
    contactResults.clear();
+
+   // Set default occulting bodies  2015.09.21 removing Luna as a default (GMT-5070)
+//   defaultOccultingBodies.push_back("Luna");
+
    #ifdef DEBUG_INIT_FINALIZE
       MessageInterface::ShowMessage("CREATED new ContactLocator %s<%p>\n",
             instanceName.c_str(), this);
@@ -1137,7 +1141,7 @@ void ContactLocator::FindEvents()
       Integer obsNaifId = stations.at(j)->GetIntegerParameter(
                           stations.at(j)->GetParameterID("NAIFId"));
       theObsrvr = GmatStringUtil::ToString(obsNaifId);
-      std::string obsFrame = stations.at(j)->GetStringParameter("SpiceFrameName");
+      std::string obsFrame = stations.at(j)->GetStringParameter("SpiceFrameId");
 
       Real  minElAngle  = stations.at(j)->GetRealParameter("MinimumElevationAngle");
 

@@ -54,22 +54,24 @@ PLUGIN                 = ../plugins/libMatlabInterface
 PLUGIN                 = ../plugins/libFminconOptimizer
 PLUGIN                 = ../plugins/libDataInterface
 PLUGIN                 = ../plugins/libProductionPropagators
+PLUGIN                 = ../plugins/libPythonInterface
 
 # Alpha plugins
-#PLUGIN                = ./libCInterface
-#PLUGIN                = ../plugins/libExtraPropagators
-#PLUGIN                = ../plugins/libGmatEstimation
-#PLUGIN                = ../plugins/libGeometricMeasurements
+PLUGIN                = ./libCInterface
+PLUGIN                = ../plugins/libExtraPropagators
+PLUGIN                = ../plugins/libGmatEstimation
+PLUGIN                = ../plugins/libGeometricMeasurements
 PLUGIN                = ../plugins/libGmatFunction
-#PLUGIN                = ../plugins/libSaveCommand
+PLUGIN                = ../plugins/libSaveCommand
 PLUGIN                = ../plugins/libNewParameters
-#PLUGIN                = ../plugins/libPolyhedronGravity
+PLUGIN                = ../plugins/libPolyhedronGravity
 
 # Internal-only plugins
 PLUGIN                 = ../plugins/proprietary/libMarsGRAM
 PLUGIN                 = ../plugins/proprietary/libMsise86
 PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+PLUGIN                 = ../plugins/proprietary/libSNOptimizer
 
 #-----------------------------------------------------------
 # Directory/file paths
@@ -95,6 +97,8 @@ GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
 #-----------------------------------------------------------
 MATLAB_FUNCTION_PATH   = ROOT_PATH/matlab
 MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
+#-----------------------------------------------------------
+PYTHON_MODULE_PATH     = ROOT_PATH/userfunctions/python
 #-----------------------------------------------------------
 DATA_PATH              = ROOT_PATH/data/
 #-----------------------------------------------------------
@@ -158,6 +162,7 @@ BODY_3D_MODEL_PATH     = DATA_PATH/graphics/models/
 STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
 CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
+BORDER_FILE            = STAR_PATH/inp_Border.txt
 #-----------------------------------------------------------
 VEHICLE_MODEL_PATH     = DATA_PATH/vehicle/models/
 SPACECRAFT_MODEL_FILE  = VEHICLE_MODEL_PATH/aura.3ds
@@ -165,7 +170,9 @@ SPACECRAFT_MODEL_FILE  = VEHICLE_MODEL_PATH/aura.3ds
 SPAD_PATH              = DATA_PATH/vehicle/spad/
 SPAD_SRP_FILE          = SPAD_PATH/SphericalModel.spo
 #-----------------------------------------------------------
-ATMOSPHERE_PATH        = DATA_PATH/vehicle/atmosphere/
+ATMOSPHERE_PATH        = DATA_PATH/atmosphere/
+CSSI_FLUX_FILE         = ATMOSPHERE_PATH/CSSI_2004To2026.txt
+SCHATTEN_FILE          = ATMOSPHERE_PATH/SchattenPredict.txt
 #-----------------------------------------------------------
 HELP_FILE              = ROOT_PATH/docs/help/help.chm
 #-----------------------------------------------------------

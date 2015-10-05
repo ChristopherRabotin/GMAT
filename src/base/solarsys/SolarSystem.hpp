@@ -360,8 +360,6 @@ private:
    
    // method to set solar system body texture map file
    void           SetTextureMapFile(SpacePoint *sp, const std::string &bodyName);
-//   /// load the matching SPK file to the selected DE/SPICE
-//   bool           LoadMatchingSPK(Integer ofType);
    
    /// @todo review the use of the validModels and corresponding constants, e.g. PLANET_ATMOSPHERE_MODELS
    /// default values for CelestialBody data

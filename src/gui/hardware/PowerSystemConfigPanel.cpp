@@ -127,7 +127,7 @@ void PowerSystemConfigPanel::Create()
 
    localObject = NULL;
 
-   Integer staticTextWidth = 110;
+   Integer staticTextWidth = 120;
 
    Integer bsize = 2; // border size
    // get the config object

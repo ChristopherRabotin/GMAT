@@ -85,6 +85,11 @@ public:
    void         SetKpApConversionMethod(Integer method);
    Real         ConvertKpToAp(const Real kp);
 
+   void         SetInputSource(const std::string &historical = "ConstantFluxAndGeoMag",
+                               const std::string &predicted = "ConstantFluxAndGeoMag");
+   void         SetSchattenFlags(const std::string &timing,
+                               const std::string &magnitude);
+
    // Extra methods some models may support
    virtual bool HasWindModel();
    virtual bool Wind(Real *position, Real* wind, Real ep,
@@ -127,6 +132,8 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
 
+   SolarFluxReader*     GetFluxReader();
+   SolarFluxReader::FluxData GetFluxData(GmatEpoch epoch);
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -134,6 +141,8 @@ public:
 protected:
    /// Solar flux file reader
    SolarFluxReader         *fluxReader;
+   /// Buffer used for flux data while moving from raw data to massaged data
+   SolarFluxReader::FluxData fDbuffer;
    /// The solarsystem
    SolarSystem             *solarSystem;
    /// The central body
@@ -153,7 +162,7 @@ protected:
    /// Central body flattening factor
    Real                    cbFlattening;
    /// SolarFlux files are loaded ?
-   bool fluxReaderLoaded;
+   bool                    fluxReaderLoaded;
 
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.
@@ -166,6 +175,10 @@ protected:
    Real                    nominalAp;
    /// Index used to select Kp/Ap conversion method.  Default is a table lookup
    Integer                 kpApConversion;
+   /// Indicator of the source for historical data: 0 for constants, 1 for CSSI
+   Integer                 historicalDataSource;
+   /// Indicator of the source for predicted data: 0 for constants, 1 for CSSI, 2 for Schatten
+   Integer                 predictedDataSource;
    /// Internal coordinate system used for conversions
    CoordinateSystem        *mInternalCoordSystem;
    /// MJ2000 CS for the central body
@@ -191,6 +204,18 @@ protected:
    /// GHA epoch
    Real                    ghaEpoch;
 
+   /// Start of the historic data when using file based history data
+   GmatEpoch historicStart;
+   /// End of the historic data when using file based history data
+   GmatEpoch historicEnd;
+      /// Start of the predict data when using file based predicted data
+   GmatEpoch predictStart;
+   /// End of the predict data when using file based predicted data
+   GmatEpoch predictEnd;
+   /// Schatten timing model to use
+   Integer schattenTimingModel;
+   /// Schatten error model to use
+   Integer schattenErrorModel;
 
    // Fields used when retrieving data from a flux file
 

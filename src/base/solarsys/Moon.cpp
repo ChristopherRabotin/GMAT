@@ -24,6 +24,7 @@
 #include "Moon.hpp"
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
+#include "FileManager.hpp"
 #include "RealUtilities.hpp"
 #include "AngleUtil.hpp"
 #include "StringUtil.hpp"
@@ -89,8 +90,12 @@ Moon::Moon(std::string name) :
 //   sij = s;
 //   cij = c;
 
-   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK for now
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/moon_pa_de421_1900-2050.bpc");
+   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK and FK for now
+   {
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      attitudeSpiceKernelNames.push_back(path+"/moon_pa_de421_1900-2050.bpc");
+      frameSpiceKernelNames.push_back(path+"/moon_080317.tf");
+   }
 
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
@@ -121,8 +126,12 @@ Moon::Moon(std::string name, const std::string &cBody) :
    if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_405_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
 
-   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK for now
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/moon_pa_de421_1900-2050.bpc");
+   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK and FK for now
+   {
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      attitudeSpiceKernelNames.push_back(path+"/moon_pa_de421_1900-2050.bpc");
+      frameSpiceKernelNames.push_back(path+"/moon_080317.tf");
+   }
 
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();

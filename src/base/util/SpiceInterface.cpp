@@ -88,7 +88,7 @@ SpiceInterface::VALID_FRAMES[12] =
    "NONE",   // TBD
 };
 
-const Integer SpiceInterface::MAX_SHORT_MESSAGE         = 320;
+const Integer SpiceInterface::MAX_SHORT_MESSAGE         = MAX_SHORT_MESSAGE_VALUE;
 const Integer SpiceInterface::MAX_EXPLAIN_MESSAGE       = 320;
 const Integer SpiceInterface::MAX_LONG_MESSAGE          = MAX_LONG_MESSAGE_VALUE;
 const Integer SpiceInterface::MAX_CHAR_COMMENT          = 4000;
@@ -267,7 +267,13 @@ SpiceInterface& SpiceInterface::operator=(const SpiceInterface &copy)
 SpiceInterface::~SpiceInterface()
 {
    numInstances--;
-   if (numInstances <= 0) UnloadAllKernels();
+   if (numInstances <= 0)
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("UNLOADING ALL Kernels!\n");
+      #endif
+      UnloadAllKernels();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -616,11 +622,20 @@ StringArray SpiceInterface::GetValidFrames()
 //------------------------------------------------------------------------------
 void SpiceInterface::SetLeapSecondKernel(const std::string &lsk)
 {
-   #ifdef DEBUG_SPK_LOADING
-      MessageInterface::ShowMessage("NOW loading LSK kernel %s\n", lsk.c_str());
-   #endif
    lsKernel = lsk;
-   if (!IsLoaded(lsKernel))   LoadKernel(lsKernel);
+   if (!IsLoaded(lsKernel))
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("SpiceInterface::SetLeapSecondKernel NOW loading LSK kernel %s\n", lsk.c_str());
+      #endif
+      LoadKernel(lsKernel);
+   }
+   else
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("SpiceInterface::SetLeapSecondKernel LSK kernel %s was already loaded ...\n", lsk.c_str());
+      #endif
+   }
 }
 
 //------------------------------------------------------------------------------

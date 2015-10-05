@@ -3182,8 +3182,8 @@ aSpacecraft.Q4 = 0.5        </code>        </programlisting>
         <title>DirectionCosineMatrix (DCM)</title>
 
         <para>The Direction Cosine Matrix is a 3x3 array that contains cosines
-        of the angles between the x, y, and z body axes and the x, y, and z
-        inertial axes. The direction cosine matrix must be ortho-normal and
+        of the angles that rotate from  the x, y, and z inertial axes to the x, y, and z
+        body axes. The direction cosine matrix must be ortho-normal and
         you define the DCM element by element. Here is an example that shows
         how to define the attitude using the DCM.</para>
 

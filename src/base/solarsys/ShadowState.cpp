@@ -149,144 +149,76 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
    }
    else
    {
+         //  Compute apparent quantities like body radii and distances
+         Real apparentSunRadius, apparentBodyRadius, satToSunDist;
+         Real satToBodyDist, apparentDistFromSunToBody;
+         Real satToSunVec[3], unitSatToSun[3], unitBodyToSat[3];
+         satToSunVec[0] = -sunSat[0];
+         satToSunVec[1] = -sunSat[1];
+         satToSunVec[2] = -sunSat[2];
 
-//      if (shadowModel == "Cylindrical")
-//      {
-//          // In this model, the spacecraft is in darkness if it is within
-//          // bodyRadius of the sun-body line; otherwise it is lit
-//          Real rperp[3];
-//          rperp[0] = state[0] - rdotsun * unitsun[0];
-//          rperp[1] = state[1] - rdotsun * unitsun[1];
-//          rperp[2] = state[2] - rdotsun * unitsun[2];
-//
-//          mag = GmatMathUtil::Sqrt(rperp[0]*rperp[0] +
-//                                   rperp[1]*rperp[1] +
-//                                   rperp[2]*rperp[2]);
-//          if (mag < bodyRad)
-//          {
-//              percentSun = 0.0;
-//              lit        = false;
-//              dark       = true;
-//          }
-//          else
-//          {
-//              percentSun = 1.0;
-//              lit        = true;
-//              dark       = false;
-//          }
-//      }
-//      else if (shadowModel == "DualCone")
-//      {
-         Real s0, s2, lsc, l1, l2, c1, c2, sinf1, sinf2, tanf1, tanf2;
+         satToSunDist = GmatMathUtil::Sqrt(satToSunVec[0]*satToSunVec[0]+
+		   satToSunVec[1]*satToSunVec[1]+satToSunVec[2]*satToSunVec[2]);
+         satToBodyDist = GmatMathUtil::Sqrt(state[0]*state[0]+
+         state[1]*state[1]+state[2]*state[2]);
 
-         // Montenbruck and Gill, eq. 3.79
-         s0  = -state[0]*unitsun[0]  -
-                state[1]*unitsun[1] -
-                state[2]*unitsun[2];
-         s2  =  state[0]*state[0] +
-                state[1]*state[1] +
-                state[2]*state[2];
+         apparentSunRadius = GmatMathUtil::ASin(sunRad/satToSunDist);
+         apparentBodyRadius = GmatMathUtil::ASin(bodyRad/satToBodyDist);
+         unitBodyToSat[0] = state[0]/satToBodyDist;
+         unitBodyToSat[1] = state[1]/satToBodyDist;
+         unitBodyToSat[2] = state[2]/satToBodyDist;
+         unitSatToSun[0] = satToSunVec[0]/satToSunDist;
+         unitSatToSun[1] = satToSunVec[1]/satToSunDist;
+         unitSatToSun[2] = satToSunVec[2]/satToSunDist;
+         apparentDistFromSunToBody = GmatMathUtil::ACos(-unitBodyToSat[0]*unitSatToSun[0]
+         -unitBodyToSat[1]*unitSatToSun[1]-unitBodyToSat[2]*unitSatToSun[2]);
 
-         // Montenbruck and Gill, eq. 3.80
-         lsc = GmatMathUtil::Sqrt(s2 - s0*s0);
+       if ((rdotsun <= 0.0)  && (satToBodyDist <= bodyRad))
+       {
+          //  Unphysical case where s/c is on shadow side but inside the body
+          //  Need to trap here to avoid singularities in mathematics later
+          lit        = false;
+          dark       = true;
+          percentSun = 0.0;
+          return percentSun;
+       }
+		 if (apparentDistFromSunToBody >= apparentSunRadius + apparentBodyRadius)
+       {
+          // This is the full sun light case
+          lit        = true;
+          dark       = false;
+          percentSun = 1.0;
+          return percentSun;
+         }
+		 else if (apparentDistFromSunToBody<=apparentBodyRadius-apparentSunRadius)
+		 {
+		    // This is the umbra case
+			 lit        = false;
+          dark       = true;
+          percentSun = 0.0;
+          return percentSun;
+		 }
+		 else if (  (GmatMathUtil::Abs(apparentSunRadius-apparentBodyRadius)<apparentDistFromSunToBody)  && 
+		     (apparentDistFromSunToBody < apparentSunRadius + apparentBodyRadius) )
+		 {
+		    // This is the penumbra case
+			   Real pcbrad = GmatMathUtil::ASin(bodyRad/satToBodyDist);
+			   Real psunrad = GmatMathUtil::ASin(sunRad/satToSunDist);
+            Real unitSunToSat[3];
 
-         // Montenbruck and Gill, eq. 3.81
-         sinf1 = (sunRad + bodyRad) / mag;
-         sinf2 = (sunRad - bodyRad) / mag;
-
-         // Appropriate l1 and l2 temporarily
-         l1    = sinf1 * sinf1;
-         l2    = sinf2 * sinf2;
-         tanf1 = GmatMathUtil::Sqrt(l1 / (1.0 - l1));
-         tanf2 = GmatMathUtil::Sqrt(l2 / (1.0 - l2));
-
-         // Montenbruck and Gill, eq. 3.82
-         c1    = s0 + bodyRad / sinf1;    // ***
-         c2    = bodyRad / sinf2 - s0;       // Different sign from M&G
-
-         // Montenbruck and Gill, eq. 3.83
-         l1 = c1 * tanf1;
-         l2 = c2 * tanf2;
-
-         #ifdef DEBUG_SHADOW_STATE_2
-            MessageInterface::ShowMessage("before FSS, rdotsun= %12.10f\n",
-                  rdotsun);
-            MessageInterface::ShowMessage("   ss0 = %12.10f, s2 = %12.10f\n", s0, s2);
-            MessageInterface::ShowMessage("   lsc = %12.10f\n", lsc);
-            MessageInterface::ShowMessage("   sinf1 = %12.10f, sinf2 = %12.10f\n", sinf1, sinf2);
-            MessageInterface::ShowMessage("   tanf1 = %12.10f, tanf2 = %12.10f\n", tanf1, tanf2);
-            MessageInterface::ShowMessage("   c1 = %12.10f, c2 = %12.10f\n", c1, c2);
-            MessageInterface::ShowMessage("   l1 = %12.10f, l2 = %12.10f\n", l1, l2);
-         #endif
-         if (lsc > l1)
-         {
-            // Outside of the penumbral cone
-            lit        = true;
+            percentSun = GetPercentSunInPenumbra(state, pcbrad, psunrad, unitSatToSun);
+            lit        = false;
             dark       = false;
-            percentSun = 1.0;
-            return percentSun;
-            #ifdef DEBUG_SHADOW_STATE
-               MessageInterface::ShowMessage(
-                     "ShadowState::FindShadowState **** Body is outside penumbral zone\n");
-            #endif
-         }
-         else
-         {
-            #ifdef DEBUG_SHADOW_STATE
-               MessageInterface::ShowMessage(
-                     "ShadowState::FindShadowState sunSat = %12.10f  %12.10f  %12.10f\n",
-                     sunSat[0], sunSat[1], sunSat[2]);
-               MessageInterface::ShowMessage("   sunRadius = %12.10f\n",
-                     sunRad);
-               MessageInterface::ShowMessage("   bodyRadius = %12.10f, s2 = %12.10f, GmatMathUtil::Sqrt(s2) = %12.10f\n",
-                     bodyRad, s2, GmatMathUtil::Sqrt(s2));
-            #endif
-
-
-            Real sqrtS2 = GmatMathUtil::Sqrt(s2);
-            if (sqrtS2 < bodyRad)
-            {
-               lit        = false;
-               dark       = true;
-               percentSun = 0.0;
-               return percentSun;
-            }
-            Real pcbrad      = GmatMathUtil::ASin(bodyRad / sqrtS2);
-
-            lit         = false;
-            if (lsc < GmatMathUtil::Abs(l2))
-            {
-               // Inside umbral cone
-               if (c2 >= 0.0)
-               {
-                  // no annular ring
-                  percentSun = 0.0;
-                  dark       = true;
-               }
-               else
-               {
-                  // annular eclipse
-                  percentSun = (psunrad*psunrad - pcbrad*pcbrad) /
-                               (psunrad*psunrad);
-                  dark       = false;
-               }
-               return percentSun;
-            }
-            else
-            {
-               // In penumbra
-               percentSun = GetPercentSunInPenumbra(state, pcbrad, psunrad, force);
-               lit        = false;
-               dark       = false;
-            }
-         }
-//      }
-//      else
-//      {
-//         std::string errmsg = "ShadowState: unknown shadow model \"";
-//         errmsg += shadowModel + "\".\n";
-//         throw SolarSystemException(errmsg);
-//      }
+			   return percentSun;
+		 }
+		 else
+		 {
+			// This is the anteumbra case
+		    lit        = false;
+          dark       = false;
+          percentSun =  1 - apparentBodyRadius*apparentBodyRadius/apparentSunRadius*apparentSunRadius;
+			return percentSun;
+		 }
    }
    return percentSun;
 }
@@ -306,7 +238,7 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
  *
  * @param <state>    Current spacecraft state relative to its origin
  * @param <sunSat>   Sat-to-Sun vector
- * @param <force>    Force vector
+ * @param <unitSatToSun>  Unit vector from spacecraft to sun
  * @param <pcbrad>   Central body radius over distance
  * @param >psunrad>  Sun radius over distance
  *
@@ -314,22 +246,26 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
  */
 //------------------------------------------------------------------------------
 Real ShadowState::GetPercentSunInPenumbra(Real *state,
-                  Real pcbrad, Real psunrad, Real *force)
+                  Real pcbrad, Real psunrad, Real *unitSatToSun)
 {
    Real mag = GmatMathUtil::Sqrt(state[0]*state[0] +
                                  state[1]*state[1] +
                                  state[2]*state[2]);
 
    // Montenbruck and Gill, eq. 3.87
-   Real c = GmatMathUtil::ACos((state[0]*force[0] +
-                                state[1]*force[1] +
-                                state[2]*force[2]) / mag);
+   Real c = GmatMathUtil::ACos((-state[0]*unitSatToSun[0] -
+                                state[1]*unitSatToSun[1] -
+                                state[2]*unitSatToSun[2]) / mag);
 
    Real a2 = psunrad*psunrad;
    Real b2 = pcbrad*pcbrad;
 
    // Montenbruck and Gill, eq. 3.93
    Real x = (c*c + a2 - b2) / (2.0 * c);
+   #ifdef DEBUG_SHADOW_STATE
+         MessageInterface::ShowMessage("   sqrt in penumbra calc = %12.10f",a2 - x*x);
+   #endif
+
    Real y = GmatMathUtil::Sqrt(a2 - x*x);
 
    // Montenbruck and Gill, eq. 3.92
