@@ -180,7 +180,7 @@
               </variablelist></entry>
           </row>
 
-		         <row>
+          <row>
             <entry><guilabel>MajorOptimalityTolerance</guilabel></entry>
 
             <entry><para>Specifies the final accuracy of the dual variables. 
@@ -234,8 +234,6 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-		  
- 
 
           <row>
             <entry><guilabel>OutputFileName</guilabel></entry>
@@ -294,8 +292,7 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-		  
-		  
+
           <row>
             <entry><guilabel>OverrideSpecsFileValues</guilabel></entry>
 
@@ -358,7 +355,7 @@
               </variablelist></entry>
           </row>
 
-                   <row>
+          <row>
             <entry><guilabel>ReportFile</guilabel></entry>
 
             <entry><para> Contains the path and file name of the report file.
@@ -544,8 +541,8 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-		  
-		  <row>
+
+          <row>
             <entry><guilabel>SpecsFileName</guilabel></entry>
 
             <entry><para> File read by SNOPT to configure all settings of the
@@ -608,7 +605,7 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
-		  
+
           <row>
             <entry><guilabel>TotalIterationsLimit</guilabel></entry>
 
@@ -774,7 +771,9 @@ End options  </programlisting>
       <guilabel>SNOPT</guilabel>, derivatives are computed by
       <guilabel>SNOPT</guilabel> via the optimizer's built-in finite
       differencing. If an optimization problem is not appropriately scaled,
-      optimization may fail, or take an un-nesessarily long time.</para>
+      optimization may fail, or take an un-nesessarily long time. Note that
+      SNOPT has built-in scaling options that can be set via the Specs file
+      and are described in further detail in the SNOPT user guide.</para>
     </refsection>
 
     <refsection>

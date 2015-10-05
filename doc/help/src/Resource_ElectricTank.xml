@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="ElectricTank" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="ElectricTank"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -21,18 +22,25 @@
   <refnamediv>
     <refname>ElectricTank</refname>
 
-    <refpurpose>A one-line fragment describing the resource, without a
-    period</refpurpose>
+    <refpurpose>A model of a tank containing fuel for an electric propulsion
+    system.</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The text description of the command. Use special formatting for
-    <guilabel>command names</guilabel> and <guilabel>field
-    names</guilabel>.</para>
+    <para>An <guilabel>ElectricTank</guilabel> is a model of a tank and is
+    required for finite burns employing an electric propulsion system. To use
+    an <guilabel>ElectricTank</guilabel>, you must first create the tank, and
+    then attach it to the desired <guilabel>Spacecraft</guilabel> and
+    associate it with an <guilabel>ElectricThruster</guilabel> as shown in the
+    example below. Additionally you must create a
+    <guilabel>SolarPowerSystem</guilabel> or
+    <guilabel>NuclearPowerSystem</guilabel> and attach it to the
+    <guilabel>Spacecraft</guilabel>.</para>
 
-    <para><phrase role="ref_seealso">See Also</phrase>: </para>
+    <para>See Also (TODO: add other components) <xref
+    linkend="ImpulsiveBurn"/>,<xref linkend="Thruster"/></para>
   </refsection>
 
   <refsection>
@@ -40,7 +48,7 @@
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
-        <colspec colnum="1" colwidth=".5*"/>
+        <colspec colnum="1" colwidth="1.5*"/>
 
         <colspec colnum="2" colwidth="3*"/>
 
@@ -54,18 +62,18 @@
 
         <tbody>
           <row>
-            <entry><guilabel>FieldName</guilabel></entry>
+            <entry><guilabel>AllowNegativeFuelMass </guilabel></entry>
 
-            <entry><para>Description of the field. Use special formatting for
-            <guilabel>command names</guilabel> and <guilabel>field
-            names</guilabel>. See the next cell for an
-            example.</para><variablelist>
+            <entry><para>This field allows the
+            <guilabel>ElectricTank</guilabel> to have negative fuel mass which
+            can be useful in optimization and targeting sequences before
+            convergence has occurred. This field cannot be modified in the
+            Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>a list of data types from the Data Type column of
-                    the Field Spec</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -73,8 +81,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>a range spec of list of allowed values from the
-                    Range column of the Field Spec</para>
+                    <para><literal>true</literal>,
+                    <literal>false</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -82,8 +90,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>set, get, or only one (from the Access column of the
-                    Field Spec)</para>
+                    <para>set</para>
                   </listitem>
                 </varlistentry>
 
@@ -91,8 +98,9 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>value from the Default Value column of the Field
-                    Spec</para>
+                    <para>
+                      <literal>false</literal>
+                    </para>
                   </listitem>
                 </varlistentry>
 
@@ -100,7 +108,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>the unit or N/A</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -108,24 +116,21 @@
                   <term>Interfaces</term>
 
                   <listitem>
-                    <para>GUI, script, or only one</para>
+                    <para>GUI, script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
           </row>
 
           <row>
-            <entry><guilabel>Start</guilabel></entry>
+            <entry><guilabel>FuelMass</guilabel></entry>
 
-            <entry><para>The <guilabel>Start</guilabel> parameter is the
-            initial value for the <guilabel>Index</guilabel>
-            parameter.</para><variablelist>
+            <entry><para> The mass of fuel in the tank. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Real Number, Variable, Array Element, or Scalar Real
-                    Object Parameter</para>
+                    <para>Real</para>
                   </listitem>
                 </varlistentry>
 
@@ -133,7 +138,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>-∞ &lt; <guilabel>Start</guilabel> &lt; ∞</para>
+                    <para>Real &gt; 0</para>
                   </listitem>
                 </varlistentry>
 
@@ -141,8 +146,7 @@
                   <term>Access</term>
 
                   <listitem>
-                    <para>set, get, or only one (from the Access column of the
-                    Field Spec)</para>
+                    <para>set, get</para>
                   </listitem>
                 </varlistentry>
 
@@ -150,7 +154,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>1</para>
+                    <para>756</para>
                   </listitem>
                 </varlistentry>
 
@@ -158,7 +162,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>the unit or N/A</para>
+                    <para>kg</para>
                   </listitem>
                 </varlistentry>
 
@@ -179,52 +183,147 @@
   <refsection>
     <title>GUI</title>
 
+    <para>The <guilabel>ElectricTank</guilabel> dialog box allows you to
+    specify properties of a fuel tank. The layout of the
+    <guilabel>ElectricTank</guilabel> dialog box is shown below.</para>
+
     <screenshot>
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Command_For_Default.bmp"
-                     scalefit="1" width="100%"/>
+                     fileref="files/images/Resource_ElectricTank_GUI.png"
+                     scalefit="1" width="75%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
-
-    <para>A screenshot of the GUI (above) along with a text
-    description.</para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
-    <para>A more detailed text description of the command.</para>
+    <refsection>
+      <title>Use of ElectricTank Resource in Conjunction with
+      Maneuvers</title>
 
-    <para>Use this syntax for code snippets:</para>
+      <para>A <guilabel>ElectricTank</guilabel> is used in conjunction with
+      finite maneuvers. To implement a finite maneuver, you must first create
+      both an <guilabel>ElectricThruster</guilabel> and a
+      <guilabel>FiniteBurn</guilabel> resource. You must also associate the
+      <guilabel>ElectricTank</guilabel> with the
+      <guilabel>ElectricThruster</guilabel> resource and you must associate
+      the <guilabel>ElectricThruste</guilabel><guilabel>r</guilabel> with the
+      <guilabel>FiniteBurn</guilabel> resource. The actual finite maneuver is
+      implemented using the <guilabel>BeginFiniteBurn/EndFiniteBurn</guilabel>
+      commands. See the <guilabel>BeginFiniteBurn/EndFiniteBurn</guilabel>
+      command documentation for worked examples on how the
+      <guilabel>ElectricTank</guilabel> resource is used in conjunction with
+      finite maneuvers. TODO: Update this to point to tutorial.</para>
+    </refsection>
 
-    <programlisting>For I = 1:1:3
-    I = 100
-    Report aReport I
-EndFor</programlisting>
+    <refsection>
+      <title>Behavior When Configuring Tank and Attached Tank
+      Properties</title>
 
-    <para>and this syntax for output examples:</para>
+      <para>Create a default <guilabel>ElectricTank</guilabel> and attach it
+      to a <guilabel>Spacecraft</guilabel> and
+      <guilabel>ElectricThruster</guilabel>.</para>
 
-    <programlisting><computeroutput>100
-100
-100</computeroutput></programlisting>
+      <programlisting>%  Create the ElectricTank Resource
+Create ElectricTank aTank
+aTank.AllowNegativeFuelMass = false
+aTank.FuelMass = 756
 
-    <para>This is a warning:</para>
+%  Create an ElectricThruster and assign it a ElectricTank
+Create ElectricThruster aThruster
+aThruster.Tank = {aTank}
 
-    <warning>
-      <para>Text of the warning.</para>
-    </warning>
+%  Add the ElectricTank and Thruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank}
+aSpacecraft.Thrusters = {aThruster}    </programlisting>
+
+      <para>As exhibited below, there are some subtleties associated with
+      setting and getting parent vs. cloned resources. In the example above,
+      <literal>aTank </literal>is the parent <guilabel>ElectricTank</guilabel>
+      resource and the field <literal>aSpacecraft.Tanks</literal> is populated
+      with a cloned copy of <literal>aTank</literal>.</para>
+
+      <para>Create a second spacecraft and attach a fuel tank using the same
+      procedure used in the previous example. Set the
+      <guilabel>FuelMass</guilabel> in the parent resource,
+      <literal>aTank</literal>, to 900 kg.</para>
+
+      <programlisting>%  Add the ElectricTank and ElectricThruster to a second Spacecraft
+Create Spacecraft bSpacecraft
+bSpacecraft.Tanks = {aTank}
+bSpacecraft.Thrusters = {aThruster}
+aTank.FuelMass = 900    %Can be performed in both resource and 
+                        %command modes</programlisting>
+
+      <para>Note that in the example above, setting the value of the parent
+      resource, <literal>aTank</literal>, changes the fuel mass value in both
+      cloned fuel tank resources. More specifically, the value of both
+      <literal>aSpacecraft.aTank.FuelMass</literal> and
+      <literal>bSpacecraft.aTank.FuelMass</literal> are both now equal to the
+      new value of 900 kg. We note that the assignment command for the parent
+      resource, <literal>aTank.FuelMass</literal>, can be performed in both
+      resource and command modes.</para>
+
+      <para>To change the value of the fuel mass in only the first created
+      spacecraft, <guilabel>aSpacecraft</guilabel>, we do the
+      following.</para>
+
+      <programlisting><code>%  Create the Fuel Tank Resource
+BeginMissionSequence
+aTank.FuelMass = 756   %Fuel tank mass in both s/c set back to default
+aSpacecraft.aTank.FuelMass = 1000 %Can only be performed in command mode.</code>      </programlisting>
+
+      <para>As a result of the commands in the previous example, the value of
+      <literal>aSpacecraft.aTank.FuelMass</literal> is <literal>1000</literal>
+      kg and the value of <literal>bSpacecraft.aTank.FuelMass</literal> is 756
+      kg. We note that the assignment command for the cloned resource,
+      <literal>aSpacecraft.aTank.FuelMass</literal>, can only be performed in
+      command mode.</para>
+
+      <refsection>
+        <title>Caution: Value of AllowNegativeFuelMass Flag Can Affect
+        Iterative Processes</title>
+
+        <para>By default, GMAT will not allow the fuel mass to be negative.
+        However, occasionally in iterative processes such as targeting, a
+        solver will try values of a maneuver parameter that result in total
+        fuel depletion. Using the default tank settings, this will throw an
+        exception stopping the run unless you set the
+        <guilabel>AllowNegativeFuelMass</guilabel> flag to true. GMAT will not
+        allow the the total spacecraft mass to be negative. If DryMass +
+        FuelMass is negative GMAT will throw an exception and stop.</para>
+      </refsection>
+    </refsection>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>A text introduction to the example:</para>
+      <para>Create a default <guilabel>ElectricTank</guilabel> and attach it
+      to a <guilabel>Spacecraft</guilabel> and
+      <guilabel>ElectricThruster</guilabel>.</para>
 
-      <programlisting><code>The example script snippet.</code></programlisting>
+      <programlisting>%  Create the ElectricTank Resource
+Create ElectricTank aTank
+aTank.AllowNegativeFuelMass = false
+aTank.FuelMass = 756
+
+%  Create an ElectricThruster and assign it a ElectricTank
+Create ElectricThruster aThruster
+aThruster.Tank = {aTank}
+
+%  Add the ElectricTank and ElectricThruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank}
+aSpacecraft.Thrusters = {aThruster}   
+
+BeginMissionSequence    </programlisting>
     </informalexample>
   </refsection>
 </refentry>
