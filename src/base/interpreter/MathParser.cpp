@@ -767,12 +767,26 @@ MathNode* MathParser::ParseNode(const std::string &str)
       MessageInterface::ShowMessage
          ("   After removing extra parenthesis, str=<%s>\n", str1.c_str());
       #endif
-      mathNode = CreateNode("MathElement", str1);
-      #if DEBUG_PARSE_NODE
-      MessageInterface::ShowMessage
-         ("MathParser::Parse() <%s> is a math element, so returning "
-          "MathElement node <%p>\n", str1.c_str(), mathNode);
-      #endif
+      
+      // Check for GmatFunction with no parenthesis
+      if (IsGmatFunction(str1))
+      {
+         mathNode = CreateNode(str1, "");
+         #if DEBUG_PARSE_NODE
+         MessageInterface::ShowMessage
+            ("MathParser::Parse() <%s> is a GmatFunction, so returning "
+             "MathElement node <%p>\n", str.c_str(), mathNode);
+         #endif
+      }
+      else
+      {
+         mathNode = CreateNode("MathElement", str1);
+         #if DEBUG_PARSE_NODE
+         MessageInterface::ShowMessage
+            ("MathParser::Parse() <%s> is a math element, so returning "
+             "MathElement node <%p>\n", str1.c_str(), mathNode);
+         #endif
+      }
       return mathNode;
    }
    
@@ -1241,7 +1255,9 @@ StringArray MathParser::Decompose(const std::string &str)
    {
       if (IsParenPartOfFunction(items[0]))
       {
+         #if DEBUG_DECOMPOSE
          MessageInterface::ShowMessage("   ===> '%s' is a function\n", items[0].c_str());
+         #endif
       }
       else
       {
