@@ -33,8 +33,12 @@
 #include "bitmaps/rt_GroundStation.xpm"
 // Hardware
 #include "bitmaps/rt_Hardware.xpm"
-#include "bitmaps/rt_Tank.xpm"
-#include "bitmaps/rt_Thruster.xpm"
+#include "bitmaps/rt_ChemicalTank.xpm"
+#include "bitmaps/rt_ElectricTank.xpm"
+#include "bitmaps/rt_ChemicalThruster.xpm"
+#include "bitmaps/rt_ElectricThruster.xpm"
+#include "bitmaps/rt_SolarPowerSystem.xpm"
+#include "bitmaps/rt_NuclearPowerSystem.xpm"
 #include "bitmaps/rt_Antenna.xpm"
 #include "bitmaps/rt_Transmitter.xpm"
 #include "bitmaps/rt_Receiver.xpm"
@@ -88,7 +92,8 @@
 // CoordinateSystem
 #include "bitmaps/rt_CoordinateSystem.xpm"
 // EclipseLocator
-#include "bitmaps/rt_EclipseLocator.xpm"
+#include "bitmaps/rt_ContactLocator.xpm"   
+#include "bitmaps/rt_EclipseLocator.xpm"   
 // User Variable/Array/String
 #include "bitmaps/rt_Variable.xpm"
 #include "bitmaps/rt_Array.xpm"
@@ -1388,28 +1393,30 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    else if (obj->IsOfType("ChemicalTank"))
    {
       itemType = GmatTree::FUELTANK_CHEMICAL;
-      itemIcon = GmatTree::RESOURCE_ICON_TANK;   // need specific one
+      itemIcon = GmatTree::RESOURCE_ICON_CHEMICAL_TANK;   // need specific one
    }
    else if (obj->IsOfType("ElectricTank"))
    {
       itemType = GmatTree::FUELTANK_ELECTRIC;
-      itemIcon = GmatTree::RESOURCE_ICON_TANK; // need specific one
+      itemIcon = GmatTree::RESOURCE_ICON_ELECTRIC_TANK; // need specific one
    }
    else if (obj->IsOfType("ChemicalThruster"))
    {
       itemType = GmatTree::THRUSTER_CHEMICAL;
-      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;  // need specific one
+      itemIcon = GmatTree::RESOURCE_ICON_CHEMICAL_THRUSTER;  // need specific one
    }
    else if (obj->IsOfType("ElectricThruster"))
    {
       itemType = GmatTree::THRUSTER_ELECTRIC;
-      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER; // need specific one
+      itemIcon = GmatTree::RESOURCE_ICON_ELECTRIC_THRUSTER; // need specific one
    }
    else if (obj->IsOfType("PowerSystem"))
    {
       itemType = GmatTree::POWER_SYSTEM;
-//      itemIcon = GmatTree::RESOURCE_ICON_POWER_SYSTEM;   // TBD - need Solar and Nuclear?
-      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;         // temporary
+      if (obj->IsOfType("SolarPowerSystem"))
+         itemIcon = GmatTree::RESOURCE_ICON_SOLAR_POWER_SYSTEM;
+      else
+         itemIcon = GmatTree::RESOURCE_ICON_NUCLEAR_POWER_SYSTEM;
    }
    // Burn
    else if (obj->IsOfType("ImpulsiveBurn"))
@@ -1533,11 +1540,18 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       itemIcon = GmatTree::RESOURCE_ICON_ESTIMATOR;
    }
    
-   // EventLocator -- We need an icon for this
+   // EventLocator
    else if (obj->IsOfType("EventLocator") || obj->IsOfType(Gmat::EVENT_LOCATOR))
    {
       itemType = GmatTree::EVENT_LOCATOR;
-      itemIcon = GmatTree::RESOURCE_ICON_BOUNDARY_VALUE_SOLVER;
+      if (obj->IsOfType("EclipseLocator"))
+      {
+         itemIcon = GmatTree::RESOURCE_ICON_ECLIPSE_LOCATOR;
+      }
+      else
+      {
+         itemIcon = GmatTree::RESOURCE_ICON_CONTACT_LOCATOR;
+      }
    }   
    // MeasurementModel
    else if (obj->IsOfType("MeasurementModel") || obj->IsOfType(Gmat::MEASUREMENT_MODEL))
@@ -2818,8 +2832,12 @@ void ResourceTree::AddIcons()
    theGuiManager->LoadIcon("rt_GroundStation", bitmapType, &bitmaps[++index], rt_GroundStation_xpm);   
    
    theGuiManager->LoadIcon("rt_Hardware", bitmapType, &bitmaps[++index], rt_Hardware_xpm);
-   theGuiManager->LoadIcon("rt_Tank", bitmapType, &bitmaps[++index], rt_Tank_xpm);
-   theGuiManager->LoadIcon("rt_Thruster", bitmapType, &bitmaps[++index], rt_Thruster_xpm);
+   theGuiManager->LoadIcon("rt_ChemicalTank", bitmapType, &bitmaps[++index], rt_ChemicalTank_xpm); 
+   theGuiManager->LoadIcon("rt_ElectricTank", bitmapType, &bitmaps[++index], rt_ElectricTank_xpm); 
+   theGuiManager->LoadIcon("rt_ChemicalThruster", bitmapType, &bitmaps[++index], rt_ChemicalThruster_xpm); 
+   theGuiManager->LoadIcon("rt_ElectricThruster", bitmapType, &bitmaps[++index], rt_ElectricThruster_xpm); 
+   theGuiManager->LoadIcon("rt_SolarPowerSystem", bitmapType, &bitmaps[++index], rt_SolarPowerSystem_xpm); 
+   theGuiManager->LoadIcon("rt_NuclearPowerSystem", bitmapType, &bitmaps[++index], rt_NuclearPowerSystem_xpm); 
    theGuiManager->LoadIcon("rt_Antenna", bitmapType, &bitmaps[++index], rt_Antenna_xpm);
    theGuiManager->LoadIcon("rt_Transmitter", bitmapType, &bitmaps[++index], rt_Transmitter_xpm);
    theGuiManager->LoadIcon("rt_Receiver", bitmapType, &bitmaps[++index], rt_Receiver_xpm);
@@ -2874,7 +2892,8 @@ void ResourceTree::AddIcons()
    
    theGuiManager->LoadIcon("rt_CoordinateSystem", bitmapType, &bitmaps[++index], rt_CoordinateSystem_xpm);
    
-   theGuiManager->LoadIcon("rt_EclipseLocator", bitmapType, &bitmaps[++index], rt_EclipseLocator_xpm);
+   theGuiManager->LoadIcon("rt_EclipseLocator", bitmapType, &bitmaps[++index], rt_EclipseLocator_xpm); 
+   theGuiManager->LoadIcon("rt_ContactLocator", bitmapType, &bitmaps[++index], rt_ContactLocator_xpm); 
 
    theGuiManager->LoadIcon("rt_GmatFunction", bitmapType, &bitmaps[++index], rt_GmatFunction_xpm);
    theGuiManager->LoadIcon("rt_MatlabFunction", bitmapType, &bitmaps[++index], rt_MatlabFunction_xpm);

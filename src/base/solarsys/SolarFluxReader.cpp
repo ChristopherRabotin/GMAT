@@ -337,7 +337,7 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
       if (fm->DoesFileExist(weatherfile) == false)
          weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
       if (fm->DoesFileExist(weatherfile) == false)
-         throw SolarSystemException("Cannot open the predicted space weather file " +
+         throw SolarSystemException("Cannot open the historic space weather file " +
                obsFileName + ", nor the file at the location " + weatherfile);
 
       obsFileName = weatherfile;
@@ -402,7 +402,7 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
                 (theLine.find("EARLY TIMING") != std::string::npos))
             {
                GmatFileUtil::GetLine(&inPredict, theLine);
-               GmatFileUtil::GetLine(&inPredict, theLine);
+//               GmatFileUtil::GetLine(&inPredict, theLine);
                begData = inPredict.tellg();
 
                break;
@@ -599,6 +599,7 @@ bool SolarFluxReader::LoadPredictData()
    Integer hour = 0, minute = 0, dom = 1;
    Real sec = 0.0;
    std::string theLine;
+   std::stringstream messageQueue;
 
    inPredict.seekg(begData, std::ios_base::beg);
    
@@ -607,6 +608,8 @@ bool SolarFluxReader::LoadPredictData()
    while (!inPredict.eof())
    {
       GmatFileUtil::GetLine(&inPredict, theLine);
+      if (theLine.find("BEGIN_DATA") != std::string::npos)
+         continue;
       line = theLine.c_str();
       ++lineCounter;
 
@@ -637,6 +640,13 @@ bool SolarFluxReader::LoadPredictData()
          // Set ref epoch to midnight for the date on the current line
          Integer year = atoi(tokens[1].c_str());
          Integer month = atoi(tokens[0].c_str());
+
+         if ((month < 1) || (month > 12))
+         {
+            if (lineList.str() != "")
+               lineList << ", ";
+            lineList << lineCounter;
+         }
 
          Real mjd = ModifiedJulianDate(year, month, dom, hour, minute, sec);
          ++month;
