@@ -6396,9 +6396,13 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
         </listitem>
       </itemizedlist>
 
-      <para>Note that to use these parameters, you must first set the epoch of
-      the Resource to the desired epoch at which you want the data. See the
-      following example:</para>
+      <warning>
+        <para>Note that to use these parameters, you must first set the epoch
+        of the Resource to the desired epoch at which you want the data.
+        Additionally, the epoch should be set after the
+        <guilabel>BeginMissionSequence</guilabel> Command. See the following
+        example.</para>
+      </warning>
 
       <programlisting><code>Create ReportFile rf
 
