@@ -152,19 +152,19 @@ ElectricThruster::ElectricThruster(const std::string &nomme) :
 
    // Thrust coefficient units
    thrustCoeffUnits.clear();
-   thrustCoeffUnits.push_back("TBD");
-   thrustCoeffUnits.push_back("TBD");
-   thrustCoeffUnits.push_back("TBD");
-   thrustCoeffUnits.push_back("TBD");
-   thrustCoeffUnits.push_back("TBD");
+   thrustCoeffUnits.push_back("See Docs");
+   thrustCoeffUnits.push_back("See Docs");
+   thrustCoeffUnits.push_back("See Docs");
+   thrustCoeffUnits.push_back("See Docs");
+   thrustCoeffUnits.push_back("See Docs");
 
    // Mass Flow coefficient units
    mfCoeffUnits.clear();
-   mfCoeffUnits.push_back("TBD");
-   mfCoeffUnits.push_back("TBD");
-   mfCoeffUnits.push_back("TBD");
-   mfCoeffUnits.push_back("TBD");
-   mfCoeffUnits.push_back("TBD");
+   mfCoeffUnits.push_back("See Docs");
+   mfCoeffUnits.push_back("See Docs");
+   mfCoeffUnits.push_back("See Docs");
+   mfCoeffUnits.push_back("See Docs");
+   mfCoeffUnits.push_back("See Docs");
 
    for (Integer i=ThrusterParamCount; i < ElectricThrusterParamCount; i++)  // is this right?
       parameterWriteOrder.push_back(i);
