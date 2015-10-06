@@ -85,6 +85,9 @@ ContactLocator::ContactLocator(const std::string &name) :
    stations.clear();
    contactResults.clear();
 
+   // Override default stepSize for the ContactLocator
+   stepSize = 600;
+
    // Set default occulting bodies  2015.09.21 removing Luna as a default (GMT-5070)
 //   defaultOccultingBodies.push_back("Luna");
 
