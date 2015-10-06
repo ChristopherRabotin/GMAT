@@ -165,7 +165,7 @@ bool SolverBranchCommand::Initialize()
    BranchCommand::Initialize();
 
    if (showProgressWindow)
-      AddListener( ListenerManagerInterface::CreateSolverListener(summaryName, "", 0, 0, 0, 0, false) );
+      AddListener( ListenerManagerInterface::CreateSolverListener(GetGeneratingString(Gmat::NO_COMMENTS), "", 0, 0, 0, 0, false) );
    
    #ifdef DEBUG_SOLVERBRANCHCOMMAND_INIT
    ShowCommand("SolverBranchCommand::Initialize() exited ", "this=", this);
