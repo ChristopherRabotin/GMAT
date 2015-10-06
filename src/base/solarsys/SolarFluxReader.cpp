@@ -402,9 +402,6 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
                 (theLine.find("EARLY TIMING") != std::string::npos))
             {
                GmatFileUtil::GetLine(&inPredict, theLine);
-//               GmatFileUtil::GetLine(&inPredict, theLine);
-               begData = inPredict.tellg();
-
                break;
             }
          }
@@ -601,8 +598,6 @@ bool SolarFluxReader::LoadPredictData()
    std::string theLine;
    std::stringstream messageQueue;
 
-   inPredict.seekg(begData, std::ios_base::beg);
-   
    Integer lineCounter = 0;
    std::stringstream lineList;
    while (!inPredict.eof())
