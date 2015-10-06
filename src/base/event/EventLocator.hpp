@@ -163,6 +163,8 @@ protected:
    bool                        writeReport;
    /// Should we do location at the end, when commanded to do so, or not at all?
    std::string                 runMode;
+   /// String to write when the locator is running
+   std::string                 locatingString;
    /// Use the entire time interval (true  - use the entire interval; false,
    /// use the input start and stop epochs)
    bool                        useEntireInterval;
@@ -258,6 +260,7 @@ protected:
     virtual std::string    GetAbcorrString();
     virtual CelestialBody* GetCelestialBody(const std::string &withName);
     virtual std::string    GetNoEventsString(const std::string &forType);
+    virtual void           SetLocatingString(const std::string &forType);
     virtual void           FindEvents() = 0;
 };
 
