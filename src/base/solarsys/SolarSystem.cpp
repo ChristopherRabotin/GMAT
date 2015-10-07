@@ -353,9 +353,9 @@ SolarSystem::SolarSystem(std::string withName) :
    // added to the startup file.
    std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
 
-   theSPKKernelNames.push_back(path+"/DE421AllPlanets.bsp");         // DE405
+   theSPKKernelNames.push_back(path+"/DE405AllPlanets.bsp");         // DE405
    theSPKKernelNames.push_back(path+"/DE421AllPlanets.bsp");  // DE421
-   theSPKKernelNames.push_back(path+"/DE421AllPlanets.bsp");         // DE424
+   theSPKKernelNames.push_back(path+"/DE424AllPlanets.bsp");         // DE424
 //   theSPKKernelNames.push_back("PLANETARY_EPHEM_SPK_PATH/DE421AllPlanets.bsp");         // DE430
    theSPKKernelNames.push_back(path+"/DE421AllPlanets.bsp");  // SPICE
 
