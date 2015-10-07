@@ -337,7 +337,7 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
       if (fm->DoesFileExist(weatherfile) == false)
          weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
       if (fm->DoesFileExist(weatherfile) == false)
-         throw SolarSystemException("Cannot open the predicted space weather file " +
+         throw SolarSystemException("Cannot open the historic space weather file " +
                obsFileName + ", nor the file at the location " + weatherfile);
 
       obsFileName = weatherfile;
@@ -402,9 +402,6 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
                 (theLine.find("EARLY TIMING") != std::string::npos))
             {
                GmatFileUtil::GetLine(&inPredict, theLine);
-               GmatFileUtil::GetLine(&inPredict, theLine);
-               begData = inPredict.tellg();
-
                break;
             }
          }
@@ -599,14 +596,15 @@ bool SolarFluxReader::LoadPredictData()
    Integer hour = 0, minute = 0, dom = 1;
    Real sec = 0.0;
    std::string theLine;
+   std::stringstream messageQueue;
 
-   inPredict.seekg(begData, std::ios_base::beg);
-   
    Integer lineCounter = 0;
    std::stringstream lineList;
    while (!inPredict.eof())
    {
       GmatFileUtil::GetLine(&inPredict, theLine);
+      if (theLine.find("BEGIN_DATA") != std::string::npos)
+         continue;
       line = theLine.c_str();
       ++lineCounter;
 
@@ -637,6 +635,13 @@ bool SolarFluxReader::LoadPredictData()
          // Set ref epoch to midnight for the date on the current line
          Integer year = atoi(tokens[1].c_str());
          Integer month = atoi(tokens[0].c_str());
+
+         if ((month < 1) || (month > 12))
+         {
+            if (lineList.str() != "")
+               lineList << ", ";
+            lineList << lineCounter;
+         }
 
          Real mjd = ModifiedJulianDate(year, month, dom, hour, minute, sec);
          ++month;
@@ -970,55 +975,47 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       }
 
       // Update the F10.7 data and (if selected) interpolate
-//      if (interpolateFlux)
-//      {
-//         Real vals[2];
-//         Real avals[2];
-//         Real eps[2];
-//         Integer index = fD.id;
-//
-//         // Pick the correct timespan
-//         eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
-//         if (eps[0] > epoch)
-//         {
-//            eps[1] = eps[0];
-//            --index;
-//            if (index >= 0)
-//               eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
-//            else
-//               index = 0;
-//         }
-//         else
-//         {
-//            eps[1] = (index < obsFluxData.size() - 1 ?
-//                  obsFluxData[index+1].epoch + f107Offset + 0.5 : eps[0] + 1.0);
-//         }
-////         vals[0] = obsFluxData[index].obsF107;
-//         vals[0] = obsFluxData[index-1].obsF107;
-//         avals[0] = obsFluxData[index-1].obsCtrF107a;
-//
-//         if (index < obsFluxData.size()-1)
-////            vals[1] = obsFluxData[index+1].obsF107;
-//         {
-//            vals[1] = obsFluxData[index].obsF107;
-//            avals[1] = obsFluxData[index].obsCtrF107a;
-//         }
-//         else
-//            vals[1] = vals[0];
-//
-//         Real dt = eps[1] - eps[0];
-//         Real delta = epoch - eps[0];
-//         Real portion = delta / dt;
-//         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
-//         fD.obsCtrF107a = avals[0] + portion * (avals[1] - avals[0]);
-//
-//         #ifdef DEBUG_FLUXINTERPOLATION
-//            MessageInterface::ShowMessage("F10.7 Interpolated from [%lf %lf] "
-//                  "to [%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
-//                  vals[1], epoch, fD.obsF107);
-//         #endif
-//      }
-//      else
+      if (interpolateFlux && (epoch >= obsFluxData[0].epoch))
+      {
+         Real vals[2];
+         Real eps[2];
+         Integer index = fD.id;
+
+         // Pick the correct timespan
+         eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
+         if (eps[0] > epoch)
+         {
+            eps[1] = eps[0];
+            --index;
+            if (index >= 0)
+               eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
+            else
+               index = 0;
+         }
+         else
+         {
+            eps[1] = (index < obsFluxData.size() - 1 ?
+                  obsFluxData[index+1].epoch + f107Offset + 0.5 : eps[0] + 1.0);
+         }
+         vals[0] = obsFluxData[index-1].obsF107;
+
+         if (index < obsFluxData.size()-1)
+            vals[1] = obsFluxData[index].obsF107;
+         else
+            vals[1] = vals[0];
+
+         Real dt = eps[1] - eps[0];
+         Real delta = epoch - eps[0];
+         Real portion = delta / dt;
+         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
+
+         #ifdef DEBUG_FLUXINTERPOLATION
+            MessageInterface::ShowMessage("F10.7 Interpolated from [%lf %lf] "
+                  "to [%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
+                  vals[1], epoch, fD.obsF107);
+         #endif
+      }
+      else
       {
          // Daily value from previous day
          fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 :

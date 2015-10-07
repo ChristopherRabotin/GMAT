@@ -26,17 +26,10 @@ SET(PLUGIN_DIRS event factory include locator plugin)
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    event/Antumbra.cpp
-    event/Contact.cpp
     event/ContactEvent.cpp
     event/ContactResult.cpp
-    event/Eclipse.cpp
     event/EclipseEvent.cpp
     event/EclipseTotalEvent.cpp
-    event/Elevation.cpp
-    event/LineOfSight.cpp
-    event/Penumbra.cpp
-    event/Umbra.cpp
     factory/EventLocatorFactory.cpp
     locator/ContactLocator.cpp
     locator/EclipseLocator.cpp

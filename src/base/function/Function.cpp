@@ -1730,8 +1730,6 @@ bool Function::IsAutomaticObjectGlobal(const std::string &autoObjName,
 void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
                              const std::string &mapName)
 {
-   #ifdef DEBUG_OBJECT_MAP
-   
    MessageInterface::ShowMessage("%s\n", title.c_str());
    MessageInterface::ShowMessage("this=<%p>, functionName='%s'\n", this, functionName.c_str());
    if (objMap == NULL)
@@ -1794,7 +1792,6 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
       else
          MessageInterface::ShowMessage("\n");
    }
-   #endif
 }
 
 

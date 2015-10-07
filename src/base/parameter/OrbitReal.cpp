@@ -463,7 +463,7 @@ GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
 {
    #ifdef DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
-      ("OrbitReal::GetRefObject() this='%s', type=%d, name='%s'\n",
+      ("OrbitReal::GetRefObject() <%p>'%s' entered, type=%d, name='%s'\n", this,
        this->GetName().c_str(), type, name.c_str());
    #endif
    
@@ -476,6 +476,12 @@ GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
           GmatBase::GetObjectTypeString(type) + ", name:" + name + " in " +
           this->GetName());
    }
+   
+   #ifdef DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("OrbitReal::GetRefObject() <%p>'%s' returning %s\n", this, GetName().c_str(),
+       GmatBase::WriteObjectInfo("", obj).c_str());
+   #endif
    
    return obj;
 }
@@ -518,6 +524,12 @@ bool OrbitReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    if (setOK && obj->IsOfType("SpacePoint") && !(obj->IsOfType("Spacecraft")) &&
        (obj->GetName() == mParamOwnerName))
       mIsSettable = false;
+   
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("OrbitReal::SetRefObject() '%s' returning %d\n", GetName().c_str(), setOK);
+   #endif
+   
    return setOK;
 //   return OrbitData::SetRefObject(obj, type, name);
 }

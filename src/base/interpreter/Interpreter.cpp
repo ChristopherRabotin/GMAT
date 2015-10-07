@@ -3959,6 +3959,7 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
    {
       std::string funcName = GmatStringUtil::ParseFunctionName(rhs);
       #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage("   RHS <%s> has no math symbos\n", rhs.c_str());
       MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());
       #endif
       if (funcName != "")

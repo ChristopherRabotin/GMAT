@@ -1047,13 +1047,12 @@ Maneuver myImpulsiveBurn(Sat);</programlisting>
       <guilabel>VNB</guilabel> components of the maneuver are (-Vx, -Vy,
       -Vz).</para>
 
-      <para>To hopefully make this logic clearer, consider the script sample
-      below where the ‘<guilabel>N</guilabel>’ and ‘<guilabel>B</guilabel>’
-      components of the maneuver are zero and the ‘<guilabel>V</guilabel>’
-      component is +5 km/s. If the spacecraft velocity is (7,0,0) km/s in
-      J2000 inertial coordinates, then after the backwards-propagated
-      impulsive maneuver, the velocity of the spacecraft will be (2,0,0)
-      km/s.</para>
+      <para>Consider the script sample below where the
+      ‘<guilabel>N</guilabel>’ and ‘<guilabel>B</guilabel>’ components of the
+      maneuver are zero and the ‘<guilabel>V</guilabel>’ component is +5 km/s.
+      If the spacecraft velocity is (7,0,0) km/s in J2000 inertial
+      coordinates, then after the backwards-propagated impulsive maneuver, the
+      velocity of the spacecraft will be (2,0,0) km/s.</para>
 
       <programlisting><code>Create Spacecraft Sat;
 Create ImpulsiveBurn myImpulsiveBurn;

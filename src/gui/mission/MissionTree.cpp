@@ -57,7 +57,7 @@
 #include "bitmaps/mt_NonlinearConstraint.xpm"
 #include "bitmaps/mt_RunSimulator.xpm"
 #include "bitmaps/mt_RunEstimator.xpm"
-//#include "bitmaps/mt_FindEvents.xpm"
+#include "bitmaps/mt_FindEvents.xpm"   
 
 #include <wx/tipwin.h>
 
@@ -4204,6 +4204,8 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
       return GmatTree::MISSION_ICON_RUN_SIMULATOR;
    if (cmd == "RunEstimator")
       return GmatTree::MISSION_ICON_RUN_ESTIMATOR;
+   if (cmd == "FindEvents")
+      return GmatTree::MISSION_ICON_FIND_EVENTS;
    
    return GmatTree::MISSION_ICON_DEFAULT;
 }

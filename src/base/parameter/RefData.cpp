@@ -26,8 +26,7 @@
 
 //#define DEBUG_REFDATA_CREATE
 //#define DEBUG_REFDATA_OBJECT 2
-//#define DEBUG_REFDATA_OBJECT_GET 2
-//#define DEBUG_REFDATA_OBJECT_SET 2
+//#define DEBUG_REF_OBJECT 2
 //#define DEBUG_REFDATA_FIND 1
 //#define DEBUG_REFDATA_ADD 1
 //#define DEBUG_RENAME 1
@@ -307,7 +306,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllRefObjectNames.clear();
 
-   #if DEBUG_REFDATA_OBJECT_GET
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
       ("RefData::GetRefObjectNameArray() '%s', type=%d\n   there are %d ref "
        "objects\n", mActualParamName.c_str(), type, mNumRefObjects);
@@ -415,21 +414,42 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
                                 const std::string &name)
 {
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::GetRefObject() <%p>'%s' entered, type=%d, name='%s', mNumRefObjects=%d\n",
+       this, mActualParamName.c_str(), type, name.c_str(), mNumRefObjects);
+   #endif
+   
+   GmatBase *refObj = NULL;
+   
    for (int i=0; i<mNumRefObjects; i++)
    {
       if (mRefObjList[i].objType == type)
       {
          if (name == "") //if name is "", return first object
-            return mRefObjList[i].obj;
+         {
+            //return mRefObjList[i].obj;
+            refObj = mRefObjList[i].obj;
+            break;
+         }
          
          if (mRefObjList[i].objName == name)
          {
-            return mRefObjList[i].obj;
+            //return mRefObjList[i].obj;
+            refObj = mRefObjList[i].obj;
+            break;
          }
       }
    }
    
-   return NULL;
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::GetRefObject() <%p>'%s' returning %s\n", this, mActualParamName.c_str(),
+       GmatBase::WriteObjectInfo("", refObj).c_str());
+   #endif
+   
+   //return NULL;
+   return refObj;
 }
 
 
@@ -447,7 +467,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                            const std::string &name)
 {
    bool status = false;
-   #if DEBUG_REFDATA_OBJECT_SET
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
       ("RefData::SetRefObject() <%p>'%s' entered\n   numRefObjects=%d, type=%d, "
        "obj=<%p>'%s'\n", this, mActualParamName.c_str(), mNumRefObjects, type, obj, name.c_str());
@@ -462,7 +482,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    
    for (int i=0; i<mNumRefObjects; i++)
    {
-      #if DEBUG_REFDATA_OBJECT_SET > 1
+      #if DEBUG_REF_OBJECT > 1
       MessageInterface::ShowMessage
          ("   type=%d, obj=<%p>, name='%s'\n", mRefObjList[i].objType,
           mRefObjList[i].obj, mRefObjList[i].objName.c_str());
@@ -475,7 +495,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          if (mRefObjList[i].objType == actualType)
          {
             mRefObjList[i].obj = obj;
-            #if DEBUG_REFDATA_OBJECT_SET > 1
+            #if DEBUG_REF_OBJECT > 1
             MessageInterface::ShowMessage
                ("   1 The object pointer <%p> set to '%s'\n", obj, name.c_str());
             #endif
@@ -486,7 +506,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                   mRefObjList[i].objType == Gmat::SPACE_POINT)
          {
             mRefObjList[i].obj = obj;
-            #if DEBUG_REFDATA_OBJECT_SET > 1
+            #if DEBUG_REF_OBJECT > 1
             MessageInterface::ShowMessage
                ("   2 The object pointer <%p> set to '%s'\n", obj, name.c_str());
             #endif
@@ -498,14 +518,14 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    
    if (!status)
    {
-      #if DEBUG_REFDATA_OBJECT_SET
+      #if DEBUG_REF_OBJECT
       MessageInterface::ShowMessage
          ("*** WARNING *** RefData::SetRefObject() Cannot find '%s' of type '%s'\n",
           name.c_str(), GmatBase::GetObjectTypeString(actualType).c_str());
       #endif
    }
    
-   #if DEBUG_REFDATA_OBJECT_SET
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
       ("RefData::SetRefObject() <%p>'%s' returning %d\n", this, mActualParamName.c_str(), status);
    #endif

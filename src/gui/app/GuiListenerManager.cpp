@@ -96,7 +96,7 @@ ISolverListener* GuiListenerManager::CreateSolverListener(const std::string &tab
    
    #if DEBUG_TABLE_CREATE
    MessageInterface::ShowMessage
-      ("GuiListenerManager::CreateListener() Creating MdiTableViewFrame "
+      ("GuiListenerManager::CreateSolverListener() Creating MdiTableViewFrame "
          "%s\n", plotName.c_str());
    #endif
       
@@ -143,7 +143,7 @@ ISolverListener* GuiListenerManager::CreateSolverListener(const std::string &tab
          
    #if DEBUG_TABLE_CREATE
    MessageInterface::ShowMessage
-      ("GuiListenerManager::CreateListener() frame created, frame->GetPlotName()=%s\n",
+      ("GuiListenerManager::CreateSolverListener() frame created, frame->GetPlotName()=%s\n",
          frame->GetPlotName().c_str());
    #endif
       
@@ -165,7 +165,7 @@ ISolverListener* GuiListenerManager::CreateSolverListener(const std::string &tab
    
    #if DEBUG_TABLE_CREATE
    MessageInterface::ShowMessage
-      ("GuiListenerManager::CreateListener returning true, there are %d plots.\n",
+      ("GuiListenerManager::CreateSolverListener returning true, there are %d plots.\n",
        MdiGlPlot::numChildren);
    #endif
    
