@@ -65,7 +65,8 @@
 //#define DEBUG_DEFSTR
 //#define DEBUG_CMD_SUMMARY
 
-#ifdef DEBUG_FUNCTION
+//#ifdef DEBUG_FUNCTION
+#if defined(DEBUG_FUNCTION) || defined(DEBUG_OBJECT_MAP)
 #include "Function.hpp"
 #endif
 
