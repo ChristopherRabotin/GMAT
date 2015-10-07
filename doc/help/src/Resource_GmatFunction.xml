@@ -12,85 +12,484 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Resources</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>GMATFunction</refname>
 
-    <refpurpose>Under Construction.</refpurpose>
+    <refpurpose>Declaration of a GMAT function</refpurpose>
   </refnamediv>
-
-  <refsynopsisdiv>
-    <synopsis> Under Construction.
-   </synopsis>
-  </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>Under Construction.</para>
+    <para>The <guilabel>GmatFunction</guilabel> resource declares a new GMAT
+    function or can be used to load-in a pre-existing GMAT function. This
+    function can be called in the Mission Sequence through GMAT's
+    <guilabel>CallGmatFunction</guilabel> command. See the <guilabel><xref
+    linkend="CallGmatFunction"/></guilabel> reference for details.</para>
+
+    <para>Through this GMAT function, data can be passed in the function as
+    input and received as output. Data that is passed into the function as
+    input or received from the function as output can also be declared as
+    global. See the <guilabel><xref linkend="Global"/></guilabel> reference
+    for more details. See also the <xref linkend="GmatFunction_Remarks"
+    xrefstyle="select:title"/> and <xref linkend="GmatFunction_Examples"
+    xrefstyle="select:title"/> sections for detailed discussion on GMAT
+    functions and how to use them.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="CallGmatFunction"/>, <xref linkend="Global"/></para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <variablelist>
-      <varlistentry>
-        <term>Field Name</term>
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth=".5*"/>
 
-        <listitem>
-          <para>Description....</para>
+        <colspec colnum="2" colwidth="3*"/>
 
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Type</term>
+        <thead>
+          <row>
+            <entry>Field</entry>
 
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
+            <entry>Description</entry>
+          </row>
+        </thead>
 
-            <varlistentry>
-              <term>Default</term>
+        <tbody>
+          <row>
+            <entry><guilabel>FunctionPath</guilabel></entry>
 
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
+            <entry><para>Allows the user to define a valid function path. In
+            the GUI, the <guilabel>FunctionPath</guilabel> field is activated
+            after editing the function and then clicking on the function's
+            <literal>Save As</literal> button. The path of the function can be
+            defined as either absolute or relative. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
 
-            <varlistentry>
-              <term>Limits</term>
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
+                <varlistentry>
+                  <term>Allowed Values</term>
 
-            <varlistentry>
-              <term>Units</term>
+                  <listitem>
+                    <para>Valid file path. The path can be either absolute or
+                    relative</para>
+                  </listitem>
+                </varlistentry>
 
-              <listitem>
-                <para>Fill This In.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>User-defined</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </refsection>
 
   <refsection>
+    <title>GUI</title>
+
+    <para>In the GUI, a new <guilabel>GmatFunction</guilabel> resource is
+    created as follows:</para>
+
+    <orderedlist>
+      <listitem>
+        <para>In the <guilabel>Resources Tree</guilabel>, right click on the
+        <guilabel>Functions</guilabel> folder, select <guilabel>Add</guilabel>
+        -&gt; <guilabel>GMAT Function</guilabel> -&gt;
+        <guilabel>New</guilabel></para>
+      </listitem>
+
+      <listitem>
+        <para>In the <guilabel>New GMAT function</guilabel> dialog box, type
+        the desired name of your function.</para>
+      </listitem>
+    </orderedlist>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_GmatFunction_GUI_0.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>The <guilabel>GmatFunction</guilabel> resource's GUI window is very
+    simple. When a new GMAT function is created through the GUI, the
+    <guilabel>FunctionPath</guilabel> field is defined by first editing the
+    function and then clicking on the <literal>Save As</literal> button. This
+    lets you graphically define the path.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_GmatFunction_GUI_1.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+  </refsection>
+
+  <refsection xml:id="GmatFunction_Remarks">
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Behavior When using Filename field</title>
+
+      <para>GMAT allows you to specify the name of the report file in two
+      ways. The default naming convention for a report file when using
+      <guilabel>FileName</guilabel> field is shown below:</para>
+
+      <programlisting><code>Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.WriteReport = true</code></programlisting>
+
+      <para>An alternate method for naming a report file is to name the file
+      without using any single quotes around the report file’s name.</para>
+
+      <programlisting><code>Create ReportFile aReport
+aReport.Filename = ReportFile1.txt
+aReport.WriteReport = true</code></programlisting>
+    </refsection>
+
+    <refsection>
+      <title>How data is reported to a report file</title>
+
+      <para>GMAT allows you to report data to a report file in two ways: You
+      can use <guilabel>ReportFile.Add</guilabel> field or a
+      <guilabel>Report</guilabel> command.</para>
+
+      <para>You can add data using the <guilabel>.Add</guilabel> field of
+      <guilabel>ReportFile</guilabel> resource and this method reports data to
+      the report file at each propagation step. Below is an example script
+      snippet that shows how to report epoch and selected orbital elements
+      using the <guilabel>.Add</guilabel> field:</para>
+
+      <programlisting><code>Create Spacecraft aSat
+Create ReportFile aReport
+
+aReport.Add = {aSat.UTCGregorian aSat.Earth.SMA, aSat.Earth.ECC, ...
+aSat.Earth.TA, aSat.EarthMJ2000Eq.RAAN}
+
+Create Propagator aProp
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></programlisting>
+
+      <para>GMAT’s <guilabel>ReportFile.Add</guilabel> field will not report
+      selected data to the report file at each propagation step if
+      <guilabel>Propagate</guilabel> command is not included under the
+      <guilabel>BeginMissionSequence</guilabel>.</para>
+
+      <para>An alternative method of reporting data to the report file is via
+      the <guilabel>Report</guilabel> command. Using the
+      <guilabel>Report</guilabel> command allows you to report data to the
+      report file at specific points in your mission. Below is an example
+      script snippet that shows how to report epoch and selected orbital
+      elements using the <guilabel>Report </guilabel>command:</para>
+
+      <programlisting><code>Create Spacecraft aSat
+Create ReportFile aReport
+
+Create Propagator aProp
+
+BeginMissionSequence
+
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
+
+Report aReport aSat.UTCGregorian aSat.Earth.SMA aSat.Earth.ECC ...
+aSat.Earth.TA aSat.EarthMJ2000Eq.RAAN</code></programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Behavior and Interactions when using ReportFile Resource &amp;
+      Report Command</title>
+
+      <para>Suppose you utilize a <guilabel>ReportFile</guilabel> resource and
+      opt not to write a report and select <guilabel>false</guilabel> for the
+      field name <guilabel>WriteReport</guilabel>, as shown in the example
+      below:</para>
+
+      <programlisting><code>Create ReportFile aReport
+aReport.Filename = ReportFile1.txt
+aReport.Add = {aSat.A1ModJulian, aSat.Earth.SMA}
+aReport.WriteReport = false</code></programlisting>
+
+      <para>Now assume that at the same time, you decide to utilize
+      <guilabel>Report</guilabel> command in the <guilabel>Mission</guilabel>
+      tree, as shown in the example script snippet below:</para>
+
+      <programlisting><code>BeginMissionSequence;
+Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC
+Propagate aProp(aSat) {aSat.Earth.Periapsis}
+Report aReport aSat.A1ModJulian aSat.Earth.SMA aSat.Earth.ECC</code></programlisting>
+
+      <para>At this point, you may think that since false option is selected
+      under the field name <guilabel>WriteReport</guilabel> in
+      <guilabel>ReportFile</guilabel> resource, hence GMAT will not generate
+      the report file called <literal>ReportFile1.txt</literal>. On the
+      Contrary, GMAT will generate a report called
+      <literal>ReportFile1.txt</literal>, but this report will only contain
+      data that was requested using the <guilabel>Report</guilabel> command.
+      <literal>ReportFile1.txt</literal> text file will contain epoch,
+      semi-major-axis and eccentricity only at specific points of the
+      mission.</para>
+    </refsection>
+
+    <refsection>
+      <title>Behavior when reporting data in Iterative Processes</title>
+
+      <para>GMAT allows you to specify how data is written to reports during
+      iterative processes such as differential correction or optimization.
+      <guilabel>SolverIterations</guilabel> field of
+      <guilabel>ReportFile</guilabel> resource supports 3 options which are
+      described in the table below:</para>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1" colwidth=".75*"/>
+
+          <colspec colnum="2" colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>SolverIterations options</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>All</guilabel></entry>
+
+              <entry><para> Shows only current iteration/perturbation after
+              the end of an iterative process and reports current solution to
+              a report file. </para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Current</guilabel></entry>
+
+              <entry><para> Shows all iterations/perturbations in an iterative
+              process and reports all iterations/perturbations to a report
+              file. </para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>None</guilabel></entry>
+
+              <entry><para> Shows only final solution after the end of an
+              iterative process and reports only final solution to a report
+              file. </para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>Where Reports are written</title>
+
+      <para>GMAT allows you to write reports to any desired path or location.
+      You can do this by going to GMAT’s startup file called
+      <literal>gmat_startup_file.txt </literal>and define an absolute path
+      under <literal>OUTPUT_PATH</literal>. This allows you to save report
+      files in the directory of your choice as oppose to saving report files
+      in GMAT's default Output folder. In
+      <guilabel>ReportFile.FileName</guilabel> field, If no path is provided
+      and only name of the report file is defined, then report files are
+      written to GMAT's default Output folder. The default path where reports
+      are written to is the Output folder located in the main directory where
+      GMAT is installed.</para>
+
+      <para>Below is an example script snippet that shows where generated
+      reports are written when only report file’s name is provided under the
+      <guilabel>FileName</guilabel> field. In this example,
+      <literal>'ReportFile1.txt'</literal>report is written to the Output
+      folder located in the main directory where GMAT is installed:</para>
+
+      <programlisting><code>Create ReportFile aReport
+
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.A1ModJulian, aSat.Earth.ECC}</code></programlisting>
+
+      <para>An alternate method where report files can be written is by
+      defining a relative path. You can define the relative path in GMAT’s
+      startup file <literal>gmat_startup_file.txt</literal> under
+      <literal>OUTPUT_PATH</literal>. For example, you can set a relative path
+      by setting <literal>OUTPUT_PATH =
+      C:/Users/rqureshi/Desktop/GMAT/mytestfolder/../output2/</literal>. In
+      this path, the syntax ".." means to “go up one level”. After saving the
+      startup file, when the script is executed, the generated report file
+      named under <guilabel>FileName</guilabel> field will be written to a
+      path <literal>C:\Users\rqureshi\Desktop\GMAT\output2</literal>.</para>
+
+      <para>Another method where report files can be written to is by defining
+      an absolute path in GMAT’s startup file
+      <literal>gmat_startup_file.txt</literal> under
+      <literal>OUTPUT_PATH</literal>. For example, you can set an absolute
+      path by setting <literal>OUTPUT_PATH =
+      C:/Users/rqureshi/Desktop/GMAT/mytestfolder/</literal>. When the script
+      is executed, report file named under <guilabel>FileName</guilabel> field
+      will be written to an absolute path
+      <literal>C:\Users\rqureshi\Desktop\GMAT\mytestfolder</literal>.</para>
+
+      <para>Instead of defining a relative or an absolute path in GMAT's
+      startup file, you can choose to define an absolute path under
+      <guilabel>FileName</guilabel> field too. For example, if you set
+      <literal>ReportFile.FileName =
+      C:\Users\rqureshi\Desktop\GMAT\mytestfolder\ReportFile.txt</literal>,
+      then report file will be saved in
+      <literal>mytestfolder</literal>.</para>
+    </refsection>
+
+    <refsection>
+      <title>Behavior when using ReportFile Resource &amp; Toggle
+      Command</title>
+
+      <para>GMAT allows you to use <guilabel>Toggle</guilabel> command while
+      using the <guilabel>Add</guilabel> field of
+      <guilabel>ReportFile</guilabel> resource. When <guilabel>Toggle
+      Off</guilabel> command is issued for a <guilabel>ReportFile</guilabel>,
+      not data is sent to a report file until a <guilabel>Toggle On</guilabel>
+      command is issued. Similarly, when a <guilabel>Toggle On</guilabel>
+      command is used, data is sent to a report file at each integration step
+      until a <guilabel>Toggle Off</guilabel> command is used.</para>
+
+      <para>Below is an example script snippet that shows how to use
+      <guilabel>Toggle Off</guilabel> and <guilabel>Toggle On</guilabel>
+      command while using the <guilabel>ReportFile</guilabel> resource.
+      Spacecraft’s cartesian position vector is reported to the report
+      file.</para>
+
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
+
+Create ReportFile aReport
+aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.UTCGregorian, aSat.EarthMJ2000Eq.X ...
+aSat.EarthMJ2000Eq.Y aSat.EarthMJ2000Eq.Z}
+
+BeginMissionSequence
+
+Toggle aReport Off
+Propagate aProp(aSat) {aSat.ElapsedDays = 2}
+Toggle aReport On
+Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Behavior When Specifying Empty Brackets in ReportFile's Add
+      Field</title>
+
+      <para>When using <guilabel>ReportFile.Add</guilabel> field, GMAT does
+      not allow brackets to be left empty. The brackets must always be
+      populated with values that you wish to report. If brackets are left
+      empty, then GMAT throws in an exception. Below is a sample script
+      snippet that shows an example of empty brackets. If you were to run this
+      script, then GMAT throws in an execption reminding you that brackets
+      cannot be left empty.</para>
+
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
+Create ReportFile aReport
+
+aReport.Add = {}
+
+BeginMissionSequence
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}</code></programlisting>
+    </refsection>
+  </refsection>
+
+  <refsection xml:id="GmatFunction_Examples">
     <title>Examples</title>
 
-    <example>
-      <title>Example Script</title>
+    <informalexample>
+      <para>Propagate an orbit and write cartesian state to a report file at
+      every integrator step</para>
 
-      <programlisting>% 
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
 
-</programlisting>
-    </example>
+Create ReportFile aReport
+GMAT aReport.Filename = 'ReportFile1.txt'
+aReport.Add = {aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 8640.0}
+</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Propagate an orbit for 1 day and write cartesian state to a report
+      file at specific points in your mission</para>
+
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
+
+Create ReportFile aReport
+GMAT aReport.Filename = 'ReportFile1.txt'
+
+BeginMissionSequence
+
+Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+
+Report aReport aSat.EarthMJ2000Eq.X aSat.EarthMJ2000Eq.Y ...
+aSat.EarthMJ2000Eq.Z aSat.EarthMJ2000Eq.VX ...
+aSat.EarthMJ2000Eq.VY aSat.EarthMJ2000Eq.VZ
+</code></programlisting>
+    </informalexample>
   </refsection>
 </refentry>
