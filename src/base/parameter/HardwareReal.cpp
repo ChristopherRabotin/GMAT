@@ -22,6 +22,7 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_REF_OBJECT 1
 
 //------------------------------------------------------------------------------
 // HardwareReal(const std::string &name, const std::string &typeStr, 
@@ -98,7 +99,7 @@ bool HardwareReal::AddRefObject(GmatBase *obj, bool replaceName)
 {
    if (obj != NULL)
    {
-      #if DEBUG_ATTITUDEREAL
+      #if DEBUG_REF_OBJECT
       MessageInterface::ShowMessage
          ("HardwareReal::AddRefObject() obj->GetName()=%s, type=%d\n",
           obj->GetName().c_str(), obj->GetType());
@@ -252,11 +253,15 @@ GmatBase* HardwareReal::GetRefObject(const Gmat::ObjectType type,
 bool HardwareReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                 const std::string &name)
 {
-   #if DEBUG_ATTITUDEREAL
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
       ("HardwareReal::SetRefObject() setting type=%d, name=%s to %s\n",
        type, name.c_str(), this->GetName().c_str());
    #endif
+   
+   // Set owner object for Parameter here (LOJ: 2015.09.30)
+   if (obj->GetName() == mParamOwnerName)
+      SetOwner(obj);
    
    return SpacecraftData::SetRefObject(obj, type, name);
 }
