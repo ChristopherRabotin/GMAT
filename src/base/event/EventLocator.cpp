@@ -561,9 +561,15 @@ std::string EventLocator::GetStringParameter(const Integer id) const
    if (id == INPUT_EPOCH_FORMAT)
       return epochFormat;
    if (id == INITIAL_EPOCH)
-      return initialEpoch;
+   {
+//      return initialEpoch;
+      return GetEpochString("INITIAL", epochFormat);
+   }
    if (id == FINAL_EPOCH)
-      return finalEpoch;
+   {
+//      return finalEpoch;
+      return GetEpochString("FINAL", epochFormat);
+   }
    if (id == RUN_MODE)
       return runMode;
 
@@ -1281,13 +1287,16 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
 }
 
 //------------------------------------------------------------------------------
-// std::string GetEpochString(const std::string whichOne = "INITIAL")
+// std::string GetEpochString(const std::string &whichOne  = "INITIAL",
+//                            const std::string &outFormat = "UTCGregorian")
 //------------------------------------------------------------------------------
-std::string EventLocator::GetEpochString(const std::string whichOne)
+std::string EventLocator::GetEpochString(const std::string &whichOne,
+                                         const std::string &outFormat) const
 {
    Real outMjd = -999.999;
    std::string outStr;
-   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
+   std::string outputFormat = outFormat;
+//   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
 
    if (whichOne == "INITIAL")
    {

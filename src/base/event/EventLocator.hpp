@@ -120,7 +120,8 @@ public:
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
 
    virtual void         SetEpoch(const std::string &ep, Integer id);
-   virtual std::string  GetEpochString(const std::string whichOne = "INITIAL");
+   virtual std::string  GetEpochString(const std::string &whichOne = "INITIAL",
+                        const std::string &outFormat = "UTCGregorian") const;
    virtual void         SetAppend(bool appendIt);
 
    virtual void         SetSolarSystem(SolarSystem *ss);
