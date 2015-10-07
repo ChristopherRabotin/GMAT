@@ -59,17 +59,10 @@ archclean :
 
 CPP_OBJECTS = \
     plugin/GmatPluginFunctions.o \
-    event/Elevation.o \
-    event/Contact.o \
     event/ContactEvent.o \
     event/ContactResult.o \
-    event/Eclipse.o \
     event/EclipseEvent.o \
     event/EclipseTotalEvent.o \
-    event/Antumbra.o \
-    event/Penumbra.o \
-    event/Umbra.o \
-    event/LineOfSight.o \
     locator/ContactLocator.o \
     locator/EclipseLocator.o \
     factory/EventLocatorFactory.o 
