@@ -120,7 +120,7 @@ Planet::Planet(std::string name) :
       std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
       attitudeSpiceKernelNames.push_back(path+"/earth_070425_370426_predict.bpc");
       attitudeSpiceKernelNames.push_back(path+"/earth_720101_070426.bpc");
-      attitudeSpiceKernelNames.push_back(path+"/earth_000101_150307_141214.bpc");
+      attitudeSpiceKernelNames.push_back(path+"/earth_000101_151228_151006.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();
@@ -168,7 +168,7 @@ Planet::Planet(std::string name, const std::string &cBody) :
       std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
          attitudeSpiceKernelNames.push_back(path+"/earth_070425_370426_predict.bpc");
          attitudeSpiceKernelNames.push_back(path+"/earth_720101_070426.bpc");
-         attitudeSpiceKernelNames.push_back(path+"/earth_000101_150307_141214.bpc");
+         attitudeSpiceKernelNames.push_back(path+"/earth_000101_151228_151006.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();
