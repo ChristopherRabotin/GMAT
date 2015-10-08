@@ -497,10 +497,11 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    #endif
    
    #if DBGLVL_WRAPPERS > 1
-      MessageInterface::ShowMessage
-         ("In ValidateCommand, has %d wrapper names:\n", wrapperNames.size());
-      for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
-         MessageInterface::ShowMessage("      %s\n", wrapperNames[ii].c_str());
+   MessageInterface::ShowMessage
+      ("In ValidateCommand, '%s' has %d wrapper names:\n",
+       cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str(), wrapperNames.size());
+   for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
+      MessageInterface::ShowMessage("      %s\n", wrapperNames[ii].c_str());
    #endif
    
    // Set function pointer to command
@@ -682,7 +683,7 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
-      ("In Validator::CreateElementWrapper\n"
+      ("In Validator::CreateElementWrapper()\n"
        "   original string is <%s>\n", desc.c_str(), "\"\n");
    MessageInterface::ShowMessage
       ("   with no extra paren is <%s>\n", noExtraParen.c_str());

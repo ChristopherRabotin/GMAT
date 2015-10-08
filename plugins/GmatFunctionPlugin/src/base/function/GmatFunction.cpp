@@ -405,6 +405,10 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          MessageInterface::ShowMessage(GmatBase::WriteObjectInfo("   owner=", owner));
          #endif
          autoObj->SetIsGlobal(true);
+         
+         // Set IsLocal to false to indicate it is not created inside a function (LOJ: 2015.10.03)
+         owner->SetIsLocal(false);
+         autoObj->SetIsLocal(false);
       }
       
       // if name not found, clone it and add to map (loj: 2008.12.15)
@@ -443,7 +447,8 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          }
          #endif
          
-         clonedAutoObj->SetIsLocal(true);
+         // Do not set IsLocal to true since it is cloned above (LOJ: 2015.10.03)
+         //clonedAutoObj->SetIsLocal(true);
          objectStore->insert(std::make_pair(autoObjName, clonedAutoObj));
       }
    }
@@ -470,12 +475,20 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          {
             #ifdef DEBUG_FUNCTION_INIT
             MessageInterface::ShowMessage
-               ("   obj<%p>'%s' is global and not local so moving it from "
+               ("   ==> obj<%p>'%s' is global and not local, so moving it from "
                 "objectStore to globalObjectStore\n", obj, objName.c_str());
             #endif
             globalObjectStore->insert(std::make_pair(objName, obj));
             objectStore->erase(objName);
          }
+      }
+      else
+      {
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   ==> obj<%p>'%s' is global and local, so it stays in objectStore\n",
+             obj, objName.c_str());
+         #endif
       }
    }
    
@@ -492,6 +505,9 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       validatorStore.insert(std::make_pair(omi->first, omi->second));
    for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
       validatorStore.insert(std::make_pair(omi->first, omi->second));
+   #ifdef DEBUG_FUNCTION_INIT
+   ShowObjectMap(&validatorStore, "In GmatFunction::Initialize()", "validatorStore");
+   #endif
    validator->SetObjectMap(&validatorStore);
    
    // Create wrappers for local subscribers (fix for GMT1552 LOJ: 2015.06.24)
@@ -532,6 +548,8 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       current->SetTransientForces(forces);      
       
       // See if commands can be validated only once (LOJ: 2015.04.21)
+      // With this change function tests seem to run 2-4 times faster depends
+      // on the length of function. (For GmatFunction performance improvements)
       if (fcsInitialized)
       {
          #ifdef DEBUG_FUNCTION_INIT
@@ -770,7 +788,8 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       {
          #ifdef DEBUG_FUNCTION_EXEC
          MessageInterface::ShowMessage
-            ("Caught CommandException:\n%s\n", e.GetFullMessage().c_str());
+            ("Caught CommandException: IsFatal()=%d\n%s\n", e.IsFatal(),
+             e.GetFullMessage().c_str());
          #endif
          
          // If it is user interrupt, rethrow (loj: 2008.10.16)

@@ -1112,6 +1112,9 @@ bool Assignment::Execute()
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
        callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL",
        internalCoordSys);
+   MessageInterface::ShowMessage
+      ("   lhsWrapper=<%p>, rhsWrapper=<%p>, mathTree=<%p>\n", lhsWrapper, rhsWrapper,
+       mathTree);
    #endif
    
    if (lhsWrapper == NULL || (rhsWrapper == NULL && mathTree == NULL))

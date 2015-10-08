@@ -589,181 +589,191 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
 {
    bool retval = false;
 
-   try // Since we are making Python calls here, wrap in a handler
-   {
-      // Reals
-      if (PyFloat_Check(member))
-      {
-         PyReturnValue rv;
-         rv.toType = Gmat::REAL_TYPE;
-         rv.floatData.push_back(PyFloat_AsDouble(member));
-         dataReturn.push_back(rv);
-         retval = true;
-      }
-      // Integers, passed into real number containers
-      else if (PyLong_Check(member))
-      {
-         PyReturnValue rv;
-         rv.toType = Gmat::REAL_TYPE;
-         rv.floatData.push_back(PyLong_AsDouble(member));
-         dataReturn.push_back(rv);
-         retval = true;
-      }
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("BuildReturnFromPyObject(%p)\n", member);
+   #endif
 
-      // Strings
+   if (member != Py_None)
+   {
+      try // Since we are making Python calls here, wrap in a handler
+      {
+         // Reals
+         if (PyFloat_Check(member))
+         {
+            PyReturnValue rv;
+            rv.toType = Gmat::REAL_TYPE;
+            rv.floatData.push_back(PyFloat_AsDouble(member));
+            dataReturn.push_back(rv);
+            retval = true;
+         }
+         // Integers, passed into real number containers
+         else if (PyLong_Check(member))
+         {
+            PyReturnValue rv;
+            rv.toType = Gmat::REAL_TYPE;
+            rv.floatData.push_back(PyLong_AsDouble(member));
+            dataReturn.push_back(rv);
+            retval = true;
+         }
+
+         // Strings
 #ifdef IS_PY3K
-      else if (PyUnicode_Check(member))
-      {
-         #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("A Python String was returned.\n");
-         #endif
-         PyReturnValue rv;
-         rv.toType = Gmat::STRING_TYPE;
-         rv.stringData = _PyUnicode_AsString(member);
-         dataReturn.push_back(rv);
-         retval = true;
-      }
+         else if (PyUnicode_Check(member))
+         {
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("A Python String was returned.\n");
+            #endif
+            PyReturnValue rv;
+            rv.toType = Gmat::STRING_TYPE;
+            rv.stringData = _PyUnicode_AsString(member);
+            dataReturn.push_back(rv);
+            retval = true;
+         }
 #else
-      else if (PyBytes_Check(member))
-      {
-         PyReturnValue rv;
-         rv.toType = Gmat::STRING_TYPE;
-         rv.stringData.push_back(PyBytes_AsString(member));
-         dataReturn.push_back(rv);
-         retval = true;
-      }
+         else if (PyBytes_Check(member))
+         {
+            PyReturnValue rv;
+            rv.toType = Gmat::STRING_TYPE;
+            rv.stringData.push_back(PyBytes_AsString(member));
+            dataReturn.push_back(rv);
+            retval = true;
+         }
 #endif
 
-      // Lists of floats/ints or lists of lists of floats/ints
-      else if (PyList_Check(member))
-      {
-         #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("Return was a list of size %d\n", 
-                  PyList_Size(member));
-         #endif
-
-         // number of list elements in a list, for example: [ [], [], [] ]
-         Integer listSz = PyList_Size(member);
-         PyObject *pyItem = PyList_GetItem(member, 0);
-
-         // number of elements in a list, for example: [ 1, 2, 3 ]
-         Integer elementSz = PyList_Size(pyItem);
-         PyReturnValue rv;
-
-         if (PyList_Check(pyItem))
+         // Lists of floats/ints or lists of lists of floats/ints
+         else if (PyList_Check(member))
          {
             #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("Python has returned a list of list "
-                     "of Floats/Integers.\n");
+               MessageInterface::ShowMessage("Return was a list of size %d\n", 
+                  PyList_Size(member));
             #endif
 
-            rv.toType = Gmat::RMATRIX_TYPE;
+            // number of list elements in a list, for example: [ [], [], [] ]
+            Integer listSz = PyList_Size(member);
+            PyObject *pyItem = PyList_GetItem(member, 0);
 
-            for (Integer i = 1; i < listSz; i++)
-            {
-               // throw an exception if the output dimension row and column is not
-               // what has been returned by Python, or if the size of each list
-               // within the top list is not the same.
-               if ((PyList_Size(pyItem) != PyList_Size(PyList_GetItem(member, i))) ||
-                  (listSz != outRow) || (elementSz != outCol))
-                  throw CommandException("The dimension of the array returned "
-                  "from Python does not match the dimension of the "
-                  "receiving array in GMAT on the script line\n   \"" +
-                  GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
-            }
+            // number of elements in a list, for example: [ 1, 2, 3 ]
+            Integer elementSz = PyList_Size(pyItem);
+            PyReturnValue rv;
 
-            for (Integer i = 0; i < listSz; i++)
+            if (PyList_Check(pyItem))
             {
-               pyItem = PyList_GetItem(member, i);
-               RealArray vItem;
-               for (Integer j = 0; j < elementSz; j++)
+               #ifdef DEBUG_EXECUTION
+                  MessageInterface::ShowMessage("Python has returned a list of list "
+                     "of Floats/Integers.\n");
+               #endif
+
+               rv.toType = Gmat::RMATRIX_TYPE;
+
+               for (Integer i = 1; i < listSz; i++)
                {
-                  Real ret;
-                  PyObject *pyElem = PyList_GetItem(pyItem, j);
-
-                  // If element is a Python Integer/Long, convert to Real
-                  if (PyLong_Check(pyElem))
-                     ret = PyLong_AsDouble(pyElem);
-                  else if (PyFloat_Check(pyElem))
-                     ret = PyFloat_AsDouble(pyElem);
-                  else
-                     throw CommandException("An array member received from Python "
-                     "is neither a float nor an integer, so GMAT cannot "
-                     "process the value returned on the script line\n   \"" +
+                  // throw an exception if the output dimension row and column is not
+                  // what has been returned by Python, or if the size of each list
+                  // within the top list is not the same.
+                  if ((PyList_Size(pyItem) != PyList_Size(PyList_GetItem(member, i))) ||
+                     (listSz != outRow) || (elementSz != outCol))
+                     throw CommandException("The dimension of the array returned "
+                     "from Python does not match the dimension of the "
+                     "receiving array in GMAT on the script line\n   \"" +
                      GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
+               }
+
+               for (Integer i = 0; i < listSz; i++)
+               {
+                  pyItem = PyList_GetItem(member, i);
+                  RealArray vItem;
+                  for (Integer j = 0; j < elementSz; j++)
+                  {
+                     Real ret;
+                     PyObject *pyElem = PyList_GetItem(pyItem, j);
+
+                     // If element is a Python Integer/Long, convert to Real
+                     if (PyLong_Check(pyElem))
+                        ret = PyLong_AsDouble(pyElem);
+                     else if (PyFloat_Check(pyElem))
+                        ret = PyFloat_AsDouble(pyElem);
+                     else
+                        throw CommandException("An array member received from Python "
+                        "is neither a float nor an integer, so GMAT cannot "
+                        "process the value returned on the script line\n   \"" +
+                        GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
+
+                     #ifdef DEBUG_EXECUTION
+                        MessageInterface::ShowMessage("Array element [%d, %d] value in "
+                           "output array is %lf\n", i, j, ret);
+                     #endif
+
+                     vItem.push_back(ret);
+                  }
+                  rv.lolData.push_back(vItem);
+               }
+               dataReturn.push_back(rv);
+               retval = true;
+            }
+            else if (PyFloat_Check(pyItem))
+            {
+               #ifdef DEBUG_EXECUTION
+                  MessageInterface::ShowMessage("Python has returned a list of "
+                     "floats.\n");
+               #endif
+               rv.toType = Gmat::RMATRIX_TYPE;
+               for (Integer i = 0; i < listSz; ++i)
+               {
+                  pyItem = PyList_GetItem(member, i);
+                  rv.floatData.push_back(PyFloat_AsDouble(pyItem));
 
                   #ifdef DEBUG_EXECUTION
-                     MessageInterface::ShowMessage("Array element [%d, %d] value in "
-                           "output array is %lf\n", i, j, ret);
-                  #endif
-
-                  vItem.push_back(ret);
-               }
-               rv.lolData.push_back(vItem);
-            }
-            dataReturn.push_back(rv);
-            retval = true;
-         }
-         else if (PyFloat_Check(pyItem))
-         {
-            #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("Python has returned a list of "
-                     "floats.\n");
-            #endif
-            rv.toType = Gmat::RMATRIX_TYPE;
-            for (Integer i = 0; i < listSz; ++i)
-            {
-               pyItem = PyList_GetItem(member, i);
-               rv.floatData.push_back(PyFloat_AsDouble(pyItem));
-
-               #ifdef DEBUG_EXECUTION
-                  MessageInterface::ShowMessage("Value is %lf\n", 
+                     MessageInterface::ShowMessage("Value is %lf\n", 
                         rv.floatData[rv.floatData.size()-1]);
-               #endif
+                  #endif
+               }
+               dataReturn.push_back(rv);
+               retval = true;
             }
-            dataReturn.push_back(rv);
-            retval = true;
-         }
-         else if (PyLong_Check(pyItem))
-         {
-            #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("Python has returned a list of Integers.\n");
-            #endif
-               rv.toType = Gmat::REAL_TYPE;
-            for (Integer i = 0; i < listSz; ++i)
+            else if (PyLong_Check(pyItem))
             {
-               pyItem = PyList_GetItem(member, i);
-               rv.floatData.push_back(PyLong_AsDouble(pyItem));
+               #ifdef DEBUG_EXECUTION
+                  MessageInterface::ShowMessage("Python has returned a list of Integers.\n");
+               #endif
+               rv.toType = Gmat::REAL_TYPE;
+               for (Integer i = 0; i < listSz; ++i)
+               {
+                  pyItem = PyList_GetItem(member, i);
+                  rv.floatData.push_back(PyLong_AsDouble(pyItem));
+               }
+               dataReturn.push_back(rv);
+               retval = true;
             }
-            dataReturn.push_back(rv);
-            retval = true;
-         }
-         else
-         {
-            // The return type is not handled
-            throw CommandException("The list member returned from the Python "
+            else
+            {
+               // The return type is not handled
+               throw CommandException("The list member returned from the Python "
                   "call on the script line\n   \"" +
                   GetGeneratingString(Gmat::NO_COMMENTS) + "\"\nis a type that "
                   "GMAT does not handle.");
+            }
+         }
+         else if (!PyTuple_Check(member))
+         {
+            // The return type is not handled
+            throw CommandException("The returned value from the Python call is a "
+               "type not handled by GMAT");
          }
       }
-      else
+      catch (BaseException &ex)
       {
-         // The return type is not handled
-         throw CommandException("The returned value from the Python call is a "
-               "type not handled by GMAT");
+         throw CommandException(ex.GetFullMessage() + " on the script line\n   \"" +
+            GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
+      }
+      catch (...)
+      {
+         throw CommandException("An error was encountered processing return data "
+            "from Python");
       }
    }
-   catch (BaseException &ex)
-   {
-      throw CommandException(ex.GetFullMessage() + " on the script line\n   \"" +
-            GetGeneratingString(Gmat::NO_COMMENTS) + "\"");
-   }
-   catch (...)
-   {
-      throw CommandException("An error was encountered processing return data "
-            "from Python");
-   }
+   else 
+      // Empty returns are allowed
+      retval = true;
 
    return retval;
 }

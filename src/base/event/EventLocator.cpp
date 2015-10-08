@@ -125,6 +125,7 @@ EventLocator::EventLocator(const std::string &typeStr,
    useLightTimeDelay       (true),
    useStellarAberration    (true),
    writeReport             (true),
+   locatingString          (""),
    runMode                 ("Automatic"),
    useEntireInterval       (true),
    appendReport            (false),
@@ -200,6 +201,7 @@ EventLocator::EventLocator(const EventLocator& el) :
    useStellarAberration    (el.useStellarAberration),
    writeReport             (el.writeReport),
    runMode                 (el.runMode),
+   locatingString          (el.locatingString),
    useEntireInterval       (el.useEntireInterval),
    appendReport            (el.appendReport),
    epochFormat             (el.epochFormat),
@@ -262,6 +264,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       useStellarAberration = el.useStellarAberration;
       writeReport          = el.writeReport;
       runMode              = el.runMode;
+      locatingString       = el.locatingString;
       useEntireInterval    = el.useEntireInterval;
       appendReport         = el.appendReport;
       epochFormat          = el.epochFormat;
@@ -558,9 +561,15 @@ std::string EventLocator::GetStringParameter(const Integer id) const
    if (id == INPUT_EPOCH_FORMAT)
       return epochFormat;
    if (id == INITIAL_EPOCH)
-      return initialEpoch;
+   {
+//      return initialEpoch;
+      return GetEpochString("INITIAL", epochFormat);
+   }
    if (id == FINAL_EPOCH)
-      return finalEpoch;
+   {
+//      return finalEpoch;
+      return GetEpochString("FINAL", epochFormat);
+   }
    if (id == RUN_MODE)
       return runMode;
 
@@ -1278,13 +1287,16 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
 }
 
 //------------------------------------------------------------------------------
-// std::string GetEpochString(const std::string whichOne = "INITIAL")
+// std::string GetEpochString(const std::string &whichOne  = "INITIAL",
+//                            const std::string &outFormat = "UTCGregorian")
 //------------------------------------------------------------------------------
-std::string EventLocator::GetEpochString(const std::string whichOne)
+std::string EventLocator::GetEpochString(const std::string &whichOne,
+                                         const std::string &outFormat) const
 {
    Real outMjd = -999.999;
    std::string outStr;
-   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
+   std::string outputFormat = outFormat;
+//   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
 
    if (whichOne == "INITIAL")
    {
@@ -1823,6 +1835,9 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
 //      // Stop the data recording so that the kernel will be loaded
 //      sat->ProvideEphemerisData();
 
+      // write the 'running'message each time location is performed
+      MessageInterface::ShowMessage(locatingString);
+
       // Locate events in derived class and store them as you have decided to do so
       FindEvents();
       #ifdef DEBUG_EVENTLOCATOR_DATA
@@ -2094,4 +2109,11 @@ std::string EventLocator::GetNoEventsString(const std::string &forType)
    return noEvents;
 }
 
+void EventLocator::SetLocatingString(const std::string &forType)
+{
+   locatingString  = "Finding events for ";
+   locatingString += forType + " ";
+   locatingString += instanceName + " ...\n";
+   locatingString += "Celestial body properties are provided by SPICE kernels.\n";
+}
 

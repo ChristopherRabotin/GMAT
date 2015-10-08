@@ -396,7 +396,8 @@ std::string ElementWrapper::EvaluateString() const
 bool ElementWrapper::SetString(const std::string &toValue)
 {
    throw GmatBaseException(
-      "In ElementWrapper, SetString() method not valid for wrapper of non-String type.\n");
+      "Cannot set string \"" + toValue + "\" to non-String type. In ElementWrapper, SetString() "
+      "method not valid for wrapper of non-String type.\n");
 }
 
 //---------------------------------------------------------------------------
@@ -611,7 +612,9 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
           rhsObj ? rhsObj->GetName().c_str() : "NULL", sval.c_str());
       #endif
       
-      // Now assign to RHS
+      //==============================================================
+      // Now set value to LHS
+      //==============================================================
       switch (lhsDataType)
       {
       case Gmat::BOOLEAN_TYPE:
@@ -819,8 +822,17 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             // Handle special case for "DefaultFM.Drag = None;"
             if (rhsDataType == Gmat::STRING_TYPE)
             {
+               GmatBase *lhsObj = lhsWrapper->GetRefObject();
+               
                #ifdef DEBUG_EW_SET_VALUE
-               MessageInterface::ShowMessage("   calling lhsWrapper->SetString(rhs)\n");
+               MessageInterface::ShowMessage
+                  ("   lhsObj=<%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n", lhsObj,
+                   lhsObj ? lhsObj->GetTypeName().c_str() : "NULL",
+                   lhsObj ? lhsObj->GetName().c_str() : "NULL",
+                   lhsObj ? lhsObj->IsGlobal() : -999,
+                   lhsObj ? lhsObj->IsLocal() : -999);
+               MessageInterface::ShowMessage
+                  ("   rhsObj is NULL, calling lhsWrapper->SetString(rhs)\n");
                #endif
                
                // Show more meaningful message
@@ -828,10 +840,29 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
                {
                   lhsWrapper->SetString(rhs);
                }
-               catch (BaseException &)
+               catch (BaseException &be)
                {
-                  // Show more meaningful message from the wrapper ref object (LOJ: 2011.02.17)
-                  throw;
+                  // Will this fix GMT-5336 Case_2.script error? (LOJ: 2015.10.03)
+                  // If function output is not declared and it is global object
+                  // ignore exception
+                  // sample script:
+                  // function [MAVEN] = Case_2()
+                  // %%Create Spacecraft MAVEN;
+                  // BeginMissionSequence;
+                  // Global MAVEN
+                  if (lhsObj != NULL && lhsObj->IsGlobal() && !(lhsObj->IsLocal()))
+                  {
+                     #ifdef DEBUG_EW_SET_VALUE
+                     MessageInterface::ShowMessage
+                        ("==> lhsObj is global so ignoring exception '%s'\n",
+                         be.GetFullMessage().c_str());
+                     #endif
+                  }
+                  else
+                  {
+                     // Show more meaningful message from the wrapper ref object (LOJ: 2011.02.17)
+                     throw;
+                  }
                }
             }
             // Handle case like "XYPlot1.IndVar = sat.A1ModJulian;"
