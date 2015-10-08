@@ -22,27 +22,6 @@
     <title>New Features</title>
 
     <section>
-      <title>GMAT Stuff</title>
-
-      <para>You can now purchase clothing and other items with the GMAT logo
-      via ©Land's End, Inc at the <link
-      xlink:href="http://ocs.landsend.com/cd/frontdoor?store_name=nasagsfc&amp;store_type=3">GSFC
-      Store</link> . Once, you've chosen an item, make sure to select the GMAT
-      logo!</para>
-
-      <informalfigure>
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="files/images/relnotes/r2015a/SWAG.png"
-                         scale="60"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
-      </informalfigure>
-    </section>
-
-    <section>
       <title>Solver Status Window</title>
 
       <para>GMAT now displays a window showing solver variables and constraint
@@ -63,54 +42,16 @@
     </section>
 
     <section>
-      <title>New Orbit State Representations</title>
+      <title>SNOPT Optimizer</title>
 
-      <para>GMAT now supports six new common orbit state representations,
-      developed with support by the Korea Aerospace Research Institute (KARI).
-      The new representations are:<itemizedlist spacing="compact">
-          <listitem>
-            <para>Long- and short-period Brouwer-Lyddane mean elements
-            (<guilabel>BrouwerMeanLong</guilabel> and
-            <guilabel>BrouwerMeanShort</guilabel>)</para>
-          </listitem>
-
-          <listitem>
-            <para>Incoming and outgoing hyperbolic asymptote elements
-            (<guilabel>IncomingAsymptote</guilabel> and
-            <guilabel>OutgoingAsymptote</guilabel>)</para>
-          </listitem>
-
-          <listitem>
-            <para>Modified equinoctial elements
-            (<guilabel>ModifiedEquinoctial</guilabel>)</para>
-          </listitem>
-
-          <listitem>
-            <para>Alternate equinoctial elements
-            (<guilabel>AlternateEquinoctial</guilabel>)</para>
-          </listitem>
-
-          <listitem>
-            <para>Delaunay elements (<guilabel>Delaunay</guilabel>)</para>
-          </listitem>
-
-          <listitem>
-            <para>Planetodetic elements, when using a body-fixed coordinate
-            system (<guilabel>Planetodetic</guilabel>)</para>
-          </listitem>
-        </itemizedlist></para>
-
-      <para>The new representations are available as options in the
-      <guilabel>Spacecraft</guilabel> "<guilabel>State Type</guilabel>" list,
-      and as options to the
-      <guilabel>Spacecraft</guilabel>.<guilabel>DisplayStateType</guilabel>
-      field.</para>
+      <para>GMAT now interfaces to Stanford Business Softwares SNOPT
+      Optimizer</para>
 
       <informalfigure>
         <screenshot>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/r2014a/SpacecraftStateTypes.png"
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_SNOPT.png"
                          scale="50"/>
             </imageobject>
           </mediaobject>
@@ -122,35 +63,17 @@
     </section>
 
     <section>
-      <title>New Attitude Models</title>
+      <title>Eclipse Location</title>
 
-      <para>GMAT now supports three new kinematic attitude models, developed
-      with support by the Korea Aerospace Research Institute (KARI). The new
-      representations are:<itemizedlist spacing="compact">
-          <listitem>
-            <para>Precessing spinner</para>
-          </listitem>
-
-          <listitem>
-            <para>Nadir pointing</para>
-          </listitem>
-
-          <listitem>
-            <para>CCSDS Attitude Ephemeris Message (AEM)</para>
-          </listitem>
-        </itemizedlist></para>
-
-      <para>The new representations are available as options in the
-      <guilabel>Spacecraft</guilabel> "<guilabel>Attitude</guilabel>" list,
-      and as options to the
-      <guilabel>Spacecraft</guilabel>.<guilabel>DisplayStateType</guilabel>
-      field.</para>
+      <para>GMAT now supports eclipse location. Under the hood GMAT calls NAIF
+      SPICE routines. Thanks to the NAIF for making this great functionality
+      available.</para>
 
       <informalfigure>
         <screenshot>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/r2014a/AttitudeTypes.png"
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_EclipseLocation.png"
                          scale="50"/>
             </imageobject>
           </mediaobject>
@@ -162,80 +85,106 @@
     </section>
 
     <section>
-      <title>Dynamics and Model Improvements</title>
+      <title>Station Contact Location</title>
 
-      <para>GMAT now supports several new dynamics models and a new numerical
-      integrator.<itemizedlist spacing="compact">
-          <listitem>
-            <para>Prince Dormand 853 integrator. See the <link
-            linkend="Propagator">Propagator</link> reference for more
-            information.</para>
-          </listitem>
+      <para>GMAT now supports station contact location. Under the hood GMAT
+      calls NAIF SPICE routines. Thanks to the NAIF for making this great
+      functionality available.</para>
 
-          <listitem>
-            <para>Mars-GRAM density model. See the <link
-            linkend="Propagator">Propagator</link> reference for more
-            information.</para>
-          </listitem>
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_ContactLocation.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
 
-          <listitem>
-            <para>High-fidelity, attitude dependent SRP dynamics model. See
-            the <link linkend="Propagator">Propagator</link> reference, and
-            the <link linkend="SpacecraftBallisticMass">Spacecraft Ballistic
-            and Mass Properties</link> reference for more information.</para>
-          </listitem>
-        </itemizedlist></para>
+      <para>See the <link linkend="SpacecraftAttitude">Spacecraft
+      Attitude</link> reference for more information.</para>
     </section>
 
     <section>
-      <title>Targeting and Optimization Improvements</title>
+      <title>Electric Propulsion</title>
 
-      <para><itemizedlist spacing="compact">
-          <listitem>
-            <para>There are new boundary value solver options on
-            <guilabel>DifferentialCorrector</guilabel>
-            (<guilabel>Broyden</guilabel>, and
-            <guilabel>ModifiedBroyden</guilabel>). Brodyen’s method and
-            modified Broyden's method usually take more iterations but fewer
-            function evaluations than <guilabel>NewtonRaphson</guilabel> and
-            so are often faster. See the <link
-            linkend="DifferentialCorrector">Differential Corrector</link>
-            reference for more information.</para>
-          </listitem>
+      <para>GMAT now supports modelling of electric propulsion systems. Below
+      is an examle showing GMAT modelling a cube-sat with electric propulsion
+      in a lunar weak-stablity orbit. You can model electric tanks, thrusters,
+      and power systems (both Solar and nuclear). See the TODO tutorial for
+      details on configuring GMAT for this type of analysis.</para>
 
-          <listitem>
-            <para>There are new parameters that check for convergence of
-            solvers. See the <link linkend="CalculationParameters">Calculation
-            Parameters</link> reference for more information.</para>
-          </listitem>
-        </itemizedlist> Below is a script example that illustrates the new
-      algorithm and parameter options.<programlisting><code>Create Spacecraft aSat
-Create Propagator aPropagator
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_ElectricPropulsionSystem.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
+    </section>
 
-Create ImpulsiveBurn aBurn
-Create DifferentialCorrector aDC
-%  This algorithm is often faster, as is ModifiedBroyden
-aDC.Algorithm = Broyden  
+    <section>
+      <title>Python Interface</title>
 
-Create OrbitView EarthView
-EarthView.Add = {Earth,aSat}
-EarthView.ViewScaleFactor = 5
+      <para>GMAT now supports an interface with Python. The power of the
+      Python ecosystem can now be used in parallel with GMAT.</para>
 
-Create ReportFile aReport 
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_Python.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
+    </section>
 
-BeginMissionSequence
+    <section>
+      <title>GMAT Functions</title>
 
-%  Report targeter status here
-Report aReport aDC.SolverStatus aDC.SolverState
-Target aDC
-    Vary aDC(aBurn.Element1 = 1.0, {Upper = 3, MaxStep = 0.4})
-    Maneuver aBurn(aSat)
-    Propagate aPropagator(aSat,{aSat.Apoapsis})
-    Achieve aDC(aSat.RMAG = 42164)
-EndTarget
-%  Report targeter status here
-Report aReport aDC.SolverStatus aDC.SolverState
-</code></programlisting></para>
+      <para>You can now write functions (sub-routines) in the GMAT script
+      language. This powerful feature greatly expands the practical capability
+      of the system and makes maintaining complex configurations simpler. You
+      can also share GMAT script among projects. If you need a new math
+      computation, want to isolate a complex section of code, or re-use code,
+      GMAT functions are a great solution.</para>
+
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_GMATFunctions.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
+    </section>
+
+    <section>
+      <title>Space Weather Modelling</title>
+
+      <para>You can now provide flux files for drag modelling including
+      Schatten historical files and Center for Space Standards and Innovation
+      (CSSI) Space Weather Files. This greatly improves long term orbital
+      predictions and reconstructions in the Earth's atmosphere.</para>
+
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_SpaceWeather.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
     </section>
   </section>
 
@@ -243,17 +192,43 @@ Report aReport aDC.SolverStatus aDC.SolverState
     <title>Improvements</title>
 
     <section>
-      <title>Dependencies in Assignment Command</title>
+      <title>Documentation</title>
 
-      <para>You can now define settable parameters by using a dependency on
-      the LHS of an assignment command:</para>
+      <para>We've written TODO new pages of high-quality user documentation!
+      We've also written two conference papers documenting our testing process
+      and results, and the flight qualification program and results for the
+      Advanced Composition Explorer. The conference papers are located in the
+      distribution package as shown below</para>
 
-      <programlisting><code>Create Spacecraft aSat
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_VandV.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
+    </section>
 
-BeginMissionSequence
+    <section>
+      <title>Training Videos</title>
 
-aSat.EarthFixed.X = 7000
-aSat.EarthMJ2000Eq.VZ = 1</code></programlisting>
+      <para>We've posted training videos on YouTube TODO Link. You can now
+      take GMAT training even if you are unable to take the live
+      classes!</para>
+
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_TrainingVideos.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
     </section>
 
     <section>
@@ -272,19 +247,8 @@ aSat.EarthMJ2000Eq.VZ = 1</code></programlisting>
         </listitem>
 
         <listitem>
-          <para>You can now supply a Schatten file for predicted solar flux
-          data for use in orbit propagation.</para>
-        </listitem>
-
-        <listitem>
-          <para>You can now supply a Center for Space Standards and Innovation
-          (CSSI) Space Weather File for using historical flux data in orbit
-          propagation.</para>
-        </listitem>
-
-        <listitem>
-          <para>The sytem now looks in the working directory for scripts on
-          command line</para>
+          <para>The system now looks in the working directory for scripts run
+          from the command line</para>
         </listitem>
 
         <listitem>
@@ -330,10 +294,21 @@ aSat.EarthMJ2000Eq.VZ = 1</code></programlisting>
         <guilabel>ChemicalThruster</guilabel> to distinguish between chemical
         and electric systems.</para>
       </listitem>
-	  
-	  <listitem>
-        <para>The sensitivity of Spacecraft Resource setting such as <guilabel>ModelOffsetX</guilabel>, <guilabel>ModelRotationY</guilabel>, and <guilabel>ModelScale</guilabel> 
-		has changed has changed in 3-D graphics.</para>
+
+      <listitem>
+        <para>The sensitivity of Spacecraft Resource setting such as
+        <guilabel>ModelOffsetX</guilabel>,
+        <guilabel>ModelRotationY</guilabel>, and
+        <guilabel>ModelScale</guilabel> has changed has changed in 3-D
+        graphics.</para>
+      </listitem>
+
+      <listitem>
+        <para>When applying an <guilabel>ImpulsiveBurn</guilabel> during
+        backwards targeting, GMAT now attempts to compute maneuver values that
+        are consistent with a forward targeting approach. The maneuver values
+        reference the pre-manevuer velocity components instead of the
+        post-maneuver components.</para>
       </listitem>
     </itemizedlist>
   </section>
@@ -355,7 +330,7 @@ aSat.EarthMJ2000Eq.VZ = 1</code></programlisting>
     <section>
       <title>Developer Tools and Dependencies</title>
 
-      <para>We developed a new Cmake-based build system that is used all
+      <para>We developed a new Cmake-based build system that is used on all
       platforms. The Cmake configuration is maintained by the GMAT team and
       distributed with the source code. Thanks to Cmake, it is much easier to
       compile GMAT. See the <link
@@ -364,6 +339,27 @@ aSat.EarthMJ2000Eq.VZ = 1</code></programlisting>
 
       <para>We updated SPICE to version N0065 and updated WxWidgets to Wx
       3.0.2.</para>
+    </section>
+
+    <section>
+      <title>GMAT Stuff</title>
+
+      <para>You can now purchase clothing and other items with the GMAT logo
+      via ©Land's End, Inc at the <link
+      xlink:href="http://ocs.landsend.com/cd/frontdoor?store_name=nasagsfc&amp;store_type=3">GSFC
+      Store</link> . Once, you've chosen an item, make sure to select the GMAT
+      logo!</para>
+
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/SWAG.png"
+                         scale="60"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
     </section>
   </section>
 
