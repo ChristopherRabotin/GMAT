@@ -92,11 +92,11 @@
 
     <para>Attached-hardware parameters have no dependencies, but are
     themselves dependent on being attached to a
-    <guilabel>Spacecraft</guilabel>. <guilabel>FuelTank</guilabel> and
+    <guilabel>Spacecraft</guilabel>. <guilabel>ChemicalTank</guilabel> and
     <guilabel>Thruster</guilabel> parameters are examples of this. The
-    <guilabel>FuelMass</guilabel> parameter of <guilabel>FuelTank</guilabel>
+    <guilabel>FuelMass</guilabel> parameter of <guilabel>ChemicalTank</guilabel>
     cannot be referenced without first attaching the
-    <guilabel>FuelTank</guilabel> to a <guilabel>Spacecraft</guilabel>. Then,
+    <guilabel>ChemicalTank</guilabel> to a <guilabel>Spacecraft</guilabel>. Then,
     the parameter can be referenced as:
     <literal><replaceable>Spacecraft</replaceable>.FuelTank.FuelMass</literal>.</para>
 
@@ -161,7 +161,7 @@
       <para>If the <guilabel>Spacecraft</guilabel> type is selected, the
       <guilabel>Attached Hardware List</guilabel> appears below the
       <guilabel>Object List</guilabel>. This list displays any hardware (such
-      as <guilabel>FuelTank</guilabel> resources) attached to the selected
+      as <guilabel>ChemicalTank</guilabel> resources) attached to the selected
       <guilabel>Spacecraft</guilabel>. If the <guilabel>Array</guilabel> type
       is selected, <guilabel>Row</guilabel> and <guilabel>Col</guilabel> boxes
       appear. Use these to specify a row and column to select an individual
@@ -5614,7 +5614,7 @@
               <entry>Y</entry>
 
               <entry><para>Total mass, including fuel mass from attached
-              <guilabel>FuelTank</guilabel> resources.</para><variablelist>
+              <guilabel>ChemicalTank</guilabel> resources.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6109,14 +6109,14 @@
     <refsection>
       <title>FuelTank</title>
 
-      <para><guilabel>FuelTank</guilabel> parameters are accessible only after
-      attaching the <guilabel>FuelTank</guilabel> resource to a
+      <para><guilabel>ChemicalTank</guilabel> parameters are accessible only after
+      attaching the <guilabel>ChemicalTank</guilabel> resource to a
       <guilabel>Spacecraft</guilabel>, like so:<programlisting><code>Create FuelTank aTank
 Create Spacecraft aSat
 aSat.Tanks = {aTank}</code></programlisting></para>
 
-      <para>Then, <guilabel>FuelTank</guilabel> parameters are accessible by
-      specifying the <guilabel>FuelTank</guilabel> name as the parameter
+      <para>Then, <guilabel>ChemicalTank</guilabel> parameters are accessible by
+      specifying the <guilabel>ChemicalTank</guilabel> name as the parameter
       dependency:<programlisting><code>Create ReportFile aReport
 aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
 
@@ -6151,7 +6151,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>FuelDensity</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>FuelDensity</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6186,7 +6186,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>FuelMass</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>FuelMass</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6221,7 +6221,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>Pressure</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>Pressure</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6256,7 +6256,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>RefTemperature</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>RefTemperature</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6291,7 +6291,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>Temperature</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>Temperature</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6326,7 +6326,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>Volume</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>Volume</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 

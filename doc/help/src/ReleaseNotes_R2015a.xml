@@ -284,7 +284,7 @@
 
     <itemizedlist>
       <listitem>
-        <para>The <guilabel>FuelTank</guilabel> Resource has been renamed to
+        <para>The <guilabel>ChemicalTank</guilabel> Resource has been renamed to
         <guilabel>ChemicalTank</guilabel> to distinguish between chemical and
         electric systems.</para>
       </listitem>

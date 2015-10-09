@@ -697,7 +697,7 @@
           <row>
             <entry><guilabel>Tank</guilabel></entry>
 
-            <entry><para><guilabel>FuelTank</guilabel> from which the
+            <entry><para><guilabel>ChemicalTank</guilabel> from which the
             <guilabel>Thruster</guilabel> draws propellant from. This field
             cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
@@ -897,7 +897,7 @@
     the Remarks for more detail on local coordinate systems.</para>
 
     <para>If <guimenu>Decrement Mass</guimenu> is checked, then you can select
-    the desired <guilabel>FuelTank</guilabel> used as the fuel supply for mass
+    the desired <guilabel>ChemicalTank</guilabel> used as the fuel supply for mass
     depletion.</para>
   </refsection>
 
@@ -1104,7 +1104,7 @@ Maneuver BackProp myImpulsiveBurn(Sat);</code></programlisting>
 
               <entry><para> If you want to model mass depletion for an
               <guilabel>ImpulsiveBurn</guilabel>, attach a
-              <guilabel>FuelTank</guilabel> to the maneuvered
+              <guilabel>ChemicalTank</guilabel> to the maneuvered
               <guilabel>Spacecraft</guilabel> as a source of fuel mass.
               </para></entry>
             </row>
@@ -1137,10 +1137,10 @@ Maneuver BackProp myImpulsiveBurn(Sat);</code></programlisting>
     <title>Examples</title>
 
     <informalexample>
-      <para>Create a default <guilabel>FuelTank</guilabel> and an
+      <para>Create a default <guilabel>ChemicalTank</guilabel> and an
       <guilabel>ImpulsiveBurn</guilabel> that allows for fuel depletion,
       assign the <guilabel>ImpulsiveBurn</guilabel> the default
-      <guilabel>FuelTank</guilabel>, attach the <guilabel>FuelTank</guilabel>
+      <guilabel>ChemicalTank</guilabel>, attach the <guilabel>ChemicalTank</guilabel>
       to a <guilabel>Spacecraft</guilabel>, and apply the
       <guilabel>ImpulsiveBurn</guilabel> to the
       <guilabel>Spacecraft</guilabel>.</para>

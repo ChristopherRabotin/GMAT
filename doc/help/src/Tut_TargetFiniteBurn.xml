@@ -126,8 +126,8 @@
 
       <para>To model thrust and fuel use associated with a finite burn, we
       must create a <guilabel>Thruster</guilabel> and a
-      <guilabel>FuelTank</guilabel> and then attach the newly created
-      <guilabel>FuelTank</guilabel> to the
+      <guilabel>ChemicalTank</guilabel> and then attach the newly created
+      <guilabel>ChemicalTank</guilabel> to the
       <guilabel>Thruster</guilabel>.</para>
 
       <procedure>
@@ -142,7 +142,7 @@
         <step>
           <para>In the <guilabel>Resources</guilabel> tree, right-click on the
           <guilabel>Hardware</guilabel> folder, point to
-          <guilabel>Add</guilabel>, and click <guilabel>FuelTank</guilabel>.
+          <guilabel>Add</guilabel>, and click <guilabel>ChemicalTank</guilabel>.
            A resource named <guilabel>FuelTank1</guilabel> will be
           created.</para>
         </step>

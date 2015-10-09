@@ -32,7 +32,7 @@
     electric thruster which supports several models for thrust and mass flow
     computation. The <guilabel>Thruster</guilabel> model also allows you to
     specify properties such as a duty cycle and scale factor and to connect a
-    <guilabel>Thruster</guilabel> with a <guilabel>FuelTank</guilabel>. You
+    <guilabel>Thruster</guilabel> with a <guilabel>ChemicalTank</guilabel>. You
     can flexibly define the direction of the thrust by specifying the thrust
     components in coordinate systems such as (locally defined)
     <guilabel>SpacecraftBody</guilabel> or <guilabel>LVLH</guilabel>, or by
@@ -979,11 +979,11 @@
           <row>
             <entry><guilabel>Tank</guilabel></entry>
 
-            <entry><para><guilabel>FuelTank</guilabel> from which the
+            <entry><para><guilabel>ChemicalTank</guilabel> from which the
             <guilabel>Thruster</guilabel> draws propellant from. In a script
             command, an empty list, e.g., <literal>Thruster1.Tank =
             {}</literal>, is NOT allowed. Via the script, if you wish to
-            indicate that no <guilabel>FuelTank</guilabel> is associated with
+            indicate that no <guilabel>ChemicalTank</guilabel> is associated with
             a <guilabel>Thruster</guilabel>, do not include commands such as
             <literal>Thruster1.Tank = ...</literal> in your script. This field
             cannot be modified in the Mission Sequence. </para> <variablelist>
@@ -1672,7 +1672,7 @@
     properties of a <guilabel>Thruster</guilabel> including the
     <guilabel>Coordinate System</guilabel> of the thrust acceleration
     direction vector, the thrust magnitude and Isp coefficients, and choice of
-    <guilabel>FuelTank</guilabel>. The layout of the
+    <guilabel>ChemicalTank</guilabel>. The layout of the
     <guilabel>Thruster</guilabel> dialog box is shown below.</para>
 
     <screenshot>
@@ -1780,9 +1780,9 @@
 
       <para>A <guilabel>Thruster</guilabel> resource is used only in
       association with finite maneuvers. To implement a finite maneuver, you
-      must first create both a <guilabel>FuelTank</guilabel> and a
+      must first create both a <guilabel>ChemicalTank</guilabel> and a
       <guilabel>FiniteBurn</guilabel> resource. You must also associate a
-      <guilabel>FuelTank</guilabel> with the <guilabel>Thruster</guilabel>
+      <guilabel>ChemicalTank</guilabel> with the <guilabel>Thruster</guilabel>
       resource and you must associate a <guilabel>Thruster</guilabel> with the
       <guilabel>FiniteBurn</guilabel> resource. The actual finite maneuver is
       implemented using the
