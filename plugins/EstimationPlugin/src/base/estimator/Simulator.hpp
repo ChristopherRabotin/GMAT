@@ -220,6 +220,9 @@ protected:
    void                   FindNextSimulationEpoch();
    // progress string for reporting
    virtual std::string    GetProgressString();
+
+private:
+   bool               isTheFirstMeasurement;                                    // fix bug GMT-4909
 };
 
 #endif /* Simulator_hpp */

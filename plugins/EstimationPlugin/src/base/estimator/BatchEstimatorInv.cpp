@@ -168,6 +168,8 @@ void BatchEstimatorInv::Accumulate()
    std::string keyword = gsName + " " + typeName;
    
    // Set initial value for 2 statistics tables
+   if (statisticsTable["TOTAL NUM RECORDS"].find(keyword) ==  statisticsTable["TOTAL NUM RECORDS"].end())
+      statisticsTable["TOTAL NUM RECORDS"][keyword] = 0.0;
    if (statisticsTable["ACCEPTED RECORDS"].find(keyword) ==  statisticsTable["ACCEPTED RECORDS"].end())
       statisticsTable["ACCEPTED RECORDS"][keyword] = 0.0;
    if (statisticsTable["WEIGHTED RMS"].find(keyword) ==  statisticsTable["WEIGHTED RMS"].end())
@@ -177,6 +179,8 @@ void BatchEstimatorInv::Accumulate()
    if (statisticsTable["STANDARD DEVIATION"].find(keyword) ==  statisticsTable["STANDARD DEVIATION"].end())
       statisticsTable["STANDARD DEVIATION"][keyword] = 0.0;
 
+   if (statisticsTable1["TOTAL NUM RECORDS"].find(typeName) ==  statisticsTable1["TOTAL NUM RECORDS"].end())
+      statisticsTable1["TOTAL NUM RECORDS"][typeName] = 0.0;
    if (statisticsTable1["ACCEPTED RECORDS"].find(typeName) ==  statisticsTable1["ACCEPTED RECORDS"].end())
       statisticsTable1["ACCEPTED RECORDS"][typeName] = 0.0;
    if (statisticsTable1["WEIGHTED RMS"].find(typeName) ==  statisticsTable1["WEIGHTED RMS"].end())

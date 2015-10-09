@@ -114,9 +114,14 @@ public:
    virtual bool         Initialize();
 
    virtual bool CalculateMeasurement(bool withEvents = false,
+                       bool withMediaCorrection = true,                 // made changes by TUAN NGUYEN
                        ObservationData* forObservation = NULL,
                        std::vector<RampTableData>* rampTB = NULL,
-                       Real atTimeOffset = 0.0, Integer forStrand = -1);
+                       Real atTimeOffset = 0.0, 
+                       Integer forStrand = -1);
+   virtual bool ReCalculateFrequencyAndMediaCorrection(
+                       UnsignedInt pathIndex, Real uplinkFrequency,
+                       std::vector<RampTableData>* rampTB);             // made changes by TUAN NGUYEN
 
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
@@ -145,8 +150,8 @@ public:
    /// Measurement Model Settings
    virtual bool         SetProgressReporter(ProgressReporter* reporter);
 
-   ///// Set value for Doppler count interval. It is used to calculate measurement for Start path          // made changes by TUAN NGUYEN
-   //void                 SetCountInterval(Real timeInterval);                                             // made changes by TUAN NGUYEN
+   /// Set value for Doppler count interval. It is used to calculate measurement for Start path
+   void                 SetCountInterval(Real timeInterval);
 
    /// Get paticipant objects lists
    virtual const std::vector<ObjectArray*>&
@@ -186,8 +191,8 @@ protected:
    /// Flag to indicate measurerment time tag to be at the end of signal path
    bool epochIsAtEnd;
 
-   ///// Count interval is time interval (in seconds) between Start-path and End-path          // made changes by TUAN NGUYEN
-   //Real countInterval;                                                                       // made changes by TUAN NGUYEN
+   /// Count interval is time interval (in seconds) between Start-path and End-path
+   Real countInterval;
 
    /// The reporter for status information
    ProgressReporter *navLog;

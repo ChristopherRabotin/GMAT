@@ -317,6 +317,13 @@ bool StatisticRejectFilter::SetStringParameter(const std::string &label,
 }
 
 
+bool StatisticRejectFilter::SetTrackingConfigs(StringArray tkconfigs)
+{
+   tkConfigList = tkconfigs;
+   return true;
+}
+
+
 ObservationData* StatisticRejectFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
 #ifdef DEBUG_FILTER

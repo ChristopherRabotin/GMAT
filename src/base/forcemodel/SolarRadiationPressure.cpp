@@ -1099,7 +1099,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                if ((old_cr != cr[i]))
                {
                   old_cr = cr[i];
-                  MessageInterface::ShowMessage("Cr = %.12lf\n", cr[i]);
+                  // MessageInterface::ShowMessage("Cr = %.12lf\n", cr[i]);         // made changes by TUAN NGUYEN
                }
 
                // All of the common terms for C_s

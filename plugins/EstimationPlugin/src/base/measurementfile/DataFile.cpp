@@ -851,7 +851,6 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
    ObservationData* obdata = dataObject;
 
    // Run statistic reject filters when it passes accept filters
-   //MessageInterface::ShowMessage("I am here 0: There are %d filter.\n  List of statistics reject filters:\n", filterList.size());
    if (obdata)
    {
       for (UnsignedInt i = 0; i < filterList.size(); ++i)
@@ -868,7 +867,6 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
       }
    }
 
-   //MessageInterface::ShowMessage("I am here 1\n");
    // Run statistic accept filters
    if (obdata)
    {
@@ -888,7 +886,6 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
 
       rejectedReason = rejReason;
    }
-   //MessageInterface::ShowMessage("I am here 2\n");
 
    // Increasing record counters in all accept filters
    for (UnsignedInt i = 0; i < filterList.size(); ++i)
@@ -896,7 +893,7 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
       if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
          ((StatisticAcceptFilter*)filterList[i])->IncreasingRecordCounter();
    }
-   //MessageInterface::ShowMessage("I am here 3\n");
+   
 #ifdef DEBUG_FILTER_NEW
    if (rejectedReason != 0)
       MessageInterface::ShowMessage("Exit DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>, rejectedReason = %d)\n", GetName().c_str(), this, dataObject, rejectedReason);

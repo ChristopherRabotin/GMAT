@@ -55,6 +55,11 @@ public:
                         CalculateMeasurement(bool withEvents = false,
                               ObservationData* forObservation = NULL,
                               std::vector<RampTableData>* rampTB = NULL);
+   
+   virtual bool         ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
+                              Real uplinkFrequency, 
+                              std::vector<RampTableData>* rampTB);                         // made changes by TUAN NGUYEN
+
    virtual const MeasurementData&
                         CalculateMeasurementAtOffset(bool withEvents = false,
                               Real dt = 0.0, ObservationData* forObservation = NULL,

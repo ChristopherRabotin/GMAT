@@ -300,18 +300,18 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       else
          isInitialized = false;
    }
-   else
-   {
-      if (modelState != NULL)
-      {
-         #ifdef DEBUG_STATE_ALLOCATION
-            MessageInterface::ShowMessage("Deleting modelState at %p\n",
-                  modelState);
-         #endif
-         delete [] modelState;
-         modelState = NULL;
-      }
-   }
+   //else                                                                        // made changes by TUAN NGUYEN
+   //{                                                                           // made changes by TUAN NGUYEN
+   //   if (modelState != NULL)                                                  // made changes by TUAN NGUYEN
+   //   {                                                                        // made changes by TUAN NGUYEN
+   //      #ifdef DEBUG_STATE_ALLOCATION                                         // made changes by TUAN NGUYEN
+   //         MessageInterface::ShowMessage("Deleting modelState at %p\n",       // made changes by TUAN NGUYEN
+   //               modelState);                                                 // made changes by TUAN NGUYEN
+   //      #endif                                                                // made changes by TUAN NGUYEN
+   //      delete [] modelState;                                                 // made changes by TUAN NGUYEN
+   //      modelState = NULL;                                                    // made changes by TUAN NGUYEN
+   //   }                                                                        // made changes by TUAN NGUYEN
+   //}                                                                           // made changes by TUAN NGUYEN
    rawState = modelState;
    
    if (pm.deriv != NULL) 
@@ -327,8 +327,8 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       else
          isInitialized = false;
    }
-   else
-      deriv = NULL;
+   //else
+   //   deriv = NULL;
 
    parameterCount = PhysicalModelParamCount;
 }
@@ -411,6 +411,18 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    
       stateChanged = pm.stateChanged;
    }
+   else
+   {
+      if (modelState != NULL)
+      {
+         #ifdef DEBUG_STATE_ALLOCATION
+            MessageInterface::ShowMessage("Deleting modelState at %p\n",
+                  modelState);
+         #endif
+         delete [] modelState;
+         modelState = NULL;
+      }
+   }
 
    rawState = modelState;
    
@@ -439,6 +451,14 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
       else
          isInitialized = false;
    }
+   else                                    // made changes by TUAN NGUYEN
+   {                                       // made changes by TUAN NGUYEN
+      if (deriv)                           // made changes by TUAN NGUYEN
+      {                                    // made changes by TUAN NGUYEN
+         delete [] deriv;                  // made changes by TUAN NGUYEN
+         deriv = NULL;                     // made changes by TUAN NGUYEN
+      }                                    // made changes by TUAN NGUYEN
+   }                                       // made changes by TUAN NGUYEN
    
    return *this;
 }
@@ -476,18 +496,21 @@ std::string PhysicalModel::GetBodyName()
 //------------------------------------------------------------------------------
 void PhysicalModel::SetBody(CelestialBody *theBody)
 {  
-   if (theBody != NULL)
-   {
-      if (body != NULL)
-      {
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (deriv, "deriv", "PhysicalModel::SetBody()",
-             "deleting deriv", this);
-         #endif
-         delete body;
-      }
-   }
+   // Comments: delete body may cause crash when body is a celestial body in solar system. 
+   // For example, if Earth object is deleted, GMAT will crash due to other part of 
+   // GMAT code is used Earth object for calculation.
+   //if (theBody != NULL)
+   //{
+   //   if (body != NULL)
+   //   {
+   //      #ifdef DEBUG_MEMORY
+   //      MemoryTracker::Instance()->Remove
+   //         (deriv, "deriv", "PhysicalModel::SetBody()",
+   //          "deleting deriv", this);
+   //      #endif
+   //      delete body;
+   //   }
+   //}
    
    body = theBody;
    bodyName = body->GetName();
@@ -601,6 +624,9 @@ bool PhysicalModel::Initialize()
       else
          isInitialized = false;
    }
+   else                                       // made changes by TUAN NGUYEN
+      isInitialized = false;                  // made changes by TUAN NGUYEN
+
    rawState = modelState;
    
    return isInitialized;

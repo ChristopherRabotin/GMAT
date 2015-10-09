@@ -29,6 +29,7 @@
 #include "DataFileAdapter.hpp"
 #include "PropSetup.hpp"
 #include "StatisticAcceptFilter.hpp"
+#include "StatisticRejectFilter.hpp"             // made changes by TUAN NGUYEN
 
 // Temporary to get Adapters hooked up
 #include "GmatObType.hpp"
@@ -291,12 +292,10 @@ bool MeasurementManager::Initialize()
    for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
    {
       // For each tracking set, It needs to do the following steps to process
-      //MessageInterface::ShowMessage("*** Processing TrackingFileSet %s:\n", trackingSets[i]->GetName().c_str());
 
       // Step 1: Initialize trackingSets[i]
       if (trackingSets[i]->Initialize() == false)
          return false;
-      //MessageInterface::ShowMessage("Step 1: Initialize %s\n", trackingSets[i]->GetName().c_str());
 
       // Step 2: Load data adapters from tracking file sets to measurement manager
       std::vector<TrackingDataAdapter*> *setAdapters =
@@ -312,19 +311,15 @@ bool MeasurementManager::Initialize()
          // Set retval?
       }
       adapterFromTFSMap[trackingSets[i]] = names;
-      //MessageInterface::ShowMessage("Step 2: Load adapters from TrackingFileSet to measurement nananger\n");
 
       // Step 3: Set stream objects and data filters for all observation data files in trackingSet[i]
       // 3.1. Create DataFile object for each file name
-      //MessageInterface::ShowMessage("Step 3.1: Create DataFile object for each file name:\n");
-
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("FileName");
       for (UnsignedInt k = 0; k < filenames.size(); ++k)
       {
          // 3.1.1 Create DataFile object
          DataFile *newStream = new DataFile(filenames[k]);
          newStream->SetStringParameter("Filename", filenames[k]);
-         //MessageInterface::ShowMessage("Step 3.1.1: Create DataFile object for %s\n", filenames[k].c_str());
 
          // 3.1.2 Create and set a data stream associated with the DataFile object
          GmatObType *got = new GmatObType();                      // ??? what happen for GMAT_OD and GMAT_ODDoppler???   // In new design, GMATInteral data file contains data records with different measurement type
@@ -336,7 +331,6 @@ bool MeasurementManager::Initialize()
          #endif
 
          SetStreamObject(newStream);
-         //MessageInterface::ShowMessage("Step 3.1.2: Create and set data stream with DataFile '%s'\n", newStream->GetName().c_str());
 
          // Associate the adapters with the stream
          for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
@@ -356,12 +350,10 @@ bool MeasurementManager::Initialize()
                      " failed to open in simulation mode");
          }
       }// for k loop
-      //MessageInterface::ShowMessage("Step 3.1: Create DataFile object for each file name: complete\n");
 
-      // 3.2. Set data filters to data file (only set data filters in estimation mode)           // made changes by TUAN NGUYEN
-      if (!inSimulationMode)                                                                     // made changes by TUAN NGUYEN
-         SetStatisticsDataFiltersToDataFiles(i);                                                 // made changes by TUAN NGUYEN
-      //MessageInterface::ShowMessage("Step 3.2: Set data filters to data file\n");
+      // 3.2. Set data filters to data file (only set data filters in estimation mode)
+      if (!inSimulationMode)
+         SetStatisticsDataFiltersToDataFiles(i);
 
       // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
       StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampTable");
@@ -406,8 +398,6 @@ bool MeasurementManager::Initialize()
                      " failed to open in simulation mode");
          }
       }// for k1 loop
-      //MessageInterface::ShowMessage("Step 4: Set stream objects for all ramped tables in %s\n", trackingSets[i]->GetName().c_str());
-      //MessageInterface::ShowMessage("*** Complete processing TrackingFileSet %s:\n", trackingSets[i]->GetName().c_str());
 
    }// for i loop
 
@@ -454,9 +444,6 @@ bool MeasurementManager::Initialize()
 //-----------------------------------------------------------------------------------
 bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
 {
-
-//   for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
-//   {
       // 1. Get tracking configs in ID from TrackingFileSet trackingSet[i]
       StringArray tkconfigs;
       std::stringstream ss;
@@ -492,8 +479,13 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
       // 3. Set tracking configs to statistics data filters in order to filter data based on them
       for (UnsignedInt k = 0; k < dataFilterObjects.size(); ++k)
       {
+         // set tracking configs to statistics accept filter
          if (dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter"))
             ((StatisticAcceptFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
+
+         // set tracking configs to statistics reject filter                                     // made changes by TUAN NGUYEN
+         if (dataFilterObjects[k]->IsOfType("StatisticsRejectFilter"))                           // made changes by TUAN NGUYEN
+            ((StatisticRejectFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);       // made changes by TUAN NGUYEN
       }
 
       // 4. Get list of all file names defined in trackingSet[i]
@@ -503,7 +495,7 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
          for(UnsignedInt j = 0; j < filenames.size(); ++j)
             MessageInterface::ShowMessage("file %d: <%s>\n", j, filenames[j].c_str());
       #endif
-
+      
       // 5. Set data filters to the DataFile objects
       for (UnsignedInt j = 0; j < filenames.size(); ++j)
       {
@@ -520,25 +512,51 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
          }
          if (fileObj == NULL)
             throw MeasurementException("Error: DataFile object with name '" + filenames[j] + "' was not set in MeasurementManager.\n");
-
+         
          // 5.2. Set data filters of type "Statistics" filter to DataFile object
          for (UnsignedInt k = 0; k < dataFilterObjects.size(); ++k)
          {
             GmatBase*  datafilter = dataFilterObjects[k];
-            if ((datafilter->IsOfType("StatisticsAcceptFilter"))||(datafilter->IsOfType("StatisticsRejectFilter")))
+            StringArray nameList = datafilter->GetStringArrayParameter("FileNames");
+
+            bool setfilter = false;
+
+            if (datafilter->IsOfType("StatisticsAcceptFilter"))
             {
-               // data filter is only set to data file if and only if datafilter.Filenames parameter 
-               // is an empty list or contains the name of data file.
-               StringArray nameList = datafilter->GetStringArrayParameter("FileNames");
-               
-               bool setfilter = false;
+               // For StatisticsAcceptFilter, the filter is applied to data files which are specified in StatisticAcceptFilter.FileNames.
+               // Special case: if StatisticsAcceptFilter.Filenames is an empty list, the filter is applied for all data files 
                if (nameList.size() == 0)
-                  setfilter = true;
+                  setfilter = true;                    // when no data file is set to StatisticsAcceptFilter.FileNames, statistics accept filter is used for all data file
                else
                {
-                  if ((datafilter->IsOfType("StatisticsAcceptFilter"))&&
-                      ((find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end())||
-                       (find(nameList.begin(), nameList.end(), "All") != nameList.end())))
+                  if ((find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end())||
+                          (find(nameList.begin(), nameList.end(), "All") != nameList.end()))
+                        setfilter = true;
+                  else
+                  {
+                     for (UnsignedInt q = 0; q < nameList.size(); ++q)
+                     {
+                        if (GmatStringUtil::ToUpper(nameList[q]) == GmatStringUtil::ToUpper(fileName))
+                        {
+                           setfilter = true;
+                           break;
+                        }
+                     }
+                  }
+               }
+            }
+            else if (datafilter->IsOfType("StatisticsRejectFilter"))
+            {
+               // For StatisticsRejectFilter, the filter is applied to data files which are specified in StatisticRejectFilter.FileNames.
+               // Special case: if StatisticsRejectFilter.Filenames is an empty list, the filter is not applied for any data files 
+               if (nameList.size() == 0)
+               {
+                  setfilter = false;                      // when no data file is set to TrackingFileSet.FileName, statistics reject filter is not used for any data file
+                  
+               }
+               else
+               {
+                  if (find(nameList.begin(), nameList.end(), "All") != nameList.end())
                      setfilter = true;
                   else
                   {
@@ -552,18 +570,18 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
                      }
                   }
                }
-
-               if (setfilter)
-               {
-                  #ifdef DEBUG_INITIALIZATION
-                     MessageInterface::ShowMessage(" &&&&   Set data filter <%s,%p> to data file <%s,%p>.\n", datafilter->GetName().c_str(), datafilter, fileObj->GetName().c_str(), fileObj);
-                  #endif
-                  fileObj->SetDataFilter((DataFilter*)datafilter);
-               }
             }
+
+            if (setfilter)
+            {
+               #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage(" &&&&   Set data filter <%s,%p> to data file <%s,%p>.\n", datafilter->GetName().c_str(), datafilter, fileObj->GetName().c_str(), fileObj);
+               #endif
+               fileObj->SetDataFilter((DataFilter*)datafilter);
+            }
+            
          }// for k loop
       }// for j loop
-//   }// for i loop
 
    return true;
 }
@@ -1100,7 +1118,6 @@ UnsignedInt MeasurementManager::LoadObservations()
    std::vector<ObservationData*> dataBuffer;
    ObservationData* odPointer;
    
-   //MessageInterface::ShowMessage("Hi there 1: streamList.size() = %d\n", streamList.size());
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
       odPointer = streamList[i]->ReadObservation();
@@ -1114,11 +1131,9 @@ UnsignedInt MeasurementManager::LoadObservations()
       count.push_back(0);
    }
 
-   //MessageInterface::ShowMessage("Hi there 2\n");
    ObservationData od;
    while (true)
    {
-      //MessageInterface::ShowMessage("Hi there 3.1\n");
       // 1. get a data record in data buffer with smallest value of epoch
       UnsignedInt minIndex = dataBuffer.size();     // point to the outside of data buffer
       for (UnsignedInt i = 0; i < dataBuffer.size(); ++i)
@@ -1135,19 +1150,16 @@ UnsignedInt MeasurementManager::LoadObservations()
          }
       }
 
-      //MessageInterface::ShowMessage("Hi there 3.2\n");
       // 2. if dada buffer contains all NULL data record (that means all streams at EOF), then exit while loop
       if (minIndex == dataBuffer.size())
          break;
 
-      //MessageInterface::ShowMessage("Hi there 3.3\n");
       // 3. Filter the data record do it for all filters
       Integer rejectedReason = 0;
       ObservationData* obsData = dataBuffer[minIndex];
       // Note that: this observation data is belong to data file: streamList[minIndex]. Therefor, it needs to use filters defined in that data file object
       ObservationData* selectedData = streamList[minIndex]->FilteringData(obsData, rejectedReason);
 
-      //MessageInterface::ShowMessage("Hi there 3.4\n");
       // 4. if it passes all filters then add it to observations
       if (selectedData != NULL)
       {
@@ -1172,7 +1184,6 @@ UnsignedInt MeasurementManager::LoadObservations()
             trackingConfigsMap[minIndex].push_back(ss.str());
       }
 
-      //MessageInterface::ShowMessage("Hi there 3.5\n");
       // 5. count throw recods based on rejectedReason
       switch (rejectedReason)
       {
@@ -1204,7 +1215,6 @@ UnsignedInt MeasurementManager::LoadObservations()
             break;
       }
 
-      //MessageInterface::ShowMessage("Hi there 3.6\n");
       // 6. Read data record from streamList[minIndex] to fill data buffer if the stream is not EOF
       if (dataBuffer[minIndex] != NULL)
       {

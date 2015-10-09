@@ -28,13 +28,13 @@
 #include "ErrorModel.hpp"
 #include <sstream>
 
-#define DEBUG_ADAPTER_EXECUTION
-#define DEBUG_ADAPTER_DERIVATIVES
-#define DEBUG_DERIVATIVE_CALCULATION
-#define DEBUG_SET_PARAMETER
-#define DEBUG_CONSTRUCTION
-#define DEBUG_INITIALIZE
-#define DEBUG_DOPPLER_CALCULATION
+//#define DEBUG_ADAPTER_EXECUTION
+//#define DEBUG_ADAPTER_DERIVATIVES
+//#define DEBUG_DERIVATIVE_CALCULATION
+//#define DEBUG_SET_PARAMETER
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_INITIALIZE
+//#define DEBUG_DOPPLER_CALCULATION
 
 //------------------------------------------------------------------------------
 // Static data
@@ -44,9 +44,9 @@ TDRSDopplerAdapter::PARAMETER_TEXT[TDRSDopplerAdapterParamCount - RangeAdapterKm
 {
    "DopplerCountInterval",
    "ServiceAccess",
-   "SimNode4Frequency",
-   "SimNode4FrequencyBand",
-   "SimSmarId",
+   "Node4Frequency",
+   "Node4Band",
+   "SmarId",
 };
 
 
@@ -331,7 +331,7 @@ bool TDRSDopplerAdapter::SetStringParameter(const Integer id, const std::string&
 {
    // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
    bool retval = true;
-   if (id != MEASUREMENT_TYPE)
+   if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))
    {
       retval = adapterSL->SetStringParameter(id, value) && retval;
       retval = adapterSS->SetStringParameter(id, value) && retval;
@@ -867,8 +867,8 @@ bool TDRSDopplerAdapter::Initialize()
    if (RangeAdapterKm::Initialize())
    {
       // @todo: initialize all needed variables
-      if (serviceAccessList.size() == 0)
-         throw MeasurementException("Error: no TDRS service access was set for measurement\n");
+      //if (serviceAccessList.size() == 0)
+      //   throw MeasurementException("Error: no TDRS service access was set for measurement\n");
 
       serviceAccessIndex = 0;
 
@@ -923,8 +923,24 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       node4FreqBand = obsData->tdrsNode4Band;                        // 0: unspecified, 1: S-band, 2: X-band, 3: K-band
       smarId        = obsData->tdrsSMARID;
    }
+   
+   cMeasurement.tdrsNode4Freq = node4Freq*1.0e6;        // unit Hz
+   cMeasurement.tdrsNode4Band = node4FreqBand;
+   cMeasurement.tdrsSMARID    = smarId;
 
-   MessageInterface::ShowMessage("Hi there 1: dopplerCountInterval = %lf seconds\n", dopplerCountInterval);
+   if (serviceAccessList.empty())
+      throw MeasurementException("Error: No service access is specified for the measurement.\n");
+   cMeasurement.tdrsServiceID = serviceAccessList[serviceAccessIndex];
+
+
+   //MessageInterface::ShowMessage("Hi there 1: dopplerCountInterval = %lf seconds\n", dopplerCountInterval);
+   //MessageInterface::ShowMessage("            node 4 frequency = %lf MHz\n", node4Freq);
+   //MessageInterface::ShowMessage("            node 4 band = %d\n", node4FreqBand);
+   //MessageInterface::ShowMessage("            SMAR id = %d\n", smarId);
+   //MessageInterface::ShowMessage("            service access = {");
+   //for(UnsignedInt i = 0; i < serviceAccessList.size(); ++i)
+   //   MessageInterface::ShowMessage("%s,", serviceAccessList[i].c_str());
+   //MessageInterface::ShowMessage("}\n");
 
    // 2. Compute range for End path
    // 2.1. Propagate all space objects to time tm
@@ -936,17 +952,20 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    bool addNoiseOption  = addNoise;
    bool addBiasOption   = addBias;
    bool rangeOnlyOption = rangeOnly; 
+   bool withMedia = withMediaCorrection;
 
    // 2.2.1. Compute range in km w/o any noise or bias for End-Long path
    addNoise  = false;
    addBias   = false;
    rangeOnly = true;
+   withMediaCorrection = false;
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
    measDataEL = GetMeasurement();
-   
+
    addNoise  = addNoiseOption;
    addBias   = addBiasOption;
    rangeOnly = rangeOnlyOption;
+   withMediaCorrection = withMedia;
    
    // 2.2.2. Specify uplink frequency
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
@@ -955,7 +974,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    
    // 2.3.1. Measurement time is the same as the one for End-path
    GmatTime tm = cMeasurement.epoch;                                // Get measurement time
-   MessageInterface::ShowMessage("Hi there 2: measurement epoch = %.15lf\n", cMeasurement.epoch);
+//   MessageInterface::ShowMessage("Hi there 2: measurement epoch = %.15lf\n", cMeasurement.epoch);
    ObservationData* obData = NULL;
    if (forObservation)
       obData = new ObservationData(*forObservation);
@@ -968,6 +987,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    adapterES->AddBias(false);
    adapterES->AddNoise(false);
    adapterES->SetRangeOnly(true);
+   adapterES->AddMediaCorrection(false);
    adapterES->CalculateMeasurement(withEvents, obData, rampTB);
    measDataES = adapterES->GetMeasurement();
    measDataES.value[0] = measDataES.value[0] / adapterES->GetMultiplierFactor();      // convert to full range in km  // Does it need to convert to full range ?????? Answer: Yes, when Range_KM measurement takes half range to be its value, in this case, we need to convert to full range 
@@ -978,28 +998,28 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       MessageInterface::ShowMessage("Compute range for S-Path...\n");
    #endif
    
-   //// 3.1. Set doppler count interval to MeasureModel object due to                               // made changes by TUAN NGUYEN
-   //// Start-Long path and Start-Short path are measured earlier by number of                      // made changes by TUAN NGUYEN
-   //// seconds shown in doppler count interval                                                     // made changes by TUAN NGUYEN
-   //adapterSL->GetMeasurementModel()->SetCountInterval(dopplerCountInterval);                      // made changes by TUAN NGUYEN
-   //adapterSS->GetMeasurementModel()->SetCountInterval(dopplerCountInterval);                      // made changes by TUAN NGUYEN
+   // 3.1. Set doppler count interval to MeasureModel object due to
+   // Start-Long path and Start-Short path are measured earlier by number of
+   // seconds shown in doppler count interval
+   adapterSL->GetMeasurementModel()->SetCountInterval(dopplerCountInterval);
+   adapterSS->GetMeasurementModel()->SetCountInterval(dopplerCountInterval);
 
    // 3.2. For Start-path, range calculation does not add bias and noise to calculated value
    // Note that: default option is no adding noise
    adapterSL->AddBias(false);
    adapterSL->AddNoise(false);
    adapterSL->SetRangeOnly(true);
+   adapterSL->AddMediaCorrection(false);
    adapterSS->AddBias(false);
    adapterSS->AddNoise(false);
    adapterSS->SetRangeOnly(true);
+   adapterSS->AddMediaCorrection(false);
 
    // 3.3. Compute range for Start long and short paths
-   //adapterSL->CalculateMeasurement(withEvents, obData, rampTB);                                   // made changes by TUAN NGUYEN
-   //adapterSS->CalculateMeasurement(withEvents, obData, rampTB);                                   // made changes by TUAN NGUYEN
-   adapterSL->CalculateMeasurementAtOffset(withEvents, -dopplerCountInterval, obData, rampTB);      // made changes by TUAN NGUYEN
-   adapterSS->CalculateMeasurementAtOffset(withEvents, -dopplerCountInterval, obData, rampTB);      // made changes by TUAN NGUYEN
+   adapterSL->CalculateMeasurement(withEvents, obData, rampTB);
+   adapterSS->CalculateMeasurement(withEvents, obData, rampTB);
 
-   MessageInterface::ShowMessage("Hi there 3\n");
+//   MessageInterface::ShowMessage("Hi there 3\n");
    // 3.4. Remove obData object when it is not used
    if (obData)
       delete obData;
@@ -1010,39 +1030,60 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    measDataSS = adapterSS->GetMeasurement();
    measDataSS.value[0] = measDataSS.value[0] / adapterSS->GetMultiplierFactor();      // convert to full range in km
 
-   MessageInterface::ShowMessage("Hi there 4\n");
-   // 4. Convert range from km to Hz and store in cMeasurement:
-   Real dt, dtSL;
-   GmatTime t1TE, t5RE;
+//   MessageInterface::ShowMessage("Hi there 4\n");
+   // 4. Calculate Doopler shift frequency (unit: Hz) based on range (unit: km) and store result to cMeasurement:
    Real speedoflightkm = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM;
    
    std::vector<SignalBase*> paths = calcData->GetSignalPaths();
    for (UnsignedInt i = 0; i < paths.size(); ++i)          // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths.
    {
-      MessageInterface::ShowMessage("Hi there 4.1\n");
-      // 4.0. Specify transmit frequency from ground station for the measurement
-      // It is calculated base on the node 4 receive frequency.
-
-      // 4.1. Specify received frequency at TDRS in backward link leg for paths[i]
-      SignalData* sd;
+//      MessageInterface::ShowMessage("Hi there 4.1\n");
+      // 4.1. Specify uplink frequency from ground station for the measurement
+      // 4.1.1. Specify transmit frequency at ground station and the received frequency at TDRS in backward link leg for paths[i]
       SignalBase* leg = paths[i];
+      SignalData* sd1 = leg->GetSignalDataObject();
+      Real tranFreq = sd1->transmitFreq;
+
       SignalBase* downlinkLeg = NULL;
       while (leg != NULL)
       {
+         sd1 = leg->GetSignalDataObject();
+         //MessageInterface::ShowMessage(" transmit node:%s receive node:%s:     transmit frequency = %le    receive frequency = %le   arrive frequency = %le\n", sd1->tNode->GetName().c_str(), sd1->rNode->GetName().c_str(), sd1->transmitFreq, sd1->receiveFreq, sd1->arriveFreq);
          if (leg->GetNext())
             downlinkLeg = leg;
          // move to the next leg
          leg = leg->GetNext();
       }
-      sd = downlinkLeg->GetSignalDataObject();
-      MessageInterface::ShowMessage("Hi there 4.2\n");
-      // 4.2. Calulate measurement data:
+      SignalData* sd = downlinkLeg->GetSignalDataObject();
+      //MessageInterface::ShowMessage(" Downlink leg: transmit node:%s receive node:%s:     transmit frequency = %le    receive frequency = %le  arrive frequency = %le\n", sd->tNode->GetName().c_str(), sd->rNode->GetName().c_str(), sd->transmitFreq, sd->receiveFreq, sd->arriveFreq);
+
+//      MessageInterface::ShowMessage("Hi there 4.2\n");
+      // 4.1.2. Calulate measurement data:
       // Specify effective frequency
-      Real effFreq = sd->arriveFreq;
-      MessageInterface::ShowMessage("Hi there 4.2.1: effTreq = %le\n", effFreq);
+      Real effFreq = node4Freq;
+
+      //4.1.3. Calculate uplink frequency:
+      uplinkFreq = (uplinkFreq/sd->receiveFreq)*node4Freq;
+      //MessageInterface::ShowMessage("Hi there 4.1.3: uplink frequency = %le    effFreq = %le\n", uplinkFreq, effFreq);
+
+      // 4.1.4. Recalculate frequency and media correction for each leg
+      ReCalculateFrequencyAndMediaCorrection(i, uplinkFreq, rampTB);
+      adapterES->ReCalculateFrequencyAndMediaCorrection(i, uplinkFreq, rampTB);
+      adapterSL->ReCalculateFrequencyAndMediaCorrection(i, uplinkFreq, rampTB);
+      adapterSS->ReCalculateFrequencyAndMediaCorrection(i, uplinkFreq, rampTB);
+
+      // 4.1.5. Get measurement data for each path
+      measDataEL = GetMeasurement();
+      measDataES = adapterES->GetMeasurement();
+      measDataES.value[0] = measDataES.value[0] / adapterES->GetMultiplierFactor();      // convert to full range in km
+      measDataSL = adapterSL->GetMeasurement();
+      measDataSL.value[0] = measDataSL.value[0] / adapterSL->GetMultiplierFactor();      // convert to full range in km
+      measDataSS = adapterSS->GetMeasurement();
+      measDataSS.value[0] = measDataSS.value[0] / adapterSS->GetMultiplierFactor();      // convert to full range in km
+
 
       // Specify pivot frequency
-      Real pivotFreq;
+      Real pivotFreq;                        // unit: MHz
       if ((node4FreqBand == 1)&&(serviceAccessList[serviceAccessIndex] == "SA1"))        // node 4 frequency band is S band and TDRS service is SA1
          pivotFreq = 13677.5 + GmatMathUtil::Floor(effFreq*2 + 0.5)/2;
       else if ((node4FreqBand == 1)&&(serviceAccessList[serviceAccessIndex] == "SA2"))   // node 4 frequency band is S band and TDRS service is SA2
@@ -1054,31 +1095,56 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       else if ((node4FreqBand == 2)&&(serviceAccessList[serviceAccessIndex] == "SA2"))   // node 4 frequency band is K band and TDRS service is SA2
          pivotFreq = -1075.0;      // -1075 MHz
 
-      // 4.2. Specify multiplier for S-path and E-path
+      // 4.2. Specify multiplier for SL-path, SS-path, EL-path, and ES-path
       multiplierSL = (effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
       multiplierSS = (pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);               // unit: Hz/Km
       multiplierEL = (effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
-      multiplierSS = (pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);               // unit: Hz/Km
-      MessageInterface::ShowMessage("Hi there 4.3\n");
+      multiplierES = (pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);               // unit: Hz/Km
+//      MessageInterface::ShowMessage("Hi there 4.3\n");
 
-      // 4.3. Time travel
-      dtSL = measDataSL.value[0]/ speedoflightkm;
-      dt = dopplerCountInterval + dtSL;
-      t5RE = measDataEL.epoch;
-      t1TE = t5RE - dt/GmatTimeConstants::SECS_PER_DAY;
-
+      // 4.3. Set uplink frequency, uplink frequency band, node4 frequency, node4 fequency band
 //     cMeasurement.epoch = measDataEL.epoch;
-      cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
-      cMeasurement.uplinkBand = freqBand;
+      cMeasurement.uplinkFreq           = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
+      cMeasurement.uplinkBand           = freqBand;
+      cMeasurement.tdrsNode4Freq        = node4Freq*1.0e6;          // convert Mhz to Hz due cMeasurement.tdrsNode4Freq's unit is Hz
+      cMeasurement.tdrsNode4Band        = node4FreqBand;
+      cMeasurement.tdrsSMARID           = smarId;
+      cMeasurement.tdrsServiceID        = serviceAccessList[serviceAccessIndex];
       cMeasurement.dopplerCountInterval = dopplerCountInterval;
-      MessageInterface::ShowMessage("Hi there 4.4\n");
+
+//      MessageInterface::ShowMessage("Hi there 4.4\n");
       // 4.4. Calculate Frequency Doppler Shift
       Real dopplerFreq = - (effFreq*(measDataEL.value[i] - measDataSL.value[i]) + pivotFreq*(measDataES.value[i] - measDataSS.value[i]))/dopplerCountInterval/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000);  //(Equation 7-92 GTDS MathSpec)
       cMeasurement.value[i] = dopplerFreq*1.0e6;               // unit: Hz
-      cMeasurement.isFeasible = true;
-      cMeasurement.unfeasibleReason = "N";
-//          currentMeasurement.feasibilityValue is set to elevation angle as shown in section 15
-            
+
+      // 4.5. Specify measurement feasibility
+      if (!measDataEL.isFeasible)
+      {
+         cMeasurement.isFeasible = false;
+         cMeasurement.unfeasibleReason = measDataEL.unfeasibleReason;
+         cMeasurement.feasibilityValue = measDataEL.feasibilityValue;
+      }
+      else if (!measDataES.isFeasible)
+      {
+         cMeasurement.isFeasible = false;
+         cMeasurement.unfeasibleReason = measDataES.unfeasibleReason;
+         cMeasurement.feasibilityValue = measDataES.feasibilityValue;
+      }
+      else if (!measDataSL.isFeasible)
+      {
+         cMeasurement.isFeasible = false;
+         cMeasurement.unfeasibleReason = measDataSL.unfeasibleReason;
+         cMeasurement.feasibilityValue = measDataSL.feasibilityValue;
+      }
+      else if (!measDataSS.isFeasible)
+      {
+         cMeasurement.isFeasible = false;
+         cMeasurement.unfeasibleReason = measDataSS.unfeasibleReason;
+         cMeasurement.feasibilityValue = measDataSS.feasibilityValue;
+      }
+      
+
+      // 4.6. Add noise and bias
       Real C_idealVal = cMeasurement.value[i];
       
       if (measurementType == "TDRSDoppler_HZ")
@@ -1124,8 +1190,14 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Measurement type            : <%s>\n", measurementType.c_str());
          MessageInterface::ShowMessage("      . Noise adding option         : %s\n", (addNoise?"true":"false"));
          MessageInterface::ShowMessage("      . Doppler count interval      : %.12lf seconds\n", dopplerCountInterval);
-         MessageInterface::ShowMessage("      . Real travel time for SL-path : %.12lf seconds\n", dtSL);
-         MessageInterface::ShowMessage("      . Real travel time            : %.12lf seconds\n", dt);
+         MessageInterface::ShowMessage("      . Real travel time for SL-path : %.12lf Km\n", measDataSL.value[i]);
+         MessageInterface::ShowMessage("      . Real travel time for SS-path : %.12lf Km\n", measDataSS.value[i]);
+         MessageInterface::ShowMessage("      . Real travel time for EL-path : %.12lf Km\n", measDataEL.value[i]);
+         MessageInterface::ShowMessage("      . Real travel time for ES-path : %.12lf Km\n", measDataES.value[i]);
+         MessageInterface::ShowMessage("      . Node 4 frequency band        : %d\n", node4FreqBand);
+         MessageInterface::ShowMessage("      . Effect (node 4) frequency    : %.12lf MHz\n", effFreq);
+         MessageInterface::ShowMessage("      . SMAR id                      : %d\n", smarId);
+         MessageInterface::ShowMessage("      . Pivot frequency              : %.12lf MHz\n", pivotFreq);
          MessageInterface::ShowMessage("      . Multiplier factor for SL-path: %.12lf Hz/Km\n", multiplierSL);
          MessageInterface::ShowMessage("      . Multiplier factor for SS-path: %.12lf Hz/Km\n", multiplierSS);
          MessageInterface::ShowMessage("      . Multiplier factor for EL-path: %.12lf Hz/Km\n", multiplierEL);

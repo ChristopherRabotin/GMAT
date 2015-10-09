@@ -32,7 +32,7 @@ struct shc3_1_ {
 struct {
     integer iupd_igrz__, iupm_igrz__, iupy_igrz__, imst_igrz__, iyst_igrz__, 
 	    imend_igrz__, iyend_igrz__;
-    real ionoindx_igrz__[722], indrz_igrz__[722];
+    real ionoindx_igrz__[2000], indrz_igrz__[2000];
 } igrz1_;
 
 #define igrz1_1 igrz1_
@@ -89,6 +89,7 @@ struct {
 static integer c__1 = 1;
 static integer c__3 = 3;
 static integer c__4 = 4;
+static integer c__9 = 9;
 static integer c__2 = 2;
 
 /*     Loads all files into memory so they don't have to be reread on */
@@ -107,6 +108,7 @@ static integer c__2 = 2;
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
 
 /* Subroutine */ int load_shc__(integer *ifile, char *filename, integer *
 	ierror, char *errmsg, ftnlen filename_len, ftnlen errmsg_len)
@@ -125,17 +127,23 @@ static integer c__2 = 2;
     integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi();
     /* Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
     integer f_open(olist *), s_rsle(cilist *), e_rsle(), do_lio(integer *, 
-	    integer *, char *, ftnlen), f_clos(cllist *);
+	    integer *, char *, ftnlen), s_wsle(cilist *), e_wsle(), f_clos(
+	    cllist *);
     /* Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
     char fullpath[256];
-    integer i__, mm, nn, irec;
+    integer i__, mm, nn;
+    real yy;
+    integer irec;
 
     /* Fortran I/O blocks */
     static cilist io___2 = { 0, 84, 0, 0, 0 };
     static cilist io___3 = { 0, 84, 0, 0, 0 };
-    static cilist io___7 = { 0, 84, 0, 0, 0 };
+    static cilist io___5 = { 0, 6, 0, 0, 0 };
+    static cilist io___6 = { 0, 6, 0, 0, 0 };
+    static cilist io___10 = { 0, 84, 0, 0, 0 };
+    static cilist io___12 = { 0, 6, 0, 0, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -143,6 +151,7 @@ static integer c__2 = 2;
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
 /*         Special for IRIWeb version */
 /* 1001     format('/usr/local/etc/httpd/cgi-bin/models/IRI/',A12) */
 /* 1001     format(A12) */
@@ -187,7 +196,21 @@ static integer c__2 = 2;
 	    sizeof(integer));
     do_lio(&c__4, &c__1, (char *)&shc1_1.erad_shc__[*ifile - 1], (ftnlen)
 	    sizeof(real));
+    do_lio(&c__4, &c__1, (char *)&yy, (ftnlen)sizeof(real));
     e_rsle();
+    s_wsle(&io___5);
+    do_lio(&c__9, &c__1, "Read ", (ftnlen)5);
+    do_lio(&c__9, &c__1, fullpath, (ftnlen)256);
+    e_wsle();
+    s_wsle(&io___6);
+    do_lio(&c__3, &c__1, (char *)&shc1_1.nmax_shc__[*ifile - 1], (ftnlen)
+	    sizeof(integer));
+    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
+    do_lio(&c__4, &c__1, (char *)&shc1_1.erad_shc__[*ifile - 1], (ftnlen)
+	    sizeof(real));
+    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
+    do_lio(&c__4, &c__1, (char *)&yy, (ftnlen)sizeof(real));
+    e_wsle();
 /*         -------------------------------------------------------------- */
 /*         Read the coefficient file, arranged as follows: */
 
@@ -222,12 +245,25 @@ static integer c__2 = 2;
 			 (ftnlen)256, (ftnlen)44);
 		return 0;
 	    }
-	    s_rsle(&io___7);
+	    s_rsle(&io___10);
 	    for (i__ = 1; i__ <= 4; ++i__) {
 		do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[i__ + (irec + *
 			ifile * 200 << 2) - 805], (ftnlen)sizeof(real));
 	    }
 	    e_rsle();
+	    s_wsle(&io___12);
+	    do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[(irec + *ifile * 
+		    200 << 2) - 804], (ftnlen)sizeof(real));
+	    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
+	    do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[(irec + *ifile * 
+		    200 << 2) - 803], (ftnlen)sizeof(real));
+	    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
+	    do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[(irec + *ifile * 
+		    200 << 2) - 802], (ftnlen)sizeof(real));
+	    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
+	    do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[(irec + *ifile * 
+		    200 << 2) - 801], (ftnlen)sizeof(real));
+	    e_wsle();
 	}
     }
     cl__1.cerr = 0;
@@ -274,10 +310,10 @@ L2001:
     integer i__, inum_vals__;
 
     /* Fortran I/O blocks */
-    static cilist io___10 = { 0, 84, 0, 0, 0 };
-    static cilist io___11 = { 0, 84, 0, 0, 0 };
-    static cilist io___13 = { 0, 84, 0, 0, 0 };
+    static cilist io___14 = { 0, 84, 0, 0, 0 };
     static cilist io___15 = { 0, 84, 0, 0, 0 };
+    static cilist io___17 = { 0, 84, 0, 0, 0 };
+    static cilist io___19 = { 0, 84, 0, 0, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -285,6 +321,7 @@ L2001:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
 /*         Special for IRIWeb version */
 /* 1001     format('/usr/local/etc/httpd/cgi-bin/models/IRI/',A) */
 /* 1001     format(A) */
@@ -315,7 +352,7 @@ L2001:
     }
 /*         Read the update date, the start date and the end date */
 /*         (mm,yyyy), and get number of data points to read. */
-    s_rsle(&io___10);
+    s_rsle(&io___14);
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupd_igrz__, (ftnlen)sizeof(integer)
 	    );
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupm_igrz__, (ftnlen)sizeof(integer)
@@ -323,7 +360,7 @@ L2001:
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupy_igrz__, (ftnlen)sizeof(integer)
 	    );
     e_rsle();
-    s_rsle(&io___11);
+    s_rsle(&io___15);
     do_lio(&c__3, &c__1, (char *)&igrz1_1.imst_igrz__, (ftnlen)sizeof(integer)
 	    );
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iyst_igrz__, (ftnlen)sizeof(integer)
@@ -335,7 +372,7 @@ L2001:
     e_rsle();
     inum_vals__ = 3 - igrz1_1.imst_igrz__ + (igrz1_1.iyend_igrz__ - 
 	    igrz1_1.iyst_igrz__) * 12 + igrz1_1.imend_igrz__;
-    if (inum_vals__ > 722) {
+    if (inum_vals__ > 2000) {
 /*              write(*,*) */
 /*     &           'ERROR: load_igrz: inum_vals exceeds MAXRECORDLEN_IGRZ' */
 /*              stop 1 */
@@ -345,14 +382,14 @@ L2001:
 	return 0;
     }
 /*         Read data records */
-    s_rsle(&io___13);
+    s_rsle(&io___17);
     i__1 = inum_vals__;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	do_lio(&c__4, &c__1, (char *)&igrz1_1.ionoindx_igrz__[i__ - 1], (
 		ftnlen)sizeof(real));
     }
     e_rsle();
-    s_rsle(&io___15);
+    s_rsle(&io___19);
     i__1 = inum_vals__;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	do_lio(&c__4, &c__1, (char *)&igrz1_1.indrz_igrz__[i__ - 1], (ftnlen)
@@ -402,7 +439,7 @@ L3001:
     integer k, irec;
 
     /* Fortran I/O blocks */
-    static cilist io___18 = { 0, 84, 1, fmt_1002, 0 };
+    static cilist io___22 = { 0, 84, 1, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -410,6 +447,7 @@ L3001:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
 /*         Special for IRIWeb version */
 /* 1001     format('/usr/local/etc/httpd/cgi-bin/models/IRI/',A) */
 /* 1001     format(A) */
@@ -446,7 +484,7 @@ L3001:
 	    s_copy(errmsg, "ERROR: load_ap: irec exceeds MAXRECORDS_AP", (
 		    ftnlen)256, (ftnlen)42);
 	}
-	i__1 = s_rsfe(&io___18);
+	i__1 = s_rsfe(&io___22);
 	if (i__1 != 0) {
 	    goto L2001;
 	}
@@ -513,7 +551,7 @@ L4001:
     integer i__, j, k;
 
     /* Fortran I/O blocks */
-    static cilist io___21 = { 0, 84, 0, fmt_1002, 0 };
+    static cilist io___25 = { 0, 84, 0, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -521,6 +559,7 @@ L4001:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
 /*         Special for IRIWeb version */
 /* 1001     format('/usr/local/etc/httpd/cgi-bin/models/IRI/ccir', */
 /*    &           I2,'.asc') */
@@ -558,7 +597,7 @@ L4001:
     if (i__1 != 0) {
 	goto L5001;
     }
-    s_rsfe(&io___21);
+    s_rsfe(&io___25);
     for (k = 1; k <= 2; ++k) {
 	for (j = 1; j <= 76; ++j) {
 	    for (i__ = 1; i__ <= 13; ++i__) {
@@ -622,7 +661,7 @@ L5001:
     integer i__, j, k;
 
     /* Fortran I/O blocks */
-    static cilist io___26 = { 0, 84, 0, fmt_1002, 0 };
+    static cilist io___30 = { 0, 84, 0, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -630,6 +669,7 @@ L5001:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
 /*         Special for IRIWeb version */
 /* 1001     format('/usr/local/etc/httpd/cgi-bin/models/IRI/ursi', */
 /*    &           I2,'.asc') */
@@ -667,7 +707,7 @@ L5001:
     if (i__1 != 0) {
 	goto L6001;
     }
-    s_rsfe(&io___26);
+    s_rsfe(&io___30);
     for (k = 1; k <= 2; ++k) {
 	for (j = 1; j <= 76; ++j) {
 	    for (i__ = 1; i__ <= 13; ++i__) {
@@ -712,6 +752,7 @@ L6001:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
     for (i__ = 1; i__ <= 14; ++i__) {
 	load_shc__(&i__, shc2_1.filmod + (i__ - 1) * 12, ierror, errmsg, (
 		ftnlen)12, (ftnlen)256);

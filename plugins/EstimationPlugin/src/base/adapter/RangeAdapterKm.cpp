@@ -322,10 +322,10 @@ bool RangeAdapterKm::Initialize()
  * @note: The parameters associated with this call will probably be removed;
  * they are here to support compatibility with the old measurement models
  *
- * @param withEvents Flag indicating is the light time solution should be
- *                   included
- * @param forObservation The observation data associated with this measurement
- * @param rampTB Ramp table for a ramped measurement
+ * @param withEvents          Flag indicating is the light time solution should be
+ *                            included
+ * @param forObservation      The observation data associated with this measurement
+ * @param rampTB              Ramp table for a ramped measurement
  *
  * @return The computed measurement data
  */
@@ -344,7 +344,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             instanceName + " before the measurement was set");
    
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))
+   //if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))                        // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))     // made changes by TUAN NGUYEN
    {
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
@@ -448,7 +449,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          Real measVal = values[i];
          #ifdef DEBUG_RANGE_CALCULATION
             MessageInterface::ShowMessage("===================================================================\n");
-            MessageInterface::ShowMessage("====  RangeAdapterKm: Range Calculation for Measurement Data %dth  \n", i);
+            MessageInterface::ShowMessage("====  RangeAdapterKm (%s): Range Calculation for Measurement Data %dth  \n", GetName().c_str(), i);
             MessageInterface::ShowMessage("===================================================================\n");
 
             MessageInterface::ShowMessage("      . Path : ");
@@ -554,6 +555,47 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 }
 
 
+bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, Real uplinkFrequency, std::vector<RampTableData>* rampTB)
+{
+   bool retval = false;
+
+   // Recalculate frequency and mediacorrection
+   calcData->ReCalculateFrequencyAndMediaCorrection(pathIndex, uplinkFrequency, rampTB);
+   
+   // Add media correction to C-value
+   std::vector<SignalBase*> paths = calcData->GetSignalPaths();
+   SignalBase *currentleg = paths[pathIndex];
+   SignalData *current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
+   
+   Real correction = 0.0;
+   while (currentleg != NULL)
+   {
+      for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+      {
+         if (current->useCorrection[j])
+         {
+            if ((current->correctionIDs[j] == "Troposphere")||(current->correctionIDs[j] == "Ionosphere"))
+            {
+               correction += current->corrections[j];
+               //MessageInterface::ShowMessage(" leg %s -> %s: correction name = %s   correction = %.12lf\n", current->tNode->GetName().c_str(), current->rNode->GetName().c_str(), current->correctionIDs[j].c_str(), current->corrections[j]);
+            }
+         }
+      }
+      currentleg = currentleg->GetNext();
+      current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
+   }
+
+   //MessageInterface::ShowMessage("Hello there: C-value = %.12lf   correction = %.12lf\n", cMeasurement.value[pathIndex], correction);
+   cMeasurement.value[pathIndex] += correction;
+         
+   retval = true;
+
+   return retval;
+}
+
+
+
+
 const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
       bool withEvents, Real dt, ObservationData* forObservation,
       std::vector<RampTableData>* rampTB)
@@ -565,7 +607,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
             instanceName + " before the measurement was set");
 
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt))
+   //if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt))                            // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, dt))         // made changes by TUAN NGUYEN
    {
       std::vector<SignalData*> data = calcData->GetSignalData();
       std::string unfeasibilityReason;

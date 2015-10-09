@@ -85,8 +85,8 @@ public:
                         ModelSignalDerivative(GmatBase *obj,
                               Integer forId) = 0;
 
-   /// This fucntion is used to compute signal frequency on each signal leg            // made changes by TUAN NGUYEN
-   virtual bool   SignalFrequencyCalculation(std::vector<RampTableData>* rampTB) = 0;  // made changes by TUAN NGUYEN
+   /// This fucntion is used to compute signal frequency on each signal leg                                              // made changes by TUAN NGUYEN
+   virtual bool         SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency = 0.0) = 0;  // made changes by TUAN NGUYEN
 
 
    /// This function is used to add media correction to measurement model

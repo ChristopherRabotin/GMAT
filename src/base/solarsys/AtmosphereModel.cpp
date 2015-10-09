@@ -349,6 +349,21 @@ void AtmosphereModel::SetCbJ2000CoordinateSystem(CoordinateSystem *cs)
    cbJ2000 = cs;
 }
 
+
+// made changes  for bug GMT-5282
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetCbJ2000CoordinateSystem()
+//------------------------------------------------------------------------------
+/**
+ * Gets the body centered J2000 coordinate system.
+ */
+//------------------------------------------------------------------------------
+CoordinateSystem* AtmosphereModel::GetCbJ2000CoordinateSystem()
+{
+   return cbJ2000;
+}
+
+
 //------------------------------------------------------------------------------
 // void SetFixedCoordinateSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
@@ -1147,6 +1162,7 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
    CoordinateSystem *j2000ToUse = (cbJ2000 == NULL ? mInternalCoordSystem : cbJ2000);
 
 #ifdef DEBUG_CALCULATE_GEODETICS
+   MessageInterface::ShowMessage("AtmosphereModel::CalculateGeodetics():   cbJ2000 = <%p>    mInternalCoordSystem = <%p>\n", cbJ2000, mInternalCoordSystem);
    if (cbJ2000 == NULL)
 	   MessageInterface::ShowMessage("cbJ2000 == NULL, mInternalCoordSystem <%p,%s>\n", mInternalCoordSystem, mInternalCoordSystem->GetName().c_str());
    else
@@ -1160,7 +1176,8 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
    #ifdef DEBUG_COORDINATE_TRANSFORMS
       MessageInterface::ShowMessage("Geodetic calculations at epoch %.12lf\n",
             when);
-      MessageInterface::ShowMessage("Internal CS:\n%s\nFixed:\n%s\n",
+      if ((mInternalCoordSystem != NULL)&&(cbFixed != NULL))
+         MessageInterface::ShowMessage("Internal CS:\n%s\nFixed:\n%s\n",
             mInternalCoordSystem->GetGeneratingString(
                   Gmat::NO_COMMENTS).c_str(),
             cbFixed->GetGeneratingString(Gmat::NO_COMMENTS).c_str());

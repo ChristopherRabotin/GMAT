@@ -211,6 +211,13 @@ bool RungeKutta::Initialize()
         isInitialized = false;
         return isInitialized;
     }
+    else
+    {
+       // allocate memmory for each row for matrix bij
+       for (UnsignedInt i = 0; i < stages; ++i)
+          bij[i] = new Real[stages];
+    }
+
     if ((cj = new Real [stages]) == NULL)
     {
         delete [] ai;
@@ -226,6 +233,13 @@ bool RungeKutta::Initialize()
         isInitialized = false;
         return isInitialized;
     }
+    else
+    {
+       // allocate memmory for each row for matrix ki
+       for (UnsignedInt i = 0; i < stages; ++i)
+          ki[i] = new Real[stages];
+    }
+
     if ((ee = new Real [stages]) == NULL)
     {
         delete [] ai;
@@ -325,6 +339,14 @@ bool RungeKutta::Step()
            return false;
         }
     } while (!goodStepTaken);
+
+    if (debug)
+    {
+       MessageInterface::ShowMessage("Propagator's step taken = %.15lf   ", stepTaken);
+       for (UnsignedInt i = 0; i < dimension; ++i)
+          MessageInterface::ShowMessage("%.12lf,   ", outState[i]);
+       MessageInterface::ShowMessage("\n");
+    }
 
     physicalModel->IncrementTime(stepTaken);
     return true;
@@ -466,6 +488,9 @@ bool RungeKutta::Step(Real dt)
       timeleft -= stepTaken;
       ++attemptsTaken;
    } while (stepFinished == false);
+
+   if (debug)
+      MessageInterface::ShowMessage(" stepTaken %.15lf\n", stepTaken);
 
    #ifdef DEBUG_STEPSIZE
       MessageInterface::ShowMessage("Done!\n");

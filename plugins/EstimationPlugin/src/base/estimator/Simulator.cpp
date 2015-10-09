@@ -38,7 +38,7 @@
 //#define DEBUG_TIMESTEP
 //#define DEBUG_EVENT
 //#define DEBUG_INITIALIZE
-//#define DEBUG_CLONED_PARAMETER UPDATES
+//#define DEBUG_CLONED_PARAMETER_UPDATES
 
 //------------------------------------------------------------------------------
 // static data
@@ -1567,7 +1567,7 @@ void Simulator::UpdateClonedObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 void Simulator::UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
 {
-#ifdef DEBUG_CLONED_PARAMETER UPDATES
+#ifdef DEBUG_CLONED_PARAMETER_UPDATES
    MessageInterface::ShowMessage("Simulator updating parameter %d (%s) using "
          "object %s\n", updatedParameterId, obj->GetParameterText(updatedParameterId).c_str(),
          obj->GetName().c_str());
@@ -1611,6 +1611,8 @@ void Simulator::CompleteInitialization()
    else
       currentState = PROPAGATING;
 
+   isTheFirstMeasurement = true;                                  // fix bug GMT-4909
+
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Epoch is %.12lf, Start epoch is %.12lf\n",
                currentEpoch, nextSimulationEpoch);
@@ -1635,7 +1637,8 @@ void Simulator::FindTimeStep()
 {
    if (currentEpoch > simulationEnd)
    {
-      currentState = FINISHED;
+      if (!isTheFirstMeasurement)                                // fix bug GMT-4909
+         currentState = FINISHED;
    }
    else if (GmatMathUtil::IsEqual(currentEpoch, nextSimulationEpoch,
             SIMTIME_ROUNDOFF))
@@ -1762,6 +1765,7 @@ void Simulator::SimulateData()
    }
    
    // Prep for the next measurement simulation
+   isTheFirstMeasurement = false;                                    // fix bug GMT-4909
    FindNextSimulationEpoch();
    
    if ((currentEpoch < simulationEnd) && (nextSimulationEpoch < simulationEnd))

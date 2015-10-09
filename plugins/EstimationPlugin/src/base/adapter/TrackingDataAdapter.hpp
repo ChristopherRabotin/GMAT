@@ -178,7 +178,8 @@ public:
    // Get measurement model object
    virtual MeasureModel * GetMeasurementModel();
 
-   virtual void         AddBias(bool isAdd) {addBias = isAdd;}
+   virtual void         AddMediaCorrection(bool isAdd) {withMediaCorrection = isAdd;}                      // made changes by TUAN NGUYEN
+   virtual void         AddBias(bool isAdd) {addBias = isAdd;}                                             // made changes by TUAN NGUYEN
    virtual void         AddNoise(bool isAdd) {addNoise = isAdd;}                                           // made changes by TUAN NGUYEN
    virtual void         SetRangeOnly(bool isRangeOnly) {rangeOnly = isRangeOnly;}                          // made changes by TUAN NGUYEN
    
@@ -247,6 +248,9 @@ protected:
    /// Flag indicating to compute range only (w/o bias and noise model).                     // made changes by TUAN NGUYEN
    /// It is used in Doppler measurement for E and S-paths before adding noise and bias,     // made changes by TUAN NGUYEN
    bool                      rangeOnly;                                                      // made changes by TUAN NGUYEN
+
+   /// Flag indicating to compute media correction as seting by GMAT script                  // made changes by TUAN NGUYEN
+   bool                      withMediaCorrection;                                            // made changes by TUAN NGUYEN
 
    /// Measurement error covariance matrix
    Covariance                measErrorCovariance;

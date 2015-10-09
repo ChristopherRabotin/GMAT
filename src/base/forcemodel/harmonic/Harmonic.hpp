@@ -64,6 +64,9 @@ public:
    Integer      GetMM() const;
    Real         GetRadius() const;
    Real         GetFactor() const;
+   void         CalculateField1(const Real& jday,  const Real pos[3],        const Integer& nn,
+                               const Integer& mm, const bool& fillgradient, Real  acc[3],
+                               Rmatrix33& gradient) const;
    void         CalculateField(const Real& jday,  const Real pos[3],        const Integer& nn,
                                const Integer& mm, const bool& fillgradient, Real  acc[3],
                                Rmatrix33& gradient) const;

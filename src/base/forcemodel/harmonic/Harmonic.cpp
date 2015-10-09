@@ -158,7 +158,7 @@ Real Harmonic::GetFactor() const
 }
 
 //------------------------------------------------------------------------------
-void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Integer& nn,
+void Harmonic::CalculateField1(const Real& jday,  const Real pos[3], const Integer& nn,
                               const Integer& mm, const bool& fillgradient,
                               Real  acc[3],      Rmatrix33& gradient) const
 {
@@ -249,14 +249,17 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
          sum3 +=     Avv01 * D;
          sum4 +=     Avv11 * D;
 
+         // made changes by TUAN NGUYEN
          // Truncate the gradient at 20x20, if calculated
          if (fillgradient)
          {
             if ((m < GRADIENT_MAX + 1) && (n < GRADIENT_MAX + 1))
             {
                // Pines Equation 27 (Part of)
-               Real G = m<=2 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
-               Real H = m<=2 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
+               //Real G = m<=2 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
+               //Real H = m<=2 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
+               Real G = m<=1 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
+               Real H = m<=1 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
                // Correct for normalization
 
                Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
@@ -320,6 +323,8 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
       a2 += rr*sum2;
       a3 += rr*sum3;
       a4 -= rr*sum4;
+
+      // made changes by TUAN NGUYEN
       if (fillgradient)
       {
          // Pines Equation 36 (Part of)
@@ -347,6 +352,8 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
    acc[0] = a1+a4*s;
    acc[1] = a2+a4*t;
    acc[2] = a3+a4*u;
+
+   // made changes by TUAN NGUYEN
    if (fillgradient)
    {
       // Pines Equation 37
@@ -368,6 +375,41 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
       MessageInterface::ShowMessage("Leaving Harmonic::CalculateField\n");
    #endif
 }
+
+void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Integer& nn,
+                              const Integer& mm, const bool& fillgradient,
+                              Real  acc[3],      Rmatrix33& gradient) const
+{
+   // Calculate acceleration at location pos
+   CalculateField1(jday, pos, nn, mm, fillgradient, acc, gradient);
+
+   //if (fillgradient)
+   //{
+   //   Real delta = 1.0e-3;
+   //   Real newAcc[3];
+   //   Real posVec[3];
+
+   //   // Specify gradient by using finite difference
+   //   for(UnsignedInt col = 0; col < 3; ++col)
+   //   {
+   //      posVec[0] = pos[0]; posVec[1] = pos[1]; posVec[2] = pos[2];
+   //      posVec[col] += delta;
+
+   //      // Calculate acceleration at location pos + delta
+   //      CalculateField1(jday, posVec, nn, mm, fillgradient, newAcc, gradient);
+   //      for(UnsignedInt row = 0; row < 3; ++row)
+   //      {
+   //         gradient(row,col) = (newAcc[row] - acc[row])/ delta;
+   //      }
+   //   }
+   //}
+
+   //#ifdef DEBUG_GRADIENT
+   //   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+   //   MessageInterface::ShowMessage("gradientHarmonic = %s\n", gradient.ToString().c_str());
+   //#endif
+}
+
 
 //------------------------------------------------------------------------------
 // protected methods

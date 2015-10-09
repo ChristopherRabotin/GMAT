@@ -7020,7 +7020,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       }
       
       // If value is None, do not create DragForce
-      if (value == "None")
+      if ((value == "None")||(value == "'None'"))   // made changes for bug GMT-5282   bug occurs when ForceModel.Drag.AtmosphereModel = 'None'
          return true;
       
       // Special handling for Drag

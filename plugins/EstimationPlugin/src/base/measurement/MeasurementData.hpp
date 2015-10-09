@@ -83,7 +83,7 @@ public:
 
 
 ///// TBD: Do these go here like this?  We may want a more generic container here
-   // This section added for DSNTwoWayRange measurement data
+   // This section is added for DSNTwoWayRange measurement data
    /// Uplink band
    Integer uplinkBand;
    /// Uplink frequency
@@ -92,9 +92,15 @@ public:
    Real rangeModulo;
 
 ///// TBD: Do these go here like this?  We may want a more generic container here
-   // This section added for DSNTwoWayDoppler measurement data
+   // This section is added for DSNTwoWayDoppler measurement data
    // Doppler count interval
    Real dopplerCountInterval;
+
+   // This section is added for TDRS Doppler measurement data
+   Real           tdrsNode4Freq;            // the received frequency at the return-link TDRS      (unit: Hz)           // made changes by TUAN NGUYEN
+   Integer        tdrsNode4Band;            // the received frequency band at the return-link TDRS                      // made changes by TUAN NGUYEN
+   std::string    tdrsServiceID;            // value of serviceID would be "S1", "S2", or "MA"                          // made changes by TUAN NGUYEN
+   Integer        tdrsSMARID;               // TDRS SMAR id                                                             // made changes by TUAN NGUYEN
 
 };
 

@@ -54,6 +54,13 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual Integer      GetIntegerParameter(const Integer id) const;         // made changes by TUAN NGUYEN
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);            // made changes by TUAN NGUYEN
+   virtual Integer      GetIntegerParameter(const std::string &label) const; // made changes by TUAN NGUYEN
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);            // made changes by TUAN NGUYEN
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
@@ -187,8 +194,17 @@ protected:
    /// Doppler count interval
    Real        dopplerCountInterval;
 
+   
+   /// TDRS parameters for simulation
    /// Service access list. It is used in TDRS doppler measurement to specify a list of serivce access used for measurement (SA1, SA2, or MA)
-   StringArray serviceAccessList;
+   StringArray tdrsServiceAccessList;
+   /// Node 4 frequency
+   Real tdrsNode4Frequency;
+   /// Node 4 frequency band
+   Integer tdrsNode4Band;
+   /// TDRS SMAR Id
+   Integer tdrsSMARID;
+
 
    /// Data filters
    StringArray dataFilterNames;
@@ -215,7 +231,10 @@ protected:
       USE_ETMINUSTAI,
       RANGE_MODULO,
       DOPPLER_COUNT_INTERVAL,
-      SERVICE_ACCESS,               // made changes by TUAN NGUYEN
+      TDRS_SERVICE_ACCESS,               // made changes by TUAN NGUYEN
+      TDRS_NODE4_FREQUENCY,              // made changes by TUAN NGUYEN
+      TDRS_NODE4_BAND,                   // made changes by TUAN NGUYEN
+      TDRS_SMAR_ID,                      // made changes by TUAN NGUYEN
       DATA_FILTERS,
       TrackingFileSetParamCount,
    };

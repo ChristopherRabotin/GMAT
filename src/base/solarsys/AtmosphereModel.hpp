@@ -78,6 +78,8 @@ public:
    void         SetUpdateParameters(Real interval, GmatEpoch epoch = -1.0);
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void SetCbJ2000CoordinateSystem(CoordinateSystem *cs);
+   virtual CoordinateSystem *
+                GetCbJ2000CoordinateSystem();                           // made changes for bug GMT-5282
    void         SetFixedCoordinateSystem(CoordinateSystem *cs);
    Real*        GetAngularVelocity(const Real GmatEpoch = -1.0);
    void         BuildAngularVelocity(const Real GmatEpoch);

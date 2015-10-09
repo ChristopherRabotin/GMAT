@@ -102,7 +102,7 @@ protected:
    Real           ETminusTAI(Real tA1MJD, SpacePoint* participant);
 
    /// This fucntion is used to compute signal frequency on each signal leg
-   virtual bool   SignalFrequencyCalculation(std::vector<RampTableData>* rampTB);                                                  // made changes by TUAN NGUYEN
+   virtual bool   SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency = 0.0);                           // made changes by TUAN NGUYEN
 
    /// These functions are used to compute midia correction
    virtual bool   MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL);

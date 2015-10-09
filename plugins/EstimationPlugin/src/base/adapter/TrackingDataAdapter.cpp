@@ -183,6 +183,7 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter copy constructor  from <%p> to <%p>\n", &ma, this);
 #endif
+   MessageInterface::ShowMessage("It is coppying\n");
    isInitialized = false;
 }
 

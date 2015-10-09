@@ -416,12 +416,12 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
       else
       ///@todo: Put in test for obstructing bodies; for now, always feasible
       {
-         //signalIsFeasible = true;
-         // Put in test for obstructing bodies
-         signalIsFeasible = TestSignalBlockedBetweenTwoSpacecrafts();
-         theData.feasibility = signalIsFeasible;
-         theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked; "N": normal state
-         theData.feasibilityValue = -100.0;
+         signalIsFeasible = true;
+         //// Put in test for obstructing bodies
+         //signalIsFeasible = TestSignalBlockedBetweenTwoSpacecrafts();
+         //theData.feasibility = signalIsFeasible;
+         //theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked; "N": normal state
+         //theData.feasibilityValue = -100.0;
       }
 
       #ifdef DEBUG_RANGE_CALCULATION 
@@ -1236,7 +1236,7 @@ bool PhysicalSignal::HardwareDelayCalculation()
 }
 
 
-bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* rampTB)
+bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency)         // made changes by TUAN NGUYEN
 {
    // 1. Verify the exsisting of transmit participant and receive participant 
    if (theData.tNode == NULL)
@@ -1270,7 +1270,7 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
             GmatTime t1 = theData.tPrecTime - theData.tDelay/GmatTimeConstants::SECS_PER_DAY;
             frequency = GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;                     // unit: Mhz
          }
-         else
+         else if (uplinkFrequency == 0.0)                                 // made changes by TUAN NGUYEN
          {
             // Get transmit frequency from ground station's transmitter
             ObjectArray hardwareList = ((GroundstationInterface*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
@@ -1291,6 +1291,8 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
                throw MeasurementException(ss.str());
             }
          }
+         else                                                            // made changes by TUAN NGUYEN
+            frequency = uplinkFrequency;                                 // made changes by TUAN NGUYEN
       }
       else
       {
@@ -1321,25 +1323,30 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
    {
       if (theData.arriveFreq == -1.0)               // theData.arriveFerq only equals -1.0 when Transmit Node is the first node in signal path 
       {
-         // Case 3: Transmit Node is a spacecraft and is the first node in signal path 
-         // Get transmit frequency from spacecraft's transmitter
-         ObjectArray hardwareList = ((Spacecraft*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
-         UnsignedInt i;
-         for (i = 0; i < hardwareList.size(); ++i)
+         if (uplinkFrequency == 0.0)                           // made changes by TUAN NGUYEN
          {
-            if (hardwareList[i]->IsOfType("Transmitter"))
+            // Case 3: Transmit Node is a spacecraft and is the first node in signal path 
+            // Get transmit frequency from spacecraft's transmitter
+            ObjectArray hardwareList = ((Spacecraft*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+            UnsignedInt i;
+            for (i = 0; i < hardwareList.size(); ++i)
             {
-               frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();    // unit: MHz 
-               break;
+               if (hardwareList[i]->IsOfType("Transmitter"))
+               {
+                  frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();    // unit: MHz 
+                  break;
+               }
+            }
+
+            if (i == hardwareList.size())
+            {
+               std::stringstream ss;
+               ss << "Error: Spacecraft " << theData.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+               throw MeasurementException(ss.str());
             }
          }
-
-         if (i == hardwareList.size())
-         {
-            std::stringstream ss;
-            ss << "Error: Spacecraft " << theData.tNode->GetName() << " does not have a transmitter to transmit signal\n";
-            throw MeasurementException(ss.str());
-         }
+         else                                               // made changes by TUAN NGUYEN
+            frequency = uplinkFrequency;                    // made changes by TUAN NGUYEN
       }
       else
       {
@@ -1507,8 +1514,24 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       ionosphereModel = gs->GetStringParameter("IonosphereModel");
    }
    
-   theData.correctionIDs.push_back("Troposphere");
-   theData.corrections.push_back(0.0);
+   UnsignedInt i = 0;
+   for (; i < theData.correctionIDs.size(); ++i)
+      if (theData.correctionIDs[i] == "Troposphere")
+         break;
+   if (i == theData.correctionIDs.size())
+   {
+      theData.correctionIDs.push_back("Troposphere");
+      theData.useCorrection.push_back(true);
+      theData.corrections.push_back(0.0);
+   }
+   else
+   {
+      theData.useCorrection[i] = true;
+      theData.corrections[i] = 0.0;
+   }
+
+   //theData.correctionIDs.push_back("Troposphere");
+   //theData.corrections.push_back(0.0);
    if (troposphereModel == "HopfieldSaastamoinen")
    {
       if (troposphere == NULL)
@@ -1519,8 +1542,24 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       theData.useCorrection.push_back(false);
 
 #ifdef IONOSPHERE
-   theData.correctionIDs.push_back("Ionosphere");
-   theData.corrections.push_back(0.0);
+   UnsignedInt i1 = 0;
+   for (; i1 < theData.correctionIDs.size(); ++i1)
+      if (theData.correctionIDs[i1] == "Ionosphere")
+         break;
+   if (i1 == theData.correctionIDs.size())
+   {
+      theData.correctionIDs.push_back("Ionosphere");
+      theData.useCorrection.push_back(true);
+      theData.corrections.push_back(0.0);
+   }
+   else
+   {
+      theData.useCorrection[i1] = true;
+      theData.corrections[i1] = 0.0;
+   }
+
+   //theData.correctionIDs.push_back("Ionosphere");
+   //theData.corrections.push_back(0.0);
    if (ionosphereModel == "IRI2007")
    {
       if (ionosphere == NULL)
@@ -1570,7 +1609,7 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    MessageInterface::ShowMessage("   ++++    Media corrections calculation for leg from %s to %s :\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
    MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
    MessageInterface::ShowMessage("     .Frequency       : %.12le Mhz\n", frequency);
-   UnsignedInt i;
+   //UnsignedInt i;
    for(i = 0; i < theData.correctionIDs.size(); ++i)
    {
       if (theData.correctionIDs[i] == "Troposphere")
@@ -1625,8 +1664,24 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
       ionosphereModel = gs->GetStringParameter("IonosphereModel");
    }
    
-   theData.correctionIDs.push_back("Troposphere");
-   theData.corrections.push_back(0.0);
+   UnsignedInt i = 0;
+   for (; i < theData.correctionIDs.size(); ++i)
+      if (theData.correctionIDs[i] == "Troposphere")
+         break;
+   if (i == theData.correctionIDs.size())
+   {
+      theData.correctionIDs.push_back("Troposphere");
+      theData.useCorrection.push_back(true);
+      theData.corrections.push_back(0.0);
+   }
+   else
+   {
+      theData.useCorrection[i] = true;
+      theData.corrections[i] = 0.0;
+   }
+
+   //theData.correctionIDs.push_back("Troposphere");
+   //theData.corrections.push_back(0.0);
    if (troposphereModel == "HopfieldSaastamoinen")
    {
       if (troposphere == NULL)
@@ -1637,8 +1692,24 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
       theData.useCorrection.push_back(false);
 
 #ifdef IONOSPHERE
-   theData.correctionIDs.push_back("Ionosphere");
-   theData.corrections.push_back(0.0);
+   UnsignedInt i1 = 0;
+   for (; i1 < theData.correctionIDs.size(); ++i1)
+      if (theData.correctionIDs[i1] == "Ionosphere")
+         break;
+   if (i1 == theData.correctionIDs.size())
+   {
+      theData.correctionIDs.push_back("Ionosphere");
+      theData.useCorrection.push_back(true);
+      theData.corrections.push_back(0.0);
+   }
+   else
+   {
+      theData.useCorrection[i1] = true;
+      theData.corrections[i1] = 0.0;
+   }
+
+   //theData.correctionIDs.push_back("Ionosphere");
+   //theData.corrections.push_back(0.0);
    if (ionosphereModel == "IRI2007")
    {
       if (ionosphere == NULL)
@@ -1865,7 +1936,7 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
    MessageInterface::ShowMessage("   ++++    Media corrections calculation for leg from %s to %s :\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
    MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
    MessageInterface::ShowMessage("     .Frequency       : %.12le Mhz\n", frequency);
-   UnsignedInt i;
+//   UnsignedInt i;
    for(i = 0; i < theData.correctionIDs.size(); ++i)
    {
       if (theData.correctionIDs[i] == "Troposphere")
@@ -2296,7 +2367,7 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
    {
       tropoCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
       #ifdef DEBUG_MEASUREMENT_CORRECTION
-         MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2B-r1B = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, rangeVector[0], rangeVector[1], rangeVector[2]);
+         MessageInterface::ShowMessage(" frequency = %le MHz,  epoch1 = %.12lf   epoch2 = %.12lf,   r2B-r1B = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch1, epoch2, rangeVector[0], rangeVector[1], rangeVector[2]);
          MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", tropoCorrection[0], tropoCorrection[1], tropoCorrection[2]);
       #endif
       
