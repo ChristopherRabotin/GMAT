@@ -283,7 +283,7 @@
           </row>
 
           <row>
-            <entry><guilabel>FuelTank resource</guilabel></entry>
+            <entry><guilabel>ChemicalTank resource</guilabel></entry>
 
             <entry><para> To perform a finite burn, a
             <guilabel>ChemicalTank</guilabel> must be attached to the
@@ -332,17 +332,17 @@
       Create a <guilabel>Finite Burn</guilabel> that uses the default thruster
       and apply a 30 minute finite burn to the spacecraft.</para>
 
-      <programlisting>% Create a default Spacecraft and FuelTank Resource
+      <programlisting>% Create a default Spacecraft and ChemicalTank Resource
 Create Spacecraft DefaultSC
-Create FuelTank FuelTank1
+Create ChemicalTank FuelTank1
 
 % Create a default Thruster.  Allow for fuel depletion from 
-% the default FuelTank.
+% the default ChemicalTank.
 Create Thruster Thruster1
 Thruster1.DecrementMass = true
 Thruster1.Tank = {FuelTank1}
 
-%  Attach FuelTank and Thruster to the spacecraft
+%  Attach ChemicalTank and Thruster to the spacecraft
 DefaultSC.Thrusters = {Thruster1}
 DefaultSC.Tanks = {FuelTank1}
 

@@ -184,11 +184,11 @@
     <title>GUI</title>
 
     <para>There are two spacecraft hardware items, the<guilabel>
-    FuelTank</guilabel> and the <guilabel>ChemicalThruster</guilabel>, that can be
+    FuelTank</guilabel> and the <guilabel>Thruster</guilabel>, that can be
     attached to a Spacecraft. Here, we describe the method used to create and
     then attach these items to a <guilabel>Spacecraft</guilabel>. For details
     on how to configure the <guilabel>FuelTank </guilabel>and
-    <guilabel>ChemicalThruster</guilabel> resources, see the help for the individual
+    <guilabel>Thruster</guilabel> resources, see the help for the individual
     hardware item.</para>
 
     <para>As shown below, to add a <guilabel>ChemicalTank</guilabel> to your
@@ -239,7 +239,7 @@
     </screenshot>
 
     <para>Next, select the desired <guilabel>ChemicalTank</guilabel> and use the
-    right arrow button to attach the<guilabel> FuelTank</guilabel> to the
+    right arrow button to attach the<guilabel> ChemicalTank</guilabel> to the
     <guilabel>Spacecraft</guilabel> as shown below. Then click the
     <guibutton>Apply</guibutton> button.</para>
 
@@ -294,12 +294,12 @@
       <guilabel>ChemicalTank</guilabel> and <guilabel>ChemicalThruster</guilabel>
       resources and attach them to the <guilabel>Spacecraft</guilabel>.</para>
 
-      <programlisting><code>% Create default Spacecraft FuelTank, and Thruster Resources
+      <programlisting><code>% Create default Spacecraft, ChemicalTank, and Thruster Resources
 Create Spacecraft DefaultSC
-Create FuelTank FuelTank1
-Create Thruster Thruster1
+Create ChemicalTank FuelTank1
+Create ChemicalThruster Thruster1
 
-%  Attach FuelTank and Thruster to the spacecraft
+%  Attach ChemicalTank and Thruster to the spacecraft
 DefaultSC.Thrusters = {Thruster1}
 DefaultSC.Tanks = {FuelTank1}
 

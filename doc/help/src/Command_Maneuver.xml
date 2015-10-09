@@ -213,7 +213,7 @@
         <listitem>
           <para>Select a <guilabel>ChemicalTank</guilabel> for the
           <guilabel>ImpulsiveBurn </guilabel>object and attach this
-          selected<guilabel> FuelTank </guilabel>to the
+          selected<guilabel> ChemicalTank </guilabel>to the
           <guilabel>Spacecraft</guilabel>.</para>
         </listitem>
 
@@ -276,13 +276,13 @@
       Perform a 100 m/s impulsive maneuver in the Earth VNB-V
       direction.</para>
 
-      <programlisting>%  Create default Spacecraft and FuelTank and attach the FuelTank 
+      <programlisting>%  Create default Spacecraft and ChemicalTank and attach the ChemicalTank 
 %  to the Spacecraft.
 Create Spacecraft DefaultSC
-Create FuelTank FuelTank1
+Create ChemicalTank FuelTank1
 DefaultSC.Tanks = {FuelTank1}
 
-%  Set FuelTank1 parameters to default values
+%  Set ChemicalTank1 parameters to default values
 FuelTank1.AllowNegativeFuelMass = false
 FuelTank1.FuelMass = 756
 FuelTank1.Pressure = 1500
@@ -292,7 +292,7 @@ FuelTank1.Volume = 0.75
 FuelTank1.FuelDensity = 1260
 FuelTank1.PressureModel = PressureRegulated
 
-%  Create ImpulsiveBurn associated with the created FuelTank
+%  Create ImpulsiveBurn associated with the created ChemicalTank
 Create ImpulsiveBurn IB
 IB.CoordinateSystem = Local
 IB.Origin = Earth

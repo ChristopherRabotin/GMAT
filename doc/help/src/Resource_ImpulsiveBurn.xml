@@ -713,7 +713,7 @@
 
                   <listitem>
                     <para>User defined list of
-                    <guilabel>FuelTanks</guilabel></para>
+                    <guilabel>ChemicalTanks</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -1100,7 +1100,7 @@ Maneuver BackProp myImpulsiveBurn(Sat);</code></programlisting>
             </row>
 
             <row>
-              <entry><guilabel>FuelTank resource</guilabel></entry>
+              <entry><guilabel>ChemicalTank resource</guilabel></entry>
 
               <entry><para> If you want to model mass depletion for an
               <guilabel>ImpulsiveBurn</guilabel>, attach a
@@ -1145,8 +1145,8 @@ Maneuver BackProp myImpulsiveBurn(Sat);</code></programlisting>
       <guilabel>ImpulsiveBurn</guilabel> to the
       <guilabel>Spacecraft</guilabel>.</para>
 
-      <programlisting>%  Create the FuelTank Resource
-Create FuelTank FuelTank1
+      <programlisting>%  Create the ChemicalTank Resource
+Create ChemicalTank FuelTank1
 FuelTank1.AllowNegativeFuelMass = false
 FuelTank1.FuelMass = 756
 FuelTank1.Pressure = 1500
@@ -1168,7 +1168,7 @@ DefaultIB.Tank = {FuelTank1}
 DefaultIB.Isp = 300
 DefaultIB.GravitationalAccel = 9.810000000000001
 
-%  Add the the FuelTank to a Spacecraft
+%  Add the the ChemicalTank to a Spacecraft
 Create Spacecraft DefaultSC
 DefaultSC.Tanks = {FuelTank1}
 
