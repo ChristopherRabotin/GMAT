@@ -64,13 +64,13 @@
 
         <tbody>
           <row>
-            <entry><guilabel>Thruster</guilabel></entry>
+            <entry><guilabel>ChemicalThruster</guilabel></entry>
 
-            <entry><para>The <guilabel>Thruster</guilabel> field allows the
-            selection of which <guilabel>Thruster</guilabel>, from a list of
+            <entry><para>The <guilabel>ChemicalThruster</guilabel> field allows the
+            selection of which <guilabel>ChemicalThruster</guilabel>, from a list of
             previously created thrusters, to use when applying a finite burn.
             Currently, using the GUI, you can only select  one
-            <guilabel>Thruster</guilabel> to attach to a
+            <guilabel>ChemicalThruster</guilabel> to attach to a
             <guilabel>FiniteBurn</guilabel> resource. Using the scripting
             interface, you may attach multiple thrusters to a
             <guilabel>FiniteBurn</guilabel> resource. Using the scripting
@@ -78,7 +78,7 @@
             <guilabel>FiniteBurn</guilabel> resource. In a script command, an
             empty list, e.g., <literal>FiniteBurn1.Thruster={}</literal>, is
             allowed but is of limited utility since the GUI will automatically
-            associate a <guilabel>Thruster</guilabel>, if one has been
+            associate a <guilabel>ChemicalThruster</guilabel>, if one has been
             created, with the <guilabel>FiniteBurn</guilabel>. This field
             cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
@@ -93,7 +93,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any <guilabel>Thruster</guilabel> created by
+                    <para>Any <guilabel>ChemicalThruster</guilabel> created by
                     user</para>
                   </listitem>
                 </varlistentry>
@@ -138,7 +138,7 @@
             <entry><para>Deprecated. Allows you to define the format of the
             finite burn thrust direction. This field has no affect. The finite
             burn thrust direction, as specified in the
-            <guilabel>Thruster</guilabel> resource, is always given in
+            <guilabel>ChemicalThruster</guilabel> resource, is always given in
             <literal>Cartesian</literal> format. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -224,11 +224,11 @@
       <para>To perform a finite burn, the <guilabel>FiniteBurn</guilabel>
       resource itself and a number of related resources and commands must be
       properly configured. You must associate a specific
-      <guilabel>Thruster</guilabel> hardware resource with a created
+      <guilabel>ChemicalThruster</guilabel> hardware resource with a created
       <guilabel>FiniteBurn</guilabel>. You must associate a specific
       <guilabel>ChemicalTank</guilabel> hardware resource with the chosen
-      <guilabel>Thruster</guilabel>. Finally, you must attach both the chosen
-      <guilabel>Thruster</guilabel> and <guilabel>ChemicalTank</guilabel> to the
+      <guilabel>ChemicalThruster</guilabel>. Finally, you must attach both the chosen
+      <guilabel>ChemicalThruster</guilabel> and <guilabel>ChemicalTank</guilabel> to the
       desired <guilabel>Spacecraft</guilabel>. See the example below for
       additional details.</para>
     </refsection>
@@ -237,7 +237,7 @@
       <title>FiniteBurn Using Multiple Thrusters</title>
 
       <para>Using the GUI, a <guilabel>FiniteBurn</guilabel> resource must be
-      associated with exactly one <guilabel>Thruster</guilabel>. Future GMAT
+      associated with exactly one <guilabel>ChemicalThruster</guilabel>. Future GMAT
       GUI versions will allow multiple thrusters to be attached to a single
       <guilabel>FiniteBurn</guilabel> resource.</para>
 
@@ -276,8 +276,8 @@
 
             <entry><para> As discussed in the <guilabel>Remarks</guilabel>,
             every <guilabel>FiniteBurn</guilabel> resource must be associated
-            with at least one <guilabel>Thruster</guilabel>. Any
-            <guilabel>Thruster</guilabel> created in the resource tree can be
+            with at least one <guilabel>ChemicalThruster</guilabel>. Any
+            <guilabel>ChemicalThruster</guilabel> created in the resource tree can be
             incorporated into a <guilabel>FiniteBurn.</guilabel>
             </para></entry>
           </row>
@@ -324,9 +324,9 @@
     <informalexample>
       <para>Create a default <guilabel>Spacecraft</guilabel> and
       <guilabel>ChemicalTank</guilabel> Resource; Create a default
-      <guilabel>Thruster</guilabel> that allows for fuel depletion from the
+      <guilabel>ChemicalThruster</guilabel> that allows for fuel depletion from the
       default <guilabel>ChemicalTank</guilabel>; Attach
-      <guilabel>ChemicalTank</guilabel> and <guilabel>Thruster</guilabel> to the
+      <guilabel>ChemicalTank</guilabel> and <guilabel>ChemicalThruster</guilabel> to the
       <guilabel>Spacecraft</guilabel>; Create default
       <guilabel>ForceModel</guilabel> and <guilabel>Propagator</guilabel>;
       Create a <guilabel>Finite Burn</guilabel> that uses the default thruster

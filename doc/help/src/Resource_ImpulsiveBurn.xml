@@ -698,7 +698,7 @@
             <entry><guilabel>Tank</guilabel></entry>
 
             <entry><para><guilabel>ChemicalTank</guilabel> from which the
-            <guilabel>Thruster</guilabel> draws propellant from. This field
+            <guilabel>ChemicalThruster</guilabel> draws propellant from. This field
             cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>

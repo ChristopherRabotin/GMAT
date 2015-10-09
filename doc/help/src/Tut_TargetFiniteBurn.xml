@@ -125,16 +125,16 @@
       <title>Create a Thruster and a Fuel Tank</title>
 
       <para>To model thrust and fuel use associated with a finite burn, we
-      must create a <guilabel>Thruster</guilabel> and a
+      must create a <guilabel>ChemicalThruster</guilabel> and a
       <guilabel>ChemicalTank</guilabel> and then attach the newly created
       <guilabel>ChemicalTank</guilabel> to the
-      <guilabel>Thruster</guilabel>.</para>
+      <guilabel>ChemicalThruster</guilabel>.</para>
 
       <procedure>
         <step>
           <para>In the <guilabel>Resources</guilabel> tree, right-click on the
           <guilabel>Hardware</guilabel> folder, point to
-          <guilabel>Add</guilabel>, and click <guilabel>Thruster</guilabel>.
+          <guilabel>Add</guilabel>, and click <guilabel>ChemicalThruster</guilabel>.
            A resource named <guilabel>Thruster1</guilabel> will be
           created.</para>
         </step>
@@ -255,7 +255,7 @@
 
       <para>The exact form of the pre-defined Thrust polynomial, associated
       with the coefficients above, are given in the
-      <guilabel>Thruster</guilabel> help. We note that, by default, all of the
+      <guilabel>ChemicalThruster</guilabel> help. We note that, by default, all of the
       Thrust coefficients associated with terms that involve tank pressure are
       zero. We have kept the default zero values for all of these
       coefficients. We simply changed the constant term in the Thrust
@@ -347,7 +347,7 @@
         </step>
 
         <step>
-          <para>Use the menu to the right of the <guilabel>Thruster</guilabel>
+          <para>Use the menu to the right of the <guilabel>ChemicalThruster</guilabel>
           field to select <guilabel>Thruster1</guilabel> as the thruster
           associated with <guilabel>FiniteBurn1</guilabel>. Click
           <guilabel>OK</guilabel>.</para>

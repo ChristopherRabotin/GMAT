@@ -30,7 +30,7 @@
 
     <para>The hardware fields allow you to attach pre-configured hardware
     models to a spacecraft. Current models include
-    <guilabel>ChemicalTank</guilabel> and <guilabel>Thruster</guilabel>. Before
+    <guilabel>ChemicalTank</guilabel> and <guilabel>ChemicalThruster</guilabel>. Before
     you attach a hardware model to a <guilabel>Spacecraf</guilabel>t, you must
     first create the model.</para>
 
@@ -138,7 +138,7 @@
 
                   <listitem>
                     <para>Any user-defined
-                    <guilabel>Thruster</guilabel>.</para>
+                    <guilabel>ChemicalThruster</guilabel>.</para>
                   </listitem>
                 </varlistentry>
 
@@ -184,11 +184,11 @@
     <title>GUI</title>
 
     <para>There are two spacecraft hardware items, the<guilabel>
-    FuelTank</guilabel> and the <guilabel>Thruster</guilabel>, that can be
+    FuelTank</guilabel> and the <guilabel>ChemicalThruster</guilabel>, that can be
     attached to a Spacecraft. Here, we describe the method used to create and
     then attach these items to a <guilabel>Spacecraft</guilabel>. For details
     on how to configure the <guilabel>FuelTank </guilabel>and
-    <guilabel>Thruster</guilabel> resources, see the help for the individual
+    <guilabel>ChemicalThruster</guilabel> resources, see the help for the individual
     hardware item.</para>
 
     <para>As shown below, to add a <guilabel>ChemicalTank</guilabel> to your
@@ -207,7 +207,7 @@
 
     <para>To add a <guilabel>Thruste</guilabel>r to your script, highlight the
     <guilabel>Hardware</guilabel> resource and then right click to add a
-    <guilabel>Thruster</guilabel>.</para>
+    <guilabel>ChemicalThruster</guilabel>.</para>
 
     <screenshot>
       <mediaobject>
@@ -220,8 +220,8 @@
     </screenshot>
 
     <para>Thus far, we have created both a <guilabel>ChemicalTank</guilabel> and a
-    <guilabel>Thruster</guilabel>. Next, we attach both the
-    <guilabel>ChemicalTank</guilabel> and the <guilabel>Thruster</guilabel> to a
+    <guilabel>ChemicalThruster</guilabel>. Next, we attach both the
+    <guilabel>ChemicalTank</guilabel> and the <guilabel>ChemicalThruster</guilabel> to a
     particular<guilabel> Spacecraft</guilabel>. To do this, double click on
     the desired <guilabel>Spacecraft</guilabel> under the
     <guilabel>Spacecraft</guilabel> resource to bring up the associated GUI
@@ -253,12 +253,12 @@
       </mediaobject>
     </screenshot>
 
-    <para>Similarly, to attach a <guilabel>Thruster</guilabel> to a
+    <para>Similarly, to attach a <guilabel>ChemicalThruster</guilabel> to a
     <guilabel>Spacecraft</guilabel>, double click on the desired
     <guilabel>Spacecraft</guilabel> under the <guilabel>Spacecraft</guilabel>
     resource and then select the <guilabel>Actuators</guilabel> tab. Then
-    select the desired <guilabel>Thruster</guilabel> and use the right arrow
-    to attach the <guilabel>Thruster</guilabel> to the
+    select the desired <guilabel>ChemicalThruster</guilabel> and use the right arrow
+    to attach the <guilabel>ChemicalThruster</guilabel> to the
     <guilabel>Spacecraft</guilabel> as shown below. Finally, click the
     <guibutton>Apply</guibutton> button.</para>
 
@@ -276,13 +276,13 @@
   <refsection>
     <title>Remarks</title>
 
-    <para>To actually use the <guilabel>Thruster</guilabel> to apply a finite
+    <para>To actually use the <guilabel>ChemicalThruster</guilabel> to apply a finite
     burn to a <guilabel>Spacecraft</guilabel>, additional steps are required.
-    For example, when you create the <guilabel>Thruster</guilabel> resource,
+    For example, when you create the <guilabel>ChemicalThruster</guilabel> resource,
     you have to associate a <guilabel>ChemicalTank</guilabel> with the
-    <guilabel>Thruster</guilabel>. For details on this and related matters,
+    <guilabel>ChemicalThruster</guilabel>. For details on this and related matters,
     see the help for the <guilabel>ChemicalTank</guilabel>,
-    <guilabel>Thruster</guilabel>, and <guilabel>FiniteBurn</guilabel>
+    <guilabel>ChemicalThruster</guilabel>, and <guilabel>FiniteBurn</guilabel>
     resources.</para>
   </refsection>
 
@@ -291,7 +291,7 @@
 
     <informalexample>
       <para>Create a default <guilabel>Spacecraft</guilabel>. Create
-      <guilabel>ChemicalTank</guilabel> and <guilabel>Thruster</guilabel>
+      <guilabel>ChemicalTank</guilabel> and <guilabel>ChemicalThruster</guilabel>
       resources and attach them to the <guilabel>Spacecraft</guilabel>.</para>
 
       <programlisting><code>% Create default Spacecraft FuelTank, and Thruster Resources

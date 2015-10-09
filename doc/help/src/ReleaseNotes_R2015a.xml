@@ -290,7 +290,7 @@
       </listitem>
 
       <listitem>
-        <para>The <guilabel>Thruster</guilabel> Resource has been renamed to
+        <para>The <guilabel>ChemicalThruster</guilabel> Resource has been renamed to
         <guilabel>ChemicalThruster</guilabel> to distinguish between chemical
         and electric systems.</para>
       </listitem>

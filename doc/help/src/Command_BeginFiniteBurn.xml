@@ -54,7 +54,7 @@
     <guilabel>EndFiniteBurn</guilabel> commands, a
     <guilabel>FiniteBurn</guilabel> object must be configured. This object
     requires the configuration of <guilabel>ChemicalTank</guilabel> and
-    <guilabel>Thruster</guilabel> models. See the Remarks section and the
+    <guilabel>ChemicalThruster</guilabel> models. See the Remarks section and the
     examples below for a more detailed explanation.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
@@ -340,7 +340,7 @@
     without first creating a <guilabel>FiniteBurn</guilabel> object, GMAT will
     create a default <guilabel>FiniteBurn</guilabel> object called
     <guilabel>DefaultFB</guilabel>. However, you will need to configure the
-    required <guilabel>ChemicalTank</guilabel> and <guilabel>Thruster</guilabel>
+    required <guilabel>ChemicalTank</guilabel> and <guilabel>ChemicalThruster</guilabel>
     objects required for a <guilabel>FiniteBurn</guilabel> object before you
     can run the mission. See the Remarks section for detailed
     instructions.</para>
@@ -355,7 +355,7 @@
       <para>To use the <guilabel>BeginFiniteBurn</guilabel> and
       <guilabel>EndFiniteBurn</guilabel> commands in your mission sequence,
       you must configure a <guilabel>FiniteBurn</guilabel> object along with
-      <guilabel>ChemicalTank</guilabel> and <guilabel>Thruster</guilabel> objects
+      <guilabel>ChemicalTank</guilabel> and <guilabel>ChemicalThruster</guilabel> objects
       as shown in the examples below and as described in these steps:</para>
 
       <orderedlist>
@@ -365,7 +365,7 @@
         </listitem>
 
         <listitem>
-          <para>Create a <guilabel>Thruster</guilabel> model:</para>
+          <para>Create a <guilabel>ChemicalThruster</guilabel> model:</para>
 
           <orderedlist>
             <listitem>
@@ -374,7 +374,7 @@
             </listitem>
 
             <listitem>
-              <para>Configure the <guilabel>Thruster</guilabel> to use the
+              <para>Configure the <guilabel>ChemicalThruster</guilabel> to use the
               <guilabel>ChemicalTank</guilabel> created in Step 1.</para>
             </listitem>
           </orderedlist>
@@ -382,13 +382,13 @@
 
         <listitem>
           <para>Add the <guilabel>ChemicalTank</guilabel> and
-          <guilabel>Thruster</guilabel> created in the previous two steps to
+          <guilabel>ChemicalThruster</guilabel> created in the previous two steps to
           the <guilabel>Spacecraft</guilabel>.</para>
         </listitem>
 
         <listitem>
           <para>Create a <guilabel>FiniteBurn</guilabel> model and configure
-          it to use the <guilabel>Thruster</guilabel> created in Step
+          it to use the <guilabel>ChemicalThruster</guilabel> created in Step
           2.</para>
         </listitem>
       </orderedlist>
@@ -398,7 +398,7 @@
       <title>Initial Thruster Status</title>
 
       <para>When you configure the<guilabel> Spacecraft</guilabel>,
-      <guilabel>ChemicalTank</guilabel>, <guilabel>Thruster</guilabel>, and
+      <guilabel>ChemicalTank</guilabel>, <guilabel>ChemicalThruster</guilabel>, and
       <guilabel>FiniteBurn</guilabel> objects, GMAT initializes these objects
       with the thrusters turned off, so that no finite burns are active. You
       must use the <guilabel>BeginFiniteBurn</guilabel> command to turn on the
@@ -452,7 +452,7 @@ BeginFiniteBurn aFiniteBurn(aSat)</code></programlisting>
       <programlisting><code>%  Create objects
 Create Spacecraft aSat
 Create Thruster aThruster
-Create FuelTank aTank
+Create ChemicalTank aTank
 Create FiniteBurn aFiniteBurn
 Create Propagator aPropagator
 
@@ -478,7 +478,7 @@ EndFiniteBurn aFiniteBurn(aSat)</code>   </programlisting>
       <programlisting><code>%  Create objects
 Create Spacecraft aSat
 Create Thruster aThruster
-Create FuelTank aTank
+Create ChemicalTank aTank
 Create FiniteBurn aFiniteBurn
 Create Propagator aPropagator
 

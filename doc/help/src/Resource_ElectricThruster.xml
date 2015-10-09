@@ -30,9 +30,9 @@
 
     <para>The <guilabel>ElectricThruster</guilabel> resource is a model of an
     electric thruster which supports several models for thrust and mass flow
-    computation. The <guilabel>Thruster</guilabel> model also allows you to
+    computation. The <guilabel>ChemicalThruster</guilabel> model also allows you to
     specify properties such as a duty cycle and scale factor and to connect a
-    <guilabel>Thruster</guilabel> with a <guilabel>ChemicalTank</guilabel>. You
+    <guilabel>ChemicalThruster</guilabel> with a <guilabel>ChemicalTank</guilabel>. You
     can flexibly define the direction of the thrust by specifying the thrust
     components in coordinate systems such as (locally defined)
     <guilabel>SpacecraftBody</guilabel> or <guilabel>LVLH</guilabel>, or by
@@ -912,7 +912,7 @@
             <entry><para>This field, used in conjunction with the
             <guilabel>Axes</guilabel> field, allows the user to define a
             spacecraft centered set of axes for the
-            <guilabel>Thruster</guilabel>. <guilabel>Origin</guilabel> has no
+            <guilabel>ChemicalThruster</guilabel>. <guilabel>Origin</guilabel> has no
             affect when a <guilabel>Local</guilabel> coordinate system is used
             and the <guilabel>Axes</guilabel> are set to
             <guilabel>MJ2000Eq</guilabel> or
@@ -980,11 +980,11 @@
             <entry><guilabel>Tank</guilabel></entry>
 
             <entry><para><guilabel>ChemicalTank</guilabel> from which the
-            <guilabel>Thruster</guilabel> draws propellant from. In a script
+            <guilabel>ChemicalThruster</guilabel> draws propellant from. In a script
             command, an empty list, e.g., <literal>Thruster1.Tank =
             {}</literal>, is NOT allowed. Via the script, if you wish to
             indicate that no <guilabel>ChemicalTank</guilabel> is associated with
-            a <guilabel>Thruster</guilabel>, do not include commands such as
+            a <guilabel>ChemicalThruster</guilabel>, do not include commands such as
             <literal>Thruster1.Tank = ...</literal> in your script. This field
             cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
@@ -1628,7 +1628,7 @@
             <entry><guilabel>FuelTank resource</guilabel></entry>
 
             <entry><para>This resource contains the fuel used to power the
-            <guilabel>Thruster</guilabel> specified by the<guilabel>
+            <guilabel>ChemicalThruster</guilabel> specified by the<guilabel>
             FiniteBurn</guilabel> resource.</para></entry>
           </row>
 
@@ -1668,12 +1668,12 @@
   <refsection>
     <title>GUI</title>
 
-    <para>The <guilabel>Thruster</guilabel> dialog box allows you to specify
-    properties of a <guilabel>Thruster</guilabel> including the
+    <para>The <guilabel>ChemicalThruster</guilabel> dialog box allows you to specify
+    properties of a <guilabel>ChemicalThruster</guilabel> including the
     <guilabel>Coordinate System</guilabel> of the thrust acceleration
     direction vector, the thrust magnitude and Isp coefficients, and choice of
     <guilabel>ChemicalTank</guilabel>. The layout of the
-    <guilabel>Thruster</guilabel> dialog box is shown below.</para>
+    <guilabel>ChemicalThruster</guilabel> dialog box is shown below.</para>
 
     <screenshot>
       <mediaobject>
@@ -1712,7 +1712,7 @@
 
     <para>Selecting the <guimenu>Edit Thruster Coef.</guimenu> button brings
     up the following dialog box where you may input the coefficients for the
-    <guilabel>Thruster</guilabel> polynomial.</para>
+    <guilabel>ChemicalThruster</guilabel> polynomial.</para>
 
     <screenshot>
       <mediaobject>
@@ -1778,19 +1778,19 @@
     <refsection>
       <title>Use of Thruster Resource in Conjunction With Maneuvers</title>
 
-      <para>A <guilabel>Thruster</guilabel> resource is used only in
+      <para>A <guilabel>ChemicalThruster</guilabel> resource is used only in
       association with finite maneuvers. To implement a finite maneuver, you
       must first create both a <guilabel>ChemicalTank</guilabel> and a
       <guilabel>FiniteBurn</guilabel> resource. You must also associate a
-      <guilabel>ChemicalTank</guilabel> with the <guilabel>Thruster</guilabel>
-      resource and you must associate a <guilabel>Thruster</guilabel> with the
+      <guilabel>ChemicalTank</guilabel> with the <guilabel>ChemicalThruster</guilabel>
+      resource and you must associate a <guilabel>ChemicalThruster</guilabel> with the
       <guilabel>FiniteBurn</guilabel> resource. The actual finite maneuver is
       implemented using the
       <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel>
       commands. See the
       <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel>
       command documentation for worked examples on how the
-      <guilabel>Thruster</guilabel> resource is used in conjunction with
+      <guilabel>ChemicalThruster</guilabel> resource is used in conjunction with
       finite maneuvers.</para>
     </refsection>
 
@@ -1841,7 +1841,7 @@
       <title>Local Coordinate Systems</title>
 
       <para>Here, a Local coordinate system is defined as one that we
-      configure "locally" using the <guilabel>Thruster</guilabel> resource
+      configure "locally" using the <guilabel>ChemicalThruster</guilabel> resource
       interface as opposed to defining a coordinate system using the
       <guilabel>Coordinate Systems</guilabel> folder in the
       <guilabel>Resources</guilabel> Tree.</para>
