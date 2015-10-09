@@ -809,6 +809,7 @@ bool Optimize::ExecuteCallback()
          "Optimize::ExecuteCallback - state is NOMINAL\n");
    #endif
    callbackResults = theSolver->AdvanceNestedState(vars);
+   theSolver->ReportProgress(listeners, Solver::UNDEFINED_STATE);
    ResetLoopData();
 
    #ifdef DEBUG_CALLBACK
