@@ -167,7 +167,8 @@ protected:
       /// Method to determine the coverage window(s) for the spacecraft
       void                 GetRequiredCoverageWindow(SpiceCell* w, Real s, Real e,
                                                      bool useEntireIntvl,
-                                                     bool includeAll = true,
+                                                     const std::string &abCorr     = "NONE",
+                                                     bool includeAll          = true,
                                                      bool lightTimeCorrection = false,
                                                      bool transmit = false,
                                                      Real stepSize = 10.0,

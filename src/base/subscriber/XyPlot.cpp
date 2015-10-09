@@ -1445,6 +1445,19 @@ const StringArray& XyPlot::GetWrapperObjectNameArray(bool completeSet)
    return allWrapperObjectNames;
 }
 
+
+//------------------------------------------------------------------------------
+// void XyPlot::SetRunState(Gmat::RunState rs)
+//------------------------------------------------------------------------------
+void XyPlot::SetRunState(Gmat::RunState rs)
+{
+   if (rs == Gmat::IDLE)
+      PlotInterface::TakeXYAction(instanceName, "AlwaysRedraw");
+   else
+      PlotInterface::TakeXYAction(instanceName, "RunModeRedraw");
+   Subscriber::SetRunState(rs);
+}
+
 //---------------------------------
 // protected methods
 //---------------------------------

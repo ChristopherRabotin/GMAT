@@ -124,6 +124,8 @@ private:
    ObjectInitializer                 *objInit;
    /// Update method used for owned clones
    updateMethod                      cloneUpdateStyle;
+   /// Flag indicting error creating FCS
+   bool                              errorInPreviousFcs;
    
    /// List of FiniteThrust objects that are currently available
    std::vector<PhysicalModel *>      transientForces;

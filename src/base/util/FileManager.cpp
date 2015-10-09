@@ -1176,6 +1176,9 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    /// to proceed addressing path issues in GMAT.
    // SetPathsAbsolute();
    
+   // Validate PATHs
+   ValidatePaths();
+
    #ifdef DEBUG_MAPPING
    ShowMaps("In ReadStartupFile()");
    #endif
@@ -3436,4 +3439,88 @@ void FileManager::SetPathsAbsolute()
          MessageInterface::ShowMessage("   %s  %s\n", file->second->mPath.c_str(),
                file->second->mFile.c_str());
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ValidatePaths()
+//------------------------------------------------------------------------------
+/*
+ * Validate all paths in file manager
+ */
+//------------------------------------------------------------------------------
+bool FileManager::ValidatePaths()
+{
+   std::string s = "";
+   int i = 0;
+   FileType type;
+
+   for ( int fooInt = BEGIN_OF_PATH; fooInt != END_OF_PATH; fooInt++ )
+   {
+      type = FileType(fooInt);
+      switch (type)
+      {
+         case BEGIN_OF_PATH:
+         case END_OF_PATH:
+            break;
+         // non fatal paths?
+         case TEXTURE_PATH:
+         case BODY_3D_MODEL_PATH:
+         case MEASUREMENT_PATH:
+         case GUI_CONFIG_PATH:
+         case SPLASH_PATH:
+         case ICON_PATH:
+         case VEHICLE_MODEL_PATH:
+            try
+            {
+               if (!DoesDirectoryExist(GetFullPathname(type)))
+               {
+                  MessageInterface::ShowMessage("%s directory does not exist: %s",
+                     FileManager::FILE_TYPE_STRING[type].c_str(),
+                     GetFullPathname(type).c_str());
+               }
+            }
+            catch (UtilityException &e)
+            {
+                  MessageInterface::ShowMessage("%s directory not specified in gmat_startup_file",
+                     FileManager::FILE_TYPE_STRING[type].c_str());
+            }
+            break;
+         default:
+            try
+            {
+               if (!DoesDirectoryExist(GetFullPathname(type)))
+               {
+                  i++;
+                  if (i > 9) goto loopexit;
+                  if (i > 1)
+                     s = s + "\n";
+                  s = s + FileManager::FILE_TYPE_STRING[type] + " = " + 
+                     GetFullPathname(type);
+               }
+            }
+            catch (UtilityException &e)
+            {
+               i++;
+               if (i > 9) goto loopexit;
+               if (i > 1)
+                  s = s + "\n";
+               s = s + FileManager::FILE_TYPE_STRING[type] + " = MISSING in gmat_startup_file";
+            }
+      }
+   }
+
+loopexit:
+   UtilityException ue;
+   if (i == 1)
+   {
+      ue.SetDetails("The following directory does not exist:\n%s", s.c_str());
+      throw ue;
+   }
+   else if (i > 1)
+   {
+      ue.SetDetails("At least %d directories do not exist, including:\n%s", i, s.c_str());
+      throw ue;
+   }
+   return i == 0;
 }

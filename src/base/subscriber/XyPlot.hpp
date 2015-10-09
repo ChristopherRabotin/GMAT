@@ -121,6 +121,8 @@ public:
    virtual const StringArray&
                         GetWrapperObjectNameArray(bool completeSet = false);
 
+   virtual void         SetRunState(Gmat::RunState rs);
+
 protected:
 
    bool SetXParameter(const std::string &paramName);

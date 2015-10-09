@@ -1007,6 +1007,41 @@ bool Assignment::Initialize()
       
       try
       {
+         // Currently GmatFunction is not allowed in a math eqation
+         StringArray gmatFunctions = mathTree->GetGmatFunctionNames();
+         #ifdef DEBUG_ASSIGNMENT_INIT
+         MessageInterface::ShowMessage
+            ("Assignment command has %d GmatFunctions\n", gmatFunctions.size());
+         for (unsigned int i = 0; i < gmatFunctions.size(); i++)
+            MessageInterface::ShowMessage
+               ("gmatFunctions[%d] = '%s'\n", i, gmatFunctions[i].c_str());
+         #endif
+         
+         
+         // I think I fixed MathParser to parse GmatFunction with math operators,
+         // but if any test fails, set this to 1 (LOJ: 2015.10.02)
+         //===========================================================
+         #if 0
+         //===========================================================
+         if (gmatFunctions.size() > 0)
+         {
+            // If any math operator found with GmatFunction, throw an exception
+            // for GMT-5262 (LOJ: 2015.10.02)
+            if (GmatStringUtil::IsThereMathSymbol(rhs))
+            {
+               #ifdef DEBUG_ASSIGNMENT_INIT
+               MessageInterface::ShowMessage
+                  ("Throwing exception: Using GmatFunction in math equation is not "
+                   "allowed in this release");
+               #endif
+               throw CommandException
+                  ("Using GmatFunction in math equation is not allowed in this release");
+            }
+         }
+         //===========================================================
+         #endif
+         //===========================================================
+         
          if (mathTree->Initialize(objectMap, globalObjectMap))
          {
             try
@@ -1077,6 +1112,9 @@ bool Assignment::Execute()
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
        callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL",
        internalCoordSys);
+   MessageInterface::ShowMessage
+      ("   lhsWrapper=<%p>, rhsWrapper=<%p>, mathTree=<%p>\n", lhsWrapper, rhsWrapper,
+       mathTree);
    #endif
    
    if (lhsWrapper == NULL || (rhsWrapper == NULL && mathTree == NULL))

@@ -39,6 +39,10 @@
 class MdiTableViewFrame: public GmatMdiChildFrame, ISolverListener
 {
 public:
+   enum ConvergenceType
+   {
+      ITERATING, CONVERGENCE, NO_CONVERGENCE
+   };
    MdiTableViewFrame(wxMDIParentFrame *parent, const wxString& plotName,
                      const wxString& title, const wxPoint& pos,
                      const wxSize& size, const long style);
@@ -51,6 +55,7 @@ public:
    virtual void VariabledChanged(std::string name, std::string &value);
    
    // setters
+   virtual void SetConvergence(ConvergenceType value, std::string info = "");
    
    //virtual void SetIsNewFrame(bool flag);
    
@@ -79,6 +84,7 @@ protected:
    wxScrolledWindow *scrollWindow;
    wxBannerWindow *convergenceText;
    wxString mPlotTitle;
+   ConvergenceType convergence;
    bool mInFunction;
    
    void CheckFrame();

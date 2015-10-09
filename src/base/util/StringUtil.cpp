@@ -55,6 +55,7 @@
 //#define DEBUG_NUMBER_WITH_NAME
 //#define DEBUG_SCI_NOTATION
 //#define DEBUG_SINGLE_ITEM 1
+//#define DEBUG_MATH_SYMBOL 1
 
 //------------------------------------------------------------------------------
 // std::string RemoveAll(const std::string &str, char ch, Integer start = 0)
@@ -4110,27 +4111,74 @@ bool GmatStringUtil::IsThereEqualSign(const std::string &str)
 //------------------------------------------------------------------------------
 bool GmatStringUtil::IsThereMathSymbol(const std::string &str)
 {
+   #if DEBUG_MATH_SYMBOL > 0
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::IsThereMathSymbol() entered, str = <%s>\n", str.c_str());
+   #endif
+   
    bool inQuotes = false;
    std::string str1 = RemoveScientificNotation(str);
    Integer size = str1.size();
    
+   if (IsEnclosedWith(str1, "'"))
+   {
+      #if DEBUG_MATH_SYMBOL > 0
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::IsThereMathSymbol() returning false, string is enclosed "
+          "with single quotes\n");
+      #endif
+      return false;
+   }
+   
    for (Integer i=0; i<size; i++)
    {
+      #if DEBUG_MATH_SYMBOL > 1
+      MessageInterface::ShowMessage("==> %c\n", str1[i]);
+      MessageInterface::ShowMessage("==> inQuotes = %d\n", inQuotes);
+      #endif
+      
       if (str1[i] == '\'')
       {
+         // If last position has first single quote, return true
+         if (!inQuotes && (i == size - 1))
+         {
+            #if DEBUG_MATH_SYMBOL > 0
+            MessageInterface::ShowMessage
+               ("GmatStringUtil::IsThereMathSymbol() returning true, last position "
+                "has first single quote\n");
+            #endif
+            return true;
+         }
+         
          if (inQuotes)
             inQuotes = false;
          else
             inQuotes = true;
       }
       else if (str1[i] == '+' || str1[i] == '-' || str1[i] == '*' || str1[i] == '/' ||
-               str1[i] == '^' || str1[i] == '=' || str1[i] == '<' || str1[i] == '>')
+               str1[i] == '^' || str1[i] == '=' || str1[i] == '<' || str1[i] == '>' ||
+               str1[i] == '\'')
       {
+         #if DEBUG_MATH_SYMBOL > 1
+         MessageInterface::ShowMessage("==> inQuotes = %d\n", inQuotes);
+         #endif
          if (!inQuotes)
+         {
+            #if DEBUG_MATH_SYMBOL > 0
+            MessageInterface::ShowMessage
+               ("GmatStringUtil::IsThereMathSymbol() returning true, found math "
+                "simbol '%c'\n", str1[i]);
+            #endif
             return true;
+         }
       }
    }
-
+   
+   #if DEBUG_MATH_SYMBOL > 0
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::IsThereMathSymbol() returning false, no math symbol found\n");
+   #endif
+   
    return false;
 }
 

@@ -113,7 +113,7 @@ Function::Function(const std::string &typeStr, const std::string &name) :
 //------------------------------------------------------------------------------
 Function::~Function()
 {
-   #ifdef DEBUG_DESTRUCTOR
+   #ifdef DEBUG_FUNCTION_FINALIZE
    MessageInterface::ShowMessage
       ("Function::~Function() <%p>[%s]'%s' entered\n", this, GetTypeName().c_str(),
        GetName().c_str());
@@ -128,7 +128,7 @@ Function::~Function()
    ClearAutomaticObjects();
    ClearFunctionObjects();
    
-   #ifdef DEBUG_DESTRUCTOR
+   #ifdef DEBUG_FUNCTION_FINALIZE
    MessageInterface::ShowMessage
       ("Function::~Function() <%p>[%s]'%s' leaving\n", this, GetTypeName().c_str(),
        GetName().c_str());
@@ -1199,7 +1199,7 @@ void Function::ClearFunctionObjects()
        "functionObjectMap.size()=%d, sandboxObjects.size()=%d, "
        "objectsToDelete.size()=%d\n", this, GetName().c_str(),
        functionObjectMap.size(), sandboxObjects.size(), objectsToDelete.size());
-   ShowObjects("In ClearFunctionObjects()");
+   ShowObjectMap(&functionObjectMap, "In ClearFunctionObjects()", "functionObjectMap");
    #endif
    
    StringArray toDelete;
@@ -1345,10 +1345,24 @@ void Function::ClearAutomaticObjects()
          ("Checking if <%p> '%s' can be deleted\n", omi->second,
           (omi->first).c_str());
       #endif
-      if (omi->second != NULL && !sandboxObjects.empty() &&
-          find(sandboxObjects.begin(), sandboxObjects.end(), omi->second) ==
-          sandboxObjects.end())
+      if (omi->second != NULL)
       {
+         std::string objName = (omi->second)->GetName();
+         
+         // If same object found in sandboxObjects then skip
+         if (!sandboxObjects.empty() &&
+             find(sandboxObjects.begin(), sandboxObjects.end(), omi->second) !=
+             sandboxObjects.end())
+            continue;
+         
+         // If same object found in functionObjectMap then skip
+         if (functionObjectMap.find(objName) != functionObjectMap.end())
+         {
+            ObjectMap::iterator iobjfound = functionObjectMap.find(objName);
+            if (omi->second == iobjfound->second)
+               continue;
+         }
+         
          //------------------------------------------------------
          #ifdef __COLLECT_AUTO_OBJECTS__
          //------------------------------------------------------
@@ -1716,8 +1730,6 @@ bool Function::IsAutomaticObjectGlobal(const std::string &autoObjName,
 void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
                              const std::string &mapName)
 {
-   #ifdef DEBUG_OBJECT_MAP
-   
    MessageInterface::ShowMessage("%s\n", title.c_str());
    MessageInterface::ShowMessage("this=<%p>, functionName='%s'\n", this, functionName.c_str());
    if (objMap == NULL)
@@ -1730,6 +1742,7 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
    GmatBase *obj = NULL;
    GmatBase *paramOwner = NULL;
    std::string objName;
+   std::string objTypeName = "NULL";
    std::string isGlobal;
    std::string isLocal;
    std::string paramOwnerType;
@@ -1753,6 +1766,7 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
       
       if (obj)
       {
+         objTypeName = obj->GetTypeName();
          if (obj->IsGlobal())
             isGlobal = "Yes";
          if (obj->IsLocal())
@@ -1770,8 +1784,7 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
       }
       MessageInterface::ShowMessage
          ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
-          obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
-          isLocal.c_str());
+          objTypeName.c_str(), isGlobal.c_str(), isLocal.c_str());
       if (isParameter)
          MessageInterface::ShowMessage
             ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
@@ -1779,7 +1792,6 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
       else
          MessageInterface::ShowMessage("\n");
    }
-   #endif
 }
 
 

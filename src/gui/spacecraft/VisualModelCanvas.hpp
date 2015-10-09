@@ -40,12 +40,11 @@ public:
    ~VisualModelCanvas();
    bool LoadModel(const wxString &filePath);
    void LoadModel();
-   void RecenterModel(float *offset);
-   float AutoscaleModel();
    void Rotate(bool useDegrees, float xAngle, float yAngle, float zAngle);
    void Translate(float x, float y, float z);
-   void Scale(float xScale, float yScale, float zScale);
-   void ToggleEarth(){ showEarth = !showEarth; Refresh(false); }
+   void Scale(float scale);
+   void ToggleEarth()
+      { showEarth = !showEarth; Refresh(false); }
 
 protected:
    DECLARE_EVENT_TABLE();
@@ -57,7 +56,6 @@ protected:
 private:
 
    bool glInitialized;
-   bool recentered;
    
    // Camera and light used in the canvas
    Camera mCamera;
@@ -65,7 +63,9 @@ private:
 
    // Pointers to the current spacecraft and current model from the model manager
    Spacecraft *currentSpacecraft;
+public:
    ModelObject *loadedModel;
+private:
 
    // The path to the model and a flag for loading the model
    wxString modelPath;

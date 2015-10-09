@@ -156,8 +156,6 @@ protected:
    CoordinateSystem     *internalCS;
    /// pointer to the function's function control sequence
    GmatCommand          *fcs;
-   /// current command being executed
-   GmatCommand          *current;
    /// Call stack of FOSs for nested/recursive function calls
    ObjectMapStack       callStack;
    /// Call stack of LOSs for nested/recursive function calls

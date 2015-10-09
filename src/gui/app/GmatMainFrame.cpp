@@ -3234,6 +3234,14 @@ bool GmatMainFrame::SaveScriptAs()
    bool scriptSaved = true;
    std::string oldScriptName = mScriptFilename;
    
+   if (mInterpretFailed)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Errors were found in the script named \"%s\".\n"
+            "Please fix all errors listed in message window before saving "
+            "the mission.\n", mScriptFilename.c_str());
+      return false;
+   }
    wxFileDialog dialog(this, "Choose a file", "", "",
                        "Script files (*.script, *.m)|*.script;*.m|"
                        "Text files (*.txt, *.text)|*.txt;*.text|"

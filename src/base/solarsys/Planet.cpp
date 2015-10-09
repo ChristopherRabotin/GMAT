@@ -20,6 +20,7 @@
 #include "gmatdefs.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
+#include "FileManager.hpp"
 #include "Rmatrix.hpp"
 #include "Planet.hpp"
 #include "MessageInterface.hpp"
@@ -116,9 +117,10 @@ Planet::Planet(std::string name) :
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_070425_370426_predict.bpc");
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_720101_070426.bpc");
-      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      attitudeSpiceKernelNames.push_back(path+"/earth_070425_370426_predict.bpc");
+      attitudeSpiceKernelNames.push_back(path+"/earth_720101_070426.bpc");
+      attitudeSpiceKernelNames.push_back(path+"/earth_000101_151228_151006.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();
@@ -163,9 +165,10 @@ Planet::Planet(std::string name, const std::string &cBody) :
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
-         attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_070425_370426_predict.bpc");
-         attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_720101_070426.bpc");
-         attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+         attitudeSpiceKernelNames.push_back(path+"/earth_070425_370426_predict.bpc");
+         attitudeSpiceKernelNames.push_back(path+"/earth_720101_070426.bpc");
+         attitudeSpiceKernelNames.push_back(path+"/earth_000101_151228_151006.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();

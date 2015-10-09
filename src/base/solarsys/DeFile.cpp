@@ -683,8 +683,15 @@ void DeFile::Read_Coefficients( double Time )
       // can be safely ignored.
       size_t len = fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);
       if ((Integer)len != arraySize)
-         throw PlanetaryEphemException("Requested epoch is not on the DE file");
-
+      {
+         // Write detaild message (LOJ: 2015.10.03)
+         //throw PlanetaryEphemException("Requested epoch is not on the DE file");
+         PlanetaryEphemException ex;
+         ex.SetDetails("Requested epoch %.9f is not on the DE file '%s'.\n", Time,
+                       theFileName.c_str());
+         throw ex;
+      }
+      
       T_beg  = Coeff_Array[0] - baseEpoch;
       T_end  = Coeff_Array[1] - baseEpoch;
       T_span = T_end - T_beg;

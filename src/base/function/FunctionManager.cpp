@@ -100,7 +100,6 @@ FunctionManager::FunctionManager() :
    objInit             (NULL),
    internalCS          (NULL), 
    fcs                 (NULL),
-   current             (NULL),
    callingFunction     (NULL)
 {
    #ifdef DEBUG_FUNCTION_MANAGER
@@ -172,7 +171,6 @@ FunctionManager::FunctionManager(const FunctionManager &fm) :
    objInit             (NULL),
    internalCS          (fm.internalCS), 
    fcs                 (NULL),
-   current             (NULL),
    callingFunction     (NULL)
 {
    #ifdef DEBUG_FUNCTION_MANAGER
@@ -219,7 +217,6 @@ FunctionManager& FunctionManager::operator=(const FunctionManager &fm)
       objInit             = NULL;  
       internalCS          = fm.internalCS;  // right?
       fcs                 = NULL;
-      current             = NULL;
       callingFunction     = NULL;
    }
    return *this;
@@ -651,6 +648,7 @@ bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAd
              "deleting oldObj passedInput");
          #endif
          delete oldObj;
+         oldObj = NULL;
       }
       inputAdded = false;
       
@@ -679,6 +677,7 @@ bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAd
              "deleting oldObj passedInput");
          #endif
          delete oldObj;
+         oldObj = NULL;
       }
    }
    else
@@ -953,12 +952,15 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    #endif
    
    // Set re-initialize flag, set to true if it is nested function call
-   bool reinitialize = false;
-   if (callingFunction != NULL)
-      reinitialize = true;
+   //bool reinitialize = false;
+   // if (callingFunction != NULL)
+   //    reinitialize = true;
    
-   // must re-initialize the function each time, as it may be called in more than
-   // one place
+   // Must re-initialize the function each time, as it may be called in more than
+   // one place. This will make function to run properly inside a target loop.
+   // This fixes GMT-5311 (LOJ: 2015.10.05)
+   bool reinitialize = true;
+   
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
       ("FunctionManager::Execute() Now initializing currentFunction '%s'\n",
@@ -1003,11 +1005,6 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       ("======================================================= Calling currentFunction->Execute()\n");
    #endif
    
-   // // Set re-initialize flag, set to true if it is nested function call
-   // bool reinitialize = false;
-   // if (callingFunction != NULL)
-   //    reinitialize = true;
-
    // Now, execute the function
    // If function sequence failed or threw an exception, finalize the function
    try
@@ -1355,9 +1352,9 @@ bool FunctionManager::CreatePassingArgWrappers()
    MessageInterface::ShowMessage("\n==================================================\n");
    MessageInterface::ShowMessage
       ("FunctionManager::CreatePassingArgWrappers() entered for '%s'\n", functionName.c_str());
-   ShowObjectMap(functionObjectStore, "functionObjectStore in CreatePassingArgWrappers()");
-   ShowObjectMap(localObjectStore, "localObjectStore in CreatePassingArgWrappers()");
-   ShowObjectMap(globalObjectStore, "globalObjectStore in CreatePassingArgWrappers()");
+   ShowObjectMap(functionObjectStore, "functionObjectStore in FM:CreatePassingArgWrappers()");
+   ShowObjectMap(localObjectStore, "localObjectStore in FM:CreatePassingArgWrappers()");
+   ShowObjectMap(globalObjectStore, "globalObjectStore in FM:CreatePassingArgWrappers()");
    #endif
    
    GmatBase *obj, *objFOS;
@@ -1973,6 +1970,7 @@ GmatBase* FunctionManager::CreateObject(const std::string &fromString)
              "deleting unused wrapper");
          #endif
          delete ew;
+         ew = NULL;
       }
       if (obj) createdOthers.insert(std::make_pair(str, obj));
    }
@@ -2045,6 +2043,7 @@ void FunctionManager::AssignResult()
              "deleting output wrapper");
          #endif
          delete ew;
+         ew = NULL;
       }
    }
 }

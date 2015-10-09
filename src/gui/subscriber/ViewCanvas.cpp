@@ -1100,9 +1100,8 @@ void ViewCanvas::SetDrawingMode()
    // as its 'front' for lighting and culling purposes
    glFrontFace(GL_CCW);
    
-   // Enable face culling, so that polygons facing away (defines by front face)
-   // from the viewer aren't drawn (for efficiency).
-   glEnable(GL_CULL_FACE);
+   // Disable face culling so that backwards models (like Mir) will work
+   glDisable (GL_CULL_FACE);
    
    // Enable OpenGL to use glColorMaterial() to get material properties
    glEnable(GL_COLOR_MATERIAL);

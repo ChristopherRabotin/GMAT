@@ -76,7 +76,7 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const std::string &nomme) :
    Burn (Gmat::FINITE_BURN, "FiniteBurn", nomme),
-   throttleLogicAlgorithm   ("MaximumPowerUsage"),
+   throttleLogicAlgorithm   ("MaxNumberOfThrusters"),
    isElectricBurn           (false)       // default is Chemical
 {
    objectTypes.push_back(Gmat::FINITE_BURN);
@@ -548,12 +548,12 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
    case BURNAXES:
       return true; // just to ignore
    case THROTTLE_LOGIC_ALGORITHM:
-      if (value != "MaximumPowerUsage")
+      if (value != "MaxNumberOfThrusters")
       {
          std::string msg =
             "The value of \"" + value + "\" for field \"ThrottleLogicAlgorithm\""
             " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [\"MaximumPowerUsage\"]. ";   // will need to add list if other options become available
+            "The allowed values are: [\"MaxNumberOfThrusters\"]. ";   // will need to add list if other options become available
 
          throw BurnException(msg);
       }
@@ -1100,7 +1100,7 @@ bool FiniteBurn::ComputeThrottleLogic(Real powerAvailable)
    // MinimumUsablePower for each
 //   for (StringArray::iterator i = thrusterNames.begin();
 //        i != thrusterNames.end(); ++i)
-   if (throttleLogicAlgorithm == "MaximumPowerUsage")
+   if (throttleLogicAlgorithm == "MaxNumberOfThrusters")
    {
       for (Integer ii = 0; ii < numThrusters; ii++)
       {
