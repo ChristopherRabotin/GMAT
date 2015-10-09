@@ -180,6 +180,9 @@ public:
 
    virtual Real        GetSolverVariable(Integer id);
    virtual void        SetUnscaledVariable(Integer id, Real value);
+
+   virtual const RealArray*
+                       GetSolverData(const std::string &type);
     
    //---------------------------------------------------------------------------
    //  Integer SetSolverResults(Real *data, std::string name)
