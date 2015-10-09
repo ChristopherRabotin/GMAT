@@ -753,6 +753,8 @@ bool EclipseLocator::Initialize()
    // NOW initialize the base class
    retval = EventLocator::Initialize();
 
+   SetLocatingString("EclipseLocator");
+
    return retval;
 }
 

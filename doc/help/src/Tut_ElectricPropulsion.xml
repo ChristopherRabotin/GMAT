@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="Tut_ElectricPropulsion"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Electric Propulsion</title>
+
+  <variablelist>
+    <varlistentry>
+      <term>Audience</term>
+
+      <listitem>
+        <para>Beginner</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Length</term>
+
+      <listitem>
+        <para>30 minutes</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Prerequisites</term>
+
+      <listitem>
+        <para>Complete <xref linkend="SimulatingAnOrbit"
+        xrefstyle="select:title"/></para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Script File</term>
+
+      <listitem>
+        <para><filename>Tut_SimpleOrbitTransfer.script</filename></para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+
+  <section>
+    <title>Objective and Overview</title>
+
+    <note>
+      <para>One of the most common problems in space mission design is to
+      design a transfer from one circular orbit to another circular orbit that
+      lie within the same orbital plane. Circular coplanar transfers are used
+      to raise low-Earth orbits that have degraded due to the effects of
+      atmospheric drag. They are also used to transfer from a low-Earth orbit
+      to a geosynchronous orbit and to send spacecraft to Mars. There is a
+      well known sequence of maneuvers, called the Hohmann transfer, that
+      performs a circular, coplanar transfer using the least possible amount
+      of fuel. A Hohmann transfer employs two maneuvers. The first maneuver
+      raises the orbital apoapsis (or lowers orbital periapsis) to the desired
+      altitude and places the spacecraft in an elliptical transfer orbit. At
+      the apoapsis (or periapsis) of the elliptical transfer orbit, a second
+      maneuver is applied to circularize the orbit at the final
+      altitude.</para>
+    </note>
+
+    <procedure>
+      <step>
+        <para>Create and configure a
+        <classname>DifferentialCorrector</classname> resource.</para>
+      </step>
+
+      <step>
+        <para>Modify the <classname>DefaultOrbitView</classname> to visualize
+        the trajectory.</para>
+      </step>
+
+      <step>
+        <para>Create two <classname>ImpulsiveBurn</classname> resources with
+        default settings.</para>
+      </step>
+
+      <step>
+        <para>Create a <function>Target</function> sequence to (1) raise
+        apoapsis to geosynchronous altitude and (2) circularize the
+        orbit.</para>
+      </step>
+
+      <step>
+        <para>Run the mission and analyze the results.</para>
+      </step>
+    </procedure>
+  </section>
+
+  <section>
+    <title>Configure Resources</title>
+
+    <para>For this tutorial, you’ll need</para>
+
+    <section>
+      <title>Create the TBD Resource</title>
+
+      <para>The <function>Target</function> sequence we will create later
+      needs a <classname>DifferentialCorrector</classname> resource to
+      operate, so let’s create one now. We'll leave the settings at their
+      defaults.</para>
+
+      <procedure>
+        <step>
+          <para>In the <guilabel>Resource</guilabel> tree, expand the
+          <guilabel>Solvers</guilabel> folder if it isn’t already.</para>
+        </step>
+
+        <step>
+          <para>Right-click the<guilabel> Boundary Value Solvers</guilabel>
+          folder, point to <guilabel>Add</guilabel>, and click
+          <guilabel>DifferentialCorrector</guilabel>. A new resource called
+          <guilabel>DC1</guilabel> will be created.</para>
+        </step>
+      </procedure>
+    </section>
+  </section>
+
+  <section>
+    <title>Configure the Mission Sequence</title>
+
+    <para>Now we will configure</para>
+
+    <section>
+      <title>Configure the TBD Command</title>
+
+      <procedure>
+        <step>
+          <para>Click on the <guilabel>Mission</guilabel> tab to show the
+          <guilabel>Mission</guilabel> tree.</para>
+        </step>
+
+        <step>
+          <para>Configure <guilabel>Propagate1</guilabel> to propagate to
+          <userinput>DefaultSC.Earth.Periapsis</userinput>.</para>
+        </step>
+
+        <step>
+          <para>Rename <guilabel>Propagate1</guilabel> to <userinput>Prop To
+          Periapsis</userinput>.</para>
+        </step>
+      </procedure>
+    </section>
+  </section>
+
+  <section>
+    <title>Run the Mission</title>
+
+    <para>Before running the mission, click <guilabel>Save</guilabel>
+    (<inlinemediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="8pt"
+                     fileref="files/images/icons/SaveMission.png" width="1em"/>
+        </imageobject>
+      </inlinemediaobject>) and save the mission to a file of your choice. Now
+    click <guilabel>Run</guilabel> (<inlinemediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="8pt"
+                     fileref="files/images/icons/RunMission.png" width="1em"/>
+        </imageobject>
+      </inlinemediaobject>).</para>
+
+    <figure>
+      <title>3D View of Hohmann Transfer</title>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_SimpleOrbitTransfer_OrbitView.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </figure>
+
+    <para>If you were to continue developing this mission, you can store the
+    final solution of the <function>Target</function> sequence as the initial
+    conditions of the <guilabel>TOI</guilabel> and <guilabel>GOI</guilabel>
+    resources themselves, so that if you make small changes, the subsequent
+    runs will take less time. To do this, follow these steps:</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Mission</guilabel> tree, double-click
+        <guilabel>Hohmann Transfer</guilabel> to edit its properties.</para>
+      </step>
+
+      <step>
+        <para>Click <guilabel>Apply Corrections</guilabel>.</para>
+      </step>
+
+      <step>
+        <para>Now re-run the mission. If you inspect the results in the
+        message window, you will see that the <function>Target</function>
+        sequence converges in one iteration because you stored the solution as
+        the initial condition.</para>
+      </step>
+    </procedure>
+  </section>
+</chapter>

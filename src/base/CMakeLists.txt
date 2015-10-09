@@ -195,13 +195,9 @@ SET(BASE_SRCS
     coordsystem/ITRFAxes.cpp
     coordsystem/IAUFile.cpp
     coordsystem/BodySpinSunAxes.cpp
-    #event/Brent.cpp
     event/EventException.cpp
-    event/EventFunction.cpp
     event/EventLocator.cpp
     event/LocatedEvent.cpp
-    event/LocatedEventTable.cpp
-    #event/RootFinder.cpp
     executive/ListenerManager.cpp
     executive/ListenerManagerInterface.cpp
     executive/Moderator.cpp
@@ -426,7 +422,6 @@ SET(BASE_SRCS
     solarsys/Planet.cpp
     solarsys/ShadowState.cpp
     solarsys/SlpFile.cpp
-    solarsys/SolarFluxFileReader.cpp
     solarsys/SolarFluxReader.cpp
     solarsys/SolarSystemException.cpp
     solarsys/SolarSystem.cpp

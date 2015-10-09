@@ -8,11 +8,11 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>MATLAB Interface</primary>
+    <primary>Python Interface</primary>
   </indexterm>
 
   <refmeta>
-    <refentrytitle>MATLAB Interface</refentrytitle>
+    <refentrytitle>Python Interface</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -20,7 +20,7 @@
   </refmeta>
 
   <refnamediv>
-    <refname>MATLAB Interface</refname>
+    <refname>Python Interface</refname>
 
     <refpurpose>Interface to MATLAB system</refpurpose>
   </refnamediv>

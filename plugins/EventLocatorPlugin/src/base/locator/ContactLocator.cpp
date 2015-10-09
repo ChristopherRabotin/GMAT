@@ -1023,6 +1023,11 @@ bool ContactLocator::Initialize()
       retval = true;
    }
 
+   #ifdef DEBUG_CONTACTLOCATOR_INIT
+      MessageInterface::ShowMessage("In CL::Init  about to set locatingString\n");
+   #endif
+   SetLocatingString("ContactLocator");
+
    return retval;
 }
 

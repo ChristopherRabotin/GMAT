@@ -261,10 +261,8 @@ OBJECTS = \
     coordsystem/TopocentricAxes.o \
     coordsystem/TrueOfDateAxes.o \
     event/EventException.o \
-    event/EventFunction.o \
     event/EventLocator.o \
     event/LocatedEvent.o \
-    event/LocatedEventTable.o \
     executive/ListenerManager.o \
     executive/ListenerManagerInterface.o \
     executive/Moderator.o \
@@ -488,7 +486,6 @@ OBJECTS = \
     solarsys/Planet.o \
     solarsys/ShadowState.o \
     solarsys/SlpFile.o \
-    solarsys/SolarFluxFileReader.o \
     solarsys/SolarFluxReader.o \
     solarsys/SolarSystemException.o \
     solarsys/SolarSystem.o \
@@ -575,28 +572,6 @@ OBJECTS = \
     solarsys/SimpleExponentialAtmosphere.o \
     $(TCPIP_OBJECTS) \
     $(SPICE_OBJECTS)
-#    solarsys/BodyDataReader.o \
-#    spacecraft/TimeConverter.o \
-#    interface/SocketServer.o \
-#    util/Keplerian.o \
-#    util/CoordUtil.o \
-#    util/ModKeplerian.o \
-#    util/Anomaly.o \
-#    spacecraft/StateConverter.o \
-#    spacecraft/Converter.o \
-#    util/Cartesian.o \
-#    event/Brent.o \
-#    event/RootFinder.o \
-#    forcemodel/EventModel.o \
-
-
-#    parameter/OrbitAMatrixParameters.o \
-#    forcemodel/harmonic/EarthTide.o \
-#    $(BRIDGEOBJECTS)
-
-# Future classes:
-#    propagator/Cowell.o \
-
 
 
 FORTRAN_OBJECTS = solarsys/msise90_sub.o

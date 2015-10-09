@@ -915,9 +915,6 @@
     <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp">
       <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp">
-      <Filter>Source Files\base\solarsys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystem.cpp">
       <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
@@ -1959,38 +1956,11 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.cpp">
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp">
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp">
       <Filter>Source Files\base\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Antumbra.cpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Contact.cpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Eclipse.cpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Elevation.cpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\LineOfSight.cpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Penumbra.cpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Umbra.cpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimator.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\estimator</Filter>
@@ -3054,9 +3024,6 @@
       <Filter>Source Files\base\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp">
-      <Filter>Source Files\base\solarsys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp">
       <Filter>Source Files\base\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystem.hpp">
@@ -4166,38 +4133,11 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.hpp">
       <Filter>Source Files\base\event</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp">
       <Filter>Source Files\base\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp">
       <Filter>Source Files\base\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Umbra.hpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Antumbra.hpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Contact.hpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Eclipse.hpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Elevation.hpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\LineOfSight.hpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Penumbra.hpp">
-      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\Simulator.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\estimator</Filter>
