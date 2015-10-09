@@ -568,7 +568,7 @@ Report aReport aDC.SolverStatus aDC.SolverState</code></programlisting>
 
       <programlisting><code>Create Spacecraft DefaultSC
 Create Propagator DefaultProp
-Create Thruster Thruster1
+Create ChemicalThruster Thruster1
 GMAT Thruster1.C1 = 1000
 GMAT Thruster1.DecrementMass = true
 Create ChemicalTank FuelTank1

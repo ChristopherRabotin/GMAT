@@ -30,7 +30,7 @@
 
     <para>The hardware fields allow you to attach pre-configured hardware
     models to a spacecraft. Current models include
-    <guilabel>ChemicalTank</guilabel> and <guilabel>ChemicalThruster</guilabel>. Before
+    <guilabel>ChemicalTank</guilabel>, <guilabel>ChemicalThruster</guilabel> ,<guilabel>ElectricTank</guilabel>, and <guilabel>ElectricThruster</guilabel>. Before
     you attach a hardware model to a <guilabel>Spacecraf</guilabel>t, you must
     first create the model.</para>
 
@@ -137,8 +137,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any user-defined
-                    <guilabel>ChemicalThruster</guilabel>.</para>
+                    <para>A list of
+                    <guilabel>ChemicalThruster</guilabel> or <guilabel>ElectricThruster</guilabel> without mixed types.</para>
                   </listitem>
                 </varlistentry>
 
@@ -205,9 +205,9 @@
       </mediaobject>
     </screenshot>
 
-    <para>To add a <guilabel>Thruste</guilabel>r to your script, highlight the
+    <para>To add a <guilabel>Thruster</guilabel> to your script, highlight the
     <guilabel>Hardware</guilabel> resource and then right click to add a
-    <guilabel>ChemicalThruster</guilabel>.</para>
+    <guilabel>Thruster</guilabel>.</para>
 
     <screenshot>
       <mediaobject>

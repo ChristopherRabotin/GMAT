@@ -451,7 +451,7 @@ BeginFiniteBurn aFiniteBurn(aSat)</code></programlisting>
 
       <programlisting><code>%  Create objects
 Create Spacecraft aSat
-Create Thruster aThruster
+Create ChemicalThruster aThruster
 Create ChemicalTank aTank
 Create FiniteBurn aFiniteBurn
 Create Propagator aPropagator
@@ -477,7 +477,7 @@ EndFiniteBurn aFiniteBurn(aSat)</code>   </programlisting>
 
       <programlisting><code>%  Create objects
 Create Spacecraft aSat
-Create Thruster aThruster
+Create ChemicalThruster aThruster
 Create ChemicalTank aTank
 Create FiniteBurn aFiniteBurn
 Create Propagator aPropagator

@@ -276,8 +276,8 @@
 
             <entry><para> As discussed in the <guilabel>Remarks</guilabel>,
             every <guilabel>FiniteBurn</guilabel> resource must be associated
-            with at least one <guilabel>ChemicalThruster</guilabel>. Any
-            <guilabel>ChemicalThruster</guilabel> created in the resource tree can be
+            with at least one <guilabel>ChemicalThruster</guilabel> or <guilabel>ElectricThruster</guilabel>. Any
+            thruster created in the resource tree can be
             incorporated into a <guilabel>FiniteBurn.</guilabel>
             </para></entry>
           </row>
@@ -336,13 +336,13 @@
 Create Spacecraft DefaultSC
 Create ChemicalTank FuelTank1
 
-% Create a default Thruster.  Allow for fuel depletion from 
+% Create a default ChemicalThruster.  Allow for fuel depletion from 
 % the default ChemicalTank.
-Create Thruster Thruster1
+Create ChemicalThruster Thruster1
 Thruster1.DecrementMass = true
 Thruster1.Tank = {FuelTank1}
 
-%  Attach ChemicalTank and Thruster to the spacecraft
+%  Attach ChemicalTank and ChemicalThruster to the spacecraft
 DefaultSC.Thrusters = {Thruster1}
 DefaultSC.Tanks = {FuelTank1}
 
