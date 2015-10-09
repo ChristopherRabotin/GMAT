@@ -164,9 +164,13 @@ bool SolverBranchCommand::Initialize()
    
    BranchCommand::Initialize();
 
-   if (showProgressWindow)
-      AddListener( ListenerManagerInterface::CreateSolverListener(GetGeneratingString(Gmat::NO_COMMENTS), "", 0, 0, 0, 0, false) );
-   
+   if (showProgressWindow) 
+   {
+      // THIS IS IDIOTIC BUT SINCE INITIALIZE IS CALLED TWICE, JUST DON'T CREATE NO NEW LISTENERS
+      // AFTER THE FIRST ONE (Grubb.T 2015-10-09)
+      if (listeners.size() == 0)
+         AddListener( ListenerManagerInterface::CreateSolverListener(GetGeneratingString(Gmat::NO_COMMENTS), "", 0, 0, 0, 0, false) );
+   }
    #ifdef DEBUG_SOLVERBRANCHCOMMAND_INIT
    ShowCommand("SolverBranchCommand::Initialize() exited ", "this=", this);
    #endif
@@ -182,7 +186,7 @@ bool SolverBranchCommand::Initialize()
  * Access the next command in the mission sequence.
  *
  * For SolverBranchCommands, this method returns its own pointer while the child
- * commands are executingm, and it tells the Publisher about a state change after
+ * commands are executing, and it tells the Publisher about a state change after
  * the Solver has finished its work.
  *
  * @return The next command, or NULL if the sequence has finished executing.
