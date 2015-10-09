@@ -562,14 +562,14 @@ void SpiceOrbitKernelWriter::SetBasicMetaData()
 }
 
 //------------------------------------------------------------------------------
-//  FinalizeKernel(bool done = true)
+//  FinalizeKernel(bool done = true, writeMetaData = true)
 //------------------------------------------------------------------------------
 /**
  * This method writes the meta data (comments) to the kernel and then closes it.
  *
  */
 //------------------------------------------------------------------------------
-void SpiceOrbitKernelWriter::FinalizeKernel(bool done)
+void SpiceOrbitKernelWriter::FinalizeKernel(bool done, bool writeMetaData)
 {
    #ifdef DEBUG_SPK_WRITING
       MessageInterface::ShowMessage("In FinalizeKernel .... tmpFileOK = %s\n",
@@ -585,7 +585,7 @@ void SpiceOrbitKernelWriter::FinalizeKernel(bool done)
    if ((fileOpen) && (dataWritten)) // should be both or neither are true
    {
       // write all the meta data to the file
-      if (tmpFileOK && done) WriteMetaData();
+      if (tmpFileOK && (done || writeMetaData)) WriteMetaData();
       #ifdef DEBUG_SPK_WRITING
          MessageInterface::ShowMessage("In SOKW::FinalizeKernel ... is it loaded?  %s\n",
                (IsLoaded(kernelFileName)? "true" : "false"));

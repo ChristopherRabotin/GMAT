@@ -48,7 +48,7 @@ public:
    
    // Need to be able to close background SPKs and leave ready for appending
    // Finalization
-   void                 CloseEphemerisFile(bool done = true);
+   void                 CloseEphemerisFile(bool done = true, bool writeMetaData = true);
    bool                 InsufficientSPKData();
 
    // methods inherited from Subscriber
@@ -327,7 +327,7 @@ protected:
    void         WriteSpkOrbitDataSegment();
    void         WriteSpkOrbitMetaData();
    void         WriteSpkComments(const std::string &comments);
-   void         FinalizeSpkFile(bool done = true);
+   void         FinalizeSpkFile(bool done = true, bool writeMetaData = true);
    
    // Code500 file writing
    void         WriteCode500OrbitDataSegment(bool canFinalize = false);
