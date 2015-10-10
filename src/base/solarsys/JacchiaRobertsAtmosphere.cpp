@@ -497,6 +497,7 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
          case 1:
          {
             SolarFluxReader::FluxData fD = fluxReader->GetInputs(a1_time);
+            fluxReader->PrepareKpData(fD, a1_time);
             geo.xtemp = 379.0 + 3.24 * fD.obsCtrF107a + 1.3 * (fD.obsF107 - fD.obsCtrF107a);
             geo.tkp   = fD.kp[0];
             nominalF107 = fD.obsF107;
