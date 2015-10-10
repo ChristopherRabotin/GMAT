@@ -405,7 +405,7 @@ void EphemManager::StopRecording(bool done)
       #ifdef DEBUG_EM_FILENAME
          MessageInterface::ShowMessage("In StopRecording, closing ephem file ...");
       #endif
-      ephemFile->CloseEphemerisFile(false);
+      ephemFile->CloseEphemerisFile(false, true);
       bool notAllDataWritten = ephemFile->InsufficientSPKData();
       if (notAllDataWritten)
       {
@@ -431,7 +431,7 @@ void EphemManager::StopRecording(bool done)
       #ifdef DEBUG_EPHEM_MANAGER
          MessageInterface::ShowMessage("-==-==-= Calling CloseEphemerisFile\n");
       #endif
-      ephemFile->CloseEphemerisFile(false);
+      ephemFile->CloseEphemerisFile(false, true);
       bool notAllDataWritten = ephemFile->InsufficientSPKData();
       if (notAllDataWritten)
       {

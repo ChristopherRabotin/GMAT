@@ -821,7 +821,7 @@ Record count       : 2701
       of the <guilabel>DryMass</guilabel> value and the sum of the fuel mass
       in all attached fuel tanks. GMAT’s propagators will not allow the total
       mass of a spacecraft to be negative. However, GMAT will allow the mass
-      of a <guilabel>FuelTank</guilabel> to be negative. See the <xref
+      of a <guilabel>ChemicalTank</guilabel> to be negative. See the <xref
       linkend="FuelTank" xrefstyle="select:title"/> documentation for
       details.</para>
     </refsection>

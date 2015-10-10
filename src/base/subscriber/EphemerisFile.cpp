@@ -2164,9 +2164,9 @@ bool EphemerisFile::OpenTextEphemerisFile()
 
 
 //------------------------------------------------------------------------------
-// void CloseEphemerisFile(bool done = true)
+// void CloseEphemerisFile(bool done = true, writeMetaData = true)
 //------------------------------------------------------------------------------
-void EphemerisFile::CloseEphemerisFile(bool done)
+void EphemerisFile::CloseEphemerisFile(bool done, bool writeMetaData)
 {
    // Close SPK file
    #ifdef __USE_SPICE__
@@ -2178,7 +2178,7 @@ void EphemerisFile::CloseEphemerisFile(bool done)
    if (spkWriter != NULL)
    {
       if (!spkWriteFailed)
-         FinalizeSpkFile(done);
+         FinalizeSpkFile(done, writeMetaData);
       
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Remove
@@ -4664,9 +4664,9 @@ void EphemerisFile::WriteSpkComments(const std::string &comments)
 
 
 //------------------------------------------------------------------------------
-// void FinalizeSpkFile(bool done = true)
+// void FinalizeSpkFile(bool done = true, writeMetaData = true)
 //------------------------------------------------------------------------------
-void EphemerisFile::FinalizeSpkFile(bool done)
+void EphemerisFile::FinalizeSpkFile(bool done, bool writeMetaData)
 {
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage("=====> FinalizeSpkFile() entered\n");
@@ -4727,7 +4727,7 @@ void EphemerisFile::FinalizeSpkFile(bool done)
       #ifdef DEBUG_EPHEMFILE_SPICE
       MessageInterface::ShowMessage("   about to call FinalizeKernel!!!\n");
       #endif
-      spkWriter->FinalizeKernel(done);
+      spkWriter->FinalizeKernel(done, writeMetaData);
       // so we recreate next time - for background SPKs only
       if (!done) isEphemFileOpened = false;
    }

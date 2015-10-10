@@ -897,7 +897,6 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
       switch (currentState)
       {
          case NOMINAL:
-         case RUNEXTERNAL:
             // Iterate through the variables, notifying the listener
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
@@ -906,6 +905,16 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
                ++i;
             }
             break;
+
+         case RUNEXTERNAL:
+            // Iterate through the variables, notifying the listener
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               listener->VariabledChanged(*current, variable[i]);
+               ++i;
+            }
+            // fall through
 
          case CHECKINGRUN:
             // Iterate through the equality constraints, notifying the listener
