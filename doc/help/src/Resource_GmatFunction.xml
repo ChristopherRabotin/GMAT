@@ -185,7 +185,7 @@
       given GMAT object is not declared as global in both the main script and
       in the function, then all objects that are passed into or received as
       output from the function are considered to be local to that
-      function.</para>
+      function and the main script.</para>
 
       <para>In GMAT, you can use <guilabel>CallGmatFunction</guilabel> command
       to pass GMAT objects as input arguments and receive objects as output
