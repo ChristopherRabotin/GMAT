@@ -190,24 +190,27 @@
     <section>
       <title><filename>samples</filename></title>
 
-      <para>The <filename>samples</filename> directory contains over 45 sample
-      missions, ranging from a Hohmann transfer to libration point
+      <para>The <filename>samples</filename> directory contains sample
+      missions and scripts, ranging from a Hohmann transfer to libration point
       station-keeping to Mars B-plane targeting. Example files begin with
       "Ex_" and files that corresponde to GMAT tutorials begin with "Tut_".
       These files are intended to demonstrate GMAT’s capabilities and to
       provide you with a potential starting point for building common mission
       types for your application and flight regime. Samples with specific
       requirements are located in subdirectories such as
-      <filename>NeedMatlab</filename> and
-      <filename>NeedVF13ad</filename>.</para>
+      <filename>NeedMatlab</filename> and <filename>NeedVF13ad</filename>.
+      </para>
     </section>
 
     <section>
       <title><filename>userfunctions</filename></title>
 
-      <para>The <filename>userfunctions</filename> directory contains MATLAB
-      functions that are included in the GMAT distribution. You can also store
-      your own custom MATLAB functions in this folders.</para>
+      <para>The <filename>userfunctions</filename> directory contains MATLAB,
+      Python, and GMAT functions that are included in the GMAT distribution.
+      You can also store your own custom functions in the subdirectories named
+      GMAT, Python, and MATLAB. GMAT includes those subdirectories in its
+      search path to locate functions referenced in GMAT scripts and GMAT
+      functions.</para>
     </section>
   </section>
 
@@ -277,6 +280,14 @@
       interface.</para>
     </section>
 
+    <section>
+      <title>Configuring the Python Inteface</title>
+
+      <para>GMAT contains an interface to Python. See the <xref
+      linkend="PythonInterface"/> reference to configure the MATLAB
+      interface.</para>
+    </section>
+	
     <section>
       <title>User-defined Function Paths</title>
 
