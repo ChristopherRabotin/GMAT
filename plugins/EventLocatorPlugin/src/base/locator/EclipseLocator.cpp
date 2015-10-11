@@ -13,9 +13,11 @@
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Sep 2, 2011
+// Updated: 2015  Wendy Shoan / GSFC
 //
 /**
- * Implementation of the eclipse locator
+ * Implementation of the EclipseLocator
+ * Updates based on prototype by Yeerang Lim/KAIST
  */
 //------------------------------------------------------------------------------
 

@@ -13,9 +13,11 @@
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Nov 7, 2011
+// Updated: 2015  Wendy Shoan / GSFC and Yeerang Lim/KAIST
 //
 /**
- * Definition of the ...
+ * Definition of the ContactLocator
+ * Updates based on prototype by Joel Parker / GSFC
  */
 //------------------------------------------------------------------------------
 
