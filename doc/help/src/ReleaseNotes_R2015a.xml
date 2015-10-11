@@ -41,6 +41,9 @@
           </mediaobject>
         </screenshot>
       </informalfigure>
+
+      <para>See the <link linkend="Tut_UsingGMATFunctions">Using GMAT
+      Functions</link> tutorial for more information.</para>
     </section>
 
     <section>
@@ -61,8 +64,8 @@
         </screenshot>
       </informalfigure>
 
-      <para>See the <link linkend="SpacecraftAttitude">Spacecraft
-      Attitude</link> reference for more information.</para>
+      <para>See the <link linkend="EclipseLocator">Eclipse Locator</link>
+      reference for more information.</para>
     </section>
 
     <section>
@@ -83,15 +86,15 @@
         </screenshot>
       </informalfigure>
 
-      <para>See the <link linkend="SpacecraftAttitude">Spacecraft
-      Attitude</link> reference for more information.</para>
+      <para>See the <link linkend="ContactLocator">Contact Locator</link>
+      reference for more information.</para>
     </section>
 
     <section>
       <title>Python Interface</title>
 
       <para>GMAT now supports an interface with Python. The power of the
-      Python ecosystem can now be used in parallel with GMAT.</para>
+      Python ecosystem can now be used with GMAT.</para>
 
       <informalfigure>
         <screenshot>
@@ -103,6 +106,9 @@
           </mediaobject>
         </screenshot>
       </informalfigure>
+
+      <para>See the <link linkend="CallPythonFunction">Python</link> reference
+      for more information.</para>
     </section>
 
     <section>
@@ -111,8 +117,7 @@
       <para>GMAT now supports modelling of electric propulsion systems. Below
       is an examle showing GMAT modelling a cube-sat with electric propulsion
       in a lunar weak-stablity orbit. You can model electric tanks, thrusters,
-      and power systems (both Solar and nuclear). See the TODO tutorial for
-      details on configuring GMAT for this type of analysis.</para>
+      and power systems (both Solar and nuclear).</para>
 
       <informalfigure>
         <screenshot>
@@ -124,12 +129,15 @@
           </mediaobject>
         </screenshot>
       </informalfigure>
+
+      <para>See the <link linkend="Tut_ElectricPropulsion">Electric
+      Propulsion</link> tutorial for more information.</para>
     </section>
 
     <section>
       <title>SNOPT Optimizer</title>
 
-      <para>GMAT now interfaces to Stanford Business Softwares SNOPT
+      <para>GMAT now interfaces to Stanford Business Software, Inc. SNOPT
       Optimizer</para>
 
       <informalfigure>
@@ -143,8 +151,8 @@
         </screenshot>
       </informalfigure>
 
-      <para>See the <link linkend="SpacecraftOrbitState">Spacecraft Orbit
-      State</link> reference for more information.</para>
+      <para>See the <link linkend="SNOPTOptimizer">SNOPT</link> reference for
+      more information.</para>
     </section>
 
     <section>
@@ -165,6 +173,30 @@
           </mediaobject>
         </screenshot>
       </informalfigure>
+
+      <para>See the <link linkend="Propagator">Propagator</link> reference for
+      more information.</para>
+    </section>
+
+    <section>
+      <title>Celestial Body 3-D Graphics Models</title>
+
+      <para>You can now use a 3D model for celestial bodies in 3-D
+      graphics.</para>
+
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_Comet3DModel.png"
+                         scale="100"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
+
+      <para>See the <link linkend="CelestialBody">Celestial Body</link>
+      reference for more information.</para>
     </section>
 
     <section>
@@ -194,11 +226,12 @@
     <section>
       <title>Documentation</title>
 
-      <para>We've written TODO new pages of high-quality user documentation!
-      We've also written two conference papers documenting our testing process
-      and results, and the flight qualification program and results for the
-      Advanced Composition Explorer. The conference papers are located in the
-      distribution package as shown below</para>
+      <para>We've written over 70 pages of new, high-quality user
+      documentation! We've also written two conference papers documenting our
+      verification and validation process and results, and the flight
+      qualification program and results for the Advanced Composition Explorer
+      (ACE). Conference papers are located in the "docs" folder of the
+      distribution.</para>
 
       <informalfigure>
         <screenshot>
@@ -215,9 +248,10 @@
     <section>
       <title>Training Videos</title>
 
-      <para>We've posted training videos on YouTube TODO Link. You can now
-      take GMAT training even if you are unable to take the live
-      classes!</para>
+      <para>We've posted training videos on <link
+      xlink:href="https://www.youtube.com/channel/UCt-REODJNr2mB3t-xH6kbjg">YouTube
+      </link>. You can now take GMAT training even if you are unable to attend
+      the live classes!</para>
 
       <informalfigure>
         <screenshot>
@@ -284,23 +318,22 @@
 
     <itemizedlist>
       <listitem>
-        <para>The <guilabel>ChemicalTank</guilabel> Resource has been renamed to
-        <guilabel>ChemicalTank</guilabel> to distinguish between chemical and
-        electric systems.</para>
-      </listitem>
-
-      <listitem>
-        <para>The <guilabel>ChemicalThruster</guilabel> Resource has been renamed to
-        <guilabel>ChemicalThruster</guilabel> to distinguish between chemical
+        <para>The <guilabel>ChemicalTank</guilabel> Resource has been renamed
+        to <guilabel>ChemicalTank</guilabel> to distinguish between chemical
         and electric systems.</para>
       </listitem>
 
       <listitem>
-        <para>The sensitivity of Spacecraft Resource setting such as
-        <guilabel>ModelOffsetX</guilabel>,
+        <para>The <guilabel>ChemicalThruster</guilabel> Resource has been
+        renamed to <guilabel>ChemicalThruster</guilabel> to distinguish
+        between chemical and electric systems.</para>
+      </listitem>
+
+      <listitem>
+        <para>The sensitivity of <guilabel>Spacecraft</guilabel> Resource
+        settings such as <guilabel>ModelOffsetX</guilabel>,
         <guilabel>ModelRotationY</guilabel>, and
-        <guilabel>ModelScale</guilabel> has changed has changed in 3-D
-        graphics.</para>
+        <guilabel>ModelScale</guilabel> has changed in 3-D graphics.</para>
       </listitem>
 
       <listitem>
@@ -330,14 +363,14 @@
     <section>
       <title>Developer Tools and Dependencies</title>
 
-      <para>We developed a new Cmake-based build system that is used on all
-      platforms. The Cmake configuration is maintained by the GMAT team and
-      distributed with the source code. Thanks to Cmake, it is much easier to
+      <para>We developed a new CMake-based build system that is used on all
+      platforms. The CMake configuration is maintained by the GMAT team and
+      distributed with the source code. Thanks to CMake, it is much easier to
       compile GMAT. See the <link
       xlink:href="http://gmatcentral.org/display/GW/Compiling">wiki
       documentation for details</link>.</para>
 
-      <para>We updated SPICE to version N0065 and updated WxWidgets to Wx
+      <para>We updated SPICE to version N0065 and updated WxWidgets to version
       3.0.2.</para>
     </section>
 
@@ -379,7 +412,7 @@
 
       <para>All known issues that affect this version of GMAT can be seen in
       the <link
-      xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=12407">"Known
+      xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=13219">"Known
       Issues in R2015a" report</link> in JIRA.</para>
 
       <para>There are several known issues in this release that we consider to
@@ -398,6 +431,21 @@
             <tbody>
               <row>
                 <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-5353">GMT-5253</link></entry>
+
+                <entry>GMAT stuck in script state after bad script
+                load.</entry>
+              </row>
+
+              <row>
+                <entry><link
+                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-5269">GMT-5269</link></entry>
+
+                <entry>Atmosphere model affects propagation at GEO.</entry>
+              </row>
+
+              <row>
+                <entry><link
                 xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-2561">GMT-2561</link></entry>
 
                 <entry>UTC Epoch Entry and Reporting During Leap Second is
@@ -410,14 +458,6 @@
 
                 <entry>Inconsistent validation when creating variables that
                 shadow built-in math functions</entry>
-              </row>
-
-              <row>
-                <entry><link
-                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3108">GMT-3108</link></entry>
-
-                <entry>OrbitView with STM and Propagate Synchronized does not
-                show spacecraft in correct locations</entry>
               </row>
 
               <row>
@@ -435,23 +475,7 @@
                 <entry>Single-quote requirements are not consistent across
                 objects and modes</entry>
               </row>
-
-              <row>
-                <entry><link
-                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3556">GMT-3556</link></entry>
-
-                <entry>Unable to associate tank with thruster in command
-                mode</entry>
-              </row>
-
-              <row>
-                <entry><link
-                xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3629">GMT-3629</link></entry>
-
-                <entry>GUI starts in bad state when started with
-                --minimize</entry>
-              </row>
-
+			  
               <row>
                 <entry><link
                 xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-3669">GMT-3669</link></entry>
