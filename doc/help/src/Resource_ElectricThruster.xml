@@ -30,10 +30,10 @@
 
     <para>The <guilabel>ElectricThruster</guilabel> resource is a model of an
     electric thruster which supports several models for thrust and mass flow
-    computation. The <guilabel>ChemicalThruster</guilabel> model also allows
+    computation. The <guilabel>ElecticThruster</guilabel> model also allows
     you to specify properties such as a duty cycle and scale factor and to
-    connect a <guilabel>ChemicalThruster</guilabel> with a
-    <guilabel>ChemicalTank</guilabel>. You can flexibly define the direction
+    connect an <guilabel>ElectricThruster</guilabel> with an
+    <guilabel>ElectricTank</guilabel>. You can flexibly define the direction
     of the thrust by specifying the thrust components in coordinate systems
     such as (locally defined) <guilabel>SpacecraftBody</guilabel> or
     <guilabel>LVLH</guilabel>, or by choosing any configured
@@ -43,8 +43,8 @@
     for electric propulsion modelling, see the Tutorial named <xref
     linkend="Tut_ElectricPropulsion"/></para>
 
-    <para>See Also <xref linkend="ElectricTank"/>,<xref
-    linkend="NuclearPowerSystem"/>,<xref linkend="SolarPowerSystem"/></para>
+    <para>See Also <xref linkend="ElectricTank"/>, <xref
+    linkend="NuclearPowerSystem"/>, <xref linkend="SolarPowerSystem"/></para>
   </refsection>
 
   <refsection>
@@ -128,9 +128,9 @@
           <row>
             <entry><guilabel>ConstantThrust</guilabel></entry>
 
-            <entry><para>Thrust value used for
-            <guilabel>ConstantThrustAndIsp</guilabel> mode. Not used
-            otherwise.. </para> <variablelist>
+            <entry><para>Thrust value used<guilabel> ThrustModel</guilabel> is
+            set to <guilabel>ConstantThrustAndIsp</guilabel>. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -473,10 +473,10 @@
           <row>
             <entry><guilabel>Isp</guilabel></entry>
 
-            <entry><para>Thruster specific impulse. Only used for
-            <guilabel>FixedEfficiency</guilabel> and
-            <guilabel>ConstantThrustAndIsp</guilabel> models. </para>
-            <variablelist>
+            <entry><para>Thruster specific impulse. Only used when
+            <guilabel>ThrustModel</guilabel> is set to
+            <guilabel>FixedEfficiency</guilabel> or
+            <guilabel>ConstantThrustAndIsp</guilabel>. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -559,7 +559,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>300</para>
+                    <para>-0.004776</para>
                   </listitem>
                 </varlistentry>
 
@@ -567,7 +567,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>s</para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -613,7 +614,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>0.05717</para>
                   </listitem>
                 </varlistentry>
 
@@ -621,7 +622,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>s/kPa</para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -667,7 +669,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>-0.09956</para>
                   </listitem>
                 </varlistentry>
 
@@ -675,7 +677,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>s</para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -721,7 +724,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>0.03211</para>
                   </listitem>
                 </varlistentry>
 
@@ -729,7 +732,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>s/kPa</para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -775,7 +779,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>2.13781</para>
                   </listitem>
                 </varlistentry>
 
@@ -783,7 +787,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>s/kPa<superscript>2</superscript></para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -915,7 +920,7 @@
             <entry><para>This field, used in conjunction with the
             <guilabel>Axes</guilabel> field, allows the user to define a
             spacecraft centered set of axes for the
-            <guilabel>ChemicalThruster</guilabel>. <guilabel>Origin</guilabel>
+            <guilabel>ElectricThruster</guilabel>. <guilabel>Origin</guilabel>
             has no affect when a <guilabel>Local</guilabel> coordinate system
             is used and the <guilabel>Axes</guilabel> are set to
             <guilabel>MJ2000Eq</guilabel> or
@@ -982,12 +987,12 @@
           <row>
             <entry><guilabel>Tank</guilabel></entry>
 
-            <entry><para><guilabel>ChemicalTank</guilabel> from which the
-            <guilabel>ChemicalThruster</guilabel> draws propellant from. In a
+            <entry><para><guilabel>ElectricTank</guilabel> from which the
+            <guilabel>ElectricThruster</guilabel> draws propellant from. In a
             script command, an empty list, e.g., <literal>Thruster1.Tank =
             {}</literal>, is NOT allowed. Via the script, if you wish to
-            indicate that no <guilabel>ChemicalTank</guilabel> is associated
-            with a <guilabel>ChemicalThruster</guilabel>, do not include
+            indicate that no <guilabel>ElectricTank</guilabel> is associated
+            with an <guilabel>ElectricThruster</guilabel>, do not include
             commands such as <literal>Thruster1.Tank = ...</literal> in your
             script. This field cannot be modified in the Mission Sequence.
             </para> <variablelist>
@@ -1074,7 +1079,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>10</para>
+                    <para>-5.19082</para>
                   </listitem>
                 </varlistentry>
 
@@ -1082,7 +1087,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N</para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -1128,7 +1134,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>2.96519</para>
                   </listitem>
                 </varlistentry>
 
@@ -1136,7 +1142,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N/kPa</para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -1182,7 +1189,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>-14.41789</para>
                   </listitem>
                 </varlistentry>
 
@@ -1190,7 +1197,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N</para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -1236,7 +1244,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>54.05382</para>
                   </listitem>
                 </varlistentry>
 
@@ -1244,7 +1252,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N/kPa</para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -1290,7 +1299,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>0</para>
+                    <para>-0.00100092</para>
                   </listitem>
                 </varlistentry>
 
@@ -1298,7 +1307,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N/kPa<superscript>2</superscript></para>
+                    <para>See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/></para>
                   </listitem>
                 </varlistentry>
 
@@ -1484,7 +1494,8 @@
           <row>
             <entry><guilabel>ThrustModel</guilabel></entry>
 
-            <entry><para>The type of thruster model.</para> <variablelist>
+            <entry><para>The type of thruster model. See <xref linkend="ElectricThruster_Models"
+                    xrefstyle="select:title"/> for a detailed description of the options.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1629,10 +1640,10 @@
           </row>
 
           <row>
-            <entry><guilabel>FuelTank resource</guilabel></entry>
+            <entry><guilabel>ElectricTank resource</guilabel></entry>
 
             <entry><para>This resource contains the fuel used to power the
-            <guilabel>ChemicalThruster</guilabel> specified by the<guilabel>
+            <guilabel>ElectricThruster</guilabel> specified by the<guilabel>
             FiniteBurn</guilabel> resource.</para></entry>
           </row>
 
@@ -1643,8 +1654,8 @@
             <guilabel>BeginFiniteBurn/EndFiniteBurn</guilabel> commands, you
             must specify which <guilabel>FiniteBurn</guilabel> resource to
             implement. The <guilabel>FiniteBurn</guilabel> resource specifies
-            which <guilabel>Thruster(s)</guilabel> to use for the finite burn.
-            </para></entry>
+            which <guilabel>ElectricThruster(s)</guilabel> to use for the
+            finite burn. </para></entry>
           </row>
 
           <row>
@@ -1669,11 +1680,11 @@
     </informaltable>
   </refsection>
 
-  <refsection>
+  <refsection >
     <title>GUI</title>
 
     <para>The <guilabel>ElectricThruster</guilabel> dialog box allows you to
-    specify properties of a <guilabel>ElectricThruster</guilabel> including
+    specify properties of an <guilabel>ElectricThruster</guilabel> including
     the <guilabel>Coordinate System</guilabel> of the thrust acceleration
     direction vector, the thrust magnitude and Isp coefficients, and choice of
     <guilabel>ElectricTank</guilabel>. The layout of the
@@ -1699,24 +1710,9 @@
     either <guimenuitem>VNB</guimenuitem> or
     <guimenuitem>LVLH</guimenuitem>.</para>
 
-    <para>As shown below, if <guilabel>Decrement Mass</guilabel> is checked,
-    then you can input the gravitational acceleration value used to calculate
-    fuel use. The value of the gravitational acceleration input here only
-    affects fuel use and does not affect the force model.</para>
-
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_ElectricThruster_GUI_4.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
-
     <para>Selecting the <guimenu>Configure Polynomials</guimenu> button brings
     up the following dialog box where you may input the coefficients for the
-    <guilabel>ElectricThruster</guilabel> polynomial. </para>
+    <guilabel>ElectricThruster</guilabel> polynomial.</para>
 
     <screenshot>
       <mediaobject>
@@ -1745,107 +1741,105 @@
   <refsection>
     <title>Remarks</title>
 
-    <refsection>
+    <refsection xml:id="ElectricThruster_Models">
       <title>Mathematical Models</title>
 
-      <para>The constants <guilabel>Ci</guilabel> below are used in the
-      following equation to calculate thrust (in Newtons),
-      F<subscript>T</subscript>, as a function of pressure P (kPa) and
-      temperature T (Celsius).</para>
+      <para>The <guilabel>ElectricThruster</guilabel> model supports several
+      models for computation of thrust and and mass flow rate and the model
+      used is set by the <guilabel>ThrustModel</guilabel> field. When
+      <guilabel>ThrustModel</guilabel> is set to
+      <guilabel>ThrustMassPolynomial</guilabel>, the following polynomials are
+      used to compute thrust and mass flow rate</para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_Thruster_GUI_1.png"
+                       fileref="files/images/Resource_ElectricThruster_ThustMassPolynomial.png"
                        scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>The constants <guilabel>Ki</guilabel> below are used in the
-      following equation to calculate ISP (in seconds), Isp, as a function of
-      pressure P (kPa) and temperature T (Celsius).</para>
+      <para>where P is the power provided to the thruster which is computed
+      using the power logic defined on the FiniteBurn resource, f_d is duty
+      cycle, f_s is thrust scale factor, R_iT is the rotation matrix from the
+      thrust coordinate system to the inertial system, and T_hat is the thrust
+      unit vector. By industry convention, the mass flow rate and thrust
+      polynomial equations are in mg/s and milli-Newtons respectively. GMAT
+      internally converts the units to be consistent with the equations of
+      motion.</para>
+
+      <para>When <guilabel>ThrustModel</guilabel> is set to
+      <guilabel>ConstantThrustAndIsp</guilabel>, the following polynomials are
+      used to compute thrust and mass flow rate</para>
 
       <screenshot>
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_Thruster_GUI_2.png"
+                       fileref="files/images/Resource_ElectricThruster_ConstThrustAndIspEq.png"
                        scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
+
+      <para>where C_t1 is set using the <guilabel>ConstantThrust</guilabel>
+      field, Isp is set using the <guilabel>Isp</guilabel> field, f_d is duty
+      cycle, f_s is thrust scale factor, R_iT is the rotation matrix from the
+      thrust coordinate system to the inertial system, and T_hat is the thrust
+      unit vector. Note, by industry convention, the mass flow rate and thrust
+      polynomial equations are in mg/s and milli-Newtons respectively. GMAT
+      internally converts the units to be consistent with the equations of
+      motion.</para>
+
+      <para>When <guilabel>ThrustModel</guilabel> is set to
+      <guilabel>FixedEfficiency</guilabel>, the following polynomials are used
+      to compute thrust and mass flow rate</para>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_ElectricThruster_FixedEfficiencyEq.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <para>where P is the power provided to the thruster which is computed
+      from the power logic defined on the <guilabel>FiniteBurn</guilabel>
+      Resource. "Eta" is the <guilabel>FixedEfficiency</guilabel> setting, f_d
+      is duty cycle, f_s is thrust scale factor, R_iT is the rotation matrix
+      from the thrust coordinate system to the inertial system, and T_hat is
+      the thrust unit vector.</para>
     </refsection>
 
     <refsection>
       <title>Use of Thruster Resource in Conjunction With Maneuvers</title>
 
-      <para>A <guilabel>ChemicalThruster</guilabel> resource is used only in
+      <para>An <guilabel>ElectricThruster</guilabel> resource is used only in
       association with finite maneuvers. To implement a finite maneuver, you
-      must first create both a <guilabel>ChemicalTank</guilabel> and a
-      <guilabel>FiniteBurn</guilabel> resource. You must also associate a
-      <guilabel>ChemicalTank</guilabel> with the
-      <guilabel>ChemicalThruster</guilabel> resource and you must associate a
-      <guilabel>ChemicalThruster</guilabel> with the
+      must first create both an <guilabel>ElectricTank</guilabel> and a
+      <guilabel>FiniteBurn</guilabel> resource. You must also associate an
+      <guilabel>ElectricTank</guilabel> with the
+      <guilabel>ElectricThruster</guilabel> resource and you must associate an
+      <guilabel>ElectricThruster</guilabel> with the
       <guilabel>FiniteBurn</guilabel> resource. The actual finite maneuver is
       implemented using the
       <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel>
-      commands. See the
-      <guilabel>BeginFiniteBurn</guilabel>/<guilabel>EndFiniteBurn</guilabel>
-      command documentation for worked examples on how the
-      <guilabel>ChemicalThruster</guilabel> resource is used in conjunction
-      with finite maneuvers.</para>
-    </refsection>
+      commands.</para>
 
-    <refsection>
-      <title>Thrust and ISP Calculation</title>
-
-      <para>Unscaled thrust, F<subscript>T</subscript>, and Isp, as a function
-      of Pressure, in kPa, and Temperature, in degrees Celsius, are calculated
-      using the following polynomials.</para>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_Thruster_GUI_7.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-
-      <para>The thrust, T, output in Newtons, is scaled by the <guimenu>Duty
-      Cycle</guimenu> and <guimenu>Thrust Scale Factor</guimenu>. The thrust
-      acceleration direction vector (the direction of the actual acceleration
-      not the thruster nozzle) is given by
-      <guimenu>ThrustDirection1-3</guimenu> and is applied in the input
-      <guilabel>Coordinate System</guilabel>. The Isp is output in
-      seconds.</para>
-
-      <para>The mass flow rate and the thrust equations are shown below where
-      F<subscript>T</subscript> and Isp are defined above,
-      f<subscript>d</subscript> is the duty cycle, f<subscript>s</subscript>
-      is the thrust scale factor, R<subscript>iT</subscript> is the rotation
-      matrix from the thrust coordinate system to the inertial system, and
-      T<subscript>d</subscript> is the unitized thrust direction.</para>
-
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_Thruster_GUI_8.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
+      <para>For a complete descripton of how to configure all Resources
+      required for electric propulsion modelling, see the Tutorial named <xref
+      linkend="Tut_ElectricPropulsion"/></para>
     </refsection>
 
     <refsection>
       <title>Local Coordinate Systems</title>
 
       <para>Here, a Local coordinate system is defined as one that we
-      configure "locally" using the <guilabel>ChemicalThruster</guilabel>
+      configure "locally" using the <guilabel>ElectricThruster</guilabel>
       resource interface as opposed to defining a coordinate system using the
       <guilabel>Coordinate Systems</guilabel> folder in the
       <guilabel>Resources</guilabel> Tree.</para>
@@ -1890,7 +1884,17 @@
     <refsection>
       <title>Caution Regarding Force Model Discontinuties</title>
 
-      <para>Note that when modellign shadows...</para>
+      <para>Note that when modellign shadows on a
+      <guilabel>SolarPowerSystem</guilabel> Resource, it is possible that
+      there is not enough power available to power an
+      <guilabel>ElectricThruster</guilabel>. This occurs when the power
+      available from the <guilabel>SolarPowerSystem</guilabel>, or the power
+      distributed to the thruster, is less than
+      <guilabel>MinimumUsablePower</guilabel>. When this occurs, the thruster
+      model turns off thrust and this can cause a discontinuity in the force
+      model. To avoid this, you must propagate to the boundary and switch
+      propagators, or configure the <guilabel>Propagator</guilabel> to
+      continue propagating if a poor step occurs.</para>
     </refsection>
   </refsection>
 
@@ -1898,10 +1902,10 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>Create a default <guilabel>ElectricTank</guilabel> and a
+      <para>Create a default <guilabel>ElectricTank</guilabel> and an
       <guilabel>ElectricThruster</guilabel> that allows for fuel depletion,
       assign the <guilabel>ElectricThruster</guilabel> the default
-      <guilabel>ElectricTank</guilabel>, and attach both the to a
+      <guilabel>ElectricTank</guilabel>, and attach both to a
       <guilabel>Spacecraft</guilabel>.</para>
 
       <programlisting>%  Create an ElectricTank Resource
