@@ -23,7 +23,7 @@
     <refname>ElectricTank</refname>
 
     <refpurpose>A model of a tank containing fuel for an electric propulsion
-    system.</refpurpose>
+    system</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -39,8 +39,12 @@
     <guilabel>NuclearPowerSystem</guilabel> and attach it to the
     <guilabel>Spacecraft</guilabel>.</para>
 
-    <para>See Also (TODO: add other components) <xref
-    linkend="ImpulsiveBurn"/>,<xref linkend="Thruster"/></para>
+    <para>For a complete descripton of how to configure all Resources required
+    for electric propulsion modelling, see the Tutorial named <xref
+    linkend="Tut_ElectricPropulsion"/></para>
+
+    <para>See Also <xref linkend="ElectricThruster"/>,<xref
+    linkend="NuclearPowerSystem"/>,<xref linkend="SolarPowerSystem"/></para>
   </refsection>
 
   <refsection>
@@ -205,20 +209,26 @@
       <title>Use of ElectricTank Resource in Conjunction with
       Maneuvers</title>
 
-      <para>A <guilabel>ElectricTank</guilabel> is used in conjunction with
+      <para>An <guilabel>ElectricTank</guilabel> is used in conjunction with
       finite maneuvers. To implement a finite maneuver, you must first create
       both an <guilabel>ElectricThruster</guilabel> and a
       <guilabel>FiniteBurn</guilabel> resource. You must also associate the
       <guilabel>ElectricTank</guilabel> with the
       <guilabel>ElectricThruster</guilabel> resource and you must associate
       the <guilabel>ElectricThruste</guilabel><guilabel>r</guilabel> with the
-      <guilabel>FiniteBurn</guilabel> resource. The actual finite maneuver is
+      <guilabel>FiniteBurn</guilabel> resource. The finite maneuver is
       implemented using the <guilabel>BeginFiniteBurn/EndFiniteBurn</guilabel>
       commands. See the <guilabel>BeginFiniteBurn/EndFiniteBurn</guilabel>
       command documentation for worked examples on how the
       <guilabel>ElectricTank</guilabel> resource is used in conjunction with
-      finite maneuvers. TODO: Update this to point to tutorial.</para>
+      finite maneuvers.</para>
+	  
+	  
+    <para>For a complete descripton of how to configure all Resources required
+    for electric propulsion modelling, see the Tutorial named <xref
+    linkend="Tut_ElectricPropulsion"/></para>
     </refsection>
+
 
     <refsection>
       <title>Behavior When Configuring Tank and Attached Tank

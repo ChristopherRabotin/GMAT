@@ -847,6 +847,9 @@ void EclipseLocator::FindEvents()
    clock_t t = clock();
    #endif
 
+   // Clear old events
+   TakeAction("Clear", "Events");
+
    // Set up data for the calls to CSPICE
    std::string      theFront  = "";  // we will loop over occultingBodies
    std::string      theFShape = "ELLIPSOID";
@@ -917,8 +920,8 @@ void EclipseLocator::FindEvents()
       return;
    }
 
-   // Clear old events
-   TakeAction("Clear", "Events");
+//   // Clear old events
+//   TakeAction("Clear", "Events");
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Events have been cleared ... numEventsInTotal = %d\n",
             numEventsInTotal);

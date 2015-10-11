@@ -570,6 +570,28 @@ void Solver::SetUnscaledVariable(Integer id, Real value)
    unscaledVariable.at(id) = value;
 }
 
+
+//------------------------------------------------------------------------------
+// const RealArray* GetSolverData(const std::string type)
+//------------------------------------------------------------------------------
+/**
+*  Method used to pull data for reporting from other objects
+*
+*  This method retrieves the current values for Solver fields, so that they can be
+*  exposed elsewhere.  The Solver Window uses it to retrieve values for the VF13
+*  optimizer.
+*
+*  @param type The type of data requested
+*
+*  @return The numbers that match the type
+*/
+//------------------------------------------------------------------------------
+const RealArray* Solver::GetSolverData(const std::string &type)
+{
+   return NULL;
+}
+
+
 //------------------------------------------------------------------------------
 //  SolverState GetState()
 //------------------------------------------------------------------------------

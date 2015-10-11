@@ -39,9 +39,9 @@
     <guilabel>Spacecraft</guilabel>. To perform an impulsive maneuver using
     the <guilabel>Maneuver</guilabel> command, you must create an
     <guilabel>ImpulsiveBurn</guilabel>. If you wish to model fuel depletion,
-    you must associate a specific <guilabel>FuelTank</guilabel> hardware
+    you must associate a specific <guilabel>ChemicalTank</guilabel> hardware
     object with this <guilabel>ImpulsiveBurn</guilabel> and attach the
-    <guilabel>FuelTank</guilabel> to the desired
+    <guilabel>ChemicalTank</guilabel> to the desired
     <guilabel>Spacecraft</guilabel>. See the Remarks and example shown below
     for more details.</para>
 
@@ -211,9 +211,9 @@
         </listitem>
 
         <listitem>
-          <para>Select a <guilabel>FuelTank</guilabel> for the
+          <para>Select a <guilabel>ChemicalTank</guilabel> for the
           <guilabel>ImpulsiveBurn </guilabel>object and attach this
-          selected<guilabel> FuelTank </guilabel>to the
+          selected<guilabel> ChemicalTank </guilabel>to the
           <guilabel>Spacecraft</guilabel>.</para>
         </listitem>
 
@@ -245,9 +245,9 @@
             </row>
 
             <row>
-              <entry><guilabel>FuelTank</guilabel></entry>
+              <entry><guilabel>ChemicalTank</guilabel></entry>
 
-              <entry><para> The <guilabel>FuelTank</guilabel> specified by
+              <entry><para> The <guilabel>ChemicalTank</guilabel> specified by
               the<guilabel> ImpulsiveBurn</guilabel> object is (optionally)
               used to power the <guilabel>ImpulsiveBurn</guilabel>.
               </para></entry>
@@ -271,18 +271,18 @@
 
     <informalexample>
       <para>Create a default <guilabel>Spacecraft</guilabel> and
-      <guilabel>FuelTank</guilabel> and attach the
-      <guilabel>FuelTank</guilabel> to the <guilabel>Spacecraft</guilabel>.
+      <guilabel>ChemicalTank</guilabel> and attach the
+      <guilabel>ChemicalTank</guilabel> to the <guilabel>Spacecraft</guilabel>.
       Perform a 100 m/s impulsive maneuver in the Earth VNB-V
       direction.</para>
 
-      <programlisting>%  Create default Spacecraft and FuelTank and attach the FuelTank 
+      <programlisting>%  Create default Spacecraft and ChemicalTank and attach the ChemicalTank 
 %  to the Spacecraft.
 Create Spacecraft DefaultSC
-Create FuelTank FuelTank1
+Create ChemicalTank FuelTank1
 DefaultSC.Tanks = {FuelTank1}
 
-%  Set FuelTank1 parameters to default values
+%  Set ChemicalTank1 parameters to default values
 FuelTank1.AllowNegativeFuelMass = false
 FuelTank1.FuelMass = 756
 FuelTank1.Pressure = 1500
@@ -292,7 +292,7 @@ FuelTank1.Volume = 0.75
 FuelTank1.FuelDensity = 1260
 FuelTank1.PressureModel = PressureRegulated
 
-%  Create ImpulsiveBurn associated with the created FuelTank
+%  Create ImpulsiveBurn associated with the created ChemicalTank
 Create ImpulsiveBurn IB
 IB.CoordinateSystem = Local
 IB.Origin = Earth

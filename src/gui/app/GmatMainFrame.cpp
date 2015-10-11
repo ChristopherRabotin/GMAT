@@ -1518,9 +1518,14 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          
          // MdiChildViewFrame::OnPlotClose() and MdiChildTsFrame::OnPlotClose()
          // sets deleteChild to false
+
+         // Here we call Destroy() rather than deleting the window in order to 
+         // avoid race conditions that result in the window destruction before 
+         // all pending messages have been processed.
          if (deleteChild)
-            delete child;
-         
+            child->Destroy();
+         //delete child;
+
          delete node;
          childRemoved = true;
          break;

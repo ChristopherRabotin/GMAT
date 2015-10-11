@@ -59,7 +59,7 @@
     linkend="ResourcesTree_Fig_AddSpacecraft" xrefstyle="select:label"/>).
     Other folders have multiple objects that can be added and the user must
     first select the “<guimenuitem>Add</guimenuitem>” menu before selecting
-    the object; for example to add a <guilabel>FuelTank</guilabel>, right
+    the object; for example to add a <guilabel>ChemicalTank</guilabel>, right
     click the “<guilabel>Hardware</guilabel>” folder, select
     “<guimenuitem>Add</guimenuitem>”, then the list of available resource
     types is displayed and the user can click “<guimenuitem>Fuel

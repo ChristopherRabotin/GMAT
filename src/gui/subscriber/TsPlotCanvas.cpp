@@ -54,6 +54,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
                            const wxSize& size, long style,
                            const wxString& name) :
    wxWindow       (parent, -1, pos, size, style),
+   runState       (10000),
    left           (80),
    right          (30),
    top            (20),
@@ -204,6 +205,10 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
       if (upd)
          resized = true;
    }
+
+   // Always refresh all in idle state (10000)
+   if (runState == 10000)
+      resized = true;
 
    wxPaintDC dc(this);
    wxCoord w, h;
@@ -1786,4 +1791,5 @@ double TsPlotCanvas::GetActualYValue(int y, int x)
 void TsPlotCanvas::AlwaysDraw(bool tf)
 {
    alwaysDraw = tf;
+   runState = alwaysDraw ? 10000 : 10001;
 }
