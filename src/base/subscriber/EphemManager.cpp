@@ -16,6 +16,8 @@
  * responsible for creating, loading, and managing private/hidden EphemerisFile
  * objects associated with its specified Spacecraft object.
  * NOTE: currently, the EphemManager will only handle SPK Orbit files.
+ * NOTE: code to get occultation and contact intervals based on
+ * prototypes written by Joel Parker/GSFC and Yeerang Lim/KAIST
  */
 //------------------------------------------------------------------------------
 #include <stdio.h>
@@ -651,6 +653,45 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
 }
 
 /// @YRL
+//------------------------------------------------------------------------------
+//    bool    GetContactIntervals(const std::string &observerID,
+//                                Real              minElevation,
+//                                const std::string &obsFrameName,
+//                                StringArray       &occultingBodyNames,
+//                                const std::string &abCorrection,
+//                                Real              s,
+//                                Real              e,
+//                                bool              useEntireIntvl,
+//                                bool              useLightTime,
+//                                bool              transmit,
+//                                Real              stepSize,
+//                                Integer           &numIntervals,
+//                                RealArray         &starts,
+//                                RealArray         &ends)
+//------------------------------------------------------------------------------
+/**
+ * This method determines the contact intervals given the input observer,
+ * abberration correction, times, and stepsize.
+ *
+ * @param observerID         NAIF ID of the observer
+ * @param minElevation       minimum elevation of the GS
+ * @param obsFrameName       frame name for the observer
+ * @param occultingBodyNames array of occulting bodies
+ * @param abCorrection       aberration correction
+ * @param s                  start time
+ * @param e                  end time
+ * @param useEntireIntvl the flag to use entire available interval
+ * @param useLightTime       use light time delay flag
+ * @param transmit           transmit or receive
+ * @param stepSize           stepsize
+ * @param numIntervals       number of intervals returned (output)
+ * @param starts             array of start times for the intervals (output)
+ * @param ends               array of end times for the intervals (output)
+ *
+ * Note: initial implementation by Yeerang Lim/KAIST
+ *
+ */
+//------------------------------------------------------------------------------
 bool EphemManager::GetContactIntervals(const std::string &observerID,
                                        Real              minElevation,
                                        const std::string &obsFrameName,
