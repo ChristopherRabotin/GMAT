@@ -1,4 +1,10 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2015-10-04 12:37:06
 
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
 % -------------------------------------------------------------------------
 % --------------------------- Create Objects ------------------------------
 % -------------------------------------------------------------------------
@@ -23,8 +29,11 @@ GMAT Sat.DragArea = 4;
 GMAT Sat.SRPArea = 4;
 GMAT Sat.NAIFId = -123456789;
 GMAT Sat.NAIFIdReferenceFrame = -123456789;
+GMAT Sat.OrbitColor = Red;
+GMAT Sat.TargetColor = Teal;
 GMAT Sat.Id = 'SatId';
 GMAT Sat.Attitude = CoordinateSystemFixed;
+GMAT Sat.SPADSRPScaleFactor = 1;
 GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
 GMAT Sat.ModelOffsetX = 0;
 GMAT Sat.ModelOffsetY = 0;
@@ -32,11 +41,12 @@ GMAT Sat.ModelOffsetZ = 0;
 GMAT Sat.ModelRotationX = 0;
 GMAT Sat.ModelRotationY = 0;
 GMAT Sat.ModelRotationZ = 0;
-GMAT Sat.ModelScale = 3;
+GMAT Sat.ModelScale = 1;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Sat.AttitudeCoordinateSystem = EarthMJ2000Eq;
 GMAT Sat.EulerAngleSequence = '321';
+
 
 %----------------------------------------
 %---------- ForceModels
@@ -55,6 +65,7 @@ GMAT PointMass.GravityField.Earth.Order = 0;
 GMAT PointMass.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT PointMass.GravityField.Earth.EarthTideModel = 'None';
 
+
 %  Define Force Model with third bodies 
 Create ForceModel ThirdBodies;
 GMAT ThirdBodies.CentralBody = Earth;
@@ -69,6 +80,7 @@ GMAT ThirdBodies.GravityField.Earth.Order = 0;
 GMAT ThirdBodies.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT ThirdBodies.GravityField.Earth.EarthTideModel = 'None';
 
+
 %  Define Force Model with 12x12 gravity
 Create ForceModel NonSpherical12;
 GMAT NonSpherical12.CentralBody = Earth;
@@ -82,6 +94,7 @@ GMAT NonSpherical12.GravityField.Earth.Order = 12;
 GMAT NonSpherical12.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT NonSpherical12.GravityField.Earth.EarthTideModel = 'None';
 
+
 %  Define Force Model with MSISE90 Drag 
 Create ForceModel MSISE90Drag;
 GMAT MSISE90Drag.CentralBody = Earth;
@@ -94,9 +107,16 @@ GMAT MSISE90Drag.GravityField.Earth.Order = 0;
 GMAT MSISE90Drag.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT MSISE90Drag.GravityField.Earth.EarthTideModel = 'None';
 GMAT MSISE90Drag.Drag.AtmosphereModel = MSISE90;
+GMAT MSISE90Drag.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT MSISE90Drag.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT MSISE90Drag.Drag.CSSISpaceWeatherFile = 'CSSI_2004To2026.txt';
+GMAT MSISE90Drag.Drag.SchattenFile = 'SchattenPredict.txt';
 GMAT MSISE90Drag.Drag.F107 = 175;
 GMAT MSISE90Drag.Drag.F107A = 175;
 GMAT MSISE90Drag.Drag.MagneticIndex = 4;
+GMAT MSISE90Drag.Drag.SchattenErrorModel = 'Nominal';
+GMAT MSISE90Drag.Drag.SchattenTimingModel = 'NominalCycle';
+
 
 %  Define Force Model with Jacchia Roberts Drag 
 Create ForceModel JRDrag;
@@ -110,9 +130,16 @@ GMAT JRDrag.GravityField.Earth.Order = 0;
 GMAT JRDrag.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT JRDrag.GravityField.Earth.EarthTideModel = 'None';
 GMAT JRDrag.Drag.AtmosphereModel = JacchiaRoberts;
+GMAT JRDrag.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT JRDrag.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT JRDrag.Drag.CSSISpaceWeatherFile = 'CSSI_2004To2026.txt';
+GMAT JRDrag.Drag.SchattenFile = 'SchattenPredict.txt';
 GMAT JRDrag.Drag.F107 = 150;
 GMAT JRDrag.Drag.F107A = 150;
 GMAT JRDrag.Drag.MagneticIndex = 3;
+GMAT JRDrag.Drag.SchattenErrorModel = 'Nominal';
+GMAT JRDrag.Drag.SchattenTimingModel = 'NominalCycle';
+
 
 %  Define Force Model with SRP
 Create ForceModel SRP;
@@ -127,7 +154,9 @@ GMAT SRP.GravityField.Earth.Order = 0;
 GMAT SRP.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT SRP.GravityField.Earth.EarthTideModel = 'None';
 GMAT SRP.SRP.Flux = 1367;
+GMAT SRP.SRP.SRPModel = Spherical;
 GMAT SRP.SRP.Nominal_Sun = 149597870.691;
+
 
 %  Define Force Model with SRP
 Create ForceModel AllForces;
@@ -141,11 +170,18 @@ GMAT AllForces.GravityField.Earth.Order = 20;
 GMAT AllForces.GravityField.Earth.PotentialFile = 'JGM2.cof';
 GMAT AllForces.GravityField.Earth.EarthTideModel = 'None';
 GMAT AllForces.SRP.Flux = 1367;
+GMAT AllForces.SRP.SRPModel = Spherical;
 GMAT AllForces.SRP.Nominal_Sun = 149597870.691;
 GMAT AllForces.Drag.AtmosphereModel = MSISE90;
+GMAT AllForces.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT AllForces.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT AllForces.Drag.CSSISpaceWeatherFile = 'CSSI_2004To2026.txt';
+GMAT AllForces.Drag.SchattenFile = 'SchattenPredict.txt';
 GMAT AllForces.Drag.F107 = 150;
 GMAT AllForces.Drag.F107A = 150;
 GMAT AllForces.Drag.MagneticIndex = 3;
+GMAT AllForces.Drag.SchattenErrorModel = 'Nominal';
+GMAT AllForces.Drag.SchattenTimingModel = 'NominalCycle';
 
 %----------------------------------------
 %---------- Propagators
@@ -233,10 +269,10 @@ GMAT EarthFull.StopIfAccuracyIsViolated = false;
 
 Create OrbitView GLPlot;
 GMAT GLPlot.SolverIterations = Current;
-GMAT GLPlot.UpperLeft = [ 0.004549590536851683 0 ];
-GMAT GLPlot.Size = [ 0.7998180163785259 0.8502202643171806 ];
-GMAT GLPlot.RelativeZOrder = 95;
-GMAT GLPlot.Maximized = true;
+GMAT GLPlot.UpperLeft = [ 0.00411764705882353 0 ];
+GMAT GLPlot.Size = [ 0.7994117647058824 0.850132625994695 ];
+GMAT GLPlot.RelativeZOrder = 290;
+GMAT GLPlot.Maximized = false;
 GMAT GLPlot.Add = {Sat, Earth};
 GMAT GLPlot.CoordinateSystem = EarthMJ2000Eq;
 GMAT GLPlot.DrawObject = [ true true ];
@@ -244,6 +280,7 @@ GMAT GLPlot.DataCollectFrequency = 1;
 GMAT GLPlot.UpdatePlotFrequency = 50;
 GMAT GLPlot.NumPointsToRedraw = 0;
 GMAT GLPlot.ShowPlot = true;
+GMAT GLPlot.ShowLabels = true;
 GMAT GLPlot.ViewPointReference = Earth;
 GMAT GLPlot.ViewPointVector = [ -10000 -15000 3000 ];
 GMAT GLPlot.ViewDirection = Earth;

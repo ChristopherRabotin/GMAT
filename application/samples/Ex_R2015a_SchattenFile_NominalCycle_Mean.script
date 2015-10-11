@@ -1,0 +1,126 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2015-09-09 11:06:38
+
+
+%----------------------------------------
+%---------- User-Modified Default Celestial Bodies
+%----------------------------------------
+
+GMAT Earth.NutationUpdateInterval = 0;
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft SPC;
+GMAT SPC.DateFormat = UTCGregorian;
+GMAT SPC.Epoch = '15 Jun 2016 12:00:00.000';
+GMAT SPC.CoordinateSystem = EarthMJ2000Eq;
+GMAT SPC.DisplayStateType = Cartesian;
+GMAT SPC.X = 6728.137;
+GMAT SPC.Y = 0;
+GMAT SPC.Z = 0;
+GMAT SPC.VX = 0;
+GMAT SPC.VY = 4.78097433374032;
+GMAT SPC.VZ = 6.0320883756781;
+GMAT SPC.DryMass = 2000;
+GMAT SPC.Cd = 2.1;
+GMAT SPC.Cr = 1.8;
+GMAT SPC.DragArea = 40;
+GMAT SPC.SRPArea = 35;
+GMAT SPC.NAIFId = -10001001;
+GMAT SPC.NAIFIdReferenceFrame = -9001001;
+GMAT SPC.OrbitColor = Red;
+GMAT SPC.TargetColor = Teal;
+GMAT SPC.Id = 'SatId';
+GMAT SPC.Attitude = CoordinateSystemFixed;
+GMAT SPC.SPADSRPScaleFactor = 1;
+GMAT SPC.ModelFile = 'aura.3ds';
+GMAT SPC.ModelOffsetX = 0;
+GMAT SPC.ModelOffsetY = 0;
+GMAT SPC.ModelOffsetZ = 0;
+GMAT SPC.ModelRotationX = 0;
+GMAT SPC.ModelRotationY = 0;
+GMAT SPC.ModelRotationZ = 0;
+GMAT SPC.ModelScale = 1;
+GMAT SPC.AttitudeDisplayStateType = 'Quaternion';
+GMAT SPC.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT SPC.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT SPC.EulerAngleSequence = '321';
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel Earth2Body;
+GMAT Earth2Body.CentralBody = Earth;
+GMAT Earth2Body.PrimaryBodies = {Earth};
+GMAT Earth2Body.SRP = Off;
+GMAT Earth2Body.RelativisticCorrection = Off;
+GMAT Earth2Body.ErrorControl = RSSStep;
+GMAT Earth2Body.GravityField.Earth.Degree = 0;
+GMAT Earth2Body.GravityField.Earth.Order = 0;
+GMAT Earth2Body.GravityField.Earth.PotentialFile = '../data/gravity/earth/JGM2.cof';
+GMAT Earth2Body.GravityField.Earth.EarthTideModel = 'None';
+GMAT Earth2Body.Drag.AtmosphereModel =  NRLMSISE00;
+GMAT Earth2Body.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT Earth2Body.Drag.PredictedWeatherSource = 'SchattenFile';
+GMAT Earth2Body.Drag.SchattenFile = '../data/atmosphere/earth/SchattenPredict.txt';
+%GMAT Earth2Body.Drag.SchattenFile = '../data/atmosphere/earth/SchattenPredict.txt'
+GMAT Earth2Body.Drag.SchattenErrorModel = 'Nominal';
+GMAT Earth2Body.Drag.SchattenTimingModel = 'NominalCycle';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator PD78;
+GMAT PD78.FM = Earth2Body;
+GMAT PD78.Type = PrinceDormand78;
+GMAT PD78.InitialStepSize = 60;
+GMAT PD78.Accuracy = 1e-011;
+GMAT PD78.MinStep = 0;
+GMAT PD78.MaxStep = 6000;
+GMAT PD78.MaxStepAttempts = 50;
+GMAT PD78.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile SPC_Report;
+GMAT SPC_Report.SolverIterations = Current;
+GMAT SPC_Report.UpperLeft = [ 0.1582352941176471 0.3288508557457213 ];
+GMAT SPC_Report.Size = [ 0.5988235294117648 0.7970660146699267 ];
+GMAT SPC_Report.RelativeZOrder = 225;
+GMAT SPC_Report.Maximized = false;
+GMAT SPC_Report.Filename = 'SchattenPredict_NominalCycle_Mean.report';
+GMAT SPC_Report.Precision = 16;
+GMAT SPC_Report.WriteHeaders = false;
+GMAT SPC_Report.LeftJustify = On;
+GMAT SPC_Report.ZeroFill = Off;
+GMAT SPC_Report.FixedWidth = true;
+GMAT SPC_Report.Delimiter = ' ';
+GMAT SPC_Report.ColumnWidth = 23;
+GMAT SPC_Report.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable OutputStepSize i;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+%-----------Begin Propagation and Report Generation--------
+% Propagate based on preset propagation parameters
+% and current stop conditions.
+BeginMissionSequence;
+
+% Output Report file data for each propagation set in the FOR loop
+Report SPC_Report SPC.A1ModJulian SPC.X SPC.Y SPC.Z SPC.VX SPC.VY SPC.VZ;
+For i = 1:288
+  Propagate PD78(SPC) {SPC.ElapsedSecs = 300};
+  Report SPC_Report SPC.A1ModJulian SPC.X SPC.Y SPC.Z SPC.VX SPC.VY SPC.VZ;
+EndFor
