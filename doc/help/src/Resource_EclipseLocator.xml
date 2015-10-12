@@ -1174,8 +1174,6 @@ el.EclipseTypes = {'Umbra', 'Penumbra', 'Antumbra'}
 BeginMissionSequence
 
 Propagate prop(sat) {sat.ElapsedSecs = 10800}
-
-FindEvents el
 </programlisting>
     </informalexample>
 

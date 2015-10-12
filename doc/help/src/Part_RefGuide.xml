@@ -101,6 +101,7 @@
       <xi:include href="Command_CallPythonFunction.xml" />
       <xi:include href="Command_ClearPlot.xml" />
       <xi:include href="Command_EndFiniteBurn.xml" />
+	  <xi:include href="Command_FindEvents.xml" />
       <xi:include href="Command_For.xml" />
 	  <xi:include href="Command_Global.xml" />
       <xi:include href="Command_If.xml" />
