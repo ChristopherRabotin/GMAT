@@ -254,6 +254,8 @@ private:
    bool mExitWithoutConfirm;
    bool mUndockedMissionTreePresized;
    Integer mRunStatus;
+
+   bool useChildDelete;
    
    GmatServer *mMatlabServer;
    std::string mScriptFilename;
