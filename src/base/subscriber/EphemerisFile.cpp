@@ -2164,9 +2164,9 @@ bool EphemerisFile::OpenTextEphemerisFile()
 
 
 //------------------------------------------------------------------------------
-// void CloseEphemerisFile(bool done = true)
+// void CloseEphemerisFile(bool done = true, writeMetaData = true)
 //------------------------------------------------------------------------------
-void EphemerisFile::CloseEphemerisFile(bool done)
+void EphemerisFile::CloseEphemerisFile(bool done, bool writeMetaData)
 {
    // Close SPK file
    #ifdef __USE_SPICE__
@@ -2178,7 +2178,7 @@ void EphemerisFile::CloseEphemerisFile(bool done)
    if (spkWriter != NULL)
    {
       if (!spkWriteFailed)
-         FinalizeSpkFile(done);
+         FinalizeSpkFile(done, writeMetaData);
       
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Remove
@@ -3237,7 +3237,50 @@ void EphemerisFile::FinishUpWritingSPK(bool canFinalize)
    {
       if (spkWriter != NULL)
       {
-         WriteSpkOrbitDataSegment();
+         Integer mnSz   = spkWriter->GetMinNumberOfStates();
+         Integer numPts = (Integer) a1MjdArray.size();
+         // if we are generating SPK files in the background and there
+         // are not enough states for the interpolation, we DO NOT
+         // want to try to write and trigger the SPICE error;
+         // for user-specified SPK files, we DO want to present
+         // errors to the user.
+         if (!generateInBackground || (numPts >= mnSz))
+         {
+            #ifdef DEBUG_EPHEMFILE_SPICE
+            MessageInterface::ShowMessage("FinishUpWritingSPK::about to write SPK orbit data segment\n");
+            #endif
+//            // Save last data to become first data of next segment - since we may start up
+//            // a new SPK file after this one
+//            A1Mjd *a1mjd  = new A1Mjd(*a1MjdArray.back());
+//            Rvector6 *rv6 = new Rvector6(*stateArray.back());
+
+            // Write a segment and delete data array pointers
+            WriteSpkOrbitDataSegment();
+
+//            // Add saved data to arrays if we are not done yet
+//            if (!done)
+//            {
+//               a1MjdArray.push_back(a1mjd);
+//               stateArray.push_back(rv6);
+//            }
+            insufficientSPKData = false;
+            #ifdef DEBUG_EPHEMFILE_SPICE
+            MessageInterface::ShowMessage("   DONE writing SPK orbit data segment\n");
+            #endif
+         }
+         // background SPKs need to know if there was data unwritten
+         // will have 1 point from the last segment in the beginning of this
+         // set of data
+         else if (generateInBackground && (numPts > 1))
+         {
+            #ifdef DEBUG_EPHEMFILE_SPICE
+            MessageInterface::ShowMessage("NOT WRITING SPK data - only %d points available!!!\n",
+                  numPts);
+            #endif
+            insufficientSPKData = true; // data is available, but has not been written yet
+         }
+//      }
+//         WriteSpkOrbitDataSegment();
       }
       else
       {
@@ -4621,9 +4664,9 @@ void EphemerisFile::WriteSpkComments(const std::string &comments)
 
 
 //------------------------------------------------------------------------------
-// void FinalizeSpkFile(bool done = true)
+// void FinalizeSpkFile(bool done = true, writeMetaData = true)
 //------------------------------------------------------------------------------
-void EphemerisFile::FinalizeSpkFile(bool done)
+void EphemerisFile::FinalizeSpkFile(bool done, bool writeMetaData)
 {
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage("=====> FinalizeSpkFile() entered\n");
@@ -4636,25 +4679,47 @@ void EphemerisFile::FinalizeSpkFile(bool done)
    {
       if (!a1MjdArray.empty())
       {
-         Integer mnSz = spkWriter->GetMinNumberOfStates();
+         Integer mnSz   = spkWriter->GetMinNumberOfStates();
+         Integer numPts = (Integer) a1MjdArray.size();
          // if we are generating SPK files in the background and there
          // are not enough states for the interpolation, we DO NOT
          // want to try to write and trigger the SPICE error;
          // for user-specified SPK files, we DO want to present
          // errors to the user.
-         if (!generateInBackground || ((Integer) a1MjdArray.size() >= mnSz))
+         if (!generateInBackground || (numPts >= mnSz))
          {
             #ifdef DEBUG_EPHEMFILE_SPICE
             MessageInterface::ShowMessage("   about to write SPK orbit data segment\n");
             #endif
+            // Save last data to become first data of next segment - since we may start up
+            // a new SPK file after this one
+            A1Mjd *a1mjd  = new A1Mjd(*a1MjdArray.back());
+            Rvector6 *rv6 = new Rvector6(*stateArray.back());
+
+            // Write a segment and delete data array pointers
             WriteSpkOrbitDataSegment();
+
+            // Add saved data to arrays if we are not done yet
+            if (!done)
+            {
+               a1MjdArray.push_back(a1mjd);
+               stateArray.push_back(rv6);
+            }
+            insufficientSPKData = false;
+//            WriteSpkOrbitDataSegment();
             #ifdef DEBUG_EPHEMFILE_SPICE
             MessageInterface::ShowMessage("   DONE writing SPK orbit data segment\n");
             #endif
          }
          // background SPKs need to know if there was data unwritten
-         else if (generateInBackground)
+         // will have 1 point from the last segment in the beginning of this
+         // set of data
+         else if (generateInBackground && (numPts > 1))
          {
+            #ifdef DEBUG_EPHEMFILE_SPICE
+            MessageInterface::ShowMessage("NOT WRITING SPK data - only %d points available!!!\n",
+                  numPts);
+            #endif
             insufficientSPKData = true; // data is available, but has not been written yet
          }
       }
@@ -4662,7 +4727,9 @@ void EphemerisFile::FinalizeSpkFile(bool done)
       #ifdef DEBUG_EPHEMFILE_SPICE
       MessageInterface::ShowMessage("   about to call FinalizeKernel!!!\n");
       #endif
-      spkWriter->FinalizeKernel(done);
+      spkWriter->FinalizeKernel(done, writeMetaData);
+      // so we recreate next time - for background SPKs only
+      if (!done) isEphemFileOpened = false;
    }
    catch (BaseException &e)
    {
@@ -5646,6 +5713,10 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    //=================================================================
    
    bool processData = false;
+#if DBGLVL_EPHEMFILE_DATA
+MessageInterface::ShowMessage
+   ("EphemerisFile::Distribute() ********* state is %d\n", runstate);
+#endif
       
    //------------------------------------------------------------
    // if solver is not running or solver has finished, write data
@@ -5658,6 +5729,10 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
           "solution, runstate=%d, maneuverEpochInDays=%.15f\n", runstate,
           maneuverEpochInDays);
       DebugWriteOrbit("In Distribute:", currEpochInDays, currState, true, true);
+      #endif
+      #if DBGLVL_EPHEMFILE_DATA
+      MessageInterface::ShowMessage
+         ("EphemerisFile::Distribute() state is RUNNING or SOLVEDPASS\n");
       #endif
       
       // Check for epoch before maneuver epoch
@@ -5680,8 +5755,16 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
          return true;
       }
       
+#if DBGLVL_EPHEMFILE_DATA
+MessageInterface::ShowMessage
+   ("EphemerisFile::Distribute() about to check initial and final epoch\n");
+#endif
       // Check user defined initial and final epoch
       processData = CheckInitialAndFinalEpoch();
+#if DBGLVL_EPHEMFILE_DATA
+MessageInterface::ShowMessage
+   ("EphemerisFile::Distribute() checked initial and final epoch\n");
+#endif
       
       // Check if it is time to write
       bool timeToWrite = false;

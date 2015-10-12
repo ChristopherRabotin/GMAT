@@ -83,7 +83,7 @@
       The reference manual contains detailed information on all GMAT
       components. Whether you need detailed information on syntax or
       application-specific examples, go here. For each GMAT resource (e.g.
-      <guilabel>Spacecraft</guilabel>, <guilabel>Thruster</guilabel>,
+      <guilabel>Spacecraft</guilabel>, <guilabel>ChemicalThruster</guilabel>,
       <guilabel>XYPlot</guilabel>) and command (e.g.
       <guilabel>Optimize</guilabel>, <guilabel>Propagate</guilabel>), the
       following information is documented:</para>

@@ -888,12 +888,15 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
 {
    StringArray::iterator current;
    Integer i;
+
+   const RealArray *deltavalues;
+   RealArray values;
+
    if (isInitialized)
    {
       switch (currentState)
       {
          case NOMINAL:
-         case RUNEXTERNAL:
             // Iterate through the variables, notifying the listener
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
@@ -903,10 +906,23 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
             }
             break;
 
+         case RUNEXTERNAL:
+            // Iterate through the variables, notifying the listener
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               listener->VariabledChanged(*current, variable[i]);
+               ++i;
+            }
+            // fall through
+
          case CHECKINGRUN:
             // Iterate through the equality constraints, notifying the listener
             if (eqConstraintCount > 0)
             {
+               values.clear();
+               deltavalues = GetSolverData("EqConstraints");
+               if (deltavalues == NULL) deltavalues = &eqConstraintAchievedValues;
                for (current = eqConstraintNames.begin(), i = 0;
                     current != eqConstraintNames.end(); ++current)
                {
@@ -916,13 +932,17 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
                         (*current).c_str(), eqConstraintDesiredValues[i], eqConstraintAchievedValues[i], 
                         eqConstraintDesiredValues[i]-eqConstraintAchievedValues[i], eqConstraintValues[i]);
                   #endif
-                  listener->ConstraintChanged(*current, eqConstraintDesiredValues[i], eqConstraintAchievedValues[i]);
+                  listener->ConstraintChanged(*current, eqConstraintDesiredValues[i], deltavalues->at(i));
                   ++i;
                }
             }
 
             if (ineqConstraintCount > 0)
             {
+               values.clear();
+               deltavalues = GetSolverData("IneqConstraints");
+               if (deltavalues == NULL) deltavalues = &ineqConstraintAchievedValues;
+
                // Iterate through the inequality constraints, notifying the listener
                for (current = ineqConstraintNames.begin(), i = 0;
                     current != ineqConstraintNames.end(); ++current)
@@ -934,7 +954,7 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
                         ineqConstraintDesiredValues[i]-ineqConstraintAchievedValues[i], ineqConstraintValues[i]);
                   #endif
                   listener->ConstraintChanged(*current, ineqConstraintDesiredValues[i], 
-                     ineqConstraintAchievedValues[i], ineqConstraintOp[i]);
+                     deltavalues->at(i), ineqConstraintOp[i]);
                   ++i;
                }
             }

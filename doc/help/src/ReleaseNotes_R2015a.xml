@@ -9,57 +9,38 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>GMAT R2015a Release Notes</title>
 
-  <para>The General Mission Analysis Tool (GMAT) version R2014a was released
+  <para>The General Mission Analysis Tool (GMAT) version R2015a was released
   Nov 2015. This is the first public release since July 2014, and is the 9th
   release for the project.</para>
 
   <para>Below is a summary of key changes in this release. Please see the full
   <link
-  xlink:href="http://ocs.landsend.com/cd/frontdoor?store_name=nasagsfc&amp;store_type=3">R2015a
+  xlink:href="http://bugs.gmatcentral.org/secure/ReleaseNote.jspa?version=10600&amp;styleName=Html&amp;projectId=10000">R2015a
   Release Notes</link> on JIRA for a complete list.</para>
 
   <section>
     <title>New Features</title>
 
     <section>
-      <title>Solver Status Window</title>
+      <title>GMAT Functions</title>
 
-      <para>GMAT now displays a window showing solver variables and constraint
-      values during execution. This helps track the progress of targeters and
-      optimizers and is an important aid in troubleshooting convergence
-      issues.</para>
-
-      <informalfigure>
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_SolverWindow.png"
-                         scale="60"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
-      </informalfigure>
-    </section>
-
-    <section>
-      <title>SNOPT Optimizer</title>
-
-      <para>GMAT now interfaces to Stanford Business Softwares SNOPT
-      Optimizer</para>
+      <para>You can now write functions (sub-routines) in the GMAT script
+      language. This powerful feature greatly expands the practical capability
+      of the system and makes maintaining complex configurations simpler. This
+      feature also enables sharing GMAT script utilities among among projects.
+      If you need a new math computation, want to isolate a complex section of
+      code, or re-use code, GMAT functions are a great solution.</para>
 
       <informalfigure>
         <screenshot>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_SNOPT.png"
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_GMATFunctions.png"
                          scale="50"/>
             </imageobject>
           </mediaobject>
         </screenshot>
       </informalfigure>
-
-      <para>See the <link linkend="SpacecraftOrbitState">Spacecraft Orbit
-      State</link> reference for more information.</para>
     </section>
 
     <section>
@@ -107,6 +88,24 @@
     </section>
 
     <section>
+      <title>Python Interface</title>
+
+      <para>GMAT now supports an interface with Python. The power of the
+      Python ecosystem can now be used in parallel with GMAT.</para>
+
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_Python.png"
+                         scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
+    </section>
+
+    <section>
       <title>Electric Propulsion</title>
 
       <para>GMAT now supports modelling of electric propulsion systems. Below
@@ -128,43 +127,24 @@
     </section>
 
     <section>
-      <title>Python Interface</title>
+      <title>SNOPT Optimizer</title>
 
-      <para>GMAT now supports an interface with Python. The power of the
-      Python ecosystem can now be used in parallel with GMAT.</para>
-
-      <informalfigure>
-        <screenshot>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_Python.png"
-                         scale="50"/>
-            </imageobject>
-          </mediaobject>
-        </screenshot>
-      </informalfigure>
-    </section>
-
-    <section>
-      <title>GMAT Functions</title>
-
-      <para>You can now write functions (sub-routines) in the GMAT script
-      language. This powerful feature greatly expands the practical capability
-      of the system and makes maintaining complex configurations simpler. You
-      can also share GMAT script among projects. If you need a new math
-      computation, want to isolate a complex section of code, or re-use code,
-      GMAT functions are a great solution.</para>
+      <para>GMAT now interfaces to Stanford Business Softwares SNOPT
+      Optimizer</para>
 
       <informalfigure>
         <screenshot>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_GMATFunctions.png"
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_SNOPT.png"
                          scale="50"/>
             </imageobject>
           </mediaobject>
         </screenshot>
       </informalfigure>
+
+      <para>See the <link linkend="SpacecraftOrbitState">Spacecraft Orbit
+      State</link> reference for more information.</para>
     </section>
 
     <section>
@@ -181,6 +161,26 @@
             <imageobject>
               <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_SpaceWeather.png"
                          scale="50"/>
+            </imageobject>
+          </mediaobject>
+        </screenshot>
+      </informalfigure>
+    </section>
+
+    <section>
+      <title>Solver Status Window</title>
+
+      <para>GMAT now displays a window showing solver variables and constraint
+      values during execution. This helps track the progress of targeters and
+      optimizers and is an important aid in troubleshooting convergence
+      issues.</para>
+
+      <informalfigure>
+        <screenshot>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="files/images/relnotes/r2015a/ReleaseNotes_R2015a_SolverWindow.png"
+                         scale="60"/>
             </imageobject>
           </mediaobject>
         </screenshot>
@@ -284,13 +284,13 @@
 
     <itemizedlist>
       <listitem>
-        <para>The <guilabel>FuelTank</guilabel> Resource has been renamed to
+        <para>The <guilabel>ChemicalTank</guilabel> Resource has been renamed to
         <guilabel>ChemicalTank</guilabel> to distinguish between chemical and
         electric systems.</para>
       </listitem>
 
       <listitem>
-        <para>The <guilabel>Thruster</guilabel> Resource has been renamed to
+        <para>The <guilabel>ChemicalThruster</guilabel> Resource has been renamed to
         <guilabel>ChemicalThruster</guilabel> to distinguish between chemical
         and electric systems.</para>
       </listitem>
@@ -366,13 +366,13 @@
   <section>
     <title>Known &amp; Fixed Issues</title>
 
-    <para>Over 123 bugs were closed in this release. See the <link
-    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=12406">"Critical
-    Issues Fixed in R2014a" report</link> for a list of critical bugs and
-    resolutions in R2014a. See the <link
-    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=12408">"Minor
-    Issues Fixed for R2014a" report</link> for minor issues addressed in
-    R2014a.</para>
+    <para>Over 215 bugs were closed in this release. See the <link
+    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=13220">"Critical
+    Issues Fixed in R2015a" report</link> for a list of critical bugs and
+    resolutions in R2015a. See the <link
+    xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=13221">"Minor
+    Issues Fixed for R2015a" report</link> for minor issues addressed in
+    R2015a.</para>
 
     <section>
       <title>Known Issues</title>
@@ -380,7 +380,7 @@
       <para>All known issues that affect this version of GMAT can be seen in
       the <link
       xlink:href="http://li64-187.members.linode.com:8080/issues/?filter=12407">"Known
-      Issues in R2014a" report</link> in JIRA.</para>
+      Issues in R2015a" report</link> in JIRA.</para>
 
       <para>There are several known issues in this release that we consider to
       be significant:<informaltable frame="topbot">

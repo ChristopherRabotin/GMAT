@@ -31,6 +31,8 @@
 //#define DEBUG_FILE_INDEXING
 //#define DEBUG_GETFLUXINPUTS
 //#define DEBUG_FLUXINTERPOLATION
+//#define DUMP_FLUX_DATA
+//#define DEBUG_FIRST_CALL
 
 //#define DEBUG_FIRSTFEW_READS
 
@@ -901,6 +903,8 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       // row for data from 8 am on the current day to 8 am the next day.
       // f107index is used to track that piece.
       Real f107Offset = (epoch < f107RefEpoch ? 5.0/24.0 : 8.0/24.0);
+//      Real f107Offset = (epoch < f107RefEpoch ? 17.0/24.0 : 20.0/24.0);
+
       if (fracEpoch < f107Offset)
          f107index = (f107index > 0 ? f107index - 1 : 0);
 
@@ -975,7 +979,7 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       }
 
       // Update the F10.7 data and (if selected) interpolate
-      if (interpolateFlux && (epoch >= obsFluxData[0].epoch))
+      if (interpolateFlux && (epoch >= historicStart))
       {
          Real vals[2];
          Real eps[2];
@@ -1108,6 +1112,11 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       }
    }
 
+#ifdef DUMP_FLUX_DATA
+   MessageInterface::ShowMessage("%.12lf ==> %lf  %lf  [%lf %lf %lf %lf %lf %lf %lf %lf]\n",
+         epoch, fD.obsF107, fD.obsCtrF107a, fD.ap[0], fD.ap[1], fD.ap[2],
+         fD.ap[3], fD.ap[4], fD.ap[5], fD.ap[6], fD.ap[7]);
+#endif
 
 #ifdef DEBUG_FIRSTFEW_READS
    if (numberReadIndex < howMany)
@@ -1144,36 +1153,100 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
 void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epoch )
 {
    Integer f107index = fD.index;
-   if ((fD.index < (Integer)obsFluxData.size()) && ((fD.index - 2) >= 0))
+   if (fD.isObsData)
    {
-      // Index >= 0 means obs data; -1 means predict data
-      if (fD.index >= 0)
+      f107index = fD.id;
+      FluxData fD_OneBefore = obsFluxData[fD.id - 1];
+
+      // Fill in fD.kp[0] so it contains the reading at epoch - 6.7 Hrs, per
+      // Vallado and Finkleman
+      Real fracEpoch = epoch - fD.epoch;
+      Real fracEpochKp = fracEpoch - 6.7/24.0;
+//      Real fracEpochKp = fracEpoch - 3.0/24.0;
+//      Integer subIndex = (Integer)floor(fracEpochKp * 8);
+      Integer subIndex = (Integer)floor(fracEpoch * 8);
+
+      // F10.7 is measured at 8 pm (5pm before 5/31/91), so we use the current
+      // row for data from 8 am on the current day to 8 am the next day.
+      // f107index is used to track that piece.
+      Real f107Offset = (epoch < f107RefEpoch ? 5.0/24.0 : 8.0/24.0);
+
+      if (fracEpoch < f107Offset)
+         f107index = (f107index > 0 ? f107index - 1 : 0);
+
+      if (subIndex >= 8)
+         subIndex = 7;
+
+      if (subIndex > 0)
+         fD.kp[0] = fD.kp[subIndex];
+
+      if (subIndex < 0)
+         fD.kp[0] = fD_OneBefore.kp[8+subIndex];
+
+      if (interpolateFlux && (epoch >= historicStart))
       {
-         FluxData fD_OneBefore = obsFluxData[fD.index - 1];
+         Real vals[2];
+         Real eps[2];
+         Integer index = fD.id;
 
-         // Fill in fD.kp[0] so it contains the reading at epoch - 6.7 Hrs, per
-         // Vallado and Finkleman
-         Real fracEpoch = (epoch - 0.5) - fD.epoch - 6.7/24.0;
-         Integer subIndex = (Integer)floor(fracEpoch * 8);
+         // Pick the correct timespan
+         eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
+         if (eps[0] > epoch)
+         {
+            eps[1] = eps[0];
+            --index;
+            if (index >= 0)
+               eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
+            else
+               index = 0;
+         }
+         else
+         {
+            eps[1] = (index < obsFluxData.size() - 1 ?
+                  obsFluxData[index+1].epoch + f107Offset + 0.5 : eps[0] + 1.0);
+         }
+         vals[0] = obsFluxData[index].obsF107;
 
-         // F10.7 is measured at 8 pm (5pm before ???), so we use the current row for
-         // data from 8 am on the current day to 8 am the next day.  f107index is
-         // used to track that piece.
-         if (fracEpoch < 8.0/24.0)
-            f107index = (f107index > 0 ? f107index - 1 : 0);
+         if (index < obsFluxData.size())
+            vals[1] = obsFluxData[index+1].obsF107;
+         else
+            vals[1] = vals[0];
 
-         if (subIndex >= 8)
-            subIndex = 7;
+         Real dt = eps[1] - eps[0];
+         Real delta = epoch - eps[0];
+         Real portion = delta / dt;
+         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
 
-         if (subIndex > 0)
-            fD.kp[0] = fD.kp[subIndex];
-
-         if (subIndex < 0)
-            fD.kp[0] = fD_OneBefore.kp[8+subIndex];
-
-         fD.adjF107 = obsFluxData[f107index].adjF107;
-         fD.adjCtrF107a = obsFluxData[f107index].adjCtrF107a;
+         #ifdef DEBUG_FLUXINTERPOLATION
+            MessageInterface::ShowMessage("F10.7 Interpolated from [%lf %lf] "
+                  "to [%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
+                  vals[1], epoch, fD.obsF107);
+         #endif
       }
+      else
+      {
+         // Daily value from previous day
+         fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 :
+                                       obsFluxData[f107index].obsF107);
+      }
+
+      // Average value from detected day
+      fD.obsCtrF107a = obsFluxData[f107index].obsCtrF107a;
+
+      #ifdef DEBUG_FIRST_CALL
+         std::stringstream msg;
+         msg   << "Epoch:                  " << epoch
+               << "\nfracEpoch:            " << fracEpoch
+               << "\nfracEpochKp:          " << fracEpochKp
+               << "\nSubindex:             " << subIndex
+               << "\nSource record index:  " << f107index
+               << "\n     Epoch: " << fD.epoch
+               << "\n     f107:  " << fD.obsF107
+               << "\n     f107a: " << fD.obsCtrF107a
+               << "\n     Kp:    " << fD.kp[0]
+               << "\n";
+         throw SolarSystemException(msg.str());
+      #endif
    }
    else if (fD.index == -1) // predict data
    {
@@ -1183,6 +1256,14 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       for (Integer i = 0; i < 8; i++)
          fD.kp[i] = kp;
    }
+
+#ifdef DUMP_FLUX_DATA
+   MessageInterface::ShowMessage("%.12lf ==> %lf  %lf  [%lf %lf %lf %lf %lf %lf %lf %lf]\n",
+         epoch, fD.obsF107, fD.obsCtrF107a, fD.kp[0], fD.kp[1], fD.kp[2],
+         fD.kp[3], fD.kp[4], fD.kp[5], fD.kp[6], fD.kp[7]);
+#endif
+
+
 #ifdef DEBUG_FIRSTFEW_READS
    if (numberReadIndex < howMany)
    {

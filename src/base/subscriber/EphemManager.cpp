@@ -46,6 +46,7 @@
 //#define DEBUG_CONTACT
 //#define DEBUG_EM_TIME_SPENT
 //#define DEBUG_EM_TIME_ADJUST
+//#define DEBUG_EM_FILENAME
 
 #ifdef DEBUG_EM_TIME_SPENT
 #include <time.h>
@@ -97,6 +98,14 @@ EphemManager::~EphemManager()
    #endif
    // Stop recording
    if (recording) StopRecording(true);
+
+   // Unsubscribe
+   if (ephemFile)
+   {
+      Publisher *pub = Publisher::Instance();
+      pub->Unsubscribe(ephemFile);
+   }
+
    // Unload the SPK files that we have already loaded
    for (unsigned int ii = 0; ii < fileList.size(); ii++)
    {
@@ -275,6 +284,10 @@ bool EphemManager::RecordEphemerisData()
          ephemName = ss.str();
          ss << ".bsp";
          fileName = ss.str();
+         #ifdef DEBUG_EM_FILENAME
+            MessageInterface::ShowMessage("(base) Filename for NEW ephemFile is determined to be: %s\n",
+                  fileName.c_str());
+         #endif
          ephemFile         = new EphemerisFile(ephemName);
          #ifdef DEBUG_EPHEM_MANAGER_FILES
             MessageInterface::ShowMessage(
@@ -289,6 +302,10 @@ bool EphemManager::RecordEphemerisData()
 //         fileName = spkPath + fileName;
          std::string spkTmpPath = GmatFileUtil::GetTemporaryDirectory();
          fileName = spkTmpPath + fileName;
+         #ifdef DEBUG_EM_FILENAME
+            MessageInterface::ShowMessage("(full-path) Filename for NEW ephemFile is determined to be: %s\n",
+                  fileName.c_str());
+         #endif
          #ifdef DEBUG_EPHEM_MANAGER_FILES
             MessageInterface::ShowMessage(
                   "In EphemManager::RecordEphemerisData,  fileName (full path) = %s\n",
@@ -321,9 +338,33 @@ bool EphemManager::RecordEphemerisData()
 
          ephemCount++;
       }
+      else if (!recording)
+      {
+         // Set up the name for the EphemerisFile, and the file name
+         std::stringstream ss("");
+//         ss << "tmp_" << theObjName << "_" << ephemCount << "_" << GmatTimeUtil::FormatCurrentTime(4);
+         ss << "tmp_" << theObjName << "_" << GmatTimeUtil::FormatCurrentTime(4);
+         ephemName = ss.str();
+         ss << ".bsp";
+         fileName = ss.str();
+         std::string spkTmpPath = GmatFileUtil::GetTemporaryDirectory();
+         fileName = spkTmpPath + fileName;
+         #ifdef DEBUG_EM_FILENAME
+            MessageInterface::ShowMessage("(full path) Filename for existing ephemFile is determined to be: %s\n",
+                  fileName.c_str());
+         #endif
+         // if it has an ephemFile but it is not recording,
+         // reset the SPK filename
+         ephemFile->SetStringParameter("Filename", fileName);
+      }
       else
       {
-         // anything to do here?
+         // continue recording
+         #ifdef DEBUG_EPHEM_MANAGER_FILES
+            MessageInterface::ShowMessage(
+                  "In EphemManager::RecordEphemerisData for SC %s, ephemFile is already recording!!!\n",
+                  theObj->GetName().c_str());
+         #endif
       }
       recording = true;
       return true;
@@ -356,12 +397,15 @@ void EphemManager::StopRecording(bool done)
    // Finalize and close the SPK file
    if (done)
    {
-      // Unsubscribe
-      Publisher *pub = Publisher::Instance();
-      pub->Unsubscribe(ephemFile);
+//      // Unsubscribe
+//      Publisher *pub = Publisher::Instance();
+//      pub->Unsubscribe(ephemFile);
       // Delete the current ephemFile - this should finalize the SPK writing and then
       // close the <fileName> file
-      ephemFile->CloseEphemerisFile(false);
+      #ifdef DEBUG_EM_FILENAME
+         MessageInterface::ShowMessage("In StopRecording, closing ephem file ...");
+      #endif
+      ephemFile->CloseEphemerisFile(false, true);
       bool notAllDataWritten = ephemFile->InsufficientSPKData();
       if (notAllDataWritten)
       {
@@ -371,9 +415,9 @@ void EphemManager::StopRecording(bool done)
          warn            += "incomplete.  Try increasing the propagation time.\n";
          MessageInterface::ShowMessage(warn);
       }
-      delete ephemFile;
+//      delete ephemFile;
    }
-   else
+   else  // appending - this is turned OFF for now
    {
       #ifdef __USE_SPICE__
          #ifdef DEBUG_EPHEM_MANAGER
@@ -387,7 +431,7 @@ void EphemManager::StopRecording(bool done)
       #ifdef DEBUG_EPHEM_MANAGER
          MessageInterface::ShowMessage("-==-==-= Calling CloseEphemerisFile\n");
       #endif
-      ephemFile->CloseEphemerisFile(false);
+      ephemFile->CloseEphemerisFile(false, true);
       bool notAllDataWritten = ephemFile->InsufficientSPKData();
       if (notAllDataWritten)
       {
@@ -398,21 +442,13 @@ void EphemManager::StopRecording(bool done)
          MessageInterface::ShowMessage(warn);
       }
 
-//      #ifdef DEBUG_EPHEM_MANAGER
-//         MessageInterface::ShowMessage("-==-==-= Now attempting to UNload fileList \"%s\"\n",
-//               fileName.c_str());
-//      #endif
-//      #ifdef __USE_SPICE__
-//         if (spice->IsLoaded(fileName))
-//            spice->UnloadKernel(fileName);   // need to unload before re-loading?
-//      #endif
    }
    // Load the current SPK file, if it has been written
    if (GmatFileUtil::DoesFileExist(fileName))
    {
       #ifdef __USE_SPICE__
          #ifdef DEBUG_EPHEM_MANAGER
-            MessageInterface::ShowMessage("-==-==-= Now attempting to re-load fileList \"%s\"\n",
+            MessageInterface::ShowMessage("-==-==-= Now attempting to re-load file \"%s\"\n",
                   fileName.c_str());
          #endif
          spice->LoadKernel(fileName);
@@ -433,7 +469,7 @@ void EphemManager::StopRecording(bool done)
             fileName.c_str());
       }
    #endif
-   if (done) ephemFile = NULL;
+//   if (done) ephemFile = NULL;
    recording = false;
 }
 

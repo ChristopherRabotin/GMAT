@@ -77,7 +77,7 @@ public:
                             const StateArray &states, const EpochArray &epochs);
    void        AddMetaData(const std::string &line,  bool done = false);
    void        AddMetaData(const StringArray &lines, bool done = false);
-   void        FinalizeKernel(bool done = true);
+   void        FinalizeKernel(bool done = true, bool writeMetaData = true);
    Integer     GetMinNumberOfStates();
 
 protected:
