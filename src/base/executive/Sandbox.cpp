@@ -1096,10 +1096,12 @@ bool Sandbox::Execute()
       state = STOPPED;
       
       #if DBGLVL_SANDBOX_RUN
-         MessageInterface::ShowMessage
-            ("   Sandbox rethrowing %s\n", e.GetFullMessage().c_str());
+      MessageInterface::ShowMessage
+         ("Sandbox::Execute() rethrowing %s\n", e.GetFullMessage().c_str());
       #endif
       
+      // Set FCS eror flag (LOJ: 2015.10.07)
+      errorInPreviousFcs = true;
       throw;
    }
    
@@ -1775,25 +1777,23 @@ void Sandbox::ShowObjectMap(ObjectMap &om, const std::string &title)
    {
       std::string objName;
       GmatBase *obj = NULL;
-      GmatBase *paramOwner = NULL;
       std::string isGlobal;
       std::string isLocal;
+      GmatBase *paramOwner = NULL;
+      bool isParameter = false;
       std::string paramOwnerType;
       std::string paramOwnerName;
-      bool isParameter = false;
       
       for (ObjectMap::iterator i = om.begin(); i != om.end(); ++i)
       {
          objName = i->first;
          obj = i->second;
-         paramOwner = NULL;
-         isParameter = false;
          isGlobal = "No";
          isLocal = "No";
-         // MessageInterface::ShowMessage
-         //    ("   %50s  <%p> [%s] %s\n", objName.c_str(), obj,
-         //     obj ? obj->GetTypeName().c_str() : "NULL",
-         //     obj->IsGlobal() ? "Global" : "");
+         paramOwner = NULL;
+         isParameter = false;
+         paramOwnerType = "";
+         paramOwnerName = "";
          
          if (obj)
          {
