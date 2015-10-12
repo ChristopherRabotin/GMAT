@@ -16,63 +16,40 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="manual">Resources</refmiscinfo>
+    <refmiscinfo class="manual">System</refmiscinfo>
   </refmeta>
 
   <refnamediv>
     <refname>Python Interface</refname>
 
-    <refpurpose>Interface to MATLAB system</refpurpose>
+    <refpurpose>Interface to the Python programming language</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The MATLAB interface provides a link to the Mathworks MATLAB
-    environment, allowing GMAT to run MATLAB functions as if they were native
+    <para>The Python interface provides a link to the Python programming 
+    language, allowing GMAT to run Python functions as if they were native
     functions in the GMAT script language.</para>
 
     <para>The interface cannot be controlled directly through the script
-    language, though it can be in the GMAT GUI. Instead, GMAT starts the
-    interface automatically when it calls a MATLAB function.</para>
+    language. Instead, GMAT starts the Python interface automatically when it 
+    calls a Python function.</para>
 
-    <para>There are two GMAT components that provide user access to the
-    interface. For details on declaring a MATLAB function, see the
-    <guilabel><xref linkend="MatlabFunction"/></guilabel> reference. For
-    details on calling a function and passing data, see the <guilabel><xref
-    linkend="CallMatlabFunction"/></guilabel> reference.</para>
+    <para>The Python interface is accessed using GMAT's CallPythonFunction 
+    command. For details on calling a function and passing data, see the 
+    <guilabel><xref linkend="CallPythonFunction"/></guilabel> reference.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="CallMatlabFunction"/>, <xref linkend="MatlabFunction"/></para>
+    linkend="CallPythonFunction"/></para>
   </refsection>
 
   <refsection>
     <title>GUI</title>
 
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/System_MatlabInterface_ResourcesTree.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
-
-    <para>The MATLAB interface provides an icon in the
-    <guilabel>Interfaces</guilabel> folder in the Resources tree that can be
-    used to control the interface. Right-clicking the icon shows two options:
-    <guilabel>Open</guilabel> and <guilabel>Close</guilabel>.</para>
-
-    <para>The <guilabel>Open</guilabel> menu item causes GMAT to open a
-    connection to the MATLAB Engine, which in turns displays a MATLAB command
-    window in the background. This connection is then used for all
-    communication between GMAT and MATLAB until the connection is closed. Only
-    one connection can be open at a time.</para>
-
-    <para>The <guilabel>Close</guilabel> menu item causes GMAT to close any
-    open connection to the MATLAB Engine. If no connection is open, it has no
-    effect.</para>
+    <para>The Python interface in GMAT is launced and driven internally.  Users 
+    do not have direct access to the interface from the GMAT graphical user 
+    interface.</para>
   </refsection>
 
   <refsection>
@@ -83,46 +60,44 @@
       Setup</title>
 
       <para>The following conditions must be true for GMAT to successfully
-      initiate communication with MATLAB. All conditions must be true for the
-      same instance of MATLAB.</para>
+      initiate communication with Python. All conditions must be true for the
+      same instance of Python.</para>
 
       <itemizedlist spacing="normal">
         <listitem>
-          <para>A compatible, licensed version of MATLAB must be installed on
-          the same machine on which GMAT is running. GMAT is tested with the
-          latest version of MATLAB at the time of release, though versions
-          R2006b and newer have been known to work.</para>
+          <para>A compatible version of Python must be installed on
+          the same machine on which GMAT is running.  GMAT is built and tested 
+          with Python 3.4.3.  The interface is linked with the Python binary 
+          libraries, so the installed version of Python on the user's machine 
+          must match the architecture and release used to build GMAT.</para>
         </listitem>
 
         <listitem>
           <para>The architecture (32-bit or 64-bit) of GMAT and the installed
-          version of MATLAB must match. For example, the 32-bit version of
-          GMAT is compatible only with the 32-bit version of MATLAB.</para>
+          version of Python must match. For example, the 32-bit version of
+          GMAT is compatible only with the 32-bit version of Python.</para>
+        </listitem>
+        
+        <listitem>
+          <para>The Python system accesses Python modules on the user's machine.  
+          This functionality is configured, including path information used by 
+          Python, by installing the Python as a resource for all users of the 
+         machine.</para>
         </listitem>
 
         <listitem>
           <para>On Windows: <itemizedlist>
               <listitem>
                 <para>The following path (where
-                <filename><replaceable>MATLAB</replaceable></filename> is the
-                path to the installed version of MATLAB) must be present in
-                the <envar>Path</envar> environment variable. For some older
-                versions of MATLAB, this path must be present before the
-                default Windows paths.</para>
+                <filename><replaceable>Python</replaceable></filename> is the
+                path to the installed version of Python) must be present in
+                the <envar>Path</envar> environment variable.</para>
 
-                <para><filename><replaceable>MATLAB</replaceable>\bin\win32</filename>
+                <para><filename><replaceable>Python</replaceable>\bin\win32</filename>
                 (or <filename>win64</filename> for use with 64-bit versions of
                 GMAT)</para>
 
                 <para/>
-              </listitem>
-
-              <listitem>
-                <para>MATLAB must be registered as a COM server. This is done
-                automatically by the MATLAB installer. To do it manually, open
-                an elevated command window and run the command:
-                <userinput>matlab -regserver</userinput>. Make sure the proper
-                instance of MATLAB is being run by this command.</para>
               </listitem>
             </itemizedlist></para>
         </listitem>
@@ -169,32 +144,28 @@
       <title>MATLAB Engine Connection</title>
 
       <warning>
-        <para>Caution: GMAT does not close the MATLAB Command Window it
-        creates after a run has completed. This allows manual inspection of
-        the MATLAB workspace, but it can lead to confusing behavior if MATLAB
-        functions or paths are changed and rerun in the same window.</para>
+        <para>Caution: GMAT does not close the Python interface after a run has 
+        completed. This feature prevents anomalous behavior that can occur when 
+        loading some Python modules repeatedly during a run, but it can lead to
+        confusing behavior if Python files are changed and rerun in the same 
+        GMAT session.</para>
 
-        <para>We recommend closing the MATLAB Command Window by right-clicking
-        Matlab in the Resources tree and clicking Close between each run if
-        you are actively editing the script.</para>
+        <para>We recommend restarting GMAT after editing Python functions in 
+        order to guarantee that your edits take effect when you rerun your 
+        script.</para>
       </warning>
 
-      <para>When GMAT runs a mission that contains a MATLAB function call, it
-      opens a connection to the MATLAB engine before it makes the function
-      call. It then reuses this connection for the rest of the GMAT
+      <para>When GMAT runs a mission that contains a Python function call, it
+      loads Python into memory as an embedded system in GMAT before it makes the
+      function call. It then reuses this system for the rest of the GMAT
       session.</para>
-
-      <para>The MATLAB Engine can be controlled manually through the
-      <guilabel>Open</guilabel> and <guilabel>Close</guilabel> options
-      available by right-clicking the <guilabel>Matlab</guilabel> item in the
-      Resources tree.</para>
     </refsection>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
-    <para>See the <xref linkend="MatlabFunction"/> reference for common
+    <para>See the <xref linkend="CallPythonFunction"/> reference for common
     examples.</para>
   </refsection>
 </refentry>

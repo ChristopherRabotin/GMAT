@@ -29,7 +29,7 @@
     <title>Script Syntax</title>
 
     <synopsis>
-    	<literal>Python.</literal><replaceable>PythonModule</replaceable><literal>.</literal><replaceable>PythonFunction</replaceable><literal>()</literal>
+<literal>Python.</literal><replaceable>PythonModule</replaceable><literal>.</literal><replaceable>PythonFunction</replaceable><literal>()</literal>
 <literal>Python.</literal><replaceable>PythonModule</replaceable><literal>.</literal><replaceable>PythonFunction</replaceable><literal>(</literal><replaceable>input_argument</replaceable>[<literal>,</literal> <replaceable>input_argument</replaceable>]...<literal>)</literal>
 <literal>[</literal><replaceable>output_argument</replaceable>[<literal>,</literal> <replaceable>output_argument</replaceable>]...<literal>]</literal> <literal>=</literal> <literal>Python.</literal><replaceable>PythonModule</replaceable><literal>.</literal><replaceable>PythonFunction</replaceable>
 <literal>[</literal><replaceable>output_argument</replaceable>[<literal>,</literal> <replaceable>output_argument</replaceable>]...<literal>]</literal> <literal>=</literal> <literal>Python.</literal><replaceable>PythonModule</replaceable><literal>.</literal><replaceable>PythonFunction</replaceable><literal>(</literal><replaceable>input_argument</replaceable>[<literal>,</literal> <replaceable>input_argument</replaceable>]...<literal>)</literal></synopsis>
@@ -54,7 +54,8 @@
 
     <para>When a Python function is called, GMAT loads the Python engine in the 
     background. This functionality requires that a compatible installation of 
-    Python be properly installed and configured on your system.</para>
+    Python be properly installed and configured on your system.  Once GMAT has
+    loaded the engine, it remains in memory until GMAT is closed.</para>
   </refsection>
 
   <refsection>
@@ -70,27 +71,21 @@
       </mediaobject>
     </screenshot>
 
-    <para>The <guilabel>CallPythonFunction</guilabel> GUI provides two input
-    boxes for input and output arguments and a list to select a function to
-    call.</para>
+    <para>The <guilabel>CallPythonFunction</guilabel> GUI provides a single 
+    text entry field used to enter the Python function as a line of script.</para>
 
-    <para>The <guilabel>Output</guilabel> box lists all configured output
-    argument parameters. These must be selected by clicking
-    <guilabel>Edit</guilabel>, which displays a parameter selection window.
-    See the <xref linkend="CalculationParameters"/> reference for details on
-    how to select a parameter.</para>
+    <para>The syntax for the CallPythonFunction is as described in the Script 
+    Syntax section above.  GMAT's Python interface accepts Variables, Strings, 
+    numerical object parameters, and one dimensional arrays as input parameters.  
+    It returns Variables, Arrays, and Strings, either as a single value or as a collection of 
+    values.  The interface calls into Python scripts, identified by the 
+    PythonModule field, that define the function to be accessed.  The receiving 
+    function is responsible for validating the inputs, based on the type 
+    conversions described in the Remarks below.</para>
 
-    <para>The <guilabel>Input</guilabel> box is identical in behavior to
-    <guilabel>Output</guilabel>, but lists all configured input arguments to
-    the function. Arguments must be selected by clicking
-    <guilabel>Edit</guilabel>. The <guilabel>Function</guilabel> list displays
-    all functions that have been declared as
-    <guilabel>PythonFunction</guilabel> resources in the Resources tree.
-    Select a function from the list to call it.</para>
-
-    <para>When the changes are accepted, GMAT does not perform any validation
-    of input or output arguments. This validation is performed when the
-    mission is run, when MATLAB has been started.</para>
+    <para>When the user accepts the entries on the panel, GMAT does not perform 
+    any validation of input or output arguments. This validation is performed 
+    when the mission is run, after Python has been started.</para>
   </refsection>
 
   <refsection xml:id="CallPythonFunction_Remarks">
@@ -110,7 +105,7 @@
         </listitem>
 
         <listitem>
-          <para><guilabel>Array</guilabel>, <guilabel>String</guilabel>, or
+          <para>One dimensional <guilabel>Array</guilabel>, <guilabel>String</guilabel>, or
           <guilabel>Variable</guilabel> resource</para>
         </listitem>
 
@@ -122,29 +117,17 @@
     <para>The output arguments (<replaceable>output_argument</replaceable>
     values in the syntax description) can be any of the following types:
     <itemizedlist>
-        <listitem>
-          <para>resource parameter of real number type (e.g.
-          <guilabel><replaceable>Spacecraft</replaceable>.X</guilabel>)</para>
-        </listitem>
-
-        <listitem>
-          <para>resource parameter of string type (e.g.
-          <guilabel><replaceable>Spacecraft</replaceable>.UTCGregorian</guilabel>)</para>
-        </listitem>
 
         <listitem>
           <para><guilabel>Array</guilabel>, <guilabel>String</guilabel>, or
           <guilabel>Variable</guilabel> resource</para>
         </listitem>
 
-        <listitem>
-          <para><guilabel>Array</guilabel> resource element</para>
-        </listitem>
       </itemizedlist></para>
 
     <para>Data type conversion is performed for the following data types when
-    values are passed between MATLAB and GMAT. When data is passed from GMAT
-    to MATLAB as input arguments, the following conversions occur.</para>
+    values are passed between Python and GMAT. When data is passed from GMAT
+    to Python as input arguments, the following conversions occur.</para>
 
     <informaltable colsep="0" frame="topbot">
       <tgroup cols="2">
@@ -155,8 +138,7 @@
         <thead>
           <row>
             <entry>GMAT</entry>
-
-            <entry>MATLAB</entry>
+            <entry>Python</entry>
           </row>
         </thead>
 
@@ -166,7 +148,7 @@
             <guilabel>Variable</guilabel>, <guilabel>Array</guilabel> element)
             </para></entry>
 
-            <entry><para> double</para></entry>
+            <entry><para>float</para></entry>
           </row>
 
           <row>
@@ -174,19 +156,18 @@
             <guilabel><replaceable>Spacecraft</replaceable>.UTCGregorian</guilabel>,
             <guilabel>String</guilabel> resource) </para></entry>
 
-            <entry><para> char array</para></entry>
+            <entry><para>str</para></entry>
           </row>
 
           <row>
             <entry><para><guilabel>Array</guilabel> resource </para></entry>
-
-            <entry><para> double array</para></entry>
+            <entry><para>memoryview</para></entry>
           </row>
         </tbody>
       </tgroup>
     </informaltable>
 
-    <para>When data is passed from MATLAB to GMAT as output arguments, the
+    <para>When data is passed from Python to GMAT as output arguments, the
     following conversions occur.</para>
 
     <informaltable colsep="0" frame="topbot">
@@ -197,7 +178,7 @@
 
         <thead>
           <row>
-            <entry>MATLAB</entry>
+            <entry>Python</entry>
 
             <entry>GMAT</entry>
           </row>
@@ -205,21 +186,18 @@
 
         <tbody>
           <row>
-            <entry><para>char array </para></entry>
-
-            <entry><para> string</para></entry>
+            <entry><para>str</para></entry>
+            <entry><para>String</para></entry>
           </row>
 
           <row>
-            <entry><para>double </para></entry>
-
-            <entry><para> real number</para></entry>
+            <entry><para>float</para></entry>
+            <entry><para>real number</para></entry>
           </row>
 
           <row>
-            <entry><para>double array </para></entry>
-
-            <entry><para> Array resource</para></entry>
+            <entry><para>float array </para></entry>
+            <entry><para>Array resource</para></entry>
           </row>
         </tbody>
       </tgroup>
@@ -230,26 +208,22 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>Call a simple built-in MATLAB function:</para>
+      <para>Call a simple Python function:</para>
 
-      <programlisting><code>Create PythonFunction sinh
-Create Variable x y
+      <programlisting><code>Create Variable x y
 
 BeginMissionSequence
 
 x = 1
-[y] = sinh(x)</code></programlisting>
+y = Python.MyMath.sinh(x)</code></programlisting>
     </informalexample>
 
     <informalexample>
-      <para>Call an external custom MATLAB function:</para>
+      <para>Call a multiple input and output Python function:</para>
 
       <programlisting><code>Create Spacecraft aSat
 Create ImpulsiveBurn aBurn
 Create Propagator aProp
-
-Create PythonFunction CalcHohmann
-CalcHohmann.FunctionPath = 'C:\path\to\functions'
 
 Create Variable a_target mu dv1 dv2
 mu = 398600.4415
@@ -257,7 +231,7 @@ mu = 398600.4415
 BeginMissionSequence
 
 % calculate burns for circular Hohmann transfer (example)
-[dv1, dv2] = CalcHohmann(aSat.SMA, a_target, mu)
+[dv1, dv2] = Python.MyOrbitFunctions.CalcHohmann(aSat.SMA, a_target, mu)
 
 % perform first maneuver
 aBurn.Element1 = dv1
@@ -268,23 +242,9 @@ Propagate aProp(aSat) {aSat.Apoapsis}
 
 % perform second burn
 aBurn.Element1 = dv2
-Maneuver aBurn(aSat)</code></programlisting>
+Maneuver aBurn(aSat)</code>
+    </programlisting>
     </informalexample>
 
-    <informalexample>
-      <para>Return the MATLAB search path and working directory:</para>
-
-      <programlisting><code>Create PythonFunction path pwd
-Create String pathStr pwdStr
-Create ReportFile aReport
-
-BeginMissionSequence
-
-[pathStr] = path
-[pwdStr] = pwd
-
-Report aReport pathStr
-Report aReport pwdStr</code></programlisting>
-    </informalexample>
   </refsection>
 </refentry>
