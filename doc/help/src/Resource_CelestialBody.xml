@@ -93,10 +93,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <literal>user-define path (either absolute or relative)
-                      to a .3ds model file</literal>
-                    </para>
+                    <para>empty</para>
                   </listitem>
                 </varlistentry>
 
