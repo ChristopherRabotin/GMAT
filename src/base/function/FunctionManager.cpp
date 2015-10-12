@@ -1417,18 +1417,25 @@ bool FunctionManager::CreatePassingArgWrappers()
             "   passed input object <%p>\"%s\" of type \"%s\" found in LOS/GOS \n",
             obj, (passedIns.at(ii)).c_str(), (obj->GetTypeName()).c_str());
          #endif
-         objFOS = obj->Clone();
-         objFOS->SetName(formalName);
+
+         if (obj->IsGlobal() && formalName == obj->GetName())
+         {
+            objFOS = obj;
+         }
+         else
+         {
+            objFOS = obj->Clone();
+            objFOS->SetName(formalName);
+            // Flag it as local object
+            objFOS->SetIsLocal(true);
+         }
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
             (objFOS, formalName, "FunctionManager::CreatePassingArgWrappers()",
              "objFOS = obj->Clone()");
          #endif
       }
-      
-      // Flag it as local object
-      objFOS->SetIsLocal(true);
-      
+            
       functionObjectStore->insert(std::make_pair(formalName,objFOS));
       
       #ifdef DEBUG_FM_INIT // ------------------------------------------------- debug ---
@@ -2616,35 +2623,59 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
       }
    }
 
-   
+   GmatBase *mapObj = NULL;
    // Delete the rest of objects (LOJ: 2015.07.07)
    for (omi = om->begin(); omi != om->end(); ++omi)
    {
+      mapObj = omi->second;
       if (omi->second != NULL)
       {
          if (!(omi->second)->IsOfType(Gmat::SUBSCRIBER))
          {
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Remove
-               (omi->second, (omi->second)->GetName(), "FunctionManager::EmptyObjectMap()",
-                "deleting obj from ObjectMap");
-            #endif
-            #ifdef DEBUG_CLEANUP
-            MessageInterface::ShowMessage
-               ("   Deleting <%p>'%s' IsGlobal:%d IsLocal:%dfrom om\n", omi->second,
-                (omi->first).c_str(), (omi->second)->IsGlobal(), (omi->second)->IsLocal());
-            #endif
-            delete omi->second;
-            omi->second = NULL;
+            // Do not delete if object is a global and not created inside a function
+            if (mapObj->IsGlobal() && !(mapObj->IsLocal()))
+            {
+               #ifdef DEBUG_CLEANUP
+               MessageInterface::ShowMessage
+                  ("   '%s' is global and not local, so skip deleting\n",
+                   mapObj->GetName().c_str());
+               #endif
+            }
+            else
+            {
+               #ifdef DEBUG_MEMORY
+               MemoryTracker::Instance()->Remove
+                  (omi->second, (omi->second)->GetName(), "FunctionManager::EmptyObjectMap()",
+                   "deleting obj from ObjectMap");
+               #endif
+               #ifdef DEBUG_CLEANUP
+               MessageInterface::ShowMessage
+                  ("   Deleting <%p>'%s' IsGlobal:%d IsLocal:%dfrom om\n", omi->second,
+                   (omi->first).c_str(), (omi->second)->IsGlobal(), (omi->second)->IsLocal());
+               #endif
+               delete omi->second;
+               omi->second = NULL;
+            }
          }
       }
       
       if (omi->second != NULL)
       {
-         #ifdef DEBUG_CLEANUP
-         MessageInterface::ShowMessage("   Adding <%p>'%s' to toDelete\n", omi->second, (omi->first).c_str());
-         #endif
-         toDelete.push_back(omi->first);
+         if (mapObj->IsGlobal() && !(mapObj->IsLocal()))
+         {
+            #ifdef DEBUG_CLEANUP
+            MessageInterface::ShowMessage
+               ("   '%s' is global and not local, so skip deleting\n",
+                mapObj->GetName().c_str());
+            #endif
+         }
+         else
+         {
+            #ifdef DEBUG_CLEANUP
+            MessageInterface::ShowMessage("   Adding <%p>'%s' to toDelete\n", omi->second, (omi->first).c_str());
+            #endif
+            toDelete.push_back(omi->first);
+         }
       }
    }
    #ifdef DEBUG_CLEANUP

@@ -36,11 +36,13 @@ GMAT LEOsat.ModelOffsetZ = 0;
 GMAT LEOsat.ModelRotationX = 0;
 GMAT LEOsat.ModelRotationY = 0;
 GMAT LEOsat.ModelRotationZ = 0;
-GMAT LEOsat.ModelScale = 3;
+GMAT LEOsat.ModelScale = 1;
 GMAT LEOsat.AttitudeDisplayStateType = 'Quaternion';
 GMAT LEOsat.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT LEOsat.AttitudeCoordinateSystem = EarthMJ2000Eq;
 GMAT LEOsat.EulerAngleSequence = '321';
+
+
 
 
 %----------------------------------------
@@ -62,9 +64,15 @@ GMAT LEOprop_ForceModel.SRP.Flux = 1367;
 GMAT LEOprop_ForceModel.SRP.SRPModel = Spherical;
 GMAT LEOprop_ForceModel.SRP.Nominal_Sun = 149597870.691;
 GMAT LEOprop_ForceModel.Drag.AtmosphereModel = JacchiaRoberts;
+GMAT LEOprop_ForceModel.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT LEOprop_ForceModel.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT LEOprop_ForceModel.Drag.CSSISpaceWeatherFile = 'CSSI_2004To2026.txt';
+GMAT LEOprop_ForceModel.Drag.SchattenFile = 'SchattenPredict.txt';
 GMAT LEOprop_ForceModel.Drag.F107 = 150;
 GMAT LEOprop_ForceModel.Drag.F107A = 150;
 GMAT LEOprop_ForceModel.Drag.MagneticIndex = 3;
+GMAT LEOprop_ForceModel.Drag.SchattenErrorModel = 'Nominal';
+GMAT LEOprop_ForceModel.Drag.SchattenTimingModel = 'NominalCycle';
 
 %----------------------------------------
 %---------- Propagators
@@ -124,9 +132,9 @@ GMAT DC.Algorithm = NewtonRaphson;
 
 Create OrbitView DefaultOrbitView;
 GMAT DefaultOrbitView.SolverIterations = Current;
-GMAT DefaultOrbitView.UpperLeft = [ 0 0 ];
-GMAT DefaultOrbitView.Size = [ 0 0 ];
-GMAT DefaultOrbitView.RelativeZOrder = 725;
+GMAT DefaultOrbitView.UpperLeft = [ 0.4041176470588235 0.4721485411140584 ];
+GMAT DefaultOrbitView.Size = [ 0.5 0.4496021220159151 ];
+GMAT DefaultOrbitView.RelativeZOrder = 571;
 GMAT DefaultOrbitView.Maximized = false;
 GMAT DefaultOrbitView.Add = {LEOsat, Earth};
 GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
@@ -155,9 +163,9 @@ GMAT DefaultOrbitView.EnableConstellations = On;
 
 Create XYPlot XYPlot1;
 GMAT XYPlot1.SolverIterations = Current;
-GMAT XYPlot1.UpperLeft = [ 0 0 ];
-GMAT XYPlot1.Size = [ 0 0 ];
-GMAT XYPlot1.RelativeZOrder = 723;
+GMAT XYPlot1.UpperLeft = [ 0.4052941176470588 0.02122015915119363 ];
+GMAT XYPlot1.Size = [ 0.5 0.4496021220159151 ];
+GMAT XYPlot1.RelativeZOrder = 569;
 GMAT XYPlot1.Maximized = false;
 GMAT XYPlot1.XVariable = LEOsat.A1ModJulian;
 GMAT XYPlot1.YVariables = {LEOsat.Earth.Altitude};
@@ -175,7 +183,7 @@ While 'While ElapsedDays < 10' LEOsat.ElapsedDays < 10.0
    Propagate 'Prop One Step' LEOprop(LEOsat);
    If 'If Alt < Threshold' LEOsat.Earth.Altitude < 342
       Propagate 'Prop To Periapsis' LEOprop(LEOsat) {LEOsat.Periapsis};
-      Target 'Raise Orbit' DC {SolveMode = Solve, ExitMode = DiscardAndContinue};
+      Target 'Raise Orbit' DC {SolveMode = Solve, ExitMode = DiscardAndContinue, ShowProgressWindow = true};
          Vary 'Vary TCM1.V' DC(TCM1.Element1 = 0.002, {Perturbation = 0.0001, Lower = -9.999999e300, Upper = 9.999999e300, MaxStep = 0.05, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
          Maneuver 'Apply TCM1' TCM1(LEOsat);
          Propagate 'Prop to Apoapsis' LEOprop(LEOsat) {LEOsat.Earth.Apoapsis};

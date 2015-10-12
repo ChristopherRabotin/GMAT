@@ -134,22 +134,22 @@
         <step>
           <para>In the <guilabel>Resources</guilabel> tree, right-click on the
           <guilabel>Hardware</guilabel> folder, point to
-          <guilabel>Add</guilabel>, and click <guilabel>ChemicalThruster</guilabel>.
-           A resource named <guilabel>Thruster1</guilabel> will be
-          created.</para>
+          <guilabel>Add</guilabel>, and click
+          <guilabel>ChemicalThruster</guilabel>.  A resource named
+          <guilabel>ChemicalThruster1</guilabel> will be created.</para>
         </step>
 
         <step>
           <para>In the <guilabel>Resources</guilabel> tree, right-click on the
           <guilabel>Hardware</guilabel> folder, point to
-          <guilabel>Add</guilabel>, and click <guilabel>ChemicalTank</guilabel>.
-           A resource named <guilabel>ChemicalTank1</guilabel> will be
-          created.</para>
+          <guilabel>Add</guilabel>, and click
+          <guilabel>ChemicalTank</guilabel>.  A resource named
+          <guilabel>ChemicalTank1</guilabel> will be created.</para>
         </step>
 
         <step>
-          <para>Double-click<guilabel> Thruster1</guilabel> to edit its
-          properties.</para>
+          <para>Double-click<guilabel> ChemicalThruster1</guilabel> to edit
+          its properties.</para>
         </step>
 
         <step>
@@ -161,17 +161,17 @@
           <para>Use the drop down menu to the right of the
           <guilabel>Tank</guilabel> field to select
           <guilabel>ChemicalTank1</guilabel> as the fuel source for
-          <guilabel>Thruster1</guilabel>.  Click <guilabel>OK</guilabel>.
-           </para>
+          <guilabel>ChemicalThruster1</guilabel>.  Click
+          <guilabel>OK</guilabel>.  </para>
         </step>
       </procedure>
 
       <para><xref
       linkend="Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration"/> below
-      shows the default <guilabel>ChemicalTank1</guilabel> configuration that we
-      will use and <xref
+      shows the default <guilabel>ChemicalTank1</guilabel> configuration that
+      we will use and <xref
       linkend="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration"/> shows the
-      finished <guilabel>Thruster1</guilabel> configuration.</para>
+      finished <guilabel>ChemicalThruster1</guilabel> configuration.</para>
 
       <figure xml:id="Tut_TargetFiniteBurn_Fig1_FuelTank1_Configuration">
         <title><guilabel>ChemicalTank1</guilabel> Configuration</title>
@@ -188,7 +188,7 @@
       </figure>
 
       <figure xml:id="Tut_TargetFiniteBurn_Fig2_Thruster1_Configuration">
-        <title><guilabel>Thruster1</guilabel> Configuration</title>
+        <title><guilabel>ChemicalThruster1</guilabel> Configuration</title>
 
         <screenshot>
           <mediaobject>
@@ -215,8 +215,9 @@
       Thruster Coef.</guilabel> button and to view the ISP coefficients which
       determine fuel use, click the <guilabel>Edit Impulse Coef.</guilabel>
       button. For this tutorial, we will use the default ISP polynomial
-      coefficient values but we will change the <guilabel>Thruster1</guilabel>
-      polynomial coefficients as follows.</para>
+      coefficient values but we will change the
+      <guilabel>ChemicalThruster1</guilabel> polynomial coefficients as
+      follows.</para>
     </section>
 
     <section>
@@ -225,7 +226,7 @@
       <procedure>
         <step>
           <para>In the <guilabel>Resources</guilabel> tree, double-click
-          <guilabel>Thruster1</guilabel> to edit its properties</para>
+          <guilabel>ChemicalThruster1</guilabel> to edit its properties</para>
         </step>
 
         <step>
@@ -240,7 +241,8 @@
       </procedure>
 
       <figure xml:id="Tut_TargetFiniteBurn_Fig3_Thruster1_Thrust_Coefficients">
-        <title><guilabel>Thruster1</guilabel> Thrust Coefficients</title>
+        <title><guilabel>ChemicalThruster1</guilabel> Thrust
+        Coefficients</title>
 
         <screenshot>
           <mediaobject>
@@ -255,9 +257,9 @@
 
       <para>The exact form of the pre-defined Thrust polynomial, associated
       with the coefficients above, are given in the
-      <guilabel>ChemicalThruster</guilabel> help. We note that, by default, all of the
-      Thrust coefficients associated with terms that involve tank pressure are
-      zero. We have kept the default zero values for all of these
+      <guilabel>ChemicalThruster</guilabel> help. We note that, by default,
+      all of the Thrust coefficients associated with terms that involve tank
+      pressure are zero. We have kept the default zero values for all of these
       coefficients. We simply changed the constant term in the Thrust
       polynomial from <literal>10</literal> to <literal>1000</literal> which
       is much larger than the thrust for a typical chemical thruster. The
@@ -280,8 +282,8 @@
         <step>
           <para>Select the <guilabel>Tanks</guilabel> tab. In the
           <guilabel>Available Tanks</guilabel> column, select
-          <guilabel>ChemicalTank1</guilabel>. Then click the right arrow button to
-          add <guilabel>ChemicalTank1</guilabel> to the
+          <guilabel>ChemicalTank1</guilabel>. Then click the right arrow
+          button to add <guilabel>ChemicalTank1</guilabel> to the
           <guilabel>SelectedTanks</guilabel> list. Click
           <guilabel>Apply</guilabel>.</para>
         </step>
@@ -289,8 +291,8 @@
         <step>
           <para>Select the <guilabel>Actuators</guilabel> tab. In the
           <guilabel>Available Thrusters</guilabel> column, select
-          <guilabel>Thruster1</guilabel>. Then click the right arrow button to
-          add <guilabel>Thruster1</guilabel> to the
+          <guilabel>ChemicalThruster1</guilabel>. Then click the right arrow
+          button to add <guilabel>ChemicalThruster1</guilabel> to the
           <guilabel>SelectedThrusters</guilabel> list. Click
           <guilabel>OK</guilabel>.</para>
         </step>
@@ -312,7 +314,7 @@
       </figure>
 
       <figure xml:id="Tut_TargetFiniteBurn_Fig5_Attach_Thruster1_to_DefaultSC">
-        <title>Attach <guilabel>Thruster1</guilabel> to
+        <title>Attach <guilabel>ChemicalThruster1</guilabel> to
         <guilabel>DefaultSC</guilabel></title>
 
         <screenshot>
@@ -347,9 +349,9 @@
         </step>
 
         <step>
-          <para>Use the menu to the right of the <guilabel>ChemicalThruster</guilabel>
-          field to select <guilabel>Thruster1</guilabel> as the thruster
-          associated with <guilabel>FiniteBurn1</guilabel>. Click
+          <para>Use the menu to the right of the <guilabel>Thruster</guilabel>
+          field to select <guilabel>ChemicalThruster1</guilabel> as the
+          thruster associated with <guilabel>FiniteBurn1</guilabel>. Click
           <guilabel>OK</guilabel>.</para>
         </step>
       </procedure>

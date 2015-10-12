@@ -61,6 +61,455 @@
 
         <tbody>
           <row>
+            <entry><guilabel>3DModelFile</guilabel></entry>
+
+            <entry><para>Allows you to load 3D models for your celestial body.
+            Models must be in .3ds model formats. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>. 3ds model formats only</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <literal>user-define path (either absolute or relative)
+                      to a .3ds model file</literal>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>3DModelOffsetX</guilabel></entry>
+
+            <entry><para> This field lets you translate a celestial body in +X
+            or -X axis of central body's coordinate system. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-3.5 &lt;= Real &lt;= 3.5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>3DModelOffsetY</guilabel></entry>
+
+            <entry><para> This field lets you translate a celestial body in +Y
+            or -Y axis of central body's coordinate system. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-3.5 &lt;= Real &lt;= 3.5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>3DModelOffsetZ</guilabel></entry>
+
+            <entry><para> This field lets you translate a celestial body in +Z
+            or -Z axis of central body's coordinate system. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-3.5 &lt;= Real &lt;= 3.5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>3DModelRotationX</guilabel></entry>
+
+            <entry><para>Allows you to perform a fixed rotation of a celestial
+            body's attitude w.r.t X-axis of central body's coordinate system.
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-180 &lt;= Real &lt;= 180</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>3DModelRotationY</guilabel></entry>
+
+            <entry><para>Allows you to perform a fixed rotation of a celestial
+            body's attitude w.r.t Y-axis of central body's coordinate system.
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-180 &lt;= Real &lt;= 180</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>3DModelRotationZ</guilabel></entry>
+
+            <entry><para>Allows you to perform a fixed rotation of a celestial
+            body's attitude w.r.t Z-axis of central body's coordinate system.
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-180 &lt;= Real &lt;= 180</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>0.000000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Deg.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>3DModelScale</guilabel></entry>
+
+            <entry><para>Allows you to apply a scale factor to the celestial
+            body's model size.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>0.001 &lt;= Real &lt;= 1000</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>10</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>CentralBody</guilabel></entry>
 
             <entry><para> The central body of the celestial body. The central
@@ -269,6 +718,66 @@
 
                   <listitem>
                     <para>0.0033527</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FrameSpiceKernelName</guilabel></entry>
+
+            <entry><para>List of SPICE FK files to load for this body. Used to
+            define celestial body properties for use with
+            <guilabel>ContactLocator</guilabel> and
+            <guilabel>EclipseLocator</guilabel>. See <link
+            linkend="CelestialBody_ConfiguringForEventLocation">Remarks</link>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Paths to valid SPICE FK files</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Varies for built-in bodies. Empty for user-defined
+                    bodies.</para>
                   </listitem>
                 </varlistentry>
 
@@ -634,6 +1143,66 @@
           </row>
 
           <row>
+            <entry><guilabel>PlanetarySpiceKernelName </guilabel></entry>
+
+            <entry><para>List of SPICE PCK files to load for this body. Used
+            to define celestial body properties for use with
+            <guilabel>ContactLocator</guilabel> and
+            <guilabel>EclipseLocator</guilabel>. See <link
+            linkend="CelestialBody_ConfiguringForEventLocation">Remarks</link>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Paths to valid SPICE PCK files</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Varies for built-in bodies. Empty for user-defined
+                    bodies.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>PosVelSource </guilabel></entry>
 
             <entry><para>The model for user-defined body orbit ephemeredes.
@@ -673,8 +1242,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para><guilabel>DE405</guilabel> for build in bodies.
-                    <guilabel>SPICE</guilabel> for user defined bodies.</para>
+                    <para><guilabel>DE405</guilabel> for built-in bodies.
+                    <guilabel>SPICE</guilabel> for user-defined bodies.</para>
                   </listitem>
                 </varlistentry>
 
@@ -862,6 +1431,66 @@
 
                   <listitem>
                     <para>deg/day</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>SpiceFrameId</guilabel></entry>
+
+            <entry><para>SPICE ID of body-fixed frame. Used to define
+            celestial body properties for use with
+            <guilabel>ContactLocator</guilabel> and
+            <guilabel>EclipseLocator</guilabel>. See <link
+            linkend="CelestialBody_ConfiguringForEventLocation">Remarks</link>.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Valid SPICE frame ID (text or numeric)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Varies for built-in bodies. Empty for user-defined
+                    bodies.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -1163,6 +1792,63 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+
+          <row>
+            <entry><guilabel>TextureMapFileName</guilabel></entry>
+
+            <entry><para>Allows you to load a texture map file for your
+            celestial body.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>texture map files in jpeg format</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <literal>'GenericCelestialBody.jpg'</literal>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -1283,13 +1969,31 @@
         </imageobject>
       </mediaobject>
     </screenshot>
+
+    <para>The <guilabel>CelestialBody</guilabel>
+    <guilabel>Visualization</guilabel> tab is shown below for creating a
+    custom <guilabel>CelestialBody</guilabel>. On the visualization tab, you
+    can set data such as 3d model of a celestial body, texture file,
+    translation and rotation of a celestial body on all three axes, scale of
+    the 3D model as well as assign orbit and target colors to the orbit of the
+    body.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_CelestialBody_GUI_7.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="CelestialBody_Remarks">
     <title>Remarks</title>
 
     <refsection>
-      <title>Celestial Body Orientation Model</title>
+      <title>Celestial body orientation model</title>
 
       <para>The orientation of built-in celestial bodies is modeled using high
       fidelity theories on a per-body basis. The orientation of Earth is
@@ -1355,91 +2059,204 @@ Vesta.RotationRate        = 1617.332776</code></programlisting>
       respectively and the field is displayed for information purposes only.
       Future versions of GMAT will support DE421 for Luna and IAU-2000A theory
       for Earth.</para>
-
-      <refsection>
-        <title>Setting Colors On Orbits Of Celestial Bodies</title>
-
-        <para>GMAT allows you to assign colors to orbits of celestial bodies
-        that are drawn in the <guilabel>OrbitView</guilabel> graphics display
-        windows. GMAT also allows you to assign colors to perturbing celestial
-        body orbital trajectories drawn during iterative processes such as
-        differential correction or optimization. The
-        <guilabel>CelestialBody</guilabel> object's
-        <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
-        fields are used to assign colors to both orbital and perturbing
-        trajectories. See the <xref linkend="CelestialBody_Resource_Fields"
-        xrefstyle="select:title"/> section for description of these two
-        fields. Also see <xref linkend="Color"/> documentation for discussion
-        and examples on how to set colors on a celestial body.</para>
-      </refsection>
     </refsection>
-  </refsection>
 
-  <refsection>
-    <title>Configuring Orbit Ephemerides</title>
+    <refsection>
+      <title>Setting colors on orbits of celestial bodies</title>
 
-    <para>The ephemerides for built-in celestial bodies is specified by the
-    <guilabel>SolarSystem.EphemerisSource</guilabel> field and the same source
-    is used for all built-in bodies. Ephemerides for a custom
-    <guilabel>CelestialBody</guilabel> are provided by SPICE files. Archives
-    of available SPICE files can be found at the <link
-    xlink:href="ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/">JPL
-    NAIF site</link> and the <link
-    xlink:href="ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/">Solar System
-    Dynamics site</link> . JPL provides utilities to create custom SPICE files
-    in the event existing kernels don't satisfy requirements for your
-    application. To create custom SPICE kernels, see the <link
-    xlink:href="http://naif.jpl.nasa.gov/naif/documentation.html">documentation
-    provided by JPL</link>. The list of NAIF Ids for celestial bodies is
-    located <link
-    xlink:href="http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html">here</link>.</para>
+      <para>GMAT allows you to assign colors to orbits of celestial bodies
+      that are drawn in the <guilabel>OrbitView</guilabel> graphics display
+      windows. GMAT also allows you to assign colors to perturbing celestial
+      body orbital trajectories drawn during iterative processes such as
+      differential correction or optimization. The
+      <guilabel>CelestialBody</guilabel> object's
+      <guilabel>OrbitColor</guilabel> and <guilabel>TargetColor</guilabel>
+      fields are used to assign colors to both orbital and perturbing
+      trajectories. See the <xref linkend="CelestialBody_Resource_Fields"
+      xrefstyle="select:title"/> section for description of these two fields.
+      Also see <xref linkend="Color"/> documentation for discussion and
+      examples on how to set colors on a celestial body.</para>
+    </refsection>
 
-    <para>Note that the DE files model the barycenter of planetary systems. So
-    for Jupiter, when using <guilabel>DE405</guilabel> for example, you are
-    modeling Jupiter's location as the barycenter of the Jovian system.
-    <guilabel>SPICE</guilabel> kernels differentiate the barycenter of a
-    planetary system from the location of the individual bodies. So when using
-    <guilabel>SPICE</guilabel> to model Jupiter, you are modeling the location
-    of Jupiter using Jupiter's center of mass.</para>
+    <refsection>
+      <title>Configuring orbit ephemerides</title>
 
-    <para>To specify the SPICE kernels for a custom
-    <guilabel>CelestialBody</guilabel>, use the <guilabel>NAIFId</guilabel>,
-    <guilabel>CentralBody</guilabel>, and <guilabel>SourceFileName</guilabel>
-    fields. GMAT is distributed with an SPK file for CERES which has
-    <guilabel>NAIF ID</guilabel> 2000001. Here is how to configure a
-    <guilabel>CelestialBody</guilabel> to use the CERES SPICE ephemeris
-    data.</para>
+      <para>The ephemerides for built-in celestial bodies is specified by the
+      <guilabel>SolarSystem.EphemerisSource</guilabel> field and the same
+      source is used for all built-in bodies. Ephemerides for a custom
+      <guilabel>CelestialBody</guilabel> are provided by SPICE files. Archives
+      of available SPICE files can be found at the <link
+      xlink:href="ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/">JPL
+      NAIF site</link> and the <link
+      xlink:href="ftp://ssd.jpl.nasa.gov/pub/eph/planets/bsp/">Solar System
+      Dynamics site</link> . JPL provides utilities to create custom SPICE
+      files in the event existing kernels don't satisfy requirements for your
+      application. To create custom SPICE kernels, see the <link
+      xlink:href="http://naif.jpl.nasa.gov/naif/documentation.html">documentation
+      provided by JPL</link>. The list of NAIF Ids for celestial bodies is
+      located <link
+      xlink:href="http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html">here</link>.</para>
 
-    <programlisting><code>Create CelestialBody Ceres
+      <para>Note that the DE files model the barycenter of planetary systems.
+      So for Jupiter, when using <guilabel>DE405</guilabel> for example, you
+      are modeling Jupiter's location as the barycenter of the Jovian system.
+      <guilabel>SPICE</guilabel> kernels differentiate the barycenter of a
+      planetary system from the location of the individual bodies. So when
+      using <guilabel>SPICE</guilabel> to model Jupiter, you are modeling the
+      location of Jupiter using Jupiter's center of mass.</para>
+
+      <para>To specify the SPICE kernels for a custom
+      <guilabel>CelestialBody</guilabel>, use the <guilabel>NAIFId</guilabel>,
+      <guilabel>CentralBody</guilabel>, and
+      <guilabel>SourceFileName</guilabel> fields. GMAT is distributed with an
+      SPK file for CERES which has <guilabel>NAIF ID</guilabel> 2000001. Here
+      is how to configure a <guilabel>CelestialBody</guilabel> to use the
+      CERES SPICE ephemeris data.</para>
+
+      <programlisting><code>Create CelestialBody Ceres
 Ceres.CentralBody = Sun
 Ceres.SourceFilename = '../data/planetary_ephem/spk/ceres_1900_2100.bsp'</code></programlisting>
 
-    <para>Note: GMAT currently only supports a single ephemeris model for
-    custom bodies (SPICE) and this is set using PosVelSource field. The
-    default for PosVelSource is SPICE and it is not necessary to configure
-    this field in the current version of GMAT.</para>
+      <para>Note: GMAT currently only supports a single ephemeris model for
+      custom bodies (SPICE) and this is set using PosVelSource field. The
+      default for PosVelSource is SPICE and it is not necessary to configure
+      this field in the current version of GMAT.</para>
 
-    <warning>
-      <para>NIAF distributes SPICE kernels for many celestial bodies and each
-      kernel is consistent with a particular primary ephemeris release such as
-      DE421. For high precision analysis, it is important to ensure that the
-      ephemerides used for a custom celestial body are consistent with the
-      ephemeris source selection in the
-      <guilabel>SolarSystem.EphemerisSource</guilabel> field. SPICE kernels
-      are typically distributed with a ".cmt" file and in that file the line
-      that contains the ephemeris model looks like this:</para>
+      <warning>
+        <para>NAIF distributes SPICE kernels for many celestial bodies and
+        each kernel is consistent with a particular primary ephemeris release
+        such as DE421. For high precision analysis, it is important to ensure
+        that the ephemerides used for a custom celestial body are consistent
+        with the ephemeris source selection in the
+        <guilabel>SolarSystem.EphemerisSource</guilabel> field. SPICE kernels
+        are typically distributed with a ".cmt" file and in that file the line
+        that contains the ephemeris model looks like this:</para>
 
-      <para>Planetary Ephemeris Number: DE-0421/LE-0421</para>
-    </warning>
-  </refsection>
+        <para><literal>Planetary Ephemeris Number:
+        DE-0421/LE-0421</literal></para>
+      </warning>
+    </refsection>
 
-  <refsection>
-    <title>Configuring Physical Properties</title>
+    <refsection>
+      <title>Configuring physical properties</title>
 
-    <para>GMAT models all celestial bodies as spherical ellipsoids. To define
-    the physical properties use the <guilabel>Flattening</guilabel>,
-    <guilabel>EquatorialRadius</guilabel>, and <guilabel>Mu</guilabel>
-    fields.</para>
+      <para>GMAT models all celestial bodies as spherical ellipsoids. To
+      define the physical properties use the <guilabel>Flattening</guilabel>,
+      <guilabel>EquatorialRadius</guilabel>, and <guilabel>Mu</guilabel>
+      fields.</para>
+    </refsection>
+
+    <refsection xml:id="CelestialBody_ConfiguringForEventLocation">
+      <title>Configuring for event location</title>
+
+      <para>GMAT's event location subsystem (consisting of
+      <guilabel>ContactLocator</guilabel> and
+      <guilabel>EclipseLocator</guilabel>) uses celestial body definitions
+      from the SPICE toolkit. Properites such as radius, flattening,
+      ephemeris, and orientation must be configured separately for use with
+      the event locators.</para>
+
+      <para>CelestialBody shape and orientation are configured via SPICE PCK
+      files, loaded from two sources in the following order:</para>
+
+      <orderedlist>
+        <listitem>
+          <para><guilabel>SolarSystem</guilabel>.<guilabel>PCKFilename</guilabel></para>
+        </listitem>
+
+        <listitem>
+          <para><guilabel>Sun</guilabel>.<guilabel>PlanetarySpiceKernelName</guilabel>
+          (in list order), followed by <guilabel>Mercury</guilabel>,
+          <guilabel>Venus</guilabel>, <guilabel>Earth</guilabel>,
+          <guilabel>Mars</guilabel>, <guilabel>Jupiter</guilabel>,
+          <guilabel>Saturn</guilabel>, <guilabel>Uranus</guilabel>,
+          <guilabel>Neptune</guilabel>, <guilabel>Pluto</guilabel>,
+          <guilabel>Luna</guilabel></para>
+        </listitem>
+
+        <listitem>
+          <para>User-defined bodies</para>
+        </listitem>
+      </orderedlist>
+
+      <para>Data loaded last takes precedence over data loaded first, if there
+      is a conflict. Note that because the SPICE kernel pool is shared for the
+      entire run, a PCK file loaded for Pluto may override data loaded by Sun,
+      if the file contains conflicting data.</para>
+
+      <para>The body-fixed frame for a <guilabel>CelestialBody</guilabel> is
+      defined on the <guilabel>Orientation</guilabel> tab by the
+      <guilabel>SpiceFrameId</guilabel> and
+      <guilabel>SpiceFrameKernelFile</guilabel> fields. The
+      <guilabel>SpiceFrameId</guilabel> contains the SPICE ID for the
+      body-fixed frame, which may be built-in or defined via external FK
+      files. External FK files can be loaded by adding them to the
+      <guilabel>SpiceFrameKernelFile</guilabel> list for each body. These
+      files are loaded just after
+      <guilabel>PlanetarySpiceKernelName</guilabel> for each body. The list of
+      built-in frames is available as an appendix in the <link
+      xlink:href="http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html">SPICE
+      documentation</link>. GMAT's default frames are:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Earth: <literal>ITRF93</literal></para>
+        </listitem>
+
+        <listitem>
+          <para>Luna: <literal>MOON_PA</literal></para>
+        </listitem>
+
+        <listitem>
+          <para>Other default bodies:
+          <literal>IAU_<replaceable>CelestialBody</replaceable></literal></para>
+        </listitem>
+      </itemizedlist>
+
+      <para>The Earth ITRF93 frame is defined by three high-fidelity
+      orientation PCK files, shown below. More information on these files can
+      be found in the NAIF <link
+      xlink:href="http://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/aareadme.txt"><filename>aareadme.txt</filename></link>
+      file.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><filename>earth_<replaceable>start</replaceable>_<replaceable>end</replaceable>_predict.bpc</filename>:
+          long-term low-fidelity EOP predictions</para>
+        </listitem>
+
+        <listitem>
+          <para><filename>earth_<replaceable>start</replaceable>_<replaceable>end</replaceable>.bpc</filename>:
+          long-term low-fidelity historical EOP</para>
+        </listitem>
+
+        <listitem>
+          <para><filename>earth_<replaceable>start</replaceable>_<replaceable>end</replaceable>_<replaceable>filedate</replaceable>.bpc</filename>:
+          near-term high-fidelity EOP history and predictions</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>The Luna MOON_PA frame is defined by an orientation PCK file and a
+      frame-defining FK file, shown below. More information can be found in
+      the NAIF PCK <link
+      xlink:href="http://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/aareadme.txt"><filename>aareadme.txt</filename></link>
+      file and the FK <link
+      xlink:href="http://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/aareadme.txt"><filename>aareadme.txt</filename></link>
+      file. Other versions of the MOON_PA frame are available from
+      NAIF.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><filename>moon_pa_de421_1900-2050.bpc</filename>: Moon
+          orientation consistent with DE421 PA frame</para>
+        </listitem>
+
+        <listitem>
+          <para><filename>moon_080317.tf</filename>: MOON_PA frame
+          definition</para>
+        </listitem>
+      </itemizedlist>
+    </refsection>
   </refsection>
 
   <refsection>
@@ -1447,17 +2264,18 @@ Ceres.SourceFilename = '../data/planetary_ephem/spk/ceres_1900_2100.bsp'</code><
 
     <informalexample>
       <para>Configure a <guilabel>CelestialBody</guilabel> to model Saturn's
-      moon Titan. Note you must obtain the SPICE kernel named "sat351.bsp"
-      from <link
+      moon Titan. Note you must obtain the SPICE kernel named
+      "<filename>sat288.bsp</filename>" from <link
       xlink:href="ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/">here</link>
       and place it in the directory identified in the script snippet
       below</para>
 
       <programlisting><code>Create Moon Titan
 Titan.NAIFId               = 606
-Titan.OrbitSpiceKernelName = {...
-                    '../data/planetary_ephem/spk/DE421AllPlanets.bsp',...
-                    '../data/planetary_ephem/spk/sat288.bsp'}
+Titan.OrbitSpiceKernelName = { ...
+    '../data/planetary_ephem/spk/sat288.bsp' ...
+    }
+Titan.SpiceFrameId         = 'IAU_TITAN'
 Titan.EquatorialRadius     = 2575
 Titan.Flattening           = 0
 Titan.Mu                   = 8978.5215

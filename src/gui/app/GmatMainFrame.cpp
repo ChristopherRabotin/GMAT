@@ -586,6 +586,33 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    wxAcceleratorTable accel(7, entries);
    this->SetAcceleratorTable(accel);
 
+   Integer osMajor = 0;
+   Integer osMinor = 0;
+   wxString osDescription = wxGetOsDescription();
+   wxOperatingSystemId osId = wxGetOsVersion(&osMajor, &osMinor);
+   
+#ifdef DEBUG_OS_DETECTION
+   MessageInterface::ShowMessage("OS: %s\n", std::string(osDescription));
+#endif
+   int osNum = osMajor * 10 + osMinor;
+
+   // Flag to use "delete child" rather than child.Destroy()
+   useChildDelete = true;
+
+   if (osDescription.Find("Windows") == wxNOT_FOUND)
+      useChildDelete = false;
+   else if (osDescription.Find("Windows 7") == wxNOT_FOUND &&
+      osDescription.Find("Server") == wxNOT_FOUND)
+   {
+      if (osNum > 61)
+         useChildDelete = false;
+   }
+
+#ifdef DEBUG_OS_DETECTION
+   MessageInterface::ShowMessage("OS info: %d.%d ==> %d gives id %d; %sWin 8 or higher\n", 
+      osMajor, osMinor, osNum, osId, (!useChildDelete ? "Is " : "Is not "));
+#endif
+
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() this=<%p> exiting\n", this);
    #endif
@@ -1519,12 +1546,16 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          // MdiChildViewFrame::OnPlotClose() and MdiChildTsFrame::OnPlotClose()
          // sets deleteChild to false
 
-         // Here we call Destroy() rather than deleting the window in order to 
+         // Here we call Destroy rather than deleting the window in order to 
          // avoid race conditions that result in the window destruction before 
          // all pending messages have been processed.
          if (deleteChild)
-            child->Destroy();
-         //delete child;
+         {
+            if (useChildDelete)
+               delete child;
+            else
+               child->Destroy();
+         }
 
          delete node;
          childRemoved = true;

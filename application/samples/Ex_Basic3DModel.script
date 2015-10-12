@@ -16,12 +16,12 @@ GMAT Sat.DateFormat = TAIModJulian;
 GMAT Sat.Epoch = '21545';
 GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
 GMAT Sat.DisplayStateType = Keplerian;
-GMAT Sat.SMA = 9999.999999999987;
-GMAT Sat.ECC = 0.1000000000000002;
+GMAT Sat.SMA = 9999.999999999995;
+GMAT Sat.ECC = 0.09999999999999988;
 GMAT Sat.INC = 12.85008005658097;
 GMAT Sat.RAAN = 306.6148021947984;
-GMAT Sat.AOP = 314.1905515359917;
-GMAT Sat.TA = 99.88774933204918;
+GMAT Sat.AOP = 314.1905515359921;
+GMAT Sat.TA = 99.88774933204877;
 GMAT Sat.DryMass = 850;
 GMAT Sat.Cd = 2.2;
 GMAT Sat.Cr = 1.8;
@@ -29,20 +29,24 @@ GMAT Sat.DragArea = 15;
 GMAT Sat.SRPArea = 1;
 GMAT Sat.NAIFId = -123456789;
 GMAT Sat.NAIFIdReferenceFrame = -123456789;
+GMAT Sat.OrbitColor = Red;
+GMAT Sat.TargetColor = Teal;
 GMAT Sat.Id = 'SatId';
 GMAT Sat.Attitude = CoordinateSystemFixed;
+GMAT Sat.SPADSRPScaleFactor = 1;
 GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT Sat.ModelOffsetX = 1;
+GMAT Sat.ModelOffsetX = 0;
 GMAT Sat.ModelOffsetY = 0;
 GMAT Sat.ModelOffsetZ = 0;
 GMAT Sat.ModelRotationX = 0;
 GMAT Sat.ModelRotationY = 0;
 GMAT Sat.ModelRotationZ = 0;
-GMAT Sat.ModelScale = 3.624564647674561;
+GMAT Sat.ModelScale = 1.5;
 GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT Sat.AttitudeCoordinateSystem = EarthMJ2000Eq;
 GMAT Sat.EulerAngleSequence = '321';
+
 
 
 
@@ -55,10 +59,12 @@ GMAT DefaultProp_ForceModel.CentralBody = Earth;
 GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
 GMAT DefaultProp_ForceModel.Drag = None;
 GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.RelativisticCorrection = Off;
 GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
 GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
 GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
 GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT DefaultProp_ForceModel.GravityField.Earth.EarthTideModel = 'None';
 
 %----------------------------------------
 %---------- Propagators
@@ -87,7 +93,7 @@ GMAT DefaultIB.Element2 = 0;
 GMAT DefaultIB.Element3 = 0;
 GMAT DefaultIB.DecrementMass = false;
 GMAT DefaultIB.Isp = 300;
-GMAT DefaultIB.GravitationalAccel = 9.81;
+GMAT DefaultIB.GravitationalAccel = 9.810000000000001;
 
 %----------------------------------------
 %---------- Subscribers
@@ -95,8 +101,18 @@ GMAT DefaultIB.GravitationalAccel = 9.81;
 
 Create OrbitView Enhanced3DView1;
 GMAT Enhanced3DView1.SolverIterations = Current;
+GMAT Enhanced3DView1.UpperLeft = [ 0.002941176470588235 0 ];
+GMAT Enhanced3DView1.Size = [ 0.8 0.850132625994695 ];
+GMAT Enhanced3DView1.RelativeZOrder = 79;
+GMAT Enhanced3DView1.Maximized = false;
 GMAT Enhanced3DView1.Add = {Sat, Earth};
 GMAT Enhanced3DView1.CoordinateSystem = EarthMJ2000Eq;
+GMAT Enhanced3DView1.DrawObject = [ true true ];
+GMAT Enhanced3DView1.DataCollectFrequency = 1;
+GMAT Enhanced3DView1.UpdatePlotFrequency = 50;
+GMAT Enhanced3DView1.NumPointsToRedraw = 0;
+GMAT Enhanced3DView1.ShowPlot = true;
+GMAT Enhanced3DView1.ShowLabels = true;
 GMAT Enhanced3DView1.ViewPointReference = Earth;
 GMAT Enhanced3DView1.ViewPointVector = [ 30000 0 0 ];
 GMAT Enhanced3DView1.ViewDirection = Earth;
@@ -110,10 +126,6 @@ GMAT Enhanced3DView1.Axes = On;
 GMAT Enhanced3DView1.Grid = Off;
 GMAT Enhanced3DView1.SunLine = Off;
 GMAT Enhanced3DView1.UseInitialView = On;
-GMAT Enhanced3DView1.DataCollectFrequency = 1;
-GMAT Enhanced3DView1.UpdatePlotFrequency = 50;
-GMAT Enhanced3DView1.NumPointsToRedraw = 0;
-GMAT Enhanced3DView1.ShowPlot = true;
 GMAT Enhanced3DView1.StarCount = 7000;
 GMAT Enhanced3DView1.EnableStars = On;
 GMAT Enhanced3DView1.EnableConstellations = On;
@@ -125,6 +137,6 @@ GMAT Enhanced3DView1.EnableConstellations = On;
 
 BeginMissionSequence;
 
- Sat.CoordinateSystem = 'EarthMJ2000Eq'
+GMAT Sat.CoordinateSystem = 'EarthMJ2000Eq';
 Propagate 'Prop 40000 s' DefaultProp(Sat) {Sat.ElapsedSecs = 40000};
 Propagate 'Prop 40000 s' DefaultProp(Sat) {Sat.ElapsedSecs = 40000};

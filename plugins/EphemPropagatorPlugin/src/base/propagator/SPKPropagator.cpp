@@ -572,6 +572,7 @@ bool SPKPropagator::Initialize()
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("SPKPropagator::Initialize() entered\n");
       MessageInterface::ShowMessage("spkCentralBody is %s\n", spkCentralBody.c_str());
+      MessageInterface::ShowMessage("solarSystem is %sNULL\n", (solarSystem? "NOT " : ""));
    #endif
 
    bool retval = false;
@@ -588,13 +589,19 @@ bool SPKPropagator::Initialize()
       j2ET = j2000_c();   // CSPICE method to return Julian date of J2000 (TDB)
 
       FileManager *fm = FileManager::Instance();
+      std::string fullPath;
 
       // Changed to use FileManager::FindPath() (LOJ: 2014.06.26)
       //std::string fullPath = fm->GetFullPathname(FileManager::PLANETARY_SPK_FILE);
-      std::string fullPath = fm->FindPath("", "PLANETARY_SPK_FILE", true, false, true);
-      
-      if (skr->IsLoaded(fullPath) == false)
-         skr->LoadKernel(fullPath);
+//      std::string fullPath = fm->FindPath("", "PLANETARY_SPK_FILE", true, false, true);
+
+      // We can assume at this point that the Solar System is already
+      // initialized, so we need not load this file (we want the current
+      // SPK file to be loaded, not necessarily the one listed in the
+      // startup file)
+//
+//      if (skr->IsLoaded(fullPath) == false)
+//         skr->LoadKernel(fullPath);
 
       if (propObjects.size() != 1)
          throw PropagatorException("SPICE propagators (i.e. \"SPK\" "
