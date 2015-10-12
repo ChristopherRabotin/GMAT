@@ -88,32 +88,41 @@
         <listitem>
           <para>On Windows: <itemizedlist>
               <listitem>
-                <para>The following path (where
+                <para>The following path entries (where
                 <filename><replaceable>Python</replaceable></filename> is the
                 path to the installed version of Python) must be present in
                 the <envar>Path</envar> environment variable.</para>
 
-                <para><filename><replaceable>Python</replaceable>\bin\win32</filename>
-                (or <filename>win64</filename> for use with 64-bit versions of
-                GMAT)</para>
+                <para><filename><replaceable>Python</replaceable></filename></para>
+
+                <para><filename><replaceable>Python</replaceable>/Scripts</filename></para>
 
                 <para/>
               </listitem>
+              
+              <listitem>
+                <para>The following path (where
+                <filename><replaceable>Python</replaceable></filename> is the
+                path to the installed version of Python) must be present in
+                the <envar>PYTHONPATH</envar> environment variable.</para>
+
+                <para><filename><replaceable>Python</replaceable>/Lib/site-packages</filename></para>
+
+                <para/>
+              </listitem>
+
             </itemizedlist></para>
         </listitem>
 
         <listitem>
-          <para>On Mac OS X: <itemizedlist>
+          <para>On Linux: <itemizedlist>
               <listitem>
-                <para>The MATLABFORGMAT environment variable must exist and
-                contain the full path to the MATLAB application bundle (e.g.
-                /Applications/MATLAB_R2010a/MATLAB_R2010a.app).</para>
-
-                <para>Note that 64-bit GMAT must be used to interface with
-                MATLAB after version R2010a.</para>
+                <para>The Python release used in the GMAT build must be the default
+                	Python package (that is, Python 3.4) accessed from the terminal.</para>
               </listitem>
             </itemizedlist></para>
         </listitem>
+        
       </itemizedlist>
 
       <note>
@@ -122,26 +131,20 @@
         <itemizedlist>
           <listitem>
             <para>If you are using the officially-released 32-bit version of
-            GMAT, make sure you have the 32-bit version of MATLAB
+            GMAT, make sure you have the 32-bit version of Python
             installed.</para>
           </listitem>
 
           <listitem>
             <para>If the path above exists in your system <envar>Path</envar>
-            variable, try place it at the front.</para>
-          </listitem>
-
-          <listitem>
-            <para>Make sure the same instance of MATLAB is referenced both in
-            the <envar>Path</envar> variable and when running
-            <userinput>matlab -regserver</userinput>.</para>
+            variable, try place it at the front of the path specification.</para>
           </listitem>
         </itemizedlist>
       </note>
     </refsection>
 
     <refsection>
-      <title>MATLAB Engine Connection</title>
+      <title>Python Engine Connection</title>
 
       <warning>
         <para>Caution: GMAT does not close the Python interface after a run has 
