@@ -15,12 +15,12 @@ GMAT DMSP.DateFormat = UTCGregorian;
 GMAT DMSP.Epoch = '01 Jul 2000 11:59:28.000';
 GMAT DMSP.CoordinateSystem = EarthMJ2000Eq;
 GMAT DMSP.DisplayStateType = Keplerian;
-GMAT DMSP.SMA = 9000.938817629016;
-GMAT DMSP.ECC = 0.02454974900597997;
+GMAT DMSP.SMA = 9000.938817629014;
+GMAT DMSP.ECC = 0.02454974900598012;
 GMAT DMSP.INC = 100.850080056581;
 GMAT DMSP.RAAN = 306.6148021947984;
-GMAT DMSP.AOP = 314.1905515359927;
-GMAT DMSP.TA = 99.88774933204815;
+GMAT DMSP.AOP = 314.1905515359924;
+GMAT DMSP.TA = 99.88774933204847;
 GMAT DMSP.DryMass = 850;
 GMAT DMSP.Cd = 2.2;
 GMAT DMSP.Cr = 1.8;
@@ -34,17 +34,18 @@ GMAT DMSP.Id = 'SatId';
 GMAT DMSP.Attitude = CoordinateSystemFixed;
 GMAT DMSP.SPADSRPScaleFactor = 1;
 GMAT DMSP.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT DMSP.ModelOffsetX = 1;
+GMAT DMSP.ModelOffsetX = 0;
 GMAT DMSP.ModelOffsetY = 0;
 GMAT DMSP.ModelOffsetZ = 0;
 GMAT DMSP.ModelRotationX = 0;
 GMAT DMSP.ModelRotationY = 0;
 GMAT DMSP.ModelRotationZ = 0;
-GMAT DMSP.ModelScale = 3;
+GMAT DMSP.ModelScale = 1;
 GMAT DMSP.AttitudeDisplayStateType = 'EulerAngles';
 GMAT DMSP.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT DMSP.AttitudeCoordinateSystem = LVLH;
 GMAT DMSP.EulerAngleSequence = '321';
+
 
 
 
@@ -116,10 +117,10 @@ GMAT LVLH.Secondary = DMSP;
 
 Create OrbitView Enhanced3DView1;
 GMAT Enhanced3DView1.SolverIterations = Current;
-GMAT Enhanced3DView1.UpperLeft = [ 0.002941176470588235 0 ];
-GMAT Enhanced3DView1.Size = [ 0.5 0.4498186215235792 ];
-GMAT Enhanced3DView1.RelativeZOrder = 31;
-GMAT Enhanced3DView1.Maximized = false;
+GMAT Enhanced3DView1.UpperLeft = [ 0.002352941176470588 0 ];
+GMAT Enhanced3DView1.Size = [ 0.5 0.4496021220159151 ];
+GMAT Enhanced3DView1.RelativeZOrder = 34;
+GMAT Enhanced3DView1.Maximized = true;
 GMAT Enhanced3DView1.Add = {DMSP, Earth};
 GMAT Enhanced3DView1.CoordinateSystem = EarthMJ2000Eq;
 GMAT Enhanced3DView1.DrawObject = [ true true ];
@@ -147,9 +148,9 @@ GMAT Enhanced3DView1.EnableConstellations = On;
 
 Create XYPlot XYPlot1;
 GMAT XYPlot1.SolverIterations = Current;
-GMAT XYPlot1.UpperLeft = [ 0.002941176470588235 0.4546553808948005 ];
-GMAT XYPlot1.Size = [ 0.5 0.4498186215235792 ];
-GMAT XYPlot1.RelativeZOrder = 33;
+GMAT XYPlot1.UpperLeft = [ 0.002352941176470588 0.4535809018567639 ];
+GMAT XYPlot1.Size = [ 0.5 0.4496021220159151 ];
+GMAT XYPlot1.RelativeZOrder = 26;
 GMAT XYPlot1.Maximized = false;
 GMAT XYPlot1.XVariable = DMSP.A1ModJulian;
 GMAT XYPlot1.YVariables = {DMSP.MRP1, DMSP.MRP2, DMSP.MRP3};
@@ -161,5 +162,6 @@ GMAT XYPlot1.ShowPlot = true;
 %----------------------------------------
 BeginMissionSequence;
 Propagate 'Prop 10000 s' DefaultProp(DMSP) {DMSP.ElapsedSecs = 20000.0};
+
 
 
