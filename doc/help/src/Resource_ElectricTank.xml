@@ -222,13 +222,11 @@
       command documentation for worked examples on how the
       <guilabel>ElectricTank</guilabel> resource is used in conjunction with
       finite maneuvers.</para>
-	  
-	  
-    <para>For a complete descripton of how to configure all Resources required
-    for electric propulsion modelling, see the Tutorial named <xref
-    linkend="Tut_ElectricPropulsion"/></para>
-    </refsection>
 
+      <para>For a complete descripton of how to configure all Resources
+      required for electric propulsion modelling, see the Tutorial named <xref
+      linkend="Tut_ElectricPropulsion"/></para>
+    </refsection>
 
     <refsection>
       <title>Behavior When Configuring Tank and Attached Tank
