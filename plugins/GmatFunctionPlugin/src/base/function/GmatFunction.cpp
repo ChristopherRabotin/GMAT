@@ -35,6 +35,7 @@
 //#define DEBUG_FUNCTION_EXEC
 //#define DEBUG_FUNCTION_FINALIZE
 //#define DEBUG_UNUSED_GOL
+//#define DEBUG_OBJECT_MAP
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -719,6 +720,9 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    }
    #endif
    
+   #ifdef DEBUG_OBJECT_MAP
+   ShowObjects("In GmatFunction::Execute()");
+   #endif
    
    // Go through each command in the sequence and execute.
    // Once it gets to a real command, initialize local and automatic objects.
@@ -817,8 +821,8 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
                 e.GetFullMessage());
             //throw;
          }
-         
-         // Should we re-throw the exception here? (LOJ: 2015.02.19)
+
+         // Should we still re-throw the exception here? (LOJ: 2015.02.19)
          throw FunctionException
             ("In " + current->GetGeneratingString(Gmat::NO_COMMENTS) + ", " +
              e.GetFullMessage());

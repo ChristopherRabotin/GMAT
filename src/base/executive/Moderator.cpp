@@ -10104,13 +10104,13 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
    }
    
    GmatBase *obj = NULL;
-   GmatBase *paramOwner = NULL;
    std::string objName;
    std::string isGlobal;
    std::string isLocal;
+   GmatBase *paramOwner = NULL;
+   bool isParameter = false;
    std::string paramOwnerType;
    std::string paramOwnerName;
-   bool isParameter = false;
    
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage
@@ -10119,10 +10119,12 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
    {
       obj = i->second;
       objName = i->first;
-      paramOwner = NULL;
-      isParameter = false;
       isGlobal = "No";
       isLocal = "No";
+      paramOwner = NULL;
+      isParameter = false;
+      paramOwnerType = "";
+      paramOwnerName = "";
       
       if (obj)
       {
