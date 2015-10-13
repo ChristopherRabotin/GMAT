@@ -47,7 +47,7 @@
   <refsection>
     <title>GUI</title>
 
-    <para>The Python interface in GMAT is launced and driven internally.  Users 
+    <para>The Python interface in GMAT is launched and driven internally.  Users 
     do not have direct access to the interface from the GMAT graphical user 
     interface.</para>
   </refsection>
@@ -81,7 +81,7 @@
         <listitem>
           <para>The Python system accesses Python modules on the user's machine.  
           This functionality is configured, including path information used by 
-          Python, by installing the Python as a resource for all users of the 
+          Python, by installing Python as a resource for all users of the 
          machine.</para>
         </listitem>
 
@@ -137,7 +137,7 @@
 
           <listitem>
             <para>If the path above exists in your system <envar>Path</envar>
-            variable, try place it at the front of the path specification.</para>
+            variable, try placing it at the front of the path specification.</para>
           </listitem>
         </itemizedlist>
       </note>
@@ -147,7 +147,7 @@
       <title>Python Engine Connection</title>
 
       <warning>
-        <para>Caution: GMAT does not close the Python interface after a run has 
+        <para>GMAT does not close the Python interface after a run has 
         completed. This feature prevents anomalous behavior that can occur when 
         loading some Python modules repeatedly during a run, but it can lead to
         confusing behavior if Python files are changed and rerun in the same 
