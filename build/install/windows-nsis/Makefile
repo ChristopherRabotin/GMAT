@@ -85,7 +85,7 @@ gmat-win-i586-$(VERSION).zip: gmat-public/GMAT/bin/GMAT.exe
 	    && zip -r9 ../$@ GMAT
 
 gmat-internal/GMAT/bin/GMAT.exe:
-	../assemblegmat.sh -d gmat-internal/GMAT -t full-release
+	./assemblegmat.sh -d gmat-internal/GMAT -t full-release
 
 gmat-public/GMAT/bin/GMAT.exe:
-	../assemblegmat.sh -d gmat-public/GMAT -t public-release
+	./assemblegmat.sh -d gmat-public/GMAT -t public-release
