@@ -32,8 +32,23 @@
     global properties for the model of the solar system including the
     ephemeris source for built-in celestial bodies and selected settings to
     improve performance when medium fidelity modelling is acceptable for your
-    application. This resource cannot be modified in the Mission
-    Sequence.</para>
+    application. This resource cannot be modified in the mission
+    sequence.</para>
+
+    <note>
+      <para>As of release R2015a, GMAT uses two separate solar system
+      configurations for core parts of the system. For propagation, GMAT uses
+      the source specified by
+      <guilabel>SolarSystem</guilabel>.<guilabel>EphemerisSource</guilabel>
+      and the <guilabel>CelestialBody</guilabel> properties configured on each
+      resource. For event location with the new
+      <guilabel>ContactLocator</guilabel> and
+      <guilabel>EclipseLocator</guilabel> resources, GMAT always uses SPICE
+      data for <guilabel>SolarSystem</guilabel> and
+      <guilabel>CelestialBody</guilabel> properties. See <xref
+      linkend="ContactLocator"/>, <xref linkend="EclipseLocator"/>, and <xref
+      linkend="CelestialBody"/> for details.</para>
+    </note>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="CelestialBody"/>, <xref linkend="LibrationPoint"/>, <xref
@@ -269,8 +284,64 @@
 
                   <listitem>
                     <para>
-                      <literal>../data/time/naif0010.tls</literal>
+                      <literal>../data/time/naif0011.tls</literal>
                     </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>PCKFilename</guilabel></entry>
+
+            <entry><para>The path and name of the PCK planetary constants
+            kernel.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Path to valid PCK planetary constants kernel
+                    (<filename>.tpc</filename>)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><literal>../data/planetary_coeff/pck00010.tpc</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -326,7 +397,7 @@
 
                   <listitem>
                     <para>
-                      <literal>../data/planetary_ephem/spk/DE421AllPlanets.bsp</literal>
+                      <literal>../data/planetary_ephem/spk/DE405AllPlanets.bsp</literal>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -352,7 +423,7 @@
           <row>
             <entry><guilabel>UseTTForEphemeris</guilabel></entry>
 
-            <entry><para> Flag to use Terrestrial Time (TT) as input to the
+            <entry><para>Flag to use Terrestrial Time (TT) as input to the
             orbital ephemeris routines. When set to false, TDB is used.
             </para> <variablelist>
                 <varlistentry>
@@ -427,21 +498,20 @@
     </screenshot>
 
     <para>The <guilabel>SolarSystem</guilabel> dialog box allows you to
-    configure global properties for solar system modelling and the default
-    configuration is illustrated above. Use
-    <guilabel>EphemerisSource</guilabel> to choose the ephemeris model for
-    built-in celestial bodies. If you select either
-    <guilabel>DE405</guilabel>, <guilabel>DE421</guilabel>, or
-    <guilabel>DE424</guilabel> the dialog box above illustrates available
-    options.</para>
+    configure global properties for solar system modelling. The default
+    configuration is illustrated above. Use <guilabel>Ephemeris
+    Source</guilabel> to choose the ephemeris model for built-in celestial
+    bodies. If you select either <guilabel>DE405</guilabel>,
+    <guilabel>DE421</guilabel>, or <guilabel>DE424</guilabel> the dialog box
+    above illustrates available options.</para>
 
     <warning>
-      <para>Caution: GMAT allows you to provide user-created DE or SPK kernel
-      files but we recommend using the files distributed with GMAT. The files
-      provided with GMAT have been extensively tested for consistency and
-      accuracy with the original data provided by JPL and other models in
-      GMAT. Using inconsistent ephemeris files or user-generated files can
-      result in instability or numerical issues if the files are not generated
+      <para>GMAT allows you to provide user-created DE or SPK kernel files but
+      we recommend using the files distributed with GMAT. The files provided
+      with GMAT have been extensively tested for consistency and accuracy with
+      the original data provided by JPL and other models in GMAT. Using
+      inconsistent ephemeris files or user-generated files can result in
+      instability or numerical issues if the files are not generated
       correctly.</para>
 
       <para>Changing the ephemeris source for an application is equivalent to
@@ -453,11 +523,12 @@
       change <guilabel>EphemerisSource</guilabel> via the GUI for convenience
       in early design phases when rigorous consistency in modelling is less
       important.</para>
-	  
-	  <para>Additionally, when using DE as the <guilabel>EphemerisSource</guilabel>, 
-	  modelling is with respect to planetary system barcyenter.  When using SPICE
-	  as the <guilabel>EphemerisSource</guilabel>, modelling is with respect 
-	  to the planet center. </para>
+
+      <para>Additionally, when using DE as the
+      <guilabel>EphemerisSource</guilabel>, modelling is with respect to
+      planetary system barcyenter. When using SPICE as the
+      <guilabel>EphemerisSource</guilabel>, modelling is with respect to the
+      planet center.</para>
     </warning>
 
     <screenshot>
@@ -470,10 +541,10 @@
       </mediaobject>
     </screenshot>
 
-    <para>If you select <guilabel>SPICE</guilabel> for
-    <guilabel>EphemerisSource</guilabel>, the <guilabel>SolarSystem</guilabel>
-    dialog box reconfigures to allow you to define the SPK Kernel and the leap
-    second kernel.</para>
+    <para>If you select <guilabel>SPICE</guilabel> for <guilabel>Ephemeris
+    Source</guilabel>, the <guilabel>SolarSystem</guilabel> dialog box
+    reconfigures to disable the <guilabel>Ephemeris Filename</guilabel>
+    option, indicating that this is no longer used in this mission..</para>
   </refsection>
 
   <refsection>
@@ -498,9 +569,10 @@
 
       <listitem>
         <para>For information on the SPK kernel named
-        <literal>DE421AllPlanets.bsp</literal> distributed with GMAT see the
-        SPK.Readme located in <literal>\data\planetary_ephem\spk</literal> in
-        the GMAT distribution.</para>
+        <literal>DE???AllPlanets.bsp</literal> distributed with GMAT, see the
+        <filename>Readme-DE???AllPlanets.txt</filename> files located in
+        <literal>\data\planetary_ephem\spk</literal> in the GMAT
+        distribution.</para>
       </listitem>
     </itemizedlist>
 
