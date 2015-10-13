@@ -206,10 +206,15 @@ data\planetary_ephem/spk\de421.bsp</code></programlisting>
       <para>Absolute paths are passed to the underlying operating system
       as-is, aside from normalizing the slashes.</para>
 
-      <para>Relative paths are considered relative to a location defined by
-      each resource type separately, and usually defined in the GMAT startup
-      file. For details, see the reference documentation for each resource
-      type.</para>
+      <para>For input files, relative paths are first considered relative to
+      the script file, then to a location defined by each resource type
+      separately, and usually defined in the GMAT startup file. For details,
+      see the reference documentation for each resource type.</para>
+
+      <para>For output files, relative paths are considered relative to the
+      script file. If only a filename is specified, the file is placed into
+      the output location defined in the GMAT startup file (usually GMAT's
+      <filename>output</filename> folder).</para>
 
       <para>File paths are written as string literals (see <xref
       linkend="ScriptLanguage_Strings" xrefstyle="select:title"/> under <xref
