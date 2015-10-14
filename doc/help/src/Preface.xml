@@ -81,6 +81,10 @@
     xrefstyle="select:title"/></emphasis> tutorial shows how to use finite
     maneuvers with an application to orbit apogee raising.</para>
 
+	<para>The <emphasis><xref linkend="Tut_EventLocation"
+    xrefstyle="select:title"/></emphasis> tutorial shows how to use GMAT to
+    locate elipses and station contacts.</para>
+	
     <para>The <emphasis><xref linkend="Tut_ElectricPropulsion"
     xrefstyle="select:title"/></emphasis> tutorial shows how to configure GMAT
     to model electric propulsion systems.</para>

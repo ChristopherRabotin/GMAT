@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="Tut_EventLocation"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -7,9 +7,9 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>Event Location</title>
+  <title>Finding Eclipses and Station Contacts</title>
 
- <variablelist>
+  <variablelist>
     <varlistentry>
       <term>Audience</term>
 
@@ -30,7 +30,7 @@
       <term>Prerequisites</term>
 
       <listitem>
-        <para>Complete <xref linkend="SimulatingAnOrbit"
+        <para>Complete <xref linkend="SimpleOrbitTransfer"
         xrefstyle="select:title"/></para>
       </listitem>
     </varlistentry>
@@ -39,7 +39,7 @@
       <term>Script File</term>
 
       <listitem>
-        <para><filename>Tut_SimpleOrbitTransfer.script</filename></para>
+        <para><filename>Tut_FindingEclipsesAndContacts.script</filename></para>
       </listitem>
     </varlistentry>
   </variablelist>
@@ -47,87 +47,128 @@
   <section>
     <title>Objective and Overview</title>
 
-    <note>
-      <para>One of the most common problems in space mission design is to
-      design a transfer from one circular orbit to another circular orbit that
-      lie within the same orbital plane. Circular coplanar transfers are used
-      to raise low-Earth orbits that have degraded due to the effects of
-      atmospheric drag. They are also used to transfer from a low-Earth orbit
-      to a geosynchronous orbit and to send spacecraft to Mars. There is a
-      well known sequence of maneuvers, called the Hohmann transfer, that
-      performs a circular, coplanar transfer using the least possible amount
-      of fuel. A Hohmann transfer employs two maneuvers. The first maneuver
-      raises the orbital apoapsis (or lowers orbital periapsis) to the desired
-      altitude and places the spacecraft in an elliptical transfer orbit. At
-      the apoapsis (or periapsis) of the elliptical transfer orbit, a second
-      maneuver is applied to circularize the orbit at the final
-      altitude.</para>
-    </note>
+    <para>In this tutorial we will modify an existing mission to add eclipse
+    and station contact detection using the
+    <guilabel>EclipseLocator</guilabel> and
+    <guilabel>ContactLocator</guilabel> resources. We will start with the
+    completed Simple Orbit Transfer mission and modify it to add these event
+    reports.</para>
+
+    <para>The basic steps of this tutorial are:</para>
 
     <procedure>
       <step>
-        <para>Create and configure a
-        <classname>DifferentialCorrector</classname> resource.</para>
+        <para>Load the Simple Orbit Transfer mission.</para>
       </step>
 
       <step>
-        <para>Modify the <classname>DefaultOrbitView</classname> to visualize
-        the trajectory.</para>
+        <para>Configure GMAT for event location.</para>
       </step>
 
       <step>
-        <para>Create two <classname>ImpulsiveBurn</classname> resources with
-        default settings.</para>
+        <para>Add and configure an <guilabel>EclipseLocator</guilabel> to
+        report eclipses.</para>
       </step>
 
       <step>
-        <para>Create a <function>Target</function> sequence to (1) raise
-        apoapsis to geosynchronous altitude and (2) circularize the
-        orbit.</para>
+        <para>Run the mission and analyze the eclipse report.</para>
       </step>
 
       <step>
-        <para>Run the mission and analyze the results.</para>
+        <para>Add and configure a <guilabel>GroundStation</guilabel> and a
+        <guilabel>ContactLocator</guilabel> to report contact times.</para>
+      </step>
+
+      <step>
+        <para>Run the mission and analyze the contact report.</para>
       </step>
     </procedure>
   </section>
 
   <section>
-    <title>Configure Resources</title>
+    <title>Load the Mission</title>
 
-    <para>For this tutorial, you’ll need</para>
+    <para>For this tutorial, we will start with a preexisting mission created
+    during the Simple Orbit Transfer tutorial. You can either complete that
+    tutorial prior to this one, or you can load the end result directly, as
+    shown below.</para>
 
-    <section>
-      <title>Create the TBD Resource</title>
+    <procedure>
+      <step>
+        <para>Open GMAT.</para>
+      </step>
 
-      <para>The <function>Target</function> sequence we will create later
-      needs a <classname>DifferentialCorrector</classname> resource to
-      operate, so let’s create one now. We'll leave the settings at their
-      defaults.</para>
+      <step>
+        <para>Click <guilabel>Open</guilabel> in the toolbar and navigate to
+        the GMAT <filename>samples</filename> directory.</para>
+      </step>
 
-      <procedure>
-        <step>
-          <para>In the <guilabel>Resource</guilabel> tree, expand the
-          <guilabel>Solvers</guilabel> folder if it isn’t already.</para>
-        </step>
+      <step>
+        <para>Select <filename>Tut_SimpleOrbitTransfer.script</filename> and
+        click <guibutton>Open</guibutton>.</para>
+      </step>
 
-        <step>
-          <para>Right-click the<guilabel> Boundary Value Solvers</guilabel>
-          folder, point to <guilabel>Add</guilabel>, and click
-          <guilabel>DifferentialCorrector</guilabel>. A new resource called
-          <guilabel>DC1</guilabel> will be created.</para>
-        </step>
-      </procedure>
-    </section>
+      <step>
+        <para>Click <guilabel>Run</guilabel> (<inlinemediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="8pt"
+                         fileref="files/images/icons/RunMission.png"
+                         width="1em"/>
+            </imageobject>
+          </inlinemediaobject>) to run the mission.</para>
+      </step>
+    </procedure>
+
+    <para>You should see the following result in the
+    <guilabel>DefaultOrbitView</guilabel> window.</para>
+
+    <informalfigure>
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_EventLocation_1.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+    </informalfigure>
   </section>
 
   <section>
-    <title>Configure the Mission Sequence</title>
+    <title>Configure GMAT for Event Location</title>
 
-    <para>Now we will configure</para>
+    <para/>
+  </section>
+
+  <section>
+    <title>Configure and Run the Eclipse Locator</title>
+
+    <para/>
 
     <section>
-      <title>Configure the TBD Command</title>
+      <title>Configure the EclipseLocator Resource</title>
+
+      <procedure>
+        <step>
+          <para>Click on the <guilabel>Mission</guilabel> tab to show the
+          <guilabel>Mission</guilabel> tree.</para>
+        </step>
+
+        <step>
+          <para>Configure <guilabel>Propagate1</guilabel> to propagate to
+          <userinput>DefaultSC.Earth.Periapsis</userinput>.</para>
+        </step>
+
+        <step>
+          <para>Rename <guilabel>Propagate1</guilabel> to <userinput>Prop To
+          Periapsis</userinput>.</para>
+        </step>
+      </procedure>
+    </section>
+
+    <section>
+      <title>Run the Mission</title>
 
       <procedure>
         <step>
@@ -149,58 +190,71 @@
   </section>
 
   <section>
-    <title>Run the Mission</title>
+    <title>Configure and Run the Contact Locator</title>
 
-    <para>Before running the mission, click <guilabel>Save</guilabel>
-    (<inlinemediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="8pt"
-                     fileref="files/images/icons/SaveMission.png" width="1em"/>
-        </imageobject>
-      </inlinemediaobject>) and save the mission to a file of your choice. Now
-    click <guilabel>Run</guilabel> (<inlinemediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="8pt"
-                     fileref="files/images/icons/RunMission.png" width="1em"/>
-        </imageobject>
-      </inlinemediaobject>).</para>
+    <para/>
 
-    <figure>
-      <title>3D View of Hohmann Transfer</title>
+    <section>
+      <title>Add Ground Stations</title>
 
-      <screenshot>
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Tut_SimpleOrbitTransfer_OrbitView.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
-        </mediaobject>
-      </screenshot>
-    </figure>
+      <procedure>
+        <step>
+          <para>Click on the <guilabel>Mission</guilabel> tab to show the
+          <guilabel>Mission</guilabel> tree.</para>
+        </step>
 
-    <para>If you were to continue developing this mission, you can store the
-    final solution of the <function>Target</function> sequence as the initial
-    conditions of the <guilabel>TOI</guilabel> and <guilabel>GOI</guilabel>
-    resources themselves, so that if you make small changes, the subsequent
-    runs will take less time. To do this, follow these steps:</para>
+        <step>
+          <para>Configure <guilabel>Propagate1</guilabel> to propagate to
+          <userinput>DefaultSC.Earth.Periapsis</userinput>.</para>
+        </step>
 
-    <procedure>
-      <step>
-        <para>In the <guilabel>Mission</guilabel> tree, double-click
-        <guilabel>Hohmann Transfer</guilabel> to edit its properties.</para>
-      </step>
+        <step>
+          <para>Rename <guilabel>Propagate1</guilabel> to <userinput>Prop To
+          Periapsis</userinput>.</para>
+        </step>
+      </procedure>
+    </section>
 
-      <step>
-        <para>Click <guilabel>Apply Corrections</guilabel>.</para>
-      </step>
+    <section>
+      <title>Configure the ContactLocator Resource</title>
 
-      <step>
-        <para>Now re-run the mission. If you inspect the results in the
-        message window, you will see that the <function>Target</function>
-        sequence converges in one iteration because you stored the solution as
-        the initial condition.</para>
-      </step>
-    </procedure>
+      <procedure>
+        <step>
+          <para>Click on the <guilabel>Mission</guilabel> tab to show the
+          <guilabel>Mission</guilabel> tree.</para>
+        </step>
+
+        <step>
+          <para>Configure <guilabel>Propagate1</guilabel> to propagate to
+          <userinput>DefaultSC.Earth.Periapsis</userinput>.</para>
+        </step>
+
+        <step>
+          <para>Rename <guilabel>Propagate1</guilabel> to <userinput>Prop To
+          Periapsis</userinput>.</para>
+        </step>
+      </procedure>
+    </section>
+
+    <section>
+      <title>Run the Mission</title>
+
+      <procedure>
+        <step>
+          <para>Click on the <guilabel>Mission</guilabel> tab to show the
+          <guilabel>Mission</guilabel> tree.</para>
+        </step>
+
+        <step>
+          <para>Configure <guilabel>Propagate1</guilabel> to propagate to
+          <userinput>DefaultSC.Earth.Periapsis</userinput>.</para>
+        </step>
+
+        <step>
+          <para>Rename <guilabel>Propagate1</guilabel> to <userinput>Prop To
+          Periapsis</userinput>.</para>
+        </step>
+      </procedure>
+    </section>
   </section>
 </chapter>
