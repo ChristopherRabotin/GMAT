@@ -253,6 +253,9 @@ protected:
        PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount];
     static const std::string RUN_MODES[3];
     static const Integer numModes;
+    static const std::string defaultFormat;
+    static const Real        defaultInitialEpoch;
+    static const Real        defaultFinalEpoch;
 
     static const Real STEP_MULTIPLE;
 

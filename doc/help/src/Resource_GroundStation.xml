@@ -32,10 +32,11 @@
     surface of a <guilabel>CelestialBody</guilabel>. There are several state
     representations available for defining the location of a ground station
     including Cartesian and spherical. This resource cannot be modified in the
-    Mission Sequence.</para>
+    mission sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="CoordinateSystem"/>, <xref linkend="Color"/></para>
+    linkend="ContactLocator"/>, <xref linkend="CoordinateSystem"/>, <xref
+    linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="GroundStation_Resource_Fields">
@@ -588,6 +589,62 @@
           </row>
 
           <row>
+            <entry><guilabel>MinimumElevationAngle</guilabel></entry>
+
+            <entry><para>Minimum elevation angle constraint for use with
+            <guilabel>ContactLocator</guilabel>.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-90 ≤ <guilabel>MinimumElevationAngle</guilabel> ≤
+                    90</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>7</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>OrbitColor</guilabel></entry>
 
             <entry><para>Allows you to select available colors for a
@@ -802,7 +859,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_GroundStation_Default2.png"
-                     scalefit="1" width="60%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -846,7 +903,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_GroundStation_Ellipsoid2.png"
-                     scalefit="1" width="60%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -877,8 +934,8 @@
       fields are used to set colors on a ground station facility. See the
       <xref linkend="GroundStation_Resource_Fields" xrefstyle="select:title"/>
       section to read more about these two fields. Also See <xref
-      linkend="Color"/> documentation for discussion and examples on
-      how to set colors on a ground station facility.</para>
+      linkend="Color"/> documentation for discussion and examples on how to
+      set colors on a ground station facility.</para>
     </refsection>
   </refsection>
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xml:id="RunningGmat"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -14,7 +14,7 @@
 
     <para>On Microsoft Windows platforms there are several ways to start a
     GMAT session. If you used the GMAT installer, you can click the
-    <guimenuitem>GMAT R2014a</guimenuitem> item in the
+    <guimenuitem>GMAT R2015a</guimenuitem> item in the
     <guimenu>Start</guimenu> menu. If you installed GMAT from a
     <filename>.zip</filename> file or by compiling the system, locate the GMAT
     <filename>bin</filename> directory double-click
