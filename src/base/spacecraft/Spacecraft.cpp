@@ -3259,10 +3259,13 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 
    if (label == "Cd")
    {
-      if (value >= 0.0)
+      if ((value >= 0.0) || (constrainCd == false))
       {
          coeffDrag = value;
          cdEpsilon = 0.0;
+         if (value < 0.0)
+            MessageInterface::ShowMessage("Warning: The Cd value %lf is "
+                  "outside of the expected range of 0.0 <= Cd\n", value);
       }
       else
       {
@@ -5550,14 +5553,13 @@ bool Spacecraft::IsEstimationParameterValid(const Integer item)
          retval = true;
          break;
       
-      case CR_EPSILON:                       // made changes by TUAN NGUYEN
-         retval = true;                      // made changes by TUAN NGUYEN
-         break;                              // made changes by TUAN NGUYEN
+      case CR_EPSILON:
+         retval = true;
+         break;
 
-      case CD_EPSILON:                       // made changes by TUAN NGUYEN
-         // @todo: when code for Cd is completed. It need to add the following line.
-         //retval = true;                      // made changes by TUAN NGUYEN
-         break;                              // made changes by TUAN NGUYEN
+      case CD_EPSILON:
+         retval = true;
+         break;
 
       case Gmat::MASS_FLOW:          /// Is it correct ???? Spacecraft::SC_Param_ID::MASS_FLOW or Gmat::MASS_FLOW ???
          // todo: Access tanks for mass information to handle mass flow
