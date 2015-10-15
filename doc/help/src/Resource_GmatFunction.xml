@@ -184,8 +184,8 @@
       function and receive entire objects as output from the function. If a
       given GMAT object is not declared as global in both the main script and
       in the function, then all objects that are passed into or received as
-      output from the function are considered to be local to that
-      function and the main script.</para>
+      output from the function are considered to be local to that function and
+      the main script.</para>
 
       <para>In GMAT, you can use <guilabel>CallGmatFunction</guilabel> command
       to pass GMAT objects as input arguments and receive objects as output
@@ -264,40 +264,45 @@
       <guilabel>Global</guilabel> command in the <guilabel>Mission</guilabel>
       tree. All default objects present in GMAT's Resources tree or any new
       user-defined resources can be declared as global. Currently any default
-      or new user-defined coordinate systems, <guilabel>SolarSystemBarycenter</guilabel>,
-      <guilabel>SolarSystem</guilabel>, default or new user-defined propagators are automatic
-      global objects and not needed to be specifically declared as global via
-      the <guilabel>Global</guilabel> command.</para>
+      or new user-defined coordinate systems,
+      <guilabel>SolarSystemBarycenter</guilabel>,
+      <guilabel>SolarSystem</guilabel>, default or new user-defined
+      propagators are automatic global objects and not needed to be
+      specifically declared as global via the <guilabel>Global</guilabel>
+      command.</para>
 
       <para>Often times, there will be cases when you will propagate a
-      spacecraft both inside the main script and from the GMAT function.
+      spacecraft both in the main script and from inside the GMAT function.
       Additionally users may want to report and/or plot spacecraft's
-      trajectory, parameters, variables, and arrays to subscribers both from
-      the main script and/or solely from inside the function. If you want to
-      report and plot continuous set of data to any of the five subscribers
-      (i.e. <guilabel>OrbitView</guilabel>,
+      trajectory, parameters, variables, arrays and strings to same
+      subscribers both from the main script and/or solely from inside the
+      function. If you want to report and plot continuous set of data to any
+      of the five subscribers (i.e. <guilabel>OrbitView</guilabel>,
       <guilabel>GroundTrackPlot</guilabel>, <guilabel>XYPlot</guilabel>,
       <guilabel>ReportFile</guilabel>, <guilabel>EphemerisFile</guilabel>),
       then always declare your <guilabel>Spacecraft</guilabel> object and
       subscriber objects as global both in the main script and inside the
-      function.</para>
-
-      <para>Currently in GMAT, any spacecraft objects and subscribers that
-      have been declared global in both the main script and in function, then
-      do not pass the globally declared spacecraft and subscribers as input
-      arguments into the function or receive them as output arguments from the
       function. Abiding by this rule draws plots, reports and ephemeris files
       correctly and flow of data will be reported continuously to all the
-      subscribers. With the exception of global variables, arrays and strings,
-      the general rule of thumb is that if an object has been declared as
-      global in both the script and in function, then do not pass that object
-      into the function or receive it as output from the function. You can
-      always pass global variables/arrays/strings arguments into the function
-      and receive them as output from the function.</para>
+      subscribers.</para>
+
+      <para>In general, a good scripting practice is that objects that have
+      been declared global don't need to be sent as input or output arguments
+      to and from the function. For example, if
+      <guilabel>Spacecraft</guilabel>, all subscriber objects or objects that
+      are used to perform propagation, targeting or optimization have already
+      been declared global, then you don't to be redundant and send those
+      global objects again as input or receive them as output from the
+      function. Having said that, GMAT does allow globally declared objects
+      such as <guilabel>Spacecraft</guilabel>, global variables/arrays/strings
+      to be passed as input/output argument to and from the function. Globally declared objects such as spacecraft,
+      variables/arrays/strings can be plotted or reported interchangeably both
+      from the main script and inside the function to globally declared
+      subscribers. </para>
 
       <para>See <xref linkend="GmatFunction_Examples"
-      xrefstyle="select:title"/> section that shows two examples of how to
-      declare both spacecraft and five subscribers as global in both the main
+      xrefstyle="select:title"/> section that shows three examples of how to
+      declare spacecraft, all five subscribers and variables/arrays as global in both the main
       script and inside the function. As you run the examples, notice that the
       flow of data reported to all five subscribers is continuous.</para>
     </refsection>
