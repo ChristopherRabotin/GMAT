@@ -527,7 +527,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       validator->HandleCcsdsEphemerisFile(objectStore, true);
       #ifdef DEBUG_FUNCTION_INIT
       MessageInterface::ShowMessage
-         ("GmatFunction::Initialize() calling InitializeLocalObjects()\n");
+         ("GmatFunction::Initialize() Calling InitializeLocalObjects()\n");
       #endif
       InitializeLocalObjects(objInit, current, true);
    }
@@ -770,7 +770,10 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
                MessageInterface::ShowMessage
                   ("============================ Initializing LocalObjects at current\n"
                    "%s\n", current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+               MessageInterface::ShowMessage
+                  ("GmatFunction::Execute() Calling InitializeLocalObjects()\n");
                #endif
+                              
                InitializeLocalObjects(objInit, current, true);
             }
          }
@@ -850,30 +853,51 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       #endif
    }
    
+   // This block no longer needed since two-mode parsing already filled
+   // object map for the Validator.
+   // (LOJ: 2015.10.15 Fixes GMT-5336 Passing global objects in and out to a fucction)
    // Set ObjectMap from the last command to Validator in order to create
    // valid output wrappers (loj: 2008.11.12)
-   validator->SetObjectMap(last->GetObjectMap());
+   // #ifdef DEBUG_FUNCTION_EXEC
+   // MessageInterface::ShowMessage
+   //    ("GmatFunction()::Execute() Setting object map from the last command <%p>[%s]\n",
+   //     last, last->GetTypeName().c_str());
+   // ShowObjectMap(last->GetObjectMap());
+   // #endif
+   //validator->SetObjectMap(last->GetObjectMap());
    
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage
-      ("   Now about to create %d output wrapper(s) to set results, objectsInitialized=%d\n",
-       outputNames.size(), objectsInitialized);
+      ("GmatFunction()::Execute()  Now about to create %d output wrapper(s) to "
+       "set results, objectsInitialized=%d\n", outputNames.size(), objectsInitialized);
    #endif
    
    // create output wrappers and put into map
-   GmatBase *obj;
+   GmatBase *obj = NULL;
    wrappersToDelete.clear();
    for (unsigned int jj = 0; jj < outputNames.size(); jj++)
    {
+      #ifdef DEBUG_FUNCTION_EXEC
+      MessageInterface::ShowMessage
+         ("   Trying to find ouputNames[%d]='%s'\n", jj, outputNames[jj].c_str());
+      #endif
       if (!(obj = FindObject(outputNames.at(jj))))
       {
          std::string errMsg = "Function: Output \"" + outputNames.at(jj);
          errMsg += " not found for function \"" + functionName + "\"";
          throw FunctionException(errMsg);
       }
+      
       std::string outName = outputNames.at(jj);
+      #ifdef DEBUG_FUNCTION_EXEC
+      MessageInterface::ShowMessage
+         ("   The object '%s' found\n   Trying to create wrapper for '%s'\n",
+          GmatBase::WriteObjectInfo("", obj, false).c_str(), outName.c_str());
+      #endif
+      
       ElementWrapper *outWrapper =
          validator->CreateElementWrapper(outName, false, 0);
+      
       #ifdef DEBUG_MORE_MEMORY
       MessageInterface::ShowMessage
          ("+++ GmatFunction::Execute() *outWrapper = validator->"
