@@ -26,6 +26,7 @@
 #include "MessageInterface.hpp"
 #include "CoordinateSystem.hpp"
 #include "TimeTypes.hpp"
+#include "FileManager.hpp"    // for flux files
 
 #include <sstream>                 // for <<
 #include <cmath>
@@ -39,6 +40,7 @@
 //#define DEBUG_ANGVEL
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_NAN_CONDITIONS
+//#define DEBUG_FLUX_FILE
 
 //#define DUMP_DERIVATIVE
 //#define DUMP_DENSITY
@@ -148,8 +150,6 @@ DragForce::DragForce(const std::string &name) :
    dataType                ("Constant"),
    historicWSource         ("ConstantFluxAndGeoMag"),
    predictedWSource        ("ConstantFluxAndGeoMag"),
-   cssiWFile               (""),
-   schattenWFile           (""),
    fluxF107                (150.0),
    fluxF107A               (150.0),
    kp                      (3.0),
@@ -182,10 +182,10 @@ DragForce::DragForce(const std::string &name) :
    
    density = new Real[1];
 
-//   // Nominal Earth angular velocity
-//   angVel[0]      = 0.0;
-//   angVel[1]      = 0.0;
-//   angVel[2]      = 7.29211585530e-5;
+   FileManager *fm = FileManager::Instance();
+   fluxPath = fm->GetAbsPathname("ATMOSPHERE_PATH");
+   cssiWFile = fm->GetFilename("CSSI_FLUX_FILE");
+   schattenWFile = fm->GetFilename("SCHATTEN_FILE");
    
    ap = CalculateAp(kp);
    
@@ -294,6 +294,7 @@ DragForce::DragForce(const DragForce& df) :
    dataType                (df.dataType),
    historicWSource         (df.historicWSource),
    predictedWSource        (df.predictedWSource),
+   fluxPath                (df.fluxPath),
    cssiWFile               (df.cssiWFile),
    schattenWFile           (df.schattenWFile),
    fluxF107                (df.fluxF107),
@@ -303,10 +304,8 @@ DragForce::DragForce(const DragForce& df) :
    schattenTimingModel     (df.schattenTimingModel),
    cartIndex               (df.cartIndex),
    fillCartesian           (df.fillCartesian),
-//   cbFixed                 (NULL),                          // made changes for bug GMT-5282
-//   internalCoordSystem     (NULL),                          // made changes for bug GMT-5282
-   cbFixed                 (df.cbFixed),                      // made changes for bug GMT-5282
-   internalCoordSystem     (df.internalCoordSystem),          // made changes for bug GMT-5282
+   cbFixed                 (NULL),
+   internalCoordSystem     (NULL),
    kpApConversion          (df.kpApConversion)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -323,11 +322,13 @@ DragForce::DragForce(const DragForce& df) :
       #endif
    }
    
-//   if (df.cbFixed)                                                                                            // made changes for bug GMT-5282
-////      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());      // Any other initialization needed?          // made changes for bug GMT-5282
-//      cbFixed = (CoordinateSystem*)(df.cbFixed);                                                              // made changes for bug GMT-5282
+   if (df.cbFixed)
+//      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());      // Any other initialization needed?
+      cbFixed = (CoordinateSystem*)(df.cbFixed);
 
-   parameterCount += 7;
+//   parameterCount += 7;
+   parameterCount = DragForceParamCount;
+
    dimension = df.dimension;
    orbitDimension = df.orbitDimension;
 
@@ -818,7 +819,7 @@ bool DragForce::Initialize()
                   "GMAT builds.");
          }
          
-		   if (dragBody.size() > 0)
+         if (dragBody.size() > 0)
             bodyName = dragBody[0];
          else
             bodyName = "Earth";
@@ -837,7 +838,7 @@ bool DragForce::Initialize()
             std::string modelBodyIsUsing =
                centralBody->GetAtmosphereModelType();
             
-			   // Density from the body
+			// Density from the body
             if (modelBodyIsUsing == "Undefined")
             {
                #ifdef DEBUG_DRAGFORCE_DENSITY
@@ -880,7 +881,9 @@ bool DragForce::Initialize()
                throw ODEModelException("No central body is defined for DragForce\n");
 
             if (body->GetName() != atmos->GetCentralBodyName())
-				   throw ODEModelException("Force model's central body ('" + body->GetName() + "') and Atmosphere model's central body ('" + atmos->GetCentralBodyName() + "')are different\n"); 
+				   throw ODEModelException("Force model's central body ('" +
+				         body->GetName() + "') and Atmosphere model's central body ('" +
+				         atmos->GetCentralBodyName() + "') are different\n");
 
             atmos->SetSunVector(sunLoc);
             atmos->SetCentralBodyVector(cbLoc);
@@ -904,9 +907,22 @@ bool DragForce::Initialize()
             atmos->SetRealParameter(F107AID, fluxF107A);
             atmos->SetRealParameter(KPID, kp);
 
-            // Set the file names
-            atmos->SetStringParameter(cssiWFileID, cssiWFile);
-            atmos->SetStringParameter(schattenWFileID, schattenWFile);
+            // Set the fully qualified file names
+            std::string weatherfile = fluxPath + cssiWFile;
+            atmos->SetStringParameter(cssiWFileID, weatherfile);
+
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("CSSI File setting: %s\n",
+                     atmos->GetStringParameter(cssiWFileID).c_str());
+            #endif
+
+            weatherfile = fluxPath + schattenWFile;
+            atmos->SetStringParameter(schattenWFileID, weatherfile);
+
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("Schatten File setting: %s\n",
+                     atmos->GetStringParameter(schattenWFileID).c_str());
+            #endif
 
             if (cbFixed != NULL)
                atmos->SetFixedCoordinateSystem(cbFixed);
@@ -928,7 +944,7 @@ bool DragForce::Initialize()
 //				   MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
 			      atmos->SetStringParameter("DensityModel", densityModel);	// made changes for GMT-4299
 			      atmos->SetStringParameter("InputFile", inputFile);		   // made changes for GMT-4299
-			   } catch (...){}
+               } catch (...){}
 
 			   atmos->Initialize();										            // Note: it needs to initialize before use. Fixed bug GMT-4124
          }
@@ -1507,7 +1523,8 @@ bool DragForce::IsParameterReadOnly(const Integer id) const
 {
    if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX ||
        id == HISTORIC_WEATHER_SOURCE || id == PREDICTED_WEATHER_SOURCE ||
-       id == CSSI_WEATHER_FILE || id == SCHATTEN_WEATHER_FILE)
+       id == CSSI_WEATHER_FILE || id == SCHATTEN_WEATHER_FILE ||
+       id == SCHATTEN_ERROR_MODEL || id == SCHATTEN_TIMING_MODEL)
    {
       if (atmosphereType == "Exponential")
          return true;
@@ -2258,6 +2275,22 @@ bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
 AtmosphereModel* DragForce::GetInternalAtmosphereModel()
 {
    return internalAtmos;
+}
+
+
+//------------------------------------------------------------------------------
+// AtmosphereModel* GetInternalAtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ * Gets the internal atmosphere model for the DragForce.
+ *
+ * @return pointer to the internal atmosphere model used by the DragForce
+ *         object when useExternalAtmosphere is set to false.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* DragForce::GetAtmosphereModel()
+{
+   return (internalAtmos ? internalAtmos : atmos);
 }
 
 
