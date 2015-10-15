@@ -1163,8 +1163,8 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       Real fracEpoch = epoch - fD.epoch;
       Real fracEpochKp = fracEpoch - 6.7/24.0;
 //      Real fracEpochKp = fracEpoch - 3.0/24.0;
-//      Integer subIndex = (Integer)floor(fracEpochKp * 8);
-      Integer subIndex = (Integer)floor(fracEpoch * 8);
+      Integer subIndex = (Integer)floor(fracEpochKp * 8);
+//      Integer subIndex = (Integer)floor(fracEpoch * 8);
 
       // F10.7 is measured at 8 pm (5pm before 5/31/91), so we use the current
       // row for data from 8 am on the current day to 8 am the next day.
@@ -1183,47 +1183,47 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       if (subIndex < 0)
          fD.kp[0] = fD_OneBefore.kp[8+subIndex];
 
-      if (interpolateFlux && (epoch >= historicStart))
-      {
-         Real vals[2];
-         Real eps[2];
-         Integer index = fD.id;
-
-         // Pick the correct timespan
-         eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
-         if (eps[0] > epoch)
-         {
-            eps[1] = eps[0];
-            --index;
-            if (index >= 0)
-               eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
-            else
-               index = 0;
-         }
-         else
-         {
-            eps[1] = (index < obsFluxData.size() - 1 ?
-                  obsFluxData[index+1].epoch + f107Offset + 0.5 : eps[0] + 1.0);
-         }
-         vals[0] = obsFluxData[index].obsF107;
-
-         if (index < obsFluxData.size())
-            vals[1] = obsFluxData[index+1].obsF107;
-         else
-            vals[1] = vals[0];
-
-         Real dt = eps[1] - eps[0];
-         Real delta = epoch - eps[0];
-         Real portion = delta / dt;
-         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
-
-         #ifdef DEBUG_FLUXINTERPOLATION
-            MessageInterface::ShowMessage("F10.7 Interpolated from [%lf %lf] "
-                  "to [%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
-                  vals[1], epoch, fD.obsF107);
-         #endif
-      }
-      else
+//      if (interpolateFlux && (epoch >= historicStart))
+//      {
+//         Real vals[2];
+//         Real eps[2];
+//         Integer index = fD.id;
+//
+//         // Pick the correct timespan
+//         eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
+//         if (eps[0] > epoch)
+//         {
+//            eps[1] = eps[0];
+//            --index;
+//            if (index >= 0)
+//               eps[0] = obsFluxData[index].epoch + f107Offset + 0.5;
+//            else
+//               index = 0;
+//         }
+//         else
+//         {
+//            eps[1] = (index < obsFluxData.size() - 1 ?
+//                  obsFluxData[index+1].epoch + f107Offset + 0.5 : eps[0] + 1.0);
+//         }
+//         vals[0] = obsFluxData[index].obsF107;
+//
+//         if (index < obsFluxData.size())
+//            vals[1] = obsFluxData[index+1].obsF107;
+//         else
+//            vals[1] = vals[0];
+//
+//         Real dt = eps[1] - eps[0];
+//         Real delta = epoch - eps[0];
+//         Real portion = delta / dt;
+//         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
+//
+//         #ifdef DEBUG_FLUXINTERPOLATION
+//            MessageInterface::ShowMessage("F10.7 Interpolated from [%lf %lf] "
+//                  "to [%lf %lf] to get [%lf  %lf]\n", eps[0], vals[0], eps[1],
+//                  vals[1], epoch, fD.obsF107);
+//         #endif
+//      }
+//      else
       {
          // Daily value from previous day
          fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 :
@@ -1231,7 +1231,8 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       }
 
       // Average value from detected day
-      fD.obsCtrF107a = obsFluxData[f107index].obsCtrF107a;
+      fD.obsCtrF107a = (f107index > 0 ? obsFluxData[f107index-1].obsCtrF107a :
+                                        obsFluxData[f107index].obsCtrF107a);
 
       #ifdef DEBUG_FIRST_CALL
          std::stringstream msg;

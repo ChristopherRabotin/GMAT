@@ -901,7 +901,7 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               listener->VariabledChanged(*current, variable[i]);
+               listener->VariabledChanged(*current, unscaledVariable.at(i));
                ++i;
             }
             break;
@@ -911,7 +911,7 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               listener->VariabledChanged(*current, variable[i]);
+               listener->VariabledChanged(*current, unscaledVariable.at(i));
                ++i;
             }
             // fall through
@@ -967,7 +967,7 @@ void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forS
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               listener->VariabledChanged(*current, variable[i]);
+               listener->VariabledChanged(*current, unscaledVariable.at(i));
                ++i;
             }
             if (converged)
