@@ -148,12 +148,22 @@ std::string GmatFileUtil::GetPathSeparator()
 
 
 //------------------------------------------------------------------------------
-// std::string GMAT_API ConvertToOsFileName(const std::string &fileName)
+// std::string ConvertToOsFileName(const std::string &fileName,
+//                                 bool forceForwardSlash = true)
 //------------------------------------------------------------------------------
-std::string GmatFileUtil::ConvertToOsFileName(const std::string &fileName)
+std::string GmatFileUtil::ConvertToOsFileName(const std::string &fileName,
+                                              bool forceForwardSlash)
 {
    std::string fname = fileName;
-   if (IsOsWindows())
+   bool useBackSlash = false;
+   if (!forceForwardSlash)
+   {
+      if (IsOsWindows())
+         useBackSlash = true;
+   }
+   
+   //if (IsOsWindows())
+   if (useBackSlash)
    {
       if (fname.find("/") != fname.npos)
          fname = GmatStringUtil::Replace(fname, "/", "\\");

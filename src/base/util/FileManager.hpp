@@ -178,7 +178,8 @@ public:
    std::string GetAbsPathname(const FileType type);
    std::string GetAbsPathname(const std::string &typeName);
    
-   std::string ConvertToAbsPath(const std::string &relPath, bool appendPathSep = true);
+   std::string ConvertToAbsPath(const std::string &relPath, bool appendPathSep = true,
+                                bool prependBinDir = true);
    
    void SetAbsPathname(const FileType type, const char *newpath);
    void SetAbsPathname(const FileType type, const std::string &newpath);

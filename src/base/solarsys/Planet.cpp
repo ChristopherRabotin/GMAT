@@ -117,7 +117,9 @@ Planet::Planet(std::string name) :
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
-      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      // Changed to use GetPathname() (LOJ: 2015.10.14)
+      //std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      std::string path = FileManager::Instance()->GetPathname(FileManager::PLANETARY_COEFF_PATH);
       attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
       attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
       attitudeSpiceKernelNames.push_back(path+"earth_000101_151228_151006.bpc");
@@ -165,12 +167,14 @@ Planet::Planet(std::string name, const std::string &cBody) :
       #ifdef DEBUG_PLANET_CONSTRUCT
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
-      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-         attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
-         attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
-         attitudeSpiceKernelNames.push_back(path+"earth_000101_151228_151006.bpc");
+      // Changed to use GetPathname() (LOJ: 2015.10.14)
+      //std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      std::string path = FileManager::Instance()->GetPathname(FileManager::PLANETARY_COEFF_PATH);
+      attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
+      attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
+      attitudeSpiceKernelNames.push_back(path+"earth_000101_151228_151006.bpc");
    }
-
+   
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
 }

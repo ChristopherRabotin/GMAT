@@ -30,7 +30,7 @@
 #include "GmatDefaults.hpp"
 #include "StringUtil.hpp"               // for ToString()
 #include "FileUtil.hpp"                 // for DoesFileExist
-#include "FileManager.hpp"              // for GetFullPathname()
+#include "FileManager.hpp"              // for GetPathname()
 #include "ColorTypes.hpp"               // for namespace GmatColor::
 #include "MessageInterface.hpp"         // for debugging
 #include "CoordinateSystem.hpp"
@@ -351,14 +351,16 @@ SolarSystem::SolarSystem(std::string withName) :
    // pckKernelName = "DATA_PATH/planetary_coeff/pck00010.tpc";  // HARD_CODED default for now
    // @todo add these to planetarySourceNames at some point?  These should be
    // added to the startup file.
-   std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
-
-   theSPKKernelNames.push_back(path+"DE405AllPlanets.bsp");         // DE405
+   // Changed to use GetPathname() (LOJ: 2015.10.14)
+   //std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+   std::string path = FileManager::Instance()->GetPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+   MessageInterface::ShowMessage("   ==> planetaryEphemSpkPath = '%s'\n", path.c_str());
+   theSPKKernelNames.push_back(path+"DE405AllPlanets.bsp");  // DE405
    theSPKKernelNames.push_back(path+"DE421AllPlanets.bsp");  // DE421
-   theSPKKernelNames.push_back(path+"DE424AllPlanets.bsp");         // DE424
-//   theSPKKernelNames.push_back("PLANETARY_EPHEM_SPK_PATH/DE421AllPlanets.bsp");         // DE430
+   theSPKKernelNames.push_back(path+"DE424AllPlanets.bsp");  // DE424
+   //theSPKKernelNames.push_back(path+"DE430AllPlanets.bsp");  // DE430
    theSPKKernelNames.push_back(path+"DE421AllPlanets.bsp");  // SPICE
-
+   
    #ifdef DEBUG_SS_CREATE
    MessageInterface::ShowMessage
       ("SolarSystem::SolarSystem(default), this=<%p>, planetarySPK<%p> created\n",
@@ -1738,8 +1740,10 @@ void SolarSystem::LoadSpiceKernels()
          // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
          // std::string spkPath =
          //    FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+         // Changed to use GetPathname() (LOJ: 2015.10.14)
          std::string spkPath =
-            FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+            //FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+            FileManager::Instance()->GetPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
          spkName = spkPath + spkName;
          try
          {
@@ -1833,8 +1837,10 @@ MessageInterface::ShowMessage
       if (pckName.find("/") == pckName.npos &&
           pckName.find("\\") == pckName.npos)
       {
+         // Changed to use GetPathname() (LOJ: 2015.10.14)
          std::string pckPath =
-            FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+            //FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+            FileManager::Instance()->GetPathname(FileManager::PLANETARY_COEFF_PATH);
          pckName = pckPath + pckName;
          try
          {
@@ -1916,8 +1922,10 @@ MessageInterface::ShowMessage
       if (lskName.find("/") == lskName.npos &&
           lskName.find("\\") == lskName.npos)
       {
+         // Changed to use GetPathname() (LOJ: 2015.10.14)
          std::string lskPath =
-            FileManager::Instance()->GetFullPathname(FileManager::TIME_PATH);
+            //FileManager::Instance()->GetFullPathname(FileManager::TIME_PATH);
+            FileManager::Instance()->GetPathname(FileManager::TIME_PATH);
          lskName = lskPath + lskName;
          try
          {
