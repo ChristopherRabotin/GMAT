@@ -9,7 +9,7 @@ VERSION = dev
 # Standard targets
 #
 
-all: installer-internal installer-public zip-internal zip-public
+all: installer-internal zip-internal installer-public zip-public
 
 clean:
 	rm -fr gmat-internal gmat-public *.exe *.zip uninstall.nsh
