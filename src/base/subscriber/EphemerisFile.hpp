@@ -130,6 +130,7 @@ protected:
    std::string fullPathFileName;
    std::string spacecraftName;
    std::string spacecraftId;
+   std::string prevFileName;
    std::string fileName;
    std::string fileFormat;
    std::string epochFormat;
