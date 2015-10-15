@@ -5640,13 +5640,13 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
    GmatCommand *cmd = NULL;
    if (fileName != "")
       cmd =  theScriptInterpreter->InterpretGmatFunction(fileName);
-   
-   #if DEBUG_GMAT_FUNCTION
-   MessageInterface::ShowMessage
-      ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
-   #endif
-   
-   ResetConfigurationChanged();
+
+   // Do not reset configuration changed flag here (LOJ: 2015.10.4 GMT5374)
+   // #if DEBUG_GMAT_FUNCTION
+   // MessageInterface::ShowMessage
+   //    ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
+   // #endif
+   //ResetConfigurationChanged();
    
    #if DEBUG_GMAT_FUNCTION
    MessageInterface::ShowMessage
@@ -5731,12 +5731,12 @@ GmatCommand* Moderator::InterpretGmatFunction(Function *funct, ObjectMap *objMap
    GmatCommand *cmd = NULL;
    cmd = theScriptInterpreter->InterpretGmatFunction(funct);
    
-   #if DEBUG_GMAT_FUNCTION
-   MessageInterface::ShowMessage
-      ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
-   #endif
-   
-   ResetConfigurationChanged();
+   // Do not reset configuration changed flag here (LOJ: 2015.10.4 GMT5374)
+   // #if DEBUG_GMAT_FUNCTION
+   // MessageInterface::ShowMessage
+   //    ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
+   // #endif
+   //ResetConfigurationChanged();
    
    // reset current function to NULL
    currentFunction = NULL;
