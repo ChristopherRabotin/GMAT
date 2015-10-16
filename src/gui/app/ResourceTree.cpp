@@ -1863,16 +1863,10 @@ void ResourceTree::AddDefaultLocators(wxTreeItemId itemId, bool restartCounter)
 
    if (size > 0)
    {
-      GmatBase *obj = GetObject(itemNames[0]);
-      GmatTree::ItemType itemType;
-      GmatTree::ResourceIconType itemIcon;
-      GetItemTypeAndIcon(obj, itemType, itemIcon);
-      
       for (int i = 0; i<size; i++)
       {
-         objName = wxString(itemNames[i].c_str());
-         AppendItem(itemId, objName, itemIcon, -1,
-                    new GmatTreeItemData(objName, itemType));
+         GmatBase *obj = GetObject(itemNames[i]);
+         AddObjectToTree(obj);
       };
       
       Expand(itemId);
