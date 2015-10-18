@@ -3181,10 +3181,12 @@ GMAT aForceModel.Drag.AtmosphereModel = NRLMSISE00
 
         <listitem>
           <para>If you have selected a CSSI file as the historical data
-          source, if the CSSI file contains historical data for the simulation
-          epoch, then the CSSI data used, otherwise, the predicted data source
-          is used. (Note: GMAT does not use any of the predicted data from the
-          CSSI file).</para>
+          source, if the simulation epoch falls before the last row of
+          historical data in the CSSI file's historical data block, then the
+          CSSI data is used (the first row is used if the simulation epoch is
+          before the first historical data record), otherwise, the predicted
+          data source is used. Note: GMAT does not use any of the predicted
+          data from the CSSI file.</para>
         </listitem>
 
         <listitem>
