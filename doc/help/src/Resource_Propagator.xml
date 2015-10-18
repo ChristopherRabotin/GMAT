@@ -1259,6 +1259,65 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
             </row>
 
             <row>
+              <entry><guilabel>Drag.CSSISpaceWeatherFile</guilabel></entry>
+
+              <entry><para>The file name of the CSSI space weather file with
+              optional path information. See <xref
+              linkend="Propagator_ForceModel_Remarks"
+              xrefstyle="select:title"/> for details on file
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para>String containing name of the CSSI file with
+                      optional path information.</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para><literal>'CSSI_2004To2026.txt'</literal></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/A</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>Drag.DensityModel</guilabel></entry>
 
               <entry><para>Enabled when
@@ -1439,6 +1498,63 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
             </row>
 
             <row>
+              <entry><guilabel>Drag.HistoricWeatherSource</guilabel></entry>
+
+              <entry><para>Defines the source for historical flux and
+              Geo-magnetic indeces used in Earth density
+              modeling.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Enumeration</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para><guilabel>ConstantFluxAndGeoMag</guilabel>,
+                      <guilabel>CSSISpaceWeatherFile</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para><guilabel>ConstantFluxAndGeoMag</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/A</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>Drag.InputFile</guilabel></entry>
 
               <entry><para>Enabled when
@@ -1554,6 +1670,243 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
 
                     <listitem>
                       <para>script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Drag.PredictedWeatherSource</guilabel></entry>
+
+              <entry><para>Defines the source for predicted flux and
+              Geo-magnetic indeces used in Earth density
+              modeling.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Enumeration</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para><guilabel>SchattenFile</guilabel>,
+                      <guilabel>CSSISpaceWeatherFile</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para><guilabel>ConstantFluxAndGeoMag</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/A</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Drag.SchattenErrorModel</guilabel></entry>
+
+              <entry><para>The error model used from the Schatten file.
+              Schatten predicts include mean, +2 sigma, and -2 sigma models.
+              See <xref linkend="Propagator_ForceModel_Remarks"
+              xrefstyle="select:title"/> for details on the file
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Enumeration</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para><guilabel>Nominal</guilabel>,
+                      <guilabel>PlusTwoSigma</guilabel>,
+                      <guilabel>MinusTwoSigma</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para><guilabel>Nominal</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/A</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Drag.SchattenFile</guilabel></entry>
+
+              <entry><para>The file name of the Schatten file with optional
+              path information. See <xref
+              linkend="Propagator_ForceModel_Remarks"
+              xrefstyle="select:title"/> for details on file
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para>String containing name of the Schatten file with
+                      optional path information.</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para><literal>'SchattenPredict.txt'</literal></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/A</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Drag.SchattenTimingModel</guilabel></entry>
+
+              <entry><para>The timing model used from the Schatten file.
+              Schatten predicts include a nominal solar cycle model, an early
+              model, and a late model. See <xref
+              linkend="Propagator_ForceModel_Remarks"
+              xrefstyle="select:title"/> for details on the file
+              format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Enumeration</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para><guilabel>NominalCycle</guilabel>,
+                      <guilabel>EarlyCycle</guilabel>,
+                      <guilabel>LateCycle</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para><guilabel>NominalCycle</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/A</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -2504,9 +2857,6 @@ aForceModel.GravityField.Earth.EarthTideModel = 'SolidAndPole'</programlisting>
       <programlisting>Create ForceModel aForceModel
 GMAT aForceModel.PrimaryBodies = {Earth}
 GMAT aForceModel.Drag.AtmosphereModel = NRLMSISE00
-GMAT aForceModel.Drag.F107 = 145
-GMAT aForceModel.Drag.F107A = 160
-GMAT aForceModel.Drag.MagneticIndex = 4
 </programlisting>
 
       <caution>
@@ -2522,11 +2872,12 @@ GMAT aForceModel.Drag.MagneticIndex = 4
       </caution>
 
       <para>Note that when you select <guilabel>None</guilabel> for
-      <guilabel>Drag.AtmosphereModel </guilabel>, the fields
-      <guilabel>Drag.F107</guilabel>, <guilabel>Drag.F107A</guilabel>, and
-      <guilabel>Drag.MagneticIndex</guilabel> are inactive and must be removed
-      from your script file to avoid parsing errors. When working in the GUI,
-      this is performed automatically.</para>
+      <guilabel>Drag.AtmosphereModel </guilabel>, the fields associated with
+      density configuration, such as <guilabel>Drag.F107</guilabel>,
+      <guilabel>Drag.F107A</guilabel>, and
+      <guilabel>Drag.MagneticIndex</guilabel> and others are inactive and must
+      be removed from your script file to avoid parsing errors. When working
+      in the GUI, this is performed automatically.</para>
 
       <para>The table below describes the limits on altitude for drag models
       supported by GMAT.</para>
@@ -2597,6 +2948,15 @@ GMAT aForceModel.Drag.MagneticIndex = 4
       atmosphere model. This model is only available when the
       <filename>libMarsGRAM</filename> plugin is available and enabled in the
       GMAT startup file.</para>
+
+      <warning>
+        <para>As of version R2015a, you can only have one unique Mars-GRAM
+        force model configuration in a given script. If you include multiple
+        propagators with Mars-GRAM force models with different Mars-GRAM
+        configurations, the different configurations are not honored, and all
+        of the propagators will use the same configuration for
+        Mars-GRAM.</para>
+      </warning>
 
       <para>When using the <guilabel>MarsGRAM2005</guilabel> atmosphere model,
       three new fields are available in the script language (but not the
@@ -2797,13 +3157,133 @@ GMAT aForceModel.Drag.MagneticIndex = 4
       returned by the Mars-GRAM 2005 model are not included in GMAT's drag
       model.</para>
 
-      <para><emphasis>Configuring an SRP Model</emphasis></para>
+      <para><emphasis>Configuring Space Weather Data for Density
+      Models</emphasis></para>
+
+      <para>GMAT supports several space weather input types for drag modelling
+      including constant flux and Geo-magnetic index values, a historical
+      weather data file, and a predicted weather data file. You can separately
+      configure the data used for historical data and predicted data. For
+      historical data you can choose between constant values and a CSSI space
+      weather file. For predicted data you can choose between constant values
+      and a Schatten predict file. Each of those sources is discussed in
+      detail below.</para>
+
+      <para>The precedence for data source is determined by the simulation
+      epoch (i.e. the epoch when density is evaluated), and the epochs
+      contained on the data files</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>If both historical data and predicted data sources are set to
+          constants, then constant values are always used.</para>
+        </listitem>
+
+        <listitem>
+          <para>If you have selected a CSSI file as the historical data
+          source, if the CSSI file contains historical data for the simulation
+          epoch, then the CSSI data used, otherwise, the predicted data source
+          is used. (Note: GMAT does not use any of the predicted data from the
+          CSSI file).</para>
+        </listitem>
+
+        <listitem>
+          <para>If you have selected the Schatten file for predicted data, if
+          the simulation epoch is NOT in the CSSI file historical data, or the
+          historical data source is set to constant values, then the data is
+          used from the Schatten file.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis>Constant Values</emphasis></para>
+
+      <para><emphasis>GMAT supports constant flux and Geo-magnetic index
+      values for all Earth density models. You configure GMAT to use those
+      values for historical and predicted data as shown below using NRLMSISE00
+      for the example.</emphasis></para>
+
+      <programlisting>Create ForceModel aForceModel
+GMAT aForceModel.Drag.AtmosphereModel = NRLMSISE00
+GMAT aForceModel.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag'
+GMAT aForceModel.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag'
+GMAT aForceModel.Drag.F107 = 150
+GMAT aForceModel.Drag.F107A = 150
+GMAT aForceModel.Drag.MagneticIndex = 3
+</programlisting>
+
+      <para><emphasis>Historical Space Weather Data</emphasis></para>
+
+      <para>You can provide a Center for Space Standards and Innovation (CSSI)
+      file for historical space weather data. GMAT does not use the predicted
+      portion of the file but does use the historical portion of the data. The
+      CCSI file format is described in detail at the <link
+      xlink:href="https://celestrak.com/SpaceData/">Celestrak</link> website
+      and the files are available for download at that site and <link
+      xlink:href="ftp://ftp.agi.com/pub/DynamicEarthData/">here</link>. You
+      configure GMAT to use historical data as shown below.</para>
+
+      <programlisting>Create ForceModel aForceModel
+GMAT aForceModel.Drag.AtmosphereModel = NRLMSISE00
+GMAT aForceModel.Drag.HistoricWeatherSource = 'CSSISpaceWeatherFile'
+GMAT aForceModel.Drag.CSSISpaceWeatherFile = 'CSSI_2004To2026.txt'
+</programlisting>
+
+      <para>You can provide a full or relative path to the file, or put the
+      file in GMAT’s data file folders documented in the startup file
+      help.</para>
+
+      <para><emphasis>Predicted Space Weather Data</emphasis></para>
+
+      <para>You configure GMAT to use Schatten predicted data as shown
+      below</para>
+
+      <programlisting>Create ForceModel aForceModel
+GMAT aForceModel.Drag.AtmosphereModel = NRLMSISE00
+GMAT aForceModel.Drag.PredictedWeatherSource = 'SchattenFile'
+GMAT aForceModel.Drag.SchattenFile = 'SchattenPredict.txt'
+GMAT aForceModel.Drag.SchattenErrorModel = 'Nominal'
+GMAT aForceModel.Drag.SchattenTimingModel = 'NominalCycle'
+</programlisting>
+
+      <para>You can provide a full or relative path to the file, or put the
+      file in GMAT’s data file folders documented in the startup file help.
+      Additionally you can choose between <guilabel>Nominal</guilabel>,
+      <guilabel>PlusTwoSigma</guilabel>, and
+      <guilabel>MinusTwoSigma</guilabel> for the
+      <guilabel>SchattenErrorModel</guilabel>, and between
+      <guilabel>NominalCycle</guilabel>, <guilabel>EarlyCycle</guilabel>, and
+      <guilabel>LateCycle</guilabel> for the
+      <guilabel>SchattenTimingModel</guilabel>.</para>
+
+      <para>The Schatten file is distributed by the Flight Dynamics Facility
+      (FDF) at Goddard Space Flight Center. You can apply for an account to
+      obtain Schatten file updates at the <link
+      xlink:href="http://fdf.gsfc.nasa.gov/forms">FDF Forms Interface</link>.
+      Note that GMAT reads the raw file containing all permutation of mean, +2
+      sigma, and -2 sigma, and nominal, early and late solar cycles. The files
+      from the FDF must be modified to include keywords that indicate when
+      data starts and ends as shown below:</para>
+
+      <programlisting>           NOMINAL TIMING      EARLY TIMING        LATE TIMING      
+ mo. yr.  mean +2sig -2sig ap mean +2sig -2sig ap mean +2sig -2sig ap
+BEGIN_DATA 
+  2 2011    92  107   76    9  105  125   85   10   77   87   66    8
+  3 2011    93  110   77    9  106  128   86   10   79   89   67    8
+  4 2011    95  112   78    9  108  129   87   10   80   92   69    8
+END_DATA
+</programlisting>
+
+      <para>Data must be formatted according to FORMAT(I3,I5,I6,11I5), and no
+      comments or blank lines can occur between the BEGIN_DATA and END_DATA
+      keywords.</para>
+
+      <para><emphasis>Configuring SRP Models</emphasis></para>
 
       <para>GMAT supports a spherical SRP model, and an SRP file for high
       fidelity SRP modelling. Both models use a dual cone model for central
       body shadowing of the spacecraft. See the <xref
       linkend="SpacecraftBallisticMass" xrefstyle="select:title"/>
-      documentation for configuring a SPAD file for a spacecraft . The script
+      documentation for configuring a SPAD file for a spacecraft. The script
       snippet below shows how to configure two
       <guilabel>ForceModels</guilabel>, one that use
       <guilabel>Spherical</guilabel> and on that uses a
@@ -2867,7 +3347,7 @@ aForceModel.SRP.Flux_Pressure = 4.53443218374393e-006</programlisting>
         <guilabel>Flux_Pressure</guilabel>.</para>
       </caution>
 
-      <para><emphasis> Variational Equations and the STM </emphasis></para>
+      <para><emphasis>Variational Equations and the STM </emphasis></para>
 
       <para>GMAT can optionally propagate the orbit State Transition Matrix
       (STM). For more information on how to configure GMAT to compute the STM,
