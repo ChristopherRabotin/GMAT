@@ -205,8 +205,15 @@
     <refsection>
       <title>Using FindEvents in loops</title>
 
-      <para>FindEvents is espectially powerfule when used in a loop, but there
-      are several potential issues to be aware of. The following snippet
+      <para>The <guilabel>FindEvents</guilabel> command can be used inside
+      loops like <guilabel>For</guilabel> and <guilabel>While</guilabel>, but
+      not inside solver sequences, like <guilabel>Target</guilabel> and
+      <guilabel>Optimize</guilabel>. To perform event location based on the
+      result of a solver sequence, put the <guilabel>FindEvents</guilabel>
+      command after the sequence.</para>
+
+      <para>When <guilabel>FindEvents</guilabel> is used inside a loop, but
+      there are several potential issues to be aware of. The following snippet
       illustrates several.</para>
 
       <programlisting>Create EclipseLocator ec
