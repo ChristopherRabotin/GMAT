@@ -2153,8 +2153,9 @@ Ceres.SourceFilename = '../data/planetary_ephem/spk/ceres_1900_2100.bsp'</code><
       ephemeris, and orientation must be configured separately for use with
       the event locators.</para>
 
-      <para>CelestialBody shape and orientation are configured via SPICE PCK
-      files, loaded from two sources in the following order:</para>
+      <para><guilabel>CelestialBody</guilabel> shape and orientation are
+      configured via SPICE PCK files, loaded from two sources in the following
+      order:</para>
 
       <orderedlist>
         <listitem>
@@ -2178,8 +2179,22 @@ Ceres.SourceFilename = '../data/planetary_ephem/spk/ceres_1900_2100.bsp'</code><
 
       <para>Data loaded last takes precedence over data loaded first, if there
       is a conflict. Note that because the SPICE kernel pool is shared for the
-      entire run, a PCK file loaded for Pluto may override data loaded by Sun,
-      if the file contains conflicting data.</para>
+      entire run, a PCK file loaded for <guilabel>Pluto</guilabel> may
+      override data loaded by <guilabel>Sun</guilabel>, if the file contains
+      conflicting data. Note that this order isn't absolute—coordinate systems
+      that with an SPK-defined origin load differently, for example. To
+      determine the exact load order, see the <filename>GmatLog.txt</filename>
+      file.</para>
+
+      <note>
+        <para>GMAT's SPICE kernel load order is based on many factors, and can
+        be unpredictable. Therefore, it is important that the kernels
+        referenced by a mission be consistent. For example, NAIF's
+        <filename>de421.bsp</filename> and <filename>mar085.bsp</filename> are
+        consistent, because they are both based on the DE421 model.
+        Inconsistent kernels can cause unpredictable behavior based on the
+        order in which they are loaded.</para>
+      </note>
 
       <para>The body-fixed frame for a <guilabel>CelestialBody</guilabel> is
       defined on the <guilabel>Orientation</guilabel> tab by the
