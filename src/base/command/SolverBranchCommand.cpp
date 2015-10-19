@@ -169,7 +169,11 @@ bool SolverBranchCommand::Initialize()
       // THIS IS IDIOTIC BUT SINCE INITIALIZE IS CALLED TWICE, JUST DON'T CREATE NO NEW LISTENERS
       // AFTER THE FIRST ONE (Grubb.T 2015-10-09)
       if (listeners.size() == 0)
-         AddListener( ListenerManagerInterface::CreateSolverListener(GetGeneratingString(Gmat::NO_COMMENTS), "", 0, 0, 0, 0, false) );
+      {
+         ISolverListener* aListener = ListenerManagerInterface::CreateSolverListener(GetGeneratingString(Gmat::NO_COMMENTS), "", 0, 0, 0, 0, false);
+         if (aListener != NULL)
+            AddListener( aListener );
+      }
    }
    #ifdef DEBUG_SOLVERBRANCHCOMMAND_INIT
    ShowCommand("SolverBranchCommand::Initialize() exited ", "this=", this);
