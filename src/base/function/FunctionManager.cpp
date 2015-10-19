@@ -1611,6 +1611,8 @@ void FunctionManager::RefreshFormalInputObjects()
 {
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage("FM:RefreshFormalInputObjects() entered\n");
+   ShowObjectMap(functionObjectStore, "FunctionObjectStore");
+   ShowObjectMap(globalObjectStore, "GlobalObjectStore");
    #endif
    
    std::string formalName, passedName;
@@ -1630,20 +1632,39 @@ void FunctionManager::RefreshFormalInputObjects()
           formalName.c_str());
       #endif
       
+      GmatBase *obj = NULL;
+      GmatBase *fosObj = NULL;
+      GmatBase *gosObj = NULL;
       if (functionObjectStore->find(formalName) == functionObjectStore->end())
       {
-         std::string errMsg = "FunctionManager error: input object \"" + formalName;
-         errMsg += "\"not found in Function Object Store.\n";
-         throw FunctionException(errMsg);
+         // Try globalObjectStore (LOJ: 2015.10.19 GMT-5336)
+         if (globalObjectStore->find(formalName) == globalObjectStore->end())
+         {
+            std::string errMsg = "FunctionManager error: input object \"" + formalName;
+            errMsg += "\"not found in Function Object Store or Global Object Store.\n";
+            throw FunctionException(errMsg);
+         }
+         else
+         {
+            #ifdef DEBUG_FM_EXECUTE
+            MessageInterface::ShowMessage
+               ("   formalName='%s' found from the global object store\n", formalName.c_str());
+            #endif
+            
+            gosObj = (*globalObjectStore)[formalName];
+         }
       }
-      
-      #ifdef DEBUG_FM_EXECUTE
-      MessageInterface::ShowMessage
-         ("   formalName='%s' found from the function object store\n", formalName.c_str());
-      #endif
-      
-      GmatBase *obj = NULL;
-      GmatBase *fosObj = (*functionObjectStore)[formalName];
+      else
+      {
+         #ifdef DEBUG_FM_EXECUTE
+         MessageInterface::ShowMessage
+            ("   formalName='%s' found from the function object store\n", formalName.c_str());
+         #endif
+         
+         // GmatBase *obj = NULL;
+         // GmatBase *fosObj = (*functionObjectStore)[formalName];
+         fosObj = (*functionObjectStore)[formalName];
+      }
       
       // Now find the corresponding input object
       // if passed name not found in LOS or GOS, it may be a number, string literal,
@@ -1730,10 +1751,17 @@ void FunctionManager::RefreshFormalInputObjects()
          ("   Update the object in the object store with the current object\n");
       #endif
       
-      // Update the object in the object store with the current/reset data
-      fosObj->Copy(obj);
-      (inputWrapperMap[formalName])->SetRefObject(fosObj);  // is this necessary? I think so
-      
+      // Update the object in the function or global object store with the current/reset data
+      // If global object use global object store (LOJ: 2015.10.19 for GMT-5336 fix)
+      if (fosObj)
+      {
+         fosObj->Copy(obj);
+         (inputWrapperMap[formalName])->SetRefObject(fosObj);  // is this necessary? I think so
+      }
+      else if (gosObj)
+      {
+         (inputWrapperMap[formalName])->SetRefObject(gosObj);
+      }
    }
    
    #ifdef DEBUG_FM_EXECUTE
