@@ -19,6 +19,7 @@
 #include "Ionosphere.hpp"
 #include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
+#include "CalculationUtilities.hpp"
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
 #include "StringUtil.hpp"
@@ -405,11 +406,24 @@ extern "C" int iri_web__(integer *jmag, logical *jf, real *alati, real *
 	*height, real *h_tec_max__, integer *ivar, real *vbeg, real *vend, 
 	real *vstp, real *a, real *b, integer *ier);
 
+
 float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
 {
+   CelestialBody* earth = solarSystem->GetBody("Earth");
+   Real radius = earth->GetRealParameter(earth->GetParameterID("EquatorialRadius"));
+   Real flattening = earth->GetRealParameter(earth->GetParameterID("Flattening"));
+
+   Rvector6 state;
+   state[0] = pos1[0]; state[1] = pos1[1]; state[2] = pos1[2];
+
    // the fisrt position's latitude and longitude (unit: degree):
-   real latitude = (real)(asin(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);   // unit: degree
-   real longitude = (real)(atan2(pos1.Get(1),pos1.Get(0))*GmatMathConstants::DEG_PER_RAD);         // unit: degree
+   real latitude  = (real)(GmatCalcUtil::CalculatePlanetData("Latitude", state, radius, flattening, 0.0));
+   real longitude = (real)(GmatCalcUtil::CalculatePlanetData("Longitude", state, radius, flattening, 0.0));
+   real hbeg      = (real)(GmatCalcUtil::CalculatePlanetData("Altitude", state, radius, flattening, 0.0));
+
+   // the fisrt position's latitude and longitude (unit: degree):
+//   real latitude = (real)(asin(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);   // unit: degree
+//   real longitude = (real)(atan2(pos1.Get(1),pos1.Get(0))*GmatMathConstants::DEG_PER_RAD);         // unit: degree
    
    // mmag  = 0 geographic   =1 geomagnetic coordinates
    integer jmag = 0;   // 1;
@@ -435,7 +449,7 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    real hour = (real)hours;
    
    // Upper and lower integration limits
-   real hbeg = (real)(pos1.GetMagnitude() - earthRadius); // 0
+   //real hbeg = (real)(pos1.GetMagnitude() - earthRadius); // 0
    if (hbeg < 1.0)
       hbeg = 1.0;         // If height is less than 1.0km then set it to 1.0km
 
