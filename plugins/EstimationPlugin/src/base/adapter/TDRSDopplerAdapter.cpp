@@ -1098,8 +1098,8 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       // 4.2. Specify multiplier for SL-path, SS-path, EL-path, and ES-path
       multiplierSL = (effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
       multiplierSS = (pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);               // unit: Hz/Km
-      multiplierEL = (effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
-      multiplierES = (pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);               // unit: Hz/Km
+      multiplierEL = -(effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
+      multiplierES = -(pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);               // unit: Hz/Km
 //      MessageInterface::ShowMessage("Hi there 4.3\n");
 
       // 4.3. Set uplink frequency, uplink frequency band, node4 frequency, node4 fequency band
@@ -1114,8 +1114,9 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
 
 //      MessageInterface::ShowMessage("Hi there 4.4\n");
       // 4.4. Calculate Frequency Doppler Shift
-      Real dopplerFreq = - (effFreq*(measDataEL.value[i] - measDataSL.value[i]) + pivotFreq*(measDataES.value[i] - measDataSS.value[i]))/dopplerCountInterval/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000);  //(Equation 7-92 GTDS MathSpec)
-      cMeasurement.value[i] = dopplerFreq*1.0e6;               // unit: Hz
+      //Real dopplerFreq = - (effFreq*(measDataEL.value[i] - measDataSL.value[i]) + pivotFreq*(measDataES.value[i] - measDataSS.value[i]))/dopplerCountInterval/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000);  //(Equation 7-92 GTDS MathSpec)
+      //cMeasurement.value[i] = dopplerFreq*1.0e6;               // unit: Hz
+      cMeasurement.value[i] = multiplierEL*measDataEL.value[i] + multiplierSL*measDataSL.value[i] + multiplierES*measDataES.value[i] + multiplierSS*measDataSS.value[i]; // unit: Hz    //(Equation 7-92 GTDS MathSpec)   
 
       // 4.5. Specify measurement feasibility
       if (!measDataEL.isFeasible)
@@ -1473,8 +1474,8 @@ const std::vector<RealArray>& TDRSDopplerAdapter::CalculateMeasurementDerivative
             if ((paramName == "Position")||(paramName == "Velocity")||(paramName == "CartesianX"))
             {
                // Convert measurement derivatives from km/s to Hz for velocity and position 
-               theDataDerivatives[i][j] = - derivativesEL[i][j] * multiplierEL
-                                          - derivativesES[i][j] * multiplierES
+               theDataDerivatives[i][j] = + derivativesEL[i][j] * multiplierEL
+                                          + derivativesES[i][j] * multiplierES
                                           + derivativesSL[i][j] * multiplierSL
                                           + derivativesSS[i][j] * multiplierSS;
             }
