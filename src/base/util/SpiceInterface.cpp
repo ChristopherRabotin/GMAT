@@ -366,6 +366,11 @@ bool SpiceInterface::LoadKernel(const std::string &fileName)
                fileName.c_str(), fName.c_str());
       }
    #endif
+
+   // Write the kernel name to the log
+   MessageInterface::LogMessage
+      ("Kernel %s has been loaded.\n", fileName.c_str());
+
    // Add the pair to the map of kernels
    loadedKernels.insert(std::make_pair(fileName, fName));
    
