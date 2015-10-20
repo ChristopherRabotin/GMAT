@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool.
 //
 // Copyright (c) 2015 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
