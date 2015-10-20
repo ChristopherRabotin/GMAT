@@ -112,7 +112,7 @@ GMAT [cross] = Python.ArrayFunctions.cross(state, vel);
 GMAT wx = cross(1);
 GMAT wy = cross(2);
 
-While sat.ElapsedDays < 90.0
+While sat.ElapsedDays < 5.0
    Propagate Propagator1(sat)
    GMAT state(1) = sat.X;
    GMAT state(2) = sat.Y;
