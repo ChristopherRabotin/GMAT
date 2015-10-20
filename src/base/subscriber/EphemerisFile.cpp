@@ -2702,15 +2702,29 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool saveE
    
    if (spkWriter != NULL)
    {
-      if (!writeAfterData)
-         WriteComments(comments, ignoreBlankComments);
-      
-      WriteSpkOrbitDataSegment();
-      
-      if (writeAfterData)
-         WriteComments(comments, ignoreBlankComments);
-      
-      currComments = "";
+      Integer mnSz   = spkWriter->GetMinNumberOfStates();
+      Integer numPts = (Integer) a1MjdArray.size();
+      if (!generateInBackground || (numPts >= mnSz))
+      {
+         if (!writeAfterData)
+            WriteComments(comments, ignoreBlankComments);
+
+         WriteSpkOrbitDataSegment();
+
+         if (writeAfterData)
+            WriteComments(comments, ignoreBlankComments);
+
+         insufficientSPKData = false; // there was enough data
+         currComments = "";
+      }
+      else if (generateInBackground && (numPts > 1))
+      {
+         #ifdef DEBUG_EPHEMFILE_SPICE
+         MessageInterface::ShowMessage("NOT WRITING SPK data - only %d points available!!!\n",
+               numPts);
+         #endif
+         insufficientSPKData = true; // data is available, but has not been written yet
+      }
    }
    else if (code500EphemFile != NULL)
    {
@@ -3279,20 +3293,10 @@ void EphemerisFile::FinishUpWritingSPK(bool canFinalize)
             #ifdef DEBUG_EPHEMFILE_SPICE
             MessageInterface::ShowMessage("FinishUpWritingSPK::about to write SPK orbit data segment\n");
             #endif
-//            // Save last data to become first data of next segment - since we may start up
-//            // a new SPK file after this one
-//            A1Mjd *a1mjd  = new A1Mjd(*a1MjdArray.back());
-//            Rvector6 *rv6 = new Rvector6(*stateArray.back());
 
             // Write a segment and delete data array pointers
             WriteSpkOrbitDataSegment();
 
-//            // Add saved data to arrays if we are not done yet
-//            if (!done)
-//            {
-//               a1MjdArray.push_back(a1mjd);
-//               stateArray.push_back(rv6);
-//            }
             insufficientSPKData = false;
             #ifdef DEBUG_EPHEMFILE_SPICE
             MessageInterface::ShowMessage("   DONE writing SPK orbit data segment\n");
