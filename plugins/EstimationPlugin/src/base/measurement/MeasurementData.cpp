@@ -50,7 +50,8 @@ MeasurementData::MeasurementData() :
    tdrsNode4Freq    (0.0),                             // made changes by TUAN NGUYEN
    tdrsNode4Band    (0),                               // made changes by TUAN NGUYEN
    tdrsServiceID    ("SA1"),                           // made changes by TUAN NGUYEN
-   tdrsSMARID       (0)                                // made changes by TUAN NGUYEN
+   tdrsSMARID       (0),                               // made changes by TUAN NGUYEN
+   tdrsDataFlag     (0)                                // made changes by TUAN NGUYEN
 {
 }
 
@@ -106,7 +107,8 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    tdrsNode4Freq    (md.tdrsNode4Freq),                        // made changes by TUAN NGUYEN
    tdrsNode4Band    (md.tdrsNode4Band),                        // made changes by TUAN NGUYEN
    tdrsServiceID    (md.tdrsServiceID),                        // made changes by TUAN NGUYEN
-   tdrsSMARID       (md.tdrsSMARID)                            // made changes by TUAN NGUYEN
+   tdrsSMARID       (md.tdrsSMARID),                           // made changes by TUAN NGUYEN
+   tdrsDataFlag     (md.tdrsDataFlag)                          // made changes by TUAN NGUYEN
 {
 }
 
@@ -147,6 +149,7 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
       tdrsNode4Band    = md.tdrsNode4Band;                     // made changes by TUAN NGUYEN
       tdrsServiceID    = md.tdrsServiceID;                     // made changes by TUAN NGUYEN
       tdrsSMARID       = md.tdrsSMARID;                        // made changes by TUAN NGUYEN
+      tdrsDataFlag     = md.tdrsDataFlag;                      // made changes by TUAN NGUYEN
    }
 
    return *this;

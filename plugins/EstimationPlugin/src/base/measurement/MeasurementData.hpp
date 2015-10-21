@@ -101,6 +101,7 @@ public:
    Integer        tdrsNode4Band;            // the received frequency band at the return-link TDRS                      // made changes by TUAN NGUYEN
    std::string    tdrsServiceID;            // value of serviceID would be "S1", "S2", or "MA"                          // made changes by TUAN NGUYEN
    Integer        tdrsSMARID;               // TDRS SMAR id                                                             // made changes by TUAN NGUYEN
+   Integer        tdrsDataFlag;             // TDRS data flag would be 0 or 1                                           // made changes by TUAN NGUYEN
 
 };
 
