@@ -343,8 +343,8 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    }
    else if (md->typeName == "TDRSDoppler_HZ")
    {
-      sprintf(databuffer, "    %d    %.15le    %s    %d   %f",
-         md->tdrsNode4Band, md->tdrsNode4Freq, md->tdrsServiceID.c_str(), md->tdrsSMARID, md->dopplerCountInterval);
+      sprintf(databuffer, "    %.15le    %d    %s    %d   %d   %f",
+         md->tdrsNode4Freq, md->tdrsNode4Band, md->tdrsServiceID.c_str(), md->tdrsDataFlag, md->tdrsSMARID, md->dopplerCountInterval);
       dataLine << databuffer;
    }
 
@@ -604,9 +604,10 @@ ObservationData* GmatObType::ReadObservation()
    }                                                                      // made changes by TUAN NGUYEN
    else if (currentObs.typeName == "TDRSDoppler_HZ")
    {
-      theLine >> currentObs.tdrsNode4Band;            // this field is used to received frequency band at the return-link TDRS 
       theLine >> currentObs.tdrsNode4Freq;            // this field is used to received frequency at the return-link TDRS 
+      theLine >> currentObs.tdrsNode4Band;            // this field is used to received frequency band at the return-link TDRS 
       theLine >> currentObs.tdrsServiceID;            // value of serviceID would be "S1", "S2", or "MA"
+      theLine >> currentObs.tdrsDataFlag;             // TDRS data flag would be 0 or 1
       theLine >> currentObs.tdrsSMARID;               // TDRS SMAR id
       theLine >> currentObs.dopplerCountInterval;
       currentObs.unit = "Hz";

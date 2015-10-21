@@ -52,8 +52,8 @@ ObservationData::ObservationData() :
    tdrsServiceID     ("SA1"),                              // made changes by TUAN NGUYEN
    tdrsNode4Freq     (0.0),                                // made changes by TUAN NGUYEN
    tdrsNode4Band     (0),                                  // made changes by TUAN NGUYEN
-   tdrsSMARID        (0)                                   // made changes by TUAN NGUYEN
-
+   tdrsSMARID        (0),                                  // made changes by TUAN NGUYEN
+   tdrsDataFlag      (0)                                   // made changes by TUAN NGUYEN
 {
 ///// TBD: This does not go here -- we'll be adding a new data type, so need to have a way to handle this
    dataFormat = "GMATInternal";
@@ -109,7 +109,8 @@ ObservationData::ObservationData(const ObservationData& od):
    tdrsServiceID           (od.tdrsServiceID),                    // made changes by TUAN NGUYEN
    tdrsNode4Freq           (od.tdrsNode4Freq),                    // made changes by TUAN NGUYEN
    tdrsNode4Band           (od.tdrsNode4Band),                    // made changes by TUAN NGUYEN
-   tdrsSMARID              (od.tdrsSMARID)                        // made changes by TUAN NGUYEN
+   tdrsSMARID              (od.tdrsSMARID),                       // made changes by TUAN NGUYEN
+   tdrsDataFlag            (od.tdrsDataFlag)                      // made changes by TUAN NGUYEN
 {
    dataFormat = od.dataFormat;
 }
@@ -158,6 +159,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       tdrsNode4Freq           = od.tdrsNode4Freq;                    // made changes by TUAN NGUYEN
       tdrsNode4Band           = od.tdrsNode4Band;                    // made changes by TUAN NGUYEN
       tdrsSMARID              = od.tdrsSMARID;                       // made changes by TUAN NGUYEN
+      tdrsDataFlag            = od.tdrsDataFlag;                     // made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -196,6 +198,7 @@ void ObservationData::Clear()
    tdrsNode4Freq           = 0.0;                      // made changes by TUAN NGUYEN
    tdrsNode4Band           = 0;                        // made changes by TUAN NGUYEN
    tdrsSMARID              = 0;                        // made changes by TUAN NGUYEN
+   tdrsDataFlag            = 0;                        // made changes by TUAN NGUYEN
 }
 
 

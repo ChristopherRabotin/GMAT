@@ -122,6 +122,8 @@ public:
    Integer           tdrsNode4Band;   // the received frequency band at the return-link TDRS. 0: unspecified, 1: S-band, 2: X-band, 3: K-band 
    /// TDRS SMAR Id
    Integer           tdrsSMARID;      // SMAR id
+   /// TDRS generation
+   Integer           tdrsDataFlag;    // TDRS data flag: 0 or 1
 
 };
 
