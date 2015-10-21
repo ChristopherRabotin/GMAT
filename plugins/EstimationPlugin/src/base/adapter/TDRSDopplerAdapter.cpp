@@ -27,6 +27,8 @@
 #include "RandomNumber.hpp"
 #include "ErrorModel.hpp"
 #include <sstream>
+#include <time.h>
+
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
@@ -47,6 +49,7 @@ TDRSDopplerAdapter::PARAMETER_TEXT[TDRSDopplerAdapterParamCount - RangeAdapterKm
    "Node4Frequency",
    "Node4Band",
    "SmarId",
+   "DataFlag",
 };
 
 
@@ -58,6 +61,7 @@ TDRSDopplerAdapter::PARAMETER_TYPE[TDRSDopplerAdapterParamCount - RangeAdapterKm
    Gmat::REAL_TYPE,                    // NODE4_FREQUENCY
    Gmat::INTEGER_TYPE,                 // NODE4_BAND
    Gmat::INTEGER_TYPE,                 // SMAR_ID
+   Gmat::INTEGER_TYPE,                 // DATA_FLAG
 };
 
 
@@ -80,7 +84,8 @@ TDRSDopplerAdapter::TDRSDopplerAdapter(const std::string& name) :
    dopplerCountInterval   (1.0),                     // 1 second
    node4Freq              (0.0),                     // 1000 Mhz
    node4FreqBand          (0),                       // 0: undefined, 1: S-band, 2: X-band, 3: K-band
-   smarId                 (0)
+   smarId                 (0),
+   dataFlag               (0)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TDRSDopplerAdapter default constructor <%p>\n", this);
@@ -129,7 +134,8 @@ TDRSDopplerAdapter::TDRSDopplerAdapter(const TDRSDopplerAdapter& da) :
    serviceAccessList      (da.serviceAccessList),
    node4Freq              (da.node4Freq),
    node4FreqBand          (da.node4FreqBand),
-   smarId                 (da.smarId)
+   smarId                 (da.smarId),
+   dataFlag               (da.dataFlag)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TDRSDopplerAdapter copy constructor   from <%p> to <%p>\n", &da, this);
@@ -164,6 +170,7 @@ TDRSDopplerAdapter& TDRSDopplerAdapter::operator=(const TDRSDopplerAdapter& da)
       node4Freq            = da.node4Freq;
       node4FreqBand        = da.node4FreqBand;
       smarId               = da.smarId;
+      dataFlag             = da.dataFlag;
 
       if (adapterSL)
       {
@@ -504,6 +511,14 @@ Integer TDRSDopplerAdapter::SetIntegerParameter(const Integer id, const Integer 
       return true;
    }
 
+   if (id == DATA_FLAG)
+   {
+      // @todo: verify a valid data flag
+      dataFlag = value;
+      return true;
+   }
+
+
    adapterSL->SetRealParameter(id, value);
    adapterSS->SetRealParameter(id, value);
    adapterES->SetRealParameter(id, value);
@@ -527,6 +542,12 @@ Integer TDRSDopplerAdapter::GetIntegerParameter(const Integer id) const
 {
    if (id == NODE4_BAND)
       return node4FreqBand;
+
+   if (id == SMAR_ID)
+      return smarId;
+
+   if (id == DATA_FLAG)
+      return dataFlag;
 
    return RangeAdapterKm::GetIntegerParameter(id);
 }
@@ -919,28 +940,30 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       dopplerCountInterval = obsData->dopplerCountInterval;          // unit: second
       serviceAccessList.clear();
       serviceAccessList.push_back(obsData->tdrsServiceID);           // SA1, SA2, or MA
+      serviceAccessIndex = 0;
       node4Freq     = obsData->tdrsNode4Freq/1.0e6;                  // unit: MHz
       node4FreqBand = obsData->tdrsNode4Band;                        // 0: unspecified, 1: S-band, 2: X-band, 3: K-band
+      dataFlag      = obsData->tdrsDataFlag;
       smarId        = obsData->tdrsSMARID;
+   }
+   else
+   {
+      // obsData == NULL That means simulation
+      srand(time(NULL));
+      serviceAccessIndex = rand() % serviceAccessList.size();
    }
    
    cMeasurement.tdrsNode4Freq = node4Freq*1.0e6;        // unit Hz
    cMeasurement.tdrsNode4Band = node4FreqBand;
+   cMeasurement.tdrsDataFlag  = dataFlag;
    cMeasurement.tdrsSMARID    = smarId;
 
    if (serviceAccessList.empty())
       throw MeasurementException("Error: No service access is specified for the measurement.\n");
    cMeasurement.tdrsServiceID = serviceAccessList[serviceAccessIndex];
+   //MessageInterface::ShowMessage("service access = %s   node 4 frequency = %le Hz   node 4 band = %d    TDRS data flag = %d    SMAR id = %d\n", 
+   //   cMeasurement.tdrsServiceID.c_str(), cMeasurement.tdrsNode4Freq, cMeasurement.tdrsNode4Band, cMeasurement.tdrsDataFlag, cMeasurement.tdrsSMARID);
 
-
-   //MessageInterface::ShowMessage("Hi there 1: dopplerCountInterval = %lf seconds\n", dopplerCountInterval);
-   //MessageInterface::ShowMessage("            node 4 frequency = %lf MHz\n", node4Freq);
-   //MessageInterface::ShowMessage("            node 4 band = %d\n", node4FreqBand);
-   //MessageInterface::ShowMessage("            SMAR id = %d\n", smarId);
-   //MessageInterface::ShowMessage("            service access = {");
-   //for(UnsignedInt i = 0; i < serviceAccessList.size(); ++i)
-   //   MessageInterface::ShowMessage("%s,", serviceAccessList[i].c_str());
-   //MessageInterface::ShowMessage("}\n");
 
    // 2. Compute range for End path
    // 2.1. Propagate all space objects to time tm
@@ -1019,7 +1042,6 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    adapterSL->CalculateMeasurement(withEvents, obData, rampTB);
    adapterSS->CalculateMeasurement(withEvents, obData, rampTB);
 
-//   MessageInterface::ShowMessage("Hi there 3\n");
    // 3.4. Remove obData object when it is not used
    if (obData)
       delete obData;
@@ -1030,49 +1052,52 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    measDataSS = adapterSS->GetMeasurement();
    measDataSS.value[0] = measDataSS.value[0] / adapterSS->GetMultiplierFactor();      // convert to full range in km
 
-//   MessageInterface::ShowMessage("Hi there 4\n");
    // 4. Calculate Doopler shift frequency (unit: Hz) based on range (unit: km) and store result to cMeasurement:
    Real speedoflightkm = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM;
    
    std::vector<SignalBase*> paths = calcData->GetSignalPaths();
    for (UnsignedInt i = 0; i < paths.size(); ++i)          // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths.
    {
-//      MessageInterface::ShowMessage("Hi there 4.1\n");
-      // 4.1. Specify uplink frequency from ground station for the measurement
-      // 4.1.1. Specify transmit frequency at ground station and the received frequency at TDRS in backward link leg for paths[i]
-      SignalBase* leg = paths[i];
-      SignalData* sd1 = leg->GetSignalDataObject();
-      Real tranFreq = sd1->transmitFreq;
+      // 4.0. Get legs: 1, 2, 3, and 4:
+      SignalBase* leg1 = paths[i];
+      SignalBase* leg2 = leg1->GetNext();
+      SignalBase* leg3 = leg2->GetNext();
+      SignalBase* leg4 = leg3->GetNext();
 
-      SignalBase* downlinkLeg = NULL;
-      while (leg != NULL)
+      // 4.1. Specify TDRS and Sat transponder turn around ratios:
+      SignalData* sd2 = leg2->GetSignalDataObject();
+      SignalData* sd3 = leg3->GetSignalDataObject();
+      Real tdrsTAR = sd2->transmitFreq / sd2->arriveFreq;      // TDRS transponder turn around ratio
+      Real satTAR   = sd3->transmitFreq / sd3->arriveFreq;      // Sat transponder turn around ratio 
+
+      // 4.2. Specify TDRS id
+      std::string tdrsId = sd2->tNode->GetStringParameter("Id");
+      Integer index = tdrsId.size()-1;
+      while(index >= 0)
       {
-         sd1 = leg->GetSignalDataObject();
-         //MessageInterface::ShowMessage(" transmit node:%s receive node:%s:     transmit frequency = %le    receive frequency = %le   arrive frequency = %le\n", sd1->tNode->GetName().c_str(), sd1->rNode->GetName().c_str(), sd1->transmitFreq, sd1->receiveFreq, sd1->arriveFreq);
-         if (leg->GetNext())
-            downlinkLeg = leg;
-         // move to the next leg
-         leg = leg->GetNext();
+         char c = tdrsId.at(index);
+         if (('0' <= c)&&(c <= '9'))
+            --index;
+         else
+            break;
       }
-      SignalData* sd = downlinkLeg->GetSignalDataObject();
-      //MessageInterface::ShowMessage(" Downlink leg: transmit node:%s receive node:%s:     transmit frequency = %le    receive frequency = %le  arrive frequency = %le\n", sd->tNode->GetName().c_str(), sd->rNode->GetName().c_str(), sd->transmitFreq, sd->receiveFreq, sd->arriveFreq);
+      ++index;
+      tdrsId = tdrsId.substr(index);
+      //MessageInterface::ShowMessage("TDRS id = %s\n", tdrsId.c_str());
 
-//      MessageInterface::ShowMessage("Hi there 4.2\n");
-      // 4.1.2. Calulate measurement data:
-      // Specify effective frequency
+      // 4.3. Specify effective frequency
       Real effFreq = node4Freq;
 
-      //4.1.3. Calculate uplink frequency:
-      uplinkFreq = (uplinkFreq/sd->receiveFreq)*node4Freq;
-      //MessageInterface::ShowMessage("Hi there 4.1.3: uplink frequency = %le    effFreq = %le\n", uplinkFreq, effFreq);
+      // 4.4. Calculate uplink frequency based on Node 4 frequency:
+      uplinkFreq = (uplinkFreq/sd3->receiveFreq)*node4Freq;
 
-      // 4.1.4. Recalculate frequency and media correction for each leg
+      // 4.5. Recalculate frequency and media correction for each leg
       ReCalculateFrequencyAndMediaCorrection(i, uplinkFreq, rampTB);
       adapterES->ReCalculateFrequencyAndMediaCorrection(i, uplinkFreq, rampTB);
       adapterSL->ReCalculateFrequencyAndMediaCorrection(i, uplinkFreq, rampTB);
       adapterSS->ReCalculateFrequencyAndMediaCorrection(i, uplinkFreq, rampTB);
 
-      // 4.1.5. Get measurement data for each path
+      // 4.6. Get measurement data for each path
       measDataEL = GetMeasurement();
       measDataES = adapterES->GetMeasurement();
       measDataES.value[0] = measDataES.value[0] / adapterES->GetMultiplierFactor();      // convert to full range in km
@@ -1081,28 +1106,117 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       measDataSS = adapterSS->GetMeasurement();
       measDataSS.value[0] = measDataSS.value[0] / adapterSS->GetMultiplierFactor();      // convert to full range in km
 
-
-      // Specify pivot frequency
+      // 4.7. Specify pivot frequency
       Real pivotFreq;                        // unit: MHz
-      if ((node4FreqBand == 1)&&(serviceAccessList[serviceAccessIndex] == "SA1"))        // node 4 frequency band is S band and TDRS service is SA1
-         pivotFreq = 13677.5 + GmatMathUtil::Floor(effFreq*2 + 0.5)/2;
-      else if ((node4FreqBand == 1)&&(serviceAccessList[serviceAccessIndex] == "SA2"))   // node 4 frequency band is S band and TDRS service is SA2
-         pivotFreq = 13697.5 + GmatMathUtil::Floor(effFreq*2 + 0.5)/2;
-      else if ((node4FreqBand == 1)&&(serviceAccessList[serviceAccessIndex] == "MA"))    // node 4 frequency band is S band and TDRS service is MA
-         pivotFreq = -2127.5;      // -2127.5 MHz
-      else if ((node4FreqBand == 2)&&(serviceAccessList[serviceAccessIndex] == "SA1"))   // node 4 frequency band is K band and TDRS service is SA1
-         pivotFreq = -1475.0;      // - 1475 MHz
-      else if ((node4FreqBand == 2)&&(serviceAccessList[serviceAccessIndex] == "SA2"))   // node 4 frequency band is K band and TDRS service is SA2
-         pivotFreq = -1075.0;      // -1075 MHz
+      if (serviceAccessList[serviceAccessIndex] == "SA1")
+      {
+         switch (node4FreqBand)
+         {
+         case 1:
+            pivotFreq = 13677.5 + GmatMathUtil::Floor(effFreq*2 + 0.5)/2;
+            break;
+         case 3:
+            pivotFreq = -1475.0;      // - 1475 MHz
+            break;
+         default:
+            throw MeasurementException("Error: TDRS SA1 service access is not available for other bands except S-band and K-band.\n");
+            break;
+         }
+      }
+      else if (serviceAccessList[serviceAccessIndex] == "SA2")
+      {
+         switch (node4FreqBand)
+         {
+         case 1:
+            pivotFreq = 13697.5 + GmatMathUtil::Floor(effFreq*2 + 0.5)/2;
+            break;
+         case 3:
+            pivotFreq = -1075.0;      // - 1075 MHz
+            break;
+         default:
+            throw MeasurementException("Error: TDRS SA2 service access is not available for other bands except S-band and K-band.\n");
+            break;
+         }
+      }
+      else if (serviceAccessList[serviceAccessIndex] == "MA")
+      {
+         switch (node4FreqBand)
+         {
+         case 1:
+            if ((tdrsId == "8")||(tdrsId == "9")||(tdrsId == "10"))
+            {
+               switch(smarId)
+               {
+               case 2:
+                  pivotFreq = 13412.5;
+                  break;
+               case 3:
+                  pivotFreq = 13420.0;
+                  break;
+               case 4:
+                  pivotFreq = 13427.5;
+                  break;
+               case 5:
+                  pivotFreq = 13435.0;
+                  break;
+               case 6:
+                  pivotFreq = 13442.5;
+                  break;
+               case 7:
+                  pivotFreq = 13450.0;
+                  break;
+               case 8:
+                  pivotFreq = 13457.5;
+                  break;
+               case 27:
+                  pivotFreq = 13600.0;
+                  break;
+               case 28:
+                  pivotFreq = 13607.5;
+                  break;
+               case 29:
+                  pivotFreq = 13615.0;
+                  break;
+               case 30:
+                  pivotFreq = 13622.5;
+                  break;
+               default:
+                  pivotFreq = 13405.0;
+                  break;
+               }
+            }
+            else
+            {
+               switch (dataFlag)
+               {
+               case 0:
+                  pivotFreq = -2279;       // -2270 MHz
+                  break;
+               case 1:
+                  pivotFreq = -2287;       // -2287 MHz
+                  break;
+               default:
+                  throw MeasurementException("Error: TDRS data flag has an invalid value.\n");
+                  break;
+               }
+            }
+            break;
+         default:
+            throw MeasurementException("Error: TDRS MA service access is not available for other bands except S-band.\n");
+            break;
+         }
+      }
+      else
+         throw MeasurementException("Error: TDRS has no service access of '" + serviceAccessList[serviceAccessIndex] + "'.\n");
 
-      // 4.2. Specify multiplier for SL-path, SS-path, EL-path, and ES-path
-      multiplierSL = (effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
-      multiplierSS = (pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);               // unit: Hz/Km
-      multiplierEL = -(effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
-      multiplierES = -(pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);               // unit: Hz/Km
-//      MessageInterface::ShowMessage("Hi there 4.3\n");
+      //MessageInterface::ShowMessage("effect freq = %le MHz     pivot freq = %le MHz   TDRS TAR = %f     Sat TAR = %f\n", effFreq, pivotFreq, tdrsTAR, satTAR);
+      // 4.8. Specify multiplier for SL-path, SS-path, EL-path, and ES-path
+      multiplierSL = (tdrsTAR*satTAR)*(effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
+      multiplierSS = (pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                                // unit: Hz/Km
+      multiplierEL = -(tdrsTAR*satTAR)*(effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                // unit: Hz/Km
+      multiplierES = -(pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                               // unit: Hz/Km
 
-      // 4.3. Set uplink frequency, uplink frequency band, node4 frequency, node4 fequency band
+      // 4.9. Set uplink frequency, uplink frequency band, node4 frequency, node4 fequency band
 //     cMeasurement.epoch = measDataEL.epoch;
       cMeasurement.uplinkFreq           = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
       cMeasurement.uplinkBand           = freqBand;
@@ -1112,13 +1226,10 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       cMeasurement.tdrsServiceID        = serviceAccessList[serviceAccessIndex];
       cMeasurement.dopplerCountInterval = dopplerCountInterval;
 
-//      MessageInterface::ShowMessage("Hi there 4.4\n");
-      // 4.4. Calculate Frequency Doppler Shift
-      //Real dopplerFreq = - (effFreq*(measDataEL.value[i] - measDataSL.value[i]) + pivotFreq*(measDataES.value[i] - measDataSS.value[i]))/dopplerCountInterval/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000);  //(Equation 7-92 GTDS MathSpec)
-      //cMeasurement.value[i] = dopplerFreq*1.0e6;               // unit: Hz
+      // 4.10. Calculate Frequency Doppler Shift
       cMeasurement.value[i] = multiplierEL*measDataEL.value[i] + multiplierSL*measDataSL.value[i] + multiplierES*measDataES.value[i] + multiplierSS*measDataSS.value[i]; // unit: Hz    //(Equation 7-92 GTDS MathSpec)   
 
-      // 4.5. Specify measurement feasibility
+      // 4.11. Specify measurement feasibility
       if (!measDataEL.isFeasible)
       {
          cMeasurement.isFeasible = false;
@@ -1143,9 +1254,8 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          cMeasurement.unfeasibleReason = measDataSS.unfeasibleReason;
          cMeasurement.feasibilityValue = measDataSS.feasibilityValue;
       }
-      
 
-      // 4.6. Add noise and bias
+      // 4.12. Add noise and bias
       Real C_idealVal = cMeasurement.value[i];
       
       if (measurementType == "TDRSDoppler_HZ")
@@ -1198,6 +1308,8 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Node 4 frequency band        : %d\n", node4FreqBand);
          MessageInterface::ShowMessage("      . Effect (node 4) frequency    : %.12lf MHz\n", effFreq);
          MessageInterface::ShowMessage("      . SMAR id                      : %d\n", smarId);
+         MessageInterface::ShowMessage("      . TDRS id                      : %s\n", tdrsId.c_str());
+         MessageInterface::ShowMessage("      . Data Flag                    : %d\n", dataFlag);
          MessageInterface::ShowMessage("      . Pivot frequency              : %.12lf MHz\n", pivotFreq);
          MessageInterface::ShowMessage("      . Multiplier factor for SL-path: %.12lf Hz/Km\n", multiplierSL);
          MessageInterface::ShowMessage("      . Multiplier factor for SS-path: %.12lf Hz/Km\n", multiplierSS);

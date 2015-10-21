@@ -138,7 +138,9 @@ protected:
    /// TDRS node 4 frequency band
    Integer              node4FreqBand;        // 0: unspecified, 1: S-band, 2: X-band, 3: K-band
    /// SMAR Id
-   Integer              smarId;
+   Integer              smarId;               // value of SMAR id should be 0 to 31
+   /// TDRS generation
+   Integer              dataFlag;             // value of TDRS data flag should be 0 or 1
 
    /// Parameter IDs for the DopplerAdapter
    enum
@@ -148,6 +150,7 @@ protected:
       NODE4_FREQUENCY,
       NODE4_BAND,
       SMAR_ID,
+      DATA_FLAG,
       TDRSDopplerAdapterParamCount,
    };
 
