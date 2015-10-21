@@ -204,7 +204,8 @@ protected:
    Integer tdrsNode4Band;
    /// TDRS SMAR Id
    Integer tdrsSMARID;
-
+   /// TDRS data flag
+   Integer tdrsDataFlag;
 
    /// Data filters
    StringArray dataFilterNames;
@@ -235,6 +236,7 @@ protected:
       TDRS_NODE4_FREQUENCY,              // made changes by TUAN NGUYEN
       TDRS_NODE4_BAND,                   // made changes by TUAN NGUYEN
       TDRS_SMAR_ID,                      // made changes by TUAN NGUYEN
+      TDRS_DATA_FLAG,                    // made changes by TUAN NGUYEN
       DATA_FILTERS,
       TrackingFileSetParamCount,
    };

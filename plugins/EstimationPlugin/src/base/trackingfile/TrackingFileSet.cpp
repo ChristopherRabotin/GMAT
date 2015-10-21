@@ -59,6 +59,7 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "SimTDRSNode4Frequency",         // TDRS_NODE4_FREQUENCY              // made changes by TUAN NGUYEN
    "SimTDRSNode4FrequencyBand",     // TDRS_NODE4_BAND                   // made changes by TUAN NGUYEN
    "SimTDRSSmarId",                 // TDSR_SMAR_ID                      // made changes by TUAN NGUYEN
+   "SimTDRSDataFlag",               // TDRS_DATA_FLAG                    // made changes by TUAN NGUYEN
    "DataFilters",                   // DATA_FILTERS
 };
 
@@ -78,6 +79,7 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::REAL_TYPE,                 // TDRS_NODE4_FREQUENCY             // made changes by TUAN NGUYEN
    Gmat::INTEGER_TYPE,              // TDRS_NODE4_BAND                  // made changes by TUAN NGUYEN
    Gmat::INTEGER_TYPE,              // TDRS_SMAR_ID                     // made changes by TUAN NGUYEN
+   Gmat::INTEGER_TYPE,              // TDRS_DATA_FLAG                   // made changes by TUAN NGUYEN
    Gmat::OBJECTARRAY_TYPE,          // DATA_FILLTERS
 };
 
@@ -102,7 +104,8 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    dopplerCountInterval      (1.0),
    tdrsNode4Frequency        (2000.0),              // unit: MHz                                          // made changes by TUAN NGUYEN
    tdrsNode4Band             (1),                   // 0: unspecified, 1: S-band, 2: X-band, 3: K-band    // made changes by TUAN NGUYEN
-   tdrsSMARID                (0)                                                                          // made changes by TUAN NGUYEN
+   tdrsSMARID                (0),                                                                         // made changes by TUAN NGUYEN
+   tdrsDataFlag              (0)                                                                          // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingFileSet <%s,%p> default construction \n", GetName().c_str(), this);
@@ -177,6 +180,7 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    tdrsNode4Frequency        (tfs.tdrsNode4Frequency),            // made changes by TUAN NGUYEN
    tdrsNode4Band             (tfs.tdrsNode4Band),                 // made changes by TUAN NGUYEN
    tdrsSMARID                (tfs.tdrsSMARID),                    // made changes by TUAN NGUYEN
+   tdrsDataFlag              (tfs.tdrsDataFlag),                  // made changes by TUAN NGUYEN
    dataFilterNames           (tfs.dataFilterNames)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -248,6 +252,7 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       tdrsNode4Frequency      = tfs.tdrsNode4Frequency;                // made changes by TUAN NGUYEN
       tdrsNode4Band           = tfs.tdrsNode4Band;                     // made changes by TUAN NGUYEN
       tdrsSMARID              = tfs.tdrsSMARID;                        // made changes by TUAN NGUYEN
+      tdrsDataFlag            = tfs.tdrsDataFlag;                      // made changes by TUAN NGUYEN
       dataFilterNames         = tfs.dataFilterNames;
 
       // Remove all dataFilters
@@ -409,6 +414,8 @@ Integer TrackingFileSet::GetIntegerParameter(const Integer id) const
       return tdrsNode4Band;
    if (id == TDRS_SMAR_ID)
       return tdrsSMARID;
+   if (id == TDRS_DATA_FLAG)
+      return tdrsDataFlag;
 
    return MeasurementModelBase::GetIntegerParameter(id);
 }
@@ -443,6 +450,15 @@ Integer TrackingFileSet::SetIntegerParameter(const Integer id, const Integer val
          throw MeasurementException("Error: Parameter "+GetName()+"."+GetParameterText(id)+" has invalid value. Its value has to be a non negative integer\n");
 
       tdrsSMARID = value;
+      return tdrsSMARID;
+   }
+
+   if (id == TDRS_DATA_FLAG)
+   {
+      if ((value != 0)&&(value != 1))
+         throw MeasurementException("Error: Parameter "+GetName()+"."+GetParameterText(id)+" has invalid value. Its value has to be 0 or 1.\n");
+
+      tdrsDataFlag = value;
       return tdrsSMARID;
    }
 
@@ -1924,8 +1940,9 @@ bool TrackingFileSet::Initialize()
             measurements[i]->SetRealParameter("Node4Frequency", tdrsNode4Frequency);
             measurements[i]->SetIntegerParameter("Node4Band", tdrsNode4Band);
 
-            // set SMARD Id to TDRSDopplerAdapter object
+            // set SMARD Id and TDRS data flag to TDRSDopplerAdapter object
             measurements[i]->SetIntegerParameter("SmarId", tdrsSMARID);
+            measurements[i]->SetIntegerParameter("DataFlag", tdrsDataFlag);
          }
 
          // Set doppler count interval for Doppler
