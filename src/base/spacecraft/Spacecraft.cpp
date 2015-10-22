@@ -83,6 +83,7 @@
 //#define DEBUG_POWER_SYSTEM
 //#define DEBUG_SPACECRAFT_STM
 //#define DEBUG_SC_NAIF_ID
+//#define DEBUG_ESTIMATION
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -5597,6 +5598,9 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
       case CARTESIAN_X:
          retval = 6;
          break;
+      case CD_ID:
+         retval = 1;
+         break;
       case CR_ID:
          retval = 1;
          break;
@@ -5627,6 +5631,10 @@ Real* Spacecraft::GetEstimationParameterValue(const Integer item)
    {
       case CARTESIAN_X:
          retval = state.GetState();
+         break;
+
+      case CD_ID:
+         retval = &coeffDrag;
          break;
 
       case CR_ID:
@@ -7490,6 +7498,8 @@ bool Spacecraft::HasDynamicParameterSTM(Integer parameterId)
 Rmatrix* Spacecraft::GetParameterSTM(Integer parameterId)
 {
    if (parameterId == CARTESIAN_X)
+      return &fullSTM;
+   if (parameterId == CD_EPSILON)
       return &fullSTM;
    if (parameterId == CR_EPSILON)
       return &fullSTM;

@@ -275,10 +275,10 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
 // SolarRadiationPressure::~SolarRadiationPressure(void)
 //------------------------------------------------------------------------------
 /**
- * 
+ * Destructor
  */
 //------------------------------------------------------------------------------
-SolarRadiationPressure::~SolarRadiationPressure(void)
+SolarRadiationPressure::~SolarRadiationPressure()
 { 
     if ((useAnalytic) && (cbSunVector))
         delete [] cbSunVector;
@@ -289,7 +289,7 @@ SolarRadiationPressure::~SolarRadiationPressure(void)
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the SolarRadiationPressure.
@@ -298,7 +298,7 @@ SolarRadiationPressure::~SolarRadiationPressure(void)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* SolarRadiationPressure::Clone(void) const
+GmatBase* SolarRadiationPressure::Clone() const
 {
    return (new SolarRadiationPressure(*this));
 }
