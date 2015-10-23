@@ -78,6 +78,8 @@ DataFilter::DataFilter(const std::string name) :
    epochFormat       ("TAIModJulian"),
    initialEpoch      (DateUtil::EARLIEST_VALID_MJD), 
    finalEpoch        (DateUtil::LATEST_VALID_MJD),
+   //epochStart        (6116.0000003979367),
+   //epochEnd          (58127.500000397937),
    isChecked         (false),
    allObserver       (false),
    allTracker        (false),
@@ -181,12 +183,12 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
       fileNames    = saf.fileNames;
       observers    = saf.observers;
       observerObjects = saf.observerObjects;
-      allObserver     = saf.allObserver;
+      allObserver  = saf.allObserver;
       trackers     = saf.trackers;
       trackerObjects  = saf.trackerObjects;
-      allTracker      = saf.allTracker;
+      allTracker   = saf.allTracker;
       dataTypes    = saf.dataTypes;
-      allDataType     = saf.allDataType;
+      allDataType  = saf.allDataType;
       epochFormat  = saf.epochFormat;
       initialEpoch = saf.initialEpoch;
       finalEpoch   = saf.finalEpoch;
@@ -234,7 +236,11 @@ bool DataFilter::Initialize()
    bool retval = true;
 
    if (epochStart > epochEnd)
-      throw MeasurementException("Error: " + GetName() + ".InitialEpoch (" + initialEpoch + ") is greater than " + GetName() +".FinalEpoch (" + finalEpoch +")\n");
+   {
+      std::stringstream ss;
+      ss << "Error: " << GetName() << ".InitialEpoch (" << epochStart << ") is greater than " << GetName() << ".FinalEpoch (" << epochEnd << ")\n";
+      throw MeasurementException(ss.str());
+   }
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("DataFilter<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
@@ -412,6 +418,9 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
       if (TimeConverterUtil::IsValidTimeSystem(value) == false)
          throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".EpochFormat parameter is invalid.\n");
 
+      Real t1;
+      TimeConverterUtil::Convert("A1ModJulian", epochStart, "", value, t1, initialEpoch);
+      TimeConverterUtil::Convert("A1ModJulian", epochEnd, "", value, t1, finalEpoch);
       epochFormat = value;
       return true;
    }
@@ -1377,4 +1386,93 @@ ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer&
 }
 
 
+bool DataFilter::HasObserver(ObservationData* dataObject)
+{
+   bool has = false;
+   if (!observers.empty())
+   {
+      if (find(observers.begin(), observers.end(), "All") == observers.end())
+      {
+         for(UnsignedInt i = 0; i < observerObjects.size(); ++i)
+         {
+            for(UnsignedInt j = 1; j < dataObject->participantIDs.size(); ++j)
+            {
+               if (observerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[j])
+               {
+                  // When it found a spacecraft matching to a observer list in DataFilter object, it set true to "has" variable
+                  has = true;
+                  break;
+               }
+            }
 
+            if (has)
+               break;
+         }
+      }
+      else
+         has = true;
+   }
+
+   return has;
+}
+
+
+bool DataFilter::HasTracker(ObservationData* dataObject)
+{
+   bool has = false;
+   if (!trackers.empty())
+   {
+      if (find(trackers.begin(), trackers.end(), "All") == trackers.end())
+      {
+         for(UnsignedInt i = 0; i < trackerObjects.size(); ++i)
+         {
+            if ((trackerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[0])||
+                (trackerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[dataObject->participantIDs.size()-1]))
+            {
+               has = true;
+               break;
+            }
+         }
+      }
+      else
+         has = true;
+   }
+
+   return has;
+}
+
+
+bool DataFilter::HasDataType(ObservationData* dataObject)
+{
+   bool has = false;
+   if (!dataTypes.empty())
+   {
+      if (find(dataTypes.begin(), dataTypes.end(), "All") == dataTypes.end())
+      {
+         for(UnsignedInt i = 0; i < dataTypes.size(); ++i)
+         {
+            if (dataTypesMap[dataTypes[i]] == dataObject->typeName)
+            {
+               has = true;
+               break;
+            }
+         }
+      }
+      else
+         has = true;
+   }
+
+   return has;
+}
+
+
+bool DataFilter::IsInTimeWindow(ObservationData* dataObject)
+{
+   bool isIn = true;
+   
+   GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
+   if ((currentEpoch < epochStart)||(currentEpoch > epochEnd))
+      isIn = false;
+
+   return isIn;
+}

@@ -841,13 +841,15 @@ void DataFile::WriteMeasurement(MeasurementData* theMeas)
 }
 
 
-ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject, Integer& rejectedReason)
+ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject, Integer& filterIndex)
 {
 #ifdef DEBUG_FILTER_NEW
-   MessageInterface::ShowMessage("Enter DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>, rejectedReason = %d).\n", GetName().c_str(), this, dataObject, rejectedReason);
+   MessageInterface::ShowMessage("Enter DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>).\n", GetName().c_str(), this, dataObject);
 #endif
 
-   rejectedReason = 0;
+   Integer rejReason;
+
+   filterIndex = filterList.size();
    ObservationData* obdata = dataObject;
 
    // Run statistic reject filters when it passes accept filters
@@ -857,12 +859,15 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
       {
          if (filterList[i]->IsOfType("StatisticsRejectFilter"))
          {
-            //MessageInterface::ShowMessage("reject filter: <%s>\n", filterList[i]->GetName().c_str());
-            obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejectedReason);
+            rejReason = 0;
+            obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejReason);
 
-            // it is rejected when it is rejected by one reject filter
+            // it is rejected when it has been rejected by any reject filter
             if (obdata == NULL)
+            {
+               filterIndex = i;
                break;
+            }
          }
       }
    }
@@ -870,33 +875,45 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
    // Run statistic accept filters
    if (obdata)
    {
-      Integer rejReason = 0;
+      ObservationData* obdata1 = NULL;
+      ObservationData* od;
+      bool hasAcceptFilter = false;
       for (UnsignedInt i = 0; i < filterList.size(); ++i)
       {
          if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
          {
-            //MessageInterface::ShowMessage("accept filter: <%s>\n", filterList[i]->GetName().c_str());
-            obdata = ((StatisticAcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+            hasAcceptFilter = true;
 
-            // it needs to pass only one accept filter
-            if (obdata)
-               break;         // for this case, rejReason = 0
+            rejReason = 0;
+            od = ((StatisticAcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+
+            // it is accepted when it has been accepted by any accept filter
+            if (od)
+            {
+               obdata1 = od;
+            }
+            else
+               filterIndex = i;
          }
       }
 
-      rejectedReason = rejReason;
+      if (hasAcceptFilter)
+      {
+         obdata = obdata1;
+         if (obdata1)
+            filterIndex = filterList.size();
+      }
    }
 
-   // Increasing record counters in all accept filters
-   for (UnsignedInt i = 0; i < filterList.size(); ++i)
-   {
-      if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
-         ((StatisticAcceptFilter*)filterList[i])->IncreasingRecordCounter();
-   }
+   //// Increasing record counters in all accept filters
+   //for (UnsignedInt i = 0; i < filterList.size(); ++i)
+   //{
+   //   if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
+   //      ((StatisticAcceptFilter*)filterList[i])->IncreasingRecordCounter();
+   //}
    
 #ifdef DEBUG_FILTER_NEW
-   if (rejectedReason != 0)
-      MessageInterface::ShowMessage("Exit DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>, rejectedReason = %d)\n", GetName().c_str(), this, dataObject, rejectedReason);
+   MessageInterface::ShowMessage("Exit DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>, filterIndex = %d)  return obdata = <%p>\n", GetName().c_str(), this, dataObject, filterIndex, obdata);
 #endif
 
    return obdata;
@@ -1010,7 +1027,11 @@ ObservationData* DataFile::FilteringData(ObservationData* dataObject, Integer& r
 
    od = FilteringDataForOldSyntax(dataObject, rejectedReason);
    if (od)
-      od = FilteringDataForNewSyntax(od, rejectedReason);
+   {
+      Integer filterIndex;
+      od = FilteringDataForNewSyntax(od, filterIndex);
+      rejectedReason = filterIndex + 6;                   // specify reject reason from filter index
+   }
 
 #ifdef DEBUG_FILTER
    MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)   exit\n", GetName().c_str(), this, dataObject, rejectedReason);
@@ -1217,4 +1238,10 @@ bool DataFile::SetDataFilter(DataFilter *filter)
       filterList.push_back(filter);
 
    return true;
+}
+
+
+std::vector<DataFilter*>& DataFile::GetFilterList()
+{
+   return filterList;
 }

@@ -69,7 +69,7 @@ public:
 
    virtual ObservationData* 
                         FilteringData(ObservationData* dataObject, Integer& rejectedReason);
-   void                 IncreasingRecordCounter();
+//   void                 IncreasingRecordCounter();
 
    StringArray          GetAllAvailableThinModes();
 
@@ -86,6 +86,9 @@ protected:
 
    /// List of tracking configs used for data filter                                          // made changes by TUAN NGUYEN
    StringArray tkConfigList;                                                                  // made changes by TUAN NGUYEN
+
+   /// Check data thinning ratio to be reached
+   bool IsThin(ObservationData* dataObject);
 
    /// Class parameter ID enumeration
    enum

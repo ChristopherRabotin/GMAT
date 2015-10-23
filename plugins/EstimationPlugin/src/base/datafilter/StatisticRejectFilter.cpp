@@ -66,8 +66,8 @@ StatisticRejectFilter::StatisticRejectFilter(const std::string name) :
 
    parameterCount = StatisticRejectFilterParamCount;
 
-   initialEpoch = finalEpoch;
-   epochStart = epochEnd;
+   //finalEpoch = initialEpoch;
+   //epochEnd   = epochStart;
 }
 
 
@@ -333,64 +333,51 @@ ObservationData* StatisticRejectFilter::FilteringData(ObservationData* dataObjec
    rejectedReason = 0;             // no reject
 
    // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
-   for(UnsignedInt i = 0; i < observers.size(); ++i)
+   if (!HasObserver(dataObject))
    {
-      for(UnsignedInt j = 1; j < dataObject->participantIDs.size(); ++j)
-      {
-         if (observers[i] == dataObject->participantIDs[j])
-         {
-            rejectedReason = 6;         // 6: rejected due to spacecraft is found in "observers" array
-            #ifdef DEBUG_FILTER
-               MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
-            #endif
-            return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 6 
-         }
-      }
+      #ifdef DEBUG_FILTER
+          MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+      #endif
+      return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
    }
 
    // 2. Trackers verify: It will be passed the test when observation data contains one ground station in "trackers" array
-   for(UnsignedInt i = 0; i < trackers.size(); ++i)
+   if (!HasTracker(dataObject))
    {
-      if (trackers[i] == dataObject->participantIDs[0])
-      {
-         rejectedReason = 5;        // 5: rejected due to ground station is found in "trackers" array
-         #ifdef DEBUG_FILTER
-            MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
-         #endif
-         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 5 
-      }
+      #ifdef DEBUG_FILTER
+          MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+      #endif
+      return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
    }
+
+   
 
    // 3. Measurement type verify: It will be passed the test when data type of observation data is found in "dataTypes" array
-   for(UnsignedInt i = 0; i < dataTypes.size(); ++i)
+   if (!HasDataType(dataObject))
    {
-      if (dataTypesMap[dataTypes[i]] == dataObject->typeName)
-      {
-         rejectedReason = 7;        // 7: rejected due to data type of observation data is not found in "dataTypes" array
-         #ifdef DEBUG_FILTER
-            MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
-         #endif
-         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
-      }
+      #ifdef DEBUG_FILTER
+          MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+      #endif
+      return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
    }
-
 
    // Strands verify:
+
    // Time interval verify:
-   GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
-   if ((currentEpoch >= epochStart)&&(currentEpoch <= epochEnd))
+   if (!IsInTimeWindow(dataObject))
    {
-      rejectedReason = 2;      // 2: rejected due to time span
       #ifdef DEBUG_FILTER
-         MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return NULL  time out of range\n", GetName().c_str(), this, dataObject, rejectedReason);
+          MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
       #endif
-      return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+      return dataObject;             // return dataObject when it does not have any spacecraft matching to observers list. The value of rejectedReason has to be 0 
    }
 
-
+   rejectedReason = 100;             // reject due to reject filter
+   dataObject = NULL;
    #ifdef DEBUG_FILTER
       MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit0 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
    #endif
+
    return dataObject;
 }
    

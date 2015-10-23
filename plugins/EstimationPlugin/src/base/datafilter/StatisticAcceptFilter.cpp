@@ -504,151 +504,197 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
 
 
    // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
-   bool pass1 = true;
-   rejectedReason = 0;   // 0: no rejected due to accept all spacecrafts
-   if (!observers.empty())
-   {
-      if (find(observers.begin(), observers.end(), "All") == observers.end())
-      {
-         for(UnsignedInt i = 0; i < observerObjects.size(); ++i)                                               // made changes by TUAN NGUYEN
-         {
-            pass1 = false;
-            rejectedReason = 6;         // 6: rejected due to spacecraft is not found
-            for(UnsignedInt j = 1; j < dataObject->participantIDs.size(); ++j)
-            {
-               if (observerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[j])              // made changes by TUAN NGUYEN
-               {
-                  rejectedReason = 0;   // 0: no rejected due to spacecraft is found in "observers" array
-                  pass1 = true;
-                  break;
-               }
-            }
+   //bool pass1 = true;
+   //rejectedReason = 0;   // 0: no rejected due to accept all spacecrafts
+   //if (!observers.empty())
+   //{
+   //   if (find(observers.begin(), observers.end(), "All") == observers.end())
+   //   {
+   //      for(UnsignedInt i = 0; i < observerObjects.size(); ++i)                                               // made changes by TUAN NGUYEN
+   //      {
+   //         pass1 = false;
+   //         rejectedReason = 6;         // 6: rejected due to spacecraft is not found
+   //         for(UnsignedInt j = 1; j < dataObject->participantIDs.size(); ++j)
+   //         {
+   //            if (observerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[j])              // made changes by TUAN NGUYEN
+   //            {
+   //               rejectedReason = 0;   // 0: no rejected due to spacecraft is found in "observers" array
+   //               pass1 = true;
+   //               break;
+   //            }
+   //         }
 
-            if (pass1)
-               break;
-         }
-      }
-   }
-   else
-   {
-      pass1 = false;
-      rejectedReason = 6;         // 6: rejected all due to observers is an empty list
-   }
+   //         if (pass1)
+   //            break;
+   //      }
+   //   }
+   //}
+   //else
+   //{
+   //   pass1 = false;
+   //   rejectedReason = 6;         // 6: rejected all due to observers is an empty list
+   //}
 
-   if (!pass1)
+   //if (!pass1)
+   //{
+   //   #ifdef DEBUG_FILTER
+   //      MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+   //   #endif
+   //   return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 6 
+   //}
+
+   if (!HasObserver(dataObject))
    {
+      rejectedReason = 6;          // 6: rejected due to spacecraft is not found
       #ifdef DEBUG_FILTER
          MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
       #endif
-      return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 6 
+      return NULL;                 // return NULL when it does not have any observer listing in DataFilter object. The value of rejectedReason has to be 6 
    }
+
 
    // 2. Trackers verify: It will be passed the test when observation data contains one ground station in "trackers" array
-   bool pass2 = true;
-   rejectedReason = 0;    // 0: no rejected due to ground station is found in "trackers" array
-   if (!trackers.empty())
-   {
-      if (find(trackers.begin(), trackers.end(), "All") == trackers.end())
-      {
-         for(UnsignedInt i = 0; i < trackerObjects.size(); ++i)                                   // made changes by TUAN NGUYEN
-         {
-            pass2 = false;
-            rejectedReason = 5;        // 5: rejected due to ground station is not found
-            //MessageInterface::ShowMessage("Pass2: trackerObjects[%d].Id = %s   dataObject->participantIDs[0] = %s\n", i, trackerObjects[i]->GetStringParameter("Id").c_str(), dataObject->participantIDs[0].c_str());
-            if (trackerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[0])    // made changes by TUAN NGUYEN
-            {
-               rejectedReason = 0;    // 0: no rejected due to ground station is found in "trackers" array
-               pass2 = true;
-               break;
-            }
-         }
-      }
-   }
-   else
-   {
-      pass2 = false;
-      rejectedReason = 5;        // 5: rejected all due to trackers is an empty list
-   }
+   //bool pass2 = true;
+   //rejectedReason = 0;    // 0: no rejected due to ground station is found in "trackers" array
+   //if (!trackers.empty())
+   //{
+   //   if (find(trackers.begin(), trackers.end(), "All") == trackers.end())
+   //   {
+   //      for(UnsignedInt i = 0; i < trackerObjects.size(); ++i)                                   // made changes by TUAN NGUYEN
+   //      {
+   //         pass2 = false;
+   //         rejectedReason = 5;        // 5: rejected due to ground station is not found
+   //         //MessageInterface::ShowMessage("Pass2: trackerObjects[%d].Id = %s   dataObject->participantIDs[0] = %s\n", i, trackerObjects[i]->GetStringParameter("Id").c_str(), dataObject->participantIDs[0].c_str());
+   //         if (trackerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[0])    // made changes by TUAN NGUYEN
+   //         {
+   //            rejectedReason = 0;    // 0: no rejected due to ground station is found in "trackers" array
+   //            pass2 = true;
+   //            break;
+   //         }
+   //      }
+   //   }
+   //}
+   //else
+   //{
+   //   pass2 = false;
+   //   rejectedReason = 5;        // 5: rejected all due to trackers is an empty list
+   //}
 
-   if (!pass2)
+   //if (!pass2)
+   //{
+   //   #ifdef DEBUG_FILTER
+   //      MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+   //   #endif
+   //   return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 5 
+   //}
+
+   if (!HasTracker(dataObject))
    {
+      rejectedReason = 5;        // 5: rejected due to ground station is not found
       #ifdef DEBUG_FILTER
          MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
       #endif
-      return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 5 
+      return NULL;             // return NULL when it does not have any tracker listing in DataFilter object. The value of rejectedReason has to be 5 
    }
 
    // 3. Measurement type verify: It will be passed the test when data type of observation data is found in "dataTypes" array
-   bool pass3 = true;
-   rejectedReason = 0;    // 0: no rejected due to data type of observation data is found in "dataTypes" array
-   if (!dataTypes.empty())
-   {
-      if (find(dataTypes.begin(), dataTypes.end(), "All") == dataTypes.end())
-      {
-         for(UnsignedInt i = 0; i < dataTypes.size(); ++i)
-         {
-            pass3 = false;
-            rejectedReason = 7;        // 7: rejected due to data type of observation data is not found
-            //MessageInterface::ShowMessage("Pass3: dataTypes[%d] = %s   dataObject->participantIDs[0] = %s\n", i, dataTypes[i].c_str(), dataObject->typeName.c_str());
-            if (dataTypesMap[dataTypes[i]] == dataObject->typeName)
-            {
-               rejectedReason = 0;    // 0: no rejected due to data type of observation data is found in "dataTypes" array
-               pass3 = true;
-               break;
-            }
-         }
-      }
-   }
-   else
-   {
-      pass3 = false;
-      rejectedReason = 7;        // 7: rejected all due to data type is an empty list
-   }
+   //bool pass3 = true;
+   //rejectedReason = 0;    // 0: no rejected due to data type of observation data is found in "dataTypes" array
+   //if (!dataTypes.empty())
+   //{
+   //   if (find(dataTypes.begin(), dataTypes.end(), "All") == dataTypes.end())
+   //   {
+   //      for(UnsignedInt i = 0; i < dataTypes.size(); ++i)
+   //      {
+   //         pass3 = false;
+   //         rejectedReason = 7;        // 7: rejected due to data type of observation data is not found
+   //         //MessageInterface::ShowMessage("Pass3: dataTypes[%d] = %s   dataObject->participantIDs[0] = %s\n", i, dataTypes[i].c_str(), dataObject->typeName.c_str());
+   //         if (dataTypesMap[dataTypes[i]] == dataObject->typeName)
+   //         {
+   //            rejectedReason = 0;    // 0: no rejected due to data type of observation data is found in "dataTypes" array
+   //            pass3 = true;
+   //            break;
+   //         }
+   //      }
+   //   }
+   //}
+   //else
+   //{
+   //   pass3 = false;
+   //   rejectedReason = 7;        // 7: rejected all due to data type is an empty list
+   //}
 
-   if (!pass3)
+   //if (!pass3)
+   //{
+   //   #ifdef DEBUG_FILTER
+   //      MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+   //   #endif
+   //   return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+   //}
+
+   if (!HasDataType(dataObject))
    {
+      rejectedReason = 7;        // 7: rejected due to data type of observation data is not found
       #ifdef DEBUG_FILTER
          MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
       #endif
-      return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+      return NULL;             // return NULL when it does not have any data type listing in DataFilter object. The value of rejectedReason has to be 7
    }
-
 
    // Strands verify:
    // 4. Time interval verify:
-   bool pass4 = true;
-   rejectedReason = 0;
-   GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
-   if ((currentEpoch < epochStart)||(currentEpoch > epochEnd))
+   //bool pass4 = true;
+   //rejectedReason = 0;
+   //GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
+   //if ((currentEpoch < epochStart)||(currentEpoch > epochEnd))
+   //{
+   //   rejectedReason = 2;      // 2: rejected due to time span
+   //   pass4 = false;
+   //}
+   //if (!pass4)
+   //{
+   //   #ifdef DEBUG_FILTER
+   //      MessageInterface::ShowMessage(" currentEpoch = %.12lf    epochStart = %.12lf     epochEnd = %.12lf\n", currentEpoch, epochStart, epochEnd);
+   //      MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return NULL  time out of range\n", GetName().c_str(), this, dataObject, rejectedReason);
+   //   #endif
+   //   return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+   //}
+
+   if (!IsInTimeWindow(dataObject))
    {
       rejectedReason = 2;      // 2: rejected due to time span
-      pass4 = false;
-   }
-   if (!pass4)
-   {
       #ifdef DEBUG_FILTER
+         GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
          MessageInterface::ShowMessage(" currentEpoch = %.12lf    epochStart = %.12lf     epochEnd = %.12lf\n", currentEpoch, epochStart, epochEnd);
          MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return NULL  time out of range\n", GetName().c_str(), this, dataObject, rejectedReason);
       #endif
-      return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+      return NULL;             // return NULL when measurement epoch is not in time window. The value of rejectedReason has to be 2 
    }
-
 
    // 5. Data thin verify:
-   if (thinMode == "F")
+   //if (thinMode == "F")
+   //{
+   //   rejectedReason = 0;
+   //   if (recCount != (thinningFrequency-1))
+   //   {
+   //      rejectedReason = 1;    // 1: reject due to thinning ratio
+   //      #ifdef DEBUG_FILTER
+   //         MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit5  return NULL   recCount = %d   thinningFrequency = %d\n", dataObject, rejectedReason, recCount, thinningFrequency);
+   //      #endif
+   //      return NULL;
+   //   }
+   //}
+   //else
+   //   throw MeasurementException("Error: " + GetName() + ".ThinMode parameter has an invalid value ('" + thinMode + "'.\n");
+
+   if (!IsThin(dataObject))
    {
-      rejectedReason = 0;
-      if (recCount != (thinningFrequency-1))
-      {
-         rejectedReason = 1;    // 1: reject due to thinning ratio
-         #ifdef DEBUG_FILTER
-            MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit5  return NULL   recCount = %d   thinningFrequency = %d\n", dataObject, rejectedReason, recCount, thinningFrequency);
-         #endif
-         return NULL;
-      }
+      rejectedReason = 1;    // 1: reject due to thinning ratio
+      #ifdef DEBUG_FILTER
+         MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit5  return NULL   recCount = %d   thinningFrequency = %d\n", dataObject, rejectedReason, recCount, thinningFrequency);
+      #endif
+      return NULL;
    }
-   else
-      throw MeasurementException("Error: " + GetName() + ".ThinMode parameter has an invalid value ('" + thinMode + "'.\n");
 
 
    #ifdef DEBUG_FILTER
@@ -667,9 +713,29 @@ StringArray StatisticAcceptFilter::GetAllAvailableThinModes()
 }
 
 
-void StatisticAcceptFilter::IncreasingRecordCounter()
+//void StatisticAcceptFilter::IncreasingRecordCounter()
+//{
+//   ++recCount;
+//   if (recCount == thinningFrequency)
+//      recCount = 0;
+//}
+
+
+bool StatisticAcceptFilter::IsThin(ObservationData* dataObject)
 {
-   ++recCount;
-   if (recCount == thinningFrequency)
-      recCount = 0;
+   bool isAccepted = false;
+   if (thinMode == "F")
+   {
+      if (recCount == (thinningFrequency-1))
+      {
+         isAccepted = true;
+         recCount = 0;
+      }
+      else
+         ++recCount;
+   }
+   else
+      throw MeasurementException("Error: " + GetName() + ".ThinMode parameter has an invalid value ('" + thinMode + "'.\n");
+
+   return isAccepted;
 }
