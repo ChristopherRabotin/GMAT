@@ -83,6 +83,7 @@
 //#define DEBUG_POWER_SYSTEM
 //#define DEBUG_SPACECRAFT_STM
 //#define DEBUG_SC_NAIF_ID
+//#define DEBUG_ESTIMATION
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -3259,10 +3260,13 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 
    if (label == "Cd")
    {
-      if (value >= 0.0)
+      if ((value >= 0.0) || (constrainCd == false))
       {
          coeffDrag = value;
          cdEpsilon = 0.0;
+         if (value < 0.0)
+            MessageInterface::ShowMessage("Warning: The Cd value %lf is "
+                  "outside of the expected range of 0.0 <= Cd\n", value);
       }
       else
       {
@@ -5550,14 +5554,13 @@ bool Spacecraft::IsEstimationParameterValid(const Integer item)
          retval = true;
          break;
       
-      case CR_EPSILON:                       // made changes by TUAN NGUYEN
-         retval = true;                      // made changes by TUAN NGUYEN
-         break;                              // made changes by TUAN NGUYEN
+      case CR_EPSILON:
+         retval = true;
+         break;
 
-      case CD_EPSILON:                       // made changes by TUAN NGUYEN
-         // @todo: when code for Cd is completed. It need to add the following line.
-         //retval = true;                      // made changes by TUAN NGUYEN
-         break;                              // made changes by TUAN NGUYEN
+      case CD_EPSILON:
+         retval = true;
+         break;
 
       case Gmat::MASS_FLOW:          /// Is it correct ???? Spacecraft::SC_Param_ID::MASS_FLOW or Gmat::MASS_FLOW ???
          // todo: Access tanks for mass information to handle mass flow
@@ -5595,6 +5598,9 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
       case CARTESIAN_X:
          retval = 6;
          break;
+      case CD_ID:
+         retval = 1;
+         break;
       case CR_ID:
          retval = 1;
          break;
@@ -5625,6 +5631,10 @@ Real* Spacecraft::GetEstimationParameterValue(const Integer item)
    {
       case CARTESIAN_X:
          retval = state.GetState();
+         break;
+
+      case CD_ID:
+         retval = &coeffDrag;
          break;
 
       case CR_ID:
@@ -7488,6 +7498,8 @@ bool Spacecraft::HasDynamicParameterSTM(Integer parameterId)
 Rmatrix* Spacecraft::GetParameterSTM(Integer parameterId)
 {
    if (parameterId == CARTESIAN_X)
+      return &fullSTM;
+   if (parameterId == CD_EPSILON)
       return &fullSTM;
    if (parameterId == CR_EPSILON)
       return &fullSTM;
