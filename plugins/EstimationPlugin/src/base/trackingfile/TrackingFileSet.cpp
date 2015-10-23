@@ -29,6 +29,7 @@
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
 #include "GNDopplerAdapter.hpp"
+#include "TDRSDopplerAdapter.hpp"                        // made changes by TUAN NGUYEN
 #include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
 
@@ -54,6 +55,11 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "UseETminusTAI",                 // USE_ETMINUSTAI
    "SimRangeModuloConstant",        // RANGE_MODULO
    "SimDopplerCountInterval",       // DOPPLER_COUNT_INTERVAL
+   "SimTDRSServiceAccessList",      // TDRS_SERVICE_ACCESS               // made changes by TUAN NGUYEN
+   "SimTDRSNode4Frequency",         // TDRS_NODE4_FREQUENCY              // made changes by TUAN NGUYEN
+   "SimTDRSNode4FrequencyBand",     // TDRS_NODE4_BAND                   // made changes by TUAN NGUYEN
+   "SimTDRSSmarId",                 // TDSR_SMAR_ID                      // made changes by TUAN NGUYEN
+   "SimTDRSDataFlag",               // TDRS_DATA_FLAG                    // made changes by TUAN NGUYEN
    "DataFilters",                   // DATA_FILTERS
 };
 
@@ -69,6 +75,11 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI
    Gmat::REAL_TYPE,                 // RANGE_MODULO
    Gmat::REAL_TYPE,                 // DOPPLER_COUNT_INTERVAL
+   Gmat::STRINGARRAY_TYPE,          // TDRS_SERVICE_ACCESS              // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,                 // TDRS_NODE4_FREQUENCY             // made changes by TUAN NGUYEN
+   Gmat::INTEGER_TYPE,              // TDRS_NODE4_BAND                  // made changes by TUAN NGUYEN
+   Gmat::INTEGER_TYPE,              // TDRS_SMAR_ID                     // made changes by TUAN NGUYEN
+   Gmat::INTEGER_TYPE,              // TDRS_DATA_FLAG                   // made changes by TUAN NGUYEN
    Gmat::OBJECTARRAY_TYPE,          // DATA_FILLTERS
 };
 
@@ -90,7 +101,11 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    useRelativityCorrection   (false),
    useETminusTAICorrection   (false),
    rangeModulo               (1.0e18),
-   dopplerCountInterval      (1.0)
+   dopplerCountInterval      (1.0),
+   tdrsNode4Frequency        (2000.0),              // unit: MHz                                          // made changes by TUAN NGUYEN
+   tdrsNode4Band             (1),                   // 0: unspecified, 1: S-band, 2: X-band, 3: K-band    // made changes by TUAN NGUYEN
+   tdrsSMARID                (0),                                                                         // made changes by TUAN NGUYEN
+   tdrsDataFlag              (0)                                                                          // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingFileSet <%s,%p> default construction \n", GetName().c_str(), this);
@@ -130,9 +145,12 @@ TrackingFileSet::~TrackingFileSet()
    // clear tracking configs
    trackingConfigs.clear();
 
-   // cleat file names and ramped table names
+   // clear file names and ramped table names
    filenames.clear();
    rampedTablenames.clear();
+
+   // clear TDRS service access list              // made changes by TUAN NGUYEN
+   tdrsServiceAccessList.clear();                 // made changes by TUAN NGUYEN
 }
 
 
@@ -158,6 +176,11 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    useETminusTAICorrection   (tfs.useETminusTAICorrection),
    rangeModulo               (tfs.rangeModulo),
    dopplerCountInterval      (tfs.dopplerCountInterval),
+   tdrsServiceAccessList     (tfs.tdrsServiceAccessList),         // made changes by TUAN NGUYEN
+   tdrsNode4Frequency        (tfs.tdrsNode4Frequency),            // made changes by TUAN NGUYEN
+   tdrsNode4Band             (tfs.tdrsNode4Band),                 // made changes by TUAN NGUYEN
+   tdrsSMARID                (tfs.tdrsSMARID),                    // made changes by TUAN NGUYEN
+   tdrsDataFlag              (tfs.tdrsDataFlag),                  // made changes by TUAN NGUYEN
    dataFilterNames           (tfs.dataFilterNames)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -225,6 +248,11 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       useETminusTAICorrection = tfs.useETminusTAICorrection;
       rangeModulo             = tfs.rangeModulo;
       dopplerCountInterval    = tfs.dopplerCountInterval;
+      tdrsServiceAccessList   = tfs.tdrsServiceAccessList;             // made changes by TUAN NGUYEN
+      tdrsNode4Frequency      = tfs.tdrsNode4Frequency;                // made changes by TUAN NGUYEN
+      tdrsNode4Band           = tfs.tdrsNode4Band;                     // made changes by TUAN NGUYEN
+      tdrsSMARID              = tfs.tdrsSMARID;                        // made changes by TUAN NGUYEN
+      tdrsDataFlag            = tfs.tdrsDataFlag;                      // made changes by TUAN NGUYEN
       dataFilterNames         = tfs.dataFilterNames;
 
       // Remove all dataFilters
@@ -370,6 +398,110 @@ std::string TrackingFileSet::GetParameterTypeString(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// std::string GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of an integer parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Integer TrackingFileSet::GetIntegerParameter(const Integer id) const
+{
+   if (id == TDRS_NODE4_BAND)
+      return tdrsNode4Band;
+   if (id == TDRS_SMAR_ID)
+      return tdrsSMARID;
+   if (id == TDRS_DATA_FLAG)
+      return tdrsDataFlag;
+
+   return MeasurementModelBase::GetIntegerParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an integer parameter
+ *
+ * @param id The ID for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Integer TrackingFileSet::SetIntegerParameter(const Integer id, const Integer value)
+{
+   if (id == TDRS_NODE4_BAND)
+   {
+      if (value < 0)
+         throw MeasurementException("Error: Parameter "+GetName()+"."+GetParameterText(id)+" has invalid value. Its value has to be a non negative integer\n");
+
+      tdrsNode4Band = value;
+      return tdrsNode4Band;
+   }
+
+   if (id == TDRS_SMAR_ID)
+   {
+      if (value < 0)
+         throw MeasurementException("Error: Parameter "+GetName()+"."+GetParameterText(id)+" has invalid value. Its value has to be a non negative integer\n");
+
+      tdrsSMARID = value;
+      return tdrsSMARID;
+   }
+
+   if (id == TDRS_DATA_FLAG)
+   {
+      if ((value != 0)&&(value != 1))
+         throw MeasurementException("Error: Parameter "+GetName()+"."+GetParameterText(id)+" has invalid value. Its value has to be 0 or 1.\n");
+
+      tdrsDataFlag = value;
+      return tdrsSMARID;
+   }
+
+   return MeasurementModelBase::SetRealParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of an integer parameter
+ *
+ * @param label The name for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Integer TrackingFileSet::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an integer parameter
+ *
+ * @param label The name for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Integer TrackingFileSet::SetIntegerParameter(const std::string &label, const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -386,6 +518,8 @@ Real TrackingFileSet::GetRealParameter(const Integer id) const
       return rangeModulo;
    if (id == DOPPLER_COUNT_INTERVAL)
       return dopplerCountInterval;
+   if (id == TDRS_NODE4_FREQUENCY)
+      return tdrsNode4Frequency;
 
    return MeasurementModelBase::GetRealParameter(id);
 }
@@ -410,7 +544,7 @@ Real TrackingFileSet::SetRealParameter(const Integer id, const Real value)
    if (id == RANGE_MODULO)
    {
       if (value <= 0.0)
-         throw MeasurementException("Error: "+GetName()+".RangeModuloConstant has an invalid value. It has to be a positive number\n");
+         throw MeasurementException("Error: "+GetName()+"."+GetParameterText(id)+" has an invalid value. It has to be a positive number\n");
 
       rangeModulo = value;
       return rangeModulo;
@@ -419,10 +553,19 @@ Real TrackingFileSet::SetRealParameter(const Integer id, const Real value)
    if (id == DOPPLER_COUNT_INTERVAL)
    {
       if (value <= 0.0)
-         throw MeasurementException("Error: "+GetName()+".DopplerCountInterval has an invalid value. It has to be a positive number\n");
+         throw MeasurementException("Error: "+GetName()+"."+GetParameterText(id)+" has an invalid value. It has to be a positive number\n");
 
       dopplerCountInterval = value;
       return dopplerCountInterval;
+   }
+
+   if (id == TDRS_NODE4_FREQUENCY)
+   {
+      if (value <= 0.0)
+         throw MeasurementException("Error: "+GetName()+"."+GetParameterText(id)+" has an invalid value. It has to be a positive number\n");
+
+      tdrsNode4Frequency = value;
+      return tdrsNode4Frequency;
    }
 
    return MeasurementModelBase::SetRealParameter(id, value);
@@ -598,6 +741,15 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
          throw MeasurementException("Index out of bounds when trying to access "
                "a data filter name");
    }
+
+   if (id == TDRS_SERVICE_ACCESS)                                                  // made changes by TUAN NGUYEN
+   {                                                                               // made changes by TUAN NGUYEN
+      if (((Integer)tdrsServiceAccessList.size() > index) && (index >= 0))         // made changes by TUAN NGUYEN
+         return tdrsServiceAccessList[index];                                      // made changes by TUAN NGUYEN
+      else                                                                         // made changes by TUAN NGUYEN
+         throw MeasurementException("Index out of bounds when trying to access "   // made changes by TUAN NGUYEN
+               "a service access list");                                           // made changes by TUAN NGUYEN
+   }                                                                               // made changes by TUAN NGUYEN
 
    return MeasurementModelBase::GetStringParameter(id, index);
 }
@@ -792,6 +944,33 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       return true;
    }
 
+   if (id == TDRS_SERVICE_ACCESS)                                                                         // made changes by TUAN NGUYEN
+   {                                                                                                      // made changes by TUAN NGUYEN
+      // return true when it is an empty list                                                             // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                    // made changes by TUAN NGUYEN
+         return true;                                                                                     // made changes by TUAN NGUYEN
+
+      if ((!tdrsServiceAccessList.empty())&&                                                              // made changes by TUAN NGUYEN
+          (find(tdrsServiceAccessList.begin(), tdrsServiceAccessList.end(), value) != tdrsServiceAccessList.end()))   // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: replication of service access name ('" + value + "').\n");    // made changes by TUAN NGUYEN
+      
+      if (((Integer)tdrsServiceAccessList.size() > index) && (index >= 0))                                // made changes by TUAN NGUYEN
+         tdrsServiceAccessList[index] = value;                                                            // made changes by TUAN NGUYEN
+      else if ((Integer)tdrsServiceAccessList.size() == index)                                            // made changes by TUAN NGUYEN
+         tdrsServiceAccessList.push_back(value);                                                          // made changes by TUAN NGUYEN
+      else                                                                                                // made changes by TUAN NGUYEN
+         throw MeasurementException("Index out of bounds when trying to "                                 // made changes by TUAN NGUYEN
+               "set a service access name");                                                              // made changes by TUAN NGUYEN
+
+      #ifdef DEBUG_INITIALIZATION                                                                         // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("%d names in TDRS service access list:\n",                         // made changes by TUAN NGUYEN
+               tdrsServiceAccessList.size());                                                             // made changes by TUAN NGUYEN
+         for (UnsignedInt i = 0; i < tdrsServiceAccessList.size(); ++i)                                   // made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("   %s\n", tdrsServiceAccessList[i].c_str());                   // made changes by TUAN NGUYEN
+      #endif                                                                                              // made changes by TUAN NGUYEN
+      return true;                                                                                        // made changes by TUAN NGUYEN
+   }                                                                                                      // made changes by TUAN NGUYEN
+
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
 
@@ -829,6 +1008,9 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
 
    if (id == RAMPED_TABLENAME)
       return rampedTablenames;
+
+   if (id == TDRS_SERVICE_ACCESS)
+      return tdrsServiceAccessList;
 
    if (id == DATA_FILTERS)
       return dataFilterNames;
@@ -1667,16 +1849,17 @@ bool TrackingFileSet::Initialize()
                      trackingConfigs[i].types[j] + " measurement");
             }
 
-            // Pass in the signal paths
-            std::string theStrand;
-            for (UnsignedInt k=0; k < trackingConfigs[i].strands[0].size(); ++k)
-            {
-               if (k > 0)
-                  theStrand += ", ";
-               theStrand += trackingConfigs[i].strands[0][k];
-            }
+            // This section was done in BuildAdapter
+            //// Pass in the signal paths
+            //std::string theStrand;
+            //for (UnsignedInt k=0; k < trackingConfigs[i].strands[0].size(); ++k)
+            //{
+            //   if (k > 0)
+            //      theStrand += ", ";
+            //   theStrand += trackingConfigs[i].strands[0][k];
+            //}
 
-            tda->SetStringParameter("SignalPath", theStrand);
+            //tda->SetStringParameter("SignalPath", theStrand);
 
             // Push tracking data apadter to measurement model list
             measurements.push_back(tda);
@@ -1746,12 +1929,28 @@ bool TrackingFileSet::Initialize()
             measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);
          }
 
+         // Set service access, node 4 frequency and band, SMAR id for TDRSDoppler
+         if (measType == "TDRSDoppler_HZ")
+         {
+            // set the list of service access to TDRSDopplerAdapter object
+            for (UnsignedInt accIndex = 0; accIndex < tdrsServiceAccessList.size(); ++accIndex) 
+               measurements[i]->SetStringParameter("ServiceAccess", tdrsServiceAccessList[accIndex], accIndex);
+
+            // set node 4 frequency and frequency band to TDRSDopplerAdapter object
+            measurements[i]->SetRealParameter("Node4Frequency", tdrsNode4Frequency);
+            measurements[i]->SetIntegerParameter("Node4Band", tdrsNode4Band);
+
+            // set SMARD Id and TDRS data flag to TDRSDopplerAdapter object
+            measurements[i]->SetIntegerParameter("SmarId", tdrsSMARID);
+            measurements[i]->SetIntegerParameter("DataFlag", tdrsDataFlag);
+         }
+
          // Set doppler count interval for Doppler
-         if ((measType == "Doppler")||(measType == "Doppler_RangeRate"))
+         if ((measType == "Doppler")||(measType == "Doppler_RangeRate")||(measType == "TDRSDoppler_HZ"))      // made changes by TUAN NGUYEN
          {
             measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);
          }
-         // Set range modulo constant for RangeRate
+         // Set DopplerInterval for RangeRate
          if (measType == "RangeRate")
          {
             //measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
@@ -1863,7 +2062,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    /// @todo: Check to see if this code works for multi-strand measurements.
    ///        Original code assumed a single strand, so it may need modification
    ///        here and wrapping in an outer loop.  Hence the indentation.
-
+   
    // 1. Set value for designators map:
    for (UnsignedInt i = 0; i < strand.size(); ++i)
    {
@@ -1910,7 +2109,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          }
       }
    }
-
+   
    // And now build the node list
    /// @todo: Check as described above.
    // 2. Add all spacecraft and station IDs to currentStrand
@@ -1921,7 +2120,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    }
    nodelist.push_back(currentStrand);
 
-
+   
    /// @todo Move this into a Factory so that plugin adapters work
    // 3. Create TrackingDataAdapter for a given measurement type
    std::stringstream ss;
@@ -1935,8 +2134,9 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    }
    ss << "}_" << type;
    std::string adapterName = ss.str();          // tracking adapter name contains TrackingFileSet name following tracking configuration index and type 
+   //MessageInterface::ShowMessage("Adapter name: <%s>\n", adapterName.c_str());
    
-   if (type == "Range_KM")
+   if (type == "Range_KM")                                    // It is GN (or USN) Range
    {
       retval = new RangeAdapterKm(adapterName);
       if (retval)
@@ -1945,7 +2145,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->SetStringParameter("MeasurementType", type);
       }
    }
-   else if (type == "DSNRange")
+   else if (type == "DSNRange")                               // It is DSN Range
    {
       retval = new DSNRangeAdapter(adapterName);
       if (retval)
@@ -1954,7 +2154,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->SetStringParameter("MeasurementType", type);
       }
    }
-   else if (type == "Doppler")
+   else if (type == "Doppler")                               // It is DSN Doppler
    {
       retval = new DopplerAdapter(adapterName);
       if (retval)
@@ -1973,6 +2173,29 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
+   }
+   else if (type == "TDRSDoppler_HZ")                    // It is 2-ways TDRS Doppler                                     // made changes by TUAN NGUYEN
+   {                                                                                                                      // made changes by TUAN NGUYEN
+      retval = new TDRSDopplerAdapter(adapterName);                                                                       // made changes by TUAN NGUYEN
+      if (retval)                                                                                                         // made changes by TUAN NGUYEN
+      {
+         retval->UsesLightTime(useLighttime);                                                                             // made changes by TUAN NGUYEN
+         retval->SetStringParameter("MeasurementType", type);                                                             // made changes by TUAN NGUYEN
+
+         // Add code to specify short strand here                                                                         // made changes by TUAN NGUYEN         
+         StringArray shortStrand;                                                                                         // made changes by TUAN NGUYEN
+         if (strand.size() != 5)
+            throw MeasurementException("Error: Signal path does not contain 5 participants.\n");
+         shortStrand.push_back(strand[0]);
+         shortStrand.push_back(strand[3]);
+         shortStrand.push_back(strand[4]);
+
+         //MessageInterface::ShowMessage("Long strand:{%s,%s,%s,%s,%s}\n", strand[0].c_str(), strand[1].c_str(), strand[2].c_str(), strand[3].c_str(), strand[4].c_str());
+         //MessageInterface::ShowMessage("Short strand:{%s,%s,%s}\n", shortStrand[0].c_str(), shortStrand[1].c_str(), shortStrand[2].c_str());
+         ((TDRSDopplerAdapter*)retval)->adapterES = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex);  // made changes by TUAN NGUYEN
+         ((TDRSDopplerAdapter*)retval)->adapterSL = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);       // made changes by TUAN NGUYEN
+         ((TDRSDopplerAdapter*)retval)->adapterSS = (RangeAdapterKm*)BuildAdapter(shortStrand, "Range_KM", configIndex);  // made changes by TUAN NGUYEN
+      }                                                                                                                   // made changes by TUAN NGUYEN
    }
    else if (type == "RangeRate")
    {                                                                  
@@ -1995,17 +2218,27 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    else                                                               
       throw MeasurementException("Error: '"+ type +"' measurement type was "
             "not implemented in this version of EstimationPlugin.\n");
-
+   
    if (retval)
    {
       TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
-
       //MeasureModel *mm = new MeasureModel(instanceName + type + "Measurement");
       MeasureModel *mm = new MeasureModel(adapterName + "Measurement");
       retval->SetMeasurement(mm);
       Integer magicNumber = mn->GetMagicNumber(nodelist, type);
       Real multiplier = mn->GetMNMultiplier(magicNumber);
       retval->SetModelTypeID(magicNumber, type, multiplier);
+
+      // Pass in the signal paths
+      std::string theStrand;
+      for (UnsignedInt k=0; k < strand.size(); ++k)
+      {
+         if (k > 0)
+            theStrand += ", ";
+         theStrand += strand[k];
+      }
+      retval->SetStringParameter("SignalPath", theStrand);
+      //MessageInterface::ShowMessage("Add signal path <%s> to %s adapter\n", theStrand.c_str(), retval->GetName().c_str());
    }
 
 #ifdef DEBUG_BUILD_ADAPTER
@@ -2032,20 +2265,6 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
       MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString().c_str());
    }
 
-   // This step was removed due to those participants were initialized in sand box
-   //// Initialize all participants
-   //for (UnsignedInt i = 0; i < references.size(); ++i)
-   //{
-   //   if ((references[i]->IsOfType(Gmat::GROUND_STATION))||(references[i]->IsOfType(Gmat::SPACECRAFT)))
-   //   {
-   //      references[i]->SetSolarSystem(solarsystem);
-
-   //      // Initialize paticipants
-   //      references[i]->Initialize();
-   //   }
-   //}
-
-   // Reinitialize
    isInitialized = false;
    
    return Initialize();

@@ -390,6 +390,9 @@
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\loadfiles.h">
       <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\TDRSDopplerAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -694,6 +697,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\loadfiles.c">
       <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\TDRSDopplerAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

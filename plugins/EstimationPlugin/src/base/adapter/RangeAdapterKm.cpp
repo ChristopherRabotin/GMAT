@@ -322,10 +322,10 @@ bool RangeAdapterKm::Initialize()
  * @note: The parameters associated with this call will probably be removed;
  * they are here to support compatibility with the old measurement models
  *
- * @param withEvents Flag indicating is the light time solution should be
- *                   included
- * @param forObservation The observation data associated with this measurement
- * @param rampTB Ramp table for a ramped measurement
+ * @param withEvents          Flag indicating is the light time solution should be
+ *                            included
+ * @param forObservation      The observation data associated with this measurement
+ * @param rampTB              Ramp table for a ramped measurement
  *
  * @return The computed measurement data
  */
@@ -344,7 +344,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             instanceName + " before the measurement was set");
    
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))
+   //if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))                        // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))     // made changes by TUAN NGUYEN
    {
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
@@ -430,8 +431,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       }// for i loop
       
       
-      // if (measurementType == "Range")                  // made changes by TUAN NGUYEN
-      if (measurementType == "Range_KM")                  // made changes by TUAN NGUYEN
+      if (measurementType == "Range_KM")
       {
          // @todo: it needs to specify number of trips instead of using 2
          ComputeMeasurementBias("Bias", "Range_KM", 2);
@@ -449,7 +449,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          Real measVal = values[i];
          #ifdef DEBUG_RANGE_CALCULATION
             MessageInterface::ShowMessage("===================================================================\n");
-            MessageInterface::ShowMessage("====  RangeAdapterKm: Range Calculation for Measurement Data %dth  \n", i);
+            MessageInterface::ShowMessage("====  RangeAdapterKm (%s): Range Calculation for Measurement Data %dth  \n", GetName().c_str(), i);
             MessageInterface::ShowMessage("===================================================================\n");
 
             MessageInterface::ShowMessage("      . Path : ");
@@ -461,7 +461,6 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf km \n", values[i]);
             MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
             MessageInterface::ShowMessage("      . Bias adding option        : %s\n", (addBias?"true":"false"));
-            // if (measurementType == "Range")            // made changes by TUAN NGUYEN
             if (measurementType == "Range_KM")            // made changes by TUAN NGUYEN
             {
                MessageInterface::ShowMessage("      . Range noise sigma          : %.12lf km \n", noiseSigma[i]);
@@ -471,12 +470,11 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          #endif
 
          // This section is only done when measurement type is "Range_KM". For other types such as DSNRange or Doppler, it will be done in their adapters  
-         // if (measurementType == "Range")                                          // made changes by TUAN NGUYEN
-         if (measurementType == "Range_KM")                                          // made changes by TUAN NGUYEN
+         if (measurementType == "Range_KM")
          {
-            // Apply multiplier for "Range_KM" measurement model. This step has to   // made changes by TUAN NGUYEN
-            // be done before adding bias and noise                               // made changes by TUAN NGUYEN
-            measVal = measVal*multiplier;                                         // made changes by TUAN NGUYEN
+            // Apply multiplier for "Range_KM" measurement model. This step has to
+            // be done before adding bias and noise
+            measVal = measVal*multiplier;
 
             // if need range value only, skip this section, otherwise add noise and bias as possible
             // Note: for Doppler measurement for E and S paths, we only need range value only and no noise and bias are added to measurement value. 
@@ -557,6 +555,47 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 }
 
 
+bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, Real uplinkFrequency, std::vector<RampTableData>* rampTB)
+{
+   bool retval = false;
+
+   // Recalculate frequency and mediacorrection
+   calcData->ReCalculateFrequencyAndMediaCorrection(pathIndex, uplinkFrequency, rampTB);
+   
+   // Add media correction to C-value
+   std::vector<SignalBase*> paths = calcData->GetSignalPaths();
+   SignalBase *currentleg = paths[pathIndex];
+   SignalData *current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
+   
+   Real correction = 0.0;
+   while (currentleg != NULL)
+   {
+      for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+      {
+         if (current->useCorrection[j])
+         {
+            if ((current->correctionIDs[j] == "Troposphere")||(current->correctionIDs[j] == "Ionosphere"))
+            {
+               correction += current->corrections[j];
+               //MessageInterface::ShowMessage(" leg %s -> %s: correction name = %s   correction = %.12lf\n", current->tNode->GetName().c_str(), current->rNode->GetName().c_str(), current->correctionIDs[j].c_str(), current->corrections[j]);
+            }
+         }
+      }
+      currentleg = currentleg->GetNext();
+      current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
+   }
+
+   //MessageInterface::ShowMessage("Hello there: C-value = %.12lf   correction = %.12lf\n", cMeasurement.value[pathIndex], correction);
+   cMeasurement.value[pathIndex] += correction;
+         
+   retval = true;
+
+   return retval;
+}
+
+
+
+
 const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
       bool withEvents, Real dt, ObservationData* forObservation,
       std::vector<RampTableData>* rampTB)
@@ -568,7 +607,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
             instanceName + " before the measurement was set");
 
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt))
+   //if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt))                            // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, dt))         // made changes by TUAN NGUYEN
    {
       std::vector<SignalData*> data = calcData->GetSignalData();
       std::string unfeasibilityReason;
@@ -646,21 +686,13 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
 
       }// for i loop
 
-      //// Specify noise sigma value
-      //Real nsigma = 0.0;
-      //// if ((measurementType == "Range")||(measurementType == "DSNRange"))           // made changes by TUAN NGUYEN
-      //if ((measurementType == "Range_KM")||(measurementType == "DSNRange"))           // made changes by TUAN NGUYEN
-      //   nsigma = noiseSigma[0];
-      ////else if ((measurementType == "Doppler")||(measurementType == "DSNDoppler"))   // made changes by TUAN NGUYEN
-      //else if (measurementType == "Doppler")                                          // made changes by TUAN NGUYEN
-      //   nsigma = noiseSigma[1];
 
       // Set measurement values
       offsetMeas.value.clear();
       for (UnsignedInt i = 0; i < values.size(); ++i)
          offsetMeas.value.push_back(0.0);
 
-      Real nsigma;                                                                      // made changes by TUAN NGUYEN
+      Real nsigma;
       for (UnsignedInt i = 0; i < values.size(); ++i)
       {
          Real measVal = values[i];
@@ -671,7 +703,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
          #endif
 
          // Add noise to measurement value
-         nsigma = noiseSigma[i];                  // noiseSigma[i] is noise sigma associated with measurement values[i]           // made changes by TUAN NGUYEN
+         nsigma = noiseSigma[i];                  // noiseSigma[i] is noise sigma associated with measurement values[i]
          if (addNoise)
          {
             // Add noise here
@@ -774,8 +806,7 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
       // Now assemble the derivative data into the requested derivative
       // Note that: multiplier is only applied for elements of spacecraft's state, position, and velocity
       Real factor = 1.0;
-      // if (measurementType == "Range")                    // made changes by TUAN NGUYEN
-      if (measurementType == "Range_KM")                    // made changes by TUAN NGUYEN
+      if (measurementType == "Range_KM")
       {
          if (obj->IsOfType(Gmat::SPACECRAFT))
          {
@@ -784,7 +815,6 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
       }
 
       UnsignedInt size = derivativeData->at(0).size();
-      //theDataDerivatives.clear();                          // made changes by TUAN NGUYEN
       for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
       {
          RealArray oneRow;

@@ -114,9 +114,14 @@ public:
    virtual bool         Initialize();
 
    virtual bool CalculateMeasurement(bool withEvents = false,
+                       bool withMediaCorrection = true,                 // made changes by TUAN NGUYEN
                        ObservationData* forObservation = NULL,
                        std::vector<RampTableData>* rampTB = NULL,
-                       Real atTimeOffset = 0.0, Integer forStrand = -1);
+                       Real atTimeOffset = 0.0, 
+                       Integer forStrand = -1);
+   virtual bool ReCalculateFrequencyAndMediaCorrection(
+                       UnsignedInt pathIndex, Real uplinkFrequency,
+                       std::vector<RampTableData>* rampTB);             // made changes by TUAN NGUYEN
 
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,

@@ -94,7 +94,8 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    rangeOnly            (false),                    // made changes by TUAN NGUYEN
    rampTB               (NULL),
    beginIndex           (0),
-   endIndex             (0)
+   endIndex             (0),
+   withMediaCorrection  (true)                     // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter default constructor <%p>\n", this);
@@ -178,11 +179,13 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    beginIndex           (ma.beginIndex),
    endIndex             (ma.endIndex),
    rampTableNames       (ma.rampTableNames),
-   forObjects           (ma.forObjects)                         // made changes by TUAN NGUYEN
+   forObjects           (ma.forObjects),                        // made changes by TUAN NGUYEN
+   withMediaCorrection  (ma.withMediaCorrection)                // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter copy constructor  from <%p> to <%p>\n", &ma, this);
 #endif
+   MessageInterface::ShowMessage("It is coppying\n");
    isInitialized = false;
 }
 
@@ -230,6 +233,7 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       endIndex           = ma.endIndex;
       rampTableNames     = ma.rampTableNames;
       forObjects         = ma.forObjects;              // made changes by TUAN NGUYEN
+      withMediaCorrection = ma.withMediaCorrection;    // made changes by TUAN NGUYEN
 
       if (calcData)
       {

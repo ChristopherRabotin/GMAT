@@ -1148,18 +1148,20 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
 /**
  * Fires all of the Signal objects to generate the raw measurement data
  *
- * @param withEvents Flag used to indicate if a light time solution should be
- *                   computed (not used)
- * @param forObservation An observation supplying data needed for the
- *                       calculation (not used)
- * @param rampTB A ramp table for the data (not used)
- * @param atTimeOffset Time offset, in seconds, from the base epoch (used for
- *                     differenced measurements)
+ * @param withEvents            Flag used to indicate if a light time solution should be
+ *                              computed (not used)
+ * @param forObservation        An observation supplying data needed for the
+ *                              calculation (not used)
+ * @param rampTB                A ramp table for the data (not used)
+ * @param atTimeOffset          Time offset, in seconds, from the base epoch (used for
+ *                              differenced measurements)
+ * @param withMediaCorrection   true for adding media correction to measurement,
+ *                              false otherwise
  *
  * @return true if the the calculation succeeded, false if not
  */
 //------------------------------------------------------------------------------
-bool MeasureModel::CalculateMeasurement(bool withEvents,
+bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrection,                    // made changes by TUAN NGUYEN
       ObservationData* forObservation, std::vector<RampTableData>* rampTB,
       Real atTimeOffset, Integer forStrand)
 {
@@ -1296,7 +1298,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       {
          leg->HardwareDelayCalculation();                  // caluclate hardware delay for signal leg
 
-         // Add count time interval to the reveiver's hardware delay of the last participant when measurement time tag is at the end of signal path  
+         // Add count time interval to the reveiver's hardware delay of the last participant when measurement time tag is at the end of signal path
          // (or to the transmiter's hardware delay of the first participant when measurement time tag is at the begining of signal path)
          if (epochIsAtEnd)
          {
@@ -1384,16 +1386,32 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
       }
-      // 4.5.2. Compute media correction and hardware delay (in forward direction of signal path)
+
+      // 4.5.2. Compute signal frequency on each leg(in forward direction of signal path)
       #ifdef DEBUG_TIMING
-         MessageInterface::ShowMessage("4.5.2 Calculate media correction for signal path %d:\n", i);
+         MessageInterface::ShowMessage("4.5.2 Compute signal frequency on each leg for signal path %d:\n", i);
       #endif
       leg = signalPaths[i];
       while(leg != NULL)
       {
-         leg->MediaCorrectionCalculation(rampTB);          // calculate media corrections for signal leg
+         leg->SignalFrequencyCalculation(rampTB);          // calculate signal frequency on each signal leg
          leg = leg->GetNext();
       }
+
+      if (withMediaCorrection)
+      {
+         // 4.5.3. Compute media correction and hardware delay (in forward direction of signal path)
+         #ifdef DEBUG_TIMING
+            MessageInterface::ShowMessage("4.5.3 Calculate media correction for signal path %d:\n", i);
+         #endif
+         leg = signalPaths[i];
+         while(leg != NULL)
+         {
+            leg->MediaCorrectionCalculation(rampTB);          // calculate media corrections for signal leg
+            leg = leg->GetNext();
+         }
+      }
+
 
       // 4.6. Reset value of hardware delay
       leg = firstleg = lastleg = signalPaths[i];
@@ -1494,6 +1512,95 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
 
    return retval;
 }
+
+
+bool MeasureModel::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, Real uplinkFrequency, std::vector<RampTableData>* rampTB)
+{
+   bool retval = false;
+   
+   SignalBase *leg;
+   // 1. Compute signal frequency
+   #ifdef DEBUG_TIMING
+      MessageInterface::ShowMessage("Compute signal frequency on each leg for signal path %d:\n", pathIndex);
+   #endif
+   leg = signalPaths[pathIndex];
+   leg->SignalFrequencyCalculation(rampTB, uplinkFrequency);          // calculate signal frequency on each signal leg
+
+   leg = leg->GetNext();
+   while(leg != NULL)
+   {
+      leg->SignalFrequencyCalculation(rampTB);          // calculate signal frequency on each signal leg
+      leg = leg->GetNext();
+   }
+
+   // 2. Compute media correction and hardware delay
+   #ifdef DEBUG_TIMING
+      MessageInterface::ShowMessage("Calculate media correction for signal path %d:\n", pathIndex);
+   #endif
+   leg = signalPaths[pathIndex];
+   while(leg != NULL)
+   {
+      leg->MediaCorrectionCalculation(rampTB);          // calculate media corrections for signal leg
+      leg = leg->GetNext();
+   }
+
+
+   #ifdef DEBUG_CALCULATE_MEASUREMENT
+         SignalData *current  = theData[pathIndex];
+         Real lightTimeRange  = 0.0;                      // unit: km
+         Real tropoCorrection = 0.0;                      // unit: km
+         Real ionoCorrection  = 0.0;                      // unit: km
+         Real relCorrection   = 0.0;                      // unit: km
+         Real ettaiCorrection = 0.0;                      // unit: km
+         Real delayCorrection = 0.0;                      // unit: km
+         while (current != NULL)
+         {
+            // accumulate all light time correction
+            lightTimeRange += current->rangeVecInertial.GetMagnitude();
+
+            // accumulate all range corrections
+            for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+            {
+               if (current->useCorrection[j])
+               {
+                  if (current->correctionIDs[j] == "Troposphere")
+                     tropoCorrection += current->corrections[j];
+                  else if (current->correctionIDs[j] == "Ionosphere")
+                     ionoCorrection += current->corrections[j];
+                  else if (current->correctionIDs[j] == "Relativity")
+                     relCorrection += current->corrections[j];
+                  else if (current->correctionIDs[j] == "ET-TAI")
+                     ettaiCorrection += current->corrections[j];
+               }
+            }
+
+            // accumulate all range correction associate with hardware delay
+            delayCorrection += (current->tDelay + current->rDelay)*(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
+
+            current = current->next;
+         }
+         Real realRange = lightTimeRange + relCorrection + ettaiCorrection + tropoCorrection + ionoCorrection + delayCorrection;
+
+         MessageInterface::ShowMessage("*** Summary of path %d ******************\n", pathIndex);
+         if (signalPaths[pathIndex]->IsSignalFeasible())
+            MessageInterface::ShowMessage("   .This path is feasible\n");
+         else
+            MessageInterface::ShowMessage("   .This path is unfeasible\n");
+
+         MessageInterface::ShowMessage("   .Light time range         : %.12lf km\n", lightTimeRange);
+         MessageInterface::ShowMessage("   .Relativity Correction    : %.12lf km\n", relCorrection);
+         MessageInterface::ShowMessage("   .ET-TAI correction        : %.12lf km\n", ettaiCorrection);
+         MessageInterface::ShowMessage("   .Troposphere correction   : %.12lf km\n", tropoCorrection);
+         MessageInterface::ShowMessage("   .Ionosphere correction    : %.12lf km\n", ionoCorrection);
+         MessageInterface::ShowMessage("   .Hardware delay correction: %.12lf km\n", delayCorrection);
+         MessageInterface::ShowMessage("   .Real range               : %.12lf km\n", realRange);
+         MessageInterface::ShowMessage("******************************************************************\n\n");
+   #endif
+
+
+   return retval;
+}
+
 
 ////------------------------------------------------------------------------------
 //// StringArray* DecomposePathString(const std::string &value)

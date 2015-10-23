@@ -142,6 +142,13 @@ public:
    /// Hardware delay associated with receive participant
    Real rDelay;
 
+   /// signal frequencies
+   /// Frequency (MHz) of the received signal at tNode's transponder. For the first signal leg, arrivedFreq is not used due to tNode is a transmiter only.
+   Real arriveFreq;
+   // Transmit frequency (MHz) from tNode
+   Real transmitFreq;
+   // Receive frequency (MHz) at rNode
+   Real receiveFreq;
 
    /// Linked list so separate signal paths are clear
    SignalData *next;

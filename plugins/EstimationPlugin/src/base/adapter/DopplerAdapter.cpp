@@ -294,7 +294,7 @@ bool DopplerAdapter::SetStringParameter(const Integer id, const std::string& val
 {
    // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
    bool retval = true;
-   if (id != MEASUREMENT_TYPE)
+   if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))               // made changes by TUAN NGUYEN
       retval = adapterS->SetStringParameter(id, value);
 
    retval = RangeAdapterKm::SetStringParameter(id, value) && retval;
@@ -738,8 +738,8 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       obData = new ObservationData();
    obData->epoch = tm.GetMjd();
    
-   // Set doppler count interval to MeasureModel object due to the Start-path 
-   // is measured earlier by number of seconds shown in doppler count interval   
+   // Set doppler count interval to MeasureModel object due to the Start-path
+   // is measured earlier by number of seconds shown in doppler count interval
    adapterS->GetMeasurementModel()->SetCountInterval(dopplerCountInterval);
    // For Start-path, range calculation does not add bias and noise to calculated value
    // Note that: default option is no adding noise
