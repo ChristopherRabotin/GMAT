@@ -169,6 +169,16 @@ protected:
    ///// Get a list of valid epoch formats
    //StringArray  GetListOfValidEpochFormats();
 
+   /// Check observation data containing a spacecraft listing in observers
+   bool     HasObserver(ObservationData* dataObject);
+   /// Check observation data containing a ground station listing in trackers
+   bool     HasTracker(ObservationData* dataObject);
+   /// Check observation data containing a data type listing in trackers
+   bool     HasDataType(ObservationData* dataObject);
+   /// Check observation data containing measurement epoch in time window
+   bool     IsInTimeWindow(ObservationData* dataObject);
+
+
 private:
    Real    ConvertToRealEpoch(const std::string &theEpoch,
                                    const std::string &theFormat);

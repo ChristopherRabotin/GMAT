@@ -1108,8 +1108,14 @@ UnsignedInt MeasurementManager::LoadObservations()
    }                                                                                                // made changes by TUAN NGUYEN
 
 
-   UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, filter6Num, filter7Num, filter8Num, filter9Num;
-   filter1Num = filter2Num = filter3Num = filter4Num = filter5Num = filter6Num = filter7Num = filter8Num = filter9Num = 0;
+   //UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, filter6Num, filter7Num, filter8Num, filter9Num;
+   //filter1Num = filter2Num = filter3Num = filter4Num = filter5Num = filter6Num = filter7Num = filter8Num = filter9Num = 0;
+   std::map<std::string, Integer> totalCount;
+   totalCount["Invalid measurement value"]        = 0;
+   totalCount["Record duplication or time order"] = 0;
+   totalCount["Trackers selection"]               = 0;
+   totalCount["Data thinning"]                    = 0;
+   totalCount["Time span"]                        = 0;
 
    observations.clear();
 
@@ -1188,31 +1194,58 @@ UnsignedInt MeasurementManager::LoadObservations()
       switch (rejectedReason)
       {
          case 1:
-            ++filter1Num; 
+            //++filter1Num; 
+            ++totalCount["Data thinning"];
             break;
          case 2:
-            ++filter2Num; 
+            //++filter2Num; 
+            ++totalCount["Time span"];
             break;
          case 3:
-            ++filter3Num; 
+            //++filter3Num;
+            ++totalCount["Invalid measurement value"];
             break;
          case 4:
-            ++filter4Num; 
+            //++filter4Num;
+            ++totalCount["Record duplication or time order"];
             break;
          case 5:
-            ++filter5Num; 
+            //++filter5Num;
+            totalCount["Trackers selection"];
             break;
-         case 6:
-            ++filter6Num; 
-            break;
-         case 7:
-            ++filter7Num; 
-            break;
-         case 8:
-            ++filter8Num; 
-         case 9:
-            ++filter9Num; 
-            break;
+
+         //case 6:
+         //   ++filter6Num; 
+         //   break;
+         //case 7:
+         //   ++filter7Num; 
+         //   break;
+         //case 8:
+         //   ++filter8Num; 
+         //   break;
+         //case 9:
+         //   ++filter9Num; 
+         //   break;
+         default:
+            {
+               if (rejectedReason >=6)
+               { 
+                  Integer filterIndex = rejectedReason - 6;
+                  std::vector<DataFilter*>& filters = streamList[minIndex]->GetFilterList();                  
+                  //MessageInterface::ShowMessage("filterIndex = %d    filters.size() = %d\n", filterIndex, filters.size());
+                  if (filterIndex < filters.size())
+                  {
+                     std::string filterName = "";
+                     if (filters[filterIndex]->IsOfType("StatisticsAcceptFilter"))
+                        filterName += "StatisticsAcceptFilter ";
+                     else if  (filters[filterIndex]->IsOfType("StatisticsRejectFilter"))
+                        filterName += "StatisticsRejectFilter ";
+                     filterName += filters[filterIndex]->GetName();
+
+                     ++totalCount[filterName];
+                  }
+               }
+            }
       }
 
       // 6. Read data record from streamList[minIndex] to fill data buffer if the stream is not EOF
@@ -1227,15 +1260,21 @@ UnsignedInt MeasurementManager::LoadObservations()
 
    // 7. Display all statistic of data records
    MessageInterface::ShowMessage("Number of thown records due to:\n");
-   MessageInterface::ShowMessage("      .Invalid measurement value       : %d\n", filter3Num);
-   MessageInterface::ShowMessage("      .Record duplication or time order: %d\n", filter4Num);
-   MessageInterface::ShowMessage("      .Trackers selection              : %d\n", filter5Num);
-   MessageInterface::ShowMessage("      .Data thinning                   : %d\n", filter1Num);
-   MessageInterface::ShowMessage("      .Time span                       : %d\n", filter2Num);
-   MessageInterface::ShowMessage("      .Observers selection             : %d\n", filter6Num);
-   MessageInterface::ShowMessage("      .Data types selection            : %d\n", filter7Num);
-   MessageInterface::ShowMessage("      .Data files selection            : %d\n", filter8Num);
-   MessageInterface::ShowMessage("      .Tracking configuration selection: %d\n", filter9Num);
+   //MessageInterface::ShowMessage("      .Invalid measurement value       : %d\n", filter3Num);
+   //MessageInterface::ShowMessage("      .Record duplication or time order: %d\n", filter4Num);
+   //MessageInterface::ShowMessage("      .Trackers selection              : %d\n", filter5Num);
+   //MessageInterface::ShowMessage("      .Data thinning                   : %d\n", filter1Num);
+   //MessageInterface::ShowMessage("      .Time span                       : %d\n", filter2Num);
+   //MessageInterface::ShowMessage("      .Observers selection             : %d\n", filter6Num);
+   //MessageInterface::ShowMessage("      .Data types selection            : %d\n", filter7Num);
+   //MessageInterface::ShowMessage("      .Data files selection            : %d\n", filter8Num);
+   //MessageInterface::ShowMessage("      .Tracking configuration selection: %d\n", filter9Num);
+   for(std::map<std::string,Integer>::iterator i = totalCount.begin(); i != totalCount.end(); ++i)
+   {
+      MessageInterface::ShowMessage("     .%s : %d\n", i->first.c_str(), i->second); 
+   }
+
+
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
       MessageInterface::ShowMessage("Data file '%s' has %d of %d records used for estimation.\n", streamList[i]->GetStringParameter("Filename").c_str(), count[i], numRec[i]);
 

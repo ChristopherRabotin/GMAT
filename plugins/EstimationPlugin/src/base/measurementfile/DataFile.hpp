@@ -93,6 +93,7 @@ public:
                                      const std::string &name = "");
 
    virtual bool         SetDataFilter(DataFilter *filter);                                     // made changes by TUAN NGUYEN
+   virtual std::vector<DataFilter*>&  GetFilterList();                                         // made changes by TUAN NGUYEN
 
    virtual bool         SetStream(ObType *thisStream);
    virtual bool         OpenStream(bool simulate = false);
@@ -165,7 +166,7 @@ protected:
 private:
    Real             ConvertToRealEpoch(const std::string &theEpoch, const std::string &theFormat);
 
-   ObservationData* FilteringDataForNewSyntax(ObservationData* dataObject, Integer& rejectedReason);  // made changes by TUAN NGUYEN
+   ObservationData* FilteringDataForNewSyntax(ObservationData* dataObject, Integer& filterIndex);     // made changes by TUAN NGUYEN
    ObservationData* FilteringDataForOldSyntax(ObservationData* dataObject, Integer& rejectedReason);  // made changes by TUAN NGUYEN
 
    ObservationData  od_old;                                                                           // made changes by TUAN NGUYEN
