@@ -82,8 +82,8 @@ TDRSDopplerAdapter::TDRSDopplerAdapter(const std::string& name) :
    adapterSS              (NULL),
    adapterES              (NULL),
    dopplerCountInterval   (1.0),                     // 1 second
-   node4Freq              (0.0),                     // 1000 Mhz
-   node4FreqBand          (0),                       // 0: undefined, 1: S-band, 2: X-band, 3: K-band
+   node4Freq              (2000.0),                  // 2000 Mhz
+   node4FreqBand          (1),                       // 0: undefined, 1: S-band, 2: X-band, 3: K-band
    smarId                 (0),
    dataFlag               (0)
 {
