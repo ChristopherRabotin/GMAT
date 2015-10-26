@@ -185,9 +185,7 @@ GMAT XYPlot1.ShowPlot = true;
 %----------------------------------------
 %---------- Functions
 %----------------------------------------
-
 Create GmatFunction TargetLEOStationKeeping;
-GMAT TargetLEOStationKeeping.FunctionPath = 'C:\Users\sphughe1\Documents\GMAT\temp\LatestCompleteVersion\userfunctions\gmat\TargetLEOStationKeeping.gmf';
 
 %----------------------------------------
 %---------- Arrays, Variables, Strings

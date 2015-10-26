@@ -303,13 +303,10 @@ GMAT rf.Delimiter = ' ';
 GMAT rf.ColumnWidth = 23;
 GMAT rf.WriteReport = true;
 
-
 %----------------------------------------
 %---------- GMAT Functions
 %----------------------------------------
-
 Create GmatFunction TargeterInsideFunction;
-%GMAT TargeterInsideFunction.FunctionPath = 'C:\Users\rqureshi\Desktop\TargeterInsideFunction.gmf';
 
 
 %----------------------------------------

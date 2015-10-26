@@ -316,10 +316,7 @@ GMAT EphemerisFile1.WriteEphemeris = true;
 %----------------------------------------
 %---------- Functions
 %----------------------------------------
-
 Create GmatFunction GMATFunction_1st_Targeter_In_Function_2nd_In_Script;
-GMAT GMATFunction_1st_Targeter_In_Function_2nd_In_Script.FunctionPath = 'C:/Users/sphughe1/Documents/GMAT/LocalBuild/bin/../userfunctions/gmat/GMATFunction_1st_Targeter_In_Function_2nd_In_Script.gmf';
-
 
 
 %----------------------------------------
