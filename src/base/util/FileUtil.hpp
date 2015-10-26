@@ -41,7 +41,7 @@ namespace GmatFileUtil
    static Real   COMPARE_TOLERANCE = 1.0e-9;
    
    std::string GMAT_API GetPathSeparator();
-   std::string GMAT_API ConvertToOsFileName(const std::string &fileName, bool forceForwardSlash = true);
+   std::string GMAT_API ConvertToOsFileName(const std::string &fileName);
    std::string GMAT_API GetCurrentWorkingDirectory();
    bool        GMAT_API SetCurrentWorkingDirectory(const std::string &newDir);
    std::string GMAT_API GetApplicationPath();
