@@ -5616,13 +5616,11 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                   // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
                   //std::string spkPath =
                   //   FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
-                  // Changed to use GetPathname() (LOJ: 2015.10.14)
                   std::string spkPath =
-                     //FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
-                     FileManager::Instance()->GetPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
-                  #ifdef DEBUG_CB_SPICE
-                  MessageInterface::ShowMessage("   In CB, spkPath returned was %s ...\n", spkPath.c_str());
-                  #endif
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   In CB, spkPath returned was %s ...\n", spkPath.c_str());
+#endif
                   spkName = spkPath + spkName;
                   try
                   {
@@ -5690,10 +5688,8 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                if (pckName.find("/") == pckName.npos &&
                    pckName.find("\\") == pckName.npos)
                {
-                  // Changed to use GetPathname() (LOJ: 2015.10.14)
                   std::string pckPath =
-                     //FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-                     FileManager::Instance()->GetPathname(FileManager::PLANETARY_COEFF_PATH);
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
                   pckName = pckPath + pckName;
                   try
                   {
@@ -5754,10 +5750,8 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                if (fkName.find("/") == fkName.npos &&
                    fkName.find("\\") == fkName.npos)
                {
-                  // Changed to use GetPathname() (LOJ: 2015.10.14)
                   std::string fkPath =
-                     //FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-                     FileManager::Instance()->GetPathname(FileManager::PLANETARY_COEFF_PATH);
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
                   fkName = fkPath + fkName;
                   try
                   {
@@ -5818,10 +5812,8 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                if (scClockName.find("/") == scClockName.npos &&
                    scClockName.find("\\") == scClockName.npos)
                {
-                  // Changed to use GetPathname() (LOJ: 2015.10.14)
                   std::string scClockPath =
-                     //FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-                     FileManager::Instance()->GetPathname(FileManager::PLANETARY_COEFF_PATH);
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
                   scClockName = scClockPath + scClockName;
                   try
                   {

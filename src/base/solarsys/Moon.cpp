@@ -102,9 +102,7 @@ Moon::Moon(std::string name) :
 
    if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK and FK for now
    {
-      // Changed to use GetPathname() (LOJ: 2015.10.14)
-      //std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-      std::string path = FileManager::Instance()->GetPathname(FileManager::PLANETARY_COEFF_PATH);
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
       attitudeSpiceKernelNames.push_back(path+"moon_pa_de421_1900-2050.bpc");
       frameSpiceKernelNames.push_back(path+"moon_080317.tf");
    }
@@ -140,9 +138,7 @@ Moon::Moon(std::string name, const std::string &cBody) :
 
    if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK and FK for now
    {
-      // Changed to use GetPathname() (LOJ: 2015.10.14)
-      //std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-      std::string path = FileManager::Instance()->GetPathname(FileManager::PLANETARY_COEFF_PATH);
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
       attitudeSpiceKernelNames.push_back(path+"moon_pa_de421_1900-2050.bpc");
       frameSpiceKernelNames.push_back(path+"moon_080317.tf");
    }

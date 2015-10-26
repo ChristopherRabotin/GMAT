@@ -2037,7 +2037,7 @@ std::string FileManager::GetPathname(const std::string &typeName)
       #endif
       
       // Replace relative path with absolute path
-      std::string abspath = ConvertToAbsPath(pathname, true, false);
+      std::string abspath = ConvertToAbsPath(pathname);
       
       #ifdef DEBUG_FILE_PATH
       MessageInterface::ShowMessage
@@ -2257,20 +2257,17 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
 
 
 //------------------------------------------------------------------------------
-// std::string ConvertToAbsPath(const std::string &relPath, bool appendPathSep = true,
-//                              bool prependBinDir = true)
+// std::string ConvertToAbsPath(const std::string &relPath, bool appendPathSep = true)
 //------------------------------------------------------------------------------
 /**
  * Converts relative path to absolute path
  */
 //------------------------------------------------------------------------------
-std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appendPathSep,
-                                          bool prependBinDir)
+std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appendPathSep)
 {
    #ifdef DEBUG_FILE_PATH
    MessageInterface::ShowMessage
-      ("FileManager::ConvertToAbsPath() relPath='%s', appendPathSep=%d, prependBinDir=%d\n",
-       relPath.c_str(), appendPathSep, prependBinDir);
+      ("FileManager::ConvertToAbsPath() relPath='%s'\n", relPath.c_str());
    #endif
    
    //std::string absPath = relPath;
@@ -2282,8 +2279,8 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    #ifdef DEBUG_FILE_PATH
    Integer numNames = allNames.size();
    MessageInterface::ShowMessage("There are %d names in relPath\n", numNames);
-   // for (int i = 0; i < numNames; i++)
-   //    MessageInterface::ShowMessage("   allNames[%d] = '%s'\n", i, allNames[i].c_str());
+   for (int i = 0; i < numNames; i++)
+      MessageInterface::ShowMessage("   allNames[%d] = '%s'\n", i, allNames[i].c_str());
    #endif
    
    for (UnsignedInt i = 0; i < allNames.size(); i++)
@@ -2311,12 +2308,7 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
          // If _PATH found and it is not the same as original name,
          // Call ConvertToAbsPath() again
          if (absPath.find("_PATH") != absPath.npos && absPath != name)
-         {
-            #ifdef DEBUG_FILE_PATH
-            MessageInterface::ShowMessage("   Calling ConvertToAbsPath()\n");
-            #endif
-            absPath = ConvertToAbsPath(absPath, appendPathSep, prependBinDir);
-         }
+            absPath = ConvertToAbsPath(absPath);
          
          #ifdef DEBUG_FILE_PATH
          MessageInterface::ShowMessage("   2nd absPath = '%s'\n", absPath.c_str());
@@ -2338,9 +2330,6 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    absPath = "";
    for (UnsignedInt i = 0; i < pathNames.size(); i++)
    {
-      #ifdef DEBUG_FILE_PATH
-      MessageInterface::ShowMessage("   pathNames[%d] = '%s'\n", i, pathNames[i].c_str());
-      #endif
       if (i < pathNames.size() - 1)
       {
          if (GmatStringUtil::EndsWithPathSeparator(pathNames[i]))
@@ -2361,15 +2350,10 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
          }
       }
    }
-   
-   #ifdef DEBUG_FILE_PATH
-   MessageInterface::ShowMessage("   absPath = '%s'\n", absPath.c_str());
-   #endif
-   
+     
    // Convert path to absolute by prepending bin dir (LOJ: 2014.06.18)
    if (absPath != "" && absPath[0] == '.')
-      if (prependBinDir)
-         absPath = mAbsBinDir + absPath;
+      absPath = mAbsBinDir + absPath;
    
    // Conver to OS path name
    absPath = GmatFileUtil::ConvertToOsFileName(absPath);

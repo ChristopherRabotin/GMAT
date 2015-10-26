@@ -374,10 +374,6 @@ void UniversePanel::LoadData()
       {
          wxString type                  = mAllFileTypes[i].c_str();
          wxString typeName              = theGuiInterpreter->GetPlanetarySourceName(mAllFileTypes[i]).c_str();
-         #ifdef DEBUG_UNIVERSEPANEL_LOAD
-         MessageInterface::ShowMessage
-            ("   type     = '%s', typeName = '%s'\n", type.WX_TO_C_STRING, type.WX_TO_C_STRING);
-         #endif
          mFileTypeNameMap[type]         = typeName;
          mPreviousFileTypeNameMap[type] = typeName;
          mFileTypeComboBox->Append(type);
@@ -385,18 +381,15 @@ void UniversePanel::LoadData()
       
       // Get the list of kernel names (indexed by file type)
       spiceKernelNames = theSolarSystem->GetSpiceKernelNames();
-      
+
       #ifdef DEBUG_UNIVERSEPANEL_LOAD
-      MessageInterface::ShowMessage("   Here are spice kernel names\n");
-      for (unsigned int i = 0; i < spiceKernelNames.size(); i++)
-         MessageInterface::ShowMessage("      spiceKernamNames[%d] = '%s'\n", i, spiceKernelNames[i].c_str());
       MessageInterface::ShowMessage("   Here is the mapping of file types\n");
       for (std::map<wxString, wxString>::iterator i = mFileTypeNameMap.begin();
            i != mFileTypeNameMap.end(); ++i)
          MessageInterface::ShowMessage
-            ("      <%-20s>   '%-30s'\n", (i->first).WX_TO_C_STRING, (i->second).WX_TO_C_STRING);
+            ("      <%-20s>   '%-30s'\n", (i->first).c_str(), (i->second).c_str());
       #endif
-      
+
       std::string currentSource =
          theSolarSystem->GetStringParameter(theSolarSystem->GetParameterID("EphemerisSource"));
       mFileTypeComboBox->SetStringSelection(currentSource.c_str());
@@ -469,11 +462,6 @@ void UniversePanel::LoadData()
             wxString fileName = mFileTypeNameMap[selStr];
             mDEFileNameTextCtrl->SetValue(fileName);
             mPreviousFileTypeNameMap[selStr] = fileName;
-            #ifdef DEBUG_UNIVERSEPANEL_LOAD
-            MessageInterface::ShowMessage
-               ("   mPreviousFileTypeNameMap[%s] set to '%s'\n",
-                selStr.c_str(), fileName.c_str());
-            #endif
          }
          else  // what to set DE filename to if it's SPICE?
          {
@@ -481,16 +469,17 @@ void UniversePanel::LoadData()
             mDEFileNameTextCtrl->SetValue(mFileTypeNameMap[type]); // ???????
             mPreviousFileTypeNameMap[selStr] = mFileTypeNameMap[type];
          }
+         
+         #ifdef DEBUG_UNIVERSEPANEL_LOAD
+         MessageInterface::ShowMessage
+            ("   Ephemeris file name set to '%s'\n", fileName.c_str());
+         #endif
       }
       
       wxString spkFile = (theSolarSystem->GetStringParameter("SPKFilename")).c_str();
-      #ifdef DEBUG_UNIVERSEPANEL_LOAD
-      MessageInterface::ShowMessage("   spkFile set to '%s'\n", spkFile.WX_TO_C_STRING);
-      #endif
-      
       mSPKFileNameTextCtrl->SetValue(spkFile);
       previousSpkFile  = spkFile;
-      
+
       wxString lskFile = (theSolarSystem->GetStringParameter("LSKFilename")).c_str();
       mLSKFileNameTextCtrl->SetValue(lskFile);
       previousLskFile  = lskFile;
