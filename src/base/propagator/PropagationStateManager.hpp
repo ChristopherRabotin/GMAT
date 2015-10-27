@@ -51,12 +51,17 @@ public:
    virtual Integer GetCompletionCount();
    virtual Integer GetCompletionIndex(const Integer which);
    virtual Integer GetCompletionSize(const Integer which);
+   virtual Integer GetSTMIndex(Integer forParameterID);
 
 protected:
-
+   /// Flag indicating if a member needs updating after superposition occurs
    bool           hasPostSuperpositionMember;
+   /// IDs of elements that need post superposition updates
    IntegerArray   completionIndexList;
+   /// Sizes of the elements that need post superposition updates
    IntegerArray   completionSizeList;
+   /// Mapping of the STM rows: entries are IDs of each row/column of the STM
+   IntegerArray   stmRowMap;
 
    Integer        SortVector();
 };
