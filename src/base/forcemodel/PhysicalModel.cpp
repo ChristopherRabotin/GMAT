@@ -93,6 +93,7 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
+#include "PropagationStateManager.hpp"
 
 
 //#define PHYSICAL_MODEL_DEBUG_INIT
@@ -156,6 +157,7 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    bodyName                    ("Earth"),
    dimension                   (1),
    stateChanged                (false),
+   psm                         (NULL),
    theState                    (NULL),
    modelState                  (NULL),
    rawState                    (NULL),
@@ -255,6 +257,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    bodyName                    (pm.bodyName),
    dimension                   (pm.dimension),
    stateChanged                (pm.stateChanged),
+   psm                         (NULL),
    theState                    (NULL),
    modelState                  (NULL),
    rawState                    (NULL),
@@ -1813,6 +1816,25 @@ const StringArray&  PhysicalModel::GetSupportedDerivativeNames()
 {
    return derivativeNames;
 }
+
+
+//------------------------------------------------------------------------------
+// void SetPropStateManager(PropagationStateManager *sm)
+//------------------------------------------------------------------------------
+/**
+ * Sets the ProagationStateManager pointer
+ *
+ * @note Method moved here from ODEModel to facilitate access to STM internal
+ * references that are held in the PSM.
+ *
+ * @param sm The PSM that the ODEModel uses
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetPropStateManager(PropagationStateManager *sm)
+{
+   psm = sm;
+}
+
 
 //------------------------------------------------------------------------------
 // bool BuildModelState(GmatEpoch now, Real* state, Real* j2kState,

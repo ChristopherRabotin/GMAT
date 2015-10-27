@@ -27,6 +27,7 @@
 #include "CoordinateSystem.hpp"
 #include "TimeTypes.hpp"
 #include "FileManager.hpp"    // for flux files
+#include "PropagationStateManager.hpp"
 
 #include <sstream>                 // for <<
 #include <cmath>
@@ -151,7 +152,7 @@ DragForce::DragForce(const std::string &name) :
    schattenWFileID         (-1),
    estimatingCd            (false),
    cdEpsilonID             (-1),
-   cdEpsilonRow            (6),
+   cdEpsilonRow            (-1),
    useCentralDifferences   (false),
    finiteDifferenceDv      (true),
    dataType                ("Constant"),
@@ -1192,9 +1193,12 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
       }
    }
 
-   /// @todo Temporary; needs generalization
-   if (stmRowCount == 7)
+   Integer index = psm->GetSTMIndex(cdID);
+   if (index >= 0)
+   {
       estimatingCd = true;
+      cdEpsilonRow = index;
+   }
 
    #ifdef DEBUG_INITIALIZE
       MessageInterface::ShowMessage("STM row count %d ==> %sestimating Cd\n",
