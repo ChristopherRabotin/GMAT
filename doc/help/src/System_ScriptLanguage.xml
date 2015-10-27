@@ -426,6 +426,13 @@ data\planetary_ephem/spk\de421.bsp</code></programlisting>
         in the script with that name is executed and all subsequent ones are
         ignored. The conflict is noted in a warning message.</para>
 
+        <caution>
+          <para>GMAT does not test to ensure that
+          <guilabel>Resource</guilabel> names and function names are unique.
+          Care should be taken to use unique names for user-defined GMAT,
+          MATLAB, and Python functions to avoid name clashes. </para>
+        </caution>
+
         <para>Command names and keywords are reserved. They cannot be used as
         resource names. See the <xref linkend="ScriptLanguage_Keywords"
         xrefstyle="select:title"/> section for a list of keywords.</para>
