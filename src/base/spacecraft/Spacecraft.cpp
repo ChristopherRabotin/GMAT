@@ -680,15 +680,6 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 
    // resize the matrices first, then copy the contents
    Integer r,c;
-//   r = a.orbitSTM.GetNumRows();
-//   c = a.orbitSTM.GetNumColumns();
-//   orbitSTM.SetSize(r,c);
-//   orbitSTM = a.orbitSTM;
-//
-//   r = a.orbitAMatrix.GetNumRows();
-//   c = a.orbitAMatrix.GetNumColumns();
-//   orbitAMatrix.SetSize(r,c);
-//   orbitAMatrix = a.orbitAMatrix;
 
    r = a.fullSTM.GetNumRows();
    c = a.fullSTM.GetNumColumns();
@@ -830,15 +821,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    // resize the matrices first, then copy the contents
    Integer r,c;
-//   r = a.orbitSTM.GetNumRows();
-//   c = a.orbitSTM.GetNumColumns();
-//   orbitSTM.SetSize(r,c);
-//   orbitSTM = a.orbitSTM;
-//
-//   r = a.orbitAMatrix.GetNumRows();
-//   c = a.orbitAMatrix.GetNumColumns();
-//   orbitAMatrix.SetSize(r,c);
-//   orbitAMatrix = a.orbitAMatrix;
 
    r = a.fullSTM.GetNumRows();
    c = a.fullSTM.GetNumColumns();
@@ -3857,33 +3839,52 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          return true;                                                         // made changes by TUAN NGUYEN
       }                                                                       // made changes by TUAN NGUYEN
 
+      // Only add the solvefor parameter if it is not in the list already
+      if (find(solveforNames.begin(), solveforNames.end(), value) ==
+          solveforNames.end())
+         solveforNames.push_back(value);
+
+      // Reset length and indices
       Integer length = 6;
 
       stmIndices.clear();
-      stmIndices.push_back(GetEstimationParameterID("CartesianX"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianY"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianZ"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianVX"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianVY"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianVZ"));
+      stmIndices.push_back(GetParameterID("CartesianX"));
+      stmIndices.push_back(GetParameterID("CartesianY"));
+      stmIndices.push_back(GetParameterID("CartesianZ"));
+      stmIndices.push_back(GetParameterID("CartesianVX"));
+      stmIndices.push_back(GetParameterID("CartesianVY"));
+      stmIndices.push_back(GetParameterID("CartesianVZ"));
 
-      // Only add the solvefor parameter if it is not in the list already     // made changes by TUAN NGUYEN
-      if (find(solveforNames.begin(), solveforNames.end(), value) ==          // made changes by TUAN NGUYEN
-          solveforNames.end())                                                // made changes by TUAN NGUYEN
-      {                                                                       // made changes by TUAN NGUYEN
-         solveforNames.push_back(value);                                      // made changes by TUAN NGUYEN
-         if (value != "CartesianState")
+      for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
+      {
+         // Cartesian state handled above
+         if (solveforNames[i] != "CartesianState")
          {
-            length += GetEstimationParameterSize(GetParameterID(value));
-            for (Integer i = 0; i < GetEstimationParameterSize(GetParameterID(value)); ++i)
+            length += GetEstimationParameterSize(GetParameterID(solveforNames[i]));
+            for (Integer j = 0; j < GetEstimationParameterSize(
+                  GetParameterID(solveforNames[i])); ++j)
             {
-               stmIndices.push_back(GetEstimationParameterID(value));
+               stmIndices.push_back(GetParameterID(solveforNames[i]));
+               #ifdef DEBUG_SPACECRAFT_STM
+                  MessageInterface::ShowMessage("Looking up %s --> %d\n",
+                        solveforNames[i].c_str(),
+                        GetParameterID(solveforNames[i]));
+               #endif
             }
          }
-      }                                                                       // made changes by TUAN NGUYEN
+      }
+
+      #ifdef DEBUG_SPACECRAFT_STM
+         MessageInterface::ShowMessage("Setting %s: STM has %d rows and "
+               "columns\n", value.c_str(), length);
+         for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
+            MessageInterface::ShowMessage("   %d:  %s\n", i,
+                  solveforNames[i].c_str());
+      #endif
+
       SetIntegerParameter(FULL_STM_ROWCOUNT, length);
-      return true;                                                            // made changes by TUAN NGUYEN
-   }                                                                          // made changes by TUAN NGUYEN
+      return true;
+   }
 
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
@@ -7527,7 +7528,8 @@ Integer Spacecraft::GetStmRowId(const Integer forRow)
 {
    Integer retval = -1;
 
-
+   if ((forRow < (Integer)stmIndices.size()) && (forRow >= 0))
+      retval = stmIndices[forRow];
 
    return retval;
 }
