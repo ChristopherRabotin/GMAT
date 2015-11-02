@@ -110,6 +110,11 @@
 
 #include <math.h>
 
+
+
+class PropagationStateManager;
+
+
 /** 
  * Base class used to model the physical system
  * 
@@ -150,6 +155,8 @@ public:
    virtual void SetDimension(Integer);
    virtual void SetState(const Real * st);
    virtual void SetState(GmatState * st);
+
+   virtual CelestialBody* GetForceOrigin();                    // made changes by TUAN NGUYEN
 
    Real GetErrorThreshold() const;
    bool SetErrorThreshold(const Real thold = 0.10);
@@ -228,6 +235,8 @@ public:
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
                               const std::string &name, const Integer index);
 
+   virtual void        SetPropStateManager(PropagationStateManager *sm);
+
 protected:
       
    /// pointer to the body for which this force is computed
@@ -241,6 +250,8 @@ protected:
    /// Flag that is set when SetState() or SetTime() is called
    bool stateChanged;
    
+   /// Prop State Manager
+   PropagationStateManager *psm;
    /// GMAT state that the physical model uses
    GmatState *theState;
    /// Array of data parameters containing the model data

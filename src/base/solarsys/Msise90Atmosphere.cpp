@@ -29,7 +29,7 @@
 
 
 //#define DEBUG_NAN_CONDITIONS
-#define DEBUG_FIRSTCALL
+//#define DEBUG_FIRSTCALL
 
 #ifndef __SKIP_MSISE90__
 extern "C" 

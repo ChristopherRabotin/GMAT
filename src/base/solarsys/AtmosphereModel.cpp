@@ -78,12 +78,12 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    mCentralBody         (NULL),
    obsFileName          (""),        // Set to a default when working
    predictFileName      (""),
-   fluxReaderLoaded     (false),
    sunVector            (NULL),
    centralBody          ("Earth"),
    centralBodyLocation  (NULL),
    cbRadius             (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]),
    cbFlattening         (0.0),       // Default is spherical
+   fluxReaderLoaded     (false),
    nominalF107          (150.0),
    nominalF107a         (150.0),
    nominalKp            (3.0),
@@ -153,17 +153,17 @@ AtmosphereModel::~AtmosphereModel()
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    GmatBase             (am),
+   fluxReader           (NULL),
    solarSystem          (am.solarSystem),
    mCentralBody         (am.mCentralBody),
    obsFileName          (am.obsFileName),
    predictFileName      (am.predictFileName),
-   fluxReaderLoaded     (am.fluxReaderLoaded),
    sunVector            (NULL),
    centralBody          (am.centralBody),
    centralBodyLocation  (NULL),
-   fluxReader           (NULL),
    cbRadius             (am.cbRadius),
    cbFlattening         (am.cbFlattening),
+   fluxReaderLoaded     (false),
    nominalF107          (am.nominalF107),
    nominalF107a         (am.nominalF107a),
    nominalKp            (am.nominalKp),
@@ -215,13 +215,13 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    mCentralBody         = am.mCentralBody;
    obsFileName          = am.obsFileName;
    predictFileName      = am.predictFileName;
-   fluxReaderLoaded     = am.fluxReaderLoaded;
    sunVector            = NULL;
    centralBody          = am.centralBody;
    centralBodyLocation  = NULL;
    fluxReader           = NULL;
    cbRadius             = am.cbRadius;
    cbFlattening         = am.cbFlattening;
+   fluxReaderLoaded     = false;
    nominalF107          = am.nominalF107;
    nominalF107a         = am.nominalF107a;
    nominalKp            = am.nominalKp;
@@ -1133,6 +1133,21 @@ bool AtmosphereModel::SetStringParameter(const std::string &label,
       const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// SolarFluxReader* GetFluxReader()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the flux reader for atmosphere data Parameters
+ *
+ * @return The flux reader pointer
+ */
+//------------------------------------------------------------------------------
+SolarFluxReader* AtmosphereModel::GetFluxReader()
+{
+   return fluxReader;
 }
 
 

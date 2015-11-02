@@ -1011,7 +1011,7 @@ void BatchEstimator::CompleteInitialization()
    GetEstimationStateForReport(aprioriSolveForState);
 
    isInitialized = true;
-   numDivIterations = 0;                       // It need to reset it's value when starting estimatimation calculation
+   numDivIterations = 0;                       // It need to reset its value when starting estimatimation calculation
 
 
    // Get list of signal paths and specify the length of participants' column           // made changes by TUAN NGUYEN
@@ -1845,7 +1845,7 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
    if (iterationsTaken == (maxIterations-1))
    {
       retval = MAX_ITERATIONS_DIVERGED;
-      why << "Number of iterations reaches it's maximum setting value (" << maxIterations << ")\n";
+      why << "Number of iterations reaches its maximum setting value (" << maxIterations << ")\n";
       reason = why.str();
       return retval;
    }
@@ -1858,7 +1858,7 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
          numDivIterations++;
          if (numDivIterations >= maxConsDivergences)
          {
-            why << "Number of consecutive divergences reaches it's maximum setting value (" << maxConsDivergences << ")\n";
+            why << "Number of consecutive divergences reaches its maximum setting value (" << maxConsDivergences << ")\n";
             reason = why.str();
             retval = MAX_CONSECUTIVE_DIVERGED;
          }

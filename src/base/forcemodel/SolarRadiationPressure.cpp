@@ -50,6 +50,7 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "GmatDefaults.hpp"
+#include "PropagationStateManager.hpp"
 
 //#define DEBUG_SRP_ORIGIN
 //#define DEBUG_SOLAR_RADIATION_PRESSURE
@@ -159,7 +160,7 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    areaID              (-1),
    estimatingCr        (false),
    crEpsilonID         (-1),
-   crEpsilonRow        (6)
+   crEpsilonRow        (-1)
 {
    parameterCount = SRPParamCount;
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
@@ -275,10 +276,10 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
 // SolarRadiationPressure::~SolarRadiationPressure(void)
 //------------------------------------------------------------------------------
 /**
- * 
+ * Destructor
  */
 //------------------------------------------------------------------------------
-SolarRadiationPressure::~SolarRadiationPressure(void)
+SolarRadiationPressure::~SolarRadiationPressure()
 { 
     if ((useAnalytic) && (cbSunVector))
         delete [] cbSunVector;
@@ -289,7 +290,7 @@ SolarRadiationPressure::~SolarRadiationPressure(void)
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the SolarRadiationPressure.
@@ -298,7 +299,7 @@ SolarRadiationPressure::~SolarRadiationPressure(void)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* SolarRadiationPressure::Clone(void) const
+GmatBase* SolarRadiationPressure::Clone() const
 {
    return (new SolarRadiationPressure(*this));
 }
@@ -1028,9 +1029,12 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       Real *aTilde;
       aTilde = new Real[stmSize];
 
-      /// @todo Temporary; needs generalization
-      if (stmRowCount == 7)
+      Integer index = psm->GetSTMIndex(crID);
+      if (index >= 0)
+      {
          estimatingCr = true;
+         crEpsilonRow = index;
+      }
 
       Integer associate, element;
       for (Integer i = 0; i < stmCount; ++i)

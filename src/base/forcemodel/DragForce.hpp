@@ -122,6 +122,7 @@ public:
    // Special access methods used by drag forces
    bool                 SetInternalAtmosphereModel(AtmosphereModel* atm);
    AtmosphereModel*     GetInternalAtmosphereModel();
+   AtmosphereModel*     GetAtmosphereModel();
    
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
@@ -204,6 +205,20 @@ protected:
    /// ID used to set Schatten Weather File name
    Integer schattenWFileID;
 
+   /// Flag indicating if Cd is being estimated
+   bool estimatingCd;
+   /// ID for the CdEpsilon parameter
+   Integer cdEpsilonID;
+   /// Row/Column for the Cd entries in the A-matrix and STM
+   Integer cdEpsilonRow;
+   /// Current value(s) of Cd
+   std::vector<Real> cdEpsilon;
+   /// Initial value(s) of Cd
+   std::vector<Real> cdInitial;
+   /// Flag used to indicate that central differences are used for the A-matrix
+   bool useCentralDifferences;
+   /// Flag used to finite difference the velocity derivatives
+   bool finiteDifferenceDv;
 
    // Optional input parameters used by atmospheric models
    /// Type of input data -- "File" or "Constant"
@@ -212,6 +227,8 @@ protected:
    std::string          historicWSource;
    /// Predicted Weather data type
    std::string          predictedWSource;
+   /// Default path to the flux files
+   std::string          fluxPath;
    /// Historic Weather File name
    std::string          cssiWFile;
    /// Schatten Weather File name
@@ -247,7 +264,7 @@ protected:
 //   void                 GetDensity(Real *state, Real when = GmatTimeConstants::MJD_OF_J2000);
       
    Real                 CalculateAp(Real kp);
-   
+   Rvector3             Accelerate(Real *theState, GmatEpoch &theEpoch, Real prefactor);
    
    /// Parameter IDs
    enum

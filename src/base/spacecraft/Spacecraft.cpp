@@ -83,6 +83,7 @@
 //#define DEBUG_POWER_SYSTEM
 //#define DEBUG_SPACECRAFT_STM
 //#define DEBUG_SC_NAIF_ID
+//#define DEBUG_ESTIMATION
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -679,15 +680,6 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 
    // resize the matrices first, then copy the contents
    Integer r,c;
-//   r = a.orbitSTM.GetNumRows();
-//   c = a.orbitSTM.GetNumColumns();
-//   orbitSTM.SetSize(r,c);
-//   orbitSTM = a.orbitSTM;
-//
-//   r = a.orbitAMatrix.GetNumRows();
-//   c = a.orbitAMatrix.GetNumColumns();
-//   orbitAMatrix.SetSize(r,c);
-//   orbitAMatrix = a.orbitAMatrix;
 
    r = a.fullSTM.GetNumRows();
    c = a.fullSTM.GetNumColumns();
@@ -829,15 +821,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    // resize the matrices first, then copy the contents
    Integer r,c;
-//   r = a.orbitSTM.GetNumRows();
-//   c = a.orbitSTM.GetNumColumns();
-//   orbitSTM.SetSize(r,c);
-//   orbitSTM = a.orbitSTM;
-//
-//   r = a.orbitAMatrix.GetNumRows();
-//   c = a.orbitAMatrix.GetNumColumns();
-//   orbitAMatrix.SetSize(r,c);
-//   orbitAMatrix = a.orbitAMatrix;
 
    r = a.fullSTM.GetNumRows();
    c = a.fullSTM.GetNumColumns();
@@ -3259,10 +3242,13 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 
    if (label == "Cd")
    {
-      if (value >= 0.0)
+      if ((value >= 0.0) || (constrainCd == false))
       {
          coeffDrag = value;
          cdEpsilon = 0.0;
+         if (value < 0.0)
+            MessageInterface::ShowMessage("Warning: The Cd value %lf is "
+                  "outside of the expected range of 0.0 <= Cd\n", value);
       }
       else
       {
@@ -3853,33 +3839,52 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          return true;                                                         // made changes by TUAN NGUYEN
       }                                                                       // made changes by TUAN NGUYEN
 
+      // Only add the solvefor parameter if it is not in the list already
+      if (find(solveforNames.begin(), solveforNames.end(), value) ==
+          solveforNames.end())
+         solveforNames.push_back(value);
+
+      // Reset length and indices
       Integer length = 6;
 
       stmIndices.clear();
-      stmIndices.push_back(GetEstimationParameterID("CartesianX"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianY"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianZ"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianVX"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianVY"));
-      stmIndices.push_back(GetEstimationParameterID("CartesianVZ"));
+      stmIndices.push_back(GetParameterID("CartesianX"));
+      stmIndices.push_back(GetParameterID("CartesianY"));
+      stmIndices.push_back(GetParameterID("CartesianZ"));
+      stmIndices.push_back(GetParameterID("CartesianVX"));
+      stmIndices.push_back(GetParameterID("CartesianVY"));
+      stmIndices.push_back(GetParameterID("CartesianVZ"));
 
-      // Only add the solvefor parameter if it is not in the list already     // made changes by TUAN NGUYEN
-      if (find(solveforNames.begin(), solveforNames.end(), value) ==          // made changes by TUAN NGUYEN
-          solveforNames.end())                                                // made changes by TUAN NGUYEN
-      {                                                                       // made changes by TUAN NGUYEN
-         solveforNames.push_back(value);                                      // made changes by TUAN NGUYEN
-         if (value != "CartesianState")
+      for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
+      {
+         // Cartesian state handled above
+         if (solveforNames[i] != "CartesianState")
          {
-            length += GetEstimationParameterSize(GetParameterID(value));
-            for (Integer i = 0; i < GetEstimationParameterSize(GetParameterID(value)); ++i)
+            length += GetEstimationParameterSize(GetParameterID(solveforNames[i]));
+            for (Integer j = 0; j < GetEstimationParameterSize(
+                  GetParameterID(solveforNames[i])); ++j)
             {
-               stmIndices.push_back(GetEstimationParameterID(value));
+               stmIndices.push_back(GetParameterID(solveforNames[i]));
+               #ifdef DEBUG_SPACECRAFT_STM
+                  MessageInterface::ShowMessage("Looking up %s --> %d\n",
+                        solveforNames[i].c_str(),
+                        GetParameterID(solveforNames[i]));
+               #endif
             }
          }
-      }                                                                       // made changes by TUAN NGUYEN
+      }
+
+      #ifdef DEBUG_SPACECRAFT_STM
+         MessageInterface::ShowMessage("Setting %s: STM has %d rows and "
+               "columns\n", value.c_str(), length);
+         for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
+            MessageInterface::ShowMessage("   %d:  %s\n", i,
+                  solveforNames[i].c_str());
+      #endif
+
       SetIntegerParameter(FULL_STM_ROWCOUNT, length);
-      return true;                                                            // made changes by TUAN NGUYEN
-   }                                                                          // made changes by TUAN NGUYEN
+      return true;
+   }
 
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
@@ -5550,14 +5555,13 @@ bool Spacecraft::IsEstimationParameterValid(const Integer item)
          retval = true;
          break;
       
-      case CR_EPSILON:                       // made changes by TUAN NGUYEN
-         retval = true;                      // made changes by TUAN NGUYEN
-         break;                              // made changes by TUAN NGUYEN
+      case CR_EPSILON:
+         retval = true;
+         break;
 
-      case CD_EPSILON:                       // made changes by TUAN NGUYEN
-         // @todo: when code for Cd is completed. It need to add the following line.
-         //retval = true;                      // made changes by TUAN NGUYEN
-         break;                              // made changes by TUAN NGUYEN
+      case CD_EPSILON:
+         retval = true;
+         break;
 
       case Gmat::MASS_FLOW:          /// Is it correct ???? Spacecraft::SC_Param_ID::MASS_FLOW or Gmat::MASS_FLOW ???
          // todo: Access tanks for mass information to handle mass flow
@@ -5595,6 +5599,9 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
       case CARTESIAN_X:
          retval = 6;
          break;
+      case CD_ID:
+         retval = 1;
+         break;
       case CR_ID:
          retval = 1;
          break;
@@ -5625,6 +5632,10 @@ Real* Spacecraft::GetEstimationParameterValue(const Integer item)
    {
       case CARTESIAN_X:
          retval = state.GetState();
+         break;
+
+      case CD_ID:
+         retval = &coeffDrag;
          break;
 
       case CR_ID:
@@ -7489,6 +7500,8 @@ Rmatrix* Spacecraft::GetParameterSTM(Integer parameterId)
 {
    if (parameterId == CARTESIAN_X)
       return &fullSTM;
+   if (parameterId == CD_EPSILON)
+      return &fullSTM;
    if (parameterId == CR_EPSILON)
       return &fullSTM;
 //      return &orbitSTM;
@@ -7515,7 +7528,8 @@ Integer Spacecraft::GetStmRowId(const Integer forRow)
 {
    Integer retval = -1;
 
-
+   if ((forRow < (Integer)stmIndices.size()) && (forRow >= 0))
+      retval = stmIndices[forRow];
 
    return retval;
 }

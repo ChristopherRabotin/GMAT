@@ -774,6 +774,34 @@ Integer PropagationStateManager::GetCompletionSize(const Integer which)
 
 
 //------------------------------------------------------------------------------
+// Integer GetSTMIndex(Integer forParameterID)
+//------------------------------------------------------------------------------
+/**
+ * Finds the STM row/column index for the ID'd parameter
+ *
+ * @param forParameterID The ID of the parameter
+ *
+ * @return The STM row, or -1 if not in the STM
+ */
+//------------------------------------------------------------------------------
+Integer PropagationStateManager::GetSTMIndex(Integer forParameterID)
+{
+   Integer retval = -1;
+
+   for (UnsignedInt i = 0; i < stmRowMap.size(); ++i)
+   {
+      if (stmRowMap[i] == forParameterID)
+      {
+         retval = i;
+         break;
+      }
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // Integer PropagationStateManager::SortVector()
 //------------------------------------------------------------------------------
 /**
@@ -883,12 +911,14 @@ Integer PropagationStateManager::SortVector()
    val = 0;
    completionIndexList.clear();
    completionSizeList.clear();
+   stmRowMap.clear();
 
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage(
             "State size is %d\n", stateSize);
    #endif
    
+   // Next build the state
    for (Integer i = 0; i < stateSize; ++i)
    {
       #ifdef DEBUG_STATE_CONSTRUCTION
@@ -951,6 +981,17 @@ Integer PropagationStateManager::SortVector()
                   "RowLen = %d, %d -> row %2d  col %2d\n", newItem->rowLength, 
                   val, newItem->rowIndex, newItem->colIndex); 
          #endif
+         // While we're here, grab the STM mapping if this is STM
+         if ((newItem->elementID == Gmat::ORBIT_STATE_TRANSITION_MATRIX) &&
+             (newItem->rowIndex == 0))
+         {
+            stmRowMap.push_back(owners[order[i]]->GetStmRowId(newItem->colIndex));
+
+            #ifdef DEBUG_STATE_CONSTRUCTION
+               MessageInterface::ShowMessage("   STM column for %d\n",
+                     stmRowMap[newItem->colIndex]);
+            #endif
+         }
       }
       
       newItem->nonzeroInit = owners[order[i]]->
@@ -966,8 +1007,6 @@ Integer PropagationStateManager::SortVector()
       {
          completionIndexList.push_back(newItem->elementID);
          completionSizeList.push_back(1);       // Or count sizes?
-//         newItem->nonzeroInit = true;
-//         newItem->initialValue = 1.0;
       }
 
       newItem->postDerivativeUpdate = owners[order[i]]->
