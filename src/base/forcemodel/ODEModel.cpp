@@ -256,7 +256,6 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    PhysicalModel     (Gmat::ODE_MODEL, typeName, modelName),
 //   previousState     (NULL),
    state             (NULL),
-   psm               (NULL),
    estimationMethod  (ESTIMATE_STEP),     // Should this be removed?
    normType          (L2_DIFFERENCES),
    parametersSetOnce (false),
@@ -353,7 +352,6 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    PhysicalModel              (fdf),
 //   previousState              (fdf.previousState),
    state                      (NULL),
-   psm                        (NULL),
    estimationMethod           (fdf.estimationMethod),
    normType                   (fdf.normType),
    parametersSetOnce          (false),
@@ -450,7 +448,6 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    satIds[5] = satIds[6] = -1;
    
    state = NULL;
-   psm   = NULL;
    satCount = 0;
    constrainCd = fdf.constrainCd;
    constrainCr = fdf.constrainCr;
@@ -1207,6 +1204,10 @@ bool ODEModel::BuildModelFromMap()
       MessageInterface::ShowMessage("ODEModel map has %d entries\n",
             map->size());
    #endif
+
+   applyErrorControl.clear();
+   bool ecActive = true;
+
    for (UnsignedInt index = 0; index < map->size(); ++index)
    {
       if ((*map)[index]->dynamicObjectProperty)
@@ -1242,7 +1243,13 @@ bool ODEModel::BuildModelFromMap()
          objectCount = 0;
          start = index;
          currentObject = NULL;
+
+         // Disable error control in STM propagation
+         ecActive = ((id == Gmat::ORBIT_A_MATRIX) ||
+               (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX) ? false : true);
       }
+
+      applyErrorControl.push_back(ecActive);
 
       // Increment the count for each new object
       if (currentObject != (*map)[index]->object)
@@ -1577,7 +1584,7 @@ bool ODEModel::Initialize()
       
       (*current)->SetDimension(dimension);
       (*current)->SetState(state);
-      
+
       // Only initialize the spacecraft independent pieces once
       if (forceMembersNotInitialized)
       {
@@ -3037,19 +3044,24 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
    // Handle non-Cartesian state elements as an L1 norm
    for (int i = cartesianStart + cartStateSize; i < dimension; ++i)
    {
-      // L1 norm
-      mag = fabs(answer[ i ] - modelState[ i ]);
-      err = fabs(diffs[i]);
-      if (mag >relativeErrorThreshold)
-         err = err / mag;
-
-      #ifdef DEBUG_ERROR_ESTIMATE
-         MessageInterface::ShowMessage("   {%d EstErr = %le} ", i, err);
-      #endif
-
-      if (err > retval)
+      // Error control type by type -- actually on an element level -- so it
+      // can be toggled off when necessary
+      if (applyErrorControl[i])
       {
-         retval = err;
+         // L1 norm
+         mag = fabs(answer[ i ] - modelState[ i ]);
+         err = fabs(diffs[i]);
+         if (mag >relativeErrorThreshold)
+            err = err / mag;
+
+         #ifdef DEBUG_ERROR_ESTIMATE
+            MessageInterface::ShowMessage("   {%d EstErr = %le} ", i, err);
+         #endif
+
+         if (err > retval)
+         {
+            retval = err;
+         }
       }
    }
 
@@ -4263,6 +4275,22 @@ bool ODEModel::SetEpoch(const GmatEpoch newEpoch)
 }
 
 
+//------------------------------------------------------------------------------
+// void ODEModel::SetPropStateManager(PropagationStateManager *sm)
+//------------------------------------------------------------------------------
+/**
+ * Populates the PSM pointer in the force model
+ *
+ * @param sm The propagation state manager
+ */
+//------------------------------------------------------------------------------
+void ODEModel::SetPropStateManager(PropagationStateManager *sm)
+{
+   PhysicalModel::SetPropStateManager(sm);
+   for (UnsignedInt i = 0; i < forceList.size(); ++i)
+      forceList[i]->SetPropStateManager(psm);
+}
+
 
 //---------------------------------------------------------------------------
 //  bool SetOnOffParameter(const Integer id, const std::string &value)
@@ -4818,24 +4846,6 @@ void ODEModel::ReportEpochData()
             epoch, elapsedTime);
 }
 
-
-//------------------------------------------------------------------------------
-// void SetPropStateManager(PropagationStateManager *sm)
-//------------------------------------------------------------------------------
-/**
- * Sets the ProagationStateManager pointer
- *
- * @param sm The PSM that the ODEModel uses
- */
-//------------------------------------------------------------------------------
-void ODEModel::SetPropStateManager(PropagationStateManager *sm)
-{
-   #ifdef DEBUG_OBJECT_SETTING
-      MessageInterface::ShowMessage("Setting the PSM on %s\n",
-            instanceName.c_str());
-   #endif
-   psm = sm;
-}
 
 //------------------------------------------------------------------------------
 // void SetState(GmatState *gms)

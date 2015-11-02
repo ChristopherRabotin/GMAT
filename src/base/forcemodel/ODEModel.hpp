@@ -71,10 +71,6 @@
 #include <fstream>            // Used for streams in debugging methods
 
 
-class PropagationStateManager;
-
-
-
 /**
  * ODEModel is a container class for ordinary differential equations
  * 
@@ -247,7 +243,7 @@ public:
    void                 UpdateInitialData(bool dynamicOnly = false);
    void                 ReportEpochData();
    
-   void                 SetPropStateManager(PropagationStateManager *sm);
+
    void                 SetState(GmatState *gms);
 
    virtual bool         HasLocalClones();
@@ -258,6 +254,7 @@ public:
 
    // Interface added for the C Interface to force epoch updates
    bool                 SetEpoch(const GmatEpoch newEpoch); 
+   virtual void         SetPropStateManager(PropagationStateManager *sm);
 
 protected:
    /// Count of the number of forces in the model
@@ -268,8 +265,6 @@ protected:
    Integer stateSize;
    /// The state that the model uses; set by a StateManager
    GmatState *state;
-   /// Associated Prop State Manager
-   PropagationStateManager *psm;
    
 //   /// List of spacecraft and formations that get propagated
 //   std::vector<SpaceObject *> spacecraft;
@@ -400,6 +395,8 @@ protected:
    
    /// map of mu values for SpacePoints
    std::map<std::string, Real>    muMap;
+   /// Toggles for error control
+   BooleanArray applyErrorControl;
 
    enum
    {
