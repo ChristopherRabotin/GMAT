@@ -949,6 +949,9 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    else
    {
       // obsData == NULL That means simulation
+      if (serviceAccessList.empty())
+         throw MeasurementException("Error: Simulation TDRS service access list is empty. In GMAT script, it needs to add service access to the list.\n");
+
       srand(time(NULL));
       serviceAccessIndex = rand() % serviceAccessList.size();
    }
@@ -1105,18 +1108,18 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       measDataSL.value[0] = measDataSL.value[0] / adapterSL->GetMultiplierFactor();      // convert to full range in km
       measDataSS = adapterSS->GetMeasurement();
       measDataSS.value[0] = measDataSS.value[0] / adapterSS->GetMultiplierFactor();      // convert to full range in km
-
-      // 4.7. Specify pivot frequency
-      Real pivotFreq;                        // unit: MHz
+      
+      // 4.7. Specify pilot frequency
+      Real pilotFreq;                        // unit: MHz
       if (serviceAccessList[serviceAccessIndex] == "SA1")
       {
          switch (node4FreqBand)
          {
          case 1:
-            pivotFreq = 13677.5 + GmatMathUtil::Floor(effFreq*2 + 0.5)/2;
+            pilotFreq = 13677.5 - GmatMathUtil::Fix(effFreq*2 + 0.5)/2;                // made changes by TUAN NGUYEN
             break;
          case 3:
-            pivotFreq = -1475.0;      // - 1475 MHz
+            pilotFreq = -1475.0;      // - 1475 MHz
             break;
          default:
             throw MeasurementException("Error: TDRS SA1 service access is not available for other bands except S-band and K-band.\n");
@@ -1128,10 +1131,10 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          switch (node4FreqBand)
          {
          case 1:
-            pivotFreq = 13697.5 + GmatMathUtil::Floor(effFreq*2 + 0.5)/2;
+            pilotFreq = 13697.5 - GmatMathUtil::Fix(effFreq*2 + 0.5)/2;                // made changes by TUAN NGUYEN
             break;
          case 3:
-            pivotFreq = -1075.0;      // - 1075 MHz
+            pilotFreq = -1075.0;      // - 1075 MHz
             break;
          default:
             throw MeasurementException("Error: TDRS SA2 service access is not available for other bands except S-band and K-band.\n");
@@ -1148,40 +1151,40 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
                switch(smarId)
                {
                case 2:
-                  pivotFreq = 13412.5;
+                  pilotFreq = 13412.5;
                   break;
                case 3:
-                  pivotFreq = 13420.0;
+                  pilotFreq = 13420.0;
                   break;
                case 4:
-                  pivotFreq = 13427.5;
+                  pilotFreq = 13427.5;
                   break;
                case 5:
-                  pivotFreq = 13435.0;
+                  pilotFreq = 13435.0;
                   break;
                case 6:
-                  pivotFreq = 13442.5;
+                  pilotFreq = 13442.5;
                   break;
                case 7:
-                  pivotFreq = 13450.0;
+                  pilotFreq = 13450.0;
                   break;
                case 8:
-                  pivotFreq = 13457.5;
+                  pilotFreq = 13457.5;
                   break;
                case 27:
-                  pivotFreq = 13600.0;
+                  pilotFreq = 13600.0;
                   break;
                case 28:
-                  pivotFreq = 13607.5;
+                  pilotFreq = 13607.5;
                   break;
                case 29:
-                  pivotFreq = 13615.0;
+                  pilotFreq = 13615.0;
                   break;
                case 30:
-                  pivotFreq = 13622.5;
+                  pilotFreq = 13622.5;
                   break;
                default:
-                  pivotFreq = 13405.0;
+                  pilotFreq = 13405.0;
                   break;
                }
             }
@@ -1190,10 +1193,10 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
                switch (dataFlag)
                {
                case 0:
-                  pivotFreq = -2279;       // -2270 MHz
+                  pilotFreq = -2279;       // -2270 MHz
                   break;
                case 1:
-                  pivotFreq = -2287;       // -2287 MHz
+                  pilotFreq = -2287.5;       // -2287.5 MHz                  // made changes by TUAN NGUYEN
                   break;
                default:
                   throw MeasurementException("Error: TDRS data flag has an invalid value.\n");
@@ -1208,14 +1211,14 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       }
       else
          throw MeasurementException("Error: TDRS has no service access of '" + serviceAccessList[serviceAccessIndex] + "'.\n");
-
-      //MessageInterface::ShowMessage("effect freq = %le MHz     pivot freq = %le MHz   TDRS TAR = %f     Sat TAR = %f\n", effFreq, pivotFreq, tdrsTAR, satTAR);
+      
+      //MessageInterface::ShowMessage("effect freq = %le MHz     pivot freq = %le MHz   TDRS TAR = %f     Sat TAR = %f\n", effFreq, pilotFreq, tdrsTAR, satTAR);
       // 4.8. Specify multiplier for SL-path, SS-path, EL-path, and ES-path
       multiplierSL = (tdrsTAR*satTAR)*(effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                 // unit: Hz/Km
-      multiplierSS = (pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                                // unit: Hz/Km
+      multiplierSS = (pilotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                                // unit: Hz/Km
       multiplierEL = -(tdrsTAR*satTAR)*(effFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                // unit: Hz/Km
-      multiplierES = -(pivotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                               // unit: Hz/Km
-
+      multiplierES = -(pilotFreq*1.0e6)/(dopplerCountInterval*speedoflightkm);                               // unit: Hz/Km
+      
       // 4.9. Set uplink frequency, uplink frequency band, node4 frequency, node4 fequency band
 //     cMeasurement.epoch = measDataEL.epoch;
       cMeasurement.uplinkFreq           = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
@@ -1305,12 +1308,15 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Real travel time for SS-path : %.12lf Km\n", measDataSS.value[i]);
          MessageInterface::ShowMessage("      . Real travel time for EL-path : %.12lf Km\n", measDataEL.value[i]);
          MessageInterface::ShowMessage("      . Real travel time for ES-path : %.12lf Km\n", measDataES.value[i]);
+         MessageInterface::ShowMessage("      . Service access               : %s\n", serviceAccessList[serviceAccessIndex].c_str());
+         MessageInterface::ShowMessage("      . Node 4 (effect) frequency    : %.12lf MHz\n", effFreq);
          MessageInterface::ShowMessage("      . Node 4 frequency band        : %d\n", node4FreqBand);
-         MessageInterface::ShowMessage("      . Effect (node 4) frequency    : %.12lf MHz\n", effFreq);
-         MessageInterface::ShowMessage("      . SMAR id                      : %d\n", smarId);
          MessageInterface::ShowMessage("      . TDRS id                      : %s\n", tdrsId.c_str());
+         MessageInterface::ShowMessage("      . SMAR id                      : %d\n", smarId);
          MessageInterface::ShowMessage("      . Data Flag                    : %d\n", dataFlag);
-         MessageInterface::ShowMessage("      . Pivot frequency              : %.12lf MHz\n", pivotFreq);
+         MessageInterface::ShowMessage("      . Pilot frequency              : %.12lf MHz\n", pilotFreq);
+         MessageInterface::ShowMessage("      . TDRS transponder turn around       ratio: %lf\n", tdrsTAR);
+         MessageInterface::ShowMessage("      . Spacecraft transponder turn around ratio: %lf\n", satTAR);
          MessageInterface::ShowMessage("      . Multiplier factor for SL-path: %.12lf Hz/Km\n", multiplierSL);
          MessageInterface::ShowMessage("      . Multiplier factor for SS-path: %.12lf Hz/Km\n", multiplierSS);
          MessageInterface::ShowMessage("      . Multiplier factor for EL-path: %.12lf Hz/Km\n", multiplierEL);
