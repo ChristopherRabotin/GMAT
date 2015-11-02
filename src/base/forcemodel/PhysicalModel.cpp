@@ -523,6 +523,14 @@ void PhysicalModel::SetForceOrigin(CelestialBody* toBody)
     forceOrigin = toBody;
 }
 
+
+// made changes by TUAN NGUYEN
+CelestialBody* PhysicalModel::GetForceOrigin()
+{
+   return forceOrigin;
+}
+   
+
 //------------------------------------------------------------------------------
 // bool PhysicalModel::Initialize()
 //------------------------------------------------------------------------------
@@ -543,7 +551,7 @@ bool PhysicalModel::Initialize()
             "PhysicalModel::Initialize() entered for %s; dimension = %d\n",
             typeName.c_str(), dimension);
    #endif
-      
+   
    if ((rawState != NULL) && (rawState != modelState))
    {
       #ifdef DEBUG_MEMORY
