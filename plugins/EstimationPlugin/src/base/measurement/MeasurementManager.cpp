@@ -1113,9 +1113,9 @@ UnsignedInt MeasurementManager::LoadObservations()
    std::map<std::string, Integer> totalCount;
    totalCount["Invalid measurement value"]        = 0;
    totalCount["Record duplication or time order"] = 0;
-   totalCount["Trackers selection"]               = 0;
-   totalCount["Data thinning"]                    = 0;
-   totalCount["Time span"]                        = 0;
+   totalCount["Old Syntax's Trackers selection"]  = 0;
+   totalCount["Old Syntax's Data thinning"]       = 0;
+   totalCount["Old Syntax's Time span"]           = 0;
 
    observations.clear();
 
@@ -1195,11 +1195,11 @@ UnsignedInt MeasurementManager::LoadObservations()
       {
          case 1:
             //++filter1Num; 
-            ++totalCount["Data thinning"];
+            ++totalCount["Old Syntax's Data thinning"];
             break;
          case 2:
             //++filter2Num; 
-            ++totalCount["Time span"];
+            ++totalCount["Old Syntax's Time span"];
             break;
          case 3:
             //++filter3Num;
@@ -1211,7 +1211,7 @@ UnsignedInt MeasurementManager::LoadObservations()
             break;
          case 5:
             //++filter5Num;
-            totalCount["Trackers selection"];
+            totalCount["Old Syntax's Trackers selection"];
             break;
 
          //case 6:
@@ -1237,11 +1237,12 @@ UnsignedInt MeasurementManager::LoadObservations()
                   {
                      std::string filterName = "";
                      if (filters[filterIndex]->IsOfType("StatisticsAcceptFilter"))
-                        filterName += "StatisticsAcceptFilter ";
+                        filterName += "All Statistics Accept Filter";
                      else if  (filters[filterIndex]->IsOfType("StatisticsRejectFilter"))
+                     {
                         filterName += "StatisticsRejectFilter ";
-                     filterName += filters[filterIndex]->GetName();
-
+                        filterName += filters[filterIndex]->GetName();
+                     }
                      ++totalCount[filterName];
                   }
                }
