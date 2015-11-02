@@ -2443,14 +2443,13 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          max_len = GmatMathUtil::Max(max_len, ss.str().length());
       }
 
-
       // Calculate Keplerian state for apriori, previous, current states:
       std::map<GmatBase*, Rvector6> aprioriKeplerianStateMap = CalculateKeplerianStateMap(map, aprioriSolveForState);
       std::map<GmatBase*, Rvector6> previousKeplerianStateMap = CalculateKeplerianStateMap(map, previousSolveForState);
       std::map<GmatBase*, Rvector6> currentKeplerianStateMap = CalculateKeplerianStateMap(map, currentSolveForState);
 
       std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
-
+      
       // Write state information
       textFile << "\n";
       textFile << "Iteration " << iterationsTaken << ": State Information \n"
@@ -2489,7 +2488,6 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          }
       }
 
-
       for (int i = 0; i < map->size(); ++i) 
       {
          textFile << "   ";
@@ -2517,11 +2515,13 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                   << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(previousSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // initial state
                   << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // updated state
                   << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i] - aprioriSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(GmatMathUtil::Sqrt(covar(i,i)), false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   ";
+         if (covar(i,i) >= 0.0)
+            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(GmatMathUtil::Sqrt(covar(i,i)), false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+         else
+            textFile << "       N/A\n";
       }
       textFile << "\n";
-      
 
       // Caluclate Keplerian covariance matrix
       Rmatrix convmatrix;
@@ -2575,11 +2575,14 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 
             for(UnsignedInt j = 0; j < 6; ++j)
             {
-               stdArr.push_back(GmatMathUtil::Sqrt(keplerianCovar(k,k)));
+               if (keplerianCovar(k,k) >= 0.0)
+                  stdArr.push_back(GmatMathUtil::Sqrt(keplerianCovar(k,k)));
+               else
+                  stdArr.push_back(-1.0);
                ++k;
             }
          }
-
+         
          for(UnsignedInt i = 0; i < nameList.size(); ++i)
          {
             textFile << "   ";
@@ -2588,8 +2591,11 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                      << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(previousArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // initial state
                      << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // updated state
                      << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(stdArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   ";
+            if (stdArr[i] >= 0.0)
+               textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(stdArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+            else
+               textFile << "        N/A\n";
          }         
       }
       
