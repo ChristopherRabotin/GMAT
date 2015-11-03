@@ -1,4 +1,4 @@
-# $Id: Makefile 2228 2012-03-28 17:36:30Z wshoan@NDC $
+# $Id: Makefile 2228 2012-03-28 17:36:30Z  $
 # 
 # GMAT: General Mission Analysis Tool.
 # 

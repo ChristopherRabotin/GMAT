@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -35,6 +45,7 @@
 //#define DEBUG_FUNCTION_EXEC
 //#define DEBUG_FUNCTION_FINALIZE
 //#define DEBUG_UNUSED_GOL
+//#define DEBUG_OBJECT_MAP
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -526,7 +537,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       validator->HandleCcsdsEphemerisFile(objectStore, true);
       #ifdef DEBUG_FUNCTION_INIT
       MessageInterface::ShowMessage
-         ("GmatFunction::Initialize() calling InitializeLocalObjects()\n");
+         ("GmatFunction::Initialize() Calling InitializeLocalObjects()\n");
       #endif
       InitializeLocalObjects(objInit, current, true);
    }
@@ -719,6 +730,9 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    }
    #endif
    
+   #ifdef DEBUG_OBJECT_MAP
+   ShowObjects("In GmatFunction::Execute()");
+   #endif
    
    // Go through each command in the sequence and execute.
    // Once it gets to a real command, initialize local and automatic objects.
@@ -766,7 +780,10 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
                MessageInterface::ShowMessage
                   ("============================ Initializing LocalObjects at current\n"
                    "%s\n", current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+               MessageInterface::ShowMessage
+                  ("GmatFunction::Execute() Calling InitializeLocalObjects()\n");
                #endif
+                              
                InitializeLocalObjects(objInit, current, true);
             }
          }
@@ -817,8 +834,8 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
                 e.GetFullMessage());
             //throw;
          }
-         
-         // Should we re-throw the exception here? (LOJ: 2015.02.19)
+
+         // Should we still re-throw the exception here? (LOJ: 2015.02.19)
          throw FunctionException
             ("In " + current->GetGeneratingString(Gmat::NO_COMMENTS) + ", " +
              e.GetFullMessage());
@@ -846,30 +863,51 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       #endif
    }
    
+   // This block no longer needed since two-mode parsing already filled
+   // object map for the Validator.
+   // (LOJ: 2015.10.15 Fixes GMT-5336 Passing global objects in and out to a fucction)
    // Set ObjectMap from the last command to Validator in order to create
    // valid output wrappers (loj: 2008.11.12)
-   validator->SetObjectMap(last->GetObjectMap());
+   // #ifdef DEBUG_FUNCTION_EXEC
+   // MessageInterface::ShowMessage
+   //    ("GmatFunction()::Execute() Setting object map from the last command <%p>[%s]\n",
+   //     last, last->GetTypeName().c_str());
+   // ShowObjectMap(last->GetObjectMap());
+   // #endif
+   //validator->SetObjectMap(last->GetObjectMap());
    
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage
-      ("   Now about to create %d output wrapper(s) to set results, objectsInitialized=%d\n",
-       outputNames.size(), objectsInitialized);
+      ("GmatFunction()::Execute()  Now about to create %d output wrapper(s) to "
+       "set results, objectsInitialized=%d\n", outputNames.size(), objectsInitialized);
    #endif
    
    // create output wrappers and put into map
-   GmatBase *obj;
+   GmatBase *obj = NULL;
    wrappersToDelete.clear();
    for (unsigned int jj = 0; jj < outputNames.size(); jj++)
    {
+      #ifdef DEBUG_FUNCTION_EXEC
+      MessageInterface::ShowMessage
+         ("   Trying to find ouputNames[%d]='%s'\n", jj, outputNames[jj].c_str());
+      #endif
       if (!(obj = FindObject(outputNames.at(jj))))
       {
          std::string errMsg = "Function: Output \"" + outputNames.at(jj);
          errMsg += " not found for function \"" + functionName + "\"";
          throw FunctionException(errMsg);
       }
+      
       std::string outName = outputNames.at(jj);
+      #ifdef DEBUG_FUNCTION_EXEC
+      MessageInterface::ShowMessage
+         ("   The object '%s' found\n   Trying to create wrapper for '%s'\n",
+          GmatBase::WriteObjectInfo("", obj, false).c_str(), outName.c_str());
+      #endif
+      
       ElementWrapper *outWrapper =
          validator->CreateElementWrapper(outName, false, 0);
+      
       #ifdef DEBUG_MORE_MEMORY
       MessageInterface::ShowMessage
          ("+++ GmatFunction::Execute() *outWrapper = validator->"

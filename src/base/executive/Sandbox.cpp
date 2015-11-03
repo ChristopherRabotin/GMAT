@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -1096,10 +1106,12 @@ bool Sandbox::Execute()
       state = STOPPED;
       
       #if DBGLVL_SANDBOX_RUN
-         MessageInterface::ShowMessage
-            ("   Sandbox rethrowing %s\n", e.GetFullMessage().c_str());
+      MessageInterface::ShowMessage
+         ("Sandbox::Execute() rethrowing %s\n", e.GetFullMessage().c_str());
       #endif
       
+      // Set FCS eror flag (LOJ: 2015.10.07)
+      errorInPreviousFcs = true;
       throw;
    }
    
@@ -1775,25 +1787,23 @@ void Sandbox::ShowObjectMap(ObjectMap &om, const std::string &title)
    {
       std::string objName;
       GmatBase *obj = NULL;
-      GmatBase *paramOwner = NULL;
       std::string isGlobal;
       std::string isLocal;
+      GmatBase *paramOwner = NULL;
+      bool isParameter = false;
       std::string paramOwnerType;
       std::string paramOwnerName;
-      bool isParameter = false;
       
       for (ObjectMap::iterator i = om.begin(); i != om.end(); ++i)
       {
          objName = i->first;
          obj = i->second;
-         paramOwner = NULL;
-         isParameter = false;
          isGlobal = "No";
          isLocal = "No";
-         // MessageInterface::ShowMessage
-         //    ("   %50s  <%p> [%s] %s\n", objName.c_str(), obj,
-         //     obj ? obj->GetTypeName().c_str() : "NULL",
-         //     obj->IsGlobal() ? "Global" : "");
+         paramOwner = NULL;
+         isParameter = false;
+         paramOwnerType = "";
+         paramOwnerName = "";
          
          if (obj)
          {

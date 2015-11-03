@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun / NASA
 // Created: 2009/09/02
@@ -157,6 +167,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    fullPathFileName     (""),
    spacecraftName       (""),
    spacecraftId         (""),
+   prevFileName         (""),
    fileName             (""),
    fileFormat           ("CCSDS-OEM"),
    epochFormat          ("UTCGregorian"),
@@ -253,6 +264,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    
    fullPathFileName =
       GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE", false, ".oem");
+   prevFileName = fileName;
    
    // Available enumeration type list, since it is static data, clear it first
    fileFormatList.clear();
@@ -302,6 +314,8 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    outputFormatList.push_back("UNIX");
    
    #ifdef DEBUG_EPHEMFILE
+   MessageInterface::ShowMessage
+      ("fileName='%s', fullPathFileName='%s'\n", fileName.c_str(), fullPathFileName.c_str());
    MessageInterface::ShowMessage
       ("EphemerisFile::EphemerisFile() <%p>'%s' leaving\n", this, GetName().c_str());
    #endif
@@ -385,6 +399,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    fullPathFileName     (ef.fullPathFileName),
    spacecraftName       (ef.spacecraftName),
    spacecraftId         (ef.spacecraftId),
+   prevFileName         (ef.prevFileName),
    fileName             (ef.fileName),
    fileFormat           (ef.fileFormat),
    epochFormat          (ef.epochFormat),
@@ -485,6 +500,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    fullPathFileName     = ef.fullPathFileName;
    spacecraftName       = ef.spacecraftName;
    spacecraftId         = ef.spacecraftId;
+   prevFileName         = ef.prevFileName;
    fileName             = ef.fileName;
    fileFormat           = ef.fileFormat;
    epochFormat          = ef.epochFormat;
@@ -1109,8 +1125,8 @@ bool EphemerisFile::TakeAction(const std::string &action,
    #ifdef DEBUG_EPHEMFILE_ACTION
    MessageInterface::ShowMessage
       ("EphemerisFile::TakeAction() this=<%p>'%s' entered, action='%s', actionData='%s', "
-       "isInitialized=%d\n", this, GetName().c_str(), action.c_str(), actionData.c_str(),
-       isInitialized);
+       "isInitialized=%d, firstTimeWriting=%d\n", this, GetName().c_str(), action.c_str(),
+       actionData.c_str(), isInitialized, firstTimeWriting);
    #endif
    
    bool retval = false;
@@ -1168,8 +1184,8 @@ bool EphemerisFile::TakeAction(const std::string &action,
    
    #ifdef DEBUG_EPHEMFILE_ACTION
    MessageInterface::ShowMessage
-      ("EphemerisFile::TakeAction() this=<%p>'%s' returning %d\n",
-       this, GetName().c_str(), retval);
+      ("EphemerisFile::TakeAction() this=<%p>'%s', action='%s', actionData='%s' "
+       "returning %d\n", this, GetName().c_str(), action.c_str(), actionData.c_str(), retval);
    #endif
    return retval;
 }
@@ -1525,7 +1541,8 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
    #ifdef DEBUG_EPHEMFILE_SET
    MessageInterface::ShowMessage
       ("EphemerisFile::SetStringParameter() this=<%p>'%s' entered, id=%d, "
-       "value='%s'\n", this, GetName().c_str(), id, value.c_str());
+       "value='%s'\n   isInitialized=%d, firstTimeWriting=%d\n", this, GetName().c_str(),
+       id, value.c_str(), isInitialized, firstTimeWriting);
    #endif
    
    switch (id)
@@ -1564,12 +1581,25 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
             FinishUpWriting(true);
       }
       
+      prevFileName = fileName;
       fileName = value;
       fullPathFileName =
          GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE",
                                        false, ".eph", false, true);
-            
+      
+      // If filename is set in resource mode, set prevFileName
+      if (!isInitialized)
+         prevFileName = fileName;
+      
       usingDefaultFileName = false;
+      #ifdef DEBUG_EPHEMFILE_SET
+      MessageInterface::ShowMessage
+         ("   prevFileName='%s'\n   fileName='%s'\n   fullPathFileName='%s'\n",
+          prevFileName.c_str(), fileName.c_str(), fullPathFileName.c_str());
+      MessageInterface::ShowMessage
+         ("EphemerisFile::SetStringParameter() this=<%p>'%s' returning true\n",
+          this, GetName().c_str());
+      #endif
       return true;
    }
    // Interpolator is now set along with file format (bug 2219)
@@ -1911,64 +1941,74 @@ void EphemerisFile::CreateSpiceKernelWriter()
 {
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
-      ("EphemerisFile::CreateSpiceKernelWriter() entered, spkWriter=<%p>\n",
-       spkWriter);
+      ("EphemerisFile::CreateSpiceKernelWriter() entered, spkWriter=<%p>, "
+       "isInitialized=%d, firstTimeWriting=%d\n   prevFileName='%s', "
+       "fileName='%s'\n", spkWriter, isInitialized, firstTimeWriting,
+       prevFileName.c_str(), fileName.c_str());
    #endif
-      
+   
    //=======================================================
    #ifdef __USE_SPICE__
    //=======================================================
    // If spkWriter is not NULL, delete it first
+   // Do we really want to delete here? This causes to only write
+   // segments after toggle on. So all previous data are wiped out.
+   // So check for file name change in the mission sequence
+   // before creating new spkWriter (LOJ: 2015.10.14)
    if (spkWriter != NULL)
    {
-      #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Remove
-         (spkWriter, "spkWriter", "EphemerisFile::CreateSpiceKernelWriter()",
-          "deleting local spkWriter");
-      #endif
-      delete spkWriter;
-      spkWriter = NULL;
+      if (prevFileName != fileName)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (spkWriter, "spkWriter", "EphemerisFile::CreateSpiceKernelWriter()",
+             "deleting local spkWriter");
+         #endif
+         delete spkWriter;
+         spkWriter = NULL;
+      }
    }
    
-   std::string name = spacecraft->GetName();
-   //std::string centerName = spacecraft->GetOriginName();
-   std::string centerName = outCoordSystem->GetOriginName();
-   Integer objNAIFId = spacecraft->GetIntegerParameter("NAIFId");
-   //Integer centerNAIFId = (spacecraft->GetOrigin())->GetIntegerParameter("NAIFId");
-   Integer centerNAIFId = (outCoordSystem->GetOrigin())->GetIntegerParameter("NAIFId");
-   
-   #ifdef DEBUG_EPHEMFILE_SPICE
-   MessageInterface::ShowMessage
-      ("   Creating SpiceOrbitKernelWriter with name='%s', centerName='%s', "
-       "objNAIFId=%d, centerNAIFId=%d\n   fileName='%s', interpolationOrder=%d\n",
-       name.c_str(), centerName.c_str(), objNAIFId, centerNAIFId,
-       fileName.c_str(), interpolationOrder);
-   #endif
-   
-   try
+   // Create spkWrite if it is NULL (LOJ: 2015.10.14)
+   if (spkWriter == NULL)
    {
-      spkWriter =
-         new SpiceOrbitKernelWriter(name, centerName, objNAIFId, centerNAIFId,
-                                    //fileName, interpolationOrder, "J2000");
-                                    fullPathFileName, interpolationOrder, "J2000");
-   }
-   catch (BaseException &e)
-   {
-      // Keep from setting a warning
-      e.GetMessageType();
+      std::string name = spacecraft->GetName();
+      std::string centerName = outCoordSystem->GetOriginName();
+      Integer objNAIFId = spacecraft->GetIntegerParameter("NAIFId");
+      Integer centerNAIFId = (outCoordSystem->GetOrigin())->GetIntegerParameter("NAIFId");
       
       #ifdef DEBUG_EPHEMFILE_SPICE
-      MessageInterface::ShowMessage(
-            "  Error creating SpiceOrbitKernelWriter: %s", (e.GetFullMessage()).c_str());
+      MessageInterface::ShowMessage
+         ("   Creating SpiceOrbitKernelWriter with name='%s', centerName='%s', "
+          "objNAIFId=%d, centerNAIFId=%d\n   fileName='%s', interpolationOrder=%d\n",
+          name.c_str(), centerName.c_str(), objNAIFId, centerNAIFId,
+          fileName.c_str(), interpolationOrder);
       #endif
-      throw;
+      
+      try
+      {
+         spkWriter =
+            new SpiceOrbitKernelWriter(name, centerName, objNAIFId, centerNAIFId,
+                                       fullPathFileName, interpolationOrder, "J2000");
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (spkWriter, "spkWriter", "EphemerisFile::CreateSpiceKernelWriter()",
+             "spkWriter = new SpiceOrbitKernelWriter()");
+         #endif
+      }
+      catch (BaseException &e)
+      {
+         // Keep from setting a warning
+         e.GetMessageType();
+         
+         #ifdef DEBUG_EPHEMFILE_SPICE
+         MessageInterface::ShowMessage(
+            "  Error creating SpiceOrbitKernelWriter: %s", (e.GetFullMessage()).c_str());
+         #endif
+         throw;
+      }
    }
    
-   #ifdef DEBUG_MEMORY
-   MemoryTracker::Instance()->Add
-      (spkWriter, "spkWriter", "EphemerisFile::CreateSpiceKernelWriter()",
-       "spkWriter = new SpiceOrbitKernelWriter()");
-   #endif
    
    //=======================================================
    #else
@@ -2672,15 +2712,29 @@ void EphemerisFile::RestartInterpolation(const std::string &comments, bool saveE
    
    if (spkWriter != NULL)
    {
-      if (!writeAfterData)
-         WriteComments(comments, ignoreBlankComments);
-      
-      WriteSpkOrbitDataSegment();
-      
-      if (writeAfterData)
-         WriteComments(comments, ignoreBlankComments);
-      
-      currComments = "";
+      Integer mnSz   = spkWriter->GetMinNumberOfStates();
+      Integer numPts = (Integer) a1MjdArray.size();
+      if (!generateInBackground || (numPts >= mnSz))
+      {
+         if (!writeAfterData)
+            WriteComments(comments, ignoreBlankComments);
+
+         WriteSpkOrbitDataSegment();
+
+         if (writeAfterData)
+            WriteComments(comments, ignoreBlankComments);
+
+         insufficientSPKData = false; // there was enough data
+         currComments = "";
+      }
+      else if (generateInBackground && (numPts > 1))
+      {
+         #ifdef DEBUG_EPHEMFILE_SPICE
+         MessageInterface::ShowMessage("NOT WRITING SPK data - only %d points available!!!\n",
+               numPts);
+         #endif
+         insufficientSPKData = true; // data is available, but has not been written yet
+      }
    }
    else if (code500EphemFile != NULL)
    {
@@ -3249,20 +3303,10 @@ void EphemerisFile::FinishUpWritingSPK(bool canFinalize)
             #ifdef DEBUG_EPHEMFILE_SPICE
             MessageInterface::ShowMessage("FinishUpWritingSPK::about to write SPK orbit data segment\n");
             #endif
-//            // Save last data to become first data of next segment - since we may start up
-//            // a new SPK file after this one
-//            A1Mjd *a1mjd  = new A1Mjd(*a1MjdArray.back());
-//            Rvector6 *rv6 = new Rvector6(*stateArray.back());
 
             // Write a segment and delete data array pointers
             WriteSpkOrbitDataSegment();
 
-//            // Add saved data to arrays if we are not done yet
-//            if (!done)
-//            {
-//               a1MjdArray.push_back(a1mjd);
-//               stateArray.push_back(rv6);
-//            }
             insufficientSPKData = false;
             #ifdef DEBUG_EPHEMFILE_SPICE
             MessageInterface::ShowMessage("   DONE writing SPK orbit data segment\n");

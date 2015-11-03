@@ -1,4 +1,4 @@
-# $Id: Vf13OptimizerEnv.mk 532 2010-08-26 16:58:53Z ljun@NDC $
+# $Id: Vf13OptimizerEnv.mk 532 2010-08-26 16:58:53Z  $
 # Environment settings for the Vf13Optimizer plugin; Linux 64-bit version
 
 GMAT_CODE_LOCATION = ../../../../../GmatDevelopment/src

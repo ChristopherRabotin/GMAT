@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan
 // Created: 2014.10.28
@@ -16,6 +26,8 @@
  * responsible for creating, loading, and managing private/hidden EphemerisFile
  * objects associated with its specified Spacecraft object.
  * NOTE: currently, the EphemManager will only handle SPK Orbit files.
+ * NOTE: code to get occultation and contact intervals based on
+ * prototypes written by Joel Parker/GSFC and Yeerang Lim/KAIST
  */
 //------------------------------------------------------------------------------
 #include <stdio.h>
@@ -651,6 +663,45 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
 }
 
 /// @YRL
+//------------------------------------------------------------------------------
+//    bool    GetContactIntervals(const std::string &observerID,
+//                                Real              minElevation,
+//                                const std::string &obsFrameName,
+//                                StringArray       &occultingBodyNames,
+//                                const std::string &abCorrection,
+//                                Real              s,
+//                                Real              e,
+//                                bool              useEntireIntvl,
+//                                bool              useLightTime,
+//                                bool              transmit,
+//                                Real              stepSize,
+//                                Integer           &numIntervals,
+//                                RealArray         &starts,
+//                                RealArray         &ends)
+//------------------------------------------------------------------------------
+/**
+ * This method determines the contact intervals given the input observer,
+ * abberration correction, times, and stepsize.
+ *
+ * @param observerID         NAIF ID of the observer
+ * @param minElevation       minimum elevation of the GS
+ * @param obsFrameName       frame name for the observer
+ * @param occultingBodyNames array of occulting bodies
+ * @param abCorrection       aberration correction
+ * @param s                  start time
+ * @param e                  end time
+ * @param useEntireIntvl the flag to use entire available interval
+ * @param useLightTime       use light time delay flag
+ * @param transmit           transmit or receive
+ * @param stepSize           stepsize
+ * @param numIntervals       number of intervals returned (output)
+ * @param starts             array of start times for the intervals (output)
+ * @param ends               array of end times for the intervals (output)
+ *
+ * Note: initial implementation by Yeerang Lim/KAIST
+ *
+ */
+//------------------------------------------------------------------------------
 bool EphemManager::GetContactIntervals(const std::string &observerID,
                                        Real              minElevation,
                                        const std::string &obsFrameName,

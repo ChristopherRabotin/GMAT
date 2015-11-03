@@ -208,7 +208,7 @@
     regime including enabling new mission types, extending the life of
     existing missions, and enabling new science observations. GMAT has
     supported 8 NASA missions and 8 NASA proposal efforts. The system has
-    experienced broad application and adoption around the world. To date GMAT
+    experienced broad application and adoption around the world. To date, GMAT
     has been used by over 30 organizations, with 15 universities and 12
     commercial firms publishing results in the open literature. </para>
   </section>
@@ -223,13 +223,14 @@
     <title>Platform Support</title>
 
     <para>GMAT has been rigorously tested on the Windows 7 platform and we
-    perform nightly regression tests running almost 12,000 test cases for the
-    script engine and over 4000 test cases for the GUI interface.</para>
+    perform nightly regression tests running almost 13,000 test cases for the
+    system core and over 4000 test cases for the GUI interface.</para>
 
     <para>For release R2015a, we have only addressed issues on Mac and Linux
     that also occur on the Windows 7 platform. We are currently addressing the
-    few remaining critical issues on Mac and Linux and will release console
-    builds on those platforms soon after the Windows release of R2015a.</para>
+    few remaining critical issues on Mac and Linux and will release production
+    quality console builds on those platforms soon after the Windows release
+    of R2015a.</para>
   </section>
 
   <section>
@@ -252,7 +253,7 @@
       </listitem>
 
       <listitem>
-        <para>a.i. solutions (testing)</para>
+        <para>Omitron, Inc (testing)</para>
       </listitem>
 
       <listitem>

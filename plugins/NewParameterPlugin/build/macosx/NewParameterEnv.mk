@@ -1,4 +1,4 @@
-# $Id: Vf13OptimizerEnv.mk 532 2010-08-26 16:58:53Z ljun@NDC $
+# $Id: Vf13OptimizerEnv.mk 532 2010-08-26 16:58:53Z  $
 # Architecture flags
 
 GMAT_BIN_DIR = bin

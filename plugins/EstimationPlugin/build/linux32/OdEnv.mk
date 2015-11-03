@@ -1,4 +1,4 @@
-# $Id: OdEnv.mk 1337 2011-03-30 17:02:16Z djconway@NDC $
+# $Id: OdEnv.mk 1337 2011-03-30 17:02:16Z $
 # Environment settings for the estimation plugin
 GMAT_Code_Location = ../../../GMAT_Development/src
 GMAT_Bin_Location = ../../../GMAT_Development/application/bin

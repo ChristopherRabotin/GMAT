@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -1740,14 +1750,14 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
    
    std::string objMapName = mapName;
    GmatBase *obj = NULL;
-   GmatBase *paramOwner = NULL;
    std::string objName;
    std::string objTypeName = "NULL";
    std::string isGlobal;
    std::string isLocal;
+   GmatBase *paramOwner = NULL;
+   bool isParameter = false;
    std::string paramOwnerType;
    std::string paramOwnerName;
-   bool isParameter = false;
    
    if (objMapName == "")
       objMapName = "object map";
@@ -1759,10 +1769,13 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
    {
       obj = i->second;
       objName = i->first;
-      paramOwner = NULL;
-      isParameter = false;
+      objTypeName = "";
       isGlobal = "No";
       isLocal = "No";
+      paramOwner = NULL;
+      isParameter = false;
+      paramOwnerType = "";
+      paramOwnerName = "";
       
       if (obj)
       {
@@ -1800,8 +1813,6 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
 //------------------------------------------------------------------------------
 void Function::ShowObjects(const std::string &title)
 {
-   #ifdef DEBUG_OBJECT_MAP
-   
    MessageInterface::ShowMessage("%s\n", title.c_str());
    MessageInterface::ShowMessage("this=<%p>, functionName='%s'\n", this, functionName.c_str());
    MessageInterface::ShowMessage("========================================\n");
@@ -1833,7 +1844,5 @@ void Function::ShowObjects(const std::string &title)
    ShowObjectMap(objectStore, "ShowObjects()", "objectStore");
    ShowObjectMap(globalObjectStore, "ShowObjects()", "globalObjectStore");
    MessageInterface::ShowMessage("========================================\n");
-
-   #endif
 }
 

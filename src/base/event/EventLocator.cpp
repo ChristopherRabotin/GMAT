@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under NASA Prime
 // Contract NNG10CP02C, Task Order 28
@@ -47,6 +57,7 @@
 //#define DEBUG_EVENTLOCATOR_SET
 //#define DEBUG_EVENTLOCATOR_GET
 //#define DEBUG_EVENTLOCATOR_COPY
+//#define DEBUG_EVENT_EPOCH_STRING
 
 #ifdef DEBUG_DUMPEVENTDATA
    #include <fstream>
@@ -99,6 +110,10 @@ const std::string EventLocator::RUN_MODES[3] =
 
 const Integer EventLocator::numModes = 3;
 
+const std::string EventLocator::defaultFormat        = "TAIModJulian";
+const Real        EventLocator::defaultInitialEpoch  = 21545;
+const Real        EventLocator::defaultFinalEpoch    = 21545.138;
+
 // Used for light-time calculations
 const Real EventLocator::STEP_MULTIPLE = 0.5;
 
@@ -130,11 +145,11 @@ EventLocator::EventLocator(const std::string &typeStr,
    useEntireInterval       (true),
    appendReport            (false),
    epochFormat             ("TAIModJulian"),
-   initialEpoch            ("21545"),
-   finalEpoch              ("21545.138"),
+   initialEpoch            ("21545"),        // MUST match initialEp
+   finalEpoch              ("21545.138"),    // MUST match finalEp
    stepSize                (10.0),
-   initialEp               (21545),
-   finalEp                 (21545.138),
+   initialEp               (defaultInitialEpoch),
+   finalEp                 (defaultFinalEpoch),
    fromEpoch               (0.0),
    toEpoch                 (0.0),
    findStart               (0.0),
@@ -1283,6 +1298,9 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
    MessageInterface::ShowMessage
       ("EventLocator::SetEpoch() Setting epoch (A1Mjd) to %12.15f\n",
       epochAsReal);
+   MessageInterface::ShowMessage
+      ("EventLocator::SetEpoch() Setting epoch (as string) to %s\n",
+            epochString.c_str());
    #endif
 }
 
@@ -1293,6 +1311,12 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
 std::string EventLocator::GetEpochString(const std::string &whichOne,
                                          const std::string &outFormat) const
 {
+#ifdef DEBUG_EVENT_EPOCH_STRING
+   MessageInterface::ShowMessage("In GetEpochString, initialEpoch = %s\n",
+         initialEpoch.c_str());
+   MessageInterface::ShowMessage("In GetEpochString, finalEpoch = %s\n",
+         finalEpoch.c_str());
+#endif
    Real outMjd = -999.999;
    std::string outStr;
    std::string outputFormat = outFormat;
@@ -1300,13 +1324,19 @@ std::string EventLocator::GetEpochString(const std::string &whichOne,
 
    if (whichOne == "INITIAL")
    {
-      TimeConverterUtil::Convert("A1ModJulian", initialEp, "",
-                                 outputFormat, outMjd, outStr);
+      if ((outFormat == defaultFormat) && GmatMathUtil::IsEqual(initialEp, defaultInitialEpoch))
+         outStr =  initialEpoch;
+      else
+         TimeConverterUtil::Convert("A1ModJulian", initialEp, "",
+                                     outputFormat, outMjd, outStr);
    }
    else if (whichOne == "FINAL")
    {
-      TimeConverterUtil::Convert("A1ModJulian", finalEp, "",
-                                 outputFormat, outMjd, outStr);
+      if ((outFormat == defaultFormat) && GmatMathUtil::IsEqual(finalEp, defaultFinalEpoch))
+         outStr =  finalEpoch;
+      else
+         TimeConverterUtil::Convert("A1ModJulian", finalEp, "",
+                                     outputFormat, outMjd, outStr);
    }
    else
       return "";

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -585,6 +595,33 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    entries[6].Set(wxACCEL_CTRL, (int) 'H', MENU_EDIT_FIND);
    wxAcceleratorTable accel(7, entries);
    this->SetAcceleratorTable(accel);
+
+   Integer osMajor = 0;
+   Integer osMinor = 0;
+   wxString osDescription = wxGetOsDescription();
+   wxOperatingSystemId osId = wxGetOsVersion(&osMajor, &osMinor);
+   
+#ifdef DEBUG_OS_DETECTION
+   MessageInterface::ShowMessage("OS: %s\n", std::string(osDescription));
+#endif
+   int osNum = osMajor * 10 + osMinor;
+
+   // Flag to use "delete child" rather than child.Destroy()
+   useChildDelete = true;
+
+   if (osDescription.Find("Windows") == wxNOT_FOUND)
+      useChildDelete = false;
+   else if (osDescription.Find("Windows 7") == wxNOT_FOUND &&
+      osDescription.Find("Server") == wxNOT_FOUND)
+   {
+      if (osNum > 61)
+         useChildDelete = false;
+   }
+
+#ifdef DEBUG_OS_DETECTION
+   MessageInterface::ShowMessage("OS info: %d.%d ==> %d gives id %d; %sWin 8 or higher\n", 
+      osMajor, osMinor, osNum, osId, (!useChildDelete ? "Is " : "Is not "));
+#endif
 
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() this=<%p> exiting\n", this);
@@ -1519,12 +1556,16 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          // MdiChildViewFrame::OnPlotClose() and MdiChildTsFrame::OnPlotClose()
          // sets deleteChild to false
 
-         // Here we call Destroy() rather than deleting the window in order to 
+         // Here we call Destroy rather than deleting the window in order to 
          // avoid race conditions that result in the window destruction before 
          // all pending messages have been processed.
          if (deleteChild)
-            child->Destroy();
-         //delete child;
+         {
+            if (useChildDelete)
+               delete child;
+            else
+               child->Destroy();
+         }
 
          delete node;
          childRemoved = true;
