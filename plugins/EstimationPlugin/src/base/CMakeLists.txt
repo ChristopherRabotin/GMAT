@@ -64,6 +64,7 @@ SET(PLUGIN_SRCS
     adapter/PointRangeRateAdapterKps.cpp
     adapter/RangeAdapterKm.cpp
     adapter/RangeRateAdapterKps.cpp
+    adapter/TDRSDopplerAdapter.cpp
     adapter/TrackingDataAdapter.cpp
     command/RunEstimator.cpp
     command/RunSimulator.cpp
