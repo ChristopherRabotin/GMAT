@@ -2851,7 +2851,7 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
       Integer stmSize = stmRowCount * stmRowCount;
       Real *aTilde;
       aTilde = new Real[stmSize];
-
+//MessageInterface::ShowMessage("STM_Size = %d...", stmSize);
       for (Integer m = 0; m < stmDim; ++m)
          aTilde[m] = deriv[i6+m];
 
@@ -2880,7 +2880,9 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
          }
       }
 
-	  delete [] aTilde;
+//      MessageInterface::ShowMessage("   Deleting...\n");
+      delete [] aTilde;
+//      MessageInterface::ShowMessage("   Deleted!\n");
    }
    return retval;
 }

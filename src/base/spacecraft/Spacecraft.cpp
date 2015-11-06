@@ -150,6 +150,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
       Gmat::STRINGARRAY_TYPE, // SolveFors                  // made changes by TUAN NGUYEN
+      Gmat::STRINGARRAY_TYPE, // StmElementNames
       Gmat::REAL_TYPE,        // CD_EPSILON
       Gmat::REAL_TYPE,        // CR_EPSILON
       Gmat::FILENAME_TYPE,    // Model File
@@ -212,6 +213,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "MassFlow",
       "AddHardware",
       "SolveFors",                             // made changes by TUAN NGUYEN      // move solve-for parameter from batch estimator to solve-for object 
+      "StmElementNames",
       "Cd_Epsilon",
       "Cr_Epsilon",
       "ModelFile",
@@ -648,6 +650,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    ephemMgr             (NULL),
    includeCartesianState(a.includeCartesianState),
    solveforNames        (a.solveforNames),                        // made changes by TUAN NGUYEN
+   stmElementNames      (a.stmElementNames),
    cdEpsilon            (a.cdEpsilon),
    crEpsilon            (a.crEpsilon),
    constrainCd          (a.constrainCd),
@@ -849,6 +852,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    includeCartesianState = a.includeCartesianState;
 
    solveforNames      = a.solveforNames;                                 // made changes by TUAN NGUYEN
+   stmElementNames    = a.stmElementNames;
 
    cdEpsilon          = a.cdEpsilon;
    crEpsilon          = a.crEpsilon;
@@ -2554,7 +2558,7 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       return true;
    }
 
-   if ((id == ORBIT_STM) || (id == ORBIT_A_MATRIX))
+   if ((id == ORBIT_STM) || (id == ORBIT_A_MATRIX) || (id == STMELEMENTS))
    {
       return true;
    }
@@ -3646,6 +3650,12 @@ std::string Spacecraft::GetStringParameter(const Integer id,
                return "";                                                      // made changes by TUAN NGUYEN
          }                                                                     // made changes by TUAN NGUYEN
 
+      case STMELEMENTS:
+         if ((index >= 0) && (index < (Integer)stmElementNames.size()))
+            return stmElementNames[index];
+         else
+            return "";
+
       default:
          break;
 
@@ -3691,6 +3701,8 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
       return hardwareNames;
    if (id == SOLVEFORS)                                         // made changes by TUAN NGUYEN
       return solveforNames;                                     // made changes by TUAN NGUYEN
+   if (id == STMELEMENTS)
+      return stmElementNames;
    if (id == FUEL_TANK_ID)
       return tankNames;
    if (id == THRUSTER_ID)
@@ -3831,18 +3843,35 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
-   if (id == SOLVEFORS)                                                       // made changes by TUAN NGUYEN
-   {                                                                          // made changes by TUAN NGUYEN
-      if ((value.substr(0,2) == "{}"))                                        // made changes by TUAN NGUYEN
-      {                                                                       // made changes by TUAN NGUYEN
-         solveforNames.clear();                                               // made changes by TUAN NGUYEN
-         return true;                                                         // made changes by TUAN NGUYEN
-      }                                                                       // made changes by TUAN NGUYEN
+   if ((id == SOLVEFORS) || (id == STMELEMENTS))
+   {
+      if ((id == SOLVEFORS) && (value.substr(0,2) == "{}"))
+      {
+         solveforNames.clear();
+         return true;
+      }
 
-      // Only add the solvefor parameter if it is not in the list already
-      if (find(solveforNames.begin(), solveforNames.end(), value) ==
-          solveforNames.end())
-         solveforNames.push_back(value);
+      if (id == SOLVEFORS)
+         // Only add the solvefor parameter if it is not in the list already
+         if (find(solveforNames.begin(), solveforNames.end(), value) ==
+               solveforNames.end())
+            solveforNames.push_back(value);
+
+      // Make sure the solve-for list is in the STM
+      for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
+      {
+         if (find(stmElementNames.begin(), stmElementNames.end(), value) ==
+               stmElementNames.end())
+            stmElementNames.push_back(value);
+      }
+
+      // Add extras
+      if (id == STMELEMENTS)
+      {
+         if (find(stmElementNames.begin(), stmElementNames.end(), value) ==
+               stmElementNames.end())
+            stmElementNames.push_back(value);
+      }
 
       // Reset length and indices
       Integer length = 6;
@@ -3855,20 +3884,20 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       stmIndices.push_back(GetParameterID("CartesianVY"));
       stmIndices.push_back(GetParameterID("CartesianVZ"));
 
-      for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
+      for (UnsignedInt i = 0; i < stmElementNames.size(); ++i)
       {
          // Cartesian state handled above
-         if (solveforNames[i] != "CartesianState")
+         if (stmElementNames[i] != "CartesianState")
          {
-            length += GetEstimationParameterSize(GetParameterID(solveforNames[i]));
+            length += GetEstimationParameterSize(GetParameterID(stmElementNames[i]));
             for (Integer j = 0; j < GetEstimationParameterSize(
-                  GetParameterID(solveforNames[i])); ++j)
+                  GetParameterID(stmElementNames[i])); ++j)
             {
-               stmIndices.push_back(GetParameterID(solveforNames[i]));
+               stmIndices.push_back(GetParameterID(stmElementNames[i]));
                #ifdef DEBUG_SPACECRAFT_STM
                   MessageInterface::ShowMessage("Looking up %s --> %d\n",
-                        solveforNames[i].c_str(),
-                        GetParameterID(solveforNames[i]));
+                        stmElementNames[i].c_str(),
+                        GetParameterID(stmElementNames[i]));
                #endif
             }
          }
@@ -3877,9 +3906,9 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       #ifdef DEBUG_SPACECRAFT_STM
          MessageInterface::ShowMessage("Setting %s: STM has %d rows and "
                "columns\n", value.c_str(), length);
-         for (UnsignedInt i = 0; i < solveforNames.size(); ++i)
+         for (UnsignedInt i = 0; i < stmElementNames.size(); ++i)
             MessageInterface::ShowMessage("   %d:  %s\n", i,
-                  solveforNames[i].c_str());
+                  stmElementNames[i].c_str());
       #endif
 
       SetIntegerParameter(FULL_STM_ROWCOUNT, length);
@@ -4175,6 +4204,13 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;                                                                              // made changes by TUAN NGUYEN
       }                                                                                            // made changes by TUAN NGUYEN
+   case STMELEMENTS:
+      if (index < stmElementNames.size())
+         stmElementNames[index] = value;
+      else
+         if (find(stmElementNames.begin(), stmElementNames.end(), value) == stmElementNames.end())
+            stmElementNames.push_back(value);
+      return true;
    case FUEL_TANK_ID:
       {
          if (index < (Integer)tankNames.size())
@@ -4780,17 +4816,6 @@ bool Spacecraft::TakeAction(const std::string &action,
             fullSTM(i,j) = fullSTM(j,i) = 0.0;
          }
       }
-
-//      orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
-//      orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
-//
-//      orbitSTM(0,1)=orbitSTM(0,2)=orbitSTM(0,3)=orbitSTM(0,4)=orbitSTM(0,5)=
-//      orbitSTM(1,0)=orbitSTM(1,2)=orbitSTM(1,3)=orbitSTM(1,4)=orbitSTM(1,5)=
-//      orbitSTM(2,0)=orbitSTM(2,1)=orbitSTM(2,3)=orbitSTM(2,4)=orbitSTM(2,5)=
-//      orbitSTM(3,0)=orbitSTM(3,1)=orbitSTM(3,2)=orbitSTM(3,4)=orbitSTM(3,5)=
-//      orbitSTM(4,0)=orbitSTM(4,1)=orbitSTM(4,2)=orbitSTM(4,3)=orbitSTM(4,5)=
-//      orbitSTM(5,0)=orbitSTM(5,1)=orbitSTM(5,2)=orbitSTM(5,3)=orbitSTM(5,4)
-//            = 0.0;
    }
 
    if (action == "ResetAMatrix")
@@ -4803,20 +4828,6 @@ bool Spacecraft::TakeAction(const std::string &action,
             fullAMatrix(i,j) = fullAMatrix(j,i) = 0.0;
          }
       }
-
-//      orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
-//      orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
-//
-//      orbitAMatrix(0,1) = orbitAMatrix(0,2) = orbitAMatrix(0,3) =
-//      orbitAMatrix(0,4) = orbitAMatrix(0,5) = orbitAMatrix(1,0) =
-//      orbitAMatrix(1,2) = orbitAMatrix(1,3) = orbitAMatrix(1,4) =
-//      orbitAMatrix(1,5) = orbitAMatrix(2,0) = orbitAMatrix(2,1) =
-//      orbitAMatrix(2,3) = orbitAMatrix(2,4) = orbitAMatrix(2,5) =
-//      orbitAMatrix(3,0) = orbitAMatrix(3,1) = orbitAMatrix(3,2) =
-//      orbitAMatrix(3,4) = orbitAMatrix(3,5) = orbitAMatrix(4,0) =
-//      orbitAMatrix(4,1) = orbitAMatrix(4,2) = orbitAMatrix(4,3) =
-//      orbitAMatrix(4,5) = orbitAMatrix(5,0) = orbitAMatrix(5,1) =
-//      orbitAMatrix(5,2) = orbitAMatrix(5,3) = orbitAMatrix(5,4) = 0.0;
    }
 
    return SpaceObject::TakeAction(action, actionData);
