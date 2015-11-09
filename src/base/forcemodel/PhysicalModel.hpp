@@ -156,6 +156,8 @@ public:
    virtual void SetState(const Real * st);
    virtual void SetState(GmatState * st);
 
+   virtual CelestialBody* GetForceOrigin();                    // made changes by TUAN NGUYEN
+
    Real GetErrorThreshold() const;
    bool SetErrorThreshold(const Real thold = 0.10);
 

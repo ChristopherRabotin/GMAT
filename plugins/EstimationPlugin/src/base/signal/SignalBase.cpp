@@ -1316,7 +1316,12 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
                   theData.rPropagator->GetPropagator()->AccessOutState();
 
             // set value for state and STM
+            // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                           // made changes by TUAN NGUYEN
             state.Set(pstate);
+            SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.rNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // made changes by TUAN NGUYEN  fix bug GMT-5364
+            SpacePoint* forcemodelOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
+            state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.rPrecTime));                        // made changes by TUAN NGUYEN  fix bug GMT-5364
+
             for (UnsignedInt i = 0; i < 6; ++i)
                for (UnsignedInt j = 0; j < 6; ++j)
                   stm(i,j) = pstate[6 + i*stmRowCount + j];
@@ -1365,7 +1370,12 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
                   theData.tPropagator->GetPropagator()->AccessOutState();
 
             // set value for state and STM
+            // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                           // made changes by TUAN NGUYEN
             state.Set(pstate);
+            SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // made changes by TUAN NGUYEN  fix bug GMT-5364
+            SpacePoint* forcemodelOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
+            state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.tPrecTime));                        // made changes by TUAN NGUYEN  fix bug GMT-5364
+
             for (UnsignedInt i = 0; i < 6; ++i)
                for (UnsignedInt j = 0; j < 6; ++j)
                   stm(i,j) = pstate[6 + i*stmRowCount + j];
@@ -1482,7 +1492,21 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
 
       /// @todo Adjust the following code for multiple spacecraft
 
+      // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                              // made changes by TUAN NGUYEN
       state.Set(outState);
+      if (forTransmitter)                                                                                                                                            // made changes by TUAN NGUYEN  fix bug GMT-5364
+      {                                                                                                                                                              // made changes by TUAN NGUYEN  fix bug GMT-5364
+         SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // made changes by TUAN NGUYEN  fix bug GMT-5364
+         SpacePoint* forcemodelOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
+         state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.tPrecTime));                        // made changes by TUAN NGUYEN  fix bug GMT-5364
+      }                                                                                                                                                              // made changes by TUAN NGUYEN  fix bug GMT-5364
+      else                                                                                                                                                           // made changes by TUAN NGUYEN  fix bug GMT-5364
+      {                                                                                                                                                              // made changes by TUAN NGUYEN  fix bug GMT-5364
+         SpacePoint* spacecraftOrigin = ((Spacecraft*)(theData.rNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // made changes by TUAN NGUYEN  fix bug GMT-5364
+         SpacePoint* forcemodelOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
+         state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.rPrecTime));                        // made changes by TUAN NGUYEN  fix bug GMT-5364
+      }                                                                                                                                                              // made changes by TUAN NGUYEN  fix bug GMT-5364
+
       for (UnsignedInt i = 0; i < 6; ++i)
          for (UnsignedInt j = 0; j < 6; ++j)
             stm(i,j) = outState[6 + i*stmRowCount + j];

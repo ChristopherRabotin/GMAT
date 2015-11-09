@@ -1329,11 +1329,18 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
             sdObj->tPrecTime = sdObj->rPrecTime = forEpoch;
          if (sdObj->tNode->IsOfType(Gmat::SPACECRAFT))
          {
+            // this spacecraft's state presents in MJ2000Eq with origin at ForceModel.CentralBody
             const Real* propState =
                propMap[sdObj->tNode]->GetPropagator()->AccessOutState();
-            Rvector6 state(propState);
+            Rvector6 state(propState);        // state of spacecrat presenting in MJ2000Eq coordinate system with origin at ForceModel.CentralBody
+
+            // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // made changes by TUAN NGUYEN  fix bug GMT-5364
+            SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // made changes by TUAN NGUYEN  fix bug GMT-5364
+            SpacePoint* forcemodelOrigin = propMap[sdObj->tNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
+            state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->tPrecTime));                         // made changes by TUAN NGUYEN  fix bug GMT-5364
             sdObj->tLoc = state.GetR();
             sdObj->tVel = state.GetV();
+
             // transmit participant STM at measurement time tm
             for (UnsignedInt ii = 0; ii < 6; ++ii)
                for (UnsignedInt jj = 0; jj < 6; ++jj)
@@ -1345,9 +1352,15 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
 
          if (sdObj->rNode->IsOfType(Gmat::SPACECRAFT))
          {
+            // this spacecraft's state presents in MJ2000Eq with origin at ForceModel.CentralBody
             const Real* propState =
                propMap[sdObj->rNode]->GetPropagator()->AccessOutState();
             Rvector6 state(propState);
+
+            // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // made changes by TUAN NGUYEN  fix bug GMT-5364
+            SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->rNode))->GetOrigin();                 // the origin of the receive spacecraft's cooridinate system    // made changes by TUAN NGUYEN  fix bug GMT-5364
+            SpacePoint* forcemodelOrigin = propMap[sdObj->rNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
+            state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->rPrecTime));                         // made changes by TUAN NGUYEN  fix bug GMT-5364
             sdObj->rLoc = state.GetR();
             sdObj->rVel = state.GetV();
 
