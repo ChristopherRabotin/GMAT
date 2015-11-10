@@ -5,9 +5,19 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy Shoan
 // Created: 2015.04.01
@@ -251,9 +261,6 @@ void EventLocatorPanel::Create()
       new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
                          wxSize(buttonWidth, -1));
 
-   writeReportCheckBox = new wxCheckBox(this, ID_CHECKBOX, wxT("Write Report"),
-                                  wxDefaultPosition, wxDefaultSize, 0);
-
    runModeTxt = new wxStaticText( this, ID_TEXT,
          ""GUI_ACCEL_KEY"Run Mode", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
 
@@ -262,6 +269,8 @@ void EventLocatorPanel::Create()
             emptyList, wxCB_DROPDOWN | wxCB_READONLY );
    runModeComboBox->SetToolTip(pConfig->Read(_T("RunMode")));
 
+   writeReportCheckBox = new wxCheckBox(this, ID_CHECKBOX, wxT("Write Report"),
+                                  wxDefaultPosition, wxDefaultSize, 0);
 
    #ifdef DEBUG_EVENTPANEL_CREATE
       MessageInterface::ShowMessage("EventLocatorPanel::Create() report widgets created ...\n");
@@ -766,6 +775,7 @@ void EventLocatorPanel::LoadData()
    else
    {
       stellarAberrationCheckBox->Disable();
+      stellarAberrationCheckBox->SetValue(false);
       #ifdef DEBUG_EVENTPANEL_LOAD
          MessageInterface::ShowMessage
             ("  stellar-aberration-related ones disabled\n");
@@ -1070,17 +1080,28 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
             forObject->SetBooleanParameter(paramID, false);
          isLightTimeDelayChanged = false;
       }
+      // Stellar aberration could be set to false if the light time delay is turned off
+      if (isStellarAberrationChanged)
+      {
+         paramID = forObject->GetParameterID("UseStellarAberration");
+         if (stellarAberrationCheckBox->IsChecked())
+            forObject->SetBooleanParameter(paramID, true);
+         else
+            forObject->SetBooleanParameter(paramID, false);
+         isStellarAberrationChanged = false;
+      }
+
       if (lightTimeDelayCheckBox->IsChecked())
       {
-         if (isStellarAberrationChanged)
-         {
-            paramID = forObject->GetParameterID("UseStellarAberration");
-            if (stellarAberrationCheckBox->IsChecked())
-               forObject->SetBooleanParameter(paramID, true);
-            else
-               forObject->SetBooleanParameter(paramID, false);
-            isStellarAberrationChanged = false;
-         }
+//         if (isStellarAberrationChanged)
+//         {
+//            paramID = forObject->GetParameterID("UseStellarAberration");
+//            if (stellarAberrationCheckBox->IsChecked())
+//               forObject->SetBooleanParameter(paramID, true);
+//            else
+//               forObject->SetBooleanParameter(paramID, false);
+//            isStellarAberrationChanged = false;
+//         }
 
          // light time direction
          // SC/Target
@@ -1336,6 +1357,8 @@ void EventLocatorPanel::OnCheckBoxChange(wxCommandEvent& event)
       else
       {
          stellarAberrationCheckBox->Disable();
+         stellarAberrationCheckBox->SetValue(false);
+         isStellarAberrationChanged = true;
          if (!isEclipse)
          {
 //            lightTimeDirectionTxt->Disable();

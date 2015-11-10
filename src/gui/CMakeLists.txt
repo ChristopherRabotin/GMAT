@@ -95,6 +95,7 @@ SET(GUI_SRCS
     app/GmatMenuBar.cpp
     app/GmatToolBar.cpp
     app/GuiInterpreter.cpp
+    app/GuiListenerManager.cpp
     app/GuiMessageReceiver.cpp
     app/GmatNotebook.cpp
     app/GmatServer.cpp
@@ -178,7 +179,10 @@ SET(GUI_SRCS
     rendering/ModelManager.cpp
     rendering/ModelObject.cpp
     rendering/Rendering.cpp
-    rendering/ThreeDSLoader.cpp
+    rendering/Structure.cpp
+    rendering/StructureReader.cpp
+    rendering/StructureReader3ds.cpp
+    rendering/SurfaceBase.cpp
     solarsys/BarycenterPanel.cpp
     solarsys/CelesBodySelectDialog.cpp
     solarsys/CelestialBodyOrbitPanel.cpp
@@ -215,6 +219,7 @@ SET(GUI_SRCS
     subscriber/MdiChildViewFrame.cpp
     subscriber/MdiChildTsFrame.cpp
     subscriber/MdiGlPlotData.cpp
+    subscriber/MdiTableViewFrame.cpp
     subscriber/MdiTsPlotData.cpp
     subscriber/OrbitViewCanvas.cpp
     subscriber/OrbitViewPanel.cpp
@@ -317,9 +322,6 @@ if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
     )
 
-  # Create PkgInfo file
-  SET(CMD echo -n APPL????)
-  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMD} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/${GMAT_MAC_APPBUNDLE_PATH}\" OUTPUT_FILE PkgInfo)")
 endif()
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux

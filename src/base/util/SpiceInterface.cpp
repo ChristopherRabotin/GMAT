@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // FDSS Task order 28.
@@ -88,7 +98,7 @@ SpiceInterface::VALID_FRAMES[12] =
    "NONE",   // TBD
 };
 
-const Integer SpiceInterface::MAX_SHORT_MESSAGE         = 320;
+const Integer SpiceInterface::MAX_SHORT_MESSAGE         = MAX_SHORT_MESSAGE_VALUE;
 const Integer SpiceInterface::MAX_EXPLAIN_MESSAGE       = 320;
 const Integer SpiceInterface::MAX_LONG_MESSAGE          = MAX_LONG_MESSAGE_VALUE;
 const Integer SpiceInterface::MAX_CHAR_COMMENT          = 4000;
@@ -267,7 +277,13 @@ SpiceInterface& SpiceInterface::operator=(const SpiceInterface &copy)
 SpiceInterface::~SpiceInterface()
 {
    numInstances--;
-   if (numInstances <= 0) UnloadAllKernels();
+   if (numInstances <= 0)
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("UNLOADING ALL Kernels!\n");
+      #endif
+      UnloadAllKernels();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -360,6 +376,11 @@ bool SpiceInterface::LoadKernel(const std::string &fileName)
                fileName.c_str(), fName.c_str());
       }
    #endif
+
+   // Write the kernel name to the log
+   MessageInterface::LogMessage
+      ("Kernel %s has been loaded.\n", fileName.c_str());
+
    // Add the pair to the map of kernels
    loadedKernels.insert(std::make_pair(fileName, fName));
    
@@ -552,10 +573,13 @@ bool SpiceInterface::IsLoaded(const std::string &fileName)
    std::map<std::string, std::string>::iterator ii;
    for (ii = loadedKernels.begin(); ii != loadedKernels.end(); ++ii)
    {
-      #ifdef DEBUG_SPK_ISLOADED
-          MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
-      #endif
-      if ((*ii).first == fileName) return true;
+      if ((*ii).first == fileName)
+      {
+         #ifdef DEBUG_SPK_ISLOADED
+             MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
+         #endif
+         return true;
+      }
    }
    #ifdef DEBUG_SPK_ISLOADED
       MessageInterface::ShowMessage("IsLoaded::kernel name %s NOT ALREADY LOADED\n", fileName.c_str());
@@ -613,11 +637,20 @@ StringArray SpiceInterface::GetValidFrames()
 //------------------------------------------------------------------------------
 void SpiceInterface::SetLeapSecondKernel(const std::string &lsk)
 {
-   #ifdef DEBUG_SPK_LOADING
-      MessageInterface::ShowMessage("NOW loading LSK kernel %s\n", lsk.c_str());
-   #endif
    lsKernel = lsk;
-   if (!IsLoaded(lsKernel))   LoadKernel(lsKernel);
+   if (!IsLoaded(lsKernel))
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("SpiceInterface::SetLeapSecondKernel NOW loading LSK kernel %s\n", lsk.c_str());
+      #endif
+      LoadKernel(lsKernel);
+   }
+   else
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("SpiceInterface::SetLeapSecondKernel LSK kernel %s was already loaded ...\n", lsk.c_str());
+      #endif
+   }
 }
 
 //------------------------------------------------------------------------------

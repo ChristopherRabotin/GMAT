@@ -27,15 +27,14 @@ does not require administrative privileges, and will install by
 default to your personal %LOCALAPPDATA% folder. This can be customized
 during installation.
 
-GMAT is distributed in source form as well, and can be compiled on the
-Mac and on Linux. It has not, however, been rigorously tested on these
-platforms.
+GMAT is distributed in source form as well, and can be compiled on OS X and
+Linux. It has not, however, been rigorously tested on these platforms.
 
 -----------------------------------------------------------------------
                            Running GMAT
 -----------------------------------------------------------------------
 On Windows, click Start, and then point to All Programs. Point to GMAT,
-GMAT R2014a, and then click GMAT R2014a. If you are using the zip-file bundle,
+GMAT R2015a, and then click GMAT R2015a. If you are using the zip-file bundle,
 double-click the bin\GMAT.exe application.
 
 -----------------------------------------------------------------------
@@ -81,11 +80,11 @@ release are of alpha quality, and are included here as a preview only.
                       Credits and Acknowledgments
 -----------------------------------------------------------------------
 GMAT uses:
-- wxWidgets 2.8.12 (http://www.wxwidgets.org/) 
+- wxWidgets 3.0.2 (http://www.wxwidgets.org/) 
 - TSPlot (http://sourceforge.net/projects/tsplot/)
 - SPICE (http://naif.jpl.nasa.gov/naif/toolkit.html)
 - SOFA (http://www.iausofa.org/)
-
+- Apache Xerces (http://xerces.apache.org)
 
 Planetary images are courtesy of: 
 JPL/Caltech/USGS (http://maps.jpl.nasa.gov/)
@@ -120,24 +119,27 @@ The following plugins are included and have the listed status:
 Official plugins:
 libDataInterface
 libEphemPropagator
+libEventLocator
 libFminconOptimizer
 libFormation
+libGmatFunction
 libMatlabInterface
+libNewParameters
 libProductionPropagators
+libPythonInterface
 libStation
 
 Alpha plugins (disabled by default):
 libCInterface
-libEventLocator
 libExtraPropagators
 libGeometricMeasurements
 libGmatEstimation
-libGmatFunction
+libPolyhedronGravity
 libSaveCommand
 
 Internal-only plugins:
 libMarsGRAM
 libMsise86
-libNewParameters
 libNRLMsise00
+libSNOptimizer
 libVF13Optimizer

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan
 // Created: 2014.10.28
@@ -66,7 +76,7 @@ public:
    virtual bool         ProvideEphemerisData();
    /// Stop recording - load the last ephem data - this must be called
    /// at the end of the run for the last-written SPK to be loaded correctly
-   virtual void         StopRecording();
+   virtual void         StopRecording(bool done = true);
 
    /// method to determine occultation intervals
    bool                 GetOccultationIntervals(const std::string &occType,
@@ -101,11 +111,13 @@ public:
                                             RealArray         &starts,
                                             RealArray         &ends);
 
-   bool                 GetCoverageStartAndStop(Real s, Real e,
-                                                bool useEntireIntvl,
-                                                bool includeAll,
-                                                Real &intvlStart,
-                                                Real &intvlStop);
+   bool                 GetCoverage(Real s, Real e,
+                                    bool useEntireIntvl,
+                                    bool includeAll,
+                                    Real &intvlStart,
+                                    Real &intvlStop,
+                                    Real &cvrStart,
+                                    Real &cvrStop);
 
    /// Set reference objects
    virtual void         SetObject(GmatBase *obj);
@@ -150,6 +162,10 @@ protected:
    Real                 intStart;
    /// stop time of the observation window
    Real                 intStop;
+   /// start time of the actual coverage window (coverage of loaded SPKs)
+   Real                 coverStart;
+   /// stop time of the actual coverage window (coverage of loaded SPKs)
+   Real                 coverStop;
    #ifdef __USE_SPICE__
       /// need a SpiceInterface to load and unload kernels
       SpiceInterface       *spice;
@@ -159,13 +175,14 @@ protected:
       /// object
       SpiceCell            *window;
       /// Method to determine the coverage window(s) for the spacecraft
-      void                 GetCoverageWindow(SpiceCell* w, Real s, Real e,
-                                             bool useEntireIntvl,
-                                             bool includeAll = true,
-                                             bool lightTimeCorrection = false,
-                                             bool transmit = false,
-                                             Real stepSize = 10.0,
-                                             Integer obsID = -999);
+      void                 GetRequiredCoverageWindow(SpiceCell* w, Real s, Real e,
+                                                     bool useEntireIntvl,
+                                                     const std::string &abCorr     = "NONE",
+                                                     bool includeAll          = true,
+                                                     bool lightTimeCorrection = false,
+                                                     bool transmit = false,
+                                                     Real stepSize = 10.0,
+                                                     Integer obsID = -999);
 
    #endif
 

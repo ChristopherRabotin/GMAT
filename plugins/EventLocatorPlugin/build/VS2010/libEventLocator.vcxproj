@@ -257,17 +257,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\base\event\Antumbra.hpp" />
-    <ClInclude Include="..\..\src\base\event\Contact.hpp" />
     <ClInclude Include="..\..\src\base\event\ContactEvent.hpp" />
     <ClInclude Include="..\..\src\base\event\ContactResult.hpp" />
-    <ClInclude Include="..\..\src\base\event\Eclipse.hpp" />
     <ClInclude Include="..\..\src\base\event\EclipseEvent.hpp" />
     <ClInclude Include="..\..\src\base\event\EclipseTotalEvent.hpp" />
-    <ClInclude Include="..\..\src\base\event\Elevation.hpp" />
-    <ClInclude Include="..\..\src\base\event\LineOfSight.hpp" />
-    <ClInclude Include="..\..\src\base\event\Penumbra.hpp" />
-    <ClInclude Include="..\..\src\base\event\Umbra.hpp" />
     <ClInclude Include="..\..\src\base\factory\EventLocatorFactory.hpp" />
     <ClInclude Include="..\..\src\base\include\EventLocatorDefs.hpp" />
     <ClInclude Include="..\..\src\base\locator\ContactLocator.hpp" />
@@ -275,17 +268,10 @@
     <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\base\event\Antumbra.cpp" />
-    <ClCompile Include="..\..\src\base\event\Contact.cpp" />
     <ClCompile Include="..\..\src\base\event\ContactEvent.cpp" />
     <ClCompile Include="..\..\src\base\event\ContactResult.cpp" />
-    <ClCompile Include="..\..\src\base\event\Eclipse.cpp" />
     <ClCompile Include="..\..\src\base\event\EclipseEvent.cpp" />
     <ClCompile Include="..\..\src\base\event\EclipseTotalEvent.cpp" />
-    <ClCompile Include="..\..\src\base\event\Elevation.cpp" />
-    <ClCompile Include="..\..\src\base\event\LineOfSight.cpp" />
-    <ClCompile Include="..\..\src\base\event\Penumbra.cpp" />
-    <ClCompile Include="..\..\src\base\event\Umbra.cpp" />
     <ClCompile Include="..\..\src\base\factory\EventLocatorFactory.cpp" />
     <ClCompile Include="..\..\src\base\locator\ContactLocator.cpp" />
     <ClCompile Include="..\..\src\base\locator\EclipseLocator.cpp" />

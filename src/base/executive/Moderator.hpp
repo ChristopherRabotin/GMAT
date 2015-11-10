@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -469,6 +479,7 @@ private:
    StopCondition* CreateDefaultStopCondition();
    
    // Sandbox
+   void AddFunctionToGlobalObjectMap(Function *func);
    void AddSolarSystemToSandbox(Integer index);
    void AddTriggerManagersToSandbox(Integer index);
    void AddInternalCoordSystemToSandbox(Integer index);
@@ -484,7 +495,8 @@ private:
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
    void ShowMissionSequence(const std::string &msg = "");
    void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
-   
+   std::string WriteObjectInfo(const std::string &title, GmatBase *obj,
+                               bool addEol = true);
    Moderator();
    virtual ~Moderator();
    
@@ -496,11 +508,14 @@ private:
    bool showFinalState;
    bool loadSandboxAndPause;
    Integer objectManageOption;
+   Integer currentSandboxNumber;
+   std::string currentScriptFileName;
    std::vector<Sandbox*> sandboxes;
    std::vector<TriggerManager*> triggerManagers;
    std::vector<GmatCommand*> commands;
    
    ObjectMap *objectMapInUse;
+   ObjectMap *previousObjectMap;
    Function *currentFunction;
    ObjectArray unmanagedFunctions;
    

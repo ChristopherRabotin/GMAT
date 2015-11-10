@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -80,6 +90,9 @@
 #include "BuiltinPluginManager.hpp"
 #endif
 
+//#define DEBUG_ONLY_FOR_SCRIPT
+//#define DEBUG_ONLY_FOR_FUNCTION
+
 //#define DEBUG_INITIALIZE 1
 //#define DEBUG_FINALIZE 1
 //#define DEBUG_INTERPRET 1
@@ -92,6 +105,7 @@
 //#define DEBUG_CREATE_CALC_POINT
 //#define DEBUG_CREATE_PARAMETER 1
 //#define DEBUG_CREATE_EPHEMFILE 1
+//#define DEBUG_CREATE_FUNCTION 1
 //#define DEBUG_PARAMETER_REF_OBJ 1
 //#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_COMMAND_APPEND 1
@@ -1143,14 +1157,20 @@ void Moderator::SetObjectMap(ObjectMap *objMap)
 {
    if (objMap != NULL)
    {
-      objectMapInUse = objMap;
-      
-      #ifdef DEBUG_OBJECT_MAP
-      MessageInterface::ShowMessage
-         ("Moderator::SetObjectMap() objectMapInUse was set to input objMap <%p>\n",
-          objMap);
-      ShowObjectMap("Moderator::SetObjectMap() Here is the object map in use");
-      #endif
+      if (objectMapInUse != objMap)
+      {
+         #ifdef DEBUG_OBJECT_MAP
+         ShowObjectMap("Moderator::SetObjectMap() Here is the old object map in use", objectMapInUse);
+         MessageInterface::ShowMessage
+            ("Moderator::SetObjectMap() objectMapInUse will be set to new objMap <%p>, "
+             "currentFunction='%s'\n", objMap,
+             currentFunction ? currentFunction->GetName().c_str() : "NULL");
+         ShowObjectMap("Moderator::SetObjectMap() Here is the new object map in use", objMap);
+         #endif
+         
+         previousObjectMap = objectMapInUse;
+         objectMapInUse = objMap;
+      }
    }
 }
 
@@ -1174,7 +1194,7 @@ void Moderator::SetObjectManageOption(Integer option)
 {
    #ifdef DEBUG_OBJECT_MANAGE
    MessageInterface::ShowMessage
-      ("Moderator::SetObjectManageOption() option = %d\n", option);
+      ("=====> Moderator::SetObjectManageOption() option = %d\n", option);
    #endif
    objectManageOption = option;
 }
@@ -3376,6 +3396,7 @@ bool Moderator::IsParameter(const std::string &str)
  *
  * @param <type> parameter type
  * @param <name> parameter name
+ * @param <alreadyManaged> output flag indicating object already exist
  * @param <ownerName> parameter owner name ("")
  * @param <depName> dependent object name ("")
  * @param <manage>  0, if parameter is not managed
@@ -3431,10 +3452,25 @@ Parameter* Moderator::CreateAutoParameter(const std::string &type,
          AddObject(param);
       
       alreadyManaged = true;
+      
+      #if DEBUG_CREATE_PARAMETER
+      MessageInterface::ShowMessage
+         ("Moderator::CreateAutoParameter() returning <%p>[%s]'%s', alreadyManaged=%d\n",
+          param, param->GetTypeName().c_str(), param->GetName().c_str(), alreadyManaged);
+      #endif
+      
       return param;
    }
    
-   return CreateParameter(type, name, ownerName, depName, manage);
+   param = CreateParameter(type, name, ownerName, depName, manage);
+     
+   #if DEBUG_CREATE_PARAMETER
+   MessageInterface::ShowMessage
+      ("Moderator::CreateAutoParameter() returning <%p>[%s]'%s', alreadyManaged=%d\n",
+       param, param->GetTypeName().c_str(), param->GetName().c_str(), alreadyManaged);
+   #endif
+   
+   return param;
 }
 
 
@@ -3465,33 +3501,53 @@ Parameter* Moderator::CreateParameter(const std::string &type,
                                       const std::string &ownerName,
                                       const std::string &depName,
                                       Integer manage)
-{   
+{
+   bool debugParameter = true;
+   #ifdef DEBUG_ONLY_FOR_SCRIPT
+   if (currentScriptFileName == "")
+      debugParameter = false;
+   #endif
+   
+   #ifdef DEBUG_ONLY_FOR_FUNCTION
+   if (currentFunction == NULL)
+      debugParameter = false;
+   #endif
+   
    #if DEBUG_CREATE_PARAMETER
-   MessageInterface::ShowMessage
-      ("Moderator::CreateParameter() type='%s', name='%s', ownerName='%s', "
-       "depName='%s', manage=%d\n", type.c_str(), name.c_str(), ownerName.c_str(),
-       depName.c_str(), manage);
-   MessageInterface::ShowMessage("   objectManageOption=%d\n", objectManageOption);
+   if (debugParameter)
+   {
+      MessageInterface::ShowMessage
+         ("Moderator::CreateParameter() type='%s', name='%s', ownerName='%s', "
+          "depName='%s', manage=%d\n", type.c_str(), name.c_str(), ownerName.c_str(),
+          depName.c_str(), manage);
+      MessageInterface::ShowMessage("   objectManageOption=%d\n", objectManageOption);
+   }
    #endif
    
    // if managing and Parameter already exist, give warning and return existing
    // Parameter
    Parameter *param = GetParameter(name);
    #if DEBUG_CREATE_PARAMETER
-   MessageInterface::ShowMessage
-      ("   managed param = <%p> '%s'\n", param, param ? param->GetName().c_str() : "NULL");
+   if (debugParameter)
+   {
+      MessageInterface::ShowMessage
+         ("   managed param = <%p> '%s'\n", param, param ? param->GetName().c_str() : "NULL");
+   }
    #endif
    
    // if Parameter was created during GmatFunction parsing, just set reference object
    if (param != NULL && manage != 0)
    {
       #if DEBUG_CREATE_PARAMETER
-      MessageInterface::ShowMessage
-         ("*** WARNING *** Moderator::CreateParameter() Unable to create "
-          "Parameter name: %s already exist\n", name.c_str());
-      MessageInterface::ShowMessage
-         ("Moderator::CreateParameter() returning <%s><%p>\n", param->GetName().c_str(),
-          param);
+      if (debugParameter)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Moderator::CreateParameter() Unable to create "
+             "Parameter name: %s already exist\n", name.c_str());
+         MessageInterface::ShowMessage
+            ("Moderator::CreateParameter() returning <%s><%p>\n", param->GetName().c_str(),
+             param);
+      }
       #endif
       
       // set Parameter reference object
@@ -3527,8 +3583,11 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    
    // Ceate new Parameter but do not add to ConfigManager yet
    #if DEBUG_CREATE_PARAMETER
-   MessageInterface::ShowMessage
-      ("   about to call the factory manager to create %s\n", name.c_str());
+   if (debugParameter)
+   {
+      MessageInterface::ShowMessage
+         ("   about to call the factory manager to create %s\n", name.c_str());
+   }
    #endif
    param = theFactoryManager->CreateParameter(newType, name);
    
@@ -3543,8 +3602,11 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    #endif
    
    #if DEBUG_CREATE_PARAMETER
-   MessageInterface::ShowMessage
-      ("   new param = <%p><%s>\n", param, param ? param->GetName().c_str() : "NULL");
+   if (debugParameter)
+   {
+      MessageInterface::ShowMessage
+         ("   new param = <%p><%s>\n", param, param ? param->GetName().c_str() : "NULL");
+   }
    #endif
    
    if (param == NULL)
@@ -3566,8 +3628,13 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    // CheckParameterType() deletes param pointer if invalid Parameter
    // so check again
    if (param == NULL)
+   {
+      #if DEBUG_CREATE_PARAMETER
+      if (debugParameter)
+         MessageInterface::ShowMessage("Moderator::CreateParameter() returning NULL\n");
+      #endif
       return NULL;
-   
+   }
    
    // set Parameter reference object
    SetParameterRefObject(param, newType, name, ownerName, depName, manage);
@@ -3589,11 +3656,13 @@ Parameter* Moderator::CreateParameter(const std::string &type,
          if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
             #if DEBUG_CREATE_PARAMETER
-            MessageInterface::ShowMessage
-               ("   Resetting configuration changed flag for SystemParameter "
-                "'%s' to %d\n", param->GetName().c_str(), oldFlag);
+            if (debugParameter)
+            {
+               MessageInterface::ShowMessage
+                  ("   Resetting configuration changed flag for SystemParameter "
+                   "'%s' to %d\n", param->GetName().c_str(), oldFlag);
+            }
             #endif
-            
             theConfigManager->ConfigurationChanged(oldFlag);
          }
       }
@@ -3613,9 +3682,12 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    }
    
    #if DEBUG_CREATE_PARAMETER
-   MessageInterface::ShowMessage
-      ("Moderator::CreateParameter() returning <%s><%p>\n", param->GetName().c_str(),
-       param);
+   if (debugParameter)
+   {
+      MessageInterface::ShowMessage
+         ("Moderator::CreateParameter() returning <%s><%p>\n", param->GetName().c_str(),
+          param);
+   }
    #endif
    
    return param;
@@ -5249,7 +5321,7 @@ Function* Moderator::CreateFunction(const std::string &type,
                                     const std::string &name,
                                     Integer manage)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_FUNCTION
    MessageInterface::ShowMessage
       ("Moderator::CreateFunction() type = '%s', name = '%s', manage=%d\n",
        type.c_str(), name.c_str(), manage);
@@ -5289,9 +5361,32 @@ Function* Moderator::CreateFunction(const std::string &type,
       try
       {
          if (name != "" && manage == 1)
+         {
+            #if DEBUG_CREATE_FUNCTION
+            MessageInterface::ShowMessage
+               ("==> Adding function '%s' to configuration map\n", name.c_str());
+            #endif
             theConfigManager->AddFunction(obj);
-         else if (currentFunction != NULL && manage == 0)
-            unmanagedFunctions.push_back(obj);
+         }
+         else if (currentFunction != NULL)
+         {
+            if (manage == 0)
+            {
+               #if DEBUG_CREATE_FUNCTION
+               MessageInterface::ShowMessage
+                  ("==> Adding function '%s' to unmanagedFunctions\n", name.c_str());
+               #endif
+               unmanagedFunctions.push_back(obj);
+            }
+            else if (manage == 2) // Function is created inside a function
+            {
+               #if DEBUG_CREATE_FUNCTION
+               MessageInterface::ShowMessage
+                  ("==> Adding function '%s' to Sandbox global object map\n", name.c_str());
+               #endif
+               AddFunctionToGlobalObjectMap(obj);
+            }
+         }
       }
       catch (BaseException &e)
       {
@@ -5299,7 +5394,7 @@ Function* Moderator::CreateFunction(const std::string &type,
                                        e.GetFullMessage());
       }
       
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_FUNCTION
       MessageInterface::ShowMessage
          ("Moderator::CreateFunction() returning <%p> for '%s'\n", obj,
           obj->GetName().c_str());
@@ -5308,7 +5403,7 @@ Function* Moderator::CreateFunction(const std::string &type,
    }
    else
    {
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_FUNCTION
       MessageInterface::ShowMessage
          ("Moderator::CreateFunction() Unable to create Function "
           "name: %s already exist\n", name.c_str());
@@ -5563,13 +5658,13 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
    GmatCommand *cmd = NULL;
    if (fileName != "")
       cmd =  theScriptInterpreter->InterpretGmatFunction(fileName);
-   
-   #if DEBUG_GMAT_FUNCTION
-   MessageInterface::ShowMessage
-      ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
-   #endif
-   
-   ResetConfigurationChanged();
+
+   // Do not reset configuration changed flag here (LOJ: 2015.10.4 GMT5374)
+   // #if DEBUG_GMAT_FUNCTION
+   // MessageInterface::ShowMessage
+   //    ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
+   // #endif
+   //ResetConfigurationChanged();
    
    #if DEBUG_GMAT_FUNCTION
    MessageInterface::ShowMessage
@@ -5654,12 +5749,12 @@ GmatCommand* Moderator::InterpretGmatFunction(Function *funct, ObjectMap *objMap
    GmatCommand *cmd = NULL;
    cmd = theScriptInterpreter->InterpretGmatFunction(funct);
    
-   #if DEBUG_GMAT_FUNCTION
-   MessageInterface::ShowMessage
-      ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
-   #endif
-   
-   ResetConfigurationChanged();
+   // Do not reset configuration changed flag here (LOJ: 2015.10.4 GMT5374)
+   // #if DEBUG_GMAT_FUNCTION
+   // MessageInterface::ShowMessage
+   //    ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
+   // #endif
+   //ResetConfigurationChanged();
    
    // reset current function to NULL
    currentFunction = NULL;
@@ -6653,6 +6748,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    // Set to 1 to always run the mission and get the sandbox error message
    // Changed this code while looking at Bug 1532 (LOJ: 2009.11.13)
    isRunReady = true;
+   currentSandboxNumber = sandboxNum;
    
    #if DEBUG_CONFIG
    MessageInterface::ShowMessage
@@ -7028,6 +7124,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    try
    {
       PrepareNextScriptReading();
+      currentScriptFileName = filename;
       
       // Set GMAT working directory (for GMT-4408 LOJ: 2014.06.11)
       // GMAT working directory has script file
@@ -7475,6 +7572,9 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
    
    // Set object manage option to configuration
    objectManageOption = 1;
+
+   // Reset current script file
+   currentScriptFileName = "";
    
    // Clear SpacePoint instance count so that Spacecraft color starts from the
    // same color for each run
@@ -8682,11 +8782,25 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
                                       const std::string &ownerName,
                                       const std::string &depName, Integer manage)
 {
+   bool debugParameter = true;
+   #ifdef DEBUG_ONLY_FOR_SCRIPT
+   if (currentScriptFileName == "")
+      debugParameter = false;
+   #endif
+   
+   #ifdef DEBUG_ONLY_FOR_FUNCTION
+   if (currentFunction == NULL)
+      debugParameter = false;
+   #endif
+   
    #if DEBUG_PARAMETER_REF_OBJ
-   MessageInterface::ShowMessage
-      ("Moderator::SetParameterRefObject() entered, param=<%p>, type=<%s>, name=<%s>, "
-       "owner=<%s>, dep=<%s>, manage=%d\n",  param, type.c_str(), name.c_str(),
-       ownerName.c_str(), depName.c_str(), manage);
+   if (debugParameter)
+   {
+      MessageInterface::ShowMessage
+         ("Moderator::SetParameterRefObject() entered, param=<%p>, type=<%s>, name=<%s>, "
+          "ownerName=<%s>, dep=<%s>, manage=%d\n",  param, type.c_str(), name.c_str(),
+          ownerName.c_str(), depName.c_str(), manage);
+   }
    #endif
    
    // Why do we need to set expression for non-Variable? (loj: 2008.08.09)
@@ -8699,6 +8813,16 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
    // Set parameter owner and dependent object
    if (ownerName != "")
    {
+      #if DEBUG_PARAMETER_REF_OBJ
+      if (debugParameter)
+      {
+         GmatBase *owner = FindObject(ownerName);
+         MessageInterface::ShowMessage
+            ("   Setting Parameter owner object <%p>[%s]'%s'\n", owner,
+             owner ? owner->GetTypeName().c_str() : "NULL",
+             owner ? owner->GetName().c_str() : "NULL");
+      }
+      #endif
       param->SetRefObjectName(param->GetOwnerType(), ownerName);
       param->AddRefObject((Parameter*)FindObject(ownerName));
    }
@@ -8717,8 +8841,9 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
    param->SetInternalCoordSystem(theInternalCoordSystem);
    
    #if DEBUG_PARAMETER_REF_OBJ
-   MessageInterface::ShowMessage
-      ("   name='%s', newDep='%s'\n", name.c_str(), newDep.c_str());
+   if (debugParameter)
+      MessageInterface::ShowMessage
+         ("   name='%s', newDep='%s'\n", name.c_str(), newDep.c_str());
    #endif
    
    if (newDep != "")
@@ -8727,9 +8852,12 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
       if (depObj)
       {
          #if DEBUG_PARAMETER_REF_OBJ
-         MessageInterface::ShowMessage
-            ("   Settng depObj=<%p><%s>'%s' to Parameter\n", depObj,
-             depObj->GetTypeName().c_str(), depObj->GetName().c_str());
+         if (debugParameter)
+         {
+            MessageInterface::ShowMessage
+               ("   Settng depObj=<%p><%s>'%s' to Parameter\n", depObj,
+                depObj->GetTypeName().c_str(), depObj->GetName().c_str());
+         }
          #endif
          param->AddRefObject(depObj);
       }
@@ -8750,7 +8878,8 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
       if (tokens.size() == 2 || (tokens.size() == 3 && tokens[1] == "Earth"))
       {
          #if DEBUG_PARAMETER_REF_OBJ
-         MessageInterface::ShowMessage("   Creating 'EarthFixed' CoordinateSystem\n");
+         if (debugParameter)
+            MessageInterface::ShowMessage("   Creating 'EarthFixed' CoordinateSystem\n");
          #endif
          
          // default EarthFixed
@@ -8767,8 +8896,9 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
          std::string axisName = origin + "Fixed";
          
          #if DEBUG_PARAMETER_REF_OBJ
-         MessageInterface::ShowMessage
-            ("   Creating '%s' CoordinateSystem\n", axisName.c_str());
+         if (debugParameter)
+            MessageInterface::ShowMessage
+               ("   Creating '%s' CoordinateSystem\n", axisName.c_str());
          #endif
          
          CoordinateSystem *cs = CreateCoordinateSystem(axisName, false, false, manage);
@@ -8804,9 +8934,10 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
       }
    }
    #if DEBUG_PARAMETER_REF_OBJ
-   MessageInterface::ShowMessage
-      ("Moderator::SetParameterRefObject() leaving, param's depObject='%s'\n",
-       param->GetStringParameter("DepObject").c_str());
+   if (debugParameter)
+      MessageInterface::ShowMessage
+         ("Moderator::SetParameterRefObject() leaving, param's depObject='%s'\n",
+          param->GetStringParameter("DepObject").c_str());
    #endif
 }
 
@@ -8827,17 +8958,30 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
 //------------------------------------------------------------------------------
 GmatBase* Moderator::FindObject(const std::string &name)
 {
+   bool debugFindObject = true;
+   #ifdef DEBUG_ONLY_FOR_SCRIPT
+   if (currentScriptFileName == "")
+      debugFindObject = false;
+   #endif
+   
+   #ifdef DEBUG_ONLY_FOR_FUNCTION
+   if (currentFunction == NULL)
+      debugFindObject = false;
+   #endif
+   
    #if DEBUG_FIND_OBJECT
-   MessageInterface::ShowMessage
-      ("Moderator::FindObject() entered, name='%s', objectMapInUse=<%p>, "
-       "objectManageOption=%d\n", name.c_str(), objectMapInUse, objectManageOption);
+   if (debugFindObject)
+      MessageInterface::ShowMessage
+         ("Moderator::FindObject() entered, name='%s', objectMapInUse=<%p>, "
+          "objectManageOption=%d\n", name.c_str(), objectMapInUse, objectManageOption);
    #endif
    
    if (name == "")
    {
       #if DEBUG_FIND_OBJECT
-      MessageInterface::ShowMessage
-         ("Moderator::FindObject() name is blank, so just returning NULL\n");
+      if (debugFindObject)
+         MessageInterface::ShowMessage
+            ("Moderator::FindObject() name is blank, so just returning NULL\n");
       #endif
       return NULL;
    }
@@ -8845,8 +8989,9 @@ GmatBase* Moderator::FindObject(const std::string &name)
    if (objectMapInUse == NULL)
    {
       #if DEBUG_FIND_OBJECT
-      MessageInterface::ShowMessage
-         ("Moderator::FindObject() objectMapInUse is NULL, so just returning NULL\n");
+      if (debugFindObject)
+         MessageInterface::ShowMessage
+            ("Moderator::FindObject() objectMapInUse is NULL, so just returning NULL\n");
       #endif
       return NULL;
    }
@@ -8859,12 +9004,14 @@ GmatBase* Moderator::FindObject(const std::string &name)
       newName = name.substr(0, index);
       
       #if DEBUG_FIND_OBJECT
-      MessageInterface::ShowMessage("   newName=%s\n", newName.c_str());
+      if (debugFindObject)
+         MessageInterface::ShowMessage("   newName=%s\n", newName.c_str());
       #endif
    }
    
    #if DEBUG_FIND_OBJECT > 1
-   ShowObjectMap("Moderator::FindObject() Here is the object map in use");
+   if (debugFindObject)
+      ShowObjectMap("Moderator::FindObject() Here is the object map in use", objectMapInUse);
    #endif
    
    GmatBase *obj = NULL;
@@ -8872,21 +9019,96 @@ GmatBase* Moderator::FindObject(const std::string &name)
    if (objectMapInUse->find(newName) != objectMapInUse->end())
       obj = (*objectMapInUse)[newName];
    
+   
+   // This code will fix GMT-5162 but need more testing (LOJ: 2015.08.27)
+   #if 1
+   //======================================================================
+   // LOJ: 2015.08.25
+   // This code block handles finding an automatically created Parameter
+   // such as globalSat.ElapsedDays where globalSat is a global object.
+   // For example:
+   //    function TestGlobalSat
+   //    BeginMissionSequence;
+   //    Global globalSat;
+   //    Global globalProp;
+   //    Propagate globalProp(globalSat) {globalSat.ElapsedDays = 1};
+   // When above function is parsed, it is assumed that globalSat is
+   // from the sandbox object map since globalSat is not created inside
+   // a function.
+   //
+   // If Global is specified before the BeginMissionSequence, it could
+   // be easier to handle global objects
+   //======================================================================
+   
+   // If object is not found and creating inside a function, and not a Parameter,
+   // try previous object map (LOJ: 2015.08.25)
+   if ((obj == NULL && currentFunction != NULL) &&
+       (newName.find_first_of('.') != newName.npos))
+   {
+      #if DEBUG_FIND_OBJECT
+      if (debugFindObject)
+         MessageInterface::ShowMessage
+            ("   object not found and creating inside a function, so trying "
+             "previous object map <%p>\n", previousObjectMap);
+      #endif
+      
+      std::string type, ownerName, depObj;
+      GmatStringUtil::ParseParameter(newName, type, ownerName, depObj);
+      GmatBase *paramOwner = NULL;
+      if (objectMapInUse->find(ownerName) != objectMapInUse->end())
+         paramOwner = (*objectMapInUse)[ownerName];
+      
+      // Parameter owner is not found in the objectMapInUse (at this time it should
+      // be function object map), use previous object map (sandbox object map)
+      if (paramOwner == NULL)
+      {
+         if (previousObjectMap != NULL && 
+             (previousObjectMap->find(newName) != previousObjectMap->end()))
+         {
+            GmatBase *objPrevMap = (*previousObjectMap)[newName];
+            #if DEBUG_FIND_OBJECT
+            if (debugFindObject)
+               MessageInterface::ShowMessage
+                  (WriteObjectInfo("   object found from the previous object map, ", objPrevMap).c_str());
+            #endif
+            
+            if (previousObjectMap->find(ownerName) != previousObjectMap->end())
+            {
+               paramOwner = (*previousObjectMap)[ownerName];
+               #if DEBUG_FIND_OBJECT
+               if (debugFindObject)
+                  MessageInterface::ShowMessage
+                     (WriteObjectInfo("   paramOwner found from the previous object map, ", paramOwner).c_str());
+               #endif
+               if (paramOwner->IsGlobal())
+                  obj = objPrevMap;
+            }
+         }
+      }
+   }
+   #endif
+   
+   
+   // Do we need this?
+   // Commented out and use objectManageOption below (LOJ: 2015.08.24)
+   #if 0
    // check objectManageOption
    Integer manage = 1;
    if (objectManageOption != 1)
       manage = 2;
+   #endif
    
    // If object not found, try SolarSystem
    if (obj == NULL)
    {
-      SolarSystem *ss = GetSolarSystemInUse(manage);
+      //SolarSystem *ss = GetSolarSystemInUse(manage);
+      SolarSystem *ss = GetSolarSystemInUse(objectManageOption);
       
       if (ss)
       {
          obj = (GmatBase*)(ss->GetBody(newName));
          #if DEBUG_FIND_OBJECT
-         if (obj)
+         if (debugFindObject && obj)
          {
             MessageInterface::ShowMessage
                ("   Found '%s' from the SolarSystem <%p> in the map\n",
@@ -8897,10 +9119,11 @@ GmatBase* Moderator::FindObject(const std::string &name)
    }
    
    #if DEBUG_FIND_OBJECT
-   MessageInterface::ShowMessage
-      ("Moderator::FindObject() returning <%p><%s>'%s'\n", obj, 
-       obj ? obj->GetTypeName().c_str() : "NULL",
-       obj ? obj->GetName().c_str() : "NULL");
+   if (debugFindObject)
+      MessageInterface::ShowMessage
+         ("Moderator::FindObject() returning <%p><%s>'%s'\n", obj, 
+          obj ? obj->GetTypeName().c_str() : "NULL",
+          obj ? obj->GetName().c_str() : "NULL");
    #endif
    
    return obj;
@@ -9529,7 +9752,37 @@ Parameter* Moderator::GetDefaultY()
 }
 
 
-// sandbox
+// Sandbox
+//------------------------------------------------------------------------------
+// void AddFunctionToGlobalObjectMap(GmatBase *func)
+//------------------------------------------------------------------------------
+/**
+ * This method is called when Sandbox triggers calling GmatFunction during
+ * the Sandbox initialization. So GmatFunction created inside a function
+ * should be added to Sanbox global object map
+ */
+//------------------------------------------------------------------------------
+void Moderator::AddFunctionToGlobalObjectMap(Function *func)
+{
+   #if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddFunctionToGlobalObjectMap() adding, func=<%p>'%s' to "
+       "Sandbox global object map\n", func, func ? func->GetName().c_str() : "NULL");
+   #endif
+   
+   // Will using the last sandbox number work for multiple sanbox?
+   if (currentSandboxNumber > 0 && currentSandboxNumber <= Gmat::MAX_SANDBOX)
+   {
+      sandboxes[currentSandboxNumber-1]->AddFunctionToGlobalObjectMap(func);
+   }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Adding Function to empty or invalid Sandbox number" +
+          currentSandboxNumber);
+   }
+}
+
 //------------------------------------------------------------------------------
 // void AddSolarSystemToSandbox(Integer index)
 //------------------------------------------------------------------------------
@@ -9857,6 +10110,82 @@ void Moderator::ShowMissionSequence(const std::string &msg)
 //------------------------------------------------------------------------------
 void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
 {
+   bool showObjectMap = true;
+   #ifdef DEBUG_ONLY_FOR_SCRIPT
+   if (currentScriptFileName == "")
+      showObjectMap = false;
+   #endif
+   // #ifdef DEBUG_ONLY_FOR_FUNCTION
+   // if (currentFunction == NULL)
+   //    showObjectMap = false;
+   // #endif
+   
+   if (!showObjectMap)
+      return;
+   
+   std::string objMapName = "ObjectMap";
+   MessageInterface::ShowMessage("%s\n", title.c_str());
+   if (objMap == NULL)
+   {
+      MessageInterface::ShowMessage("%s is NULL\n", objMapName.c_str());
+      return;
+   }
+   
+   GmatBase *obj = NULL;
+   std::string objName;
+   std::string isGlobal;
+   std::string isLocal;
+   GmatBase *paramOwner = NULL;
+   bool isParameter = false;
+   std::string paramOwnerType;
+   std::string paramOwnerName;
+   
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage
+      ("Here is %s <%p>, it has %d objects\n", objMapName.c_str(), objMap, objMap->size());
+   for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
+   {
+      obj = i->second;
+      objName = i->first;
+      isGlobal = "No";
+      isLocal = "No";
+      paramOwner = NULL;
+      isParameter = false;
+      paramOwnerType = "";
+      paramOwnerName = "";
+      
+      if (obj)
+      {
+         if (obj->IsGlobal())
+            isGlobal = "Yes";
+         if (obj->IsLocal())
+            isLocal = "Yes";
+         if (obj->IsOfType(Gmat::PARAMETER))
+         {
+            isParameter = true;
+            paramOwner = ((Parameter*)obj)->GetOwner();
+            if (paramOwner)
+            {
+               paramOwnerType = paramOwner->GetTypeName();
+               paramOwnerName = paramOwner->GetName();
+            }
+         }
+      }
+      MessageInterface::ShowMessage
+         ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+          obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+          isLocal.c_str());
+      if (isParameter)
+         MessageInterface::ShowMessage
+            ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+             paramOwnerName.c_str());
+      else
+         MessageInterface::ShowMessage("\n");
+   }
+
+
+
+   #if 0
    MessageInterface::ShowMessage(title + "\n");
    if (objMap != NULL)
    {
@@ -9885,8 +10214,35 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
          ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
           i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
+   #endif
 }
 
+//------------------------------------------------------------------------------
+// std::string WriteObjectInfo(const std::string &title, GmatBase *obj, bool addEol)
+//------------------------------------------------------------------------------
+std::string Moderator::WriteObjectInfo(const std::string &title, GmatBase *obj,
+                                       bool addEol)
+{
+   std::stringstream objStream;
+   char buff[10];
+   sprintf(buff, "<%p>", obj);
+   objStream << title << buff;
+   
+   if (obj)
+   {
+      objStream << "[" << obj->GetTypeName() << "]" << "'" << obj->GetName() << "'";
+      objStream << ", IsGlobal:" << obj->IsGlobal() << ", IsLocal():" << obj->IsLocal();
+   }
+   else
+   {
+      objStream << "[NULL]'NULL'";
+   }
+   
+   if (addEol)
+      objStream << "\n";
+   
+   return objStream.str();
+}
 
 //------------------------------------------------------------------------------
 // Moderator()
@@ -9907,15 +10263,17 @@ Moderator::Moderator()
    runState = Gmat::IDLE;
    detailedRunState = Gmat::IDLE;
    objectManageOption = 1;
-   
+   currentSandboxNumber = 1;
+   currentScriptFileName = "";
    theMatlabInterface = NULL;
    
    // The motivation of adding this data member was due to Parameter creation
    // in function mode. When Parameter is created, the Moderator automatically
-   // sets it's refeence object. For example, Sat.X, it sets Sat object pointer
+   // sets it's reference object. For example, Sat.X, it sets Sat object pointer
    // found from the current object map. Since we don't always want to use
-   // configuration to find object, this objectMapInUse was added. (loj: 2008.05.23)
+   // configuration map to find object, this objectMapInUse was added. (loj: 2008.05.23)
    objectMapInUse = NULL;
+   previousObjectMap = NULL;
    currentFunction = NULL;
    
    sandboxes.reserve(Gmat::MAX_SANDBOX);

@@ -47,4 +47,7 @@
     <xi:include href="Tut_TargetFiniteBurn.xml" />
     <xi:include href="Tut_Mars_B_Plane_Targeting.xml" /> 
     <xi:include href="Tut_OptimalLunarFlyby.xml" />
+	<xi:include href="Tut_UsingGMATFunctions.xml"/>
+	<xi:include href="Tut_EventLocation.xml"/>
+	<xi:include href="Tut_ElectricPropulsion.xml"/>
 </part>

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under FDSS
 // Task Order 28
@@ -414,11 +424,11 @@ namespace GmatSolarSystemDefaults
          999,
    };
 
-   const std::string           PLANET_SPICE_FRAME_NAME[NumberOfDefaultPlanets] =
+   const std::string           PLANET_SPICE_FRAME_ID[NumberOfDefaultPlanets] =
    {
          "IAU_MERCURY",
          "IAU_VENUS",
-         "IAU_EARTH",
+         "ITRF93",     // "IAU_EARTH" is low fidelity, should be "ITRF93"
          "IAU_MARS",
          "IAU_JUPITER",
          "IAU_SATURN",
@@ -587,9 +597,9 @@ namespace GmatSolarSystemDefaults
    //      402,    // Deimos
    };
 
-   const std::string           MOON_SPICE_FRAME_NAME[NumberOfDefaultMoons] =
+   const std::string           MOON_SPICE_FRAME_ID[NumberOfDefaultMoons] =
    {
-         "IAU_MOON",
+         "MOON_PA",
 //         "IAU_PHOBOS",
 //         "IAU_DEIMOS",
    };
@@ -620,7 +630,7 @@ namespace GmatSolarSystemDefaults
    const Rvector6              STAR_ORIENTATION_PARAMETERS   = Rvector6(
          286.13, 0.0, 63.87, 0.0, 84.10, 14.1844000);
    const Integer               STAR_NAIF_IDS                 = 10;
-   const std::string           STAR_SPICE_FRAME_NAME         = "IAU_SUN";
+   const std::string           STAR_SPICE_FRAME_ID           = "IAU_SUN";
 
    const Real                  STAR_RADIANT_POWER            = 1358.0;       // W / m^2
    // Units for reference distance are km (1 AU)

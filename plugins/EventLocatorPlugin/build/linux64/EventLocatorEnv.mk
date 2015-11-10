@@ -1,4 +1,4 @@
-# $Id: EventLocatorEnv.mk 1706 2011-09-10 00:13:03Z djconway@NDC $
+# $Id: EventLocatorEnv.mk 1706 2011-09-10 00:13:03Z $
 # Environment settings for the event locator plugin; Linux 64-bit version
 
 GMAT_CODE_LOCATION = ../../../../src

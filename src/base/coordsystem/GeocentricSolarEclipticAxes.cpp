@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -36,8 +46,11 @@
 #include "Rvector6.hpp"
 #include "TimeSystemConverter.hpp"
 #include "CoordinateSystemException.hpp"
+#include "MessageInterface.hpp"
 
 #include <iostream>
+
+//#define DEBUG_GSE_CALC
 
 
 using namespace GmatMathUtil;      // for trig functions, etc.
@@ -70,6 +83,9 @@ ObjectReferencedAxes("GSE",itsName)
    secondaryName = SolarSystem::SUN_NAME;
    objectTypeNames.push_back("GSE");
    parameterCount = GeocentricSolarEclipticAxesParamCount;
+
+   usesPrimary   = GmatCoordinate::REQUIRED_UNMODIFIABLE;
+   usesSecondary = GmatCoordinate::REQUIRED_UNMODIFIABLE;
 }
 
 
@@ -141,31 +157,6 @@ bool GeocentricSolarEclipticAxes::IsParameterReadOnly(const Integer id) const
       default:
          return ObjectReferencedAxes::IsParameterReadOnly(id);
    }
-}
-
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesPrimary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesPrimary() const
-{
-   return GmatCoordinate::NOT_USED;
-}
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesSecondary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesSecondary() const
-{
-   return GmatCoordinate::NOT_USED;
 }
 
 //------------------------------------------------------------------------------
@@ -242,6 +233,12 @@ GmatBase* GeocentricSolarEclipticAxes::Clone() const
 void GeocentricSolarEclipticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                                           bool forceComputation) 
 {
+   #ifdef DEBUG_GSE_CALC
+      MessageInterface::ShowMessage("In GSE::CalRotMat, epoch = %12.10f, forceComputtion = %s\n",
+            atEpoch.Get(), (forceComputation? "true" : "false"));
+      MessageInterface::ShowMessage("   primary   = %s\n", (primary->GetName()).c_str());
+      MessageInterface::ShowMessage("   secondary = %s\n", (secondary->GetName()).c_str());
+   #endif
    Rvector6 rvSun = secondary->GetMJ2000State(atEpoch) -
                     primary->GetMJ2000State(atEpoch);
    Rvector3 rSun  = rvSun.GetR();

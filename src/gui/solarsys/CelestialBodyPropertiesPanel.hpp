@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -46,11 +56,21 @@ public:
    
 private:
    
+   bool           userDef;
+   bool           allowSpiceForDefaultBodies;
+   bool           spiceAvailable;
+
    bool           dataChanged;
    bool           canClose;
+   bool           pckFilesDeleted;
    
+   StringArray    pckFiles;
+   StringArray    pckFilesToDelete;
+
    CelestialBody  *theBody;
+   GuiInterpreter *guiInterpreter;
    GuiItemManager *guiManager;
+   SolarSystem    *ss;
    
    Real           mu;
    Real           eqRad;
@@ -59,6 +79,7 @@ private:
    bool           muChanged;
    bool           eqRadChanged;
    bool           flatChanged;
+   bool           pckChanged;
    
    GmatPanel      *theCBPanel;
    
@@ -71,15 +92,22 @@ private:
    void     OnMuTextCtrlChange(wxCommandEvent &event);
    void     OnEqRadTextCtrlChange(wxCommandEvent &event);
    void     OnFlatTextCtrlChange(wxCommandEvent &event);
-   void     OnBrowseButton(wxCommandEvent &event);
+   void     OnPckFileBrowseButton(wxCommandEvent &event);
+   void     OnPckFileRemoveButton(wxCommandEvent &event);
+   void     OnPckFileListBoxChange(wxCommandEvent &event);
    
    wxString ToString(Real rval);
    
    // wx
    
+   StringArray  pckFileArray;
+
+   wxString     *pckFileArrayWX;
+
    wxStaticText *muStaticText;
    wxStaticText *eqRadStaticText;
    wxStaticText *flatStaticText;
+   wxStaticText *pckStaticText;
 
    wxStaticText *muUnitsStaticText;
    wxStaticText *eqRadUnitsStaticText;
@@ -89,21 +117,28 @@ private:
    wxTextCtrl   *eqRadTextCtrl;
    wxTextCtrl   *flatTextCtrl;
    
+   wxListBox    *pckFileListBox;
+
    /// string versions of current data
    wxString     muString;
    wxString     eqRadString;
    wxString     flatString;
    
+   wxButton     *pckFileBrowseButton;
+   wxButton     *pckFileRemoveButton;
+
    GmatStaticBoxSizer *pageSizer;
    
    /// IDs for the controls 
    enum
    {
       ID_TEXT = 7100,
-      ID_BUTTON_BROWSE,
+      ID_BROWSE_BUTTON_PCK_FILE,
+      ID_REMOVE_BUTTON_PCK_FILE,
       ID_TEXT_CTRL_MU,
       ID_TEXT_CTRL_EQRAD,
       ID_TEXT_CTRL_FLAT,
+      ID_LIST_BOX_PCK_FILE,
    };
 };
 #endif // CelestialBodyPropertiesPanel_hpp

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -33,8 +43,12 @@
 #include "bitmaps/rt_GroundStation.xpm"
 // Hardware
 #include "bitmaps/rt_Hardware.xpm"
-#include "bitmaps/rt_Tank.xpm"
-#include "bitmaps/rt_Thruster.xpm"
+#include "bitmaps/rt_ChemicalTank.xpm"
+#include "bitmaps/rt_ElectricTank.xpm"
+#include "bitmaps/rt_ChemicalThruster.xpm"
+#include "bitmaps/rt_ElectricThruster.xpm"
+#include "bitmaps/rt_SolarPowerSystem.xpm"
+#include "bitmaps/rt_NuclearPowerSystem.xpm"
 #include "bitmaps/rt_Antenna.xpm"
 #include "bitmaps/rt_Transmitter.xpm"
 #include "bitmaps/rt_Receiver.xpm"
@@ -88,7 +102,8 @@
 // CoordinateSystem
 #include "bitmaps/rt_CoordinateSystem.xpm"
 // EclipseLocator
-#include "bitmaps/rt_EclipseLocator.xpm"
+#include "bitmaps/rt_ContactLocator.xpm"   
+#include "bitmaps/rt_EclipseLocator.xpm"   
 // User Variable/Array/String
 #include "bitmaps/rt_Variable.xpm"
 #include "bitmaps/rt_Array.xpm"
@@ -1388,28 +1403,30 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    else if (obj->IsOfType("ChemicalTank"))
    {
       itemType = GmatTree::FUELTANK_CHEMICAL;
-      itemIcon = GmatTree::RESOURCE_ICON_TANK;   // need specific one
+      itemIcon = GmatTree::RESOURCE_ICON_CHEMICAL_TANK;   // need specific one
    }
    else if (obj->IsOfType("ElectricTank"))
    {
       itemType = GmatTree::FUELTANK_ELECTRIC;
-      itemIcon = GmatTree::RESOURCE_ICON_TANK; // need specific one
+      itemIcon = GmatTree::RESOURCE_ICON_ELECTRIC_TANK; // need specific one
    }
    else if (obj->IsOfType("ChemicalThruster"))
    {
       itemType = GmatTree::THRUSTER_CHEMICAL;
-      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;  // need specific one
+      itemIcon = GmatTree::RESOURCE_ICON_CHEMICAL_THRUSTER;  // need specific one
    }
    else if (obj->IsOfType("ElectricThruster"))
    {
       itemType = GmatTree::THRUSTER_ELECTRIC;
-      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER; // need specific one
+      itemIcon = GmatTree::RESOURCE_ICON_ELECTRIC_THRUSTER; // need specific one
    }
    else if (obj->IsOfType("PowerSystem"))
    {
       itemType = GmatTree::POWER_SYSTEM;
-//      itemIcon = GmatTree::RESOURCE_ICON_POWER_SYSTEM;   // TBD - need Solar and Nuclear?
-      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;         // temporary
+      if (obj->IsOfType("SolarPowerSystem"))
+         itemIcon = GmatTree::RESOURCE_ICON_SOLAR_POWER_SYSTEM;
+      else
+         itemIcon = GmatTree::RESOURCE_ICON_NUCLEAR_POWER_SYSTEM;
    }
    // Burn
    else if (obj->IsOfType("ImpulsiveBurn"))
@@ -1533,11 +1550,18 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       itemIcon = GmatTree::RESOURCE_ICON_ESTIMATOR;
    }
    
-   // EventLocator -- We need an icon for this
+   // EventLocator
    else if (obj->IsOfType("EventLocator") || obj->IsOfType(Gmat::EVENT_LOCATOR))
    {
       itemType = GmatTree::EVENT_LOCATOR;
-      itemIcon = GmatTree::RESOURCE_ICON_BOUNDARY_VALUE_SOLVER;
+      if (obj->IsOfType("EclipseLocator"))
+      {
+         itemIcon = GmatTree::RESOURCE_ICON_ECLIPSE_LOCATOR;
+      }
+      else
+      {
+         itemIcon = GmatTree::RESOURCE_ICON_CONTACT_LOCATOR;
+      }
    }   
    // MeasurementModel
    else if (obj->IsOfType("MeasurementModel") || obj->IsOfType(Gmat::MEASUREMENT_MODEL))
@@ -1849,16 +1873,10 @@ void ResourceTree::AddDefaultLocators(wxTreeItemId itemId, bool restartCounter)
 
    if (size > 0)
    {
-      GmatBase *obj = GetObject(itemNames[0]);
-      GmatTree::ItemType itemType;
-      GmatTree::ResourceIconType itemIcon;
-      GetItemTypeAndIcon(obj, itemType, itemIcon);
-      
       for (int i = 0; i<size; i++)
       {
-         objName = wxString(itemNames[i].c_str());
-         AppendItem(itemId, objName, itemIcon, -1,
-                    new GmatTreeItemData(objName, itemType));
+         GmatBase *obj = GetObject(itemNames[i]);
+         AddObjectToTree(obj);
       };
       
       Expand(itemId);
@@ -2818,8 +2836,12 @@ void ResourceTree::AddIcons()
    theGuiManager->LoadIcon("rt_GroundStation", bitmapType, &bitmaps[++index], rt_GroundStation_xpm);   
    
    theGuiManager->LoadIcon("rt_Hardware", bitmapType, &bitmaps[++index], rt_Hardware_xpm);
-   theGuiManager->LoadIcon("rt_Tank", bitmapType, &bitmaps[++index], rt_Tank_xpm);
-   theGuiManager->LoadIcon("rt_Thruster", bitmapType, &bitmaps[++index], rt_Thruster_xpm);
+   theGuiManager->LoadIcon("rt_ChemicalTank", bitmapType, &bitmaps[++index], rt_ChemicalTank_xpm); 
+   theGuiManager->LoadIcon("rt_ElectricTank", bitmapType, &bitmaps[++index], rt_ElectricTank_xpm); 
+   theGuiManager->LoadIcon("rt_ChemicalThruster", bitmapType, &bitmaps[++index], rt_ChemicalThruster_xpm); 
+   theGuiManager->LoadIcon("rt_ElectricThruster", bitmapType, &bitmaps[++index], rt_ElectricThruster_xpm); 
+   theGuiManager->LoadIcon("rt_SolarPowerSystem", bitmapType, &bitmaps[++index], rt_SolarPowerSystem_xpm); 
+   theGuiManager->LoadIcon("rt_NuclearPowerSystem", bitmapType, &bitmaps[++index], rt_NuclearPowerSystem_xpm); 
    theGuiManager->LoadIcon("rt_Antenna", bitmapType, &bitmaps[++index], rt_Antenna_xpm);
    theGuiManager->LoadIcon("rt_Transmitter", bitmapType, &bitmaps[++index], rt_Transmitter_xpm);
    theGuiManager->LoadIcon("rt_Receiver", bitmapType, &bitmaps[++index], rt_Receiver_xpm);
@@ -2874,7 +2896,8 @@ void ResourceTree::AddIcons()
    
    theGuiManager->LoadIcon("rt_CoordinateSystem", bitmapType, &bitmaps[++index], rt_CoordinateSystem_xpm);
    
-   theGuiManager->LoadIcon("rt_EclipseLocator", bitmapType, &bitmaps[++index], rt_EclipseLocator_xpm);
+   theGuiManager->LoadIcon("rt_EclipseLocator", bitmapType, &bitmaps[++index], rt_EclipseLocator_xpm); 
+   theGuiManager->LoadIcon("rt_ContactLocator", bitmapType, &bitmaps[++index], rt_ContactLocator_xpm); 
 
    theGuiManager->LoadIcon("rt_GmatFunction", bitmapType, &bitmaps[++index], rt_GmatFunction_xpm);
    theGuiManager->LoadIcon("rt_MatlabFunction", bitmapType, &bitmaps[++index], rt_MatlabFunction_xpm);
@@ -4828,7 +4851,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       scriptNames = "";
       
       // Will this fix allocation error in the MessageInterface
-      if (mBuildErrorCount <= 50)
+      if (mBuildErrorCount <= 100)
       {
          msg1.Printf("Script errors found in the following %d script(s):\n",
                      mBuildErrorCount);
@@ -4924,7 +4947,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       wxString msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6;
       
       // Show errors to message window
-      MessageInterface::ShowMessage(msg);
+      MessageInterface::ShowMessage(msg.WX_TO_STD_STRING);
       
       // Show errors to view text dialog
       ViewTextDialog *dlg =
@@ -4938,7 +4961,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       summaryFile += "FolderRunSummary.txt";
       MessageInterface::ShowMessage("Writing folder run summary to '%s'\n", summaryFile.c_str());
       MessageInterface::SetLogFile(summaryFile);
-      MessageInterface::LogMessage(msg);
+      MessageInterface::LogMessage(msg.WX_TO_STD_STRING);
       MessageInterface::SetLogFile(oldLogFile);
    }
    

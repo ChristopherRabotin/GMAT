@@ -40,7 +40,7 @@ public:
       ID_TOGGLE_LEGEND,
       ID_PLOT_DETAILS,
       ID_PLOT_SAVE,
-	  ID_PLOT_SAVEIMAGE
+      ID_PLOT_SAVEIMAGE
    };
 
 public:
@@ -51,6 +51,7 @@ public:
                 const wxString& name = "");
 
    virtual void OnPaint(wxPaintEvent& ev);
+   virtual void OnRefresh(wxFocusEvent& ev);
    virtual void OnSize(wxSizeEvent& ev);
    void OnMouseEvent(wxMouseEvent& event);
    
@@ -95,6 +96,8 @@ public:
    void AlwaysDraw(bool tf);
 
 protected:
+   /// Run state
+   int runState;
    /// borders
    int left, right, top, bottom;
    /// fonts
@@ -228,6 +231,8 @@ protected:
    int legendColumns;
    /// Flag triggered by a size event
    bool resized;
+   /// Counter for drawall calls used when repainting a hidden window
+   int drawAllCounter;
 
 //private:
    DECLARE_EVENT_TABLE()

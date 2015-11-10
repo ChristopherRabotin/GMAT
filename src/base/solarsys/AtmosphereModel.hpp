@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -87,6 +97,11 @@ public:
    void         SetKpApConversionMethod(Integer method);
    Real         ConvertKpToAp(const Real kp);
 
+   void         SetInputSource(const std::string &historical = "ConstantFluxAndGeoMag",
+                               const std::string &predicted = "ConstantFluxAndGeoMag");
+   void         SetSchattenFlags(const std::string &timing,
+                               const std::string &magnitude);
+
    // Extra methods some models may support
    virtual bool HasWindModel();
    virtual bool Wind(Real *position, Real* wind, Real ep,
@@ -130,6 +145,7 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
 
    SolarFluxReader*     GetFluxReader();
+   SolarFluxReader::FluxData GetFluxData(GmatEpoch epoch);
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -137,6 +153,8 @@ public:
 protected:
    /// Solar flux file reader
    SolarFluxReader         *fluxReader;
+   /// Buffer used for flux data while moving from raw data to massaged data
+   SolarFluxReader::FluxData fDbuffer;
    /// The solarsystem
    SolarSystem             *solarSystem;
    /// The central body
@@ -169,6 +187,10 @@ protected:
    Real                    nominalAp;
    /// Index used to select Kp/Ap conversion method.  Default is a table lookup
    Integer                 kpApConversion;
+   /// Indicator of the source for historical data: 0 for constants, 1 for CSSI
+   Integer                 historicalDataSource;
+   /// Indicator of the source for predicted data: 0 for constants, 1 for CSSI, 2 for Schatten
+   Integer                 predictedDataSource;
    /// Internal coordinate system used for conversions
    CoordinateSystem        *mInternalCoordSystem;
    /// MJ2000 CS for the central body
@@ -194,6 +216,18 @@ protected:
    /// GHA epoch
    Real                    ghaEpoch;
 
+   /// Start of the historic data when using file based history data
+   GmatEpoch historicStart;
+   /// End of the historic data when using file based history data
+   GmatEpoch historicEnd;
+      /// Start of the predict data when using file based predicted data
+   GmatEpoch predictStart;
+   /// End of the predict data when using file based predicted data
+   GmatEpoch predictEnd;
+   /// Schatten timing model to use
+   Integer schattenTimingModel;
+   /// Schatten error model to use
+   Integer schattenErrorModel;
 
    // Fields used when retrieving data from a flux file
 

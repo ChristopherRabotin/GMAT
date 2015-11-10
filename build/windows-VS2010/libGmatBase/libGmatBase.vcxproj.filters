@@ -313,16 +313,10 @@
     <ClCompile Include="..\..\..\src\base\event\EventException.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\executive\Sandbox.cpp">
@@ -733,9 +727,6 @@
     <ClCompile Include="..\..\..\src\base\parameter\EnvData.cpp">
       <Filter>Source Files\parameter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\parameter\EnvParameters.cpp">
-      <Filter>Source Files\parameter</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\parameter\EnvReal.cpp">
       <Filter>Source Files\parameter</Filter>
     </ClCompile>
@@ -965,9 +956,6 @@
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp">
-      <Filter>Source Files\solarsys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
@@ -1264,10 +1252,17 @@
     <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\Brent.cpp" />
-    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\ListenerManager.cpp">
+      <Filter>Source Files\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\ListenerManagerInterface.cpp">
+      <Filter>Source Files\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\IChangeListener.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\include\gmatdefs.hpp">
@@ -1588,16 +1583,10 @@
     <ClInclude Include="..\..\..\src\base\event\EventException.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\executive\Sandbox.hpp">
@@ -2005,9 +1994,6 @@
     <ClInclude Include="..\..\..\src\base\parameter\EnvData.hpp">
       <Filter>Source Files\parameter</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\parameter\EnvParameters.hpp">
-      <Filter>Source Files\parameter</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\EnvReal.hpp">
       <Filter>Source Files\parameter</Filter>
     </ClInclude>
@@ -2252,9 +2238,6 @@
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp">
-      <Filter>Source Files\solarsys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp">
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
@@ -2590,10 +2573,17 @@
     <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
       <Filter>Source Files\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\Brent.hpp" />
-    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\ListenerManager.hpp">
+      <Filter>Source Files\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\ListenerManagerInterface.hpp">
+      <Filter>Source Files\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\IChangeListener.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

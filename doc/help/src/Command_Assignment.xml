@@ -115,7 +115,7 @@
           <listitem>
             <para>resource parameter (e.g.
             <guilabel>Spacecraft</guilabel>.<guilabel>X</guilabel>,
-            <guilabel>Thruster</guilabel>.<guilabel>K1</guilabel>)</para>
+            <guilabel>ChemicalThruster</guilabel>.<guilabel>K1</guilabel>)</para>
           </listitem>
 
           <listitem>
@@ -262,7 +262,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
             <listitem>
               <para>gettable resource parameters (e.g.
               <guilabel>Spacecraft</guilabel>.<guilabel>X</guilabel>,
-              <guilabel>Thruster</guilabel>.<guilabel>K1</guilabel>)</para>
+              <guilabel>ChemicalThruster</guilabel>.<guilabel>K1</guilabel>)</para>
             </listitem>
 
             <listitem>

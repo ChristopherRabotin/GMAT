@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Waka Waktola
 // Created: 2006/08/25
@@ -1249,6 +1259,9 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
                return false;
             }
             
+            // Check if [] can be removed for single output (see GMT-3325).
+            // If so make it assignment command
+            
             #ifdef DEBUG_PARSE
             MessageInterface::ShowMessage
                ("   About to create CallFunction of '%s'\n", actualScript.c_str());
@@ -1840,56 +1853,58 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
       Integer objCounter = 0;
       for (Integer i = 0; i < count; i++)
       {
-         // Do not create a GmatFunction if inside a function
-         // since GmatFunction is created from the Sandbox as a global
-         // object (LOJ: 2015.03.25)
-         if (currentFunction != NULL && type == "GmatFunction")
+         // The issue is that if GmatFunction is not created inside function
+         // "myFunction.FunctionPath = './path'" will cause parse error because
+         // myFunction does not exist. So GmatFunction will be created in the
+         // Moderator and add it to Sandbox global object map. It will not be
+         // added to function object store. (GMT-4914 Fix, LOJ: 2015.09.16)
+         
+         obj = CreateObject(type, names[i], manageObject);
+         
+         if (obj == NULL)
          {
-            #if DBGLVL_GMAT_FUNCTION
+            // Check error message from the Validator which has more
+            // detailed error message
+            StringArray errList = theValidator->GetErrorList();
+            #ifdef DEBUG_PARSE
             MessageInterface::ShowMessage
-               ("   ==> '%s' is a GmatFunction inside a function, so skip creating\n",
-                names[i].c_str());
+               ("   Validator errList.size() = %d\n", errList.size());
             #endif
-            objCounter++;     
-         }
-         else
-         {
-            obj = CreateObject(type, names[i], manageObject);
-            
-            if (obj == NULL)
+            if (errList.size() > 0)
             {
-               // Check error message from the Validator which has more
-               // detailed error message
-               StringArray errList = theValidator->GetErrorList();
-               #ifdef DEBUG_PARSE
-               MessageInterface::ShowMessage
-                  ("   Validator errList.size() = %d\n", errList.size());
-               #endif
-               if (errList.size() > 0)
-               {
-                  for (UnsignedInt i=0; i<errList.size(); i++)
-                     HandleError(InterpreterException(errList[i]), true);
-                  
-                  // Empty Validator errors now
-                  theValidator->ClearErrorList();
-               }
-               else
-               {
-                  InterpreterException ex
-                     ("Cannot create an object \"" + names[i] + "\". The \"" + type +
-                      "\" is an unknown object type or invalid object name or dimension");
-                  HandleError(ex);
-               }
-               return false;
+               for (UnsignedInt i=0; i<errList.size(); i++)
+                  HandleError(InterpreterException(errList[i]), true);
+               
+               // Empty Validator errors now
+               theValidator->ClearErrorList();
             }
-            
-            objCounter++;     
-            obj->FinalizeCreation();
-            
-            SetComments(obj, preStr, inStr);
-            
-            // If creating insise a function, add it to function object map
-            if (currentFunction != NULL)
+            else
+            {
+               InterpreterException ex
+                  ("Cannot create an object \"" + names[i] + "\". The \"" + type +
+                   "\" is an unknown object type or invalid object name or dimension");
+               HandleError(ex);
+            }
+            return false;
+         }
+         
+         objCounter++;     
+         obj->FinalizeCreation();
+         
+         SetComments(obj, preStr, inStr);
+         
+         // If creating insise a function, add it to function object map
+         if (currentFunction != NULL)
+         {
+            if (obj->IsOfType("Function"))
+            {
+               #if DBGLVL_GMAT_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   ==> function object <%p>'%s' is NOT added to function object map\n", obj,
+                   obj->GetName().c_str());
+               #endif
+            }
+            else
             {
                #if DBGLVL_GMAT_FUNCTION
                MessageInterface::ShowMessage
@@ -2124,13 +2139,30 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    if (!GmatStringUtil::IsEnclosedWith(rhs, "'"))
    {
       #ifdef DEBUG_PARSE_ASSIGNMENT
-      MessageInterface::ShowMessage("   Checking for unexpected symbols\n");
+      MessageInterface::ShowMessage
+         ("   Checking for unexpected symbols in lhs = '%s'\n", lhs.c_str());
       #endif
       InterpreterException ex;
       std::string cmd, part;
-     
-      if (lhs.find_first_of("=~<>[]{}\"") != lhs.npos ||
-          rhs.find_first_of("=~<>\"") != rhs.npos)
+      
+      // Check if [] can be removed for single output
+      if (GmatStringUtil::IsEnclosedWithBrackets(lhs))
+      {
+         #ifdef DEBUG_PARSE_ASSIGNMENT
+         MessageInterface::ShowMessage("   Checking if [] can be removed from lhs\n");
+         #endif
+         std::string output = GmatStringUtil::RemoveOuterString(lhs, "[", "]");
+         if (GmatStringUtil::IsValidName(output))
+         {
+            #ifdef DEBUG_PARSE_ASSIGNMENT
+            MessageInterface::ShowMessage
+               ("   [] removed from lhs, now lhs = '%s'\n", output.c_str());
+            #endif
+            lhs = output;
+         }
+      }
+      else if (lhs.find_first_of("=~<>[]{}\"") != lhs.npos ||
+               rhs.find_first_of("=~<>\"") != rhs.npos)
       {
          if (lhs == "")
          {
@@ -2152,7 +2184,6 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
             
             if (rhs.find_first_of("=~<>\"") != rhs.npos)
                ex.SetDetails("\"" + rhs + "\" is not a valid RHS of assignment");
-            
          }
          
          HandleError(ex);

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -60,6 +70,7 @@
 //#define DEBUG_FINAL_STEP
 //#define DEBUG_EVENTLOCATORS
 //#define DEBUG_CLONES
+//#define DEBUG_CLEAN_STRING
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -2740,7 +2751,7 @@ void Propagate::FindSetupsAndStops(Integer &loc,
       std::string::size_type lastCloseParen = str2.find_last_of(")");
       
       // If syntax is "Propagate Prop(Sat1, {Sat1.ElapsedSecs = 600})",
-      // make it to standard syntanx, i.e "Propagate Prop(Sat1) {Sat1.ElapsedSecs = 600}"
+      // make it to standard syntax, i.e "Propagate Prop(Sat1) {Sat1.ElapsedSecs = 600}"
       // to use TextParser::SeparateAllBrackets(str, "{})
       // Remove last ) after }
       if (lastCloseParen == (str2.size() - 1) && str2[lastCloseParen - 1] == '}')
@@ -2778,10 +2789,11 @@ void Propagate::FindSetupsAndStops(Integer &loc,
          // If it does not starts with {, it is propagator and spacecraft
          if (parts[i][0] != '{')
          {
-            #ifdef DEBUG_PARSING
-            MessageInterface::ShowMessage("   adding prop setups\n");
-            #endif
             parts[i] = GmatStringUtil::Trim(parts[i]);
+            #ifdef DEBUG_PARSING
+            MessageInterface::ShowMessage("   adding prop setup '%s'\n",
+                  parts[i].c_str());
+            #endif
             setupStrings.push_back(parts[i]);
          }
          else
@@ -2903,6 +2915,10 @@ void Propagate::ConfigurePropSetup(std::string &setupDesc)
          "' does not identify any spacecraft for propagation on "
          + "the command line\n" + generatingString);
    prop = setupDesc.substr(0, loc);
+   if (prop == "")
+      throw CommandException("The propsetup string '" + setupDesc +
+         "' does not identify any PropSetup on "
+         + "the command line\n" + generatingString);
    sats = setupDesc.substr(loc);
 
    CleanString(prop);
@@ -3108,7 +3124,14 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
 //------------------------------------------------------------------------------
 void Propagate::CleanString(std::string &theString, const StringArray *extras)
 {
-   UnsignedInt loc, len = theString.length();
+   #ifdef DEBUG_CLEAN_STRING
+      MessageInterface::ShowMessage("In CleanString, theString = %s\n",
+            theString.c_str());
+//      for (Integer ii = 0; ii < extras->size(); ii++)
+//         MessageInterface::ShowMessage("     %d     %s\n", ii, extras->at(ii).c_str());
+   #endif
+   Integer loc;
+   Integer len = (Integer) theString.length();
    bool keepGoing = false;
 
    if (len == 0)
@@ -3117,6 +3140,10 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
    // Clean up the start of the string
    for (loc = 0; loc < len; ++loc)
    {
+      #ifdef DEBUG_CLEAN_STRING
+         MessageInterface::ShowMessage("In CleanString, theString[%d] = %c\n",
+               (Integer) loc, theString[loc]);
+      #endif
       if ((theString[loc] != ' ') && (theString[loc] != '\''))
       {
          if (extras != NULL)
@@ -3130,6 +3157,10 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
       }
    }
    theString = theString.substr(loc);
+   #ifdef DEBUG_CLEAN_STRING
+      MessageInterface::ShowMessage("In CleanString, (substring) theString = %s\n",
+            theString.c_str());
+   #endif
 
    // Clean up the end of the string
    keepGoing = false;
@@ -3148,6 +3179,10 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
       }
    }
    theString = theString.substr(0, loc+1);
+   #ifdef DEBUG_CLEAN_STRING
+      MessageInterface::ShowMessage("At the end of CleanString, (substring) theString = %s\n",
+            theString.c_str());
+   #endif
 }
 
 
@@ -3528,10 +3563,14 @@ bool Propagate::Initialize()
    #if DEBUG_PROPAGATE_INIT
       for (UnsignedInt i=0; i<stopSats.size(); i++)
          MessageInterface::ShowMessage
-            ("   stopSats[%d]=%s\n", i, stopSats[i]->GetName().c_str());
+            ("   stopSats[%d]=<%p>%s, IsStopSatGlobal:%d, IsStopSatLocal:%d\n",
+             i, stopSats[i], stopSats[i]->GetName().c_str(), stopSats[i]->IsGlobal(),
+             stopSats[i]->IsLocal());
       for (UnsignedInt i=0; i<stopWhen.size(); i++)
          MessageInterface::ShowMessage
-            ("   stopWhen[%d]=%s\n", i, stopWhen[i]->GetName().c_str());
+            ("   stopWhen[%d]=<%p>%s, IsStopWhenGlobal:%d, IsStopWhenLocal:%d\n",
+             i, stopWhen[i], stopWhen[i]->GetName().c_str(), stopWhen[i]->IsGlobal(),
+             stopWhen[i]->IsLocal());
    #endif
 
    if ((stopWhen.size() == 0) && !singleStepMode)

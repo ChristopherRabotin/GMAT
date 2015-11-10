@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number X-XXXXX-X
@@ -36,7 +46,7 @@
 
 //#define DEBUG_COLOR
 //#define DBGLVL_INIT 2
-//#define DBGLVL_DATA 2
+//#define DBGLVL_DATA 1
 //#define DBGLVL_DATA_LABELS 1
 //#define DBGLVL_UPDATE 2
 //#define DBGLVL_ADD 1
@@ -94,6 +104,7 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    // GmatBase data
    parameterCount = OrbitPlotParamCount;
    objectTypeNames.push_back("OrbitPlot");
+   objectTypeNames.push_back("Plot");
    
    mViewCoordSystem = NULL;
    
@@ -572,6 +583,7 @@ bool OrbitPlot::TakeAction(const std::string &action,
    }
    else if (action == "Finalize")
    {
+      // This action is usually called when GMAT function finalizes
       PlotInterface::DeleteGlPlot(instanceName);
    }
    else if (action == "PenUp")
@@ -1293,8 +1305,8 @@ const StringArray& OrbitPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
-      ("OrbitPlot::GetRefObjectNameArray() returning %d names for type:%d\n",
-       refObjectNames.size(), type);
+      ("OrbitPlot::GetRefObjectNameArray() returning %d names for type:%d typeName:%s\n",
+       refObjectNames.size(), type, GmatBase::GetObjectTypeString(type).c_str());
    for (unsigned int i=0; i<refObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
    #endif
@@ -2046,6 +2058,74 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
    if (len == 0)
       return true;
    
+   // Skip data if data publishing command such as Propagate is inside a function
+   // and this OrbitPlot is not a global nor a local object (i.e declared in the main script)
+   // (LOJ: 2015.08.17)
+   if (currentProvider && currentProvider->TakeAction("IsInFunction"))
+   {
+      #ifdef DEBUG_FUNCTION_DATA
+      MessageInterface::ShowMessage
+         ("   Data is published from the function, '%s' IsGlobal:%s, IsLocal:%s\n",
+          GetName().c_str(), IsGlobal() ? "Yes" : "No", IsLocal() ? "Yes" : "No");
+      #endif
+      
+      bool skipData = false;
+      // Check for spacepoints if data should be skipped or not
+      for (int i=0; i<mAllSpCount; i++)
+      {
+         SpacePoint *sp = mAllSpArray[i];
+         #ifdef DEBUG_FUNCTION_DATA
+         MessageInterface::ShowMessage
+            ("   mAllSpNameArray[%d]=<%p>'%s'\n", i, mAllSpArray[i],
+             mAllSpNameArray[i].c_str());
+         #endif
+         
+         if (sp)
+         {
+            #ifdef DEBUG_FUNCTION_DATA
+            MessageInterface::ShowMessage
+               ("   sp = <%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+                sp, sp->GetTypeName().c_str(), sp->GetName().c_str(),
+                sp->IsGlobal(), sp->IsLocal());
+            #endif
+            
+            // Skip data if OrbitPlot is global and spacepoint is local
+            if (IsGlobal() && sp->IsLocal())
+            {
+               #ifdef DEBUG_FUNCTION_DATA
+               MessageInterface::ShowMessage
+                  ("   Skip data since '%s' is global and spacepoint is local\n",
+                   GetName().c_str());
+               #endif
+               skipData = true;
+               break;
+            }
+            // Skip data if spacepoint is not a global nor a local object
+            else if (!(sp->IsGlobal()) && !(sp->IsLocal()))
+            {
+               #ifdef DEBUG_FUNCTION_DATA
+               MessageInterface::ShowMessage
+                  ("   Skip data since spacepoint is not a global nor a local object\n");
+               #endif
+               skipData = true;
+               break;
+            }
+         }
+      }
+      
+      if (skipData)
+      {
+         #ifdef DEBUG_FUNCTION_DATA
+         MessageInterface::ShowMessage
+            ("OrbitPlot::Update() this=<%p>'%s' just returning true\n   data is "
+             "from a function and spacepoint is not a global nor a local object\n",
+             this, GetName().c_str());
+         #endif
+         return true;
+      }
+   }
+   
+   
    mNumData++;
    
    #if DBGLVL_UPDATE > 1
@@ -2192,7 +2272,7 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
 {
    #if DBGLVL_DATA
    MessageInterface::ShowMessage
-      ("OrbitPlot::BufferOrbitData() '%s' entered, len=%d\n", GetName().c_str(),
+      ("OrbitPlot::BufferOrbitData() <%p>'%s' entered, len=%d\n", this, GetName().c_str(),
        len);
    #endif
    

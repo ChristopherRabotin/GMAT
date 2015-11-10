@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun / NASA
 // Created: 2009/09/02
@@ -39,10 +49,18 @@ public:
    EphemerisFile& operator=(const EphemerisFile&);
    
    // methods for this class
-   void                 SetProperFileExtension();
+   virtual std::string  GetProperFileName(const std::string &fName,
+                                          const std::string &fType,
+                                          bool setFileName);
+   virtual void         SetProperFileExtension();
    virtual void         ValidateParameters(bool forInitialization);
    virtual void         SetBackgroundGeneration(bool inBackground);
    
+   // Need to be able to close background SPKs and leave ready for appending
+   // Finalization
+   void                 CloseEphemerisFile(bool done = true, bool writeMetaData = true);
+   bool                 InsufficientSPKData();
+
    // methods inherited from Subscriber
    virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    
@@ -63,7 +81,9 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
+   
    virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
    
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
@@ -119,6 +139,8 @@ protected:
    /// ephemeris full file name including the path
    std::string fullPathFileName;
    std::string spacecraftName;
+   std::string spacecraftId;
+   std::string prevFileName;
    std::string fileName;
    std::string fileFormat;
    std::string epochFormat;
@@ -196,11 +218,15 @@ protected:
    bool        code500WriteFailed;
    bool        writeCommentAfterData;
    bool        checkForLargeTimeGap;
+   bool        isEphemFileOpened;
    
    CoordinateConverter coordConverter;
    
    /// number of SPK segments that have been written
    Integer     numSPKSegmentsWritten;
+   /// Indicates whether or not there was data 'left over' that was not enough
+   /// to write to the background SPK
+   bool        insufficientSPKData;
 
    FileType    fileType;
    
@@ -237,8 +263,8 @@ protected:
    void         CreateCode500EphemerisFile();
    bool         OpenTextEphemerisFile();
    
-   // Finalization
-   void         CloseEphemerisFile();
+//   // Finalization
+//   void         CloseEphemerisFile();
    
    // Time and data
    Real         ConvertInitialAndFinalEpoch();
@@ -312,7 +338,7 @@ protected:
    void         WriteSpkOrbitDataSegment();
    void         WriteSpkOrbitMetaData();
    void         WriteSpkComments(const std::string &comments);
-   void         FinalizeSpkFile();
+   void         FinalizeSpkFile(bool done = true, bool writeMetaData = true);
    
    // Code500 file writing
    void         WriteCode500OrbitDataSegment(bool canFinalize = false);

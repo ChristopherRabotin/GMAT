@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -20,6 +30,7 @@
 #include "AssignmentPanel.hpp"
 #include "StringUtil.hpp"           // for GmatStringUtil::
 #include "MessageInterface.hpp"
+#include "FileManager.hpp"          // GetGmatFunctionPath()
 #include <wx/config.h>
 
 //#define DEBUG_ASSIGNMENT_PANEL 1
@@ -191,16 +202,101 @@ void AssignmentPanel::SaveData()
          canClose = false;
       }
       
-      #if DEBUG_ASSIGNMENT_PANEL_SAVE
-      MessageInterface::ShowMessage("   Calling CheckVariable() to validate LHS\n");
-      #endif
-      ObjectTypeArray objTypes;
-      objTypes.push_back(Gmat::UNKNOWN_OBJECT);
-
-      // lhs should be an existing variable or valid object property
-      CheckVariable(newLhs, objTypes, "Left hand side",
-                    "Variable, Array, Array element, Object property", false,
-                    true, true, true);
+      bool isCallFunction = false;
+      
+      // Check if LHS [] for GmatFunction output
+      if (GmatStringUtil::IsEnclosedWithBrackets(newLhs))
+      {
+         // Parse function name
+         std::string fName = GmatStringUtil::ParseFunctionName(newRhs);
+         #if DEBUG_ASSIGNMENT_PANEL_SAVE
+         MessageInterface::ShowMessage("   fName = '%s'\n", fName.c_str());
+         #endif
+         
+         if (fName != "")
+         {
+            #if DEBUG_ASSIGNMENT_PANEL_SAVE
+            MessageInterface::ShowMessage
+               ("   Checking if '%s' is a configured function\n", fName.c_str());
+            #endif
+            GmatBase *func = theGuiInterpreter->GetConfiguredObject(fName);
+            if (func && func->IsOfType(Gmat::FUNCTION))
+            {
+               isCallFunction = true;
+               #if DEBUG_ASSIGNMENT_PANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   '%s' is a function, func = <%p>'%s'\n", fName.c_str(),
+                   func, func ? func->GetName().c_str() : "NULL");
+               #endif
+            }
+            else
+            {
+               // Call FileManager if function is in the GmatFunction path
+               #if DEBUG_ASSIGNMENT_PANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   Checking if '%s' is in the GmatFunction path\n", fName.c_str());
+               #endif
+               std::string funcPath = FileManager::Instance()->GetGmatFunctionPath(fName);
+               if (funcPath != "")
+               {
+                  isCallFunction = true;
+                  #if DEBUG_ASSIGNMENT_PANEL_SAVE
+                  MessageInterface::ShowMessage
+                     ("   '%s' is a function found from the start_up GmatFunction path\n",
+                      fName.c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      
+      // CallFunction is not allowed in Assignment command
+      // @todo
+      // If CallFunction, this Assignment command should be replaced with a
+      // CallFunction when panel is saved and exit (future work)
+      if (isCallFunction)
+      {
+         // Check for only one output since [] is optional
+         StringArray lhsParts = GmatStringUtil::SeparateBy(newLhs, "[],");
+         
+         #if DEBUG_ASSIGNMENT_PANEL_SAVE
+         MessageInterface::ShowMessage("   lhsParts.size() = %d\n", lhsParts.size());
+         for (unsigned int i = 0; i < lhsParts.size(); i++)
+            MessageInterface::ShowMessage("   lhsParts[%d] = %s\n", i, lhsParts[i].c_str());
+         #endif
+         
+         std::string newGenStr = newLhs + " = " + newRhs;
+         if (lhsParts.size() == 1)
+         {
+            // Set string without [] to LHS
+            newLhs = lhsParts[0];
+            mLhsTextCtrl->SetValue(newLhs.c_str());
+            MessageInterface::ShowMessage
+               ("*** WARNING *** [] is removed from the LHS of the equation: %s\n",
+                newGenStr.c_str());
+         }
+         else
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "Cannot switch to CallFunction in the equation \"" +
+                newGenStr + ".\" Please create CallGmatFunction or CallMatlabFunction from the MissionTree.");
+            canClose = false;
+         }
+      }
+      
+      if (!isCallFunction)
+      {
+         #if DEBUG_ASSIGNMENT_PANEL_SAVE
+         MessageInterface::ShowMessage("   Calling CheckVariable() to validate LHS\n");
+         #endif
+         ObjectTypeArray objTypes;
+         objTypes.push_back(Gmat::UNKNOWN_OBJECT);
+         
+         // lhs should be an existing variable or valid object property
+         CheckVariable(newLhs, objTypes, "Left hand side",
+                       "Variable, Array, Array element, Object property", false,
+                       true, true, true);
+      }
    }
    
    if (!canClose)
@@ -220,7 +316,7 @@ void AssignmentPanel::SaveData()
       std::string newGenStr = newLhs + " = " + newRhs;
       
       #if DEBUG_ASSIGNMENT_PANEL_SAVE
-      MessageInterface::ShowMessage("     newGenStr = '%s'\n", newGenStr.c_str());
+      MessageInterface::ShowMessage("   newGenStr = '%s'\n", newGenStr.c_str());
       #endif
       
       try

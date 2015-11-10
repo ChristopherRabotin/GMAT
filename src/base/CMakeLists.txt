@@ -195,13 +195,11 @@ SET(BASE_SRCS
     coordsystem/ITRFAxes.cpp
     coordsystem/IAUFile.cpp
     coordsystem/BodySpinSunAxes.cpp
-    #event/Brent.cpp
     event/EventException.cpp
-    event/EventFunction.cpp
     event/EventLocator.cpp
     event/LocatedEvent.cpp
-    event/LocatedEventTable.cpp
-    #event/RootFinder.cpp
+    executive/ListenerManager.cpp
+    executive/ListenerManagerInterface.cpp
     executive/Moderator.cpp
     executive/PlotInterface.cpp
     executive/PlotReceiver.cpp
@@ -254,6 +252,7 @@ SET(BASE_SRCS
     foundation/GmatBaseException.cpp
     foundation/GmatBase.cpp
     foundation/GmatState.cpp
+    foundation/IChangeListener.cpp
     foundation/ObjectInitializer.cpp
     foundation/SpacePoint.cpp
     foundation/StateManager.cpp
@@ -346,7 +345,6 @@ SET(BASE_SRCS
     parameter/CartesianParameters.cpp
     parameter/DelaunayParameters.cpp
     parameter/EnvData.cpp
-    parameter/EnvParameters.cpp
     parameter/EnvReal.cpp
     parameter/EquinoctialParameters.cpp
     parameter/ExpressionParser.cpp
@@ -425,7 +423,6 @@ SET(BASE_SRCS
     solarsys/Planet.cpp
     solarsys/ShadowState.cpp
     solarsys/SlpFile.cpp
-    solarsys/SolarFluxFileReader.cpp
     solarsys/SolarFluxReader.cpp
     solarsys/SolarSystemException.cpp
     solarsys/SolarSystem.cpp
@@ -434,6 +431,7 @@ SET(BASE_SRCS
     solver/DifferentialCorrector.cpp
     solver/Optimizer.cpp
     solver/InternalOptimizer.cpp
+    solver/ISolverListener.cpp
     solver/ExternalOptimizer.cpp
     solver/SteepestDescent.cpp
     solver/DerivativeModel.cpp

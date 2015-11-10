@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -107,6 +117,8 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    zeroFill        (false),
    usingDefaultFileName (true),
    fixedWidth      (true),
+   writeFinalSolverData (false),
+   finalSolverDataPosition (0),
    delimiter       (' '),
    lastUsedProvider(-1),
    mLastReportTime (0.0),
@@ -115,6 +127,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
 {
    objectTypes.push_back(Gmat::REPORT_FILE);
    objectTypeNames.push_back("ReportFile");
+   objectTypeNames.push_back("FileOutput");
    blockCommandModeAssignment = false;
    
    mNumParams = 0;
@@ -181,6 +194,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    zeroFill        (rf.zeroFill),
    usingDefaultFileName (rf.usingDefaultFileName),
    fixedWidth      (rf.fixedWidth),
+   writeFinalSolverData (rf.writeFinalSolverData),
+   finalSolverDataPosition (0),
    delimiter       (rf.delimiter),
    lastUsedProvider(-1),
    mLastReportTime (rf.mLastReportTime),
@@ -230,6 +245,8 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    zeroFill = rf.zeroFill;
    usingDefaultFileName = rf.usingDefaultFileName;
    fixedWidth = rf.fixedWidth;
+   writeFinalSolverData = rf.writeFinalSolverData;
+   finalSolverDataPosition = 0;
    delimiter = rf.delimiter;
    mParams = rf.mParams; 
    mNumParams = rf.mNumParams;
@@ -324,6 +341,8 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
          #ifdef DEBUG_REPORTFILE_SET
          MessageInterface::ShowMessage
             ("   '%s' added, size=%d\n", paramName.c_str(), mNumParams);
+         MessageInterface::ShowMessage
+            ("   yParamWrappers.size()=%d\n", yParamWrappers.size());
          #endif
          
          return true;
@@ -345,6 +364,10 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
 bool ReportFile::WriteData(WrapperArray wrapperArray)
 {
+   #if DBGLVL_WRITE_DATA > 0
+   MessageInterface::ShowMessage
+      ("ReportFile::WriteData() entered, wrapperArray.size()=%d\n", wrapperArray.size());
+   #endif
    Integer numData = wrapperArray.size();
    UnsignedInt maxRow = 1;
    Real rval = -9999.999;
@@ -359,6 +382,17 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
    MessageInterface::ShowMessage("ReportFile::WriteData() has %d wrappers\n", numData);
    MessageInterface::ShowMessage("   ==> Now start buffering data\n");
    #endif
+   
+   // Check for empty wrapper array
+   if (wrapperArray.empty())
+   {
+      #if DBGLVL_WRITE_DATA > 0
+      MessageInterface::ShowMessage
+         ("ReportFile::WriteData() just returning true, wrapperArray is empty\n");
+      #endif
+      
+      return true;
+   }
    
    // buffer formatted data
    for (Integer i=0; i < numData; i++)
@@ -411,7 +445,8 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
             else
                output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
             #ifdef DEBUG_REAL_DATA
-               MessageInterface::ShowMessage("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+            MessageInterface::ShowMessage
+               ("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
             #endif
             break;
          }
@@ -420,7 +455,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
             Gmat::ParameterType dataType = wrapperArray[i]->GetDataType();
             #if DBGLVL_WRITE_DATA > 1
             MessageInterface::ShowMessage
-               ("      It's data type is %d\n", dataType);
+               ("      It's data type is %d, PARAMETER_WT\n", dataType);
             #endif
             switch (dataType)
             {
@@ -432,7 +467,8 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
                   else
                      output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
                   #ifdef DEBUG_REAL_DATA
-                     MessageInterface::ShowMessage("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+                  MessageInterface::ShowMessage
+                     ("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
                   #endif
                   break;
                }
@@ -490,6 +526,15 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
        maxRow, output[0][0].c_str());
    #endif
    
+   if (writeFinalSolverData)
+   {
+      #if DBGLVL_WRITE_DATA > 0
+      MessageInterface::ShowMessage
+         ("   ===> Setting stream position to %ld\n", (long)finalSolverDataPosition);
+      #endif
+      dstream.seekp(finalSolverDataPosition, std::ios_base::beg);
+   }
+   
    if (leftJustify)
       dstream.setf(std::ios::left);
 
@@ -508,22 +553,33 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
          #endif
          
          UnsignedInt numRow = output[param].size();
-		 if (fixedWidth)
-		 {
-			 if (numRow >= row+1)
-				dstream << output[param][row];
-			 else if (numRow < maxRow)
-				dstream << "  ";
-		 }
-		 else
-		 {
-			 if (numRow >= row+1)
-				dstream << output[param][row];
-			 if (param < (numData-1))
-				dstream << delimiter;
-		 }
+         if (fixedWidth)
+         {
+            if (numRow >= row+1)
+               dstream << output[param][row];
+            else if (numRow < maxRow)
+               dstream << "  ";
+         }
+         else
+         {
+            if (numRow >= row+1)
+               dstream << output[param][row];
+            if (param < (numData-1))
+               dstream << delimiter;
+         }
       }
       dstream << std::endl;
+      
+      // Save current data position for use in writing final solver solution
+      if (!writeFinalSolverData)
+      {
+         finalSolverDataPosition = dstream.tellp();
+         #if DBGLVL_WRITE_DATA > 0
+         MessageInterface::ShowMessage
+            ("   ==> Saving stream position to %ld for final solver data\n",
+             (long)finalSolverDataPosition);
+         #endif
+      }
       
       #if DBGLVL_WRITE_DATA > 1
       MessageInterface::ShowMessage("\n");
@@ -585,10 +641,14 @@ bool ReportFile::Initialize()
    {
       if ((mNumParams == 0) && !usedByReport)
       {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** The ReportFile named \"%s\" will not be created.\n"
-             "No parameters were added to ReportFile.\n", GetName().c_str());
-         
+         // Write warning if ReportFile is not created inside a function
+         if (currentProvider && !(currentProvider->TakeAction("IsInFunction")))
+         {
+            MessageInterface::ShowMessage
+               ("*** WARNING *** The ReportFile named \"%s\" will not be created.  "
+                "Currently parameter list of reporting every integration step is "
+                "empty and it is not used by the Report command.\n", GetName().c_str());
+         }
          active = false;
          return false;
       }
@@ -1098,31 +1158,10 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
          se.SetDetails(errorMessageFormat.c_str(), value.c_str(), "Filename", msg.c_str());
          throw se;
       }
-      
-      // This checking will be done in FileManager::FindPath()
-      // // Check for non-existing directory
-      // if (!GmatFileUtil::DoesDirectoryExist(value))
-      // {
-      //    SubscriberException se;
-      //    se.SetDetails("Path does not exist in '%s'", value.c_str());
-      //    throw se;
-      // }
-      
+           
       usingDefaultFileName = false;
       fileName = value;
-      
-      // Moved to GetFullPathFileName() - (LOJ: 2014.06.23)
-      // // If file extension is blank, append .txt
-      // if (GmatFileUtil::ParseFileExtension(fileName) == "")
-      // {
-      //    if (fileName != "")
-      //    {
-      //       fileName = fileName + ".txt";
-      //       MessageInterface::ShowMessage
-      //          ("*** WARNING *** Appended .txt to file name '%s'\n", value.c_str());
-      //    }
-      // }
-      
+           
       #ifdef DEBUG_FILE_PATH
       MessageInterface::ShowMessage
          ("ReportFile::SetStringParameter() '%s' calling GetFullPathFileName()\n",
@@ -1130,8 +1169,8 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       #endif
       
       fullPathFileName =
-         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE", false, ".txt",
-                                       true);
+         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE",
+                                       false, ".txt", true);
       
       // Check for invalid output directory
       if (fullPathFileName == "")
@@ -1441,7 +1480,8 @@ const StringArray& ReportFile::GetWrapperObjectNameArray(bool completeSet)
    
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("ReportFile::GetWrapperObjectNameArray() size=%d\n",  yWrapperObjectNames.size());
+      ("ReportFile::GetWrapperObjectNameArray() '%s' size=%d\n", GetName().c_str(),
+       yWrapperObjectNames.size());
    for (UnsignedInt i=0; i<yWrapperObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", yWrapperObjectNames[i].c_str());
    #endif
@@ -1702,6 +1742,17 @@ bool ReportFile::Distribute(int len)
          
          dstream << data;
          dstream << std::endl;
+         
+         // Save current data position for use in writing final solver solution
+         if (!writeFinalSolverData)
+         {
+            finalSolverDataPosition = dstream.tellp();
+            #if DBGLVL_WRITE_DATA > 0
+            MessageInterface::ShowMessage
+               ("   ==> Saving stream position to %ld for final solver data\n",
+                (long)finalSolverDataPosition);
+            #endif
+         }
       }
       return true;
    }
@@ -1732,6 +1783,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    MessageInterface::ShowMessage
       ("   active=%d, isEndOfReceive=%d, mSolverIterOption=%d, runstate=%d, prevRunState=%d\n",
        active, isEndOfReceive, mSolverIterOption, runstate, prevRunState);
+   MessageInterface::ShowMessage("   mLastReportTime=%f\n", mLastReportTime);
    if (len > 0)
       MessageInterface::ShowMessage("   dat[0]=%f, dat[1]=%f\n", dat[0], dat[1]);
    #endif
@@ -1739,48 +1791,117 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    if (!active)
       return true;
    
+   bool writeData = true;
    //------------------------------------------------------------
-   // if not writing solver iteration data and solver is running,
-   // just return
+   // If not writing solver iteration data and solver is running,
+   // do not write data
    //------------------------------------------------------------
-   if ((mSolverIterOption == SI_NONE) &&
-       (runstate == Gmat::SOLVING || runstate == Gmat::SOLVEDPASS))
+   if (mSolverIterOption == SI_NONE)
    {
-      #if DBGLVL_REPORTFILE_DATA > 0
-      MessageInterface::ShowMessage
-         ("   ===> Just returning; not writing solver itertion data and solver "
-          "is running or solved\n");
-      #endif
-      return true;
+      if (runstate == Gmat::SOLVING)
+      {
+         #if DBGLVL_REPORTFILE_DATA > 0
+         MessageInterface::ShowMessage
+            ("   ===> Just returning; not writing solver itertion data and solver "
+             "is running\n");
+         #endif
+         writeData = false;
+      }
+      else if (runstate == Gmat::SOLVEDPASS)
+      {
+         // Write final solution
+         // Note: Cannot use isEndOfReceive since data length is 0
+         // So scheme is to save the last stream position and overwrite for
+         // all iterations, so that only final solver data will be written
+         #if DBGLVL_REPORTFILE_DATA > 0
+         MessageInterface::ShowMessage
+            ("   ===> Setting flag to write final solver solution for SI_NONE, runstate is SOLVEDPASS\n");
+         #endif
+         writeData = true;
+         writeFinalSolverData = true;
+      }
    }
    
    //------------------------------------------------------------
-   // if writing current iteration only and solver is not finished,
-   // just return
+   // If writing current iteration only and solver is not finished,
+   // do not write data
    //------------------------------------------------------------
-   if (mSolverIterOption == SI_CURRENT && runstate == Gmat::SOLVING)
+   else if (mSolverIterOption == SI_CURRENT)
    {
-      #if DBGLVL_REPORTFILE_DATA > 0
-      MessageInterface::ShowMessage
-         ("   ===> Just returning; writing current iteration only and solver "
-          "is not finished\n");
-      #endif
-      return true;
+      if (runstate == Gmat::SOLVING)
+      {
+         writeData = false;
+         #if DBGLVL_REPORTFILE_DATA > 0
+         MessageInterface::ShowMessage
+            ("   ===> Just returning; writing current iteration only and solver "
+             "is not finished\n");
+         #endif
+      }
+      else if (runstate == Gmat::SOLVEDPASS && prevRunState == Gmat::SOLVING)
+         writeData = true;
    }
+   
+   // Reset writeFinalSolverData
+   if (isEndOfReceive)
+      writeFinalSolverData = false;
+   
+   
+   #if DBGLVL_REPORTFILE_DATA > 0
+   MessageInterface::ShowMessage
+      ("   writeData=%d, writeFinalSolverData=%d, len=%d\n", writeData, writeFinalSolverData, len);
+   #endif
    
    if (len == 0)
       return true;
    
-   //------------------------------------------------------------
-   // If data time is the same as previous time, just return
-   //------------------------------------------------------------
-   if (mLastReportTime == dat[0])
+   if (!writeData)
    {
       #if DBGLVL_REPORTFILE_DATA > 0
       MessageInterface::ShowMessage
-         ("   ===> Just returning; current time is the same as last report time\n");
+         ("ReportFile::Distribute() this=<%p>'%s' just returning true, not writing data\n",
+          this, GetName().c_str());
       #endif
       return true;
+   }
+   
+   
+   // Skip data if data publishing command such as Propagate is inside a function
+   // and this ReportFile is not a global nor a local object (i.e declared in the main script)
+   // (LOJ: 2015.07.14)
+   if (!yParamWrappers.empty())
+   {
+      if (currentProvider && currentProvider->TakeAction("IsInFunction"))
+      {
+         bool skipDataY = ShouldDataBeSkipped(2);
+         
+         if (skipDataY)
+         {
+            #if DEBUG_XYPLOT_UPDATE > 1
+            MessageInterface::ShowMessage
+               ("ReportFile::Distribute() this=<%p>'%s' just returning true\n   data is "
+                "from a function and reporting Parameter is not a global nor a local object\n",
+                this, GetName().c_str());
+            #endif
+            return true;
+         }
+      }
+   }
+   
+   // Skip duplicate data.
+   if (mLastReportTime == dat[0])
+   {
+      // If data time is the same as previous time and not reporting all solver
+      // iterations, just return
+      if (mSolverIterOption != SI_ALL && runstate != Gmat::SOLVING)
+      {
+         #if DBGLVL_REPORTFILE_DATA > 0
+         MessageInterface::ShowMessage
+            ("ReportFile::Distribute() this=<%p>'%s' just returning true, duplicate data: "
+             "mLastReportTime = %f, dat[0] = %f\n", this, GetName().c_str(),
+             mLastReportTime, dat[0]);
+         #endif
+         return true;
+      }
    }
    
    #if DBGLVL_REPORTFILE_DATA > 0

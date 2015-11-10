@@ -1,0 +1,134 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2015-10-04 13:50:59
+
+
+%----------------------------------------
+%---------- User-Modified Default Celestial Bodies
+%----------------------------------------
+
+GMAT Earth.NutationUpdateInterval = 0;
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+
+%% $Id: GMAT_ISS_Earth_0_MSISE90_0.m,v 1.4 2007/07/26 19:12:28 edove Exp $
+
+Create Spacecraft ISS;
+GMAT ISS.DateFormat = UTCGregorian;
+GMAT ISS.Epoch = '01 Jun 2004 12:00:00.000';
+GMAT ISS.CoordinateSystem = EarthMJ2000Eq;
+GMAT ISS.DisplayStateType = Cartesian;
+GMAT ISS.X = -4453.783586;
+GMAT ISS.Y = -5038.203756;
+GMAT ISS.Z = -426.384456;
+GMAT ISS.VX = 3.831888;
+GMAT ISS.VY = -2.887221;
+GMAT ISS.VZ = -6.018232;
+GMAT ISS.DryMass = 1000;
+GMAT ISS.Cd = 2.2;
+GMAT ISS.Cr = 1.2;
+GMAT ISS.DragArea = 20;
+GMAT ISS.SRPArea = 20;
+GMAT ISS.NAIFId = -10092001;
+GMAT ISS.NAIFIdReferenceFrame = -9092001;
+GMAT ISS.OrbitColor = Red;
+GMAT ISS.TargetColor = Teal;
+GMAT ISS.Id = 'SatId';
+GMAT ISS.Attitude = CoordinateSystemFixed;
+GMAT ISS.SPADSRPScaleFactor = 1;
+GMAT ISS.ModelFile = 'aura.3ds';
+GMAT ISS.ModelOffsetX = 0;
+GMAT ISS.ModelOffsetY = 0;
+GMAT ISS.ModelOffsetZ = 0;
+GMAT ISS.ModelRotationX = 0;
+GMAT ISS.ModelRotationY = 0;
+GMAT ISS.ModelRotationZ = 0;
+GMAT ISS.ModelScale = 1;
+GMAT ISS.AttitudeDisplayStateType = 'Quaternion';
+GMAT ISS.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT ISS.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT ISS.EulerAngleSequence = '321';
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel Earth2Body;
+GMAT Earth2Body.CentralBody = Earth;
+GMAT Earth2Body.PrimaryBodies = {Earth};
+GMAT Earth2Body.SRP = Off;
+GMAT Earth2Body.RelativisticCorrection = Off;
+GMAT Earth2Body.ErrorControl = RSSStep;
+GMAT Earth2Body.GravityField.Earth.Degree = 0;
+GMAT Earth2Body.GravityField.Earth.Order = 0;
+GMAT Earth2Body.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT Earth2Body.GravityField.Earth.EarthTideModel = 'None';
+GMAT Earth2Body.Drag.AtmosphereModel = JacchiaRoberts;
+GMAT Earth2Body.Drag.HistoricWeatherSource = 'CSSISpaceWeatherFile';
+GMAT Earth2Body.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT Earth2Body.Drag.CSSISpaceWeatherFile = '../data/atmosphere/earth/CSSI_2004To2026.txt';
+GMAT Earth2Body.Drag.SchattenFile = 'SchattenPredict.txt';
+GMAT Earth2Body.Drag.F107 = 150;
+GMAT Earth2Body.Drag.F107A = 150;
+GMAT Earth2Body.Drag.MagneticIndex = 3;
+GMAT Earth2Body.Drag.SchattenErrorModel = 'Nominal';
+GMAT Earth2Body.Drag.SchattenTimingModel = 'NominalCycle';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator RKV89;
+GMAT RKV89.FM = Earth2Body;
+GMAT RKV89.Type = PrinceDormand78;
+GMAT RKV89.InitialStepSize = 5;
+GMAT RKV89.Accuracy = 9.999999999999999e-012;
+GMAT RKV89.MinStep = 0;
+GMAT RKV89.MaxStep = 2700;
+GMAT RKV89.MaxStepAttempts = 50;
+GMAT RKV89.StopIfAccuracyIsViolated = false;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile ISS_Report;
+GMAT ISS_Report.SolverIterations = Current;
+GMAT ISS_Report.UpperLeft = [ 0 0 ];
+GMAT ISS_Report.Size = [ 0 0 ];
+GMAT ISS_Report.RelativeZOrder = 0;
+GMAT ISS_Report.Maximized = false;
+GMAT ISS_Report.Filename = 'GMAT_ISS_Earth_0_JR_0_CSSI.report';
+GMAT ISS_Report.Precision = 16;
+GMAT ISS_Report.WriteHeaders = false;
+GMAT ISS_Report.LeftJustify = On;
+GMAT ISS_Report.ZeroFill = Off;
+GMAT ISS_Report.FixedWidth = true;
+GMAT ISS_Report.Delimiter = ' ';
+GMAT ISS_Report.ColumnWidth = 20;
+GMAT ISS_Report.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable OutputStepSize;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+
+%-----------Begin Propagation and Report Generation--------
+% Propagate based on preset propagation parameters
+% and current stop conditions.
+BeginMissionSequence;
+
+% Output Report file data for each propagation set in the FOR loop
+Report ISS_Report ISS.A1ModJulian ISS.X ISS.Y ISS.Z ISS.VX ISS.VY ISS.VZ;
+For OutputStepSize = 1:1:1440;
+   Propagate RKV89(ISS) {ISS.ElapsedSecs = 60};
+   Report ISS_Report ISS.A1ModJulian ISS.X ISS.Y ISS.Z ISS.VX ISS.VY ISS.VZ;
+EndFor;

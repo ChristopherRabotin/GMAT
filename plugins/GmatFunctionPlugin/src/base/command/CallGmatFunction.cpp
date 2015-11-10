@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -29,6 +39,7 @@
 //#define DEBUG_CALL_FUNCTION_PARAM
 //#define DEBUG_CALL_FUNCTION_INIT
 //#define DEBUG_CALL_FUNCTION_EXEC
+//#define DEBUG_RUN_COMPLETE
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -224,7 +235,7 @@ void CallGmatFunction::RunComplete()
 {
    #ifdef DEBUG_RUN_COMPLETE
    MessageInterface::ShowMessage
-      ("CallGmatFunction::RunComplete() entered for this=<%p> '%s',\n   "
+      ("CallGmatFunction::RunComplete() entered, this=<%p> '%s',\n   "
        "FCS %sfinalized\n", this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
        fm.IsFinalized() ? "already " : "NOT ");
    #endif
@@ -232,11 +243,22 @@ void CallGmatFunction::RunComplete()
    if (!fm.IsFinalized())
    {
       #ifdef DEBUG_RUN_COMPLETE
-      MessageInterface::ShowMessage("   calling FunctionManager::Finalize()\n");
+      MessageInterface::ShowMessage("   Calling FunctionManager::Finalize()\n");
       #endif
       fm.Finalize();
    }
    
+   #ifdef DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage("   Calling CallFunction::RunComplete()\n");
+   #endif
+   
    CallFunction::RunComplete();
+   
+   #ifdef DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage
+      ("CallGmatFunction::RunComplete() leaving, this=<%p> '%s',\n   "
+       "FCS %sfinalized\n", this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       fm.IsFinalized() ? "already " : "NOT ");
+   #endif
 }
 

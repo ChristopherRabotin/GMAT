@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -53,6 +63,7 @@ namespace Gmat
       DE405 = 0,
       DE421,
       DE424,
+//      DE430,
       SPICE,            // please leave this one at the end
       PosVelSourceCount
    };
@@ -63,6 +74,7 @@ namespace Gmat
       "DE405",
       "DE421",
       "DE424",
+//      "DE430",
       "SPICE"             // please leave this one at the end
    };
 
@@ -113,6 +125,7 @@ namespace Gmat
       DE_405_FILE = 0,
       DE_421_FILE,
       DE_424_FILE,
+//      DE_430_FILE,
       IAU_2002,
 //      IAU_FILE,   // TBD
       FK5_IAU_1980,
@@ -125,6 +138,7 @@ namespace Gmat
       "DE405File",
       "DE421File",
       "DE424File",
+//      "DE430File",
       "IAU2002",
 //      "IAUFile",  // TBD
       "FK5IAU1980",
@@ -447,6 +461,7 @@ protected:
       /// the SPICE file (kernel) reader
       SpiceOrbitKernelReader      *kernelReader;
       std::string                 mainSPK;
+      std::string                 mainPCK;
    #endif
    
    /// flag indicating whether or not to get data from potential file
@@ -608,6 +623,10 @@ protected:
                               bool writeWarning = false, bool validateOnly = false);
    bool Set3dModelFileName(const std::string &fileName,
                            bool writeWarning = false, bool validateOnly = false);
+   bool LoadNeededKernels(bool orbit = true,  bool attitude = false,
+                          bool frame = true,  bool scClock  = false);
+   bool UnloadKernels(bool orbit = true,  bool attitude = false,
+                      bool frame = true,  bool scClock  = false);
    
 private:
 

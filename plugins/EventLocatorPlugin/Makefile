@@ -1,4 +1,4 @@
-# $Id: Makefile 1706 2011-09-10 00:13:03Z djconway@NDC $
+# $Id: Makefile 1706 2011-09-10 00:13:03Z  $
 # Root level makefile 
 #
 # This file calls make on the src folder.

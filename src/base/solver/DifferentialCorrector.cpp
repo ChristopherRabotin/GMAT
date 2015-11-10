@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -1129,9 +1139,9 @@ void DifferentialCorrector::CalculateParameters()
 
             std::vector<Real> s, y, numerator;
             // Set the size for the vectors before loading them
-            s.reserve(variableCount);
-            y.reserve(goalCount);
-            numerator.reserve(goalCount);
+            s.resize(variableCount);
+            y.resize(goalCount);
+            numerator.resize(goalCount);
 
             Real denom = 0.0;
 
@@ -1173,10 +1183,10 @@ void DifferentialCorrector::CalculateParameters()
          {
             std::vector<Real> s, y, temp, v;
             // Set the size for the vectors before loading them
-            s.reserve(variableCount);
-            y.reserve(goalCount);
-            temp.reserve(variableCount);
-            v.reserve(goalCount);
+            s.resize(variableCount);
+            y.resize(goalCount);
+            temp.resize(variableCount);
+            v.resize(goalCount);
 
             for ( Integer i = 0; i < variableCount; ++i )
                s[i] = variable[i] - savedVariable[i];
@@ -1369,6 +1379,105 @@ void DifferentialCorrector::CheckCompletion()
       // If converged, we're done
       currentState = FINISHED;
       status = CONVERGED;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Shows the progress string to the user.
+ *
+ * This default version just passes the progress string to the MessageInterface.
+ */
+//------------------------------------------------------------------------------
+void DifferentialCorrector::ReportProgress(const SolverState forState)
+{
+   Solver::ReportProgress(forState);
+}
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Send to all listeners a progress report
+ *
+ */
+//------------------------------------------------------------------------------
+void DifferentialCorrector::ReportProgress(std::list<ISolverListener*> listeners, const SolverState forState)
+{
+   Solver::ReportProgress(listeners, forState);
+}
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Send to the listener a progress report
+ *
+ */
+//------------------------------------------------------------------------------
+void DifferentialCorrector::ReportProgress(ISolverListener* listener, const SolverState forState)
+{
+   StringArray::iterator current;
+   Integer i;
+   if (isInitialized)
+   {
+      switch (currentState)
+      {
+         case NOMINAL:
+            // Iterate through the variables, notifying the listener
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               listener->VariabledChanged(*current, unscaledVariable.at(i));
+               ++i;
+            }
+            break;
+         case CHECKINGRUN:
+            // Iterate through the goals, notifying the listener
+            for (current = goalNames.begin(), i = 0;
+                 current != goalNames.end(); ++current)
+            {
+               listener->ConstraintChanged(*current, goal[i], nominal[i]);
+               ++i;
+            }
+
+            break;
+         case FINISHED:
+            switch (currentMode)
+            {
+               case INITIAL_GUESS:
+                  for (current = variableNames.begin(), i = 0;
+                       current != variableNames.end(); ++current)
+                  {
+                     listener->VariabledChanged(*current, unscaledVariable.at(i));
+                     ++i;
+                  }
+                  for (current = goalNames.begin(), i = 0;
+                       current != goalNames.end(); ++current)
+                  {
+                     listener->ConstraintChanged(*current, goal[i], nominal[i]);
+                     ++i;
+                  }
+                  break;
+
+               case SOLVE:
+               default:
+                  // Iterate through the variables, notifying the listener
+                  for (current = variableNames.begin(), i = 0;
+                       current != variableNames.end(); ++current)
+                  {
+                     listener->VariabledChanged(*current, unscaledVariable.at(i));
+                     ++i;
+                  }
+                  listener->Convergence(status == CONVERGED);
+            }
+            break;
+      }
    }
 }
 

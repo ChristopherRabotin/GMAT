@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC, Thinking Systems, Inc., and Schafer Corp.,
 // under AFRL NOVA Contract #FA945104D03990003
@@ -95,6 +105,11 @@ using namespace FloatAttUtil;
 // incorrectly connecting lines
 //#define SKIP_DATA_OVER_LIMIT
 
+// Currently local plots are deleted when function run completes (2015.07.09)
+// So this macro has no effects. But if plot is global we need to check if 
+// all drawing objects are global as well since plot access object pointers.
+//#define DISABLE_REPAINT_IN_FUNCTION
+
 // debug
 //#define DEBUG_INIT 1
 //#define DEBUG_ACTION 1
@@ -177,7 +192,6 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    #endif
    
    mStars = GLStars::Instance();
-   mStars->InitStars();
    mStars->SetDesiredStarCount(mStarCount);
    
    mCamera.Reset();
@@ -556,8 +570,15 @@ void OrbitViewCanvas::ViewAnimation(int interval, int frameInc)
        interval, frameInc);
    #endif
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfData && mInFunction)
+   {
+      wxString msg = "*** WARNING *** This plot data was published inside a "
+         "function, so repainting or drawing animation is disabled.\n";
+      MessageInterface::ShowMessage(msg.c_str());
       return;
+   }
+   #endif
    
    this->SetFocus(); // so that it can get key interrupt
    mIsAnimationRunning = true;
@@ -898,7 +919,9 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
    #ifdef __WXGTK__
       hasBeenPainted = true;
    #endif
+
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfRun && mInFunction)
    {
       if (mWriteRepaintDisalbedInfo)
@@ -913,6 +936,7 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
       }
       return;
    }
+   #endif
    
    DrawPlot();
    
@@ -970,8 +994,22 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
        mUseInitialViewPoint, mIsEndOfData);
    #endif
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfData && mInFunction)
+   {
+      if (mWriteRepaintDisalbedInfo)
+      {
+         //Freeze();
+         wxString msg = "*** WARNING *** This plot data was published inside a "
+            "function, so repainting or drawing animation is disabled.\n";
+         MessageInterface::ShowMessage(msg.c_str());
+         GmatAppData::Instance()->GetMainFrame()->EnableAnimation(false);
+         
+         mWriteRepaintDisalbedInfo = false;
+      }
       return;
+   }
+   #endif
    
    int flippedY;
    int width, height;
@@ -2622,9 +2660,10 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    rotation[1] = sc->GetRealParameter(sc->GetParameterID("ModelRotationY"));
    rotation[2] = sc->GetRealParameter(sc->GetParameterID("ModelRotationZ"));
    scale = sc->GetRealParameter(sc->GetParameterID("ModelScale"));
-   scModel->SetBaseOffset(offset[0], offset[1], offset[2]);
-   scModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-   scModel->SetBaseScale(scale, scale, scale);
+   scModel->SetBodyPosition(offset[0], offset[1], offset[2]);
+   scModel->SetRotation(true, rotation[0], rotation[1], rotation[2]);
+   scModel->SetAttitude(true, 0, 0, 0);
+   scModel->SetScale(scale);
    
    #ifdef DEBUG_ATTITUDE_DISPLAY
       MessageInterface::ShowMessage("Model angles: [%lf  %lf  %lf]\n", 
@@ -2634,7 +2673,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    // Dunn's new attitude call.  Need to change to quaternions.  Also need
    // to concatenate with BaseRotation.  Also need this to work for replay
    // animation buttons.
-   scModel->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   scModel->SetAttitude(true, EAng1Deg, EAng2Deg, EAng3Deg);
    
    // The line above is where the object model gets its orientation.  This
    // also seems to be a good place to give the model its ECI position.
@@ -2761,9 +2800,10 @@ void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxStri
    rotation[1] = body->GetRealParameter(body->GetParameterID("3DModelRotationY"));
    rotation[2] = body->GetRealParameter(body->GetParameterID("3DModelRotationZ"));
    scale = body->GetRealParameter(body->GetParameterID("3DModelScale"));
-   bodyModel->SetBaseOffset(offset[0], offset[1], offset[2]);
-   bodyModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-   bodyModel->SetBaseScale(scale, scale, scale);
+   bodyModel->SetBodyPosition(offset[0], offset[1], offset[2]);
+   bodyModel->SetRotation(true, rotation[0], rotation[1], rotation[2]);
+   bodyModel->SetAttitude(true, 0, 0, 0);
+   bodyModel->SetScale(scale);
    
    #ifdef DEBUG_BODY_ATTITUDE
    MessageInterface::ShowMessage
@@ -2773,7 +2813,7 @@ void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxStri
    // Dunn's new attitude call.  Need to change to quaternions.  Also need
    // to concatenate with BaseRotation.  Also need this to work for replay
    // animation buttons.
-   bodyModel->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   bodyModel->SetAttitude(true, EAng1Deg, EAng2Deg, EAng3Deg);
    
    // Set isLit to true
    bodyModel->Draw(true);

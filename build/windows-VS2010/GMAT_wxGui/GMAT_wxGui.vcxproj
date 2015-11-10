@@ -295,6 +295,7 @@
     <ClCompile Include="..\..\..\src\gui\app\GmatToolBar.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GmatTreeItemData.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiInterpreter.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GuiListenerManager.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiMessageReceiver.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiPlotReceiver.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\InteractiveMatlabDialog.cpp">
@@ -378,7 +379,10 @@
     <ClCompile Include="..\..\..\src\gui\rendering\ModelManager.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\ModelObject.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\Rendering.cpp" />
-    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\Structure.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader3ds.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\SurfaceBase.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\BarycenterPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.cpp" />
@@ -425,6 +429,7 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiGlPlotData.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiTsPlotData.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\OpenGlOptionDialog.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -503,6 +508,7 @@
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GmatTreeItemData.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiInterpreter.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GuiListenerManager.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiMessageReceiver.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiPlotReceiver.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\InteractiveMatlabDialog.hpp">
@@ -589,7 +595,10 @@
     <ClInclude Include="..\..\..\src\gui\rendering\ModelManager.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\ModelObject.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\Rendering.hpp" />
-    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\Structure.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader3ds.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\SurfaceBase.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\BarycenterPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.hpp" />
@@ -636,6 +645,7 @@
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiGlPlotData.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiTsPlotData.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\OpenGlOptionDialog.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

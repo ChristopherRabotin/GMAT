@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -84,6 +94,7 @@ public:
       DE405_FILE,
       DE421_FILE,
       DE424_FILE,
+      DE430_FILE,
       IAUSOFA_FILE,
       ICRF_FILE,
       PLANETARY_SPK_FILE,
@@ -96,6 +107,7 @@ public:
       EOP_FILE,
       PLANETARY_COEFF_FILE,
       NUTATION_COEFF_FILE,
+      PLANETARY_PCK_FILE,
       LEAP_SECS_FILE,
       LSK_FILE,
       PERSONALIZATION_FILE,
@@ -138,6 +150,7 @@ public:
    bool DoesFileExist(const std::string &filename);
    bool RenameFile(const std::string &oldName, const std::string &newName,
                    Integer &retCode, bool overwriteIfExists = false);
+   bool ValidatePaths();
    
    // Methods for startup file
    std::string GetStartupFileDir();
@@ -196,6 +209,10 @@ public:
    std::string GetMatlabFunctionPath(const std::string &name);
    const StringArray& GetAllMatlabFunctionPaths();
    
+   // Python methods
+   void AddPythonModulePath(const std::string &path);
+   const StringArray& GetAllPythonModulePaths();
+
    // Warning/Error message
    std::string GetLastFilePathMessage();
    
@@ -240,12 +257,17 @@ private:
    std::map<std::string, FileInfo*> mFileMap;
    std::list<std::string> mGmatFunctionPaths;
    std::list<std::string> mMatlabFunctionPaths;
+  
    StringArray mGmatFunctionFullPaths;
    StringArray mMatlabFunctionFullPaths;
    StringArray mSavedComments;
    StringArray mPathWrittenOuts;
    StringArray mFileWrittenOuts;
-   
+
+   //Python
+   StringArray mPythonModuleFullPaths;
+   std::list<std::string> mPythonModulePaths;
+
    StringArray mPluginList;
    
    std::string GetFunctionPath(FunctionType type, std::list<std::string> &pathList,

@@ -10,6 +10,8 @@
 /STEREO_B_rng-edited.tdm
 /STEREO_B_rng_short.tdm
 *.bsp
+*.truth_file
+*.rmp
 /NavData/
 *.rmp
 /stuff/

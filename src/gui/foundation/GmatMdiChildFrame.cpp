@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Allison Greene
 // Created: 2003/08/28
@@ -40,7 +50,7 @@
 //#define DEBUG_PERSISTENCE
 //#define DEBUG_ACTIVATE
 //#define DEBUG_ICONIZE
-
+//#define DEBUG_GMAT_FUNCTION
 
 Integer GmatMdiChildFrame::maxZOrder = 0;
 
@@ -623,9 +633,12 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
 
    #ifdef DEBUG_PERSISTENCE
    // ======================= begin temporary ==============================
-   MessageInterface::ShowMessage("*** Size of SCREEN %s is: width = %d, height = %d\n", mChildName.c_str(), screenWidth, screenHeight);
-   MessageInterface::ShowMessage("Position of View plot %s is: x = %d, y = %d\n", mChildName.c_str(), tmpX, tmpY);
-   MessageInterface::ShowMessage("Size of View plot %s is: width = %d, height = %d\n", mChildName.c_str(), tmpW, tmpH);
+   MessageInterface::ShowMessage("*** Size of SCREEN %s is: width = %d, height = %d\n",
+                                 mChildName.WX_TO_C_STRING, screenWidth, screenHeight);
+   MessageInterface::ShowMessage("Position of View plot %s is: x = %d, y = %d\n",
+                                 mChildName.WX_TO_C_STRING, tmpX, tmpY);
+   MessageInterface::ShowMessage("Size of View plot %s is: width = %d, height = %d\n",
+                                 mChildName.WX_TO_C_STRING, tmpW, tmpH);
    // ======================= end temporary ==============================
    #endif
 
@@ -638,17 +651,44 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
        //|| (mItemType == GmatTree::EVENT_REPORT)
        )
    {
-      GmatBase *obj =
-         (Subscriber*)theGuiInterpreter->GetConfiguredObject(mChildName.c_str());
-
-      if (!obj || !obj->IsOfType("Subscriber"))
+      GmatBase *obj = theGuiInterpreter->GetConfiguredObject(mChildName.c_str());
+      
+      #ifdef DEBUG_FUNCTION
+      // Check if child name is the configured object name
+      MessageInterface::ShowMessage
+         ("GmatMdiChildFrame::SaveChildPositionAndSize() the child '%s' %s a "
+          "configured object, obj = <%p>[%s]'%s'\n", mChildName.WX_TO_C_STRING,
+          obj ? "is" : "is not", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+          obj ? obj->GetName().c_str() : "NULL");
+      #endif
+      
+      if (!obj)
       {
-         std::string errmsg = "Cannot find subscriber ";
-         errmsg += mChildName + "\n";
-         throw SubscriberException(errmsg);
+         // Just return if child is not a configured subscriber,ie,
+         // plotting from GMAT function (LOJ: 2015.06.26)
+         #ifdef DEBUG_FUNCTION
+         MessageInterface::ShowMessage
+            ("**** WARNING **** GmatMdiChildFrame::SaveChildPositionAndSize() "
+             "will not save position and size for unconfigured subscriber '%s'\n",
+             mChildName.WX_TO_C_STRING);
+         #endif
+         return;
       }
+      else if (!obj->IsOfType("Subscriber"))
+      {
+         #ifdef DEBUG_PERSISTENCE
+         MessageInterface::ShowMessage
+            ("**** WARNING **** GmatMdiChildFrame::SaveChildPositionAndSize() "
+             "cannot not save position and size for non-subscriber '%s'\n",
+             mChildName.WX_TO_C_STRING);
+         #endif
+         SubscriberException se;
+         se.SetDetails("Cannot set position and size for non-subscriber '%s'");
+         throw se;
+      }
+      
       Subscriber *sub = (Subscriber*) obj;
-
+      
       #ifdef DEBUG_PERSISTENCE
          MessageInterface::ShowMessage("...... Now saving plot data to %s:\n", (sub->GetName()).c_str());
          MessageInterface::ShowMessage("       Upper left             = %12.10f   %12.10f\n", upperLeft[0], upperLeft[1]);
@@ -658,7 +698,7 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       sub->SetRvectorParameter(sub->GetParameterID("UpperLeft"), upperLeft);
       sub->SetRvectorParameter(sub->GetParameterID("Size"), childSize);
       sub->SetIntegerParameter(sub->GetParameterID("RelativeZOrder"), relativeZOrder);
-	  sub->SetBooleanParameter(sub->GetParameterID("Maximized"), isMaximized);
+      sub->SetBooleanParameter(sub->GetParameterID("Maximized"), isMaximized);
    }
    else if (mItemType == GmatTree::MISSION_TREE_UNDOCKED)
    {
@@ -671,8 +711,8 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       size << childSize[0] << " " << childSize[1];
       pConfig->Write("/MissionTree/UpperLeft", location.str().c_str());
       pConfig->Write("/MissionTree/Size", size.str().c_str());
-	  pConfig->Write("/MissionTree/IsMaximized", isMaximized);
-	  pConfig->Write("/MissionTree/IsMinimized", isMinimized);
+      pConfig->Write("/MissionTree/IsMaximized", isMaximized);
+      pConfig->Write("/MissionTree/IsMinimized", isMinimized);
    }
    else if (mItemType == GmatTree::SCRIPT_FILE)
    {
@@ -685,8 +725,8 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
       size << childSize[0] << " " << childSize[1];
       pConfig->Write("/ScriptEditor/UpperLeft", location.str().c_str());
       pConfig->Write("/ScriptEditor/Size", size.str().c_str());
-	  pConfig->Write("/ScriptEditor/IsMaximized", isMaximized);
-	  pConfig->Write("/ScriptEditor/IsMinimized", isMinimized);
+      pConfig->Write("/ScriptEditor/IsMaximized", isMaximized);
+      pConfig->Write("/ScriptEditor/IsMinimized", isMinimized);
    }
 }
 

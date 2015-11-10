@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC, Thinking Systems, Inc., and Schafer Corp.,
 // under AFRL NOVA Contract #FA945104D03990003
@@ -81,20 +91,18 @@ VisualModelCanvas::VisualModelCanvas(wxWindow *parent, Spacecraft *spacecraft,
    
    mCamera.Relocate(15000.0f, 15000.0f, 15000.0f, 0.0f, 0.0f, 0.0f);
    mLight.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-   mLight.SetPosition(0.01f, 1.0f, 0.3f);
+   mLight.SetPosition(10.0f, -10.0f, -10.0f);
    mLight.SetDirectional(true);
    
-   glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
+   glLightfv(GL_LIGHT1, GL_SPECULAR, mLight.GetColor());
    
    // enable the light
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
+//   glEnable(GL_LIGHTING);
+//   glEnable(GL_LIGHT1);
 
    showEarth = false;
    needToLoadModel = false;
    glInitialized = false;
-   recentered = false;
-   
    glClearColor(0.0, 0.0, 0.0, 1);
    // Clear the color and depth bits
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -147,24 +155,30 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
    if (needToLoadModel)
       LoadModel();
    
-   // Set OpenGL to recognize the counter clockwise defined side of a polygon
-   // as its 'front' for lighting and culling purposes
-   glFrontFace(GL_CCW);
+   // Disable face culling so that backwards models (like Mir) will work
+   glDisable (GL_CULL_FACE);
    
-   // Enable face culling, so that polygons facing away (defined by front face)
-   // from the viewer aren't drawn (for efficiency).
    // Tell OpenGL to use glColor() to get material properties for
    glEnable(GL_COLOR_MATERIAL);
    // Set both front and back material parameters and ambient and diffuse material
    // parameters to track the current color 
+
    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+//   glColorMaterial(GL_FRONT_AND_BACK, GL_SPECULAR);
+//   glColorMaterial(GL_FRONT_AND_BACK, GL_EMISSION);
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,offset);
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,offset);
+//   glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,offset);
+   glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+
    // Set the clear color to black
    glClearColor(0.0, 0.0, 0.0, 1);
    // Clear the color and depth bits
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    
    // Set up the viewport
-   GLint h = GetSize().GetHeight(), w = GetSize().GetWidth();
+   GLint h = GetSize().GetHeight();
+   GLint w = GetSize().GetWidth();
    glViewport(0, 0, w, h);
    // Set up the projection matrix
    glMatrixMode(GL_PROJECTION);
@@ -179,12 +193,17 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
              mCamera.up[0], mCamera.up[1], mCamera.up[2]);
    
    // Set up the light and enable lighting
+   // Use LIGHT1 to avoid conflicts with OrbitViewCanvas
+   float ambient[4] = {0.2f, 0.2f, 0.2f, 0.0f};
+   float diffuse[4] = {0.8f, 0.8f, 0.8f, 0.8f};
+   glLightfv (GL_LIGHT1, GL_AMBIENT, ambient);
+   glLightfv (GL_LIGHT1, GL_DIFFUSE, diffuse);
+   glLightfv (GL_LIGHT1, GL_SPECULAR, diffuse);
    float lpos[4];
    mLight.GetPositionf(lpos);
-   glLightfv(GL_LIGHT0, GL_POSITION, lpos);
-   glLightfv(GL_LIGHT0, GL_SPECULAR, mLight.GetColor());
+   glLightfv(GL_LIGHT1, GL_POSITION, lpos);
    glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
+   glEnable(GL_LIGHT1);
    
    // Draw the model
    if (currentSpacecraft->GetModelId() == -1)
@@ -202,14 +221,15 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
       rotation[1] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"));
       rotation[2] = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"));
       scale = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelScale"));
-      loadedModel->SetBaseOffset(offset[0], offset[1], offset[2]);
-      // Dunn changed the subscript below from [3] to [2]
-      loadedModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-      loadedModel->SetBaseScale(scale, scale, scale);
+      loadedModel->SetBodyPosition (offset[0], offset[1], offset[2]);
+      loadedModel->SetRotation (true, rotation[0], rotation[1], rotation[2]);
+      loadedModel->SetAttitude (true, 0, 0, 0);
+      loadedModel->SetScale (scale);
       loadedModel->Draw(true);
    }
    
    glDisable(GL_LIGHTING);
+   glDisable(GL_LIGHT1);
    // Draw the axes
    DrawAxes();
    if (showEarth)
@@ -377,7 +397,7 @@ void VisualModelCanvas::Rotate(bool useDegrees, float xAngle, float yAngle, floa
    if (needToLoadModel)
       LoadModel();
    if (currentSpacecraft->GetModelId() != -1 && loadedModel->IsLoaded())
-      loadedModel->SetBaseRotation(useDegrees, xAngle, yAngle, zAngle);
+      loadedModel->SetRotation(useDegrees, xAngle, yAngle, zAngle);
    Refresh(false);
 }
 
@@ -397,7 +417,7 @@ void VisualModelCanvas::Translate(float x, float y, float z)
    if (needToLoadModel)
       LoadModel();
    if (currentSpacecraft->GetModelId() != -1 && loadedModel->IsLoaded())
-      loadedModel->SetBaseOffset(x,y,z);
+      loadedModel->SetBodyPosition(x,y,z);
    Refresh(false);
 }
 
@@ -413,79 +433,14 @@ void VisualModelCanvas::Translate(float x, float y, float z)
  * @param zScale The scale factor along the z-axis
  */
 //------------------------------------------------------------------------------
-void VisualModelCanvas::Scale(float xScale, float yScale, float zScale)
+void VisualModelCanvas::Scale(float scale)
 {
    if (needToLoadModel)
       LoadModel();
    if (currentSpacecraft->GetModelId() != -1 && loadedModel->IsLoaded())
-      loadedModel->SetBaseScale(xScale, yScale, zScale);
+      loadedModel->SetScale(scale);
    Refresh(false);
 }
-
-//------------------------------------------------------------------------------
-// void RecenterModel()
-//------------------------------------------------------------------------------
-/**
- * Recenters the model based on its axis-aligned bounding box.
- */
-//------------------------------------------------------------------------------
-void VisualModelCanvas::RecenterModel(float *offset)
-{
-   #ifdef DEBUG_RECENTER
-   MessageInterface::ShowMessage
-      ("RecenterModel() entered, offset=[%f, %f, %f]\n", offset[0], offset[1], offset[2]);
-   #endif
-   
-   if (needToLoadModel)
-      LoadModel();
-
-   #ifdef DEBUG_RECENTER
-   MessageInterface::ShowMessage
-      ("   modelID=%d, isLoaded=%d\n", currentSpacecraft->GetModelId(), loadedModel->isLoaded);
-   #endif
-   
-   if (currentSpacecraft->GetModelId() != -1 && loadedModel->IsLoaded())
-   {
-      vector_type bsphere_center = loadedModel->GetBSphereCenter();
-      float x = -bsphere_center.x;
-      float y = -bsphere_center.y;
-      float z = -bsphere_center.z;
-      offset[0] = x;
-      offset[1] = y;
-      offset[2] = z;
-      loadedModel->SetBaseOffset(x, y, z);
-      recentered = true;
-   }
-   
-   Refresh(false);
-   
-   #ifdef DEBUG_RECENTER
-   MessageInterface::ShowMessage
-      ("RecenterModel() leaving, offset=[%f, %f, %f]\n", offset[0], offset[1], offset[2]);
-   #endif
-}
-
-//------------------------------------------------------------------------------
-// void AutoscaleModel()
-//------------------------------------------------------------------------------
-/**
- * Rescales the model based on the Earth and model radius.
- */
-//------------------------------------------------------------------------------
-float VisualModelCanvas::AutoscaleModel()
-{
-   float earthRadius = (float) GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];
-   float modelRadius = loadedModel->GetBSphereRadius();
-
-   #ifdef DEBUG_AUTO_SCALE
-   MessageInterface::ShowMessage
-      ("VisualModelCanvas::AutoscaleModel() loadedModel=<%p>, modelRadius=%f\n",
-       loadedModel, modelRadius);
-   #endif
-   
-   return earthRadius / (5.0f * modelRadius);
-}
-
 //------------------------------------------------------------------------------
 // void LoadModel(const wxString &filePath)
 //------------------------------------------------------------------------------

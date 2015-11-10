@@ -12,8 +12,8 @@
   condition="ug">User Guide</phrase><phrase condition="tm">Training
   Manual</phrase> contains a wealth of material to introduce you to GMAT and
   how it works. It also provides an extensive Reference Guide that contains
-  data on every Resource, Command, and major subcomponent in the system.
-  </para>
+  data on every Resource, Command, and major subcomponent in the
+  system.</para>
 
   <section role="notintoc" xml:id="Preface_UsingGmat">
     <title><xref linkend="UsingGmat" xrefstyle="select:title"/></title>
@@ -60,7 +60,7 @@
     real-world analysis and are intended to take between 30 minutes and
     several hours to complete. Each tutorial has a difficulty level and an
     approximate duration listed with any prerequisites in its introduction,
-    and are arranged in a general order of difficulty. </para>
+    and are arranged in a general order of difficulty.</para>
 
     <para>Here is a summary of selected Tutorials. For a complete list of
     tutorials see the <emphasis><xref linkend="Tutorials"
@@ -69,17 +69,29 @@
     <para>The <emphasis><xref linkend="SimulatingAnOrbit"
     xrefstyle="select:title"/></emphasis> tutorial is the first tutorial you
     should take to learn how to use GMAT to solve mission design problems. You
-    will learn how to specify an orbit and propagate to orbit periapsis.
-    </para>
+    will learn how to specify an orbit and propagate to orbit
+    periapsis.</para>
 
     <para>The <emphasis><xref linkend="Mars_B_Plane_Targeting"
-    xrefstyle="select:title"/></emphasis> tutorial shows how to use GMAT to
-    design a Mars transfer trajectory by targeting desired B-plane conditions
-    at Mars. </para>
+    xrefstyle="select:title"/></emphasis> tutorial shows how to perform
+    targeting by application to a Mars transfer trajectory where you will
+    target desired B-plane conditions at Mars.</para>
 
     <para>The <emphasis><xref linkend="Tut_TargetFiniteBurn"
-    xrefstyle="select:title"/></emphasis> tutorial shows how to raise orbit
-    apogee using finite maneuver targeting. </para>
+    xrefstyle="select:title"/></emphasis> tutorial shows how to use finite
+    maneuvers with an application to orbit apogee raising.</para>
+
+	<para>The <emphasis><xref linkend="Tut_EventLocation"
+    xrefstyle="select:title"/></emphasis> tutorial shows how to use GMAT to
+    locate elipses and station contacts.</para>
+	
+    <para>The <emphasis><xref linkend="Tut_ElectricPropulsion"
+    xrefstyle="select:title"/></emphasis> tutorial shows how to configure GMAT
+    to model electric propulsion systems.</para>
+
+    <para>The <emphasis><xref linkend="Tut_UsingGMATFunctions"
+    xrefstyle="select:title"/></emphasis> tutorial shows how to use GMAT
+    functions to extend your analysis.</para>
   </section>
 
   <section condition="ug" role="notintoc">
@@ -119,19 +131,19 @@
     <para><note>
         <para>This document uses two typographical conventions
         throughout:</para>
-		    <itemizedlist spacing="compact">
-      <listitem>
-        <para>Graphical user interface (GUI) elements and resource and command
-        names are presented in <emphasis role="bold">bold</emphasis>.</para>
-      </listitem>
 
-      <listitem>
-        <para>Filenames, script examples, and user input are presented in
-        <code>monospace</code>.</para>
-      </listitem>
-    </itemizedlist>
+        <itemizedlist spacing="compact">
+          <listitem>
+            <para>Graphical user interface (GUI) elements and resource and
+            command names are presented in <emphasis
+            role="bold">bold</emphasis>.</para>
+          </listitem>
+
+          <listitem>
+            <para>Filenames, script examples, and user input are presented in
+            <code>monospace</code>.</para>
+          </listitem>
+        </itemizedlist>
       </note></para>
   </section>
-
-
 </preface>

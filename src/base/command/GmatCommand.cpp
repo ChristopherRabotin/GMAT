@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General MiHeaderssion Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -65,7 +75,8 @@
 //#define DEBUG_DEFSTR
 //#define DEBUG_CMD_SUMMARY
 
-#ifdef DEBUG_FUNCTION
+//#ifdef DEBUG_FUNCTION
+#if defined(DEBUG_FUNCTION) || defined(DEBUG_OBJECT_MAP)
 #include "Function.hpp"
 #endif
 
@@ -626,19 +637,24 @@ void GmatCommand::ClearWrappers()
  * @param cmdName The name of the command that is being checked
  * @param ignoreUnsetReference Flag used to control exceptions when the wrapper
  *                             object is not set
+ * @param checkUnsetValue  Flag for checking unset value
+ * @param unsetValue Value used for checking unset value
+ * @param unsetValueMsg The error message to be thrown when value is unset
  */
 //------------------------------------------------------------------------------
 void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                                 Gmat::ParameterType needType,
                                 const std::string &cmdName,
-                                bool ignoreUnsetReference)
+                                bool ignoreUnsetReference,
+                                bool checkUnsetValue, Real unsetValue,
+                                const std::string &unsetValueErrMsg)
 {
    if (forWrapper == NULL)
    {
       std::string cmdEx = "Reference object not set for command " + 
                           cmdName;
       cmdEx += ".\n";
-      throw CommandException(cmdEx);
+      throw CommandException(cmdEx, Gmat::ERROR_);
    }
    bool typeOK = true;
    Gmat::ParameterType baseType;
@@ -662,7 +678,7 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
       {
          std::string errmsg = "Reference not set for \"" + desc;
          errmsg += "\", cannot check for correct data type.";
-         throw CommandException(errmsg);
+         throw CommandException(errmsg, Gmat::ERROR_);
       }
    }
    
@@ -672,7 +688,34 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                   baseStr + "\" on command \"" + cmdName + 
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Object Property (Real), Real Number, Variable, "
-                  "Array Element, or Parameter ]. ");
+                  "Array Element, or Parameter ]. ", Gmat::ERROR_);
+   }
+   
+   if (checkUnsetValue)
+   {
+      try
+      {
+         Real realVal;
+         if (!GmatStringUtil::ToReal(desc, realVal))
+            realVal = forWrapper->EvaluateReal();
+         #ifdef DEBUG_CHECK_UNSET_VALUE
+         MessageInterface::ShowMessage
+            ("In GmatCommand::CheckDataType(), realVal = %g\n", realVal);
+         #endif
+         if (GmatMathUtil::IsEqual(realVal, unsetValue, 1.0e-16))
+            throw CommandException(unsetValueErrMsg, Gmat::ERROR_);
+      }
+      catch (CommandException &ce)
+      {
+         // If exception thrown right above, re-throw
+         throw;
+      }
+      catch (BaseException &be)
+      {
+         throw CommandException("A value of \"" + desc + "\" of base type \"" +
+                  baseStr + "\" on command \"" + cmdName + 
+                  "\" cannot be evaluated.\n", Gmat::ERROR_);
+      }
    }
 }
 
@@ -3093,35 +3136,119 @@ void GmatCommand::ShowWrapper(const std::string &prefix, const std::string &titl
 //------------------------------------------------------------------------------
 void GmatCommand::ShowObjectMaps(const std::string &str)
 {
+   #ifdef DEBUG_OBJECT_MAP
    MessageInterface::ShowMessage("%s\n========================================"
          "==============================\n",
        str.c_str());
    MessageInterface::ShowMessage
-      ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>\n",
-       objectMap, globalObjectMap);
+      ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>, "
+       "currentFunction=<%p>'%s'\n", objectMap, globalObjectMap,
+       currentFunction, currentFunction ? currentFunction->GetName().c_str() : "NULL");
+   
+   GmatBase *obj = NULL;
+   GmatBase *paramOwner = NULL;
+   std::string objName;
+   std::string isGlobal;
+   std::string isLocal;
+   std::string paramOwnerType;
+   std::string paramOwnerName;
+   bool isParameter = false;
    
    if (objectMap)
    {
       MessageInterface::ShowMessage
-         ("Here is the local object map for %s:\n", this->GetTypeName().c_str());
+         ("Here is the local object map for %s: '%s'\n", this->GetTypeName().c_str(),
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str());
       for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
            i != objectMap->end(); ++i)
+      {
+         // MessageInterface::ShowMessage
+         //    ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+         //     i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         obj = i->second;
+         objName = i->first;
+         paramOwner = NULL;
+         isParameter = false;
+         isGlobal = "No";
+         isLocal = "No";
+         if (obj)
+         {
+            if (obj->IsGlobal())
+               isGlobal = "Yes";
+            if (obj->IsLocal())
+               isLocal = "Yes";
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               isParameter = true;
+               paramOwner = ((Parameter*)obj)->GetOwner();
+               if (paramOwner)
+               {
+                  paramOwnerType = paramOwner->GetTypeName();
+                  paramOwnerName = paramOwner->GetName();
+               }
+            }
+         }
          MessageInterface::ShowMessage
-            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+            ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+             obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+             isLocal.c_str());
+         if (isParameter)
+            MessageInterface::ShowMessage
+               ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                paramOwnerName.c_str());
+         else
+            MessageInterface::ShowMessage("\n");
+      }
    }
    if (globalObjectMap)
    {
       MessageInterface::ShowMessage
-         ("Here is the global object map for %s:\n", this->GetTypeName().c_str());
+         ("Here is the global object map for %s: '%s'\n", this->GetTypeName().c_str(),
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str());
       for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
            i != globalObjectMap->end(); ++i)
+      {
+         // MessageInterface::ShowMessage
+         //    ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+         //     i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         obj = i->second;
+         objName = i->first;
+         paramOwner = NULL;
+         isParameter = false;
+         isGlobal = "No";
+         isLocal = "No";
+         if (obj)
+         {
+            if (obj->IsGlobal())
+               isGlobal = "Yes";
+            if (obj->IsLocal())
+               isLocal = "Yes";
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               isParameter = true;
+               paramOwner = ((Parameter*)obj)->GetOwner();
+               if (paramOwner)
+               {
+                  paramOwnerType = paramOwner->GetTypeName();
+                  paramOwnerName = paramOwner->GetName();
+               }
+            }
+         }
          MessageInterface::ShowMessage
-            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+            ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+             obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+             isLocal.c_str());
+         if (isParameter)
+            MessageInterface::ShowMessage
+               ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                paramOwnerName.c_str());
+         else
+            MessageInterface::ShowMessage("\n");
+      }
    }
    MessageInterface::ShowMessage("============================================"
          "==========================\n");
+   #endif
 }
 
 
@@ -3280,7 +3407,7 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    #endif
    
    #ifdef DEBUG_OBJECT_MAP
-   ShowObjectMaps();
+   ShowObjectMaps("In GmatCommand::FindObject()");
    #endif
    
    // Check for SolarSystem (loj: 2008.06.25)

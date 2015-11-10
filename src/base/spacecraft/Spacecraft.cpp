@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -538,7 +548,6 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
        modelFileFullPath.c_str());
    #endif
    
-   modelScale = 3.0;
    modelID = NO_MODEL;
    
    #ifdef DEBUG_SPACECRAFT
@@ -732,6 +741,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
       ("Spacecraft::Spacecraft(=) <%p>'%s' entered\n", this, GetName().c_str());
    #endif
 
+   // Preserve teh maneuvering state through the cloning
+   bool iAmManeuvering = isManeuvering;
+
    SpaceObject::operator=(a);
 
    ownedObjectCount     = a.ownedObjectCount;
@@ -807,6 +819,15 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to delete all owned objects\n");
       #endif
+
+   // Preserve thrusters that are "turned on"
+   StringArray activeThrusters;
+   for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+   {
+      if (thrusters[i]->GetBooleanParameter("IsFiring"))
+         activeThrusters.push_back(thrusters[i]->GetName());
+   }
+
    DeleteOwnedObjects(true, true, true, true, true);
 
    // then cloned owned objects
@@ -815,6 +836,18 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
       #endif
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);              // made changes on 09/23/2014
+
+   for (UnsignedInt i = 0; i < activeThrusters.size(); ++i)
+   {
+      for (UnsignedInt j = 0; j < thrusters.size(); ++j)
+      {
+         if (thrusters[j]->GetName() == activeThrusters[i])
+            thrusters[j]->SetBooleanParameter("IsFiring", true);
+      }
+   }
+   
+   // Restore the maneuving state
+   isManeuvering = iAmManeuvering ;
 
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
@@ -1346,7 +1379,6 @@ void Spacecraft::RecordEphemerisData()
 {
    if (!ephemMgr)
    {
-//      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
       ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
       ephemMgr->SetObject(this);
       // @todo - do I need to resend this, if the internalCoordSys ever changes?
@@ -1689,7 +1721,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
-   refObjectTypes.push_back(Gmat::HARDWARE);
+   refObjectTypes.push_back(Gmat::HARDWARE);  // includes PowerSystem
    if (attitude)
    {
       ObjectTypeArray attRefObjTypes = attitude->GetRefObjectTypeArray();
@@ -1843,6 +1875,7 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
                      powerSystemName.c_str());
          #endif
          // Add Spacecraft Power System name
+         if (powerSystemName != "")
          fullList.push_back(powerSystemName);  // need to check power system for ref object names
          return fullList;
       }
@@ -1852,6 +1885,8 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
          fullList = tankNames;
          fullList.insert(fullList.end(), thrusterNames.begin(), thrusterNames.end());
          fullList.insert(fullList.end(), hardwareNames.begin(), hardwareNames.end());
+         if (powerSystemName != "")
+            fullList.push_back(powerSystemName);
          return fullList;
       }
 
@@ -5084,26 +5119,20 @@ bool Spacecraft::Initialize()
 
       if (powerSystem) powerSystem->Initialize();
 
-      if (!ephemMgr)
-      {
+//      if (!ephemMgr)
+//      {
 //         ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
-         ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
-         ephemMgr->SetObject(this);
-         // @todo - do I need to resend this, if the internalCoordSys ever changes?
-         ephemMgr->SetCoordinateSystem(internalCoordSystem);
-         ephemMgr->SetSolarSystem(solarSystem);
-         ephemMgr->Initialize();
-      }
+//         ephemMgr->SetObject(this);
+//         // @todo - do I need to resend this, if the internalCoordSys ever changes?
+//         ephemMgr->SetCoordinateSystem(internalCoordSystem);
+//         ephemMgr->SetSolarSystem(solarSystem);
+//         ephemMgr->Initialize();
+//      }
 
 
       isInitialized = true;
       retval = true;
    }
-
-   // *********** testing ************************
-//   RecordEphemerisData();    // ******************<<<<<<<<<<<<<<< for testing
-   // *********** testing ************************
-
    return retval;
 }
 

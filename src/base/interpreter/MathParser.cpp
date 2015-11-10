@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS task
 // 124.
@@ -767,12 +777,26 @@ MathNode* MathParser::ParseNode(const std::string &str)
       MessageInterface::ShowMessage
          ("   After removing extra parenthesis, str=<%s>\n", str1.c_str());
       #endif
-      mathNode = CreateNode("MathElement", str1);
-      #if DEBUG_PARSE_NODE
-      MessageInterface::ShowMessage
-         ("MathParser::Parse() <%s> is a math element, so returning "
-          "MathElement node <%p>\n", str1.c_str(), mathNode);
-      #endif
+      
+      // Check for GmatFunction with no parenthesis
+      if (IsGmatFunction(str1))
+      {
+         mathNode = CreateNode(str1, "");
+         #if DEBUG_PARSE_NODE
+         MessageInterface::ShowMessage
+            ("MathParser::Parse() <%s> is a GmatFunction, so returning "
+             "MathElement node <%p>\n", str.c_str(), mathNode);
+         #endif
+      }
+      else
+      {
+         mathNode = CreateNode("MathElement", str1);
+         #if DEBUG_PARSE_NODE
+         MessageInterface::ShowMessage
+            ("MathParser::Parse() <%s> is a math element, so returning "
+             "MathElement node <%p>\n", str1.c_str(), mathNode);
+         #endif
+      }
       return mathNode;
    }
    
@@ -836,7 +860,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
          {
             #if DEBUG_PARSE_NODE
             MessageInterface::ShowMessage
-               ("MathParser::ParseNode(<%s>) throwing Missing input arguments\n", str.c_str());
+               ("MathParser::ParseNode(<%s>) *** Throwing Exception: Missing input arguments\n", str.c_str());
             #endif
             throw MathException("Missing input arguments");
          }
@@ -880,7 +904,13 @@ MathNode* MathParser::ParseNode(const std::string &str)
          if (left == "")
          {
             if (IsMathFunction(op))
+            {
+               #if DEBUG_PARSE_NODE
+               MessageInterface::ShowMessage
+                  ("MathParser::ParseNode(<%s>) *** Throwing Exception: Missing input arguments\n", str.c_str());
+               #endif
                throw MathException(op + "() - Missing input arguments");
+            }
          }
          else
          {
@@ -898,7 +928,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
             if (op == "Add" || op == "Subtract" || op == "Multiply" || op == "Divide" || op == "Power")
             {
                MessageInterface::ShowMessage
-                  (">>>>> Throwing exception: %s() - Not enought input argumets\n", op.c_str());
+                  (">>>>> Throwing Exception: %s() - Not enought input argumets\n", op.c_str());
                throw MathException(op + "() - Not enough input arguments");
             }
          }
@@ -1233,12 +1263,21 @@ StringArray MathParser::Decompose(const std::string &str)
    // Catch missing operands here (Fix for GMT-2961 LOJ: 2012.02.23)
    if (items[0] != "" && items[1] == "" && items[2] == "")
    {
-      #if DEBUG_DECOMPOSE
-      MessageInterface::ShowMessage
-         ("MathParser::Decompose() *** Throwing Exception: %s - Missing arguments\n",
-          items[0].c_str());
-      #endif
-      throw MathException(items[0] + " - Missing input arguments");
+      if (IsParenPartOfFunction(items[0]))
+      {
+         #if DEBUG_DECOMPOSE
+         MessageInterface::ShowMessage("   ===> '%s' is a function\n", items[0].c_str());
+         #endif
+      }
+      else
+      {
+         #if DEBUG_DECOMPOSE
+         MessageInterface::ShowMessage
+            ("MathParser::Decompose() *** Throwing Exception: %s - Missing arguments\n",
+             items[0].c_str());
+         #endif
+         throw MathException(items[0] + " - Missing input arguments");
+      }
    }
    
    #if DEBUG_DECOMPOSE

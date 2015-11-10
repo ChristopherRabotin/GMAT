@@ -14,6 +14,7 @@ GmatLog.txt
 language.settings.xml
 GMAT
 Debug
+Linux*
 Release
 *.user
 /.settings/
@@ -25,3 +26,5 @@ CheckRepo.TestEntry
 *~
 *.swp
 *.md
+/temp/
+/WinBuild/

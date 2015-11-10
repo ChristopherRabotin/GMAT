@@ -1,4 +1,4 @@
-# $Id: OdEnv.mk 1337 2011-03-30 17:02:16Z djconway@NDC $
+# $Id: OdEnv.mk 1337 2011-03-30 17:02:16Z $
 
 GMAT_LIB_DIR = lib
 GMAT_PLUGIN_DIR = plugins

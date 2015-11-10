@@ -4,11 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -28,6 +36,7 @@
 #include "MessageInterface.hpp"
 #include <wx/filename.h>          // for wxFileName::
 
+//#define DEBUG_FUNCTIONPANEL_CREATE
 //#define DEBUG_FUNCTIONPANEL_LOAD
 //#define DEBUG_FUNCTIONPANEL_SAVE
 //#define DEBUG_FUNCTIONPANEL_BUTTON
@@ -50,16 +59,17 @@ END_EVENT_TABLE()
 /**
  * A constructor.
  *
- * @note We may have to consider deriving this class from the GmatSavePanel
  */
 //------------------------------------------------------------------------------
 FunctionSetupPanel::FunctionSetupPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent, true)
 {
-   #ifdef DEBUG_FUNCTIONPANEL_LOAD
+   #ifdef DEBUG_FUNCTIONPANEL_CREATE
    MessageInterface::ShowMessage
-      ("In FunctionSetupPanel() constructor, function name='%s'\n", name.c_str());
+      ("FunctionSetupPanel() constructor entered, function name='%s'\n", name.WX_TO_C_STRING);
    #endif
+
+   SetName("FunctionSetupPanel");
    
    mEnableLoad = false;
    mEnableSave = false;
@@ -77,6 +87,11 @@ FunctionSetupPanel::FunctionSetupPanel(wxWindow *parent, const wxString &name)
    
    Create();
    Show();
+   
+   #ifdef DEBUG_FUNCTIONPANEL_CREATE
+   MessageInterface::ShowMessage
+      ("FunctionSetupPanel() constructor leaving, function name='%s'\n", name.WX_TO_C_STRING);
+   #endif
 }
 
 
@@ -104,6 +119,10 @@ FunctionSetupPanel::~FunctionSetupPanel()
 //------------------------------------------------------------------------------
 void FunctionSetupPanel::SetEditorModified(bool isModified)
 {
+   #ifdef DEBUG_TEXT_CHANGE
+   MessageInterface::ShowMessage
+      ("FunctionSetupPanel::SetEditorModified() entered, isModified=%d\n", isModified);
+   #endif
    EnableUpdate(isModified);
    theOkButton->Enable(isModified); // note: theOKButton is the Save button
    mEditorModified = isModified;
@@ -115,6 +134,10 @@ void FunctionSetupPanel::SetEditorModified(bool isModified)
 //------------------------------------------------------------------------------
 void FunctionSetupPanel::Create()
 {
+   #ifdef DEBUG_FUNCTIONPANEL_CREATE
+   MessageInterface::ShowMessage("FunctionSetupPanel::Create() entered\n");
+   #endif
+   
    int bsize = 3; // border size
    
    //------------------------------------------------------
@@ -123,11 +146,17 @@ void FunctionSetupPanel::Create()
    
 #ifdef __USE_STC_EDITOR__
    mEditor = new ScriptEditor(this, true, -1, wxDefaultPosition, wxSize(700,400));
+   #ifdef DEBUG_FUNCTIONPANEL_CREATE
+   MessageInterface::ShowMessage("   mEditor created\n");
+   #endif
 #else
    mFileContentsTextCtrl = 
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
          wxSize(700,400), wxTE_MULTILINE | wxGROW | wxTE_DONTWRAP);
    mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
+   #ifdef DEBUG_FUNCTIONPANEL_CREATE
+   MessageInterface::ShowMessage("   mFileContentsTextCtrl created\n");
+   #endif
 #endif
    
    //------------------------------------------------------
@@ -151,6 +180,10 @@ void FunctionSetupPanel::Create()
    theCancelButton->SetLabel("Close");
    
    theOkButton->Disable();
+   
+   #ifdef DEBUG_FUNCTIONPANEL_CREATE
+   MessageInterface::ShowMessage("FunctionSetupPanel::Create() leaving\n");
+   #endif
 }
 
 
@@ -177,7 +210,7 @@ void FunctionSetupPanel::LoadData()
    #ifdef DEBUG_FUNCTIONPANEL_LOAD
    MessageInterface::ShowMessage
       ("FunctionSetupPanel::LoadData() mFullFunctionPath='%s'\n",
-       mFullFunctionPath.c_str());
+       mFullFunctionPath.WX_TO_C_STRING);
    #endif
    
    if (wxFileName::FileExists(mFullFunctionPath))
@@ -241,12 +274,21 @@ void FunctionSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void FunctionSetupPanel::OnTextUpdate(wxCommandEvent& event)
 {
+   #ifdef DEBUG_TEXT_CHANGE
+   MessageInterface::ShowMessage("FunctionSetupPanel::OnTextUpdate() entered\n");
+   #endif
    if (event.GetEventObject() == mFileContentsTextCtrl)
    {
+      #ifdef DEBUG_TEXT_UPDATE
+      MessageInterface::ShowMessage("   Event object is mFileContextsTextCtrl\n");
+      #endif
       mEnableSave = true;
       EnableUpdate(true);
       theOkButton->Enable();
    }
+   #ifdef DEBUG_TEXT_CHANGE
+   MessageInterface::ShowMessage("FunctionSetupPanel::OnTextUpdate() leaving\n");
+   #endif
 }
 
 //---------------------------------
@@ -324,7 +366,7 @@ void FunctionSetupPanel::OnSaveAs(wxCommandEvent &event)
 
    if (dialog.ShowModal() == wxID_OK)
    {
-      wxString path = dialog.GetPath().c_str();
+      wxString path = dialog.GetPath();
       
       if (GmatFileUtil::DoesFileExist(path.c_str()))
       {
@@ -334,7 +376,7 @@ void FunctionSetupPanel::OnSaveAs(wxCommandEvent &event)
       }
       
       #ifdef DEBUG_FUNCTIONPANEL_SAVE
-      MessageInterface::ShowMessage("   path='%s'\n", path.c_str());
+      MessageInterface::ShowMessage("   path='%s'\n", path.WX_TO_C_STRING);
       #endif
       
       theGmatFunction->SetStringParameter("FunctionPath", path.c_str());

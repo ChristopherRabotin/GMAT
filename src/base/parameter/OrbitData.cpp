@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -37,6 +47,7 @@
 
 //#define DEBUG_ORBITDATA_SET
 //#define DEBUG_ORBITDATA_GET
+//#define DEBUG_REF_OBJECT
 //#define DEBUG_ORBITDATA_INIT
 //#define DEBUG_ORBITDATA_CONVERT
 //#define DEBUG_ORBITDATA_RUN
@@ -102,9 +113,10 @@ const std::string OrbitData::VALID_OTHER_ORBIT_PARAM_NAMES[ENERGY - MM + 1] =
  * Constructor.
  */
 //------------------------------------------------------------------------------
-OrbitData::OrbitData(const std::string &name, Gmat::ObjectType paramOwnerType,
+OrbitData::OrbitData(const std::string &name, const std::string &typeName,
+                     Gmat::ObjectType paramOwnerType,
                      GmatParam::DepObject depObj, bool isSettable)
-   : RefData(name, paramOwnerType, depObj, isSettable),
+   : RefData(name, typeName, paramOwnerType, depObj, isSettable),
    stateTypeId (-1)
 {
    mCartEpoch     = 0.0;
@@ -1855,6 +1867,9 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
 }
 
 // The inherited methods from RefData
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
 std::string OrbitData::GetRefObjectName(const Gmat::ObjectType type) const
 {
    try
@@ -1891,6 +1906,9 @@ std::string OrbitData::GetRefObjectName(const Gmat::ObjectType type) const
    }
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
 const StringArray& OrbitData::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    RefData::GetRefObjectNameArray(type);
@@ -1932,12 +1950,26 @@ bool OrbitData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
 GmatBase* OrbitData::GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   #ifdef DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("OrbitData::GetRefObject() <%p>'%s' entered, type=%d, name='%s'\n", this,
+       mActualParamName.c_str(), type, name.c_str());
+   #endif
+   
    try
    {
       GmatBase* theObj = RefData::GetRefObject(type, name);
+      #ifdef DEBUG_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("OrbitData::GetRefObject() <%p>'%s' returning %s\n", this, mActualParamName.c_str(),
+          GmatBase::WriteObjectInfo("", theObj).c_str());
+      #endif
       return theObj;
    }
    catch (ParameterException &pe)
@@ -1946,28 +1978,45 @@ GmatBase* OrbitData::GetRefObject(const Gmat::ObjectType type,
       // list (or vice versa?), since we are looking for a Spacecraft
       // and a Spacecraft is a SpacePoint
       Gmat::ObjectType altType = type;
+      GmatBase *refObj = NULL;
       if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;
       for (int i=0; i<mNumRefObjects; i++)
       {
          if (mRefObjList[i].objType == altType)
          {
             if (name == "") //if name is "", return first object
-               return mRefObjList[i].obj;
-
+            {
+               refObj = mRefObjList[i].obj;
+               #ifdef DEBUG_REF_OBJECT
+               MessageInterface::ShowMessage
+                  ("OrbitData::GetRefObject() <%p>'%s' returning %s\n", this,
+                   mActualParamName.c_str(),
+                   GmatBase::WriteObjectInfo("", refObj).c_str());
+               #endif
+               //return mRefObjList[i].obj;
+               return refObj;
+            }
+            
             if ((name == "" || mRefObjList[i].objName == name) &&
                 (mRefObjList[i].obj)->IsOfType("Spacecraft"))
             {
                //Notes: will return first object name.
-               #ifdef DEBUG_ORBITDATA_OBJNAME
+               #ifdef DEBUG_REF_OBJECT
                MessageInterface::ShowMessage
-                  ("---> OrbitData::GetRefObject() altType=%d returning: %s\n", altType,
-                   mRefObjList[i].objName.c_str());
+                  ("---> OrbitData::GetRefObject() <%p>'%s' altType=%d returning: %s\n",
+                   this, mActualParamName.c_str(), altType, mRefObjList[i].objName.c_str());
                #endif
                return mRefObjList[i].obj;
             }
          }
       }
-
+      
+      #ifdef DEBUG_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("OrbitData::GetRefObject() <%p>'%s' rethrowing exception: %s\n",
+          this, mActualParamName.c_str(), pe.GetFullMessage().c_str());
+      #endif
+      
       throw;
    }
 }
@@ -1985,13 +2034,21 @@ GmatBase* OrbitData::GetRefObject(const Gmat::ObjectType type,
 bool OrbitData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name)
 {
+   #ifdef DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("OrbitData::SetRefObject() <%p>'%s' entered, obj=<%p>[%s]'%s', type=%d, "
+       "name='%s'\n", this, mActualParamName.c_str(), obj,
+       obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
+   #endif
+   
    // We need to be able to handle SpacePoints, not just Spacecraft
    Gmat::ObjectType useType = type;
    if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
        (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
        (type == Gmat::BARYCENTER)       || (type == Gmat::CELESTIAL_BODY))
       useType = Gmat::SPACE_POINT;
-
+   
    return RefData::SetRefObject(obj, useType, name);
 }
 

@@ -507,9 +507,6 @@
     <ClCompile Include="..\..\..\src\gui\command\ManageObjectPanel.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
@@ -536,6 +533,24 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp">
       <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GuiListenerManager.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Structure.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader3ds.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\SurfaceBase.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.cpp">
+      <Filter>Source Files\subscriber</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -980,9 +995,6 @@
     <ClInclude Include="..\..\..\src\gui\command\ManageObjectPanel.hpp">
       <Filter>Source Files\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.hpp">
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
@@ -1009,6 +1021,24 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp">
       <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GuiListenerManager.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Structure.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader3ds.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\SurfaceBase.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.hpp">
+      <Filter>Source Files\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

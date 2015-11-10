@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under NASA Prime
 // Contract NNG10CP02C, Task Order 28
@@ -32,11 +42,12 @@
 #include "TimeSystemConverter.hpp"
 #include "GregorianDate.hpp"
 #include "MessageInterface.hpp"
-//#include "EphemManager.hpp"
+#include "RealUtilities.hpp"
+#include "EphemManager.hpp"
 
 
 //#define DEBUG_DUMPEVENTDATA
-//#define DEBUG_EVENTLOCATION
+//#define DEBUG_LOCATE_EVENTS
 //#define DEBUG_EVENT_INITIALIZATION
 //#define DEBUG_OBJECTS
 //#define DEBUG_DATE_FORMAT
@@ -46,6 +57,7 @@
 //#define DEBUG_EVENTLOCATOR_SET
 //#define DEBUG_EVENTLOCATOR_GET
 //#define DEBUG_EVENTLOCATOR_COPY
+//#define DEBUG_EVENT_EPOCH_STRING
 
 #ifdef DEBUG_DUMPEVENTDATA
    #include <fstream>
@@ -70,7 +82,6 @@ EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
    "WriteReport",          // WRITE_REPORT
    "RunMode",              // RUN_MODE
    "UseEntireInterval",    // USE_ENTIRE_INTERVAL
-//   "AppendToReport",       // APPEND_TO_REPORT *** this may be an input to the FindEvents command instead
 };
 
 const Gmat::ParameterType
@@ -88,7 +99,6 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
    Gmat::BOOLEAN_TYPE,     // WRITE_REPORT
    Gmat::ENUMERATION_TYPE, // RUN_MODE
    Gmat::BOOLEAN_TYPE,     // USE_ENTIRE_INTERVAL
-//   Gmat::BOOLEAN_TYPE,     // APPEND_TO_REPORT *** this may be an input to the FindEvents command instead
 };
 
 const std::string EventLocator::RUN_MODES[3] =
@@ -99,6 +109,10 @@ const std::string EventLocator::RUN_MODES[3] =
 };
 
 const Integer EventLocator::numModes = 3;
+
+const std::string EventLocator::defaultFormat        = "TAIModJulian";
+const Real        EventLocator::defaultInitialEpoch  = 21545;
+const Real        EventLocator::defaultFinalEpoch    = 21545.138;
 
 // Used for light-time calculations
 const Real EventLocator::STEP_MULTIPLE = 0.5;
@@ -123,18 +137,19 @@ EventLocator::EventLocator(const std::string &typeStr,
    GmatBase                (Gmat::EVENT_LOCATOR, typeStr, nomme),
    filename                (""),
    fileWasWritten          (false),
-   useLightTimeDelay       (false),
-   useStellarAberration    (false),
+   useLightTimeDelay       (true),
+   useStellarAberration    (true),
    writeReport             (true),
+   locatingString          (""),
    runMode                 ("Automatic"),
    useEntireInterval       (true),
    appendReport            (false),
    epochFormat             ("TAIModJulian"),
-   initialEpoch            ("21545"),
-   finalEpoch              ("21545.138"),
+   initialEpoch            ("21545"),        // MUST match initialEp
+   finalEpoch              ("21545.138"),    // MUST match finalEp
    stepSize                (10.0),
-   initialEp               (0.0),
-   finalEp                 (0.0),
+   initialEp               (defaultInitialEpoch),
+   finalEp                 (defaultFinalEpoch),
    fromEpoch               (0.0),
    toEpoch                 (0.0),
    findStart               (0.0),
@@ -143,7 +158,10 @@ EventLocator::EventLocator(const std::string &typeStr,
    scNow                   (0.0),
    satName                 (""),
    sat                     (NULL),
-   solarSys                (NULL)
+   solarSys                (NULL),
+   em                      (NULL),
+   initialEpochSet         (false),
+   finalEpochSet           (false)
 {
    objectTypes.push_back(Gmat::EVENT_LOCATOR);
    objectTypeNames.push_back("EventLocator");
@@ -155,8 +173,7 @@ EventLocator::EventLocator(const std::string &typeStr,
    occultingBodyNames.clear();
    occultingBodies.clear();
    defaultOccultingBodies.clear();
-   defaultOccultingBodies.push_back("Earth");
-   defaultOccultingBodies.push_back("Luna");
+   // default occulting bodies are set in the leaf classes
 }
 
 
@@ -199,6 +216,7 @@ EventLocator::EventLocator(const EventLocator& el) :
    useStellarAberration    (el.useStellarAberration),
    writeReport             (el.writeReport),
    runMode                 (el.runMode),
+   locatingString          (el.locatingString),
    useEntireInterval       (el.useEntireInterval),
    appendReport            (el.appendReport),
    epochFormat             (el.epochFormat),
@@ -215,7 +233,10 @@ EventLocator::EventLocator(const EventLocator& el) :
    scNow                   (el.scNow),
    satName                 (el.satName),
    sat                     (NULL),
-   solarSys                (el.solarSys)
+   solarSys                (el.solarSys),
+   em                      (NULL),
+   initialEpochSet         (el.initialEpochSet),
+   finalEpochSet           (el.finalEpochSet)
 {
    occultingBodyNames.clear();
    occultingBodies.clear();
@@ -258,6 +279,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       useStellarAberration = el.useStellarAberration;
       writeReport          = el.writeReport;
       runMode              = el.runMode;
+      locatingString       = el.locatingString;
       useEntireInterval    = el.useEntireInterval;
       appendReport         = el.appendReport;
       epochFormat          = el.epochFormat;
@@ -273,8 +295,11 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       scStart              = el.scStart;
       scNow                = el.scNow;
       satName              = el.satName;
-      sat                  = NULL;
+      sat                  = el.sat;     // NULL;
       solarSys             = el.solarSys;
+      em                   = NULL;
+      initialEpochSet      = el.initialEpochSet;
+      finalEpochSet        = el.finalEpochSet;
 
       occultingBodyNames.clear();
       occultingBodies.clear();
@@ -398,8 +423,6 @@ std::string EventLocator::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool EventLocator::IsParameterReadOnly(const Integer id) const
 {
-//   if (id == APPEND_TO_REPORT)
-//      return true;
 
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -553,9 +576,15 @@ std::string EventLocator::GetStringParameter(const Integer id) const
    if (id == INPUT_EPOCH_FORMAT)
       return epochFormat;
    if (id == INITIAL_EPOCH)
-      return initialEpoch;
+   {
+//      return initialEpoch;
+      return GetEpochString("INITIAL", epochFormat);
+   }
    if (id == FINAL_EPOCH)
-      return finalEpoch;
+   {
+//      return finalEpoch;
+      return GetEpochString("FINAL", epochFormat);
+   }
    if (id == RUN_MODE)
       return runMode;
 
@@ -726,15 +755,27 @@ bool EventLocator::SetStringParameter(const Integer id,
 {
    if (id == OCCULTING_BODIES)
    {
-      if (index < (Integer) occultingBodyNames.size())
+      if (find(occultingBodyNames.begin(), occultingBodyNames.end(), value) == occultingBodyNames.end())
       {
-         occultingBodyNames.at(index) = value;
-         return true;
+         if (index < (Integer) occultingBodyNames.size())
+         {
+            occultingBodyNames.at(index) = value;
+            return true;
+         }
+         else
+         {
+            occultingBodyNames.push_back(value);
+            return true;
+         }
       }
       else
       {
-         occultingBodyNames.push_back(value);
+         // ignore duplicate occulting body names, for now
          return true;
+//         std::string errmsg = "Occulting Body ";
+//         errmsg += value + " is already in list for EventLocator ";
+//         errmsg += instanceName + ".  Each body must be listed only once.\n";
+//         throw EventException(errmsg);
       }
    }
 
@@ -927,8 +968,6 @@ bool EventLocator::GetBooleanParameter(const Integer id) const
       return writeReport;
    if (id == USE_ENTIRE_INTERVAL)
       return useEntireInterval;
-//   if (id == APPEND_TO_REPORT)
-//      return appendReport;
 
    return GmatBase::GetBooleanParameter(id);
 }
@@ -968,11 +1007,6 @@ bool EventLocator::SetBooleanParameter(const Integer id, const bool value)
       useEntireInterval = value;
       return true;
    }
-//   if (id == APPEND_TO_REPORT)
-//   {
-//      appendReport = value;
-//      return true;
-//   }
 
    return GmatBase::SetBooleanParameter(id, value);
 }
@@ -1214,8 +1248,8 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
 {
    #ifdef DEBUG_DATE_FORMAT
    MessageInterface::ShowMessage
-      ("EventLocator::SetEpoch() Setting epoch (%d) for spacecraft %s to \"%s\"\n",
-       id, instanceName.c_str(), ep.c_str());
+      ("EventLocator::SetEpoch() Setting %s epoch (%d) for spacecraft %s to \"%s\"\n",
+       (id == INITIAL_EPOCH? "Initial ":"Final "), id, instanceName.c_str(), ep.c_str());
    #endif
 
    std::string epochString = "";
@@ -1223,6 +1257,11 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
    std::string timeSystem;
    std::string timeFormat;
    TimeConverterUtil::GetTimeSystemAndFormat(epochFormat, timeSystem, timeFormat);
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage("epochFormat = %s\n", epochFormat.c_str());
+      MessageInterface::ShowMessage("timeSystem  = %s\n", timeSystem.c_str());
+      MessageInterface::ShowMessage("timeFormat  = %s\n", timeFormat.c_str());
+   #endif
    if (timeFormat == "ModJulian") // numeric - save and output without quotes
       epochString = GmatStringUtil::RemoveEnclosingString(ep, "'");
    else // "Gregorian" - not numeric - save and output with quotes
@@ -1245,39 +1284,59 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
                              "A1ModJulian", epochAsReal, outStr);
    if (id == INITIAL_EPOCH)
    {
-      initialEpoch = epochString;
-      initialEp    = epochAsReal;
+      initialEpoch    = epochString;
+      initialEp       = epochAsReal;
+      initialEpochSet = true;
    }
    else  // FINAL_EPOCH
    {
-      finalEpoch   = epochString;
-      finalEp      = epochAsReal;
+      finalEpoch    = epochString;
+      finalEp       = epochAsReal;
+      finalEpochSet = true;
    }
    #ifdef DEBUG_DATE_FORMAT
    MessageInterface::ShowMessage
       ("EventLocator::SetEpoch() Setting epoch (A1Mjd) to %12.15f\n",
       epochAsReal);
+   MessageInterface::ShowMessage
+      ("EventLocator::SetEpoch() Setting epoch (as string) to %s\n",
+            epochString.c_str());
    #endif
 }
 
 //------------------------------------------------------------------------------
-// std::string GetEpochString(const std::string whichOne = "INITIAL")
+// std::string GetEpochString(const std::string &whichOne  = "INITIAL",
+//                            const std::string &outFormat = "UTCGregorian")
 //------------------------------------------------------------------------------
-std::string EventLocator::GetEpochString(const std::string whichOne)
+std::string EventLocator::GetEpochString(const std::string &whichOne,
+                                         const std::string &outFormat) const
 {
+#ifdef DEBUG_EVENT_EPOCH_STRING
+   MessageInterface::ShowMessage("In GetEpochString, initialEpoch = %s\n",
+         initialEpoch.c_str());
+   MessageInterface::ShowMessage("In GetEpochString, finalEpoch = %s\n",
+         finalEpoch.c_str());
+#endif
    Real outMjd = -999.999;
    std::string outStr;
-   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
+   std::string outputFormat = outFormat;
+//   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
 
    if (whichOne == "INITIAL")
    {
-      TimeConverterUtil::Convert("A1ModJulian", initialEp, "",
-                                 outputFormat, outMjd, outStr);
+      if ((outFormat == defaultFormat) && GmatMathUtil::IsEqual(initialEp, defaultInitialEpoch))
+         outStr =  initialEpoch;
+      else
+         TimeConverterUtil::Convert("A1ModJulian", initialEp, "",
+                                     outputFormat, outMjd, outStr);
    }
    else if (whichOne == "FINAL")
    {
-      TimeConverterUtil::Convert("A1ModJulian", finalEp, "",
-                                 outputFormat, outMjd, outStr);
+      if ((outFormat == defaultFormat) && GmatMathUtil::IsEqual(finalEp, defaultFinalEpoch))
+         outStr =  finalEpoch;
+      else
+         TimeConverterUtil::Convert("A1ModJulian", finalEp, "",
+                                     outputFormat, outMjd, outStr);
    }
    else
       return "";
@@ -1565,20 +1624,23 @@ bool EventLocator::Initialize()
       MessageInterface::ShowMessage("    Final   epoch is \"%s\"\n", finalEpoch.c_str());
    #endif
 
-      // Make sure the epochs are set and Real epochs computed
-   SetEpoch(initialEpoch, INITIAL_EPOCH);
-   SetEpoch(finalEpoch,   FINAL_EPOCH);
-
-   // Validate inputs here
-   if (initialEp > finalEp)
-   {
-      std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
-      errmsg += instanceName + ".\n";
-      throw EventException(errmsg);
-   }
-
-   fromEpoch = initialEp;
-   toEpoch   = finalEp;
+////      // Make sure the epochs are set and Real epochs computed
+////   SetEpoch(initialEpoch, INITIAL_EPOCH);
+////   SetEpoch(finalEpoch,   FINAL_EPOCH);
+////   #ifdef DEBUG_EVENT_INITIALIZATION
+////      MessageInterface::ShowMessage("Epochs Initialized!!!!\n");
+////   #endif
+//
+//   // Validate inputs here
+//   if (initialEp > finalEp)
+//   {
+//      std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
+//      errmsg += instanceName + ".\n";
+//      throw EventException(errmsg);
+//   }
+//
+//   fromEpoch = initialEp;
+//   toEpoch   = finalEp;
 
    if (!sat)
    {
@@ -1612,7 +1674,7 @@ bool EventLocator::Initialize()
    if (occultingBodyNames.size() < 1)
    {
       // Use default list here
-      for (Integer ii = 0; ii < 2; ii++)
+      for (Integer ii = 0; ii < defaultOccultingBodies.size(); ii++)
          occultingBodyNames.push_back(defaultOccultingBodies[ii]);
    }
 
@@ -1623,10 +1685,10 @@ bool EventLocator::Initialize()
       throw EventException(errmsg);
    }
 
-   // For now, call this method here to load the planetary PCKs
-   #ifdef __USE_SPICE__
-      solarSys->LoadPCKs();
-   #endif
+//   // For now, call this method here to load the planetary PCKs
+//   #ifdef __USE_SPICE__
+//      solarSys->LoadPCKs();
+//   #endif
 
    #ifdef DEBUG_EVENT_INITIALIZATION
       MessageInterface::ShowMessage(">>> About to tell spacecraft to record its data ...\n");
@@ -1637,9 +1699,8 @@ bool EventLocator::Initialize()
       sat->RecordEphemerisData();
    }
 
-
    fileWasWritten = false;
-   isInitialized = true;
+   isInitialized  = true;
 
    scStart = sat->GetEpoch();
 
@@ -1698,20 +1759,137 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
 
    if (runMode != "Disabled")
    {
+      // First, need to validate initial and final epochs here ...
+      //      // Make sure the epochs are set and Real epochs computed
+      //   SetEpoch(initialEpoch, INITIAL_EPOCH);
+      //   SetEpoch(finalEpoch,   FINAL_EPOCH);
+      //   #ifdef DEBUG_EVENT_INITIALIZATION
+      //      MessageInterface::ShowMessage("Epochs Initialized!!!!\n");
+      //   #endif
+
+      /// Get the ephem manager from the spacecraft, if we don't have it already
+      if (!em)
+      {
+         em  = sat->GetEphemManager();
+         if (!em)
+         {
+            std::string errmsg = "ERROR - no EphemManager available for spacecraft ";
+            errmsg += sat->GetName() + "!!\n";
+            throw EventException(errmsg);
+         }
+      }
+
       // Stop the data recording so that the kernel will be loaded
       sat->ProvideEphemerisData();
 
+      Real coverageBegin;
+      Real coverageEnd;
+      scNow = sat->GetEpoch();
+      em->GetCoverage(initialEp, finalEp, useEntireInterval, true,
+                      findStart, findStop, coverageBegin, coverageEnd);
+      #ifdef DEBUG_TIME_SPENT
+      Real timeSpent = (Real) (clock() - t);
+      MessageInterface::ShowMessage(" --- time spent in GetCoverage = %12.10f (sec)\n",
+            (timeSpent / CLOCKS_PER_SEC));
+      #endif
+      #ifdef DEBUG_LOCATE_EVENTS
+         MessageInterface::ShowMessage("---- findStart (from ephemManager)  = %12.10f\n", findStart);
+         MessageInterface::ShowMessage("---- findStop (from ephemManager)   = %12.10f\n", findStop );
+      #endif
+      if (GmatMathUtil::IsEqual(findStart,0.0) && GmatMathUtil::IsEqual(findStop,0.0))
+      {
+         // ... in case there were no files to read from, we'll just use the
+         // beginning and current spacecraft times
+         findStart     = scStart;
+         findStop      = scNow;
+         coverageBegin = scStart;
+         coverageEnd   = scNow;
+      }
+      #ifdef DEBUG_LOCATE_EVENTS
+      MessageInterface::ShowMessage("---- findStart      = %12.10f\n", findStart);
+      MessageInterface::ShowMessage("---- findStop       = %12.10f\n", findStop );
+      MessageInterface::ShowMessage("---- coverageBegin  = %12.10f\n", coverageBegin);
+      MessageInterface::ShowMessage("---- coverageEnd    = %12.10f\n", coverageEnd );
+      MessageInterface::ShowMessage("---- initialEp      = %12.10f\n", initialEp);
+      MessageInterface::ShowMessage("---- finalEp        = %12.10f\n", finalEp );
+      #endif
+
+      // Validate inputs here
+      if (initialEp > finalEp)
+      {
+         std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
+         errmsg += instanceName + ".\n";
+         throw EventException(errmsg);
+      }
+      // Validate initialEpoch and finalEpoch against available range of data (coverageBegin:coverageEnd)
+      Real oneMillisecond = (1.0 / GmatTimeConstants::SECS_PER_DAY) / 1000.00;
+      if (!useEntireInterval)
+      {
+         if (initialEpochSet && (initialEp < (coverageBegin - oneMillisecond)))
+         {
+            std::string errmsg = "Initial Epoch must be after the beginning of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (initialEpochSet && (initialEp > (coverageEnd + oneMillisecond)))
+         {
+            std::string errmsg = "Initial Epoch must be before the end of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (finalEpochSet && (finalEp < (coverageBegin - oneMillisecond)))
+         {
+            std::string errmsg = "Final Epoch must be after the beginning of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (finalEpochSet && (finalEp > (coverageEnd + oneMillisecond)))
+         {
+            std::string errmsg = "Final Epoch must be before the end of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+      }
+
+      fromEpoch = initialEp;
+      toEpoch   = finalEp;
+//
+//      // Stop the data recording so that the kernel will be loaded
+//      sat->ProvideEphemerisData();
+
+      // write the 'running'message each time location is performed
+      MessageInterface::ShowMessage(locatingString);
+
       // Locate events in derived class and store them as you have decided to do so
       FindEvents();
+      #ifdef DEBUG_EVENTLOCATOR_DATA
+         MessageInterface::ShowMessage("In EL::LocateEvents, after FindEvents.  About to write the report (%s) ...\n",
+               (writeReport? "true":"false"));
+      #endif
 
       // Write the report
       // appendReport should already have been set by a call to SetAppend
       if (writeReport)
       {
          bool wasOK = ReportEventData(reportNotice);
+         #ifdef DEBUG_EVENTLOCATOR_DATA
+            MessageInterface::ShowMessage("In EL::LocateEvents, after ReportEventData (wasOK = %s) ...\n",
+                  (wasOK? "true":"false"));
+         #endif
          if (wasOK) fileWasWritten = true;
       }
    }
+   #ifdef DEBUG_EVENTLOCATOR_DATA
+      MessageInterface::ShowMessage("LEAVING EL::LocateEvents ...\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1961,4 +2139,11 @@ std::string EventLocator::GetNoEventsString(const std::string &forType)
    return noEvents;
 }
 
+void EventLocator::SetLocatingString(const std::string &forType)
+{
+   locatingString  = "Finding events for ";
+   locatingString += forType + " ";
+   locatingString += instanceName + " ...\n";
+   locatingString += "Celestial body properties are provided by SPICE kernels.\n";
+}
 

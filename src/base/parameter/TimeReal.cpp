@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -22,8 +32,10 @@
 
 #include "TimeReal.hpp"
 #include "ParameterException.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_TIMEREAL 1
+//#define DEBUG_REF_OBJECT 1
 
 //---------------------------------
 // public methods
@@ -49,7 +61,7 @@ TimeReal::TimeReal(const std::string &name, const std::string &typeStr,
                    Gmat::ObjectType paramOwnerType)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
          GmatParam::NO_DEP, paramOwnerType, true, isSettable),
-     TimeData(name, paramOwnerType)
+     TimeData(name, typeStr, paramOwnerType)
 {
    AddRefObject(obj);
 }
@@ -195,9 +207,25 @@ bool TimeReal::Validate()
 //------------------------------------------------------------------------------
 bool TimeReal::Initialize()
 {
-   mInitialEpoch = 0.0;
-   mIsInitialEpochSet = false;
-
+   #if DEBUG_TIMEREAL
+   MessageInterface::ShowMessage
+      ("TimeReal::Initialize() <%p>'%s' entered, IsGlobal=%d\n", this,
+       GetName().c_str(), IsGlobal());
+   #endif
+   
+   RealVar::Initialize();
+   
+   // Set Parameter pointer (LOJ: 2015.07.24)
+   SetParameter(this);
+   
+   // Reset initial epoch and flag unless it is global
+   // for fix of GMT5160 LOJ: 2015.07.24)
+   if (!IsGlobal())
+   {
+      mInitialEpoch = 0.0;
+      mIsInitialEpochSet = false;
+   }
+   
    try
    {
       InitializeRefObjects();
@@ -214,6 +242,10 @@ bool TimeReal::Initialize()
          ("WARNING:  " + e.GetFullMessage() + " in " + GetName() + "\n");
    }
    
+   #if DEBUG_TIMEREAL
+   MessageInterface::ShowMessage
+      ("TimeReal::Initialize() <%p>'%s' returning true", this, GetName().c_str());
+   #endif
    return true;
 }
 
@@ -323,6 +355,43 @@ GmatBase* TimeReal::GetRefObject(const Gmat::ObjectType type,
 bool TimeReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name)
 {
-   return TimeData::SetRefObject(obj, type, name);
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("TimeReal::SetRefObject() <%p>'%s' entered, obj=<%p><%s>'%s', type=%d, name='%s'\n",
+       this, this->GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
+   #endif
+   
+   if (obj == NULL)
+   {
+      #if DEBUG_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("TimeReal::SetRefObject() <%p>'%s' just returning false, obj is NULL\n",
+          this, this->GetName().c_str());
+      #endif
+      return false;
+   }
+   
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("   mParamOwnerName='%s', Is%sGlobal=%d, Is%sLocal=%d\n", mParamOwnerName.c_str(),
+       name.c_str(), obj->IsGlobal(), name.c_str(), obj->IsLocal());
+   #endif
+   
+   // Set owner object for Parameter here (LOJ: 2015.08.05)
+   if (obj->GetName() == mParamOwnerName)
+      SetOwner(obj);
+   
+   bool setOk = TimeData::SetRefObject(obj, type, name);
+   
+   #if DEBUG_REF_OBJECT
+   GmatBase *paramOwner = GetOwner();
+   MessageInterface::ShowMessage(WriteObjectInfo("paramOwner=", paramOwner);
+   MessageInterface::ShowMessage
+      ("TimeReal::SetRefObject() <%p>'%s' returning %d\n", this,
+       this->GetName().c_str(), setOk);
+   #endif
+   
+   return setOk;
 }
 
