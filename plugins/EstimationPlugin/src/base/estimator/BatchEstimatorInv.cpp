@@ -34,6 +34,7 @@
 //#define DEBUG_O_MINUS_C
 //#define DEBUG_SCHUR
 //#define DEBUG_INVERSION
+//#define DEBUG_STM
 
 //------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
@@ -430,6 +431,19 @@ void BatchEstimatorInv::Accumulate()
             // Temporary buffer for non-scalar measurements; hMeas is used to build
             // the information matrix below.
             std::vector<RealArray> hMeas;
+
+            #ifdef DEBUG_STM
+               MessageInterface::ShowMessage("STM:\n");
+               for (UnsignedInt j = 0; j < stateMap->size(); ++j)
+               {
+                  MessageInterface::ShowMessage("      [");
+                  for (UnsignedInt k = 0; k < stateMap->size(); ++k)
+                  {
+                     MessageInterface::ShowMessage("  %le  ", (*stm)(j,k));
+                  }
+                  MessageInterface::ShowMessage("]\n");
+               }
+            #endif
 
             Real entry;
             for (UnsignedInt i = 0; i < hTilde.size(); ++i)
