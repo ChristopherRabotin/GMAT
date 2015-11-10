@@ -98,6 +98,7 @@
 //#define DUMP_INITIAL_STATE_DERIVATIVES_ONLY
 
 #define TEMPORARILY_DISABLE_CR_RANGE_CHECK
+#define TEMPORARILY_DISABLE_CD_RANGE_CHECK
 
 
 //#ifndef DEBUG_MEMORY
@@ -2242,9 +2243,11 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                
                // ... Coefficient of drag ...
                parm = sat->GetRealParameter(satIds[3]);
+#ifndef TEMPORARILY_DISABLE_CD_RANGE_CHECK
                if ((parm < 0) && constrainCd)
                   throw ODEModelException("Drag coefficient (Cd) is less than zero for Spacecraft \"" +
                                     sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
+#endif
                pm->SetSatelliteParameter(i, "Cd", parm, satIds[3]);
                
                // ... Drag area ...
@@ -2370,9 +2373,11 @@ Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
 
             // ... Cd ...
             parm = sat->GetRealParameter(satIds[3]);
+#ifndef TEMPORARILY_DISABLE_CD_RANGE_CHECK
             if ((parm < 0) && constrainCd)
                throw ODEModelException("Cd parameter unphysical on object " +
                   sat->GetName());
+#endif
             pm->SetSatelliteParameter(i, satIds[3], parm);
 
             // ... Cr ...
@@ -2588,7 +2593,6 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
          throw ODEModelException("Derivative " + (*i)->GetTypeName() + " failed\n");
 
          return false;
-
       }
       
       #ifdef DEBUG_ODEMODEL_EXE
