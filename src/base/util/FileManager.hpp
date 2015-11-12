@@ -219,6 +219,8 @@ public:
    // Plug-in code
    const StringArray& GetPluginList();
    
+   void AdjustSettings(const std::string &suffix, const StringArray &forEntries);
+
 private:
    
    enum FunctionType

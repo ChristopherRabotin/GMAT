@@ -2819,6 +2819,58 @@ const StringArray& FileManager::GetPluginList()
    return mPluginList;
 }
 
+
+//------------------------------------------------------------------------------
+// void AdjustSettings(const std::string &suffix, const StringArray &forEntries)
+//------------------------------------------------------------------------------
+/**
+ * Appends a suffix to a list of settings stored in the file manager
+ *
+ * @param suffix The suffix to be appended to the setting
+ * @param forEntries A list of entries that receive the suffix
+ */
+//------------------------------------------------------------------------------
+void FileManager::AdjustSettings(const std::string &suffix,
+      const StringArray &forEntries)
+{
+   std::string temp;
+   for (UnsignedInt i = 0; i < forEntries.size(); ++i)
+   {
+      // Adjust if path
+      temp = mPathMap[forEntries[i]];
+      if (temp != "")
+      {
+         std::string trailingSlash = "";
+         if ((temp[temp.length()-1] == '/') || (temp[temp.length()-1] == '\\'))
+         {
+            trailingSlash = temp.substr(temp.length()-1);
+            temp = temp.substr(0, temp.length()-1);
+         }
+         temp += suffix;
+         temp += trailingSlash;
+         mPathMap[forEntries[i]] = temp;
+      }
+      else // Adjust if file
+      {
+         FileInfo *tempFI = mFileMap[forEntries[i]];
+         temp = tempFI->mFile;
+         std::string extension = "";
+
+         if (temp.find(".") != std::string::npos)
+         {
+            extension = temp.substr(temp.find("."));
+            temp = temp.substr(0, temp.find("."));
+         }
+
+         if (temp != "")
+         {
+            temp += suffix + extension;
+            tempFI->mFile = temp;
+         }
+      }
+   }
+}
+
 //---------------------------------
 // private methods
 //---------------------------------
