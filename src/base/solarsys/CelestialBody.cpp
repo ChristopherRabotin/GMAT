@@ -897,8 +897,7 @@ Rvector6 CelestialBody::GetLastState()
  * initial state time.
  */
 //------------------------------------------------------------------------------
-const Real CelestialBody::GetFirstStateTime()
-{
+Real CelestialBody::GetFirstStateTime(){
    Real retval = -999.0;
    switch (posVelSrc)
    {

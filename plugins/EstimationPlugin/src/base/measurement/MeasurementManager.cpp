@@ -748,8 +748,7 @@ const StringArray& MeasurementManager::GetMeasurementNames() const
  * @return The ID for model
  */
 //-----------------------------------------------------------------------------
-const Integer MeasurementManager::GetMeasurementId(
-		const std::string &modelName) const
+Integer MeasurementManager::GetMeasurementId(		const std::string &modelName) const
 {
    Integer foundId = -1;
 

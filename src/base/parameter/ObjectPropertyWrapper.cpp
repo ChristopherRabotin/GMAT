@@ -714,8 +714,7 @@ bool ObjectPropertyWrapper::SetObject(GmatBase *obj)
  * @return The ID
  */
 //------------------------------------------------------------------------------
-const Integer ObjectPropertyWrapper::GetPropertyId()
-{
+Integer ObjectPropertyWrapper::GetPropertyId(){
    return propID;
 }
 

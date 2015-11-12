@@ -82,8 +82,7 @@ public:
    virtual std::string  GetTimeSystemName(const std::string& forField);
 
    const std::string    GetObjectParameterName(const std::string& forField);
-   const readerDataType GetReaderDataType(const std::string& forField);
-
+   readerDataType       GetReaderDataType(const std::string& forField);
 protected:
    /// Array of the data fields the user has selected
    StringArray selectedFields;
