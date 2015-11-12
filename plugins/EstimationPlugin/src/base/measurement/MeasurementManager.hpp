@@ -75,8 +75,7 @@ public:
    void                    AddMeasurementName(std::string measName);
    GmatBase*               GetClone(GmatBase *obj);
    const StringArray&      GetMeasurementNames() const;
-   const Integer           GetMeasurementId(const std::string &modelName) const;
-   const StringArray&      GetParticipantList();
+   Integer                 GetMeasurementId(const std::string &modelName) const;   const StringArray&      GetParticipantList();
    Integer                 Calculate(const Integer measurementToCalc,
                                      bool withEvents = false);
    const MeasurementData*  GetMeasurement(const Integer measurementToGet);

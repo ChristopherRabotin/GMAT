@@ -209,8 +209,7 @@ const CoordinateSystem& CoordinateSystem::operator=(
  * @return true if "this" is the same as the input coordSys
  */
 //---------------------------------------------------------------------------
-const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
-{
+bool CoordinateSystem::operator==(const CoordinateSystem &coordSys){
    if (&coordSys == this)
       return true;
 

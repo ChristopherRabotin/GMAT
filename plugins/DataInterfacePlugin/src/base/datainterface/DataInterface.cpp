@@ -669,8 +669,7 @@ const std::string DataInterface::GetObjectParameterName(
  * @return The readerDataType for the field.
  */
 //------------------------------------------------------------------------------
-const DataReader::readerDataType DataInterface::GetReaderParameterType(
-      const std::string& forField)
+DataReader::readerDataType DataInterface::GetReaderParameterType(      const std::string& forField)
 {
    DataReader::readerDataType theType = DataReader::READER_UNKNOWN;
 

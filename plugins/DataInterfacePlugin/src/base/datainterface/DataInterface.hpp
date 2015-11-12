@@ -94,8 +94,7 @@ public:
    const StringArray&   GetSupportedFieldNames() const;
    bool                 WasDataLoaded(const std::string& forField);
    const std::string    GetObjectParameterName(const std::string& forField);
-   const DataReader::readerDataType
-                        GetReaderParameterType(const std::string& forField);
+   DataReader::readerDataType                        GetReaderParameterType(const std::string& forField);
 
    virtual Integer      Open(const std::string &name = "");
    virtual bool         LoadData() = 0;
