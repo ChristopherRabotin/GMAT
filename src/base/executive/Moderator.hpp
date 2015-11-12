@@ -86,7 +86,8 @@ class GMAT_API Moderator
 public:
 
    static Moderator* Instance();
-   bool Initialize(const std::string &startupFile = "", bool isFromGui = false);
+   bool Initialize(const std::string &startupFile = "", bool isFromGui = false,
+         const std::string &suffix = "", const StringArray *forEntries = NULL);
    void Finalize();
    void SetRunReady(bool flag = true);
    void SetShowFinalState(bool flag = true);
