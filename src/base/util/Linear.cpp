@@ -485,11 +485,13 @@ std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
    
    if (isShowPointSet)
       ss.setf(std::ios::showpoint);
-   
-   if (isScientific)
-      ss.setf(std::ios::scientific, std::ios::floatfield);
    else
-      ss.setf(std::ios::fixed, std::ios::floatfield);
+      ss.unsetf(std::ios::showpoint);
+
+   if (isScientific)
+      ss.setf(std::ios::scientific);
+   else
+      ss.unsetf(std::ios::scientific);
 
    ss << rval;
    //return ss.str();
@@ -506,11 +508,12 @@ std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
    // ex) 1.23456e-015 to 1.23456e-15
    
    std::string sval = ss.str();
+
    if ((sval.find("e-0") != sval.npos) && (sval.size() - sval.find("e-0")) == 5)
       sval = GmatStringUtil::Replace(sval, "e-0", "e-");
    if ((sval.find("e+0") != sval.npos) && (sval.size() - sval.find("e+0")) == 5)
       sval = GmatStringUtil::Replace(sval, "e+0", "e+");
-   
+
    return sval;
 }
 
