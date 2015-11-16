@@ -147,7 +147,7 @@
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>Copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)..\..\..\..\..\GmatDevelopment\application\plugins\proprietary</Command>
+      <Command>Copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)..\..\..\..\GmatDevelopment\application\plugins</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying $(TargetName) into place</Message>
