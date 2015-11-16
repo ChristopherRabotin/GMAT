@@ -338,6 +338,7 @@ protected:
       // Hardware for spacecraft
       ADD_HARDWARE,
       SOLVEFORS,                                                    // made changes by TUAN NGUYEN
+      STMELEMENTS,
       CD_EPSILON,
       CR_EPSILON,
       // The filename used for the spacecraft's model 
@@ -634,6 +635,8 @@ protected:
    // Solve-for parameters                                               // made changes by TUAN NGUYEN
    /// List of solve-for parameters in Spacecraft object                 // made changes by TUAN NGUYEN
    StringArray       solveforNames;                                      // made changes by TUAN NGUYEN
+   /// List of STM parameters in Spacecraft object
+   StringArray       stmElementNames;
 
    /// Epsilon value used when solving for the Cd parameter
    Real              cdEpsilon;

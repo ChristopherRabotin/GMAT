@@ -35,6 +35,10 @@
 //#define DEBUG_FILTER
 //#define DEBUG_SET_PARAMETER
 
+
+
+#define TIME_EPSILON   5.0e-11          // 5.0e-11 Mdj
+
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -1471,8 +1475,8 @@ bool DataFilter::IsInTimeWindow(ObservationData* dataObject)
    bool isIn = true;
    
    GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
-   if ((currentEpoch < epochStart)||(currentEpoch > epochEnd))
+   if ((currentEpoch < (epochStart- TIME_EPSILON))||(currentEpoch > (epochEnd + TIME_EPSILON)))
       isIn = false;
-
+   //MessageInterface::ShowMessage("It is %s in time window:  currentEpoch = %.12lf    epochStart = %.12lf     epochEnd = %.12lf\n", (isIn? "":"not"), currentEpoch, epochStart, epochEnd); 
    return isIn;
 }

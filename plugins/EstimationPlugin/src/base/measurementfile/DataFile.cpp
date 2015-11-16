@@ -51,6 +51,8 @@
 //#define DEBUG_FILTER
 //#define DEBUG_FILTER_NEW
 
+
+#define TIME_EPSILON   5.0e-11      // 5.0e-11 Mjd
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -961,7 +963,7 @@ ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject
          acc = acc -1.0;
       
       // Time span filter
-      if ((od->epoch < epoch1)||(od->epoch > epoch2))
+      if ((od->epoch < (epoch1 - TIME_EPSILON))||(od->epoch > (epoch2 + TIME_EPSILON)))
       {
          #ifdef DEBUG_FILTER
             MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);

@@ -859,6 +859,27 @@ Integer PropagationStateManager::SortVector()
       }
    #endif
 
+   // Sync up the STMs that are propagated
+   StringArray stmEntries;
+   for (UnsignedInt q = 0; q < objects.size(); ++q)
+   {
+      if (objects[q]->IsOfType(Gmat::SPACECRAFT))
+      {
+         StringArray currentSTMEntries = objects[q]->GetStringArrayParameter("StmElementNames");
+         for (UnsignedInt i = 0; i < currentSTMEntries.size(); ++i)
+         {
+            if (find(stmEntries.begin(), stmEntries.end(), currentSTMEntries[i]) == stmEntries.end())
+               stmEntries.push_back(currentSTMEntries[i]);
+         }
+      }
+   }
+   for (UnsignedInt q = 0; q < objects.size(); ++q)
+   {
+      for (UnsignedInt p = 0; p < stmEntries.size(); ++p)
+         objects[q]->SetStringParameter("StmElementNames", stmEntries[p]);
+   }
+
+
    // First build a list of the property IDs and objects, measuring state size 
    // at the same time
    for (UnsignedInt q = 0; q < objects.size(); ++q)

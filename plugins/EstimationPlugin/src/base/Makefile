@@ -164,6 +164,7 @@ CPP_OBJECTS = \
     adapter/DSNRangeAdapter.o \
     adapter/DopplerAdapter.o \
     adapter/GNDopplerAdapter.o \
+    adapter/TDRSDopplerAdapter.o \
     command/RunEstimator.o \
     command/RunSimulator.o \
     datafilter/DataFilter.o \

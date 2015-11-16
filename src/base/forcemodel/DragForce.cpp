@@ -1090,6 +1090,7 @@ void DragForce::BuildPrefactors()
       throw ODEModelException(
          "Cannot use drag force: force model origin not set.");
     
+   /// @todo: for maneuvering, need to be updating mass here
    for (Integer i = 0; i < satCount; ++i)
    {
       if (mass.size() < (unsigned)(i+1))
@@ -1276,7 +1277,6 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillCartesian)
    {
-   
       for (i = 0; i < satCount; ++i)
       {
          i6 = i * 6;
@@ -1432,187 +1432,193 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
       Integer stmSize = stmRowCount * stmRowCount;
       aTilde = new Real[stmSize];
 
-      for (Integer j = 0; j < stmRowCount; ++j)
+      for (i = 0; i < satCount; ++i)
       {
-         ix = j * stmRowCount;
-         for (Integer k = 0; k < stmRowCount; ++k)
-            aTilde[ix+k] = 0.0;
-      }
-
-      // Build the base acceleration
-      Rvector3 accel = Accelerate(&state[0], now, prefactor[0]);
-
-      Rvector3 daccel, daccelm;
-      Real pert = 1.0e-3;
-      Real val;
-
-      // Finite difference the position submatrix
-      for (UnsignedInt j = 0; j < 3; ++j)
-      {
-         val = state[j];
-         state[j] += pert;
-         daccel = Accelerate(state, now, prefactor[0]);
-         ix = stmRowCount * (3 + j);
-
-         if (useCentralDifferences)
+         for (Integer j = 0; j < stmRowCount; ++j)
          {
-            state[j] -= 2.0 * pert;
-            daccelm = Accelerate(state, now, prefactor[0]);
-
-            #ifdef DEBUG_FINITEDIFF
-               MessageInterface::ShowMessage("R: [%le  %le  %le] - [%le  %le  %le] ==> ",
-                     daccel[0], daccel[1], daccel[2], daccelm[0], daccelm[1], daccelm[2]);
-            #endif
-
-            for (UnsignedInt k = 0; k < 3; ++k)
-               aTilde[ix+k] = (daccel[k] - daccelm[k]) / (2.0 * pert);
-
-            #ifdef DEBUG_FINITEDIFF
-               MessageInterface::ShowMessage("[%le  %le  %le]\n",
-                     aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
-            #endif
-         }
-         else
-         {
-            #ifdef DEBUG_FINITEDIFF
-               MessageInterface::ShowMessage("R: [%le  %le  %le] - [%le  %le  %le] ==> ",
-                     daccel[0], daccel[1], daccel[2],  accel[0], accel[1], accel[2]);
-            #endif
-
-            for (UnsignedInt k = 0; k < 3; ++k)
-               aTilde[ix+k] = (daccel[k] - accel[k]) / pert;
-
-            #ifdef DEBUG_FINITEDIFF
-               MessageInterface::ShowMessage("[%le  %le  %le]\n",
-                     aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
-            #endif
+            ix = j * stmRowCount;
+            for (Integer k = 0; k < stmRowCount; ++k)
+               aTilde[ix+k] = 0.0;
          }
 
-         #ifdef DEBUG_A_MATRIX
-            MessageInterface::ShowMessage("%d: [%.12le  %.12le  %.12le]\n", j,
-                  aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
-         #endif
+         // Build the base acceleration
+         Rvector3 accel = Accelerate(&state[i*6], now, prefactor[0]);
 
-         state[j] = val;
-      }
-      // Next handle the velocity submatrix
-      if (finiteDifferenceDv)
-      {
-         pert = 1e-6;
+         Rvector3 daccel, daccelm;
+         Real pert = 1.0e-3;
+         Real val;
+
+         // Finite difference the position submatrix
          for (UnsignedInt j = 0; j < 3; ++j)
          {
-            val = state[j+3];
-            state[j+3] += pert;
-            daccel = Accelerate(state, now, prefactor[0]);
+            val = state[i*6 + j];
+            state[i*6 + j] += pert;
+            daccel = Accelerate(&state[i*6], now, prefactor[0]);
             ix = stmRowCount * (3 + j);
 
             if (useCentralDifferences)
             {
-               state[j+3] -= 2.0 * pert;
-               daccelm = Accelerate(state, now, prefactor[0]);
+               state[j] -= 2.0 * pert;
+               daccelm = Accelerate(&state[i*6], now, prefactor[0]);
 
                #ifdef DEBUG_FINITEDIFF
-                  MessageInterface::ShowMessage("V: [%le  %le  %le] - [%le  %le  %le] ==> ",
+                  MessageInterface::ShowMessage("R: [%le  %le  %le] - [%le  %le  %le] ==> ",
                         daccel[0], daccel[1], daccel[2], daccelm[0], daccelm[1], daccelm[2]);
                #endif
 
                for (UnsignedInt k = 0; k < 3; ++k)
-                  aTilde[ix+k+3] = (daccel[k] - daccelm[k]) / (2.0 * pert);
+                  aTilde[ix+k] = (daccel[k] - daccelm[k]) / (2.0 * pert);
 
                #ifdef DEBUG_FINITEDIFF
                   MessageInterface::ShowMessage("[%le  %le  %le]\n",
-                        aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                        aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
                #endif
             }
             else
             {
                #ifdef DEBUG_FINITEDIFF
-                  MessageInterface::ShowMessage("V: [%le  %le  %le] - [%le  %le  %le] ==> ",
+                  MessageInterface::ShowMessage("R: [%le  %le  %le] - [%le  %le  %le] ==> ",
                         daccel[0], daccel[1], daccel[2],  accel[0], accel[1], accel[2]);
                #endif
 
                for (UnsignedInt k = 0; k < 3; ++k)
-                  aTilde[ix+k+3] = (daccel[k] - accel[k]) / pert;
+                  aTilde[ix+k] = (daccel[k] - accel[k]) / pert;
 
                #ifdef DEBUG_FINITEDIFF
                   MessageInterface::ShowMessage("[%le  %le  %le]\n",
-                        aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                        aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
                #endif
             }
-            #ifdef DEBUG_A_MATRIX
-               MessageInterface::ShowMessage("%d: [%.12le  %.12le  %.12le]\n",
-                     j+3, aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
-            #endif
-            state[j+3] = val;
-         }
-      }
-      else
-      {
-         throw ODEModelException("Analytic differencing for drag model A-matrix "
-               "d(accel)/dv terms in not yet implemented");
-      }
-
-      if (estimatingCd)
-      {
-         for (UnsignedInt j = 0; j < 3; ++j)
-         {
-            ix = stmRowCount * (3 + j);
-            aTilde[ix+cdEpsilonRow] = deriv[3+j] * cdInitial[0] / dragCoeff[0];;
 
             #ifdef DEBUG_A_MATRIX
-               MessageInterface::ShowMessage("Cd deriv %d: %.12le\n", j,
-                     aTilde[ix+cdEpsilonRow]);
+               MessageInterface::ShowMessage("%d: [%.12le  %.12le  %.12le]\n", j,
+                     aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
             #endif
+
+            state[i*6 + j] = val;
          }
+         // Next handle the velocity submatrix
+         if (finiteDifferenceDv)
+         {
+            pert = 1e-6;
+            for (UnsignedInt j = 0; j < 3; ++j)
+            {
+               val = state[i*6 + j+3];
+               state[i*6 + j+3] += pert;
+               daccel = Accelerate(&state[i*6], now, prefactor[0]);
+               ix = stmRowCount * (3 + j);
+
+               if (useCentralDifferences)
+               {
+                  state[j+3] -= 2.0 * pert;
+                  daccelm = Accelerate(&state[i*6], now, prefactor[0]);
+
+                  #ifdef DEBUG_FINITEDIFF
+                     MessageInterface::ShowMessage("V: [%le  %le  %le] - [%le  %le  %le] ==> ",
+                           daccel[0], daccel[1], daccel[2], daccelm[0], daccelm[1], daccelm[2]);
+                  #endif
+
+                  for (UnsignedInt k = 0; k < 3; ++k)
+                     aTilde[ix+k+3] = (daccel[k] - daccelm[k]) / (2.0 * pert);
+
+                  #ifdef DEBUG_FINITEDIFF
+                     MessageInterface::ShowMessage("[%le  %le  %le]\n",
+                           aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                  #endif
+               }
+               else
+               {
+                  #ifdef DEBUG_FINITEDIFF
+                     MessageInterface::ShowMessage("V: [%le  %le  %le] - [%le  %le  %le] ==> ",
+                           daccel[0], daccel[1], daccel[2],  accel[0], accel[1], accel[2]);
+                  #endif
+
+                  for (UnsignedInt k = 0; k < 3; ++k)
+                     aTilde[ix+k+3] = (daccel[k] - accel[k]) / pert;
+
+                  #ifdef DEBUG_FINITEDIFF
+                     MessageInterface::ShowMessage("[%le  %le  %le]\n",
+                           aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                  #endif
+               }
+               #ifdef DEBUG_A_MATRIX
+                  MessageInterface::ShowMessage("%d: [%.12le  %.12le  %.12le]\n",
+                        j+3, aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+               #endif
+               state[i*6 + j+3] = val;
+            }
+         }
+         else
+         {
+            throw ODEModelException("Analytic differencing for drag model A-matrix "
+                  "d(accel)/dv terms in not yet implemented");
+         }
+
+         if (estimatingCd)
+         {
+            for (UnsignedInt j = 0; j < 3; ++j)
+            {
+               ix = stmRowCount * (3 + j);
+               aTilde[ix+cdEpsilonRow] = deriv[i*6 + 3+j] * cdInitial[i] / dragCoeff[i];
+
+               #ifdef DEBUG_A_MATRIX
+                  MessageInterface::ShowMessage("Cd deriv %d: %.12le\n", j,
+                        aTilde[ix+cdEpsilonRow]);
+               #endif
+            }
+         }
+
+
+         Integer iStart = stmStart + i * stmSize;
+         Integer element;
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            for (Integer k = 0; k < stmRowCount; ++k)
+            {
+               element = j * stmRowCount + k;
+               deriv[iStart+element] = aTilde[element];
+            }
+         }
+
+         #ifdef DUMP_DERIVATIVE
+            MessageInterface::ShowMessage("A-matrix:\n");
+            for (Integer m = 0; m < stmRowCount; ++m)
+            {
+               MessageInterface::ShowMessage("      ");
+               for (Integer n = 0; n < stmRowCount; ++n)
+               {
+                  if (n > 0)
+                     MessageInterface::ShowMessage(", ");
+                  MessageInterface::ShowMessage("%le", aTilde[m*stmRowCount+n]);
+               }
+               MessageInterface::ShowMessage("\n");
+            }
+            MessageInterface::ShowMessage("--------------------------------------"
+                  "-----------------------------------------------------------\n");
+         #endif
+
+         #ifdef DEBUG_FINITEDIFF
+            MessageInterface::ShowMessage("Drag derivatives:\n   State: [");
+            Integer p,q;
+            for (p = 0; p < 6; ++p)
+               MessageInterface::ShowMessage(" %le ", deriv[p]);
+            MessageInterface::ShowMessage("]\n\n   A-Matrix: [");
+            for (p = 0; p < stmRowCount; ++p)
+            {
+               if (p > 0)
+                  MessageInterface::ShowMessage(";\n              ");
+               for (q = 0; q < stmRowCount; ++q)
+               {
+                  MessageInterface::ShowMessage(" %le ", deriv[6+p*stmRowCount+q]);
+               }
+            }
+            MessageInterface::ShowMessage("]\n\n");
+         #endif
+
       }
 
-      Integer iStart = stmStart, element;
-      for (Integer j = 0; j < stmRowCount; ++j)
-      {
-         for (Integer k = 0; k < stmRowCount; ++k)
-         {
-            element = j * stmRowCount + k;
-            deriv[iStart+element] = aTilde[element];
-         }
-      }
-      #ifdef DUMP_DERIVATIVE
-         MessageInterface::ShowMessage("A-matrix:\n");
-         for (Integer m = 0; m < stmRowCount; ++m)
-         {
-            MessageInterface::ShowMessage("      ");
-            for (Integer n = 0; n < stmRowCount; ++n)
-            {
-               if (n > 0)
-                  MessageInterface::ShowMessage(", ");
-               MessageInterface::ShowMessage("%le", aTilde[m*stmRowCount+n]);
-            }
-            MessageInterface::ShowMessage("\n");
-         }
-         MessageInterface::ShowMessage("--------------------------------------"
-               "-----------------------------------------------------------\n");
-      #endif
-
-      #ifdef DEBUG_FINITEDIFF
-         MessageInterface::ShowMessage("Drag derivatives:\n   State: [");
-         Integer p,q;
-         for (p = 0; p < 6; ++p)
-            MessageInterface::ShowMessage(" %le ", deriv[p]);
-         MessageInterface::ShowMessage("]\n\n   A-Matrix: [");
-         for (p = 0; p < stmRowCount; ++p)
-         {
-            if (p > 0)
-               MessageInterface::ShowMessage(";\n              ");
-            for (q = 0; q < stmRowCount; ++q)
-            {
-               MessageInterface::ShowMessage(" %le ", deriv[6+p*stmRowCount+q]);
-            }
-         }
-         MessageInterface::ShowMessage("]\n\n");
-         throw ODEModelException("First A-matrix finis");
-      #endif
-
+      delete [] aTilde;
    }
-
 
    #ifdef DEBUG_SHOW_Force
       static int iter = 0;
@@ -1622,7 +1628,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
       if (++iter == 16)
          iter = 0;
    #endif
-   
+
    return true;
 }
 
