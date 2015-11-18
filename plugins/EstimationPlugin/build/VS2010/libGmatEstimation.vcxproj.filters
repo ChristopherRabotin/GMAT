@@ -228,25 +228,7 @@
     <ClInclude Include="..\..\src\base\measurement\Troposphere\Troposphere.hpp">
       <Filter>Source Files\measurement\Troposphere</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\cira.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\igrf.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\Ionosphere.hpp">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\iridreg.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\irifun.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\irisub.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\iritec.h">
       <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\base\measurementfile\B3_obtype.hpp">
@@ -387,11 +369,11 @@
     <ClInclude Include="..\..\src\base\adapter\GNDopplerAdapter.hpp">
       <Filter>Source Files\adapter</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\loadfiles.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\adapter\TDRSDopplerAdapter.hpp">
       <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\iri2007.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -542,25 +524,7 @@
     <ClCompile Include="..\..\src\base\measurement\Troposphere\Troposphere.cpp">
       <Filter>Source Files\measurement\Troposphere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\cira.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\igrf.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\Ionosphere.cpp">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\iridreg.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\irifun.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\irisub.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\iritec.c">
       <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\measurementfile\B3_obtype.cpp">
@@ -695,11 +659,11 @@
     <ClCompile Include="..\..\src\base\adapter\GNDopplerAdapter.cpp">
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\loadfiles.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\base\adapter\TDRSDopplerAdapter.cpp">
       <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\iri2007.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
