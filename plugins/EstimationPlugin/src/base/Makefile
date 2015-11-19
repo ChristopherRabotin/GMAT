@@ -72,13 +72,14 @@ endif
 
 ifeq ($(INCLUDE_IONOSPHERE), 1)
 IONOSPHERE_C_OBJECTS = \
-	measurement/Ionosphere/cira.o \
-	measurement/Ionosphere/igrf.o \
-	measurement/Ionosphere/iridreg.o \
-	measurement/Ionosphere/irifun.o \
-	measurement/Ionosphere/iritec.o \
-	measurement/Ionosphere/irisub.o \
-	measurement/Ionosphere/loadfiles.o
+#	measurement/Ionosphere/cira.o \
+#	measurement/Ionosphere/igrf.o \
+#	measurement/Ionosphere/iridreg.o \
+#	measurement/Ionosphere/irifun.o \
+#	measurement/Ionosphere/iritec.o \
+#	measurement/Ionosphere/irisub.o \
+#	measurement/Ionosphere/loadfiles.o
+	measurement/Ionosphere/iri2007.o
 IONOSPHERE_CPP_OBJECTS = \
 	measurement/Ionosphere/Ionosphere.o 
 else

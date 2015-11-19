@@ -134,6 +134,7 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
                           Real *sunSat, Real *force, Real sunRad,
                           Real bodyRad, Real psunrad)
 {
+   //MessageInterface::ShowMessage("Hi there 1\n");
    Real      percentSun    = 1;   // default is full sun
    Real mag = GmatMathUtil::Sqrt(cbSun[0]*cbSun[0] +
                                  cbSun[1]*cbSun[1] +
@@ -189,7 +190,7 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
 //      else if (shadowModel == "DualCone")
 //      {
          
-
+         //MessageInterface::ShowMessage("Hi there 2\n");
          //  Compute apparent quantities like body radii and distances between bodies
          Real apparentSunRadius, apparentBodyRadius, satToSunDist;
          Real satToBodyDist, apparentDistFromSunToBody;
@@ -203,8 +204,24 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
          satToBodyDist = GmatMathUtil::Sqrt(state[0]*state[0]+
          state[1]*state[1]+state[2]*state[2]);
 
+         if (sunRad >= satToSunDist)
+         {
+            lit = true;
+            dark = false;
+            percentSun = 1.0;
+            return percentSun;
+         }
          apparentSunRadius = GmatMathUtil::ASin(sunRad/satToSunDist);
+
+         if (bodyRad >= satToBodyDist)
+         {
+            lit = false;
+            dark = true;
+            percentSun = 0.0;
+            return percentSun;
+         }
          apparentBodyRadius = GmatMathUtil::ASin(bodyRad/satToBodyDist);
+
          unitBodyToSat[0] = state[0]/satToBodyDist;
          unitBodyToSat[1] = state[1]/satToBodyDist;
          unitBodyToSat[2] = state[2]/satToBodyDist;
@@ -215,24 +232,27 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
          -unitBodyToSat[1]*unitSatToSun[1]-unitBodyToSat[2]*unitSatToSun[2]);
 		 
 		 if (apparentSunRadius + apparentBodyRadius <= apparentDistFromSunToBody)
-         {
+       {
             // This is the full sun light case
             lit        = true;
             dark       = false;
             percentSun = 1.0;
+            //MessageInterface::ShowMessage("Hi there 2.1\n");
             return percentSun;
-         }
+       }
 		 else if (apparentDistFromSunToBody<=apparentBodyRadius-apparentSunRadius)
 		 {
 		    // This is the umbra case
 			lit        = false;
             dark       = true;
             percentSun = 0.0;
+            //MessageInterface::ShowMessage("Hi there 2.2\n");
             return percentSun;
 		 }
 		 else if (  (GmatMathUtil::Abs(apparentSunRadius-apparentBodyRadius)<apparentDistFromSunToBody)  && 
 		     (apparentDistFromSunToBody < apparentSunRadius + apparentBodyRadius) )
 		 {
+          //MessageInterface::ShowMessage("Hi there 2.3.a\n");
 		    // This is the penumbra case
 			   Real pcbrad = GmatMathUtil::ASin(bodyRad/satToBodyDist);
 			   Real psunrad = GmatMathUtil::ASin(sunRad/satToSunDist);
@@ -244,6 +264,7 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
             percentSun = GetPercentSunInPenumbra(state, pcbrad, psunrad, unitSatToSun);
             lit        = false;
             dark       = false;
+            //MessageInterface::ShowMessage("Hi there 2.3.b\n");
 			   return percentSun;
 		 }
 		 else
@@ -252,8 +273,12 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
 		    lit        = false;
             dark       = false;
             percentSun =  1 - apparentBodyRadius*apparentBodyRadius/apparentSunRadius*apparentSunRadius;
+         //MessageInterface::ShowMessage("Hi there 2.4\n");
 			return percentSun;
 		 }
+
+       //MessageInterface::ShowMessage("Hi there 2.5\n");
+
        //   THis is old code updated as part of fix to GMT-
        //Real s0, s2, lsc, l1, l2, c1, c2, sinf1, sinf2, tanf1, tanf2;
          //// Montenbruck and Gill, eq. 3.79
@@ -365,6 +390,7 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
 //         throw SolarSystemException(errmsg);
 //      }
    }
+   //MessageInterface::ShowMessage("Hi there 2.r\n");
    return percentSun;
 }
 
