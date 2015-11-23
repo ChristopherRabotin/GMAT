@@ -688,7 +688,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
       ("Spacecraft::Spacecraft(=) <%p>'%s' entered\n", this, GetName().c_str());
    #endif
 
-   // Preserve teh maneuvering state through the cloning
+   // Preserve the maneuvering state through the cloning
    bool iAmManeuvering = isManeuvering;
 
    SpaceObject::operator=(a);
@@ -793,7 +793,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
       }
    }
    
-   // Restore the maneuving state
+   // Restore the maneuvering state
    isManeuvering = iAmManeuvering ;
 
    // Build element labels and units
@@ -7877,3 +7877,28 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    defaultStateTypeMap["VMAG"]         = "SphericalAZFPA";
 }
 
+
+//------------------------------------------------------------------------------
+// void Spacecraft::IsManeuvering()
+//------------------------------------------------------------------------------
+/**
+ * Toggles the isManeuvering flag
+ *
+ * @param mnvrFlag The desired maneuverign state
+ *
+ * @return The actual maneuvering state
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::IsManeuvering(bool mnvrFlag)
+{
+   if (mnvrFlag == false)
+   {
+      // Check for active thrusters and toggle the flag is all are inactive
+      bool setting = false;
+      for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+         setting |= thrusters[i]->GetBooleanParameter(thrusters[i]->GetParameterID("IsFiring"));
+      isManeuvering = setting | mnvrFlag;
+   }
+   else
+      isManeuvering = mnvrFlag;
+}
