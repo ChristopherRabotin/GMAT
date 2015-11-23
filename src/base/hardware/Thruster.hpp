@@ -78,6 +78,28 @@ public:
    virtual bool         GetBooleanParameter(const Integer id) const;
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value);
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
+   virtual Real         GetRealParameter(const std::string &label,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value,
+                                         const Integer index);
+
+   virtual const Rvector&
+                        GetRvectorParameter(const Integer id) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const Integer id,
+                                            const Rvector &value);
+   virtual const Rvector&
+                        GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const std::string &label,
+                                            const Rvector &value);
+
    
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const; 
@@ -177,6 +199,9 @@ protected:
    StringArray                tankNames;
    /// The tanks
    std::vector<FuelTank *>    tanks;
+   /// The mix ratio for the tank draws
+   Rvector                    mixRatio;
+
    /// Temporary buffer used to get ref objects
    ObjectArray                tempArray;
    
@@ -194,6 +219,7 @@ protected:
       THRUST_SCALE_FACTOR,
       DECREMENT_MASS,
       TANK,
+      MIXRATIO,
       GRAVITATIONAL_ACCELERATION,
       ThrusterParamCount
    };

@@ -5449,33 +5449,35 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
       throw SpaceObjectException(errmsg.str());
    }
 
-   Real dm;  // = massChange / numberFiring;
+   Real dm;
    for (UnsignedInt i = 0; i < active.size(); ++i)
    {
-      // Change the mass in each attached tank
+      // Change the mass in each attached tank based on the thruster mix ratios
       ObjectArray usedTanks = active[i]->GetRefObjectArray(Gmat::HARDWARE);
-      // ******
-      if (!GmatMathUtil::IsEqual(totalFlow,0.0))
+      if (!GmatMathUtil::IsEqual(totalFlow, 0.0))
       {
-      dm = massChange * flowrate[i] / totalFlow;
+         dm = massChange * flowrate[i] / totalFlow;
 
-      #ifdef DEBUG_MASS_FLOW
-         MessageInterface::ShowMessage("flowrate = %12.10f, totalFlow = %12.10f\n",
-               flowrate[i], totalFlow);
-         MessageInterface::ShowMessage("%.12le from %s = [ ", dm, active[i]->GetName().c_str());
-      #endif
-
-      Real dmt = dm / usedTanks.size();
-      for (ObjectArray::iterator j = usedTanks.begin();
-            j != usedTanks.end(); ++j)
-      {
          #ifdef DEBUG_MASS_FLOW
-            MessageInterface::ShowMessage(" %.12le ", dmt);
+            MessageInterface::ShowMessage("flowrate = %12.10f, totalFlow = %12.10f\n",
+                  flowrate[i], totalFlow);
+            MessageInterface::ShowMessage("%.12le from %s = [ ", dm, active[i]->GetName().c_str());
          #endif
-         (*j)->SetRealParameter("FuelMass",
-               (*j)->GetRealParameter("FuelMass") + dmt);
+
+         Rvector mixRatio = active[i]->GetRvectorParameter("MixRatio");
+         Real mixTotal = 0.0;
+         for (UnsignedInt imix = 0; imix < mixRatio.GetSize(); ++imix)
+            mixTotal += mixRatio[imix];
+         Real dmt = dm / mixTotal;
+         for (UnsignedInt j = 0; j < usedTanks.size(); ++j)
+         {
+            #ifdef DEBUG_MASS_FLOW
+               MessageInterface::ShowMessage(" %.12le ", dmt);
+            #endif
+            usedTanks[j]->SetRealParameter("FuelMass",
+                  (usedTanks[j]->GetRealParameter("FuelMass")) + dmt * mixRatio[j]);
+         }
       }
-      } // *****************
       #ifdef DEBUG_MASS_FLOW
                MessageInterface::ShowMessage(" ] ");
       #endif
