@@ -168,6 +168,10 @@ Thruster::Thruster(const std::string &typeStr, const std::string &nomme) :
    
    for (Integer i=DUTY_CYCLE; i < ThrusterParamCount; i++)
       parameterWriteOrder.push_back(i);
+
+   // Initialize mix ratio for a single tank
+   mixRatio.SetSize(1);
+   mixRatio.SetElement(0, 1.0);
 }
 
 
