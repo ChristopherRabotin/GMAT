@@ -216,7 +216,7 @@ void PythonInterface::PyPathSep()
 {
    // Unix and Mac separator is ":"
    // Windows separator is ";"
-   #ifdef __WIN32__
+   #ifdef _WIN32
       plF = ";";
    #else
       plF = ":";
