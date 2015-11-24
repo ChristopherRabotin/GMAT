@@ -19,7 +19,7 @@
 // governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// FDSS II .
+// FDSS II.
 //
 // Author: Farideh Farahnak
 // Created: 2015/05/22
@@ -39,6 +39,7 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
 
+/// Initialize the singleton pointer
 PythonInterface* PythonInterface::instance = NULL;
 
 //------------------------------------------------------------------------------
@@ -67,12 +68,12 @@ PythonInterface* PythonInterface::PyInstance()
  */
 //------------------------------------------------------------------------------
 PythonInterface::PythonInterface(const std::string &name) : 
-   Interface      ("PythonInterface", name)
+   Interface            ("PythonInterface", name),
+   isPythonInitialized  (false),
+   numPyCommands        (0),
+   // Default to the windows path separator
+   plF                  (";")
 {
-   isPythonInitialized = false;
-   numPyCommands = 0;
-   plF = new char[2];
-   memset(plF, 0, 2);
 }
 
 
@@ -85,53 +86,6 @@ PythonInterface::PythonInterface(const std::string &name) :
 //------------------------------------------------------------------------------
 PythonInterface::~PythonInterface()
 {
-   delete[] plF;
-}
-
-
-//------------------------------------------------------------------------------
-// PythonInterface(const PythonInterface& pi)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor
- *
- * @param pi The interface copied to this one
- *
- * @note Since this is a singleton, we need to determine if this methos is ever 
- * called
- */
-//------------------------------------------------------------------------------
-PythonInterface::PythonInterface(const PythonInterface& pi) :
-   Interface      (pi)
-{
-   plF = new char[2];
-   memcpy(plF, pi.plF, 2);
-}
-
-
-//------------------------------------------------------------------------------
-// PythonInterface& operator=(const PythonInterface& pi)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator
- *
- * @param pi The interface providing data for this one
- *
- * @note Since this is a singleton, we need to determine if this methos is ever
- * called
- */
-//------------------------------------------------------------------------------
-PythonInterface& PythonInterface::operator=(const PythonInterface& pi)
-{
-   if (&pi != this)
-   {
-	   Interface::operator=(pi);
-      numPyCommands = pi.numPyCommands;
-      isPythonInitialized = pi.isPythonInitialized;
-      plF = pi.plF;
-   }
-
-   return *this;
 }
 
 
@@ -145,13 +99,14 @@ PythonInterface& PythonInterface::operator=(const PythonInterface& pi)
  *
  * @return The new PythonInterface
  *
- * @note Since this is a singleton, we need to determine if this methos is ever
+ * @note Since this is a singleton, we need to determine if this method is ever
  * called
  */
 //------------------------------------------------------------------------------
 void PythonInterface::Copy(const GmatBase* orig)
 {
-   operator=(*((PythonInterface *)(orig)));
+   throw InterfaceException("The PythonInterface is a singleton and cannot be "
+         "copied");
 }
 
 
@@ -169,7 +124,8 @@ void PythonInterface::Copy(const GmatBase* orig)
 //------------------------------------------------------------------------------
 GmatBase* PythonInterface::Clone() const
 {
-   return (new PythonInterface(*this));
+   throw InterfaceException("The PythonInterface is a singleton and cannot be "
+         "cloned");
 }
 
 
@@ -258,15 +214,13 @@ bool PythonInterface::PyFinalize()
 //------------------------------------------------------------------------------
 void PythonInterface::PyPathSep()
 {
-	const char* plForm = Py_GetPlatform();
-   std::string str(plForm);
-   
    // Unix and Mac separator is ":"
    // Windows separator is ";"
-   if (str.find("win") != std::string::npos)
+   #ifdef __WIN32__
       plF = ";";
-   else
+   #else
       plF = ":";
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -280,6 +234,10 @@ void PythonInterface::PyPathSep()
 //------------------------------------------------------------------------------
 void PythonInterface::PyAddModulePath(const StringArray& path)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Entered PythonInterface::PyAddModulePath()\n");
+   #endif
+
    wchar_t *s3K = new wchar_t[8192];
    char *destPath = new char[8192];
 
@@ -290,20 +248,27 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
    //convert wchar_t to char
    wcstombs(destPath, Py_GetPath(), 8192);
    //concatenate the path delimiter (unix , windows and mac)
-   strcat(destPath, plF);
+   strcat(destPath, plF.c_str());
 #else
    strcpy(destPath, Py_GetPath());
-   strcat(destPath, plF);
+   strcat(destPath, plF.c_str());
 #endif
 
    StringArray::const_iterator it;
    for (it = path.begin(); it != path.end(); ++it)
    {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("   Adding %s to the Python path\n", it->c_str());
+   #endif
       strcat(destPath, it->c_str());
-      strcat(destPath, plF);     
+      strcat(destPath, plF.c_str());
    }
  
 #ifdef IS_PY3K
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("--> PySys_SetPath(%s)\n", destPath);
+   #endif
+
    //convert char to wchar_t
    mbstowcs(s3K, destPath, 8192);
    PySys_SetPath(s3K);
