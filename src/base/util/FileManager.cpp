@@ -2764,8 +2764,8 @@ void FileManager::AddPythonModulePath(const std::string& path)
 	
 
 #ifdef DEBUG_FUNCTION_PATH
-	pos = mPythonFunctionPaths.begin();
-	while (pos != mPythonFunctionPaths.end())
+	pos = mPythonModulePaths.begin();
+	while (pos != mPythonModulePaths.end())
 	{
 		MessageInterface::ShowMessage
 			("   mPythonModulePaths=%s\n", (*pos).c_str());
