@@ -2272,6 +2272,9 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    
    //std::string absPath = relPath;
    std::string absPath;
+   bool        startsWithSeparator = false;
+   if ((relPath[0] == '\\') || (relPath[0] == '/'))
+      startsWithSeparator = true;
    StringTokenizer st(relPath, "/\\");
    StringArray allNames = st.GetAllTokens();
    StringArray pathNames;
@@ -2328,6 +2331,9 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    }
    
    absPath = "";
+   // For paths that already started with the separator (were already absolute paths)
+   if (startsWithSeparator)
+      absPath += mPathSeparator;
    for (UnsignedInt i = 0; i < pathNames.size(); i++)
    {
       if (i < pathNames.size() - 1)
@@ -2561,7 +2567,7 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
    while (pos != mGmatFunctionPaths.end())
    {
       MessageInterface::ShowMessage
-         ("   mGmatFunctionPaths = %s\n", (*pos).c_str());
+         ("------   mGmatFunctionPaths = %s\n", (*pos).c_str());
       ++pos;
    }
    #endif
@@ -2923,6 +2929,7 @@ std::string FileManager::GetFunctionPath(FunctionType type,
       fullPath = ConvertToAbsPath(pathName) + funcName1;
 
       #ifdef DEBUG_FUNCTION_PATH
+      MessageInterface::ShowMessage("   pathName='%s'\n", pathName.c_str());
       MessageInterface::ShowMessage("   fullPath='%s'\n", fullPath.c_str());
       #endif
 
