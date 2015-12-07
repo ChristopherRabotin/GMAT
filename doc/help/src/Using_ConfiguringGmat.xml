@@ -190,8 +190,8 @@
     <section>
       <title><filename>samples</filename></title>
 
-      <para>The <filename>samples</filename> directory contains over 45 sample
-      missions, ranging from a Hohmann transfer to libration point
+      <para>The <filename>samples</filename> directory contains sample
+      missions and scripts, ranging from a Hohmann transfer to libration point
       station-keeping to Mars B-plane targeting. Example files begin with
       "Ex_" and files that corresponde to GMAT tutorials begin with "Tut_".
       These files are intended to demonstrate GMAT’s capabilities and to
@@ -205,9 +205,12 @@
     <section>
       <title><filename>userfunctions</filename></title>
 
-      <para>The <filename>userfunctions</filename> directory contains MATLAB
-      functions that are included in the GMAT distribution. You can also store
-      your own custom MATLAB functions in this folders.</para>
+      <para>The <filename>userfunctions</filename> directory contains MATLAB,
+      Python, and GMAT functions that are included in the GMAT distribution.
+      You can also store your own custom functions in the subdirectories named
+      GMAT, Python, and MATLAB. GMAT includes those subdirectories in its
+      search path to locate functions referenced in GMAT scripts and GMAT
+      functions.</para>
     </section>
   </section>
 
@@ -223,8 +226,7 @@
     customization features available in the startup file. The order of lines
     in the startup file does not matter.</para>
 
-    <para>For all details, see the <xref linkend="StartupFile"/>
-    reference.</para>
+    <para>For details, see the <xref linkend="StartupFile"/> reference.</para>
 
     <section>
       <title>Leap Second and EOP files</title>
@@ -238,9 +240,18 @@
       versions of this file are available from the <link
       xlink:href="http://data.iers.org/products/213/14444/orig/eopc04_08.62-now">IERS</link>.</para>
 
+      <para>For use with GMAT's event location subsystem, you will also need
+      to update the SPICE EOP files, distributed by NAIF: <link
+      xlink:href="http://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck"><uri>http://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck</uri></link>.
+      The high-fidelity <filename>earth_000101_yymmdd_yymmdd.bpc</filename>
+      file is updated twice per week. For more information on data
+      configuration for event location, see the <xref
+      linkend="ContactLocator"/> and <xref linkend="EclipseLocator"/>
+      reference pages.</para>
+
       <para>There are two leap second files provided with GMAT in the
       <filename>data/time</filename> directory. The
-      <filename>naif0010.tls</filename> file is used by the JPL SPICE
+      <filename>naif0011.tls</filename> file is used by the JPL SPICE
       libraries when computing ephemerides. When a new leap second is added,
       you can replace this file with the new file from <link
       xlink:href="ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/">NAIF</link>.
@@ -274,6 +285,14 @@
 
       <para>GMAT contains an interface to MATLAB. See the <xref
       linkend="MatlabInterface"/> reference to configure the MATLAB
+      interface.</para>
+    </section>
+
+    <section>
+      <title>Configuring the Python Inteface</title>
+
+      <para>GMAT contains an interface to Python. See the <xref
+      linkend="PythonInterface"/> reference to configure the MATLAB
       interface.</para>
     </section>
 

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -81,6 +91,7 @@
 //#define DEBUG_FILEPATH
 //#define DEBUG_DELETE_OWNED_OBJ
 //#define DEBUG_POWER_SYSTEM
+//#define DEBUG_SC_NAIF_ID
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -302,6 +313,8 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
 
 const Integer  Spacecraft::ATTITUDE_ID_OFFSET  = 20000;
 const Real     Spacecraft::UNSET_ELEMENT_VALUE = -999.999;
+Integer        Spacecraft::scNaifId = 10000;
+
 
 //-------------------------------------
 // public methods
@@ -377,6 +390,18 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
    
+   // Set up the appropriate naifID defaults
+   naifId         = -(scNaifId * 1000) - 1;
+   scNaifId++;
+   naifIdRefFrame = naifId + 1000000;
+
+   #ifdef DEBUG_SC_NAIF_ID
+      MessageInterface::ShowMessage("NAIF ID for spacecraft %s set to %d\n",
+            instanceName.c_str(), naifId);
+      MessageInterface::ShowMessage("NAIF ID for spacecraft %s reference frame set to %d\n",
+            instanceName.c_str(), naifIdRefFrame);
+   #endif
+
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();
@@ -488,9 +513,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
        modelFileFullPath.c_str());
    #endif
    
-   modelScale = 3.0;
    modelID = NO_MODEL;
-   
+
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft() <%p>'%s' exiting\n", this, name.c_str());
@@ -664,6 +688,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
       ("Spacecraft::Spacecraft(=) <%p>'%s' entered\n", this, GetName().c_str());
    #endif
 
+   // Preserve the maneuvering state through the cloning
+   bool iAmManeuvering = isManeuvering;
+
    SpaceObject::operator=(a);
 
    ownedObjectCount     = a.ownedObjectCount;
@@ -738,7 +765,16 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to delete all owned objects\n");
-      #endif
+   #endif
+
+   // Preserve thrusters that are "turned on"
+   StringArray activeThrusters;
+   for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+   {
+      if (thrusters[i]->GetBooleanParameter("IsFiring"))
+         activeThrusters.push_back(thrusters[i]->GetName());
+   }
+
    DeleteOwnedObjects(true, true, true, true, true);
 
    // then cloned owned objects
@@ -748,6 +784,18 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    #endif
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
    
+   for (UnsignedInt i = 0; i < activeThrusters.size(); ++i)
+   {
+      for (UnsignedInt j = 0; j < thrusters.size(); ++j)
+      {
+         if (thrusters[j]->GetName() == activeThrusters[i])
+            thrusters[j]->SetBooleanParameter("IsFiring", true);
+      }
+   }
+   
+   // Restore the maneuvering state
+   isManeuvering = iAmManeuvering ;
+
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
    
@@ -759,8 +807,10 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    spadSRPScaleFactor = a.spadSRPScaleFactor;
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
-   if (ephemMgr) delete ephemMgr;
-   ephemMgr           = NULL;
+   // We don't want to delete any ephem manager here or the event
+   // location will not work
+//   if (ephemMgr) delete ephemMgr;
+//   ephemMgr           = NULL;
 
    includeCartesianState = a.includeCartesianState;
 
@@ -815,6 +865,14 @@ void Spacecraft::SetInternalCoordSystem(CoordinateSystem *cs)
 CoordinateSystem* Spacecraft::GetInternalCoordSystem()
 {
    return internalCoordSystem;
+}
+
+//---------------------------------------------------------------------------
+// EphemManager* GetEphemManager()
+//---------------------------------------------------------------------------
+EphemManager* Spacecraft::GetEphemManager()
+{
+   return ephemMgr;
 }
 
 
@@ -1247,16 +1305,18 @@ void Spacecraft::RecordEphemerisData()
 {
    if (!ephemMgr)
    {
-      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+      ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
       ephemMgr->SetObject(this);
       // @todo - do I need to resend this, if the internalCoordSys ever changes?
       ephemMgr->SetCoordinateSystem(internalCoordSystem);
+      ephemMgr->SetSolarSystem(solarSystem);
+      ephemMgr->Initialize();
    }
    ephemMgr->RecordEphemerisData();
 }
 
 //------------------------------------------------------------------------------
-// ProvideEphemeris()
+// ProvideEphemerisData()
 // Load the recorded ephemeris and start up another file to continue recording
 //------------------------------------------------------------------------------
 void Spacecraft::ProvideEphemerisData()
@@ -1587,7 +1647,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
-   refObjectTypes.push_back(Gmat::HARDWARE);
+   refObjectTypes.push_back(Gmat::HARDWARE);  // includes PowerSystem
    if (attitude)
    {
       ObjectTypeArray attRefObjTypes = attitude->GetRefObjectTypeArray();
@@ -1741,7 +1801,8 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
                      powerSystemName.c_str());
          #endif
          // Add Spacecraft Power System name
-         fullList.push_back(powerSystemName);  // need to check power system for ref object names
+         if (powerSystemName != "")
+            fullList.push_back(powerSystemName);  // need to check power system for ref object names
          return fullList;
       }
 
@@ -1750,6 +1811,8 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
          fullList = tankNames;
          fullList.insert(fullList.end(), thrusterNames.begin(), thrusterNames.end());
          fullList.insert(fullList.end(), hardwareNames.begin(), hardwareNames.end());
+         if (powerSystemName != "")
+            fullList.push_back(powerSystemName);
          return fullList;
       }
 
@@ -1883,6 +1946,8 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
             return powerSystem;
 
       case Gmat::FUEL_TANK:
+      case Gmat::CHEMICAL_FUEL_TANK:
+      case Gmat::ELECTRIC_FUEL_TANK:
          for (ObjectArray::iterator i = tanks.begin();
               i < tanks.end(); ++i)
          {
@@ -1891,6 +1956,8 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          }
 
       case Gmat::THRUSTER:
+      case Gmat::CHEMICAL_THRUSTER:
+      case Gmat::ELECTRIC_THRUSTER:
          for (ObjectArray::iterator i = thrusters.begin();
               i < thrusters.end(); ++i)
          {
@@ -4606,14 +4673,20 @@ bool Spacecraft::Initialize()
 
       if (powerSystem) powerSystem->Initialize();
 
+//      if (!ephemMgr)
+//      {
+//         ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+//         ephemMgr->SetObject(this);
+//         // @todo - do I need to resend this, if the internalCoordSys ever changes?
+//         ephemMgr->SetCoordinateSystem(internalCoordSystem);
+//         ephemMgr->SetSolarSystem(solarSystem);
+//         ephemMgr->Initialize();
+//      }
+
+
       isInitialized = true;
       retval = true;
    }
-
-   // *********** testing ************************
-//   RecordEphemerisData();    // ******************<<<<<<<<<<<<<<< for testing
-   // *********** testing ************************
-
    return retval;
 }
 
@@ -5376,33 +5449,35 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
       throw SpaceObjectException(errmsg.str());
    }
 
-   Real dm;  // = massChange / numberFiring;
+   Real dm;
    for (UnsignedInt i = 0; i < active.size(); ++i)
    {
-      // Change the mass in each attached tank
+      // Change the mass in each attached tank based on the thruster mix ratios
       ObjectArray usedTanks = active[i]->GetRefObjectArray(Gmat::HARDWARE);
-      // ******
-      if (!GmatMathUtil::IsEqual(totalFlow,0.0))
+      if (!GmatMathUtil::IsEqual(totalFlow, 0.0))
       {
-      dm = massChange * flowrate[i] / totalFlow;
+         dm = massChange * flowrate[i] / totalFlow;
 
-      #ifdef DEBUG_MASS_FLOW
-         MessageInterface::ShowMessage("flowrate = %12.10f, totalFlow = %12.10f\n",
-               flowrate[i], totalFlow);
-         MessageInterface::ShowMessage("%.12le from %s = [ ", dm, active[i]->GetName().c_str());
-      #endif
-
-      Real dmt = dm / usedTanks.size();
-      for (ObjectArray::iterator j = usedTanks.begin();
-            j != usedTanks.end(); ++j)
-      {
          #ifdef DEBUG_MASS_FLOW
-            MessageInterface::ShowMessage(" %.12le ", dmt);
+            MessageInterface::ShowMessage("flowrate = %12.10f, totalFlow = %12.10f\n",
+                  flowrate[i], totalFlow);
+            MessageInterface::ShowMessage("%.12le from %s = [ ", dm, active[i]->GetName().c_str());
          #endif
-         (*j)->SetRealParameter("FuelMass",
-               (*j)->GetRealParameter("FuelMass") + dmt);
+
+         Rvector mixRatio = active[i]->GetRvectorParameter("MixRatio");
+         Real mixTotal = 0.0;
+         for (UnsignedInt imix = 0; imix < mixRatio.GetSize(); ++imix)
+            mixTotal += mixRatio[imix];
+         Real dmt = dm / mixTotal;
+         for (UnsignedInt j = 0; j < usedTanks.size(); ++j)
+         {
+            #ifdef DEBUG_MASS_FLOW
+               MessageInterface::ShowMessage(" %.12le ", dmt);
+            #endif
+            usedTanks[j]->SetRealParameter("FuelMass",
+                  (usedTanks[j]->GetRealParameter("FuelMass")) + dmt * mixRatio[j]);
+         }
       }
-      } // *****************
       #ifdef DEBUG_MASS_FLOW
                MessageInterface::ShowMessage(" ] ");
       #endif
@@ -7802,3 +7877,28 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    defaultStateTypeMap["VMAG"]         = "SphericalAZFPA";
 }
 
+
+//------------------------------------------------------------------------------
+// void Spacecraft::IsManeuvering()
+//------------------------------------------------------------------------------
+/**
+ * Toggles the isManeuvering flag
+ *
+ * @param mnvrFlag The desired maneuverign state
+ *
+ * @return The actual maneuvering state
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::IsManeuvering(bool mnvrFlag)
+{
+   if (mnvrFlag == false)
+   {
+      // Check for active thrusters and toggle the flag is all are inactive
+      bool setting = false;
+      for (UnsignedInt i = 0; i < thrusters.size(); ++i)
+         setting |= thrusters[i]->GetBooleanParameter(thrusters[i]->GetParameterID("IsFiring"));
+      isManeuvering = setting | mnvrFlag;
+   }
+   else
+      isManeuvering = mnvrFlag;
+}

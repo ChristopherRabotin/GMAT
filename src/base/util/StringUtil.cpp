@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -55,6 +65,7 @@
 //#define DEBUG_NUMBER_WITH_NAME
 //#define DEBUG_SCI_NOTATION
 //#define DEBUG_SINGLE_ITEM 1
+//#define DEBUG_MATH_SYMBOL 1
 
 //------------------------------------------------------------------------------
 // std::string RemoveAll(const std::string &str, char ch, Integer start = 0)
@@ -540,6 +551,108 @@ std::string GmatStringUtil::RemoveMathSymbols(const std::string &str, bool remov
    
    return str1;
 }
+
+//------------------------------------------------------------------------------
+// std::string PadWithBlanks(const std::string &str, Integer toSize,
+//                           StripType whichEnd = TRAILING)
+//------------------------------------------------------------------------------
+/*
+ * Pads leading or trailing end of string with blanks.
+ *
+ * @param  str        input string to be padded
+ * @param  toSize     total length desired
+ * @param  whichEnd   option of padding front or end
+ *
+ * @note if the input string is already of size toSize or less, it will just
+ *       return the string as is
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::PadWithBlanks(const std::string &str, Integer toSize,
+                            StripType whichEnd)
+{
+   Integer     len     = (Integer) str.length();
+   std::string blanks("");
+   for (Integer ii= 0; ii < (toSize - len);  ii++)
+      blanks += " ";
+   if (whichEnd == LEADING)
+   {
+      return blanks + str;
+   }
+   else if (whichEnd == TRAILING)
+   {
+      return str + blanks;
+   }
+   else // ignore "BOTH" for now
+   {
+      return str;
+   }
+}
+
+//------------------------------------------------------------------------------
+// const std::string BuildNumber(Real value,  bool useExp = false,
+//       Integer length)
+//------------------------------------------------------------------------------
+/**
+ * Builds a formatted string containing a Real, so the Real can be serialized to
+ * the display
+ *
+ * @param value  The Real that needs to be serialized
+ * @param useExp Use scientific notation
+ * @param length The size of the desired string
+ *
+ * @return The formatted string
+ * @note   This was moved from GmatCommand
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::BuildNumber(Real value, bool useExp,
+                                        Integer length)
+{
+   std::string retval = "Invalid number";
+
+   if (length < 100)
+   {
+      char temp[100], defstr[40];
+      Integer fraction = 1;
+
+      // check for a NaN first
+      if ((!GmatMathUtil::IsEqual(value, 0.0)) &&
+         (GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED)        ||
+          GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED_LARGE)  ||
+          GmatMathUtil::IsNaN(value)))
+      {
+         sprintf(defstr, "%%%ds", length);
+         sprintf(temp, defstr, "NaN");
+      }
+      else
+      {
+         Real shift = GmatMathUtil::Abs(value);
+         if (useExp || (shift > GmatMathUtil::Exp10((Real)length-3)))
+         {
+            fraction = length - 8;
+            sprintf(defstr, "%%%d.%de", length, fraction);
+         }
+         else
+         {
+            while (shift > 10.0)
+            {
+               ++fraction;
+               shift *= 0.1;
+            }
+            fraction = length - 3 - fraction;
+            sprintf(defstr, "%%%d.%dlf", length, fraction);
+         }
+         #ifdef DEBUG_DEFSTR
+            MessageInterface::ShowMessage("defstr = %s\n", defstr);
+            if (fraction < 0) MessageInterface::ShowMessage("   and fraction = %d\n", fraction);
+         #endif
+         sprintf(temp, defstr, value);
+      }
+      retval = temp;
+   }
+
+   return retval;
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -1214,6 +1327,35 @@ std::string GmatStringUtil::ToStringNoZeros(const Real &val)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string ToOrdinal(Integer i, bool textOnly = false)
+//------------------------------------------------------------------------------
+/**
+ * Returns the ordinal number, given the input integer.
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToOrdinal(Integer i, bool textOnly)
+{
+   std::string num  = ToString(i, 1);
+   if (textOnly)
+   {
+      // TBD
+//      return num;
+   }
+
+   // Get the digit in the ones place
+   char        ones = num[num.length() - 1];
+   if (ones == '1')
+      return num + "st";
+   else if (ones == '2')
+      return num + "nd";
+   else if (ones == '3')
+      return num + "rd";
+   else
+      return num + "th";
+}
+
+
 //-------------------------------------------------------------------------------
 // char GetClosingBracket(const char &openBracket)
 //-------------------------------------------------------------------------------
@@ -1438,6 +1580,8 @@ StringArray GmatStringUtil::SeparateByComma(const std::string &str, bool checkSi
       MessageInterface::ShowMessage
          ("GmatStringUtil::SeparateByComma() returning <%s>, no comma found\n", str.c_str());
       #endif
+      // remove leading and trailing blanks, though
+      parts[0] = Trim(parts[0], BOTH);
       return parts;
    }
    
@@ -3977,27 +4121,74 @@ bool GmatStringUtil::IsThereEqualSign(const std::string &str)
 //------------------------------------------------------------------------------
 bool GmatStringUtil::IsThereMathSymbol(const std::string &str)
 {
+   #if DEBUG_MATH_SYMBOL > 0
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::IsThereMathSymbol() entered, str = <%s>\n", str.c_str());
+   #endif
+   
    bool inQuotes = false;
    std::string str1 = RemoveScientificNotation(str);
    Integer size = str1.size();
    
+   if (IsEnclosedWith(str1, "'"))
+   {
+      #if DEBUG_MATH_SYMBOL > 0
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::IsThereMathSymbol() returning false, string is enclosed "
+          "with single quotes\n");
+      #endif
+      return false;
+   }
+   
    for (Integer i=0; i<size; i++)
    {
+      #if DEBUG_MATH_SYMBOL > 1
+      MessageInterface::ShowMessage("==> %c\n", str1[i]);
+      MessageInterface::ShowMessage("==> inQuotes = %d\n", inQuotes);
+      #endif
+      
       if (str1[i] == '\'')
       {
+         // If last position has first single quote, return true
+         if (!inQuotes && (i == size - 1))
+         {
+            #if DEBUG_MATH_SYMBOL > 0
+            MessageInterface::ShowMessage
+               ("GmatStringUtil::IsThereMathSymbol() returning true, last position "
+                "has first single quote\n");
+            #endif
+            return true;
+         }
+         
          if (inQuotes)
             inQuotes = false;
          else
             inQuotes = true;
       }
       else if (str1[i] == '+' || str1[i] == '-' || str1[i] == '*' || str1[i] == '/' ||
-               str1[i] == '^' || str1[i] == '=' || str1[i] == '<' || str1[i] == '>')
+               str1[i] == '^' || str1[i] == '=' || str1[i] == '<' || str1[i] == '>' ||
+               str1[i] == '\'')
       {
+         #if DEBUG_MATH_SYMBOL > 1
+         MessageInterface::ShowMessage("==> inQuotes = %d\n", inQuotes);
+         #endif
          if (!inQuotes)
+         {
+            #if DEBUG_MATH_SYMBOL > 0
+            MessageInterface::ShowMessage
+               ("GmatStringUtil::IsThereMathSymbol() returning true, found math "
+                "simbol '%c'\n", str1[i]);
+            #endif
             return true;
+         }
       }
    }
-
+   
+   #if DEBUG_MATH_SYMBOL > 0
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::IsThereMathSymbol() returning false, no math symbol found\n");
+   #endif
+   
    return false;
 }
 
@@ -5018,6 +5209,16 @@ bool GmatStringUtil::IsLastNumberPartOfName(const std::string &str)
    MessageInterface::ShowMessage
       ("GmatStringUtil::IsLastNumberPartOfName() entered, str=<%s>\n", str.c_str());
    #endif
+   
+   if (str.empty())
+   {
+      #ifdef DEBUG_NUMBER_WITH_NAME
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::IsLastNumberPartOfName() returning false, "
+          "input string is empty\n");
+      #endif
+      return false;
+   }
    
    if (!isdigit(str[str.size()-1]))
    {

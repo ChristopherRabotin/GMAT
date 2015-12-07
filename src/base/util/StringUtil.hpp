@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -48,6 +58,10 @@ namespace GmatStringUtil
    GMAT_API std::string RemoveScientificNotation(const std::string &str);
    GMAT_API std::string RemoveMathSymbols(const std::string &str, bool removeMathOperator = false);
    
+   GMAT_API std::string PadWithBlanks(const std::string &str, Integer toSize, StripType whichEnd = TRAILING);
+   GMAT_API std::string BuildNumber(Real value, bool useExp = false, Integer length = 17);
+
+
    GMAT_API std::string Trim(const std::string &str, StripType stype = BOTH,
                            bool removeSemicolon = false, bool removeEol = false);
    GMAT_API std::string Strip(const std::string &str, StripType stype = BOTH);
@@ -75,6 +89,8 @@ namespace GmatStringUtil
                            Integer width = GmatGlobal::INTEGER_WIDTH);
    GMAT_API std::string ToStringNoZeros(const Real &val);
    
+   GMAT_API std::string ToOrdinal(Integer i, bool textOnly = false);
+
    GMAT_API std::string RemoveExtraParen(const std::string &str, bool ignoreComma = false,
                                          bool ignoreSingleQuotes = false);
    GMAT_API std::string RemoveOuterParen(const std::string &str);
@@ -118,7 +134,7 @@ namespace GmatStringUtil
    GMAT_API UnsignedIntArray ToUnsignedIntArray(const std::string &str, bool allowOverflow = true);
    GMAT_API StringArray ToStringArray(const std::string &str);
    GMAT_API BooleanArray ToBooleanArray(const std::string &str);
-   
+
    GMAT_API void ParseParameter(const std::string &str, std::string &type,
                            std::string &owner, std::string &dep);
    GMAT_API void GetArrayCommaIndex(const std::string &str, Integer &comma,

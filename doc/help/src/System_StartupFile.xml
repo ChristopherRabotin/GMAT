@@ -20,8 +20,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">System</refmiscinfo>
   </refmeta>
 
@@ -171,7 +169,9 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
       <variablelist>
         <?dbfo list-presentation="blocks"?>
+
         <?dbhtml list-presentation="blocks"?>
+
         <varlistentry>
           <term><literal>ROOT_PATH=../</literal></term>
 
@@ -187,7 +187,9 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
       <variablelist>
         <?dbfo list-presentation="blocks"?>
+
         <?dbhtml list-presentation="blocks"?>
+
         <varlistentry>
           <term><literal>PLUGIN</literal></term>
 
@@ -201,19 +203,51 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
     </refsection>
 
     <refsection>
+      <title>User Functions</title>
+
+      <variablelist>
+        <?dbfo list-presentation="blocks"?>
+
+        <?dbhtml list-presentation="blocks"?>
+
+        <varlistentry>
+          <term><literal>GMAT_FUNCTION_PATH</literal></term>
+
+          <listitem>
+            <para>Search path for GMAT function files
+            (<filename>.gmf</filename> files). May occur multiple times to add
+            multiple paths.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>MATLAB_FUNCTION_PATH</literal></term>
+
+          <listitem>
+            <para>Search path for MATLAB function files
+            (<filename>.m</filename> files). May occur multiple times to add
+            multiple paths.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>PYTHON_MODULE_PATH</literal></term>
+
+          <listitem>
+            <para>Search path for Python modules. May occur multiple times to
+            add multiple paths.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsection>
+
+    <refsection>
       <title>Output</title>
 
       <variablelist>
         <?dbfo list-presentation="blocks"?>
-        <?dbhtml list-presentation="blocks"?>
-        <varlistentry>
-          <term><literal>EPHEM_PATH=<replaceable>OUTPUT_PATH</replaceable>/</literal></term>
 
-          <listitem>
-            <para>Default output directory path for
-            <guilabel>EphemerisFile</guilabel> resources.</para>
-          </listitem>
-        </varlistentry>
+        <?dbhtml list-presentation="blocks"?>
 
         <varlistentry>
           <term><literal>LOG_FILE=<replaceable>OUTPUT_PATH</replaceable>/GmatLog.txt</literal></term>
@@ -254,6 +288,15 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
             “<literal>SCREEN_SHOT</literal>”.</para>
           </listitem>
         </varlistentry>
+
+        <varlistentry>
+          <term><literal>VEHICLE_EPHEM_PATH=<replaceable>OUTPUT_PATH</replaceable>/</literal></term>
+
+          <listitem>
+            <para>Default output directory path for
+            <guilabel>EphemerisFile</guilabel> resources.</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </refsection>
 
@@ -262,7 +305,9 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
       <variablelist>
         <?dbfo list-presentation="blocks"?>
+
         <?dbhtml list-presentation="blocks"?>
+
         <varlistentry>
           <term><literal><replaceable>CELESTIALBODY</replaceable>_POT_PATH=<replaceable>DATA_PATH</replaceable>/gravity/<replaceable>celestialbody</replaceable>/</literal></term>
 
@@ -276,18 +321,35 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
         </varlistentry>
 
         <varlistentry>
-          <term><literal>DATA_PATH=<replaceable>ROOT_PATH</replaceable>/data/</literal></term>
+          <term><literal>ATMOSPHERE_PATH</literal></term>
 
           <listitem>
-            <para>Path to directory containing data files.</para>
+            <para>Path to directory containing atmosphere model data.</para>
           </listitem>
         </varlistentry>
 
         <varlistentry>
-          <term><literal>DE_PATH=<replaceable>DATA_PATH</replaceable>/planetary_ephem/de/</literal></term>
+          <term><literal>BODY_3D_MODEL_PATH</literal></term>
 
           <listitem>
-            <para>Path to directory containing DE ephemeris files.</para>
+            <para>Path to directory containing CelestialBody 3D model
+            files.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>CSSI_FLUX_FILE</literal></term>
+
+          <listitem>
+            <para>Path to default CSSI solar flux file.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>DATA_PATH=<replaceable>ROOT_PATH</replaceable>/data/</literal></term>
+
+          <listitem>
+            <para>Path to directory containing data files.</para>
           </listitem>
         </varlistentry>
 
@@ -375,7 +437,7 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
         </varlistentry>
 
         <varlistentry>
-          <term><literal>LSK_FILE=<replaceable>TIME_PATH</replaceable>/naif0010.tls</literal></term>
+          <term><literal>LSK_FILE</literal></term>
 
           <listitem>
             <para>Path to SPICE leap second kernel.</para>
@@ -417,6 +479,32 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
         </varlistentry>
 
         <varlistentry>
+          <term><literal>PLANETARY_EPHEM_DE_PATH</literal></term>
+
+          <listitem>
+            <para>Path to directory containing DE ephemeris files.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>PLANETARY_EPHEM_SPK_PATH</literal></term>
+
+          <listitem>
+            <para>Path to directory containing SPICE planetary ephemeris
+            files.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>PLANETARY_PCK_FILE</literal></term>
+
+          <listitem>
+            <para>Path to SPICE planetary constants kernel for default
+            celestial bodies.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term><literal>PLANETARY_SPK_FILE</literal></term>
 
           <listitem>
@@ -426,10 +514,34 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
         </varlistentry>
 
         <varlistentry>
-          <term><literal>SPK_PATH</literal></term>
+          <term><literal>SCHATTEN_FILE</literal></term>
 
           <listitem>
-            <para>Path to directory containing SPICE ephemeris kernels</para>
+            <para>Path to default Schatten solar flux predict file.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>SPACECRAFT_MODEL_FILE</literal></term>
+
+          <listitem>
+            <para>Default spacecraft 3D model file.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>SPAD_PATH</literal></term>
+
+          <listitem>
+            <para>Path to directory containing SPAD data files.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>SPAD_SRP_FILE</literal></term>
+
+          <listitem>
+            <para>Path to default SPAD SRP model.</para>
           </listitem>
         </varlistentry>
 
@@ -440,6 +552,32 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
             <para>Path to directory containing leap-second files.</para>
           </listitem>
         </varlistentry>
+
+        <varlistentry>
+          <term><literal>VEHICLE_EPHEM_CCSDS_PATH</literal></term>
+
+          <listitem>
+            <para>Path to directory containing spacecraft CCSDS-OEM ephemeris
+            files.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>VEHICLE_EPHEM_SPK_PATH</literal></term>
+
+          <listitem>
+            <para>Path to directory containing spacecraft SPK ephemeris
+            files.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>VEHICLE_MODEL_PATH</literal></term>
+
+          <listitem>
+            <para>Path to directory containing 3D spacecraft models.</para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </refsection>
 
@@ -448,15 +586,25 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
       <variablelist>
         <?dbfo list-presentation="blocks"?>
+
         <?dbhtml list-presentation="blocks"?>
+
         <varlistentry>
-          <term><literal>CELESTIALBODY_TEXTURE_FILE=<replaceable>TEXTURE_PATH</replaceable>/DefaultTextureFile.jpg</literal></term>
+          <term><literal><replaceable>CELESTIALBODY</replaceable>_TEXTURE_FILE=<replaceable>TEXTURE_PATH</replaceable>/DefaultTextureFile.jpg</literal></term>
 
           <listitem>
             <para>Path to texture file for CELESTIALBODY. CELESTIALBODY is the
             name of any of the built-in celestial bodies in GMAT.
             DefaultTextureFile is the default texture file defined for that
             celestial body.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>BORDER_FILE</literal></term>
+
+          <listitem>
+            <para>Path to constellation border catalog.</para>
           </listitem>
         </varlistentry>
 
@@ -497,14 +645,6 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
           <listitem>
             <para>Path to GUI icon.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term><literal>MODEL_PATH=<replaceable>DATA_PATH</replaceable>/vehicle/models/</literal></term>
-
-          <listitem>
-            <para>Path to directory containing 3D spacecraft models. </para>
           </listitem>
         </varlistentry>
 
@@ -573,7 +713,18 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
       <variablelist>
         <?dbfo list-presentation="blocks"?>
+
         <?dbhtml list-presentation="blocks"?>
+
+        <varlistentry>
+          <term><literal>MATLAB_APP_PATH</literal></term>
+
+          <listitem>
+            <para>[OS X only] Path to MATLAB app
+            (<filename>.app</filename>).</para>
+          </listitem>
+        </varlistentry>
+
         <varlistentry>
           <term><literal>MATLAB_MODE=SHARED</literal></term>
 
@@ -581,7 +732,9 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
             <para>MATLAB interface connection mode. The available options
             are:<variablelist>
                 <?dbfo list-presentation="blocks"?>
+
                 <?dbhtml list-presentation="blocks"?>
+
                 <varlistentry>
                   <term><literal>NO_MATLAB</literal></term>
 
@@ -628,7 +781,27 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
       <variablelist>
         <?dbfo list-presentation="blocks"?>
+
         <?dbhtml list-presentation="blocks"?>
+
+        <varlistentry>
+          <term><literal>DEBUG_FILE_PATH=OFF</literal></term>
+
+          <listitem>
+            <para>Debug file path handling. Accepted values are
+            <literal>ON</literal> and <literal>OFF</literal>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>DEBUG_MATLAB=OFF</literal></term>
+
+          <listitem>
+            <para>Debug MATLAB Interface connection. Accepted values are
+            <literal>ON</literal> and <literal>OFF</literal>.</para>
+          </listitem>
+        </varlistentry>
+
         <varlistentry>
           <term><literal>DEBUG_PARAMETERS=OFF</literal></term>
 
@@ -665,8 +838,10 @@ data\planetary_ephem/spk\de421.bsp</literallayout></para>
 
           <listitem>
             <para>GMAT execution mode. The available options are:<variablelist>
-        <?dbfo list-presentation="blocks"?>
-        <?dbhtml list-presentation="blocks"?>
+                <?dbfo list-presentation="blocks"?>
+
+                <?dbhtml list-presentation="blocks"?>
+
                 <varlistentry>
                   <term><literal>EXIT_AFTER_RUN</literal></term>
 

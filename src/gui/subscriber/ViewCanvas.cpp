@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2010/04/19
@@ -145,7 +155,8 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mPlotName = name;
    mGlInitialized = false;
    mViewPointInitialized = false;
-   mModelsAreLoaded = false;
+   mSatModelsAreLoaded = false;
+   mOtherModelsAreLoaded = false;
    mIsNewFrame = true;
    
    // Performance
@@ -1099,9 +1110,8 @@ void ViewCanvas::SetDrawingMode()
    // as its 'front' for lighting and culling purposes
    glFrontFace(GL_CCW);
    
-   // Enable face culling, so that polygons facing away (defines by front face)
-   // from the viewer aren't drawn (for efficiency).
-   glEnable(GL_CULL_FACE);
+   // Disable face culling so that backwards models (like Mir) will work
+   glDisable (GL_CULL_FACE);
    
    // Enable OpenGL to use glColorMaterial() to get material properties
    glEnable(GL_COLOR_MATERIAL);
@@ -1179,7 +1189,8 @@ void ViewCanvas::ResetPlotInfo()
    mInFunction = false;
    
    mWriteRepaintDisalbedInfo = true;
-   mModelsAreLoaded = false;
+   mSatModelsAreLoaded = false;
+   mOtherModelsAreLoaded = false;
    
    // Initialize view
    if (mUseInitialViewPoint)
@@ -2062,8 +2073,8 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadSpacecraftModels() '%s' entered, writeWarning = %d, mGlInitialized = %d, "
-       "mModelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), writeWarning, mGlInitialized,
-       mModelsAreLoaded, mScCount);
+       "mSatModelsAreLoaded = %d, mScCount = %d\n", mPlotName.WX_TO_C_STRING, writeWarning,
+       mGlInitialized, mSatModelsAreLoaded, mScCount);
    #endif
    
    // Add this here to see if it works on Linux loading spacecraft 3ds model (LOJ: 2012.08.01)
@@ -2079,7 +2090,7 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
    
    if (mGlInitialized)
    {
-      if (!mModelsAreLoaded)
+      if (!mSatModelsAreLoaded)
       {
          ModelManager *mm = ModelManager::Instance();
 			
@@ -2129,16 +2140,18 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 						{
 							if (GmatFileUtil::DoesFileExist(modelFullPath))
 							{                        
+                        int modelId = mm->LoadModel(modelFullPath);
                         #ifdef DEBUG_LOAD_MODEL
-								MessageInterface::ShowMessage("   Calling mm->LoadModel(), mm=<%p>\n", mm);
+								MessageInterface::ShowMessage
+                           ("   modelId %d returned from mm->LoadModel(), mm=<%p>\n", modelId, mm);
                         #endif
                         
-                        sat->SetModelId(mm->LoadModel(modelFullPath));
+                        sat->SetModelId(modelId);
                         numModelLoaded++;
                         
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage
-									("   Successfully loaded model '%s', numModelLoaded = %d\n", modelPath.c_str(),
+									("   Successfully loaded model '%s', numModelLoaded = %d\n", modelFullPath.c_str(),
                             numModelLoaded);
                         #endif
 							}
@@ -2162,19 +2175,124 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
             ("   numModelLoaded = %d, mScCount = %d\n", numModelLoaded, mScCount);
 			#endif
          
-			// Set mModelsAreLoaded to true if it went through all models
+			// Set mSatModelsAreLoaded to true if it went through all models
 			if (numModelLoaded == mScCount)
-				mModelsAreLoaded = true;
+				mSatModelsAreLoaded = true;
       }
    }
    
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadSpacecraftModels() '%s' leaving, mGlInitialized = %d, "
-       "mModelsAreLoaded = %d\n", mPlotName.c_str(), mGlInitialized, mModelsAreLoaded);
+       "mSatModelsAreLoaded = %d\n", mPlotName.WX_TO_C_STRING, mGlInitialized,
+       mSatModelsAreLoaded);
    #endif
    
-   return mModelsAreLoaded;
+   return mSatModelsAreLoaded;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool LoadOtherObjectModels(bool writeWarning)
+//------------------------------------------------------------------------------
+/**
+ * Loads celestial body model specified in the body object.
+ *
+ * @param  writeWarning  If true, writes warning if failed to load models
+ */
+//------------------------------------------------------------------------------
+bool ViewCanvas::LoadOtherObjectModels(bool writeWarning)
+{
+   #if DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadOtherObjectModels() '%s' entered, writeWarning = %d, "
+       "mGlInitialized = %d, mOtherModelsLoaded = %d\n", mPlotName.WX_TO_C_STRING,
+       writeWarning, mGlInitialized, mOtherModelsAreLoaded);
+   #endif
+   
+   // Add this here to see if it works on Linux loading spacecraft 3ds model (LOJ: 2012.08.01)
+   wxPaintDC dc(this);
+   if (!SetGLContext("in ViewCanvas::LoadOtherObjectModels()"))
+   {
+      #if DEBUG_LOAD_MODEL
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadOtherObjectModels() '%s' returning false, SetGLContext() failed\n");
+      #endif
+      return false;
+   }
+   
+   if (mGlInitialized)
+   {
+      if (!mOtherModelsAreLoaded)
+      {
+         ModelManager *mm = ModelManager::Instance();
+			
+			int numModelLoaded = 0;
+         
+         for (int obj = 0; obj < mObjectCount; obj++)
+         {
+            CelestialBody *body = (CelestialBody*)mObjectArray[obj];
+            
+            // If object pointer is not NULL and is a CelestialBody, check for 3D model
+            if (mObjectArray[obj] != NULL && mObjectArray[obj]->IsOfType(Gmat::CELESTIAL_BODY))
+            {
+               CelestialBody *body = (CelestialBody*)mObjectArray[obj];
+               
+               std::string modelFullPath = body->Get3dViewModelFileFullPath();
+               #ifdef DEBUG_LOAD_MODEL
+               MessageInterface::ShowMessage
+                  ("   Loading model file from the body <%p>'%s'\n   modelFile = '%s', "
+                   "modelID = %d\n",  body, body->GetName().c_str(), modelFullPath.c_str(),
+                   body->Get3dViewModelId());
+				   #endif
+               
+               // If model file is not empty and model has not already loaded
+               if (modelFullPath != "" && body->Get3dViewModelId() == -1)
+               {
+                  if (GmatFileUtil::DoesFileExist(modelFullPath))
+                  {                        
+                     int modelId = mm->LoadModel(modelFullPath);
+                     #ifdef DEBUG_LOAD_MODEL
+                     MessageInterface::ShowMessage
+                        ("   modelId %d returned from mm->LoadModel(), mm=<%p>\n", modelId, mm);
+                     #endif
+                     
+                     body->Set3dViewModelId(modelId);
+                     numModelLoaded++;
+                     
+                     #ifdef DEBUG_LOAD_MODEL
+                     MessageInterface::ShowMessage
+                        ("   Successfully loaded model '%s', numModelLoaded = %d\n", modelFullPath.c_str(),
+                         numModelLoaded);
+                     #endif
+                  }
+                  else
+                  {
+                     if (writeWarning)
+                     {
+                        MessageInterface::ShowMessage
+                           ("*** WARNING *** Cannot load the model file for spacecraft '%s'.\n    "
+                            "The file '%s' does not exist.\n", body->GetName().c_str(),
+                            modelFullPath.c_str());
+                     }
+                  }
+               }
+            }
+         }
+         
+			// Set mOtherModelsAreLoaded to true since some bodies do not have models
+         mOtherModelsAreLoaded = true;
+      }
+   }
+   
+   #if DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadOtherObjectModels() '%s' leaving, mGlInitialized = %d, "
+       "mOtherModelsAreLoaded = %d\n", mPlotName.WX_TO_C_STRING, mGlInitialized,
+       mOtherModelsAreLoaded);
+   #endif
+   
+   return mOtherModelsAreLoaded;
 }
 
 
@@ -2280,12 +2398,12 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
    MessageInterface::ShowMessage
       ("ViewCanvas::UpdateSpacecraftData() entered, time=%f, mNumData=%d, mScCount=%d\n"
        "   mIsSolving=%d, solverOption=%d, mDrawSolverData=%d, mGlInitialized=%d, "
-       "mModelsAreLoaded=%d\n", time, mNumData, mScCount, mIsSolving, solverOption,
-       mDrawSolverData, mGlInitialized, mModelsAreLoaded);
+       "mSatModelsAreLoaded=%d\n", time, mNumData, mScCount, mIsSolving, solverOption,
+       mDrawSolverData, mGlInitialized, mSatModelsAreLoaded);
    #endif
    
    // Load spacecraft models
-   if (!mModelsAreLoaded)
+   if (!mSatModelsAreLoaded)
       LoadSpacecraftModels(false);
    
    //-------------------------------------------------------
@@ -2427,6 +2545,13 @@ void ViewCanvas::UpdateOtherData(const Real &time)
    bool viewRotMatComputed = false;
    bool eclipticRotMatComputed = false;
    
+   // Load celestial body models
+   if (!mOtherModelsAreLoaded)
+      LoadOtherObjectModels(false);
+   
+   //-------------------------------------------------------
+   // update celestial body's position
+   //-------------------------------------------------------
    for (int obj = 0; obj < mObjectCount; obj++)
    {
       SpacePoint *otherObj = mObjectArray[obj];

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under
 // MOMS Task order 124.
@@ -99,6 +109,9 @@ ObjectReferencedAxes::ObjectReferencedAxes(const std::string &itsName) :
 {
    objectTypeNames.push_back("ObjectReferencedAxes");
    parameterCount = ObjectReferencedAxesParamCount;
+
+   usesPrimary   = GmatCoordinate::REQUIRED;
+   usesSecondary = GmatCoordinate::OPTIONAL_USE;
 }
 
 //---------------------------------------------------------------------------
@@ -189,30 +202,6 @@ ObjectReferencedAxes::~ObjectReferencedAxes()
 {
    primary = NULL;
    secondary = NULL;
-}
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesPrimary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesPrimary() const
-{
-   return GmatCoordinate::REQUIRED;
-}
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesSecondary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesSecondary() const
-{
-   return GmatCoordinate::OPTIONAL_USE;
 }
 
 //------------------------------------------------------------------------------
@@ -692,12 +681,16 @@ bool ObjectReferencedAxes::SetStringParameter(const Integer id,
       SetZAxis(value);
       OK = true;
    }
-   if ((UsesPrimary() != GmatCoordinate::NOT_USED) && (id == PRIMARY_OBJECT_NAME))
+   if ((usesPrimary != GmatCoordinate::NOT_USED) &&
+       (usesPrimary != GmatCoordinate::REQUIRED_UNMODIFIABLE) &&
+       (id == PRIMARY_OBJECT_NAME))
    {
       primaryName = value;
       OK = true;
    }
-   if ((UsesSecondary() != GmatCoordinate::NOT_USED) && (id == SECONDARY_OBJECT_NAME))
+   if ((usesSecondary != GmatCoordinate::NOT_USED) &&
+       (usesSecondary != GmatCoordinate::REQUIRED_UNMODIFIABLE) &&
+       (id == SECONDARY_OBJECT_NAME))
    {
       secondaryName = value;
       OK = true;

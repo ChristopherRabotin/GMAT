@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2005/12/22
@@ -49,6 +59,8 @@ RunScriptFolderDialog::RunScriptFolderDialog(wxWindow *parent, int numScripts,
    mSaveCompareResults = false;
    mOutDirChanged = false;
    mCreateRunFolder = false;
+   mExcludeScripts = false;
+   m2ndExcludeScripts = false;
    
    mNumScriptsToRun = numScripts;
    mNumTimesToRun = 1;
@@ -56,6 +68,7 @@ RunScriptFolderDialog::RunScriptFolderDialog(wxWindow *parent, int numScripts,
    mCompareDir = compareDir;
 
    mFilterString = "";
+   m2ndFilterString = "";
    mReplaceString = "GMAT";
    
    Create();
@@ -80,6 +93,14 @@ wxString RunScriptFolderDialog::GetFilterString(bool &exclude)
    return mFilterString;
 }
 
+//------------------------------------------------------------------------------
+// wxString Get2ndFilterString(bool &exclude)
+//------------------------------------------------------------------------------
+wxString RunScriptFolderDialog::Get2ndFilterString(bool &exclude)
+{
+   exclude = m2ndExcludeScripts;
+   return m2ndFilterString;
+}
 
 //------------------------------------------------------------------------------
 // virtual void Create()
@@ -97,7 +118,7 @@ void RunScriptFolderDialog::Create()
    //------------------------------------------------------
    mRunFromSavedCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT(" Save scripts to new folder and run from it"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *saveScriptsDir =
       new wxStaticText(this, ID_TEXT, wxT("Directory to save scripts:"),
@@ -105,7 +126,7 @@ void RunScriptFolderDialog::Create()
    
    mSaveScriptsDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(320,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    mChangeSaveScriptsDirButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
@@ -129,7 +150,7 @@ void RunScriptFolderDialog::Create()
    
    mStartingScriptTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("1"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *numScriptsLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of scripts to run:"),
@@ -137,7 +158,7 @@ void RunScriptFolderDialog::Create()
    
    mNumScriptsToRunTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("1"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *filterScriptsLabel =
       new wxStaticText(this, ID_TEXT, wxT("Filter scripts contain:"),
@@ -145,11 +166,23 @@ void RunScriptFolderDialog::Create()
    
    mFilterStringTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(100,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    mExcludeScriptsCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT(" Exclude"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
+   
+   wxStaticText *filterScriptsLabel2 =
+      new wxStaticText(this, ID_TEXT, wxT("2nd Filter scripts contain:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   m2ndFilterStringTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxDefaultSize, 0);
+   
+   m2ndExcludeScriptsCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT(" Exclude"),
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *numTimesLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of times to run each script:"),
@@ -157,11 +190,11 @@ void RunScriptFolderDialog::Create()
    
    mCreateRunFolderCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT(" Create RUN folder"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    mNumTimesToRunTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("1"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *currOutDir1 =
       new wxStaticText(this, ID_TEXT, wxT("Current GMAT output directory:"),
@@ -173,7 +206,7 @@ void RunScriptFolderDialog::Create()
    
    mCurrOutDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(320,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    mChangeCurrOutDirButton =
       new wxButton(this, ID_BUTTON, wxT("Change for this Run"),
@@ -195,6 +228,10 @@ void RunScriptFolderDialog::Create()
    runSizer->Add(mFilterStringTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(mExcludeScriptsCheckBox, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(filterScriptsLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
+   runSizer->Add(m2ndFilterStringTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(m2ndExcludeScriptsCheckBox, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    
    runSizer->Add(numTimesLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(mNumTimesToRunTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
@@ -220,7 +257,7 @@ void RunScriptFolderDialog::Create()
    //------------------------------------------------------
    mCompareCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Compare results"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *tolLabel =
       new wxStaticText(this, ID_TEXT, wxT("Tolerance to be used in flagging:"),
@@ -228,7 +265,7 @@ void RunScriptFolderDialog::Create()
    
    mAbsTolTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("1"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *replaceLabel =
       new wxStaticText(this, ID_TEXT, wxT("Compare files by replacing \"GMAT\" with:"),
@@ -236,7 +273,7 @@ void RunScriptFolderDialog::Create()
    
    mReplaceTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(mReplaceString),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *compDirLabel =
       new wxStaticText(this, ID_TEXT, wxT("Directory to compare:"),
@@ -254,7 +291,7 @@ void RunScriptFolderDialog::Create()
    
    mCompareDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(320,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    mDirBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
@@ -262,7 +299,7 @@ void RunScriptFolderDialog::Create()
    
    mSaveResultCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Save compare results to file"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *saveFileLabel =
       new wxStaticText(this, ID_TEXT, wxT("Filename to save:"),
@@ -270,7 +307,7 @@ void RunScriptFolderDialog::Create()
    
    mSaveFileTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(320,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    mSaveBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
@@ -438,6 +475,7 @@ void RunScriptFolderDialog::SaveData()
    }
 
    mExcludeScripts = mExcludeScriptsCheckBox->GetValue();
+   m2ndExcludeScripts = m2ndExcludeScriptsCheckBox->GetValue();
    mCreateRunFolder = mCreateRunFolderCheckBox->GetValue();
    
    mNumStartingScript = numStartingScript;
@@ -445,6 +483,7 @@ void RunScriptFolderDialog::SaveData()
    mNumTimesToRun = numTimesToRun;
    
    mFilterString = mFilterStringTextCtrl->GetValue();
+   m2ndFilterString = m2ndFilterStringTextCtrl->GetValue();
    mSaveScriptsDir = mSaveScriptsDirTextCtrl->GetValue();
    mCurrOutDir = mCurrOutDirTextCtrl->GetValue();
    

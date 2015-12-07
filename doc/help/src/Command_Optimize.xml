@@ -29,7 +29,8 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis><literal>Optimize</literal> SolverName [{[<literal>SolveMode</literal> = <replaceable>value</replaceable>], [<literal>ExitMode</literal> = <replaceable>value</replaceable>]}]
+    <synopsis><literal>Optimize</literal> SolverName [{[<literal>SolveMode</literal> = <replaceable>value</replaceable>], [<literal>ExitMode</literal> = <replaceable>value</replaceable>],
+                      [<literal>ShowProgressWindow</literal> = <replaceable>value</replaceable>] }]
       <replaceable>Vary command</replaceable> …
       <replaceable>script statement</replaceable> …
       <replaceable>NonlinearConstraint command</replaceable> …
@@ -216,6 +217,53 @@
           </row>
 
           <row>
+            <entry><guilabel>ShowProgressWindow</guilabel></entry>
+
+            <entry><para>Flag to indicate if solver progress window should be
+            displayed. </para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true,false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>true</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>no</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>SolveMode</guilabel></entry>
 
             <entry><para>Specifies how the optimization loop behaves during
@@ -375,6 +423,20 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Command_Optimize_GUI_2.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
+
+    <para>If you set <guilabel>ShowProgressWindow</guilabel> to true, then a
+    dynamic display is shown during optimization that contains values of
+    variables and constraints as shown below.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_Optimize_SolverStatusWindow.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>

@@ -35,7 +35,7 @@ ifeq ($(LINUX_MAC), 1)
 
 ifdef MAC_SPECIFIC
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
+SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) -dynamiclib -Wl -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 else
 SHARED_EXTENSION = .so
@@ -200,6 +200,7 @@ OBJECTS = \
     command/EndScript.o \
     command/EndTarget.o \
     command/EndWhile.o \
+    command/FindEvents.o \
     command/For.o \
     command/If.o \
     command/ManageObject.o \
@@ -260,10 +261,10 @@ OBJECTS = \
     coordsystem/TopocentricAxes.o \
     coordsystem/TrueOfDateAxes.o \
     event/EventException.o \
-    event/EventFunction.o \
     event/EventLocator.o \
-    event/LocatedEventTable.o \
     event/LocatedEvent.o \
+    executive/ListenerManager.o \
+    executive/ListenerManagerInterface.o \
     executive/Moderator.o \
     executive/PlotInterface.o \
     executive/PlotReceiver.o \
@@ -310,6 +311,7 @@ OBJECTS = \
     forcemodel/harmonic/HarmonicGravity.o \
     forcemodel/harmonic/HarmonicGravityCof.o \
     forcemodel/harmonic/HarmonicGravityGrv.o \
+    foundation/IChangeListener.o \
     foundation/Covariance.o \
     foundation/ElementWrapper.o \
     foundation/GmatBaseException.o \
@@ -408,7 +410,6 @@ OBJECTS = \
     parameter/CartesianParameters.o \
     parameter/DelaunayParameters.o \
     parameter/EnvData.o \
-    parameter/EnvParameters.o \
     parameter/EnvReal.o \
     parameter/EquinoctialParameters.o \
     parameter/ExpressionParser.o \
@@ -485,7 +486,6 @@ OBJECTS = \
     solarsys/Planet.o \
     solarsys/ShadowState.o \
     solarsys/SlpFile.o \
-    solarsys/SolarFluxFileReader.o \
     solarsys/SolarFluxReader.o \
     solarsys/SolarSystemException.o \
     solarsys/SolarSystem.o \
@@ -501,6 +501,7 @@ OBJECTS = \
     solver/Gradient.o \
     solver/Jacobian.o \
     solver/LineSearch.o \
+    solver/ISolverListener.o \
     spacecraft/FormationInterface.o \
     spacecraft/Spacecraft.o \
     spacecraft/SpaceObject.o \
@@ -543,7 +544,6 @@ OBJECTS = \
     util/GmatGlobal.o \
     util/GravityFileUtil.o \
     util/GregorianDate.o \
-    util/LatLonHgt.o \
     util/LeapSecsFileReader.o \
     util/Linear.o \
     util/MemoryTracker.o \
@@ -572,28 +572,6 @@ OBJECTS = \
     solarsys/SimpleExponentialAtmosphere.o \
     $(TCPIP_OBJECTS) \
     $(SPICE_OBJECTS)
-#    solarsys/BodyDataReader.o \
-#    spacecraft/TimeConverter.o \
-#    interface/SocketServer.o \
-#    util/Keplerian.o \
-#    util/CoordUtil.o \
-#    util/ModKeplerian.o \
-#    util/Anomaly.o \
-#    spacecraft/StateConverter.o \
-#    spacecraft/Converter.o \
-#    util/Cartesian.o \
-#    event/Brent.o \
-#    event/RootFinder.o \
-#    forcemodel/EventModel.o \
-
-
-#    parameter/OrbitAMatrixParameters.o \
-#    forcemodel/harmonic/EarthTide.o \
-#    $(BRIDGEOBJECTS)
-
-# Future classes:
-#    propagator/Cowell.o \
-
 
 
 FORTRAN_OBJECTS = solarsys/msise90_sub.o

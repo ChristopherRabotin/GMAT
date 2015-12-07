@@ -34,8 +34,11 @@ GMAT Sc.Tanks = {tank1};
 GMAT Sc.Thrusters = {engine1};
 GMAT Sc.NAIFId = -123456789;
 GMAT Sc.NAIFIdReferenceFrame = -123456789;
+GMAT Sc.OrbitColor = Red;
+GMAT Sc.TargetColor = Teal;
 GMAT Sc.Id = 'SatId';
 GMAT Sc.Attitude = CoordinateSystemFixed;
+GMAT Sc.SPADSRPScaleFactor = 1;
 GMAT Sc.ModelFile = '../data/vehicle/models/aura.3ds';
 GMAT Sc.ModelOffsetX = 0;
 GMAT Sc.ModelOffsetY = 0;
@@ -46,7 +49,8 @@ GMAT Sc.ModelRotationZ = 0;
 GMAT Sc.ModelScale = 3;
 GMAT Sc.AttitudeDisplayStateType = 'Quaternion';
 GMAT Sc.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Sc.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT Sc.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sc.EulerAngleSequence = '321';
 
 %----------------------------------------
 %---------- Hardware Components
@@ -55,7 +59,7 @@ GMAT Sc.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
 %  Create a fuel tank and name it tank1
 %          Here we create a fuel tank and set up its physical properties
 %          including Temperature, Fuel Mass, Fuel Density etc.
-Create FuelTank tank1;
+Create ChemicalTank tank1;
 GMAT tank1.AllowNegativeFuelMass = false;
 GMAT tank1.FuelMass = 725;
 GMAT tank1.Pressure = 1200;
@@ -71,7 +75,7 @@ GMAT tank1.PressureModel = PressureRegulated;
 %         Currently, you specify the thruster orientation with respect to
 %         the spacecraft VNB or EarthMJ2000Eq systems.  This will change
 %         when attitude capabilities are added to GMAT.
-Create Thruster engine1;
+Create ChemicalThruster engine1;
 GMAT engine1.CoordinateSystem = Local;
 GMAT engine1.Origin = Earth;
 GMAT engine1.Axes = VNB;
@@ -115,6 +119,8 @@ GMAT engine1.K13 = 0;
 GMAT engine1.K14 = 0;
 GMAT engine1.K15 = 0;
 GMAT engine1.K16 = 0;
+
+
 
 %----------------------------------------
 %---------- ForceModels
@@ -160,6 +166,7 @@ GMAT prop.StopIfAccuracyIsViolated = true;
 %         multiplied by BurnScaleFactor.
 Create FiniteBurn fb;
 GMAT fb.Thrusters = {engine1};
+GMAT fb.ThrottleLogicAlgorithm = 'MaxNumberOfThrusters';
 
 %----------------------------------------
 %---------- Subscribers
@@ -168,9 +175,10 @@ GMAT fb.Thrusters = {engine1};
 %  Create an XYPlot  
 Create XYPlot energy;
 GMAT energy.SolverIterations = Current;
-GMAT energy.UpperLeft = [ 0.2877358490566038 0 ];
-GMAT energy.Size = [ 0.360377358490566 0.4521410579345088 ];
-GMAT energy.RelativeZOrder = 55;
+GMAT energy.UpperLeft = [ 0.1017647058823529 0.02785145888594165 ];
+GMAT energy.Size = [ 0.3605882352941177 0.4522546419098144 ];
+GMAT energy.RelativeZOrder = 261;
+GMAT energy.Maximized = false;
 GMAT energy.XVariable = Sc.Epoch.A1ModJulian;
 GMAT energy.YVariables = {Sc.Energy};
 GMAT energy.ShowGrid = true;
@@ -178,9 +186,10 @@ GMAT energy.ShowPlot = true;
 
 Create XYPlot SMAvsTime;
 GMAT SMAvsTime.SolverIterations = Current;
-GMAT SMAvsTime.UpperLeft = [ 0.2877358490566038 0.455919395465995 ];
-GMAT SMAvsTime.Size = [ 0.360377358490566 0.4521410579345088 ];
-GMAT SMAvsTime.RelativeZOrder = 73;
+GMAT SMAvsTime.UpperLeft = [ 0.1035294117647059 0.486737400530504 ];
+GMAT SMAvsTime.Size = [ 0.3605882352941177 0.4522546419098144 ];
+GMAT SMAvsTime.RelativeZOrder = 265;
+GMAT SMAvsTime.Maximized = false;
 GMAT SMAvsTime.XVariable = Sc.Epoch.A1ModJulian;
 GMAT SMAvsTime.YVariables = {Sc.SMA};
 GMAT SMAvsTime.ShowGrid = true;
@@ -189,9 +198,10 @@ GMAT SMAvsTime.ShowPlot = true;
 %  Create an OpenGL Plot  
 Create OrbitView SatOpenGL;
 GMAT SatOpenGL.SolverIterations = Current;
-GMAT SatOpenGL.UpperLeft = [ 0.6207547169811321 0.2657430730478589 ];
-GMAT SatOpenGL.Size = [ 0.3613207547169811 0.4534005037783375 ];
-GMAT SatOpenGL.RelativeZOrder = 75;
+GMAT SatOpenGL.UpperLeft = [ 0.4770588235294118 0.05437665782493369 ];
+GMAT SatOpenGL.Size = [ 0.4794117647058824 0.8342175066312998 ];
+GMAT SatOpenGL.RelativeZOrder = 267;
+GMAT SatOpenGL.Maximized = false;
 GMAT SatOpenGL.Add = {Sc, Earth};
 GMAT SatOpenGL.CoordinateSystem = EarthMJ2000Eq;
 GMAT SatOpenGL.DrawObject = [ true true ];
@@ -199,6 +209,7 @@ GMAT SatOpenGL.DataCollectFrequency = 1;
 GMAT SatOpenGL.UpdatePlotFrequency = 50;
 GMAT SatOpenGL.NumPointsToRedraw = 0;
 GMAT SatOpenGL.ShowPlot = true;
+GMAT SatOpenGL.ShowLabels = true;
 GMAT SatOpenGL.ViewPointReference = Earth;
 GMAT SatOpenGL.ViewPointVector = [ 10000 10000 10000 ];
 GMAT SatOpenGL.ViewDirection = Earth;
@@ -235,5 +246,7 @@ EndFiniteBurn 'Turn off Thruster' fb(Sc);
 
 %  Propagate for 5 days
 Propagate 'Prop 1 Day' prop(Sc) {Sc.ElapsedDays = 1};
+
+
 
 

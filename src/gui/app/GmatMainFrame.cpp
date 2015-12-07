@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -48,6 +58,7 @@
 #include "SpacecraftPanel.hpp"
 #include "ThrusterConfigPanel.hpp"
 #include "PowerSystemConfigPanel.hpp"
+#include "EventLocatorPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "PropagatePanel.hpp"
@@ -65,6 +76,7 @@
 #include "ReportFileSetupPanel.hpp"
 #include "EphemerisFilePanel.hpp"
 #include "SubscriberSetupPanel.hpp"
+#include "FindEventsPanel.hpp"
 #include "MessageInterface.hpp"
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
@@ -583,6 +595,33 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    entries[6].Set(wxACCEL_CTRL, (int) 'H', MENU_EDIT_FIND);
    wxAcceleratorTable accel(7, entries);
    this->SetAcceleratorTable(accel);
+
+   Integer osMajor = 0;
+   Integer osMinor = 0;
+   wxString osDescription = wxGetOsDescription();
+   wxOperatingSystemId osId = wxGetOsVersion(&osMajor, &osMinor);
+   
+#ifdef DEBUG_OS_DETECTION
+   MessageInterface::ShowMessage("OS: %s\n", std::string(osDescription));
+#endif
+   int osNum = osMajor * 10 + osMinor;
+
+   // Flag to use "delete child" rather than child.Destroy()
+   useChildDelete = true;
+
+   if (osDescription.Find("Windows") == wxNOT_FOUND)
+      useChildDelete = false;
+   else if (osDescription.Find("Windows 7") == wxNOT_FOUND &&
+      osDescription.Find("Server") == wxNOT_FOUND)
+   {
+      if (osNum > 61)
+         useChildDelete = false;
+   }
+
+#ifdef DEBUG_OS_DETECTION
+   MessageInterface::ShowMessage("OS info: %d.%d ==> %d gives id %d; %sWin 8 or higher\n", 
+      osMajor, osMinor, osNum, osId, (!useChildDelete ? "Is " : "Is not "));
+#endif
 
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() this=<%p> exiting\n", this);
@@ -1516,9 +1555,18 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          
          // MdiChildViewFrame::OnPlotClose() and MdiChildTsFrame::OnPlotClose()
          // sets deleteChild to false
+
+         // Here we call Destroy rather than deleting the window in order to 
+         // avoid race conditions that result in the window destruction before 
+         // all pending messages have been processed.
          if (deleteChild)
-            delete child;
-         
+         {
+            if (useChildDelete)
+               delete child;
+            else
+               child->Destroy();
+         }
+
          delete node;
          childRemoved = true;
          break;
@@ -1723,7 +1771,8 @@ void GmatMainFrame::CloseActiveChild()
 //------------------------------------------------------------------------------
 // bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
 //                       bool closeReports = true, bool closeUndockedMissionTree = true,
-//                       bool closeWelcomePanel = true)
+//                       bool closeWelcomePanel = true,
+//                       bool closeSolverWindows = true)
 //------------------------------------------------------------------------------
 /*
  * Closes all mdi children frames.
@@ -1736,7 +1785,8 @@ void GmatMainFrame::CloseActiveChild()
 //------------------------------------------------------------------------------
 bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
                                      bool closeReports, bool closeUndockedMissionTree,
-                                     bool closingGmat,  bool closeWelcomePanel)
+                                     bool closingGmat,  bool closeWelcomePanel,
+                                     bool closeSolverWindows)
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
@@ -1860,6 +1910,13 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
             gmatAppData->GetOutputTree()->UpdateOutput(true, false, false);
             canDelete = true;
          }
+
+         // delete solver windows
+         if (closeSolverWindows && type == GmatTree::OUTPUT_SOLVER_WINDOW)
+         {
+            canDelete = true;
+         }
+         
       }
       else if (type == GmatTree::MISSION_TREE_UNDOCKED)
       {
@@ -3223,6 +3280,14 @@ bool GmatMainFrame::SaveScriptAs()
    bool scriptSaved = true;
    std::string oldScriptName = mScriptFilename;
    
+   if (mInterpretFailed)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Errors were found in the script named \"%s\".\n"
+            "Please fix all errors listed in message window before saving "
+            "the mission.\n", mScriptFilename.c_str());
+      return false;
+   }
    wxFileDialog dialog(this, "Choose a file", "", "",
                        "Script files (*.script, *.m)|*.script;*.m|"
                        "Text files (*.txt, *.text)|*.txt;*.text|"
@@ -4177,7 +4242,8 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new LibrationPointPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::EVENT_LOCATOR:
-     sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+//     sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      sizer->Add(new EventLocatorPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
      break;
    case GmatTree::USER_DEFINED_OBJECT:
      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
@@ -4290,6 +4356,9 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    case GmatTree::SAVE:
    case GmatTree::MANAGE_OBJECT:
       sizer->Add(new ManageObjectPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::FIND_EVENTS:
+      sizer->Add(new FindEventsPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::REPORT:
       sizer->Add(new ReportPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
@@ -6307,10 +6376,10 @@ void GmatMainFrame::CompareFiles()
    
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
-      ("   baseDir=%s\n   compDirs[0]=%s\n", baseDir.c_str(), compDirs[0].c_str());
+      ("   baseDir=%s\n   compDirs[0]=%s\n", baseDir.WX_TO_C_STRING, compDirs[0].WX_TO_C_STRING);
    MessageInterface::ShowMessage
       ("   basePrefix='%s', comparePrefixex[0]='%s', numDirsToCompare=%d, "
-       "numFilesToCompare=%d\n", basePrefix.c_str(), compStrings[0].c_str(),
+       "numFilesToCompare=%d\n", basePrefix.WX_TO_C_STRING, compStrings[0].WX_TO_C_STRING,
        numDirsToCompare, numFilesToCompare);
    #endif
 
@@ -6398,8 +6467,8 @@ void GmatMainFrame::CompareFiles()
       wxArrayString compareNames;
 
       #ifdef DEBUG_FILE_COMPARE
-      MessageInterface::ShowMessage("   baseFileName='%s'\n", baseFileName.c_str());
-      MessageInterface::ShowMessage("   noPrefixName='%s'\n", noPrefixName.c_str());
+      MessageInterface::ShowMessage("   baseFileName='%s'\n", baseFileName.WX_TO_C_STRING);
+      MessageInterface::ShowMessage("   noPrefixName='%s'\n", noPrefixName.WX_TO_C_STRING);
       #endif
 
       for (int j=0; j<numDirsToCompare; j++)
@@ -6408,7 +6477,7 @@ void GmatMainFrame::CompareFiles()
 
          #ifdef DEBUG_FILE_COMPARE
          MessageInterface::ShowMessage
-            ("   compareNames[%d]='%s'\n", j, compareNames[j].c_str());
+            ("   compareNames[%d]='%s'\n", j, compareNames[j].WX_TO_C_STRING);
          #endif
       }
       
@@ -6522,7 +6591,7 @@ void GmatMainFrame::CompareFiles()
       #ifdef DEBUG_FILE_COMPARE
       int numLines = textCtrl->GetNumberOfLines();
       for (int i = 0; i < numLines; i++)
-         MessageInterface::ShowMessage("%s\n", textCtrl->GetLineText(i).c_str());
+         MessageInterface::ShowMessage("%s\n", textCtrl->GetLineText(i).WX_TO_C_STRING);
       #endif
       
       textCtrl->SetInsertionPointEnd();
@@ -6547,7 +6616,7 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
       ("GmatMainFrame::GetBaseFilesToCompare() entered, compareOption=%d\n   baseDir='%s', "
-       "baseString='%s'\n", compareOption, baseDir.c_str(), baseString.c_str());
+       "baseString='%s'\n", compareOption, baseDir.WX_TO_C_STRING, baseString.WX_TO_C_STRING);
    #endif
    
    // Get files in the base directory
@@ -6559,6 +6628,13 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
    
    while (cont)
    {
+      // Skip GmatLog.txt since it will be always different (LOJ: 2015.04.01)
+      if (filename == "GmatLog.txt")
+      {
+         cont = dir.GetNext(&filename);
+         continue;
+      }
+      
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script") ||
           filename.Contains(".eph") || filename.Contains(".truth"))
@@ -6578,7 +6654,7 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
                noPrefixNameArray.push_back(noPrefixName.c_str());
                baseFileNameArray.push_back(filepath.c_str());
                #ifdef DEBUG_FILE_COMPARE
-               MessageInterface::ShowMessage("   Adding '%s'\n", noPrefixName.c_str());
+               MessageInterface::ShowMessage("   Adding '%s'\n", noPrefixName.WX_TO_C_STRING);
                #endif
             }
          }

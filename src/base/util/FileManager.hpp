@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -57,12 +67,13 @@ public:
       MARS_POT_PATH,
       OTHER_POT_PATH,
       TEXTURE_PATH, //Notes: TEXTURE_PATH is used in SetPathname()
+      BODY_3D_MODEL_PATH, // For celestial body 3D model path
       MEASUREMENT_PATH,
       GUI_CONFIG_PATH,
       SPLASH_PATH,
       ICON_PATH,
       STAR_PATH,
-      MODEL_PATH,
+      VEHICLE_MODEL_PATH,
       SPAD_PATH,
       ATMOSPHERE_PATH,
       
@@ -81,10 +92,11 @@ public:
       //    Notes: Don't add general planet potential files here. They are handled
       //    when gmat_startup_file are read by following naming convention.
       DE405_FILE,
-      DE421_FILE,							// made change by TUAN NGUYEN
-      DE424_FILE,							// made change by TUAN NGUYEN
-      IAUSOFA_FILE,                 // made change by TUAN NGUYEN
-      ICRF_FILE,							// made change by TUAN NGUYEN
+      DE421_FILE,
+      DE424_FILE,
+      DE430_FILE,
+      IAUSOFA_FILE,
+      ICRF_FILE,
       PLANETARY_SPK_FILE,
       JGM2_FILE,
       JGM3_FILE,
@@ -95,6 +107,7 @@ public:
       EOP_FILE,
       PLANETARY_COEFF_FILE,
       NUTATION_COEFF_FILE,
+      PLANETARY_PCK_FILE,
       LEAP_SECS_FILE,
       LSK_FILE,
       PERSONALIZATION_FILE,
@@ -137,6 +150,7 @@ public:
    bool DoesFileExist(const std::string &filename);
    bool RenameFile(const std::string &oldName, const std::string &newName,
                    Integer &retCode, bool overwriteIfExists = false);
+   bool ValidatePaths();
    
    // Methods for startup file
    std::string GetStartupFileDir();
@@ -153,6 +167,10 @@ public:
    bool GetTextureMapFile(const std::string &inFileName, const std::string &bodyName,
                           const std::string &objName, std::string &outFileName,
                           std::string &outFullPathName, bool writeWarning);
+   // Methods for celestial body model file
+   bool GetBody3dModelFile(const std::string &inFileName, const std::string &bodyName,
+                           const std::string &objName, std::string &outFileName,
+                           std::string &outFullPathName, bool writeWarning);
    
    // Methods returning path
    std::string GetPathname(const FileType type);
@@ -191,12 +209,18 @@ public:
    std::string GetMatlabFunctionPath(const std::string &name);
    const StringArray& GetAllMatlabFunctionPaths();
    
+   // Python methods
+   void AddPythonModulePath(const std::string &path);
+   const StringArray& GetAllPythonModulePaths();
+
    // Warning/Error message
    std::string GetLastFilePathMessage();
    
    // Plug-in code
    const StringArray& GetPluginList();
    
+   void AdjustSettings(const std::string &suffix, const StringArray &forEntries);
+
 private:
    
    enum FunctionType
@@ -235,12 +259,17 @@ private:
    std::map<std::string, FileInfo*> mFileMap;
    std::list<std::string> mGmatFunctionPaths;
    std::list<std::string> mMatlabFunctionPaths;
+  
    StringArray mGmatFunctionFullPaths;
    StringArray mMatlabFunctionFullPaths;
    StringArray mSavedComments;
    StringArray mPathWrittenOuts;
    StringArray mFileWrittenOuts;
-   
+
+   //Python
+   StringArray mPythonModuleFullPaths;
+   std::list<std::string> mPythonModulePaths;
+
    StringArray mPluginList;
    
    std::string GetFunctionPath(FunctionType type, std::list<std::string> &pathList,

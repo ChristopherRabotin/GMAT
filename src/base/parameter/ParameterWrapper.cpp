@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -107,8 +117,8 @@ ParameterWrapper::~ParameterWrapper()
 {
    #ifdef DEBUG_PW_REFOBJ
    MessageInterface::ShowMessage
-      ("ParameterWrapper::~ParameterWrapper() <%p>'%s' entered, param=<%p><%s>\n",
-       this, description.c_str(), param, param ? param->GetName().c_str() : "NULL");
+      ("ParameterWrapper::~ParameterWrapper() <%p>'%s' entered, param=<%p>\n",
+       this, description.c_str(), param);
    #endif
 }
 
@@ -158,6 +168,12 @@ Gmat::ParameterType ParameterWrapper::GetDataType() const
 //------------------------------------------------------------------------------
 GmatBase* ParameterWrapper::GetRefObject(const std::string &name)
 {
+   #ifdef DEBUG_PW_REFOBJ
+   MessageInterface::ShowMessage
+      ("ParameterWrapper::GetRefObject() returning <%p>'%s'\n", param,
+       param ? param->GetName().c_str() : "NULL");
+   #endif
+   
    // We don't need to check for the name since only one Parameter
    return (GmatBase*)param;
 }
@@ -221,10 +237,13 @@ Real ParameterWrapper::EvaluateReal() const
    #endif
 
    #ifdef DEBUG_PW_POINTER
-      MessageInterface::ShowMessage("ParameterWrapper: Parameter %s is at %p\n",
-            param->GetName().c_str(), param);
+   MessageInterface::ShowMessage
+      ("ParameterWrapper: Parameter %s is at %p\n", param->GetName().c_str(), param);
+   GmatBase *paramOwner = param->GetOwner();
+   MessageInterface::ShowMessage
+      ("ParameterWrapper::EvaluateReal() '%s', owner of param = <%p>'%s'\n",
+       description.c_str(), paramOwner, paramOwner ? paramOwner->GetName().c_str() : "NULL");
    #endif
-
    return param->EvaluateReal();
 }
 

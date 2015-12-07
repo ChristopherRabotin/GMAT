@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -33,6 +43,10 @@
  */
 //------------------------------------------------------------------------------
 
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include "BodyFixedPoint.hpp"
 #include "AssetException.hpp"
 #include "MessageInterface.hpp"
@@ -41,6 +55,9 @@
 #include "TimeTypes.hpp"
 #include "GmatDefaults.hpp"
 #include "CoordinateSystem.hpp"
+#include "FileManager.hpp"
+#include "GmatConstants.hpp"
+#include "FileUtil.hpp"
 
 
 //#define DEBUG_OBJECT_MAPPING
@@ -49,6 +66,7 @@
 //#define TEST_BODYFIXED_POINT
 //#define DEBUG_BODYFIXED_STATE
 //#define DEBUG_BODYFIXED_SET_REAL
+//#define DEBUG_BFP_SPICE
 
 
 //---------------------------------
@@ -91,6 +109,7 @@ BodyFixedPoint::PARAMETER_TYPE[BodyFixedPointParamCount - SpacePointParamCount] 
    };
 
 
+Integer BodyFixedPoint::gsNaifId = 999;
 
 //---------------------------------
 // public methods
@@ -120,7 +139,15 @@ BodyFixedPoint::BodyFixedPoint(const std::string &itsType, const std::string &it
    bfcs                 (NULL),
    mj2kcsName           (""),
    mj2kcs               (NULL),
-   lastStateTime        (GmatTimeConstants::MJD_OF_J2000)
+   lastStateTime        (GmatTimeConstants::MJD_OF_J2000),
+   kernelBaseName       (""),
+   spkName              (""),
+   fkName               (""),
+   deleteSPK            (true),
+   deleteFK             (true),
+   naifIDDetermined     (false),
+   kernelNamesDetermined (false),
+   kernelsWritten       (false)
 {
    objectTypes.push_back(Gmat::BODY_FIXED_POINT);
    objectTypeNames.push_back("BodyFixedPoint");
@@ -143,6 +170,11 @@ BodyFixedPoint::BodyFixedPoint(const std::string &itsType, const std::string &it
    bfLocation[0] = GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH];
    bfLocation[1] = 0.0;
    bfLocation[2] = 0.0;
+
+   #ifdef __USE_SPICE__
+      spice = NULL;
+   #endif
+
 }
 
 //---------------------------------------------------------------------------
@@ -154,6 +186,32 @@ BodyFixedPoint::BodyFixedPoint(const std::string &itsType, const std::string &it
 //---------------------------------------------------------------------------
 BodyFixedPoint::~BodyFixedPoint()
 {
+   #ifdef __USE_SPICE__
+      if (kernelsWritten)
+      {
+         if (deleteSPK && (spkName != ""))
+         {
+            #ifdef DEBUG_BFP_SPICE
+               MessageInterface::ShowMessage("**** In BFP, About to unload %s\n",
+                     spkName.c_str());
+            #endif
+            spice->UnloadKernel(spkName);
+            remove(spkName.c_str());
+         }
+         if (deleteFK && (fkName != ""))
+         {
+            #ifdef DEBUG_BFP_SPICE
+               MessageInterface::ShowMessage("**** In BFP, About to unload %s\n",
+                     fkName.c_str());
+            #endif
+            spice->UnloadKernel(fkName);
+            remove(fkName.c_str());
+         }
+      }
+
+      if (spice) delete spice;
+   #endif
+
 }
 
 //---------------------------------------------------------------------------
@@ -182,7 +240,15 @@ BodyFixedPoint::BodyFixedPoint(const BodyFixedPoint& bfp) :
    mj2kcsName           (bfp.mj2kcsName),
    mj2kcs               (NULL),
    lastStateTime        (bfp.lastStateTime),
-   lastState            (bfp.lastState)
+   lastState            (bfp.lastState),
+   kernelBaseName       (bfp.kernelBaseName),
+   spkName              (bfp.spkName),
+   fkName               (bfp.fkName),
+   deleteSPK            (bfp.deleteSPK),
+   deleteFK             (bfp.deleteFK),
+   naifIDDetermined     (bfp.naifIDDetermined), // ??
+   kernelNamesDetermined (false),
+   kernelsWritten       (false)
 {
    location[0]   = bfp.location[0];
    location[1]   = bfp.location[1];
@@ -191,6 +257,11 @@ BodyFixedPoint::BodyFixedPoint(const BodyFixedPoint& bfp) :
    bfLocation[0] = bfp.bfLocation[0];
    bfLocation[1] = bfp.bfLocation[1];
    bfLocation[2] = bfp.bfLocation[2];
+
+   #ifdef __USE_SPICE__
+      spice = NULL;
+   #endif
+
 }
 
 
@@ -228,6 +299,15 @@ BodyFixedPoint& BodyFixedPoint::operator=(const BodyFixedPoint& bfp)
       lastStateTime        = bfp.lastStateTime;
       lastState            = bfp.lastState;
 
+      kernelBaseName       = bfp.kernelBaseName;
+      spkName              = bfp.spkName;
+      fkName               = bfp.fkName;
+      deleteSPK            = bfp.deleteSPK;
+      deleteFK             = bfp.deleteFK;
+      naifIDDetermined     = bfp.naifIDDetermined;
+      kernelNamesDetermined = bfp.kernelNamesDetermined;
+      kernelsWritten       = bfp.kernelsWritten;
+
       location[0]          = bfp.location[0];
       location[1]          = bfp.location[1];
       location[2]          = bfp.location[2];;
@@ -235,6 +315,11 @@ BodyFixedPoint& BodyFixedPoint::operator=(const BodyFixedPoint& bfp)
       bfLocation[0]        = bfp.bfLocation[0];
       bfLocation[1]        = bfp.bfLocation[1];
       bfLocation[2]        = bfp.bfLocation[2];
+
+      #ifdef __USE_SPICE__
+         spice = NULL;
+      #endif
+
    }
 
    return *this;
@@ -289,6 +374,19 @@ bool BodyFixedPoint::Initialize()
    // Calculate the body-fixed Cartesian position
    // If it was input in Cartesian, we're done
    UpdateBodyFixedLocation();
+
+   if (!naifIDDetermined)
+   {
+      // Initialize/set the Naif IDs
+      Integer bodyNaif = theBody->GetIntegerParameter("NAIFId");
+      naifId           = bodyNaif * 1000 + gsNaifId--;
+      naifIdRefFrame   = naifId + 1000000;
+
+      naifIDDetermined = true;
+   }
+
+   // Set the initial epoch so that the state is computed at the start
+   SetEpoch(lastStateTime.Get());
 
    #ifdef DEBUG_INIT
       MessageInterface::ShowMessage("...BodyFixedPoint %s Initialized!\n", instanceName.c_str());
@@ -849,8 +947,6 @@ bool BodyFixedPoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          break;
    }
 
-   MessageInterface::ShowMessage("BodyFixedPoint::SetRefObject calling base for %s\n", name.c_str());
-
    // Not handled here -- invoke the next higher SetRefObject call
    return SpacePoint::SetRefObject(obj, type, name);
 }
@@ -1161,7 +1257,9 @@ const Rvector6 BodyFixedPoint::GetMJ2000State(const A1Mjd &atTime)
             mj2kcsName.c_str(), (mj2kcs? "NOT NULL" : "NULL"));
       MessageInterface::ShowMessage("bf state (in bfcs, cartesian) = %s\n",
             (bfState.ToString()).c_str());
-      MessageInterface::ShowMessage("SolarSystem is%s NULL\n", (solarSystem? "NOT " : ""));
+      MessageInterface::ShowMessage("SolarSystem is%s NULL\n", (solarSystem? " NOT " : ""));
+      MessageInterface::ShowMessage("before, J2000PosVel = %s\n",
+            (j2000PosVel.ToString()).c_str());
    #endif
    ccvtr.Convert(epoch, bfState, bfcs, j2000PosVel, mj2kcs);
    #ifdef DEBUG_BODYFIXED_STATE
@@ -1274,6 +1372,60 @@ void BodyFixedPoint::SetSolarSystem(SolarSystem *ss)
 }
 
 //------------------------------------------------------------------------------
+//  bool InitializeForContactLocation(bool deleteFiles = true)
+//------------------------------------------------------------------------------
+/**
+ */
+//------------------------------------------------------------------------------
+bool BodyFixedPoint::InitializeForContactLocation(bool deleteFiles)
+{
+   #ifdef DEBUG_BFP_SPICE
+      MessageInterface::ShowMessage("Entering InitializeForC for %s\n",
+            instanceName.c_str());
+   #endif
+
+   if (kernelsWritten) // if we've already written them, don't do it again
+      return true;
+
+   if (!kernelNamesDetermined)
+   {
+      // Use upper case name to figure out spice frame name
+      std::string thisName = GmatStringUtil::ToUpper(instanceName);
+      spiceFrameID         = thisName + "_TOPO";
+
+      // Set up the file names for the SPK and FK kernels
+      std::stringstream ss("");
+      ss << "tmp_" << instanceName;
+      std::string tmpPath = GmatFileUtil::GetTemporaryDirectory();
+      kernelBaseName = tmpPath + ss.str();
+      #ifdef DEBUG_BFP_SPICE
+         MessageInterface::ShowMessage(
+               "In InitializeForC,  fileName (full path) = %s\n",
+               kernelBaseName.c_str());
+      #endif
+
+      kernelNamesDetermined = true;
+   }
+
+   #ifdef __USE_SPICE__
+      if (!spice) spice = new SpiceInterface();
+   #endif
+
+   #ifdef DEBUG_BFP_SPICE
+      MessageInterface::ShowMessage("   About to write the SPK and FK kernels\n");
+   #endif
+   if (!WriteSPK(deleteFiles) || (!WriteFK(deleteFiles)))
+      return false;
+   #ifdef DEBUG_BFP_SPICE
+      MessageInterface::ShowMessage("   Kernels written successfully for %s\n",
+            instanceName.c_str());
+   #endif
+   kernelsWritten = true;
+
+   return true;
+}
+
+//------------------------------------------------------------------------------
 //  void UpdateBodyFixedLocation()
 //------------------------------------------------------------------------------
 /**
@@ -1324,3 +1476,233 @@ void BodyFixedPoint::UpdateBodyFixedLocation()
    }
 
 }
+
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// bool WriteSPK(bool deleteFile)
+//------------------------------------------------------------------------------
+
+bool BodyFixedPoint::WriteSPK(bool deleteFile)
+{
+   deleteSPK = deleteFile;
+
+   // Get the time (seconds since January 1, 1970), to make the temporary file name unique
+   std::string now = GmatTimeUtil::FormatCurrentTime(4);
+   spkName         = kernelBaseName + "_" + now + ".bsp";
+
+   #ifdef DEBUG_BFP_SPICE
+      MessageInterface::ShowMessage("In WriteSPK, spkName = \"%s\"\n", spkName.c_str());
+   #endif
+
+    // We are not renaming here - just remove the existing file
+   if (GmatFileUtil::DoesFileExist(spkName))
+      remove(spkName.c_str());
+
+   #ifdef __USE_SPICE__
+   if (!spice)
+      spice = new SpiceInterface();
+
+      SpiceInt        maxChar = 4000; // need static const for this?
+      std::string     internalFileName  = "GMAT-generated SPK file for " + instanceName;
+      ConstSpiceChar  *internalSPKName  = internalFileName.c_str();
+      ConstSpiceChar  *spkNameSPICE     = spkName.c_str();
+      SpiceInt        handle;
+
+      #ifdef DEBUG_BFP_SPICE
+         MessageInterface::ShowMessage("In WriteSPK, about to open SPK ...\n");
+      #endif
+      spkopn_c(spkNameSPICE, internalSPKName, maxChar, &handle); // CSPICE method to create and open an SPK kernel
+      if (failed_c()) // CSPICE method to detect failure of previous call to CSPICE
+      {
+         ConstSpiceChar option[]   = "LONG"; // retrieve long error message
+         SpiceInt       numErrChar = MAX_LONG_MESSAGE_VALUE;
+         //SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+         SpiceChar      *err = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
+         getmsg_c(option, numErrChar, err);
+         std::string errStr(err);
+         std::string errmsg = "Error getting file handle for GroundStation SPK file \"";
+         errmsg += spkName + "\".  Message received from CSPICE is: ";
+         errmsg += errStr + "\n";
+         reset_c();
+         delete [] err;
+         throw AssetException(errmsg);
+      }
+      // Write the data to the GroundStation SPK
+      SpiceInt       spiceId      = naifId;
+      Integer        bodyNaif     = theBody->GetIntegerParameter("NAIFId");
+      SpiceInt       spiceCentral = bodyNaif;
+      std::string    bodyFrame    = theBody->GetStringParameter("SpiceFrameId");
+      ConstSpiceChar *bFrame      = bodyFrame.c_str();
+
+      SpiceDouble    theMax       = GmatRealConstants::REAL_MAX - 10.0;
+      SpiceDouble    first        = -theMax/2.0;
+      SpiceDouble    last         =  theMax/2.0;
+      SpiceDouble    epoch1       = first;
+      SpiceDouble    step         = last - first;
+      std::string    segmentId    = "Segment 1 for Asset " + instanceName;
+      ConstSpiceChar *segId       = segmentId.c_str();
+      // put state into a SpiceDouble array
+      UpdateBodyFixedLocation();
+      SpiceDouble  *stateArray;
+      stateArray = new SpiceDouble[6*2];
+      stateArray[0]  = bfLocation[0];
+      stateArray[1]  = bfLocation[1];
+      stateArray[2]  = bfLocation[2];
+      stateArray[3]  = 0.0;
+      stateArray[4]  = 0.0;
+      stateArray[5]  = 0.0;
+      stateArray[6]  = bfLocation[0];
+      stateArray[7]  = bfLocation[1];
+      stateArray[8]  = bfLocation[2];
+      stateArray[9]  = 0.0;
+      stateArray[10] = 0.0;
+      stateArray[11] = 0.0;
+
+      #ifdef DEBUG_BFP_SPICE
+         MessageInterface::ShowMessage("In WriteSPK, about to write SPK ...\n");
+      #endif
+      spkw08_c(handle, spiceId, spiceCentral, bFrame, first, last, segId, 1, 2,
+            stateArray, epoch1, step);
+
+      spkcls_c(handle);
+
+      spice->LoadKernel(spkName);
+
+      delete stateArray;
+   #endif  // USE_SPICE
+
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool WriteFK(bool deleteFile)
+//------------------------------------------------------------------------------
+bool BodyFixedPoint::WriteFK(bool deleteFile)
+{
+   deleteFK = deleteFile;
+
+   // Get the time (seconds since January 1, 1970), to make the temporary file name unique
+   std::string now = GmatTimeUtil::FormatCurrentTime(4);
+   fkName          = kernelBaseName + "_" + now + ".tf";
+
+   // We are not renaming here - just remove the existing file
+   if (GmatFileUtil::DoesFileExist(fkName))
+      remove(fkName.c_str());
+
+   #ifdef __USE_SPICE__
+
+      if (!spice)
+         spice = new SpiceInterface();
+
+      // Upper case name
+      std::string thisName = GmatStringUtil::ToUpper(instanceName);
+      // Get the topocentric conversion
+      Integer        bodyNaif         = theBody->GetIntegerParameter("NAIFId");
+      std::string    centralNaifStr   = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaif));
+      std::string    centralBodyFrame = theBody->GetStringParameter("SpiceFrameId");
+
+      Rvector topo = GetTopocentricConversion(centralNaifStr);
+      /// Write the text FK kernel
+      std::ofstream fkStream(fkName.c_str(), std::ios::out);
+      fkStream.precision(16);
+      fkStream << "KPL/FK\n";
+      fkStream << "\\begindata\n";
+      fkStream << "NAIF_BODY_NAME += '" << thisName << "'\n";
+      fkStream << "NAIF_BODY_CODE += " << naifId       << "\n\n";
+      fkStream << "FRAME_" << spiceFrameID   << " = " << naifIdRefFrame << "\n";
+      fkStream << "FRAME_" << naifIdRefFrame << "_NAME = '" << spiceFrameID << "'\n";
+      fkStream << "FRAME_" << naifIdRefFrame << "_CLASS = 4\n";
+      fkStream << "FRAME_" << naifIdRefFrame << "_CLASS_ID = " << naifIdRefFrame << "\n";
+      fkStream << "FRAME_" << naifIdRefFrame << "_CENTER = " << naifId << "\n\n";
+      fkStream << "OBJECT_" << naifId << "_FRAME = '" << spiceFrameID << "'\n\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_RELATIVE = '" << centralBodyFrame << "'\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_SPEC = 'ANGLES'\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_UNITS = 'DEGREES'\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_AXES = " << "( 3, 2, 3 )\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_ANGLES = ( " << topo[0]
+//               << ", " << topo[1] << ", " << topo[2] << " )\n";
+      fkStream << "TKFRAME_" << naifIdRefFrame << "_RELATIVE = '" << centralBodyFrame << "'\n";
+      fkStream << "TKFRAME_" << naifIdRefFrame << "_SPEC = 'ANGLES'\n";
+      fkStream << "TKFRAME_" << naifIdRefFrame << "_UNITS = 'DEGREES'\n";
+      fkStream << "TKFRAME_" << naifIdRefFrame << "_AXES = " << "( 3, 2, 3 )\n";
+      fkStream << "TKFRAME_" << naifIdRefFrame << "_ANGLES = ( " << topo[0]
+               << ", " << topo[1] << ", " << topo[2] << " )\n";
+
+      fkStream.close();
+
+      spice->LoadKernel(fkName);
+   #endif  // USE_SPICE
+
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// Rvector3 GetTopocentricConversion(const std::string &centralNaifId)
+//------------------------------------------------------------------------------
+Rvector3 BodyFixedPoint::GetTopocentricConversion(
+                         const std::string &centralNaifId)
+{
+   // x_F, y_F, z_F : position w.r.t. the body-fixed frame (e.g. ECEF)
+   // R : equatorial radius of the referenced body
+   // f : flattening of the referenced body
+   // angles: (3,2,3) Euler angles from the body-fixed frame to
+   //          topocentric (NWU) frame
+
+   Rvector3 result;
+
+    // body-fixed coordinates
+   Real x_F = bfLocation[0];
+   Real y_F = bfLocation[1];
+   Real z_F = bfLocation[2];
+
+   #ifdef __USE_SPICE__
+
+      // Get body properties
+      std::string bodyID = "BODY" + centralNaifId + "_RADII";
+      ConstSpiceChar *bID = bodyID.c_str();
+      SpiceInt     n;
+      SpiceDouble  radii[3];
+      SpiceBoolean found;
+      // Ask SPICE for the body Radii
+      gdpool_c(bID, 0, 3, &n, radii, &found);
+      #ifdef DEBUG_BFP_SPICE
+         MessageInterface::ShowMessage(
+               "In GetTopocentricConversion, xyz (%s) = %12.10f   %12.10f   %12.10f\n",
+               instanceName.c_str(), x_F, y_F, z_F);
+         MessageInterface::ShowMessage(
+               "In GetTopocentricConversion, radii (%s) = %12.10f   %12.10f   %12.10f\n",
+               bodyID.c_str(), radii[0], radii[1], radii[2]);
+      #endif
+
+      Real R = radii[0];
+      Real f = (radii[0] - radii[2]) / radii[0];
+
+      // conversion
+      Real Lambda = GmatMathUtil::ATan(y_F, x_F);
+      Real r_xy   = GmatMathUtil::Sqrt((x_F*x_F) + (y_F*y_F));
+      Real phi_gd = GmatMathUtil::ATan(z_F, r_xy); // initial guess
+      Real e      = GmatMathUtil::Sqrt(2*f-(f*f));
+
+      Real delta = 1.0;
+      Real phi, C, sinPhi;
+      while (delta > 1.0e-11)
+      {
+          phi    = phi_gd;
+          sinPhi = GmatMathUtil::Sin(phi);
+          C      = R/GmatMathUtil::Sqrt(1-(e*e)*(sinPhi * sinPhi));
+          phi_gd = GmatMathUtil::ATan(z_F+C*(e*e)*sinPhi, r_xy);
+          delta  = GmatMathUtil::Abs(phi_gd-phi);
+      }
+
+//      angles = [-Lambda, -(pi()/2 - phi_gd), pi()]*180/pi();
+      result[0] = -Lambda * GmatMathConstants::DEG_PER_RAD;
+      result[1] = -(GmatMathConstants::PI_OVER_TWO - phi_gd) * GmatMathConstants::DEG_PER_RAD;
+      result[2] = 180.0;  // pi * deg-per-rad
+
+   #endif // __USE_SPICE__
+   return result;
+}
+

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -234,12 +244,12 @@ void OrbitViewPanel::Create()
    // platform dependent button size
    //-----------------------------------------------------------------
    #ifdef __WXMAC__
-   int arrowW = 40;
+   int arrowW = -1;
    #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    int colorW = 10;
    #endif
    #else
-   int arrowW = 20;
+   int arrowW = -1;
    #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    int colorW = 25;
    #endif
@@ -262,22 +272,22 @@ void OrbitViewPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    mDataCollectFreqTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    mUpdatePlotFreqTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    mStarCountStaticText =
       new wxStaticText(this, -1, wxT("Number of stars "), 
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mStarCountTextCtrl = 
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("7000"), wxDefaultPosition, wxSize(50, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("7000"), wxDefaultPosition, wxSize(50, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    //mStarCountTextCtrl->Disable();
    
    mEnableStarsCheckBox = 
-      new wxCheckBox(this, CHECKBOX, wxT("Enable Stars"), wxDefaultPosition, wxSize(100, 20), 0);
+      new wxCheckBox(this, CHECKBOX, wxT("Enable Stars"), wxDefaultPosition, wxSize(100, -1), 0);
    mEnableConstellationsCheckBox = 
-      new wxCheckBox(this, CHECKBOX, wxT("Enable Constellations"), wxDefaultPosition, wxSize(160, 20), 0);
+      new wxCheckBox(this, CHECKBOX, wxT("Enable Constellations"), wxDefaultPosition, wxSize(160, -1), 0);
    //mEnableConstellationsCheckBox->Disable();
    
    wxBoxSizer *colFreqSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -304,9 +314,9 @@ void OrbitViewPanel::Create()
    wxStaticText *numPointsToRedrawLabel1 =
       new wxStaticText(this, -1, gmatwxT("Number of points to redraw\n"
                                          "(Enter 0 to redraw whole plot)"),
-                       wxDefaultPosition, wxSize(-1, 30), 0);
+                       wxDefaultPosition, wxSize(-1, -1), 0);
    mNumPointsToRedrawTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(30, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(30, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    wxBoxSizer *numPointsSizer = new wxBoxSizer(wxHORIZONTAL);
    numPointsSizer->Add(numPointsToRedrawLabel1, 0, wxALIGN_LEFT|wxALL, 0);
@@ -488,11 +498,11 @@ void OrbitViewPanel::Create()
    // add, remove, clear buttons
    //-----------------------------------------------------------------
    addScButton = new wxButton(this, ADD_SP_BUTTON, wxT("-->"),
-                              wxDefaultPosition, wxSize(arrowW, 20), 0);
+                              wxDefaultPosition, wxSize(arrowW, -1), wxBU_EXACTFIT);
    removeScButton = new wxButton(this, REMOVE_SP_BUTTON, wxT("<--"),
-                                 wxDefaultPosition, wxSize(arrowW ,20), 0);
+                                 wxDefaultPosition, wxSize(arrowW ,-1), wxBU_EXACTFIT);
    clearScButton = new wxButton(this, CLEAR_SP_BUTTON, wxT("<="),
-                                wxDefaultPosition, wxSize(arrowW, 20), 0);
+                                wxDefaultPosition, wxSize(arrowW, -1), wxBU_EXACTFIT);
    
    wxBoxSizer *arrowButtonsSizer = new wxBoxSizer(wxVERTICAL);
    arrowButtonsSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -533,12 +543,12 @@ void OrbitViewPanel::Create()
       new wxStaticText(this, -1, wxT("Orbit Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
    mOrbitColorButton = new wxButton(this, ORBIT_COLOR_BUTTON, "",
-                                    wxDefaultPosition, wxSize(colorW, 20), 0);
+                                    wxDefaultPosition, wxSize(colorW, -1), 0);
    mTargetColorLabel =
       new wxStaticText(this, -1, wxT("Target Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
    mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
-                                     wxDefaultPosition, wxSize(colorW, 20), 0);
+                                     wxDefaultPosition, wxSize(colorW, -1), 0);
    #endif
    
    wxFlexGridSizer *scOptionSizer1 = new wxFlexGridSizer(1, 0, 0);

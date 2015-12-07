@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC, Thinking Systems, Inc., and Schafer Corp.,
 // under AFRL NOVA Contract #FA945104D03990003
@@ -95,6 +105,11 @@ using namespace FloatAttUtil;
 // incorrectly connecting lines
 //#define SKIP_DATA_OVER_LIMIT
 
+// Currently local plots are deleted when function run completes (2015.07.09)
+// So this macro has no effects. But if plot is global we need to check if 
+// all drawing objects are global as well since plot access object pointers.
+//#define DISABLE_REPAINT_IN_FUNCTION
+
 // debug
 //#define DEBUG_INIT 1
 //#define DEBUG_ACTION 1
@@ -112,6 +127,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_SHOW_SKIP 1
 //#define DEBUG_ROTATE_BODY 1
 //#define DEBUG_DATA_BUFFERRING
+//#define DEBUG_DRAW_3D_BODY
 
 #define MODE_CENTERED_VIEW 0
 #define MODE_FREE_FLYING 1
@@ -176,7 +192,6 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    #endif
    
    mStars = GLStars::Instance();
-   mStars->InitStars();
    mStars->SetDesiredStarCount(mStarCount);
    
    mCamera.Reset();
@@ -226,7 +241,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mPolygonMode = GL_FILL;
    
    mXyPlaneColor = GmatColor::NAVY;
-   mEcPlaneColor = 0x00002266; //dark red
+   mEcPlaneColor = GmatColor::MAROON;
    mSunLineColor = GmatColor::YELLOW;
    
    // animation
@@ -555,8 +570,15 @@ void OrbitViewCanvas::ViewAnimation(int interval, int frameInc)
        interval, frameInc);
    #endif
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfData && mInFunction)
+   {
+      wxString msg = "*** WARNING *** This plot data was published inside a "
+         "function, so repainting or drawing animation is disabled.\n";
+      MessageInterface::ShowMessage(msg.c_str());
       return;
+   }
+   #endif
    
    this->SetFocus(); // so that it can get key interrupt
    mIsAnimationRunning = true;
@@ -897,7 +919,9 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
    #ifdef __WXGTK__
       hasBeenPainted = true;
    #endif
+
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfRun && mInFunction)
    {
       if (mWriteRepaintDisalbedInfo)
@@ -912,6 +936,7 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
       }
       return;
    }
+   #endif
    
    DrawPlot();
    
@@ -969,8 +994,22 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
        mUseInitialViewPoint, mIsEndOfData);
    #endif
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfData && mInFunction)
+   {
+      if (mWriteRepaintDisalbedInfo)
+      {
+         //Freeze();
+         wxString msg = "*** WARNING *** This plot data was published inside a "
+            "function, so repainting or drawing animation is disabled.\n";
+         MessageInterface::ShowMessage(msg.c_str());
+         GmatAppData::Instance()->GetMainFrame()->EnableAnimation(false);
+         
+         mWriteRepaintDisalbedInfo = false;
+      }
       return;
+   }
+   #endif
    
    int flippedY;
    int width, height;
@@ -1998,7 +2037,6 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
              objName.c_str(), sat->GetModelId(), mModelsAreLoaded);
          #endif
          
-         //if (sat->modelID != -1)
          if (sat->GetModelId() != -1)
          {
             DrawSpacecraft3dModel(sat, objId, frame);
@@ -2025,10 +2063,24 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       MessageInterface::ShowMessage("   Drawing body '%s'\n", objName.c_str());
       #endif
       
+      GmatBase* tmpObj = mObjectArray[obj];
+      CelestialBody *body = NULL;
+      if (tmpObj->IsOfType(Gmat::CELESTIAL_BODY))
+         body = (CelestialBody*)tmpObj;
+      
       // put object at final position
       // Dunn took out minus signs
       glTranslatef(mObjectViewPos[index1+0],mObjectViewPos[index1+1],mObjectViewPos[index1+2]);
-      DrawObject(objName, obj);
+      
+      // If body has 3d model file, use it
+      if (body != NULL && body->Get3dViewModelId() != -1)
+      {
+         DrawCelestialBody3dModel(body, objName, objId, frame);
+      }
+      else
+      {
+         DrawObject(objName, obj);
+      }
    }
    
    if (mEnableLightSource)
@@ -2597,7 +2649,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    float EAng2Deg = float(EARad(1)) * RTD;
    float EAng3Deg = float(EARad(2)) * RTD;
 
-   // Get offset rotation and scale from Spacecraft Visualization Tab in GUI.
+   // Get offset rotation and scale from Spacecraft
    float     offset[3];
    float     rotation[3];
    float     scale;
@@ -2608,9 +2660,10 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    rotation[1] = sc->GetRealParameter(sc->GetParameterID("ModelRotationY"));
    rotation[2] = sc->GetRealParameter(sc->GetParameterID("ModelRotationZ"));
    scale = sc->GetRealParameter(sc->GetParameterID("ModelScale"));
-   scModel->SetBaseOffset(offset[0], offset[1], offset[2]);
-   scModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
-   scModel->SetBaseScale(scale, scale, scale);
+   scModel->SetBodyPosition(offset[0], offset[1], offset[2]);
+   scModel->SetRotation(true, rotation[0], rotation[1], rotation[2]);
+   scModel->SetAttitude(true, 0, 0, 0);
+   scModel->SetScale(scale);
    
    #ifdef DEBUG_ATTITUDE_DISPLAY
       MessageInterface::ShowMessage("Model angles: [%lf  %lf  %lf]\n", 
@@ -2620,7 +2673,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    // Dunn's new attitude call.  Need to change to quaternions.  Also need
    // to concatenate with BaseRotation.  Also need this to work for replay
    // animation buttons.
-   scModel->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   scModel->SetAttitude(true, EAng1Deg, EAng2Deg, EAng3Deg);
    
    // The line above is where the object model gets its orientation.  This
    // also seems to be a good place to give the model its ECI position.
@@ -2678,6 +2731,97 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    MessageInterface::ShowMessage
       ("OrbitViewCanvas::DrawSpacecraft3dModel() leaving, sc=<%p>'%s', objId=%d, "
        "frame=%d\n", sc, sc ? sc->GetName().c_str() : "NULL", objId, frame);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawCelestialBody3dModel(CelestialBody *body, int objId, int frame)
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxString &objName,
+                                               int objId, int frame)
+{
+   #ifdef DEBUG_DRAW_3D_BODY
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::DrawCelestialBody3dModel() entered, body=<%p>'%s', objName='%s', "
+       "objId=%d, frame=%d\n", body, body ? body->GetName().c_str() : "NULL", objName.WX_TO_C_STRING,
+       objId, frame);
+   #endif
+   
+   // Rotate body before drawing model
+   RotateBodyUsingAttitude(objName, objId);
+   
+   ModelManager *mm = ModelManager::Instance();
+   ModelObject *bodyModel = mm->GetModel(body->Get3dViewModelId());
+
+   // Comment out attitude for now. Add it later if needed (LOJ: 2015.01.30)
+   float RTD = (float)GmatMathConstants::DEG_PER_RAD;
+   
+   int index1 = objId * MAX_DATA * 3 + frame * 3;
+   // int attIndex = objId * MAX_DATA * 4 + mObjLastFrame[objId] * 4;
+   
+   // Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
+   //                        mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
+   
+   // #ifdef DEBUG_ATTITUDE_DISPLAY
+   // MessageInterface::ShowMessage
+   //    ("Quat[%d - %d]: [%lf  %lf  %lf  %lf]\n", 
+   //     attIndex, attIndex+3, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
+   //     mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
+   // #endif
+   
+   // Rvector3 EARad = AttitudeConversionUtility::ToEulerAngles(quat, 1,2,3);
+   Rvector3 EARad;
+   
+   #ifdef DEBUG_BODY_ATTITUDE
+   MessageInterface::ShowMessage
+      ("DrawCelestialBody3dModel(), '%s', model=<%p>, 3DModelId=%d, EARad=%s",
+       body->GetName().c_str(), model, body->GetModelId(),  EARad.ToString().c_str());
+   #endif
+   
+   float EAng1Deg = float(EARad(0)) * RTD;
+   float EAng2Deg = float(EARad(1)) * RTD;
+   float EAng3Deg = float(EARad(2)) * RTD;
+   
+   // Get offset rotation and scale from CelestialBody.
+   float     offset[3];
+   float     rotation[3];
+   float     scale = 1.0;
+   for (int i = 0; i < 3; i++)
+   {
+      offset[i] = 0.0;
+      rotation[i] = 0.0;
+   }
+   
+   offset[0]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetX"));
+   offset[1]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetY"));
+   offset[2]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetZ"));
+   rotation[0] = body->GetRealParameter(body->GetParameterID("3DModelRotationX"));
+   rotation[1] = body->GetRealParameter(body->GetParameterID("3DModelRotationY"));
+   rotation[2] = body->GetRealParameter(body->GetParameterID("3DModelRotationZ"));
+   scale = body->GetRealParameter(body->GetParameterID("3DModelScale"));
+   bodyModel->SetBodyPosition(offset[0], offset[1], offset[2]);
+   bodyModel->SetRotation(true, rotation[0], rotation[1], rotation[2]);
+   bodyModel->SetAttitude(true, 0, 0, 0);
+   bodyModel->SetScale(scale);
+   
+   #ifdef DEBUG_BODY_ATTITUDE
+   MessageInterface::ShowMessage
+      ("Model angles: [%lf  %lf  %lf]\n", EAng1Deg, EAng2Deg, EAng3Deg);
+   #endif
+
+   // Dunn's new attitude call.  Need to change to quaternions.  Also need
+   // to concatenate with BaseRotation.  Also need this to work for replay
+   // animation buttons.
+   bodyModel->SetAttitude(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   
+   // Set isLit to true
+   bodyModel->Draw(true);
+   
+   #ifdef DEBUG_DRAW_3D_BODY
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::DrawCelestialBody3dModel() leaving, body=<%p>'%s', objId=%d, "
+       "frame=%d\n", body, body ? body->GetName().c_str() : "NULL", objId, frame);
    #endif
 }
 

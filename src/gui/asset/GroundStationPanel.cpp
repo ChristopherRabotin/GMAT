@@ -5,9 +5,19 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -46,6 +56,7 @@ BEGIN_EVENT_TABLE(GroundStationPanel, wxPanel)
    EVT_TEXT(ID_LOCATION_TEXTCTRL, GroundStationPanel::OnLocationTextChange)
    EVT_TEXT(ID_STATION_ID_TEXTCTRL, GroundStationPanel::OnStationIDTextChange)
 //   EVT_TEXT(ID_HARDWARE_TEXTCTRL, GroundStationPanel::OnHardwareTextChange)
+   EVT_TEXT(ID_ELEVATION_TEXTCTRL, GroundStationPanel::OnElevationTextChange)
    EVT_COMBOBOX(ID_COMBOBOX, GroundStationPanel::OnComboBoxChange)
    EVT_COMBOBOX(ID_STATE_TYPE_COMBOBOX, GroundStationPanel::OnStateTypeComboBoxChange)
    EVT_COMBOBOX(ID_HORIZON_REFERENCE_COMBOBOX, GroundStationPanel::OnHorizonReferenceComboBoxChange)
@@ -227,6 +238,12 @@ void GroundStationPanel::Create()
    stationIDLabel->SetMinSize(wxSize(minLabelSize, stationIDLabel->GetMinHeight()));
    centralBodyLabel->SetMinSize(wxSize(minLabelSize, centralBodyLabel->GetMinHeight()));
 
+   wxStaticText *minElLabel = new wxStaticText(this, ID_TEXT, "Min. Elevation:");
+   minElLabel->SetMinSize(wxSize(minLabelSize, minElLabel->GetMinHeight()));
+   minElevationCtrl = new wxTextCtrl(this, ID_ELEVATION_TEXTCTRL,
+      wxT(""), wxDefaultPosition, wxSize(120, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   wxStaticText *minElUnitLabel = new wxStaticText(this, ID_TEXT, "deg");
+
    //-----------------------------------------------------------------
    // Add to Station ID sizer
    //-----------------------------------------------------------------
@@ -235,7 +252,13 @@ void GroundStationPanel::Create()
    flexGridSizer1->Add(stationIDTextCtrl, ctrlSizeProportion, wxGROW|wxALL, bsize);
    GmatStaticBoxSizer *idSizer = new GmatStaticBoxSizer(wxVERTICAL, this , "");
    idSizer->Add(flexGridSizer1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-      
+
+   wxFlexGridSizer *elevationGridSizer = new wxFlexGridSizer(3, 0, 0);
+   elevationGridSizer->Add(minElLabel, labelSizeProportion, wxALIGN_LEFT | wxALL, bsize);
+   elevationGridSizer->Add(minElevationCtrl, ctrlSizeProportion, wxGROW | wxALL, bsize);
+   elevationGridSizer->Add(minElUnitLabel, unitSizeProportion, wxGROW | wxALL, bsize);
+   idSizer->Add(elevationGridSizer, wxGROW | wxALIGN_CENTRE | wxALL, bsize);
+
    //-----------------------------------------------------------------
    // Add to location properties sizer
    //-----------------------------------------------------------------
@@ -297,6 +320,8 @@ void GroundStationPanel::LoadData()
    // Since Groundstation is now in plugin, this no longer works:
 //      stationIDTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(GroundStation::STATION_ID).c_str()));
       stationIDTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(localGroundStation->GetParameterID("Id")).c_str()));
+      minElevation = localGroundStation->GetRealParameter(localGroundStation->GetParameterID("MinimumElevationAngle"));
+      minElevationCtrl->SetValue(ToWxString(minElevation));
       centralBodyComboBox->SetValue(ToWxString(localGroundStation->GetStringParameter(BodyFixedPoint::CENTRAL_BODY).c_str()));
       currentStateType = localGroundStation->GetStringParameter(BodyFixedPoint::STATE_TYPE);
       stateTypeComboBox->SetValue(ToWxString(currentStateType.c_str()));
@@ -373,14 +398,30 @@ void GroundStationPanel::SaveData()
    {
       // Station ID
       text = stationIDTextCtrl->GetValue().c_str();
-      // Since Groundstation is now in plugin, this no longer works:
-//      localGroundStation->SetStringParameter(GroundStation::STATION_ID, text);
       localGroundStation->SetStringParameter(localGroundStation->GetParameterID("Id"), text);
    }
    catch (BaseException &ex)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
       canClose = false;
+   }
+   try
+   {
+	   // Minimum elevation angle
+	   minElevationCtrl->GetValue().ToCDouble(&minElevation);
+      if ((minElevation <= 90.0) && (minElevation >= -90.0))
+         localGroundStation->SetRealParameter(localGroundStation->GetParameterID("MinimumElevationAngle"), minElevation);
+      else
+      {
+         std::string elstr = minElevationCtrl->GetValue().WX_TO_STD_STRING;
+         CheckRealRange(elstr, minElevation, "MinimumElevationAngle", -90.0, 90.0, true, true, true, true);
+         canClose = false;
+      }
+   }
+   catch (BaseException &ex)
+   {
+	   MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
+	   canClose = false;
    }
    try
    {
@@ -496,6 +537,11 @@ void GroundStationPanel::OnStationIDTextChange(wxCommandEvent &event)
 {
    EnableUpdate(true);
 }    
+
+void GroundStationPanel::OnElevationTextChange(wxCommandEvent &event)
+{
+   EnableUpdate(true);
+}
 
 
 //------------------------------------------------------------------------------

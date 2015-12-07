@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2008/11/13
@@ -108,7 +118,8 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    guiManager->LoadIcon("screenshot", bitmapType, &bitmaps[16], screenshot_xpm);
    
    // Changed from wxSize(18, 15) (LOJ: 2011.02.04)
-   toolBar->SetToolBitmapSize(wxSize(16, 16));
+   // Changed from wxSize(16, 16) to accomodate large fonts (TGG: 2015.05.08)
+   toolBar->SetToolBitmapSize(wxSize(25, 25));
    
    #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding mission tools\n");
@@ -169,9 +180,10 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    // add help tool
    toolBar->AddTool(MENU_HELP_ABOUT, _T("About GMAT"), *bitmaps[7], _T("About GMAT"));
    toolBar->AddTool(MENU_HELP_CONTENTS, _T("Help"), *bitmaps[15], _T("Help"));
-   
+
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
-   toolBar->Realize();
+   //toolBar->Realize();
    
    // disable tools
    toolBar->EnableTool(MENU_EDIT_COPY, FALSE);
@@ -262,8 +274,9 @@ void GmatToolBar::AddAnimationTools(wxToolBar* toolBar)
                     _T("Show Animation Options"));
    #endif
    
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
-   toolBar->Realize();
+   //toolBar->Realize();
    
    // disable tools
    toolBar->EnableTool(TOOL_ANIMATION_PLAY, FALSE);
@@ -291,10 +304,10 @@ void GmatToolBar::AddGuiScriptSyncStatus(wxToolBar* toolBar)
    // Add GUI/Script status text
    wxStaticText *syncLabel = new wxStaticText(this, -1, wxT("GUI/Script Sync Status: "));
    theSyncStatus = new wxStaticText
-      (this, -1, wxT(" Synchronized "), wxDefaultPosition, wxSize(120, 20), wxALIGN_CENTRE);
+      (this, -1, wxT(" Synchronized "), wxDefaultPosition, wxSize(120, -1), wxALIGN_CENTRE);
 #else
    theSyncStatus = new wxStaticText
-      (this, -1, wxT("S"), wxDefaultPosition, wxSize(20, 20), wxALIGN_CENTRE);
+      (this, -1, wxT("S"), wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTRE);
 #endif
 
    // Make font bold face

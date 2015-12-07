@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan
 // Created: 2004/01/29
@@ -20,6 +30,7 @@
 #include "gmatdefs.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
+#include "FileManager.hpp"
 #include "Rmatrix.hpp"
 #include "Planet.hpp"
 #include "MessageInterface.hpp"
@@ -36,6 +47,7 @@
 //#define DEBUG_PLANET 1
 //#define DEBUG_PLANET_TWO_BODY
 //#define DEBUG_PLANET_NUTATION_INTERVAL
+//#define DEBUG_PLANET_CONSTRUCT
 
 using namespace GmatMathUtil;
 
@@ -73,6 +85,10 @@ Planet::Planet(std::string name) :
    CelestialBody     ("Planet",name),
    nutationUpdateInterval    (60.0)
 {   
+   // @todo This constructor should call the other one, setting Sun as central body!!!
+   #ifdef DEBUG_PLANET_CONSTRUCT
+      MessageInterface::ShowMessage("In Planet constructor for %s\n", name.c_str());
+   #endif
    objectTypeNames.push_back("Planet");
    parameterCount      = PlanetParamCount;
    
@@ -105,6 +121,18 @@ Planet::Planet(std::string name) :
 //   sij = s;
 //   cij = c;
 
+
+   if (name == SolarSystem::EARTH_NAME)
+   {
+      #ifdef DEBUG_PLANET_CONSTRUCT
+         MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
+      #endif
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
+      attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
+      attitudeSpiceKernelNames.push_back(path+"earth_000101_151228_151006.bpc");
+   }
+
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
 }
@@ -125,6 +153,10 @@ Planet::Planet(std::string name, const std::string &cBody) :
    CelestialBody     ("Planet",name),
    nutationUpdateInterval    (60.0)
 {
+#ifdef DEBUG_PLANET_CONSTRUCT
+   MessageInterface::ShowMessage("In Planet constructor for %s, with central body %s\n",
+         name.c_str(), cBody.c_str());
+#endif
    objectTypeNames.push_back("Planet");
    parameterCount      = PlanetParamCount;
    
@@ -138,6 +170,17 @@ Planet::Planet(std::string name, const std::string &cBody) :
    else if (name == SolarSystem::NEPTUNE_NAME)
       rotationSrc      = Gmat::IAU_2002;
    
+   if (name == SolarSystem::EARTH_NAME)
+   {
+      #ifdef DEBUG_PLANET_CONSTRUCT
+         MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
+      #endif
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+         attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
+         attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
+         attitudeSpiceKernelNames.push_back(path+"earth_000101_151228_151006.bpc");
+   }
+
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
 }

@@ -26,7 +26,7 @@ switch Type
                 for i = 1:lengthfx
 
                     dx = zeros(lengthx,1);  dx(i,1) = Options.FiniteDiffVector(i);
-                    fxplusdx =  feval(func,x + dx,varargin{:});
+                    [ci,ce] =  feval(func,x + dx,varargin{:});
                     NumFuncEvals = NumFuncEvals + 1;
                     Grad(:,i) = (fxplusdx - fx)/Options.FiniteDiffVector(i);
 

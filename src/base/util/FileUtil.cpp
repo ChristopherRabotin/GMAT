@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -42,7 +52,7 @@
 #include <direct.h>
 #endif
 
-#ifdef __MAC__
+#ifdef __APPLE__
 #include <mach-o/dyld.h>
 #include <unistd.h>                // for getcwd
 #endif
@@ -55,10 +65,12 @@ using namespace GmatStringUtil;
 
 //#define DEBUG_FIRST_10_LINES
 //#define DEBUG_REAL_COLUMNS
+//#define DEBUG_PARSE_FILENAME
 //#define DBGLVL_COMPARE_FILES 1
 //#define DBGLVL_FUNCTION_OUTPUT 2
 //#define DEBUG_ABSOLUTE_PATH
-
+//#define DEBUG_FILE_CHECK
+//#define DEBUG_TMPDIR
 
 //------------------------------------------------------------------------------
 // std::string GetGmatPath()
@@ -114,7 +126,7 @@ std::string GmatFileUtil::GetGmatPath()
 // std::string GetPathSeparator()
 //------------------------------------------------------------------------------
 /**
- * @return path separator; "/" or "\\" dependends on the platform
+ * @return path separator; "/" or "\\" depends on the platform
  */
 //------------------------------------------------------------------------------
 std::string GmatFileUtil::GetPathSeparator()
@@ -297,7 +309,7 @@ std::string GmatFileUtil::GetApplicationPath()
    }
    return appPath;
 
-#elif __MAC__
+#elif __APPLE__
    std::string appPath = "./";
    char path[GmatFile::MAX_PATH_LEN];
    char actualPath[GmatFile::MAX_PATH_LEN];
@@ -322,6 +334,47 @@ std::string GmatFileUtil::GetApplicationPath()
        "so just returning empty string\n");
    return "";
 #endif
+}
+
+//------------------------------------------------------------------------------
+// std::string GetTemporaryDirectory()
+//------------------------------------------------------------------------------
+/*
+ * @return  The temporary directory for the platform/user.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetTemporaryDirectory()
+{
+   // Need to handle the std thing here; this works on Linux:
+   using namespace std;
+
+   string tmpDir = "/tmp";     // linux
+
+   const char *tmpD = getenv("TMP");
+   if (tmpD)
+   {
+      tmpDir.assign(tmpD);     // Windows
+   }
+   else
+   {
+      const char *tmpD2 = getenv("TMPDIR");
+      if (tmpD2)
+      {
+         tmpDir.assign(tmpD2); // Mac
+      }
+   }
+   // Add the path separator if it's not there
+   unsigned int sz = tmpDir.length();
+   #ifdef DEBUG_TMPDIR
+      MessageInterface::ShowMessage("last character of temporary directory = %c\n", tmpDir[sz-1]);
+   #endif
+   if ((tmpDir[sz-1] != '\\') && (tmpDir[sz-1] != '/'))
+      tmpDir += GetPathSeparator();
+   #ifdef DEBUG_TMPDIR
+      MessageInterface::ShowMessage("Temporary directory = %s\n", tmpDir.c_str());
+   #endif
+   return tmpDir;
 }
 
 
@@ -406,7 +459,7 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath,
    
    std::string filePath("");
    std::string thePathToUse = fullPath;
-   #ifdef __MAC__
+   #ifdef __APPLE__
       std::string appString = ".app";
       std::string::size_type appLoc = fullPath.rfind(appString);
       if (appLoc != fullPath.npos)
@@ -1158,24 +1211,23 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream, const StringArray &
          
          StringArray parts = GmatStringUtil::SeparateBy(line, " ,", true);
          
-         if (parts[0] == "Global")
+         // Need to extract the type from the Create line or
+         // global object form the Global line
+         #if DBGLVL_FUNCTION_OUTPUT > 1
+         if (parts[0] == "Global" || parts[0] == "Create")
          {
-            #if DBGLVL_FUNCTION_OUTPUT > 1
             for (UnsignedInt i=0; i<parts.size(); i++)
                MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
-            #endif
-            
+         }
+         #endif
+         
+         if (parts[0] == "Global")
+         {
             for (UnsignedInt j=1; j<parts.size(); j++)
-               globals.push_back(parts[j]);
-            
+               globals.push_back(parts[j]);            
          }
          else if (parts[0] == "Create")
          {
-            #if DBGLVL_FUNCTION_OUTPUT > 1
-            for (UnsignedInt i=0; i<parts.size(); i++)
-               MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
-            #endif
-         
             for (UnsignedInt i=0; i<outputSize; i++)
             {
                for (UnsignedInt j=2; j<parts.size(); j++)
@@ -1245,6 +1297,12 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream, const StringArray &
             outputWrapperTypes.push_back(Gmat::ARRAY_WT);
             outputRows.push_back(row);
             outputCols.push_back(col);
+         }
+         else
+         {
+            outputWrapperTypes.push_back(Gmat::OBJECT_WT);
+            outputRows.push_back(-1);
+            outputCols.push_back(-1);
          }
       }
    }

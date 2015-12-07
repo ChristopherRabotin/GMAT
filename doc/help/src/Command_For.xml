@@ -364,7 +364,7 @@
         <listitem>
           <para>Resource parameter of numeric type (e.g.
           <guilabel>Spacecraft</guilabel>.<guilabel>X</guilabel>,
-          <guilabel>Thruster</guilabel>.<guilabel>K1</guilabel>)</para>
+          <guilabel>ChemicalThruster</guilabel>.<guilabel>K1</guilabel>)</para>
         </listitem>
       </itemizedlist></para>
 

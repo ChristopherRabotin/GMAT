@@ -1,32 +1,55 @@
-//$Id: ContactLocator.cpp 1979 2012-01-07 00:34:06Z djconway@NDC $
+//$Id: ContactLocator.cpp 1979 2012-01-07 00:34:06Z  $
 //------------------------------------------------------------------------------
 //                           ContactLocator
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under NASA Prime
 // Contract NNG10CP02C, Task Order 28
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Nov 7, 2011
+// Updated: 2015  Wendy Shoan / GSFC and Yeerang Lim/KAIST
 //
 /**
- * Definition of the ...
+ * Definition of the ContactLocator
+ * Updates based on prototype by Joel Parker / GSFC
  */
 //------------------------------------------------------------------------------
 
 
 #include "ContactLocator.hpp"
 #include "EventException.hpp"
-//#include "Elevation.hpp"
-//#include "LineOfSight.hpp"
 #include "MessageInterface.hpp"
+#include "GroundstationInterface.hpp"
+#include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
+#include "Star.hpp"
+#include "EventException.hpp"
+#include "EphemManager.hpp"
+#include "StringUtil.hpp"
+#include "ContactEvent.hpp"
 
 //#define DEBUG_SET
+//#define DEBUG_SETREF
+//#define DEBUG_CONTACT_LOCATOR_WRITE
+//#define DEBUG_CONTACT_EVENTS
+//#define DEBUG_INIT_FINALIZE
+//#define DEBUG_CONTACTLOCATOR_INIT
 
 //------------------------------------------------------------------------------
 // Static data
@@ -43,6 +66,12 @@ const Gmat::ParameterType ContactLocator::PARAMETER_TYPE[
 {
    Gmat::OBJECTARRAY_TYPE,    // STATIONS
    Gmat::ENUMERATION_TYPE,
+};
+
+const std::string ContactLocator::LT_DIRECTIONS[2] =
+{
+   "Transmit",
+   "Receive",
 };
 
 
@@ -63,6 +92,21 @@ ContactLocator::ContactLocator(const std::string &name) :
 {
    objectTypeNames.push_back("ContactLocator");
    parameterCount = ContactLocatorParamCount;
+
+   stationNames.clear();
+   stations.clear();
+   contactResults.clear();
+
+   // Override default stepSize for the ContactLocator
+   stepSize = 10;
+
+   // Set default occulting bodies  2015.09.21 removing Luna as a default (GMT-5070)
+//   defaultOccultingBodies.push_back("Luna");
+
+   #ifdef DEBUG_INIT_FINALIZE
+      MessageInterface::ShowMessage("CREATED new ContactLocator %s<%p>\n",
+            instanceName.c_str(), this);
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -74,6 +118,11 @@ ContactLocator::ContactLocator(const std::string &name) :
 //------------------------------------------------------------------------------
 ContactLocator::~ContactLocator()
 {
+   #ifdef DEBUG_INIT_FINALIZE
+      MessageInterface::ShowMessage("DESTRUCTING ContactLocator %s<%p>\n",
+            instanceName.c_str(), this);
+   #endif
+   TakeAction("Clear");
 }
 
 //------------------------------------------------------------------------------
@@ -90,6 +139,28 @@ ContactLocator::ContactLocator(const ContactLocator &cl) :
    stationNames         (cl.stationNames),
    lightTimeDirection   (cl.lightTimeDirection)
 {
+   // Observers
+   stationNames.clear();
+   stations.clear();
+   for (Integer jj = 0; jj < cl.stationNames.size(); jj++)
+      stationNames.push_back(cl.stationNames.at(jj));
+   for (Integer jj = 0; jj < cl.stations.size(); jj++)
+      stations.push_back(cl.stations.at(jj));
+   // ContactResults
+   TakeAction("Clear", "Events");
+   ContactResult *toCopy   = NULL;
+   ContactResult *newEvent = NULL;
+   for (Integer ii = 0; ii < cl.contactResults.size(); ii++)
+   {
+      toCopy   = cl.contactResults.at(ii);
+      newEvent = new ContactResult(*toCopy);
+      contactResults.push_back(newEvent);
+   }
+   #ifdef DEBUG_INIT_FINALIZE
+      MessageInterface::ShowMessage(
+            "CREATED new ContactLocator %s<%p> by copying %s<%p>\n",
+            instanceName.c_str(), this, cl.instanceName.c_str(), &cl);
+   #endif
 }
 
 
@@ -97,7 +168,7 @@ ContactLocator::ContactLocator(const ContactLocator &cl) :
 // ContactLocator& operator=(const ContactLocator &c)
 //------------------------------------------------------------------------------
 /**
- * Assignemtn operator
+ * Assignment operator
  *
  * @param c The ContactLocator providing parameters for this one
  *
@@ -110,9 +181,32 @@ ContactLocator& ContactLocator::operator=(const ContactLocator &c)
    {
       EventLocator::operator=(c);
 
-      stationNames       = c.stationNames;
+//      stationNames       = c.stationNames;
       lightTimeDirection = c.lightTimeDirection;
+
+      // Observers
+      stationNames.clear();
+      stations.clear();
+      for (Integer jj = 0; jj < c.stationNames.size(); jj++)
+         stationNames.push_back(c.stationNames.at(jj));
+      for (Integer jj = 0; jj < c.stations.size(); jj++)
+         stations.push_back(c.stations.at(jj));
+      // ContactResults
+      TakeAction("Clear", "Events");
+      ContactResult *toCopy   = NULL;
+      ContactResult *newEvent = NULL;
+      for (Integer ii = 0; ii < c.contactResults.size(); ii++)
+      {
+         toCopy   = c.contactResults.at(ii);
+         newEvent = new ContactResult(*toCopy);
+         contactResults.push_back(newEvent);
+      }
    }
+   #ifdef DEBUG_INIT_FINALIZE
+      MessageInterface::ShowMessage(
+            "COPIED to ContactLocator %s<%p> from %s<%p>\n",
+            instanceName.c_str(), this, c.instanceName.c_str(), &c);
+   #endif
 
    return *this;
 }
@@ -132,6 +226,20 @@ GmatBase *ContactLocator::Clone() const
    return new ContactLocator(*this);
 }
 
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ *
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void ContactLocator::Copy(const GmatBase* orig)
+{
+   operator=(*((ContactLocator *)(orig)));
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -148,6 +256,9 @@ std::string ContactLocator::GetParameterText(const Integer id) const
 {
    if (id >= EventLocatorParamCount && id < ContactLocatorParamCount)
       return PARAMETER_TEXT[id - EventLocatorParamCount];
+
+   if (id == SATNAME)  return "Target";
+
    return EventLocator::GetParameterText(id);
 }
 
@@ -170,8 +281,16 @@ Integer ContactLocator::GetParameterID(const std::string & str) const
       if (str == PARAMETER_TEXT[i - EventLocatorParamCount])
          return i;
    }
-
-   return EventLocator::GetParameterID(str);
+   if (str == "Target")
+      return SATNAME;
+   else if (str == "Spacecraft")
+   {
+      std::string errmsg = "\"Spacecraft\" not a valid field for a Contact Locator.  ";
+      errmsg += "Please use \"Target\".\n";
+      throw EventException(errmsg);
+   }
+   else
+      return EventLocator::GetParameterID(str);
 }
 
 
@@ -273,9 +392,18 @@ bool ContactLocator::SetStringParameter(const Integer id,
    }
    if (id == STATIONS)
    {
+      #ifdef DEBUG_SET
+         MessageInterface::ShowMessage("--- Attempting to add a GS to list of ground stations ...\n");
+      #endif
       if (find(stationNames.begin(), stationNames.end(), value) ==
             stationNames.end())
+      {
          stationNames.push_back(value);
+         #ifdef DEBUG_SET
+            MessageInterface::ShowMessage("--- Just added \"%s\" to list of ground stations ...\n",
+                  value.c_str());
+         #endif
+      }
       return true;
    }
 
@@ -329,15 +457,30 @@ bool ContactLocator::SetStringParameter(const Integer id,
 {
    if (id == STATIONS)
    {
-      if (index < (Integer)stationNames.size())
+      #ifdef DEBUG_SET
+         MessageInterface::ShowMessage("--- Attempting to add a GS (index = %d) to list of ground stations ...\n", index);
+      #endif
+      if (find(stationNames.begin(), stationNames.end(), value) == stationNames.end())
       {
-         stationNames[index] = value;
-         return true;
+         if (index < (Integer)stationNames.size())
+         {
+            stationNames[index] = value;
+            return true;
+         }
+         else
+         {
+            stationNames.push_back(value);
+            return true;
+         }
       }
       else
       {
-         stationNames.push_back(value);
+         // ignore duplicate station names, for now
          return true;
+//         std::string errmsg = "Observer ";
+//         errmsg += value + " is already in list for ContactLocator ";
+//         errmsg += instanceName + ".  Each observer must be listed only once.\n";
+//         throw EventException(errmsg);
       }
    }
 
@@ -532,8 +675,9 @@ const StringArray& ContactLocator::GetPropertyEnumStrings(const Integer id) cons
    {
    case LIGHT_TIME_DIRECTION:
       enumStrings.clear();
-      enumStrings.push_back("Transmit");
-      enumStrings.push_back("Receive");
+      for (Integer ii = 0; ii < 2; ii++)
+         enumStrings.push_back(LT_DIRECTIONS[ii]);
+
       return enumStrings;
    default:
       return EventLocator::GetPropertyEnumStrings(id);
@@ -637,14 +781,33 @@ GmatBase* ContactLocator::GetRefObject(const Gmat::ObjectType type,
 bool ContactLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   #ifdef DEBUG_SETREF
+      MessageInterface::ShowMessage("CL::SetRefObject, obj = %s, type = %d (%s), name= %s\n",
+            (obj? "NOT NULL" : "NULL"), (Integer) type, OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(),
+            name.c_str());
+      MessageInterface::ShowMessage("station names are:\n");
+      for (Integer ii = 0; ii < stationNames.size(); ii++)
+         MessageInterface::ShowMessage("   %s\n", stationNames.at(ii).c_str());
+   #endif
    switch (type)
    {
       case Gmat::GROUND_STATION:
          for (UnsignedInt ii = 0; ii < stationNames.size(); ii++)
          {
-            if (obj->GetName() == stationNames.at(ii))
+            #ifdef DEBUG_SETREF
+               MessageInterface::ShowMessage(
+                     "Is of type GROUND_STATION, checking name %s ...\n",
+                     stationNames.at(ii).c_str());
+            #endif
+            if (name == stationNames.at(ii))
+//            if (obj->GetName() == stationNames.at(ii))
             {
-               stations.at(ii) = obj;
+               #ifdef DEBUG_SETREF
+                  MessageInterface::ShowMessage(
+                        "it matched!!! so setting it ...\n");
+               #endif
+               stations.push_back(obj);
+//               stations.at(ii) = (GroundstationInterface*) obj;
                return true;
             }
          }
@@ -653,6 +816,10 @@ bool ContactLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       default:
          break;
    }
+   #ifdef DEBUG_SETREF
+      MessageInterface::ShowMessage(
+            "--- DIDN'T match anthing!!! so calling parent ...\n");
+   #endif
    // Call parent class to add objects to bodyList
    return EventLocator::SetRefObject(obj, type, name);
 }
@@ -683,12 +850,15 @@ const StringArray& ContactLocator::GetRefObjectNameArray(const Gmat::ObjectType 
             (Integer) type, (GmatBase::OBJECT_TYPE_STRING[type]).c_str());
    #endif
 
-   static StringArray csNames;
+   refObjectNames = EventLocator::GetRefObjectNameArray(type);
 
-   csNames.clear();
-   csNames = stationNames;
+  if ((type == Gmat::GROUND_STATION) || (type == Gmat::UNKNOWN_OBJECT))
+  {
+     refObjectNames.insert(refObjectNames.begin(), stationNames.begin(),
+           stationNames.end());
+  }
 
-   return csNames;
+   return refObjectNames;
 }
 
 //------------------------------------------------------------------------------
@@ -703,7 +873,7 @@ const StringArray& ContactLocator::GetRefObjectNameArray(const Gmat::ObjectType 
 //------------------------------------------------------------------------------
 const ObjectTypeArray& ContactLocator::GetRefObjectTypeArray()
 {
-   refObjectTypes.clear();
+   refObjectTypes = EventLocator::GetRefObjectTypeArray();
    refObjectTypes.push_back(Gmat::GROUND_STATION);
    return refObjectTypes;
 }
@@ -749,6 +919,58 @@ bool ContactLocator::RenameRefObject(const Gmat::ObjectType type,
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string &action, const std::string &actionData)
+//------------------------------------------------------------------------------
+/**
+ * Performs a custom action on the object.
+ *
+ * Event locators use this method to clear arrays in the locator.
+ *
+ * @param action The string specifying the action to be taken
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool ContactLocator::TakeAction(const std::string &action,
+                                const std::string &actionData)
+{
+   #ifdef DEBUG_ECLIPSE_ACTION
+      MessageInterface::ShowMessage(
+            "Entering EclipseLocator::TakeAction (%s<%p>) with action = %s and actionData = %s\n",
+            instanceName.c_str(), this, action.c_str(), actionData.c_str());
+   #endif
+   if (action == "Clear")
+   {
+      bool retval = false;
+
+      if ((actionData == "Observers") || (actionData == ""))
+      {
+         stationNames.clear();
+         stations.clear();
+         retval = true;
+      }
+      else if ((actionData == "Events") || (actionData == ""))
+      {
+         #ifdef DEBUG_ECLIPSE_ACTION
+            MessageInterface::ShowMessage(
+                  "In ContactLocator::TakeAction, about to clear %d events\n",
+                  (Integer) contactResults.size());
+         #endif
+         for (Integer ii = 0; ii < contactResults.size(); ii++)
+         {
+            contactResults.at(ii)->TakeAction("Clear", "Events");
+            delete contactResults.at(ii);
+         }
+         contactResults.clear();
+         retval = true;
+      }
+
+      return (EventLocator::TakeAction(action, actionData) || retval);
+   }
+
+   return EventLocator::TakeAction(action, actionData);
+}
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -762,6 +984,9 @@ bool ContactLocator::RenameRefObject(const Gmat::ObjectType type,
 bool ContactLocator::Initialize()
 {
    bool retval = false;
+   #ifdef DEBUG_CONTACTLOCATOR_INIT
+      MessageInterface::ShowMessage("In CL::Init for %s\n", instanceName.c_str());
+   #endif
 
    if (EventLocator::Initialize())
    {
@@ -780,13 +1005,29 @@ bool ContactLocator::Initialize()
             throw EventException(errmsg);
          }
       }
-      for (UnsignedInt i = 0; i < occultingBodies.size(); ++i)
-      {
+//      for (UnsignedInt i = 0; i < occultingBodies.size(); ++i)
+//      {
          for (UnsignedInt j = 0; j < stations.size(); ++j)
          {
             if (!stations[j]->IsOfType(Gmat::SPACE_POINT))
                throw EventException("The object " + stations[j]->GetName() +
                      " must be a SpacePoint for Contact Location");
+         }
+//      }
+
+      if (runMode != "Disabled")
+      {
+         // Set up the ground stations so that we can do Contact Location
+         for (UnsignedInt ii= 0; ii < stations.size(); ii++)
+         {
+            GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
+            if (!gsi->InitializeForContactLocation(true))  // use false for testing resulting files
+            {
+               std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
+               errmsg            += stationNames.at(ii) + " used by ContactLocator ";
+               errmsg            += instanceName + "\n";
+               throw EventException(errmsg);
+            }
          }
       }
 
@@ -794,51 +1035,71 @@ bool ContactLocator::Initialize()
       retval = true;
    }
 
+   #ifdef DEBUG_CONTACTLOCATOR_INIT
+      MessageInterface::ShowMessage("In CL::Init  about to set locatingString\n");
+   #endif
+   SetLocatingString("ContactLocator");
+
    return retval;
 }
 
 //------------------------------------------------------------------------------
-// void ReportEventData()
+// bool ReportEventData(const std::string &reportNotice = "")
 //------------------------------------------------------------------------------
 /**
  * Writes the event data to file and optionally displays the event data plot.
  */
 //------------------------------------------------------------------------------
-void ContactLocator::ReportEventData(const std::string &reportNotice)
+bool ContactLocator::ReportEventData(const std::string &reportNotice)
 {
-   bool openOK = OpenReportFile();
+   #ifdef DEBUG_CONTACT_LOCATOR_WRITE
+      MessageInterface::ShowMessage("ContactLocator::ReportEventData ... \n");
+   #endif
+
+   bool openOK = OpenReportFile(false);
 
    if (!openOK)
    {
       // TBD - do we want to throw an exception or just continue without writing?
-      return;
+      return false;
    }
 
-   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
-   std::string fromGregorian, toGregorian;
-   Real        resultMjd;
+   std::string    itsName   = sat->GetName();
+   theReport << "Target: " << itsName << "\n\n";
 
+   Integer     sz       = (Integer) contactResults.size();
+   std::string noEvents = GetNoEventsString("contact");
 
-   TimeConverterUtil::Convert("A1ModJulian", fromEpoch, "",
-                              outputFormat, resultMjd, fromGregorian);
-   TimeConverterUtil::Convert("A1ModJulian", toEpoch, "",
-                              outputFormat, resultMjd, toGregorian);
+   #ifdef DEBUG_CONTACT_LOCATOR_WRITE
+      MessageInterface::ShowMessage("attempting to write out %d events\n",
+            (Integer) sz);
+   #endif
+   Integer numIndividual = 0;
 
-   if (numEventsFound == 0) // This may be moved to the base EventLocator class <<<
+   if (sz ==0)
    {
-      theReport << "There are no Contact events in the time interval ";
-      theReport << fromGregorian << " to " << toGregorian + ".\n";
+      theReport << "\n" << noEvents << "\n";
    }
-   else
+   // Loop over the total events list
+   for (Integer ii = 0; ii < sz; ii++)
    {
-      // *** REPLACE THIS WITH CODE TO WRITE THE REPORT ***
-      theReport << "There are no Contact events in the time interval ";
-      theReport << fromGregorian << " to " << toGregorian + ".\n";
-      // **************************************************
+      ContactResult* ev = contactResults.at(ii);
+      numIndividual     = ev->NumberOfEvents();
+      ev->SetNoEvents(noEvents);
+
+      std::string eventString = ev->GetReportString();
+      theReport << eventString << "\n";
+
+      theReport << "\nNumber of events : " << numIndividual << "\n\n\n";
    }
 
+//   for (unsigned int jj = 0; jj < sz; jj++)
+//      numIndividual += contactResults.at(jj)->NumberOfEvents();
+
+//   theReport << "\nNumber of events : " << numIndividual << "\n\n\n";
 
    theReport.close();
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -846,18 +1107,134 @@ void ContactLocator::ReportEventData(const std::string &reportNotice)
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// void FindEvents(Real fromTime, Real toTime)
+// void FindEvents()
 //------------------------------------------------------------------------------
 /**
  * Find the eclipse events requested in the time range requested.
  *
  */
 //------------------------------------------------------------------------------
-void ContactLocator::FindEvents(Real fromTime, Real toTime)
+void ContactLocator::FindEvents()
 {
-   // *** FILL THIS IN WITH CALLS TO SPICE AND OTHER CODE ***
-   // *** IT MAY BE USEFUL TO LOOK AT SOME OTHER SPICE CODE, IN UTIL,
-   // *** TO SEE HOW STRINGS, TIMES, ETC. ARE USED AND PASSED TO CSPICE
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("Entering ContactLocator::FindEvents ...\n");
+      MessageInterface::ShowMessage("Stations (%d) are:\n", stations.size());
+      for (Integer ii = 0; ii < stations.size(); ii++)
+         MessageInterface::ShowMessage("    %d     %s<%p>\n",
+               ii, (stations.at(ii)->GetName()).c_str(), stations.at(ii));
+   #endif
+
+
+   // Set up data for the calls to CSPICE
+
+   // @YRL
+   std::string      theObsrvr = ""; // we will loop over observers for this
+   // up to this line
+//   std::string      theFront  = "";  // we will loop over occultingBodies
+//   std::string      theFShape = "ELLIPSOID";
+//   std::string      theFFrame = ""; // we will loop over occultingBodies for this
+//   std::string      theBack   = "SUN";
+//   std::string      theBShape = "ELLIPSOID";
+//   std::string      theBFrame = "IAU_SUN";
+   std::string      theAbCorr = GetAbcorrString();
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("---- theAbCorr  = %s\n", theAbCorr.c_str());
+   #endif
+
+   Integer        numContacts = 0;
+   RealArray      starts;
+   RealArray      ends;
+
+   // Need to set findStart and findStop somewhere in here!!!!
+
+   // Clear old events
+   TakeAction("Clear", "Events");
+   // @YRL
+   for (Integer j = 0; j < stations.size(); j++ )
+   {
+      // We want a ContactResult for each station whether or not there are events
+      ContactResult *evList = new ContactResult();
+      evList->SetObserverName(stations.at(j)->GetName());
+
+      starts.clear();
+      ends.clear();
+      Integer obsNaifId = stations.at(j)->GetIntegerParameter(
+                          stations.at(j)->GetParameterID("NAIFId"));
+      theObsrvr = GmatStringUtil::ToString(obsNaifId);
+      std::string obsFrame = stations.at(j)->GetStringParameter("SpiceFrameId");
+
+      Real  minElAngle  = stations.at(j)->GetRealParameter("MinimumElevationAngle");
+
+      // The ground station's central body should not be an occulting body
+      StringArray bodiesToUse;
+      std::string currentBody;
+      std::string centralBody = stations.at(j)->GetStringParameter(
+                                stations.at(j)->GetParameterID("CentralBody"));
+      for (unsigned int ii = 0; ii < occultingBodyNames.size(); ii++)
+      {
+         currentBody = occultingBodyNames.at(ii);
+         if (currentBody == centralBody)
+         {
+//            if (!centralBodyWarningWritten)
+//            {
+               MessageInterface::ShowMessage(
+                     "*** WARNING *** Body %s is the central body for "
+                     "GroundStation %s and so will not be considered an occulting body "
+                     "for contact location.\n", centralBody.c_str(),
+                     (stations.at(j)->GetName()).c_str());
+//               centralBodyWarningWritten = true;
+//            }
+         }
+         else
+         {
+            bodiesToUse.push_back(currentBody);
+         }
+      }
+
+
+      #ifdef DEBUG_CONTACT_EVENTS
+         MessageInterface::ShowMessage("Calling GetContactIntervals with: \n");
+         MessageInterface::ShowMessage("   theObsrvr         = %s(%s)\n",
+               (stations.at(j))->GetName().c_str(), theObsrvr.c_str());
+         MessageInterface::ShowMessage("   occultingBodies   = \n");
+          for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+             MessageInterface::ShowMessage("      %d     %s\n", ii, occultingBodyNames.at(ii).c_str());
+          MessageInterface::ShowMessage("   bodiesToUse   = \n");
+           for (Integer ii = 0; ii < bodiesToUse.size(); ii++)
+              MessageInterface::ShowMessage("      %d     %s\n", ii, bodiesToUse.at(ii).c_str());
+         MessageInterface::ShowMessage("   theAbCorr         = %s\n", theAbCorr.c_str());
+         MessageInterface::ShowMessage("   initialEp         = %12.10f\n", initialEp);
+         MessageInterface::ShowMessage("   finalEp           = %12.10f\n", finalEp);
+         MessageInterface::ShowMessage("   useEntireInterval = %s\n", (useEntireInterval? "true" : "false"));
+         MessageInterface::ShowMessage("   stepSize          = %12.10f\n", stepSize);
+      #endif
+      bool transmit = (GmatStringUtil::ToUpper(lightTimeDirection) == "TRANSMIT");
+      em -> GetContactIntervals(theObsrvr, minElAngle, obsFrame, bodiesToUse, theAbCorr,
+            initialEp, finalEp, useEntireInterval, useLightTimeDelay, transmit, stepSize, numContacts,
+            starts, ends);
+      #ifdef DEBUG_CONTACT_EVENTS
+         MessageInterface::ShowMessage("After GetContactIntervals: \n");
+         MessageInterface::ShowMessage("   numContacts       = %d\n", numContacts);
+      #endif
+      if (numContacts > 0)
+      {
+         // Insert the events into the array
+         for (Integer kk = 0; kk < numContacts; kk++ )
+         {
+            Real s1 = starts.at(kk);
+            Real e1 = ends.at(kk);
+            ContactEvent *newEvent = new ContactEvent(s1, e1);
+            evList->AddEvent(newEvent);
+         }
+      }
+      // One result array for each station whether or not there are events
+      contactResults.push_back(evList);
+   }
+
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("ContactLocator::FindEvents leaving ... \n");
+   #endif
+   // @YRL, upto this line
 }
 
 //------------------------------------------------------------------------------

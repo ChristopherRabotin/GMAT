@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -54,6 +64,7 @@
 //#define DEBUG_STARTUP_WITH_ABSOLUTE_PATH
 //#define DEBUG_BIN_DIR
 //#define DEBUG_TEXTURE_FILE
+//#define DEBUG_3DMODEL_FILE
 //#define DEBUG_FIND_PATH
 //#define DEBUG_FIND_INPUT_PATH
 //#define DEBUG_FIND_OUTPUT_PATH
@@ -83,12 +94,13 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "MARS_POT_PATH",
    "OTHER_POT_PATH",
    "TEXTURE_PATH",
+   "BODY_MODEL_PATH",
    "MEASUREMENT_PATH",
    "GUI_CONFIG_PATH",
    "SPLASH_PATH",
    "ICON_PATH",
    "STAR_PATH",
-   "MODEL_PATH",
+   "VEHICLE_MODEL_PATH",
    "SPAD_PATH",
    "ATMOSPHERE_PATH",
    
@@ -106,7 +118,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    // Specific file name
    "DE405_FILE",
    "DE421_FILE",						// made change by TUAN NGUYEN
-   "DE424_FILE",						// made change by TUAN NGUYEN
+   "DE424_FILE",                 // made change by TUAN NGUYEN
+   "DE430_FILE",
    "IAUSOFA_FILE",					// made change by TUAN NGUYEN
    "ICRF_FILE",						// made change by TUAN NGUYEN
    "PLANETARY_SPK_FILE",
@@ -119,6 +132,7 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "EOP_FILE",
    "PLANETARY_COEFF_FILE",
    "NUTATION_COEFF_FILE",
+   "PLANETARY_PCK_FILE",
    "LEAP_SECS_FILE",
    "LSK_FILE",
    "PERSONALIZATION_FILE",
@@ -126,8 +140,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "STAR_FILE",
    "CONSTELLATION_FILE",
    "SPACECRAFT_MODEL_FILE",
-   "HELP_FILE",
-};
+   "SPAD_SRP_FILE",
+   "HELP_FILE",};
 
 FileManager* FileManager::theInstance = NULL;
 
@@ -297,6 +311,10 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
          // will have higher priority in search path for the new file path implementation.
          // (LOJ: 2014.07.09)
          AddMatlabFunctionPath(newDir);
+         // Also add it to GmatFunction path (LOJ: 2015.09.18)
+         AddGmatFunctionPath(newDir);
+//         //Python
+//         AddPythonModulePath(newDir);
       }
       else
          return false;
@@ -1168,6 +1186,9 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    /// to proceed addressing path issues in GMAT.
    // SetPathsAbsolute();
    
+   // Validate PATHs
+   ValidatePaths();
+
    #ifdef DEBUG_MAPPING
    ShowMaps("In ReadStartupFile()");
    #endif
@@ -1637,7 +1658,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    // write the VEHICLE_EPHEM_SPK_PATH and files next
    //---------------------------------------------
    #ifdef DEBUG_WRITE_STARTUP_FILE
-   MessageInterface::ShowMessage("   .....Writing MODEL_PATH path\n");
+   MessageInterface::ShowMessage("   .....Writing VEHICLE_EPHEM_SPK_PATH path\n");
    #endif
    outStream << std::setw(22) << "VEHICLE_EPHEM_SPK_PATH" << " = "
              << mPathMap["VEHICLE_EPHEM_SPK_PATH"] << "\n";
@@ -1645,16 +1666,16 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    mPathWrittenOuts.push_back("VEHICLE_EPHEM_SPK_PATH");
    
    //---------------------------------------------
-   // write the MODEL_PATH and files next
+   // write the VEHICLE_MODEL_PATH and files next
    //---------------------------------------------
    #ifdef DEBUG_WRITE_STARTUP_FILE
-   MessageInterface::ShowMessage("   .....Writing MODEL_PATH path\n");
+   MessageInterface::ShowMessage("   .....Writing VEHICLE_MODEL_PATH path\n");
    #endif
-   outStream << std::setw(22) << "MODEL_PATH" << " = "
-             << mPathMap["MODEL_PATH"] << "\n";
+   outStream << std::setw(22) << "VEHICLE_MODEL_PATH" << " = "
+             << mPathMap["VEHICLE_MODEL_PATH"] << "\n";
    WriteFiles(outStream, "SPACECRAFT_MODEL_FILE");
    outStream << "#-----------------------------------------------------------\n";
-   mPathWrittenOuts.push_back("MODEL_PATH");
+   mPathWrittenOuts.push_back("VEHICLE_MODEL_PATH");
    
    //---------------------------------------------
    // write the HELP_FILE next
@@ -1831,6 +1852,117 @@ bool FileManager::GetTextureMapFile(const std::string &inFileName, const std::st
 
 
 //------------------------------------------------------------------------------
+// bool GetBody3dModelFile(const std::string &inFileName, const std::string &bodyName,
+//                         const std::string &objName, std::string &outFileName,
+//                         std::string &outFullPathName, bool writeWarning)
+//------------------------------------------------------------------------------
+bool FileManager::GetBody3dModelFile(const std::string &inFileName, const std::string &bodyName,
+                                     const std::string &objName, std::string &outFileName,
+                                     std::string &outFullPathName, bool writeWarning)
+{
+   #ifdef DEBUG_3DMODEL_FILE
+   MessageInterface::ShowMessage
+      ("\nFileManager::GetBody3dModelFile() entered\n   inFileName = '%s'\n   "
+       "bodyName = '%s', objName = '%s', writeWarning = %d\n", inFileName.c_str(),
+       bodyName.c_str(), objName.c_str(), writeWarning);
+   #endif
+   
+   bool retval = true;
+   std::string actualFile = inFileName;
+   std::string fullPath;
+   std::string modelFileType = GmatStringUtil::ToUpper(bodyName) + "3D_MODEL_FILE";
+   mLastFilePathMessage = "";
+   bool writeInfo = false;
+   
+   outFileName = inFileName;
+   
+   #ifdef DEBUG_3DMODEL_FILE
+   MessageInterface::ShowMessage("   actualFile  = '%s'\n", actualFile.c_str());
+   MessageInterface::ShowMessage("   modelFileType = '%s'\n", modelFileType.c_str());
+   #endif
+   
+   try
+   {
+      if (inFileName == "")
+         actualFile = GetFilename(modelFileType);
+      
+      fullPath =
+         FindPath(actualFile, modelFileType, true, writeWarning, writeInfo, objName);
+      
+      #ifdef DEBUG_3DMODEL_FILE
+      MessageInterface::ShowMessage("   actualFile = '%s'\n", actualFile.c_str());
+      MessageInterface::ShowMessage("   fullPath   = '%s'\n", fullPath.c_str());
+      #endif
+      
+      // If fullPath is blank, try with BODY_3D_MODEL_PATH since non-standard bodies'
+      // 3d file may not be available such as SOMECOMET1_3D_MODEL_FILE
+      if (fullPath == "")
+      {
+         fullPath = 
+            FindPath(actualFile, "BODY_3D_MODEL_PATH", true, false, writeInfo, objName);
+      }
+      
+      if (fullPath == "")
+      {
+         if (inFileName == "")
+         {
+            mLastFilePathMessage = GetLastFilePathMessage() + ", so using " + actualFile + ".";
+         }
+         else
+         {
+            mLastFilePathMessage = GetLastFilePathMessage();
+            retval = false;
+         }
+      }
+      else if (inFileName == "")
+      {
+         outFileName = actualFile;
+         std::string msg = "*** WARNING *** There is no 3D model file "
+            "specified for " + objName + ", so using " + actualFile;
+         mLastFilePathMessage = msg;
+         if (writeWarning)
+            MessageInterface::ShowMessage(msg + "\n");
+      }
+      
+      outFullPathName = fullPath;
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_3DMODEL_FILE
+      MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+      #endif
+      if (inFileName == "")
+      {
+         actualFile = "";
+         std::string msg = "*** WARNING *** There is no 3d model file "
+            "specified for " + objName + ", so using " + actualFile;
+         mLastFilePathMessage = msg;
+         if (writeWarning)
+            MessageInterface::ShowMessage(msg + "\n");
+         fullPath = 
+            FileManager::Instance()->FindPath(actualFile, "BODY_3D_MODEL_PATH", true, false,
+                                              writeInfo, objName);
+         outFileName = actualFile;
+         outFullPathName = fullPath;
+      }
+      else
+      {
+         outFullPathName = "";
+         retval = false;
+      }
+   }
+   
+   #ifdef DEBUG_3DMODEL_FILE
+   MessageInterface::ShowMessage
+      ("   outFileName = '%s'\n   outFullPathName = '%s'\n   mLastFilePathMessage = '%s'\n",
+       outFileName.c_str(), outFullPathName.c_str(), mLastFilePathMessage.c_str());
+   MessageInterface::ShowMessage("FileManager::GetBody3dModelFile() returnng %d\n\n", retval);
+   #endif
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string GetPathname(const FileType type)
 //------------------------------------------------------------------------------
 /**
@@ -1900,6 +2032,10 @@ std::string FileManager::GetPathname(const std::string &typeName)
    
    if (nameFound)
    {
+      #ifdef DEBUG_FILE_PATH
+      MessageInterface::ShowMessage("   pathname = '%s'\n", pathname.c_str());
+      #endif
+      
       // Replace relative path with absolute path
       std::string abspath = ConvertToAbsPath(pathname);
       
@@ -1988,7 +2124,7 @@ std::string FileManager::GetFilename(const std::string &typeName)
       MessageInterface::ShowMessage
          ("FileManager::GetFilename() returning '%s'\n", name.c_str());
       #endif
-      return name;
+      return name;
    }
    
    throw UtilityException("FileManager::GetFilename() file type: " + typeName +
@@ -2136,6 +2272,9 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    
    //std::string absPath = relPath;
    std::string absPath;
+   bool        startsWithSeparator = false;
+   if ((relPath[0] == '\\') || (relPath[0] == '/'))
+      startsWithSeparator = true;
    StringTokenizer st(relPath, "/\\");
    StringArray allNames = st.GetAllTokens();
    StringArray pathNames;
@@ -2192,6 +2331,9 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    }
    
    absPath = "";
+   // For paths that already started with the separator (were already absolute paths)
+   if (startsWithSeparator)
+      absPath += mPathSeparator;
    for (UnsignedInt i = 0; i < pathNames.size(); i++)
    {
       if (i < pathNames.size() - 1)
@@ -2351,6 +2493,9 @@ void FileManager::ClearGmatFunctionPath()
 }
 
 
+//------------------------------------------------------------------------------
+// void AddGmatFunctionPath(const char *path, bool addFront)
+//------------------------------------------------------------------------------
 void FileManager::AddGmatFunctionPath(const char *path, bool addFront)
 {
    return AddGmatFunctionPath(std::string(path), addFront);
@@ -2422,13 +2567,16 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
    while (pos != mGmatFunctionPaths.end())
    {
       MessageInterface::ShowMessage
-         ("   mGmatFunctionPaths = %s\n", (*pos).c_str());
+         ("------   mGmatFunctionPaths = %s\n", (*pos).c_str());
       ++pos;
    }
    #endif
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetGmatFunctionPath(const char *funcName)
+//------------------------------------------------------------------------------
 std::string FileManager::GetGmatFunctionPath(const char *funcName)
 {
    return GetFunctionPath(GMAT_FUNCTION, mGmatFunctionPaths, std::string(funcName));
@@ -2594,6 +2742,63 @@ const StringArray& FileManager::GetAllMatlabFunctionPaths()
    return mMatlabFunctionFullPaths;
 }
 
+
+//------------------------------------------------------------------------------
+// void AddPythonModulePath(const std::string& path)
+//------------------------------------------------------------------------------
+/**
+ * Adds a folder to the buffer for the Python search path
+ *
+ * @param path The new folder that may contain Python modules
+ */
+//------------------------------------------------------------------------------
+void FileManager::AddPythonModulePath(const std::string& path)
+{
+#ifdef DEBUG_FUNCTION_PATH
+	MessageInterface::ShowMessage
+		("FileManager::AddPythonModulePath() Adding %s to PythonModulePath\n",
+		path.c_str());
+#endif
+
+	std::list<std::string>::iterator pos =
+		find(mPythonModulePaths.begin(), mPythonModulePaths.end(), path);
+
+	if (pos == mPythonModulePaths.end())
+	{
+		mPythonModulePaths.push_back(path);
+	}
+	
+
+#ifdef DEBUG_FUNCTION_PATH
+	pos = mPythonModulePaths.begin();
+	while (pos != mPythonModulePaths.end())
+	{
+		MessageInterface::ShowMessage
+			("   mPythonModulePaths=%s\n", (*pos).c_str());
+		++pos;
+	}
+#endif
+}
+
+
+// ------------------------------------------------------------------------------
+// const StringArray& GetAllPythonModulePaths()
+//------------------------------------------------------------------------------
+const StringArray& FileManager::GetAllPythonModulePaths()
+{
+	mPythonModuleFullPaths.clear();
+
+	std::list<std::string>::iterator listpos = mPythonModulePaths.begin();
+	while (listpos != mPythonModulePaths.end())
+	{
+		mPythonModuleFullPaths.push_back(ConvertToAbsPath(*listpos));
+		++listpos;
+	}
+
+	return mPythonModuleFullPaths;
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetLastFilePathMessage()
 //------------------------------------------------------------------------------
@@ -2618,6 +2823,58 @@ std::string FileManager::GetLastFilePathMessage()
 const StringArray& FileManager::GetPluginList()
 {
    return mPluginList;
+}
+
+
+//------------------------------------------------------------------------------
+// void AdjustSettings(const std::string &suffix, const StringArray &forEntries)
+//------------------------------------------------------------------------------
+/**
+ * Appends a suffix to a list of settings stored in the file manager
+ *
+ * @param suffix The suffix to be appended to the setting
+ * @param forEntries A list of entries that receive the suffix
+ */
+//------------------------------------------------------------------------------
+void FileManager::AdjustSettings(const std::string &suffix,
+      const StringArray &forEntries)
+{
+   std::string temp;
+   for (UnsignedInt i = 0; i < forEntries.size(); ++i)
+   {
+      // Adjust if path
+      temp = mPathMap[forEntries[i]];
+      if (temp != "")
+      {
+         std::string trailingSlash = "";
+         if ((temp[temp.length()-1] == '/') || (temp[temp.length()-1] == '\\'))
+         {
+            trailingSlash = temp.substr(temp.length()-1);
+            temp = temp.substr(0, temp.length()-1);
+         }
+         temp += suffix;
+         temp += trailingSlash;
+         mPathMap[forEntries[i]] = temp;
+      }
+      else // Adjust if file
+      {
+         FileInfo *tempFI = mFileMap[forEntries[i]];
+         temp = tempFI->mFile;
+         std::string extension = "";
+
+         if (temp.find(".") != std::string::npos)
+         {
+            extension = temp.substr(temp.find("."));
+            temp = temp.substr(0, temp.find("."));
+         }
+
+         if (temp != "")
+         {
+            temp += suffix + extension;
+            tempFI->mFile = temp;
+         }
+      }
+   }
 }
 
 //---------------------------------
@@ -2672,6 +2929,7 @@ std::string FileManager::GetFunctionPath(FunctionType type,
       fullPath = ConvertToAbsPath(pathName) + funcName1;
 
       #ifdef DEBUG_FUNCTION_PATH
+      MessageInterface::ShowMessage("   pathName='%s'\n", pathName.c_str());
       MessageInterface::ShowMessage("   fullPath='%s'\n", fullPath.c_str());
       #endif
 
@@ -2739,8 +2997,10 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
       // Handle Gmat and Matlab Function path
       if (type == "GMAT_FUNCTION_PATH")
          AddGmatFunctionPath(str2, false);
-      else if (type == "MATLAB_FUNCTION_PATH")
-         AddMatlabFunctionPath(str2, false);
+	  else if (type == "MATLAB_FUNCTION_PATH")
+		  AddMatlabFunctionPath(str2, false);
+	  else if (type == "PYTHON_MODULE_PATH")
+		  AddPythonModulePath(str2);
 
    }
    else if (type.find("_FILE_ABS") != type.npos)
@@ -3116,8 +3376,8 @@ void FileManager::RefreshFiles()
    AddFileType("CONSTELLATION_FILE", "STAR_PATH/inp_Constellation.txt");
    
    // models
-   AddFileType("MODEL_PATH", "DATA_PATH/vehicle/models/");
-   AddFileType("SPACECRAFT_MODEL_FILE", "MODEL_PATH/aura.3ds");
+   AddFileType("VEHICLE_MODEL_PATH", "DATA_PATH/vehicle/models/");
+   AddFileType("SPACECRAFT_MODEL_FILE", "VEHICLE_MODEL_PATH/aura.3ds");
    
    // help file
    AddFileType("HELP_FILE", "");
@@ -3248,4 +3508,88 @@ void FileManager::SetPathsAbsolute()
          MessageInterface::ShowMessage("   %s  %s\n", file->second->mPath.c_str(),
                file->second->mFile.c_str());
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ValidatePaths()
+//------------------------------------------------------------------------------
+/*
+ * Validate all paths in file manager
+ */
+//------------------------------------------------------------------------------
+bool FileManager::ValidatePaths()
+{
+   std::string s = "";
+   int i = 0;
+   FileType type;
+
+   for ( int fooInt = BEGIN_OF_PATH; fooInt != END_OF_PATH; fooInt++ )
+   {
+      type = FileType(fooInt);
+      switch (type)
+      {
+         case BEGIN_OF_PATH:
+         case END_OF_PATH:
+            break;
+         // non fatal paths?
+         case TEXTURE_PATH:
+         case BODY_3D_MODEL_PATH:
+         case MEASUREMENT_PATH:
+         case GUI_CONFIG_PATH:
+         case SPLASH_PATH:
+         case ICON_PATH:
+         case VEHICLE_MODEL_PATH:
+            try
+            {
+               if (!DoesDirectoryExist(GetFullPathname(type)))
+               {
+                  MessageInterface::ShowMessage("%s directory does not exist: %s",
+                     FileManager::FILE_TYPE_STRING[type].c_str(),
+                     GetFullPathname(type).c_str());
+               }
+            }
+            catch (UtilityException &e)
+            {
+                  MessageInterface::ShowMessage("%s directory not specified in gmat_startup_file",
+                     FileManager::FILE_TYPE_STRING[type].c_str());
+            }
+            break;
+         default:
+            try
+            {
+               if (!DoesDirectoryExist(GetFullPathname(type)))
+               {
+                  i++;
+                  if (i > 9) goto loopexit;
+                  if (i > 1)
+                     s = s + "\n";
+                  s = s + FileManager::FILE_TYPE_STRING[type] + " = " + 
+                     GetFullPathname(type);
+               }
+            }
+            catch (UtilityException &e)
+            {
+               i++;
+               if (i > 9) goto loopexit;
+               if (i > 1)
+                  s = s + "\n";
+               s = s + FileManager::FILE_TYPE_STRING[type] + " = MISSING in gmat_startup_file";
+            }
+      }
+   }
+
+loopexit:
+   UtilityException ue;
+   if (i == 1)
+   {
+      ue.SetDetails("The following directory does not exist:\n%s", s.c_str());
+      throw ue;
+   }
+   else if (i > 1)
+   {
+      ue.SetDetails("At least %d directories do not exist, including:\n%s", i, s.c_str());
+      throw ue;
+   }
+   return i == 0;
 }

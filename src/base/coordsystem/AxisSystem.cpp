@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -116,6 +126,8 @@ AxisSystem::AxisSystem(const std::string &itsType,
                        const std::string &itsName) :
 CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
 coordName        (""),
+usesPrimary      (GmatCoordinate::NOT_USED),
+usesSecondary    (GmatCoordinate::NOT_USED),
 baseSystem       ("FK5"),
 eop              (NULL),
 itrf             (NULL),
@@ -174,6 +186,8 @@ rotMatrix         (axisSys.rotMatrix),
 rotDotMatrix      (axisSys.rotDotMatrix),
 epoch             (axisSys.epoch),
 coordName         (axisSys.coordName),
+usesPrimary       (axisSys.usesPrimary),
+usesSecondary     (axisSys.usesSecondary),
 baseSystem        (axisSys.baseSystem),
 eop               (axisSys.eop),
 itrf              (axisSys.itrf),
@@ -230,6 +244,8 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    rotDotMatrix      = axisSys.rotDotMatrix;
    epoch             = axisSys.epoch;
    coordName         = axisSys.coordName;
+   usesPrimary       = axisSys.usesPrimary;
+   usesSecondary     = axisSys.usesSecondary;
    baseSystem        = axisSys.baseSystem;
    eop               = axisSys.eop;
    itrf              = axisSys.itrf;
@@ -370,7 +386,8 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesEpoch() const
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage AxisSystem::UsesPrimary() const
 {
-   return GmatCoordinate::NOT_USED;
+//   return GmatCoordinate::NOT_USED;
+   return usesPrimary;
 }
 
 //---------------------------------------------------------------------------
@@ -386,7 +403,8 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesPrimary() const
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage AxisSystem::UsesSecondary() const
 {
-   return GmatCoordinate::NOT_USED;
+//   return GmatCoordinate::NOT_USED;
+   return usesSecondary;
 }
 
 //---------------------------------------------------------------------------
@@ -490,7 +508,7 @@ bool AxisSystem::UsesSpacecraft(const std::string &withName) const
    {
       if ((withName == "") || (origin->GetName() == withName))   return true;
    }
-   if (UsesPrimary())
+   if (usesPrimary)
    {
       SpacePoint *p = GetPrimaryObject();
       if (p && p->IsOfType("Spacecraft"))
@@ -498,7 +516,7 @@ bool AxisSystem::UsesSpacecraft(const std::string &withName) const
          if ((withName == "") || (p->GetName() == withName))   return true;
       }
    }
-   if (UsesSecondary())
+   if (usesSecondary)
    {
       SpacePoint *s = GetSecondaryObject();
       if (s && s->IsOfType("Spacecraft"))
@@ -557,6 +575,7 @@ void AxisSystem::SetAllowWithoutRates(bool allow)
    #endif
    allowNoRates = allow;
 }
+
 
 bool AxisSystem::AllowWithoutRates() const
 {
@@ -669,6 +688,7 @@ void AxisSystem::SetZAxis(const std::string &toValue)
 {
    // default behavior is to ignore this
 }
+
 
 //------------------------------------------------------------------------------
 //  void SetEopFile(EopFile *eopF)

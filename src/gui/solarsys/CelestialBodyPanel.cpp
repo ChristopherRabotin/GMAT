@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan (original author: Allison Greene 2005.07.06)
 // Created: 2009.01.26
@@ -98,15 +108,17 @@ void CelestialBodyPanel::Create()
       cbNotebook->SetBackgroundColour(GetBackgroundColour());
       cbNotebook->SetForegroundColour(GetForegroundColour());
       
-      // create properties, orbit, and orientation panels
+      // create properties, orbit, orientation, and visualization panels
       properties       = new CelestialBodyPropertiesPanel(this, cbNotebook, theCelestialBody);
       orbit            = new CelestialBodyOrbitPanel(this, cbNotebook, theCelestialBody);
       orientation      = new CelestialBodyOrientationPanel(this, cbNotebook, theCelestialBody);
+      visualization    = new CelestialBodyVisualizationPanel(this, cbNotebook, theCelestialBody);
       
       // add panels to notebook
       cbNotebook->AddPage(properties, wxT("Properties"));
       cbNotebook->AddPage(orbit, wxT("Orbit"));
       cbNotebook->AddPage(orientation, wxT("Orientation"));
+      cbNotebook->AddPage(visualization, wxT("Visualization"));
       
       theMiddleSizer->Add(cbNotebook, 1, wxGROW, 1);  // 3?
    }
@@ -131,6 +143,7 @@ void CelestialBodyPanel::LoadData()
       properties->LoadData();
       orbit->LoadData();
       orientation->LoadData();
+      visualization->LoadData();
    }
    catch (BaseException &e)
    {
@@ -175,6 +188,11 @@ void CelestialBodyPanel::SaveData()
    {
       orientation->SaveData();
       canClose = canClose && orientation->CanClosePanel();
+   }
+   if (visualization->IsDataChanged())
+   {
+      visualization->SaveData();
+      canClose = canClose && visualization->CanClosePanel();
    }
    
    if (!canClose)   // why do this???? spacecraft panel did this ....
@@ -227,6 +245,10 @@ void CelestialBodyPanel::OnPageChange(wxNotebookEvent &event)
    {
       //orientation->LoadData();
       orientation->Navigate();
+   }
+   else if (selectedPage == 3)
+   {
+      visualization->Navigate();
    }
 }
 

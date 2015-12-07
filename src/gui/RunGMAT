@@ -1,7 +1,7 @@
 #!/bin/bash
 # Sets up the environment for GMAT, then runs the executable.
 #
-#  Copyright (c) 2002-2014 United States Government as represented by the
+#  Copyright (c) 2002-2015 United States Government as represented by the
 #  Administrator of The National Aeronautics and Space Administration.
 #  All Other Rights Reserved.
 #
@@ -9,16 +9,12 @@
 # the gmat_startup_file.txt resides in the bin folder where the GMAT.app bundle resides.
 # MATLAB_APP_PATH should point to the MATLAB app in the directory where MATLAB has been installed, e.g.
 #     /Applications/MATLAB_R2010a/MATLAB_R2012a.app
-# NOTE that currently, we are only running 32-bit GUI versions of GMAT and therefore, we need to use 32-bit
-# version(s) of MATLAB here.  When 64-bit is available and working, the archflag here may be modified.
+# NOTE that currently, we are running 64-bit GUI versions of GMAT and therefore, we need to use 64-bit
+# version(s) of MATLAB here.
 #
 # To debug errors, set the debugit flag to 'true'.  By default, debug is written to a file inside
 # the bundle in the directory from which this script is run.  This may be changed to write to a
 # different file by setting debugfile (see below).
-#
-# Currently unused/TBD:
-# This also assumes that the user has set the FORTRANFORGMAT environment variable in her/his environment.plist file.
-# FORTRANFORGMAT should point to the directory where gfortran has been installed, i.e. /usr/local/gfortran
 #
 
 # First, we want to find out exactly where this script is
@@ -33,13 +29,13 @@ fi
 # ...................................................
 
 # Set architecture flag here ........................
-archflag='32bit'
-# archflag='64bit'
+# archflag='32bit'
+archflag='64bit'
 # ...................................................
 
 
 # What do we want to run?
-cmd='GMAT'
+cmd=`ls $here/GMAT* | xargs basename` # Supports release & debug GMAT
 # Where is the startup file?
 FILE="$here/../../../gmat_startup_file.txt"
 
@@ -102,9 +98,6 @@ then
    fi
 fi
 
-# FORTRAN set-up is TBD
-#export DYLD_LIBRARY_PATH=$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
-#export PATH=$matlabloc/bin:$FORTRANFORGMAT/lib:$PATH
 export PATH=$matlabloc/bin:$PATH
 
 # turn OFF extended globbing

@@ -41,8 +41,8 @@
   <refsection>
     <title>Description</title>
 
-    <para>The <guilabel>Report</guilabel> command allows you to report data at
-    specific points in your mission sequence. GMAT allows you to insert
+    <para>The <guilabel>Report</guilabel> command allows you to report data
+    at specific points in your mission sequence. GMAT allows you to insert
     <guilabel>Report</guilabel> command into the <guilabel>Mission</guilabel>
     tree at any location. <guilabel>Report</guilabel> command can be used
     through GMAT’s GUI or via the script interface. The parameters reported by
@@ -81,7 +81,7 @@
                   <term>Accepted Data Types</term>
 
                   <listitem>
-                    <para>Resource reference </para>
+                    <para>Resource reference</para>
                   </listitem>
                 </varlistentry>
 

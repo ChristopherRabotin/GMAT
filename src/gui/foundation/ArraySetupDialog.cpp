@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/12/30
@@ -42,7 +52,9 @@ BEGIN_EVENT_TABLE(ArraySetupDialog, GmatDialog)
    EVT_TEXT(ID_TEXTCTRL, ArraySetupDialog::OnTextUpdate)
    EVT_TEXT_ENTER(ID_TEXTCTRL, ArraySetupDialog::OnTextEnter)
    EVT_GRID_CELL_CHANGE(ArraySetupDialog::OnGridCellChange)
+   #if wxCHECK_VERSION(3, 0, 0)
    EVT_GRID_TABBING(ArraySetupDialog::OnGridTabbing)
+   #endif
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -98,11 +110,11 @@ void ArraySetupDialog::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mArrNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(120,20), 0);
+                                     wxDefaultPosition, wxSize(120,-1), 0);
    mArrRowTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(35,20), 0);
+                                    wxDefaultPosition, wxSize(35,-1), 0);
    mArrColTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(35,20), 0);
+                                    wxDefaultPosition, wxSize(35,-1), 0);
    
    wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array"));
    mArrStaticBoxSizer = new wxStaticBoxSizer(arrayStaticBox, wxVERTICAL);
@@ -138,7 +150,7 @@ void ArraySetupDialog::Create()
          0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
    
    mArrValTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(100,20), 0);
+                                     wxDefaultPosition, wxSize(100,-1), 0);
    mUpdateButton =
       new wxButton(this, ID_BUTTON, wxT("Update"),
                    wxDefaultPosition, wxDefaultSize, 0);
@@ -160,7 +172,9 @@ void ArraySetupDialog::Create()
    mArrGrid->SetColLabelSize(20);
    mArrGrid->SetScrollbars(5, 8, 15, 15);
    mArrGrid->EnableEditing(true);
+   #if wxCHECK_VERSION(3, 0, 0)
    mArrGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
    
    mArrValBoxSizer = new wxBoxSizer(wxVERTICAL);
    mArrValBoxSizer->Add(singleValBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);

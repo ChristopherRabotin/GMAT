@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -26,6 +36,7 @@
 #include "MessageInterface.hpp"
 #include "CoordinateSystem.hpp"
 #include "TimeTypes.hpp"
+#include "FileManager.hpp"    // for flux files
 
 #include <sstream>                 // for <<
 #include <cmath>
@@ -38,7 +49,8 @@
 //#define DEBUG_DRAGFORCE_REFOBJ
 //#define DEBUG_ANGVEL
 //#define DEBUG_FIRST_CALL
-#define DEBUG_NAN_CONDITIONS
+//#define DEBUG_NAN_CONDITIONS
+//#define DEBUG_FLUX_FILE
 
 //#define DUMP_DERIVATIVE
 //#define DUMP_DENSITY
@@ -128,6 +140,8 @@ DragForce::DragForce(const std::string &name) :
    atmos                   (NULL),
    internalAtmos           (NULL),
    density                 (NULL),
+   densityModel            (""),
+   inputFile               (""),
    prefactor               (NULL),
    firedOnce               (false),
    hasWindModel            (false),
@@ -144,26 +158,24 @@ DragForce::DragForce(const std::string &name) :
    KPID                    (-1),
    //bodyName               ("Earth"),
    dataType                ("Constant"),
-   historicWSource         (""),
-   predictedWSource        (""),
-   cssiWFile               (""),
-   schattenWFile           (""),
+   historicWSource         ("ConstantFluxAndGeoMag"),
+   predictedWSource        ("ConstantFluxAndGeoMag"),
    fluxF107                (150.0),
    fluxF107A               (150.0),
    kp                      (3.0),
-   schattenErrorModel      (""),
-   schattenTimingModel     (""),
+   schattenErrorModel      ("Nominal"),
+   schattenTimingModel     ("NominalCycle"),
    cartIndex               (0),
    fillCartesian           (false),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (0),
-   densityModel            (""),									// made changes by TUAN NGUYEN	for GMT-4299
-   inputFile               ("")										// made changes by TUAN NGUYEN	for GMT-4299
+   kpApConversion          (0)
 {
-#ifdef DEBUG_CONSTRUCTION
-	MessageInterface::ShowMessage("DragForce default construction <'%s',%p>\n", GetName().c_str(), this);
-#endif
+   #ifdef DEBUG_CONSTRUCTION
+      MessageInterface::ShowMessage("DragForce default construction "
+            "<'%s',%p>\n", GetName().c_str(), this);
+   #endif
+
    dimension = 6;
    parameterCount = DragForceParamCount;
    objectTypeNames.push_back("DragForce");
@@ -180,10 +192,10 @@ DragForce::DragForce(const std::string &name) :
    
    density = new Real[1];
 
-//   // Nominal Earth angular velocity
-//   angVel[0]      = 0.0;
-//   angVel[1]      = 0.0;
-//   angVel[2]      = 7.29211585530e-5;
+   FileManager *fm = FileManager::Instance();
+   fluxPath = fm->GetAbsPathname("ATMOSPHERE_PATH");
+   cssiWFile = fm->GetFilename("CSSI_FLUX_FILE");
+   schattenWFile = fm->GetFilename("SCHATTEN_FILE");
    
    ap = CalculateAp(kp);
    
@@ -275,6 +287,8 @@ DragForce::DragForce(const DragForce& df) :
    atmosphereType          (df.atmosphereType),
    atmos                   (NULL),
    density                 (NULL),
+   densityModel            (df.densityModel),
+   inputFile               (df.inputFile),
    prefactor               (NULL),
    firedOnce               (false),
    hasWindModel            (df.hasWindModel),
@@ -290,6 +304,7 @@ DragForce::DragForce(const DragForce& df) :
    dataType                (df.dataType),
    historicWSource         (df.historicWSource),
    predictedWSource        (df.predictedWSource),
+   fluxPath                (df.fluxPath),
    cssiWFile               (df.cssiWFile),
    schattenWFile           (df.schattenWFile),
    fluxF107                (df.fluxF107),
@@ -301,9 +316,7 @@ DragForce::DragForce(const DragForce& df) :
    fillCartesian           (df.fillCartesian),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (df.kpApConversion),
-   densityModel            (df.densityModel),							// made changes by TUAN NGUYEN	for GMT-4299
-   inputFile               (df.inputFile)								// made changes by TUAN NGUYEN	for GMT-4299
+   kpApConversion          (df.kpApConversion)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   enetered\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
@@ -323,7 +336,8 @@ DragForce::DragForce(const DragForce& df) :
 //      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());      // Any other initialization needed?
       cbFixed = (CoordinateSystem*)(df.cbFixed);
 
-   parameterCount += 7;
+   parameterCount = DragForceParamCount;
+
    dimension = df.dimension;
    orbitDimension = df.orbitDimension;
 
@@ -344,12 +358,14 @@ DragForce::DragForce(const DragForce& df) :
 
    if (internalAtmos != NULL)													// made changes by TUAN NGUYEN	for GMT-4299
    {																			// made changes by TUAN NGUYEN	for GMT-4299
-	   try																		// made changes by TUAN NGUYEN	for GMT-4299
-	   {																		// made changes by TUAN NGUYEN	for GMT-4299
-	      densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes by TUAN NGUYEN	for GMT-4299
-		  inputFile    = internalAtmos->GetStringParameter("InputFile");		// made changes by TUAN NGUYEN	for GMT-4299
-	   }																		// made changes by TUAN NGUYEN	for GMT-4299
-	   catch(...){};															// made changes by TUAN NGUYEN	for GMT-4299
+      try																		// made changes by TUAN NGUYEN	for GMT-4299
+      {																		// made changes by TUAN NGUYEN	for GMT-4299
+         densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes by TUAN NGUYEN	for GMT-4299
+         inputFile    = internalAtmos->GetStringParameter("InputFile");		// made changes by TUAN NGUYEN	for GMT-4299
+      }																		// made changes by TUAN NGUYEN	for GMT-4299
+      catch(...)
+      {
+      };															// made changes by TUAN NGUYEN	for GMT-4299
    }																			// made changes by TUAN NGUYEN	for GMT-4299
    
 #ifdef DEBUG_CONSTRUCTION
@@ -410,6 +426,8 @@ DragForce& DragForce::operator=(const DragForce& df)
          (internalAtmos, "internalAtmos", "DragForce::operator=()",
           "deleting internal atmosphere model");
       #endif
+      if (atmos == internalAtmos)
+         atmos = NULL;
       delete internalAtmos;
    }
    
@@ -802,10 +820,10 @@ bool DragForce::Initialize()
                   "GMAT builds.");
          }
          
-		 if (dragBody.size() > 0)
-          bodyName = dragBody[0];
-      else
-         bodyName = "Earth";
+         if (dragBody.size() > 0)
+            bodyName = dragBody[0];
+         else
+            bodyName = "Earth";
          centralBody = solarSystem->GetBody(bodyName);
    
          if (!centralBody)
@@ -846,8 +864,9 @@ bool DragForce::Initialize()
                }
             }
             
-            if ((atmosphereType == "BodyDefault") ||
-                (atmosphereType == modelBodyIsUsing))
+//            if ((atmosphereType == "BodyDefault") ||
+//                (atmosphereType == modelBodyIsUsing))
+            if ((atmosphereType == "BodyDefault") || (atmosphereType == "MarsGRAM2005"))
                atmos = centralBody->GetAtmosphereModel();
             else
                atmos = internalAtmos;
@@ -863,7 +882,9 @@ bool DragForce::Initialize()
                throw ODEModelException("No central body is defined for DragForce\n");
 
             if (body->GetName() != atmos->GetCentralBodyName())
-				   throw ODEModelException("Force model's central body ('" + body->GetName() + "') and Atmosphere model's central body ('" + atmos->GetCentralBodyName() + "')are different\n"); 
+				   throw ODEModelException("Force model's central body ('" +
+				         body->GetName() + "') and Atmosphere model's central body ('" +
+				         atmos->GetCentralBodyName() + "')are different\n");
 
             atmos->SetSunVector(sunLoc);
             atmos->SetCentralBodyVector(cbLoc);
@@ -881,19 +902,42 @@ bool DragForce::Initialize()
             cssiWFileID = atmos->GetParameterID("CSSISpaceWeatherFile");
             schattenWFileID = atmos->GetParameterID("SchattenFile");
 
-            if (schattenWFile != "" || cssiWFile != "")
-            {
-               if (F107ID < 0)
-                  throw ODEModelException("Atmosphere model initialization is incomplete");
-               atmos->SetRealParameter(F107ID, fluxF107);
-               atmos->SetRealParameter(F107AID, fluxF107A);
-               atmos->SetRealParameter(KPID, kp);
-               atmos->SetStringParameter(cssiWFileID, cssiWFile);
-               atmos->SetStringParameter(schattenWFileID, schattenWFile);
+            if (F107ID < 0)
+               throw ODEModelException("Atmosphere model initialization is incomplete");
+            atmos->SetRealParameter(F107ID, fluxF107);
+            atmos->SetRealParameter(F107AID, fluxF107A);
+            atmos->SetRealParameter(KPID, kp);
 
-            }
+            // Set the file names, possibly with path prefixes
+            FileManager *fm = FileManager::Instance();
 
-			   if (cbFixed != NULL)										// made changes by TUAN NGUYEN
+            std::string weatherfile = cssiWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               weatherfile = fluxPath + cssiWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               throw ODEModelException("Cannot open the observated space weather file " +
+                     cssiWFile + ", nor the file at the location " + weatherfile);
+            atmos->SetStringParameter(cssiWFileID, weatherfile);
+
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("CSSI File setting: %s\n",
+                     atmos->GetStringParameter(cssiWFileID).c_str());
+            #endif
+
+            weatherfile = schattenWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               weatherfile = fluxPath + schattenWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               throw ODEModelException("Cannot open the predicted space weather file " +
+                     schattenWFile + ", nor the file at the location " + weatherfile);
+            atmos->SetStringParameter(schattenWFileID, weatherfile);
+
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("Schatten File setting: %s\n",
+                     atmos->GetStringParameter(schattenWFileID).c_str());
+            #endif
+
+            if (cbFixed != NULL)										// made changes by TUAN NGUYEN
                atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
             if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
                atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
@@ -906,8 +950,11 @@ bool DragForce::Initialize()
             catch (...){}
 
 
-			   atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
+            atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
             
+            // Set the source flags: constants, files, etc
+            atmos->SetInputSource(historicWSource, predictedWSource);
+            atmos->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
          }
          else
          {
@@ -1482,12 +1529,23 @@ std::string DragForce::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool DragForce::IsParameterReadOnly(const Integer id) const
 {
-   if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX)
+   if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX ||
+       id == HISTORIC_WEATHER_SOURCE || id == PREDICTED_WEATHER_SOURCE ||
+       id == CSSI_WEATHER_FILE || id == SCHATTEN_WEATHER_FILE ||
+       id == SCHATTEN_ERROR_MODEL || id == SCHATTEN_TIMING_MODEL)
    {
       if (atmosphereType == "Exponential")
          return true;
       else
-         return false;
+      {
+         if (bodyName == "Earth")
+            return false;
+
+         // Only support the CSSI file and Schatten file at the Earth
+         if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX)
+            return false;
+         return true;
+      }
    }
    
    if (id == ATMOSPHERE_BODY || id == SOURCE_TYPE ||
@@ -1505,6 +1563,19 @@ bool DragForce::IsParameterReadOnly(const Integer id) const
 bool DragForce::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
+}
+
+bool DragForce::WriteEmptyStringParameter(const Integer id) const
+{
+   if (id == HISTORIC_WEATHER_SOURCE || id == PREDICTED_WEATHER_SOURCE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+      else
+         return true;
+   }
+
+   return PhysicalModel::WriteEmptyStringParameter(id);
 }
 
 
@@ -1820,24 +1891,49 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
     
    if (id == HISTORIC_WEATHER_SOURCE)
    {
-      if (value == "")
+      if (atmosphereType == "Exponential")
          return false;
+
+      if ((value == "CSSISpaceWeatherFile") ||
+          (value == "ConstantFluxAndGeoMag"))
+      {
+         historicWSource = value;
+         return true;
+      }
       
-      historicWSource = value;
-      return true;
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'CSSISpaceWeatherFile', 'ConstantFluxAndGeoMag'");
+      throw badVal;
    }
 
    if (id == PREDICTED_WEATHER_SOURCE)
    {
-      if (value == "")
+      if (atmosphereType == "Exponential")
          return false;
 
-      predictedWSource = value;
-      return true;
+      if ( // (value == "CSSISpaceWeatherFile") ||
+          (value == "ConstantFluxAndGeoMag") ||
+          (value == "SchattenFile"))
+      {
+         predictedWSource = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+//            "'CSSISpaceWeatherFile', 'ConstantFluxAndGeoMag', 'SchattenFile'");
+            "'ConstantFluxAndGeoMag', 'SchattenFile'");
+      throw badVal;
    }
 
    if (id == CSSI_WEATHER_FILE)
    {
+      if (atmosphereType == "Exponential")
+         return false;
+
       if (value == "")
          return false;
 
@@ -1847,6 +1943,9 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == SCHATTEN_WEATHER_FILE)
    {
+      if (atmosphereType == "Exponential")
+         return false;
+
       if (value == "")
          return false;
 
@@ -1856,20 +1955,40 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == SCHATTEN_ERROR_MODEL)
    {
-      if (value == "")
+      if (atmosphereType == "Exponential")
          return false;
 
-      schattenErrorModel = value;
-      return true;
+      if ((value == "Nominal") || (value == "PlusTwoSigma") ||
+          (value == "MinusTwoSigma"))
+      {
+         schattenErrorModel = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'Nominal', 'PlusTwoSigma', 'MinusTwoSigma'");
+      throw badVal;
    }
 
    if (id == SCHATTEN_TIMING_MODEL)
    {
-      if (value == "")
+      if (atmosphereType == "Exponential")
          return false;
 
-      schattenTimingModel = value;
-      return true;
+      if ((value == "NominalCycle") || (value == "EarlyCycle") ||
+          (value == "LateCycle"))
+      {
+         schattenTimingModel = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'NominalCycle', 'EarlyCycle, 'LateCycle'");
+      throw badVal;
    }
 
    return PhysicalModel::SetStringParameter(id, value);
@@ -2112,16 +2231,37 @@ bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
          (internalAtmos, "internalAtmos", "DragForce::SetInternalAtmosphereModel()",
           "deleting internal atmosphere model");
       #endif
+      if (atmos == internalAtmos)
+         atmos = NULL;
       delete internalAtmos;
    }
    
    internalAtmos = atm;
+   if (atmos == NULL)
+      atmos = internalAtmos;
 
    if (cbFixed != NULL)
       internalAtmos->SetFixedCoordinateSystem(cbFixed);
    if (internalCoordSystem != NULL)
       internalAtmos->SetInternalCoordSystem(internalCoordSystem);
    
+   F107ID = internalAtmos->GetParameterID("F107");
+   F107AID = internalAtmos->GetParameterID("F107A");
+   KPID = internalAtmos->GetParameterID("MagneticIndex");
+   cssiWFileID = internalAtmos->GetParameterID("CSSISpaceWeatherFile");
+   schattenWFileID = internalAtmos->GetParameterID("SchattenFile");
+
+   if (F107ID < 0)
+      throw ODEModelException("Atmosphere model initialization is incomplete");
+   internalAtmos->SetRealParameter(F107ID, fluxF107);
+   internalAtmos->SetRealParameter(F107AID, fluxF107A);
+   internalAtmos->SetRealParameter(KPID, kp);
+
+   // Set the file names
+   internalAtmos->SetStringParameter(cssiWFileID, cssiWFile);
+   internalAtmos->SetStringParameter(schattenWFileID, schattenWFile);
+
+
    #ifdef DEBUG_DRAGFORCE_REFOBJ
    MessageInterface::ShowMessage
       ("DragForce::SetInternalAtmosphereModel() returning true, internalAtmos=<%p>\n",
@@ -2144,6 +2284,166 @@ bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
 AtmosphereModel* DragForce::GetInternalAtmosphereModel()
 {
    return internalAtmos;
+}
+
+
+//------------------------------------------------------------------------------
+// AtmosphereModel* GetInternalAtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ * Gets the internal atmosphere model for the DragForce.
+ *
+ * @return pointer to the internal atmosphere model used by the DragForce
+ *         object when useExternalAtmosphere is set to false.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* DragForce::GetAtmosphereModel()
+{
+   return (internalAtmos ? internalAtmos : atmos);
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckFluxFile(const std::string &filename, bool isHistoric)
+//------------------------------------------------------------------------------
+/**
+ * Checks (1) for file existence and (2) for file keywords
+ *
+ * @param filename The file to check
+ * @param isHistoric Flag indicating if the file is used for measured data
+ *
+ * @return true if the file is valid and in contains the expected keywords
+ */
+//------------------------------------------------------------------------------
+std::string DragForce::CheckFluxFile(const std::string &filename, bool isHistoric)
+{
+   std::string retval = "";
+
+   Integer loc = 0;
+
+   // This is the keyword list, consisting of a header followed by begin/end tags
+   std::vector<StringArray> keywords;
+   StringArray tags;
+   // CSSI used for historic data
+   tags.push_back("DATATYPE CSSISPACEWEATHER");
+   tags.push_back("BEGIN OBSERVED");
+   tags.push_back("END OBSERVED");
+   keywords.push_back(tags);
+   tags.clear();
+
+   // CSSI used for predict data
+   tags.push_back("DATATYPE CSSISPACEWEATHER");
+   tags.push_back("BEGIN DAILY_PREDICTED");
+   tags.push_back("END DAILY_PREDICTED");
+   tags.push_back("BEGIN MONTHLY_PREDICTED");
+   tags.push_back("END MONTHLY_PREDICTED");
+   keywords.push_back(tags);
+   tags.clear();
+
+   // Schatten
+   tags.push_back("PREDICTED SOLAR DATA");
+   tags.push_back("BEGIN_DATA");
+   tags.push_back("END_DATA");
+   keywords.push_back(tags);
+
+   // Check for file existence, possibly with path prefixes
+   FileManager *fm = FileManager::Instance();
+   std::string fluxPath = fm->GetAbsPathname("ATMOSPHERE_PATH");
+
+   std::string weatherfile = filename;
+
+   MessageInterface::ShowMessage("%d %s\n", ++loc, weatherfile.c_str());
+
+   if (fm->DoesFileExist(weatherfile) == false)
+   {
+      MessageInterface::ShowMessage("No file; adding path %s\n", fluxPath.c_str());
+      weatherfile = fluxPath + filename;
+   }
+
+   MessageInterface::ShowMessage("%d %s\n", ++loc, weatherfile.c_str());
+
+   if (fm->DoesFileExist(weatherfile) == false)
+   {
+      MessageInterface::ShowMessage("Cannot locate\n");
+
+      std::string fileUsage = isHistoric ? "observed" : "predicted";
+      throw ODEModelException("Cannot open the " +
+            fileUsage + " space weather file " +
+            filename + ", nor the file at the location " + weatherfile);
+   }
+
+   MessageInterface::ShowMessage("The file %s exists\n", weatherfile.c_str());
+
+   // File exists; check for keywords
+   UnsignedInt count = (isHistoric ? 1 : keywords.size());
+   UnsignedInt start = (isHistoric ? 0 : 1);
+   UnsignedInt index = 9999;
+
+   bool fileIsValid = false;
+
+   std::ifstream inStream(weatherfile.c_str());
+   std::string line;
+
+   MessageInterface::ShowMessage("Checking for the header:\n");
+
+
+   // Check headers to determine the index of the keywork list
+   while (!inStream.eof() && (index == 9999))
+   {
+      getline(inStream, line);
+
+      // if the line is blank, skip it
+      if (GmatStringUtil::IsBlank(line, true)) continue;
+
+      // Make upper case, so we can check for certain keyword
+      line = GmatStringUtil::ToUpper(line);
+      for (UnsignedInt i = start; i < count; ++i)
+      {
+         if (std::string(line).find(keywords[i][0]) != std::string::npos)
+         {
+            index = i;
+            break;
+         }
+      }
+   }
+
+   if (index < 9999)
+   {
+      // Check start/end tags
+      UnsignedInt kwCount = keywords[index].size();
+      for (UnsignedInt i = 1; i < kwCount; ++i)
+      {
+         bool kwFound = false;
+         std::string currentString = keywords[index][i];
+
+         while (!inStream.eof() && !kwFound)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(currentString) != std::string::npos)
+            {
+               kwFound = true;
+               if (i == kwCount - 1)
+                  // Valid iff header and all keywords, in order, were found
+                  fileIsValid = true;
+            }
+         }
+      }
+   }
+   inStream.close();
+
+   if (fileIsValid)
+      retval = weatherfile;
+
+   MessageInterface::ShowMessage("The file %s; returning \"%s\"\n",
+         (fileIsValid ? "is valid" : "is NOT valid"), retval.c_str());
+
+   return retval;
 }
 
 

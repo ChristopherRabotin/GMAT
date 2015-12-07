@@ -37,7 +37,7 @@ GMAT MarsExpress.ModelOffsetZ = 0;
 GMAT MarsExpress.ModelRotationX = 0;
 GMAT MarsExpress.ModelRotationY = 0;
 GMAT MarsExpress.ModelRotationZ = 0;
-GMAT MarsExpress.ModelScale = 4;
+GMAT MarsExpress.ModelScale = 1;
 GMAT MarsExpress.AttitudeDisplayStateType = 'Quaternion';
 GMAT MarsExpress.AttitudeRateDisplayStateType = 'AngularVelocity';
 

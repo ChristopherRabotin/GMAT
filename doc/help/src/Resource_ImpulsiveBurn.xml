@@ -697,8 +697,8 @@
           <row>
             <entry><guilabel>Tank</guilabel></entry>
 
-            <entry><para><guilabel>FuelTank</guilabel> from which the
-            <guilabel>Thruster</guilabel> draws propellant from. This field
+            <entry><para><guilabel>ChemicalTank</guilabel> from which the
+            <guilabel>ChemicalThruster</guilabel> draws propellant from. This field
             cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -713,7 +713,7 @@
 
                   <listitem>
                     <para>User defined list of
-                    <guilabel>FuelTanks</guilabel></para>
+                    <guilabel>ChemicalTanks</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -897,7 +897,7 @@
     the Remarks for more detail on local coordinate systems.</para>
 
     <para>If <guimenu>Decrement Mass</guimenu> is checked, then you can select
-    the desired <guilabel>FuelTank</guilabel> used as the fuel supply for mass
+    the desired <guilabel>ChemicalTank</guilabel> used as the fuel supply for mass
     depletion.</para>
   </refsection>
 
@@ -994,6 +994,87 @@ DefaultIB.B = -2</code></programlisting>
     </refsection>
 
     <refsection>
+      <title>Backwards-propagated Impulsive maneuvers defined using the
+      spacecraft velocity</title>
+
+      <para>Examples of axes defined using the spacecraft velocity are the
+      <guilabel>VNB</guilabel> and <guilabel>LVLH</guilabel> axes discussed
+      above as well as some user-defined axes. The behavior when applying an
+      impulsive maneuver using these types of axes during a
+      backwards-propagation is subtle and requires some explanation. In the
+      examples that follow, we will focus our discussion on a
+      <guilabel>VNB</guilabel> maneuver.</para>
+
+      <para>As will be shown in the script samples below, an impulsive
+      maneuver is applied during a backwards propagation using the ‘BackProp’
+      keyword. The maneuver components that you specify for a backwards
+      propagation are used to calculate the components of the maneuver
+      actually applied. Refer to the script sample below where a
+      backwards-propagated impulsive maneuver is followed by the same maneuver
+      using a normal formal propagation. The impulsive maneuver is defined so
+      that the velocity of the spacecraft is unchanged after the script is
+      run.</para>
+
+      <programlisting>Create Spacecraft Sat;
+Create ImpulsiveBurn myImpulsiveBurn;
+GMAT myImpulsiveBurn.CoordinateSystem = Local;
+GMAT myImpulsiveBurn.Origin = Earth;
+GMAT myImpulsiveBurn.Axes = VNB;
+myImpulsiveBurn.Element1 = 3.1
+myImpulsiveBurn.Element2 = -0.1
+myImpulsiveBurn.Element3 = 0.2
+
+BeginMissionSequence
+Maneuver BackProp myImpulsiveBurn(Sat);
+Maneuver myImpulsiveBurn(Sat);</programlisting>
+
+      <para>To calculate the actual maneuver components applied, GMAT,
+      internally, uses an iterative calculation method. This iteration method
+      works best for maneuver magnitudes that are not an appreciable fraction
+      of the overall spacecraft velocity. In addition, for
+      <guilabel>VNB</guilabel> maneuvers, the iteration method works best for
+      maneuvers where the ‘<guilabel>N</guilabel>’ and
+      ‘<guilabel>B</guilabel>’ component magnitudes are relatively small as
+      compared to the '<guilabel>V</guilabel>' component magnitude. If the
+      GMAT internal iterative method fails to converge, a warning message will
+      be generated. Currently, there is not an easy way for the user to report
+      out the actual applied back-propagated maneuver components. (The
+      maneuver report outputs the user supplied <guilabel>VNB</guilabel>
+      coordinates). After the back-propagated maneuver has been applied,
+      however, we do know what the components of the maneuver are. If the
+      <guilabel>VNB</guilabel> maneuver has user-supplied components, (Vx, Vy,
+      Vz), then after the back-propagated maneuver has been applied, the
+      <guilabel>VNB</guilabel> components of the maneuver are (-Vx, -Vy,
+      -Vz).</para>
+
+      <para>Consider the script sample below where the
+      ‘<guilabel>N</guilabel>’ and ‘<guilabel>B</guilabel>’ components of the
+      maneuver are zero and the ‘<guilabel>V</guilabel>’ component is +5 km/s.
+      If the spacecraft velocity is (7,0,0) km/s in J2000 inertial
+      coordinates, then after the backwards-propagated impulsive maneuver, the
+      velocity of the spacecraft will be (2,0,0) km/s.</para>
+
+      <programlisting><code>Create Spacecraft Sat;
+Create ImpulsiveBurn myImpulsiveBurn;
+GMAT myImpulsiveBurn.CoordinateSystem = Local;
+GMAT myImpulsiveBurn.Origin = Earth;
+GMAT myImpulsiveBurn.Axes = VNB;
+
+myImpulsiveBurn.Element1 = 5
+myImpulsiveBurn.Element2 = 0.0
+myImpulsiveBurn.Element3 = 0.0
+
+BeginMissionSequence
+Maneuver BackProp myImpulsiveBurn(Sat);</code></programlisting>
+
+      <para>Finally, we note that when mass change is modeled for a
+      backwards-propagated impulsive maneuver, mass is added to the tank. This
+      is done so there is no change in mass when a backwards-propagated
+      impulsive maneuver is followed by the same maneuver using a normal
+      forward propagation.</para>
+    </refsection>
+
+    <refsection>
       <title>Interactions</title>
 
       <informaltable colsep="0" frame="topbot">
@@ -1019,11 +1100,11 @@ DefaultIB.B = -2</code></programlisting>
             </row>
 
             <row>
-              <entry><guilabel>FuelTank resource</guilabel></entry>
+              <entry><guilabel>ChemicalTank resource</guilabel></entry>
 
               <entry><para> If you want to model mass depletion for an
               <guilabel>ImpulsiveBurn</guilabel>, attach a
-              <guilabel>FuelTank</guilabel> to the maneuvered
+              <guilabel>ChemicalTank</guilabel> to the maneuvered
               <guilabel>Spacecraft</guilabel> as a source of fuel mass.
               </para></entry>
             </row>
@@ -1056,16 +1137,16 @@ DefaultIB.B = -2</code></programlisting>
     <title>Examples</title>
 
     <informalexample>
-      <para>Create a default <guilabel>FuelTank</guilabel> and an
+      <para>Create a default <guilabel>ChemicalTank</guilabel> and an
       <guilabel>ImpulsiveBurn</guilabel> that allows for fuel depletion,
       assign the <guilabel>ImpulsiveBurn</guilabel> the default
-      <guilabel>FuelTank</guilabel>, attach the <guilabel>FuelTank</guilabel>
+      <guilabel>ChemicalTank</guilabel>, attach the <guilabel>ChemicalTank</guilabel>
       to a <guilabel>Spacecraft</guilabel>, and apply the
       <guilabel>ImpulsiveBurn</guilabel> to the
       <guilabel>Spacecraft</guilabel>.</para>
 
-      <programlisting>%  Create the FuelTank Resource
-Create FuelTank FuelTank1
+      <programlisting>%  Create the ChemicalTank Resource
+Create ChemicalTank FuelTank1
 FuelTank1.AllowNegativeFuelMass = false
 FuelTank1.FuelMass = 756
 FuelTank1.Pressure = 1500
@@ -1087,7 +1168,7 @@ DefaultIB.Tank = {FuelTank1}
 DefaultIB.Isp = 300
 DefaultIB.GravitationalAccel = 9.810000000000001
 
-%  Add the the FuelTank to a Spacecraft
+%  Add the the ChemicalTank to a Spacecraft
 Create Spacecraft DefaultSC
 DefaultSC.Tanks = {FuelTank1}
 

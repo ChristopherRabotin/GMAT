@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -19,10 +29,11 @@
 //------------------------------------------------------------------------------
 
 #include "EphemerisFilePanel.hpp"
-#include "MessageInterface.hpp"
-#include "bitmaps/OpenFolder.xpm"
+#include "EphemerisFile.hpp"       // for GetProperFileName()
 #include "TimeSystemConverter.hpp"
 #include "DateUtil.hpp"
+#include "MessageInterface.hpp"
+#include "bitmaps/OpenFolder.xpm"
 #include <wx/config.h>
 
 /// wxWidget event mappings for the panel
@@ -37,6 +48,7 @@ END_EVENT_TABLE()
 //#define DEBUG_BUILD_CONTROL
 //#define DEBUG_LOAD_DATA
 //#define DEBUG_SAVE_DATA
+//#define DEBUG_COMBOBOX
 
 //-----------------------------------------
 // public methods
@@ -193,7 +205,7 @@ void EphemerisFilePanel::Create()
    fileNameTextCtrl->SetToolTip(pConfig->Read(_T("FilenameHint")));
    browseButton =
       new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    browseButton->SetToolTip(pConfig->Read(_T("BrowseEphemerisFilenameHint")));
    grid2->Add(fileNameStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid2->Add(fileNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
@@ -835,12 +847,25 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
       wxString newFileFormat = fileFormatComboBox->GetValue();
       #ifdef DEBUG_COMBOBOX
       MessageInterface::ShowMessage
-         ("fileFormat=%s, newFileFormat=%s\n", fileFormat.c_str(), newFileFormat.c_str());
+         ("fileFormat=%s, newFileFormat=%s\n", fileFormat.WX_TO_C_STRING,
+          newFileFormat.WX_TO_C_STRING);
       #endif
       if (fileFormat != newFileFormat)
       {
          fileFormat = newFileFormat;
-                  
+         
+         // Show proper file extension
+         std::string fileName = fileNameTextCtrl->GetValue().WX_TO_STD_STRING;
+         std::string stdFileFormat = fileFormat.WX_TO_STD_STRING;
+         std::string properFileName =
+            ((EphemerisFile*)mObject)->GetProperFileName(fileName, stdFileFormat, false);
+         #ifdef DEBUG_COMBOBOX
+         MessageInterface::ShowMessage
+            ("fileName='%s', stdFileFormat='%s', properFileName='%s'\n", fileName.c_str(),
+             stdFileFormat.c_str(), properFileName.c_str());
+         #endif
+         fileNameTextCtrl->SetValue(wxString(properFileName));
+         
          // Show proper coordinate systems based on the format
          ShowCoordSystems(fileFormat);
          

@@ -85,7 +85,7 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const wxString &xLabel,
       wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
    //titleBox->AddStretchSpacer();
-   plotTitle = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
+   plotTitle = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,-1));
    titleBox->Add(plotTitle, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *xlabelBox = new wxBoxSizer(wxHORIZONTAL);
@@ -93,7 +93,7 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const wxString &xLabel,
       wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
    //xlabelBox->AddStretchSpacer();
-   xAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
+   xAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,-1));
    xlabelBox->Add(xAxisLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *ylabelBox = new wxBoxSizer(wxHORIZONTAL);
@@ -101,7 +101,7 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const wxString &xLabel,
       wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
    //ylabelBox->AddStretchSpacer();
-   yAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
+   yAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,-1));
    ylabelBox->Add(yAxisLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    labelSizer->Add(titleBox, 0, wxALL, 5);

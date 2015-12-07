@@ -1,7 +1,8 @@
-open ftp.wxwidgets.org
-anonymous
-gmat@gsfc.nasa.gov
-cd pub/2.8.12
+open ftp://anonymous:gmat@ftp.wxwidgets.org
 binary
-get wxMSW-2.8.12.zip
-quit
+cd pub/3.0.2
+get wxWidgets-3.0.2_headers.7z
+cd binaries
+get wxMSW-3.0.2_vc%vs_version%0%wxwidgets_type%Dev.7z
+get wxMSW-3.0.2_vc%vs_version%0%wxwidgets_type%ReleaseDLL.7z
+exit

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS 
 // contract, Task Order 28
@@ -22,6 +32,8 @@
 #include "StringUtil.hpp"
 #include "FileUtil.hpp"
 #include "MessageInterface.hpp"
+
+//#define DEBUG_PARSING
 
 
 //------------------------------------------------------------------------------
@@ -164,7 +176,7 @@ bool FileReader::ParseRealValue(const Integer i, const std::string& theField)
             fileStringMap[theField].c_str());
    #endif
 
-   UnsignedInt start = 0, end;
+   size_t start = 0, end;
    if (theField != "")
       start = theLine.find(fileStringMap[theField]);
 
@@ -181,6 +193,12 @@ bool FileReader::ParseRealValue(const Integer i, const std::string& theField)
       } while ((end < theLine.length()) && (theLine[end] != ' '));
 
       std::string theData = theLine.substr(start, end - start);
+
+      #ifdef DEBUG_PARSING
+         MessageInterface::ShowMessage("   Details: \"%s\" is the string built "
+               "from [%d, %d] of \"%s\"\n", theData.c_str(), start, end,
+               theLine.c_str());
+      #endif
 
       // Change occurrences of "D" or "d" to "e" to account for FORTRAN doubles
       for (UnsignedInt i = 0; i < theData.length(); ++i)
@@ -319,12 +337,17 @@ bool FileReader::ParseStringValue(const Integer i, const std::string& theField)
             fileStringMap[theField].c_str());
    #endif
 
-   UnsignedInt start = 0, end;
+   size_t start = 0, end;
    if (theField != "")
       start = theLine.find(fileStringMap[theField]);
 
    if (start != std::string::npos)
    {
+      #ifdef DEBUG_PARSING
+         MessageInterface::ShowMessage("String \"%s\" found at pos %d in line \"%s\"\n",
+               fileStringMap[theField].c_str(), start, theLine.c_str());
+      #endif
+
       start += fileStringMap[theField].length() + 1;
 
       while (theLine[start] == ' ')
@@ -338,7 +361,8 @@ bool FileReader::ParseStringValue(const Integer i, const std::string& theField)
 
       #ifdef DEBUG_PARSING
          MessageInterface::ShowMessage("The data for field %s is set to "
-               "\"%s\"\n", theField.c_str(), theData.c_str());
+               "\"%s\" from start = %d, end = %d\n", theField.c_str(),
+               theData.c_str(), start, end);
       #endif
       
       // To be valid the string must contain some type of data

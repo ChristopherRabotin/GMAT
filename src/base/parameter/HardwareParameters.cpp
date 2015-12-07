@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -129,7 +139,7 @@ GmatBase* FuelMass::Clone(void) const
 // Pressure(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Pressure::Pressure(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "Pressure", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+   : HardwareReal(name, "Pressure", Gmat::SPACECRAFT, Gmat::CHEMICAL_FUEL_TANK, obj,
                   "Pressure", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -216,7 +226,7 @@ GmatBase* Pressure::Clone(void) const
 // Temperature(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Temperature::Temperature(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "Temperature", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+   : HardwareReal(name, "Temperature", Gmat::SPACECRAFT, Gmat::CHEMICAL_FUEL_TANK, obj,
                   "Temperature", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -303,7 +313,7 @@ GmatBase* Temperature::Clone(void) const
 // RefTemperature(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 RefTemperature::RefTemperature(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "RefTemperature", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+   : HardwareReal(name, "RefTemperature", Gmat::SPACECRAFT, Gmat::CHEMICAL_FUEL_TANK, obj,
                   "Ref. Temperature", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -390,7 +400,7 @@ GmatBase* RefTemperature::Clone(void) const
 // Volume(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Volume::Volume(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "Volume", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+   : HardwareReal(name, "Volume", Gmat::SPACECRAFT, Gmat::CHEMICAL_FUEL_TANK, obj,
                   "Fuel Volume", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -477,7 +487,7 @@ GmatBase* Volume::Clone(void) const
 // FuelDensity(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 FuelDensity::FuelDensity(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "FuelDensity", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
+   : HardwareReal(name, "FuelDensity", Gmat::SPACECRAFT, Gmat::CHEMICAL_FUEL_TANK, obj,
                   "Fuel Density", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -826,7 +836,7 @@ GmatBase* GravitationalAccel::Clone(void) const
 //------------------------------------------------------------------------------
 ThrustCoefficients::ThrustCoefficients(const std::string &type,
                                        const std::string &name, GmatBase *obj)
-   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
+   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::CHEMICAL_THRUSTER, obj,
                   "Thrust Coefficient " + type, "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -944,7 +954,7 @@ GmatBase* ThrustCoefficients::Clone(void) const
 //------------------------------------------------------------------------------
 ImpulseCoefficients::ImpulseCoefficients(const std::string &type,
                                          const std::string &name, GmatBase *obj)
-   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
+   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::CHEMICAL_THRUSTER, obj,
                   "Impulse Coefficient " + type, "")
 {
    #ifdef USE_PREDEFINED_COLORS

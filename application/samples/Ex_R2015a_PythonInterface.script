@@ -1,0 +1,128 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2015-03-11 15:54:43
+
+% Demonstration script for the Python interface
+%
+% This script uses GMAT's Python interface to compute a
+% spacecraft's angular momentum vector, and then plots the 
+% motion of the angular momentum vector as it precesses 
+% during propagation.
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft sat;
+GMAT sat.DateFormat = TAIModJulian;
+GMAT sat.Epoch = '21545';
+GMAT sat.CoordinateSystem = EarthMJ2000Eq;
+GMAT sat.DisplayStateType = Cartesian;
+GMAT sat.X = 7100;
+GMAT sat.Y = 0;
+GMAT sat.Z = 1300;
+GMAT sat.VX = 0;
+GMAT sat.VY = 7.35;
+GMAT sat.VZ = 1;
+GMAT sat.DryMass = 850;
+GMAT sat.Cd = 2.2;
+GMAT sat.Cr = 1.8;
+GMAT sat.DragArea = 15;
+GMAT sat.SRPArea = 1;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel Propagator1_ForceModel;
+GMAT Propagator1_ForceModel.CentralBody = Earth;
+GMAT Propagator1_ForceModel.PrimaryBodies = {Earth};
+GMAT Propagator1_ForceModel.PointMasses = {Luna, Sun};
+GMAT Propagator1_ForceModel.SRP = On;
+GMAT Propagator1_ForceModel.RelativisticCorrection = Off;
+GMAT Propagator1_ForceModel.ErrorControl = RSSStep;
+GMAT Propagator1_ForceModel.GravityField.Earth.Degree = 4;
+GMAT Propagator1_ForceModel.GravityField.Earth.Order = 4;
+GMAT Propagator1_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT Propagator1_ForceModel.GravityField.Earth.EarthTideModel = 'None';
+GMAT Propagator1_ForceModel.Drag.AtmosphereModel = MSISE90;
+GMAT Propagator1_ForceModel.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT Propagator1_ForceModel.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT Propagator1_ForceModel.Drag.CSSISpaceWeatherFile = 'CSSI_2004To2026.txt';
+GMAT Propagator1_ForceModel.Drag.SchattenFile = 'SchattenPredict.txt';
+GMAT Propagator1_ForceModel.Drag.F107 = 150;
+GMAT Propagator1_ForceModel.Drag.F107A = 150;
+GMAT Propagator1_ForceModel.Drag.MagneticIndex = 3;
+GMAT Propagator1_ForceModel.Drag.SchattenErrorModel = 'Nominal';
+GMAT Propagator1_ForceModel.Drag.SchattenTimingModel = 'NominalCycle';
+GMAT Propagator1_ForceModel.SRP.Flux = 1367;
+GMAT Propagator1_ForceModel.SRP.SRPModel = Spherical;
+GMAT Propagator1_ForceModel.SRP.Nominal_Sun = 149597870.691;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator Propagator1;
+GMAT Propagator1.FM = Propagator1_ForceModel;
+GMAT Propagator1.Type = PrinceDormand78;
+GMAT Propagator1.InitialStepSize = 60;
+GMAT Propagator1.Accuracy = 9.999999999999999e-12;
+GMAT Propagator1.MinStep = 0.001;
+GMAT Propagator1.MaxStep = 2700;
+GMAT Propagator1.MaxStepAttempts = 50;
+GMAT Propagator1.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create XYPlot XYPlot1;
+GMAT XYPlot1.SolverIterations = Current;
+GMAT XYPlot1.UpperLeft = [ 0 0 ];
+GMAT XYPlot1.Size = [ 0 0 ];
+GMAT XYPlot1.RelativeZOrder = 0;
+GMAT XYPlot1.Maximized = false;
+GMAT XYPlot1.XVariable = wx;
+GMAT XYPlot1.YVariables = {wy};
+GMAT XYPlot1.ShowGrid = true;
+GMAT XYPlot1.ShowPlot = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+
+Create Array state[1,3] vel[1,3] crossProd[1,3];
+Create Variable wx wy;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence;
+
+GMAT state(1) = sat.X;
+GMAT state(2) = sat.Y;
+GMAT state(3) = sat.Z;
+
+GMAT vel(1) = sat.VX;
+GMAT vel(2) = sat.VY;
+GMAT vel(3) = sat.VZ;
+
+GMAT [crossProd] = Python.ArrayFunctions.cross(state, vel);
+GMAT wx = crossProd(1);
+GMAT wy = crossProd(2);
+
+While sat.ElapsedDays < 5.0
+   Propagate Propagator1(sat)
+   GMAT state(1) = sat.X;
+   GMAT state(2) = sat.Y;
+   GMAT state(3) = sat.Z;
+
+   GMAT vel(1) = sat.VX;
+   GMAT vel(2) = sat.VY;
+   GMAT vel(3) = sat.VZ;
+
+   GMAT [crossProd]  = Python.ArrayFunctions.cross(state, vel);
+   GMAT wx = crossProd(1);
+   GMAT wy = crossProd(2);
+EndWhile;

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -211,6 +221,11 @@ void PropagationEnabledCommand::SetTransientForces(std::vector<PhysicalModel*> *
 //------------------------------------------------------------------------------
 bool PropagationEnabledCommand::Initialize()
 {
+   #ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage
+      ("PropagationEnabledCommand::Initialize() '%s' entered\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
    bool retval = false;
 
    if (GmatCommand::Initialize())
@@ -323,12 +338,19 @@ bool PropagationEnabledCommand::Initialize()
 
                AddToBuffer(so);
 
-//               if (so->GetType() == Gmat::FORMATION)
-//                  FillFormation(so, owners, elements);
-//               else
-//               {
-//                  SetNames(so->GetName(), owners, elements);
-//               }
+               // Uncommented out SetNames() for GMT-5101 fix (LOJ: 2015.05.14)
+               if (so->GetType() == Gmat::FORMATION)
+               {
+                  // FillFormation(so, owners, elements);
+               }
+               else
+               {
+                  #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage
+                     ("   Setting data labels for '%s'\n", so->GetName().c_str());
+                  #endif
+                  SetNames(so->GetName(), owners, elements);
+               }
             }
             #ifdef DEBUG_INITIALIZATION
                else
@@ -1083,3 +1105,40 @@ void PropagationEnabledCommand::BufferSatelliteStates(bool fillingBuffer)
             (*i)->GetRealParameter("A1Epoch"));
    #endif
 }
+
+//Moved from PropagateCommand for GMT-5101 fix (LOJ: 2015.05.14)
+//------------------------------------------------------------------------------
+// void SetNames(const std::string& name, StringArray& owners,
+//               StringArray& elements)
+//------------------------------------------------------------------------------
+/**
+ * Sets the parameter names used when publishing Spacecraft data.
+ *
+ * @param <name>     Name of the Spacecraft that is referenced.
+ * @param <owners>   Array of published data identifiers.
+ * @param <elements> Individual elements of the published data.
+ */
+//------------------------------------------------------------------------------
+void PropagationEnabledCommand::SetNames(const std::string& name, StringArray& owners,
+                         StringArray& elements)
+{
+   // Add satellite labels
+   for (Integer i = 0; i < 6; ++i)
+      owners.push_back(name);       // X, Y, Z, Vx, Vy, Vz
+
+   elements.push_back(name+".X");
+   elements.push_back(name+".Y");
+   elements.push_back(name+".Z");
+   elements.push_back(name+".Vx");
+   elements.push_back(name+".Vy");
+   elements.push_back(name+".Vz");
+   
+   #ifdef DEBUG_PUBLISH_DATA
+   MessageInterface::ShowMessage
+      ("PropagationEnabledCommand::SetNames() Setting data labels:\n");
+   for (unsigned int i = 0; i < elements.size(); i++)
+      MessageInterface::ShowMessage("%s ", elements[i].c_str());
+   MessageInterface::ShowMessage("\n");
+   #endif
+}
+

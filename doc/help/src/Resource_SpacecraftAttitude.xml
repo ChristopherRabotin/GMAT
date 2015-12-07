@@ -2254,6 +2254,61 @@
           </row>
 
           <row>
+            <entry><guilabel>NAIFIdReferenceFrame</guilabel></entry>
+
+            <entry><para>The Id of the spacecraft body frame used in SPICE
+            kernels.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-∞ &lt; Integer &lt; ∞</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>-9000001</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>NutationAngle</guilabel></entry>
 
             <entry><para>The attitude nutation angle.
@@ -3182,10 +3237,10 @@ aSpacecraft.Q4 = 0.5        </code>        </programlisting>
         <title>DirectionCosineMatrix (DCM)</title>
 
         <para>The Direction Cosine Matrix is a 3x3 array that contains cosines
-        of the angles between the x, y, and z body axes and the x, y, and z
-        inertial axes. The direction cosine matrix must be ortho-normal and
-        you define the DCM element by element. Here is an example that shows
-        how to define the attitude using the DCM.</para>
+        of the angles that rotate from the x, y, and z inertial axes to the x,
+        y, and z body axes. The direction cosine matrix must be ortho-normal
+        and you define the DCM element by element. Here is an example that
+        shows how to define the attitude using the DCM.</para>
 
         <programlisting><code>aSpacecraft.DCM11 = 1
 aSpacecraft.DCM12 = 0

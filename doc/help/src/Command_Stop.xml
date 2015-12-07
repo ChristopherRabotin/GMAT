@@ -75,7 +75,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 30};</code></programlisting>
       <para>Stopping the execution of a solver structure for further
       investigation:</para>
 
-      <programlisting><code>Create FuelTank aTank
+      <programlisting><code>Create ChemicalTank aTank
 Create ForceModel aForceModel
 Create DifferentialCorrector aDC
 

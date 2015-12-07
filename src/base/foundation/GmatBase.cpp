@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -1006,6 +1016,10 @@ Integer GmatBase::GetOwnedObjectCount()
 //---------------------------------------------------------------------------
 GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
 {
+   MessageInterface::ShowMessage
+      ("GmatBase::GetOwnedObject() entered, this=<%p>'%s', whichOne = %d\n",
+       this, this->GetName().c_str(), whichOne);
+   
    throw GmatBaseException
       ("No owned objects for this instance \"" + instanceName + "\" of type \"" +
        typeName + "\"");
@@ -1052,7 +1066,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
 }
 
 //------------------------------------------------------------------------------
-//  bool GetIsGlobal()
+//  bool tIsGlobal()
 //------------------------------------------------------------------------------
 /**
  * Method to return the isGlobal flag for an object.
@@ -1060,7 +1074,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
  * @return value of isGlobal flag (i.e. whether or not this object is Global)
  */
 //------------------------------------------------------------------------------
-bool GmatBase::GetIsGlobal() const
+bool GmatBase::IsGlobal() const
 {
    return isGlobal;
 }
@@ -3574,6 +3588,20 @@ bool GmatBase::WriteEmptyStringArray(Integer id)
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringParameter
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag specifying whether or not to write out a string to
+ * the script even if it is empty
+ *
+ * @param id    ID of the parameter
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::WriteEmptyStringParameter(const Integer id) const
+{
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // const std::string& GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -3999,6 +4027,36 @@ std::string GmatBase::GetFullPathFileName(std::string &outFileName,
    return fullPath;
 }
 
+//------------------------------------------------------------------------------
+// static std::string WriteObjectInfo(const std::string &title, GmatBase *obj,
+//                                    bool addEol = true)
+//------------------------------------------------------------------------------
+std::string GmatBase::WriteObjectInfo(const std::string &title, GmatBase *obj,
+                                      bool addEol)
+{
+   std::stringstream objStream;
+   char buff[10];
+   sprintf(buff, "<%p>", obj);
+   objStream << title << buff;
+   
+   if (obj)
+   {
+      objStream << "[" << obj->GetTypeName() << "]" << "'" << obj->GetName() << "'";
+      objStream << ", IsGlobal:" << (obj->IsGlobal() ? "true" : "false") << ", IsLocal():"
+                << (obj->IsLocal() ? "true" : "false");
+   }
+   else
+   {
+      objStream << "[NULL]'NULL'";
+   }
+   
+   if (addEol)
+      objStream << "\n";
+   
+   return objStream.str();
+}
+
+
 // todo: comments
 Integer GmatBase::GetPropItemID(const std::string &whichItem)
 {
@@ -4365,7 +4423,11 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          ("   id %d has owned object of type name <%s> and name \"%s\"\n", i,
           ownedObject->GetTypeName().c_str(), ownedObject->GetName().c_str());
       #endif
-      
+
+      // Skip writing out owned Amosphere models.  A better solution for the
+      // special case bits here should be implemented.
+      if (ownedObject->IsOfType(Gmat::ATMOSPHERE)) continue;
+
       // if owned object is a propagator, don't append the propagator name
       if (ownedObject->GetType() != Gmat::PROPAGATOR)
       {
@@ -4530,8 +4592,21 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    case Gmat::FILENAME_TYPE:
    case Gmat::STRING_TYPE:
       {
+         // Check if empty string parameter can be written (LOJ: 2015.01.30)
+         bool writeString = false;
          std::string strVal = GetStringParameter(id);
-         if (inMatlabMode || (!inMatlabMode && strVal != ""))
+         if (inMatlabMode)
+            writeString = true;
+         else if (strVal != "")
+            writeString = true;
+         else if (WriteEmptyStringParameter(id))
+            writeString = true;
+         
+         #ifdef DEBUG_WRITE_PARAM
+         MessageInterface::ShowMessage("   writeString = %d\n", writeString);
+         #endif
+         //if (inMatlabMode || (!inMatlabMode && strVal != ""))
+         if (writeString)
             stream << "'" << strVal << "'";
          
          break;

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -29,6 +39,7 @@
 BEGIN_EVENT_TABLE(TargetPanel, GmatPanel)
    EVT_COMBOBOX(ID_COMBO, TargetPanel::OnComboBoxChange)
    EVT_BUTTON(ID_APPLYBUTTON, TargetPanel::OnApplyButtonPress)
+   EVT_CHECKBOX(ID_PROGRESS_CHECKBOX, TargetPanel::OnComboBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -112,7 +123,14 @@ void TargetPanel::Create()
       new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(180,-1),
             theOptions, wxCB_READONLY);;
    
-   
+   //----------------------------------------------------------------------
+   // ShowProgressWindow flag
+   //----------------------------------------------------------------------
+   mProgressWindowCheckBox =
+      new wxCheckBox(this, ID_PROGRESS_CHECKBOX, gmatwxT(GUI_ACCEL_KEY"Show Progress Window"),
+      wxDefaultPosition, wxDefaultSize);
+   mProgressWindowCheckBox->SetToolTip(_T("Show Progress Window during targeting"));
+
    mApplyCorrectionsButton = new wxButton(this, ID_APPLYBUTTON, 
          wxT("Apply Corrections"));
    
@@ -127,6 +145,9 @@ void TargetPanel::Create()
 
    pageSizer->Add(exitModeStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(mExitModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+//   pageSizer->Add(NULL, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(20,20);
+   pageSizer->Add(mProgressWindowCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    pageSizer->Add(mApplyCorrectionsButton, 0, wxALIGN_CENTER|wxALL, bsize);
 
    theMiddleSizer->Add(pageSizer, 0, wxGROW, bsize);
@@ -155,6 +176,8 @@ void TargetPanel::LoadData()
       std::string exitMode =
                theCommand->GetStringParameter("ExitMode");
       mExitModeComboBox->SetValue(exitMode.c_str());
+
+      mProgressWindowCheckBox->SetValue((wxVariant(theCommand->GetBooleanParameter("ShowProgressWindow"))));
    }
    catch (BaseException &e)
    {
@@ -180,7 +203,12 @@ void TargetPanel::SaveData()
             solverMode);
       theCommand->SetStringParameter(theCommand->GetParameterID("ExitMode"), 
             exitMode);
-      
+
+      if (mProgressWindowCheckBox->IsChecked())
+         theCommand->SetBooleanParameter("ShowProgressWindow", true);
+      else
+         theCommand->SetBooleanParameter("ShowProgressWindow", false);
+
       EnableUpdate(false);
    }
    catch (BaseException &e)

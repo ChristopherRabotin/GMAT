@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -1204,10 +1214,10 @@ bool StopCondition::Validate()
    #ifdef DEBUG_STOPCOND_INIT   
    MessageInterface::ShowMessage
       ("StopCondition::Validate() entered, mUseInternalEpoch=%d, mEpochParam=<%p>, "
-       "mStopParam=<%p>\n   mAllowGoalParam=%d, mGoalParam=<%p>'%s', rhsWrapper=<%p>'%s'\n",
-       mUseInternalEpoch, mEpochParam, mStopParam, mAllowGoalParam, mGoalParam,
-       mGoalParam ? mGoalParam->GetName().c_str() : "NULL", rhsWrapper,
-       rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL");
+       "mStopParam=<%p>\n   mAllowGoalParam=%d, mGoalParam=<%p>'%s', rhsWrapper=<%p>'%s', "
+       "mSolarSystem=<%p>\n", mUseInternalEpoch, mEpochParam, mStopParam, mAllowGoalParam,
+       mGoalParam, mGoalParam ? mGoalParam->GetName().c_str() : "NULL", rhsWrapper,
+       rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL", mSolarSystem);
    #endif
    
    // check on epoch parameter
@@ -2717,15 +2727,15 @@ void StopCondition::CopyDynamicData(const StopCondition &stopCond)
    mBufferSize = stopCond.mBufferSize;
 
    if ((Integer)mEpochBuffer.size() < mBufferSize)
-      mEpochBuffer.reserve(mBufferSize);
+      mEpochBuffer.resize(mBufferSize);
    
    if ((Integer)lhsValueBuffer.size() < mBufferSize)
-      lhsValueBuffer.reserve(mBufferSize);
+      lhsValueBuffer.resize(mBufferSize);
    
    if ((Integer)rhsValueBuffer.size() < mBufferSize)
-      rhsValueBuffer.reserve(mBufferSize);
+      rhsValueBuffer.resize(mBufferSize);
    
-   for (int i=0; i<mBufferSize; i++)
+   for (int i = 0; i < mBufferSize; ++i)
    {
       mEpochBuffer[i] = stopCond.mEpochBuffer[i];
       lhsValueBuffer[i] = stopCond.lhsValueBuffer[i];

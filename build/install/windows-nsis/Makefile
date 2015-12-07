@@ -9,7 +9,7 @@ VERSION = dev
 # Standard targets
 #
 
-all: installer-internal installer-public zip-internal zip-public
+all: installer-internal zip-internal installer-public zip-public
 
 clean:
 	rm -fr gmat-internal gmat-public *.exe *.zip uninstall.nsh
@@ -85,7 +85,7 @@ gmat-win-i586-$(VERSION).zip: gmat-public/GMAT/bin/GMAT.exe
 	    && zip -r9 ../$@ GMAT
 
 gmat-internal/GMAT/bin/GMAT.exe:
-	../assemblegmat.sh -d gmat-internal/GMAT -t full-release
+	./assemblegmat.sh -d gmat-internal/GMAT -t full-release
 
 gmat-public/GMAT/bin/GMAT.exe:
-	../assemblegmat.sh -d gmat-public/GMAT -t public-release
+	./assemblegmat.sh -d gmat-public/GMAT -t public-release

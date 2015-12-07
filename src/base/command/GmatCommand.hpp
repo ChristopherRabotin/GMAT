@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -47,6 +57,9 @@ class FunctionManager;
 
 // Forward reference for the function containing this command
 class Function;
+
+// Other forward references
+class Parameter;
 
 /**
  * GmatCommand Base Class, used for Mission Control Sequence elements in scripts
@@ -90,7 +103,10 @@ public:
    virtual void         CheckDataType(ElementWrapper* forWrapper,
                                       Gmat::ParameterType needType,
                                       const std::string &cmdName,
-                                      bool ignoreUnsetReference = false);
+                                      bool ignoreUnsetReference = false,
+                                      bool checkUnsetValue = false,
+                                      Real unsetValue = 9.999999e300,
+                                      const std::string &unsetValueErrMsg = "");
    
    // Methods used to setup objects
    virtual bool         SetObject(const std::string &name,
@@ -341,8 +357,6 @@ protected:
    virtual void         BuildCommandSummaryString(bool commandCompleted = true);
    virtual const std::string 
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
-   virtual const std::string
-                        BuildNumber(Real value, bool useExp = false, Integer length = 17);
    // for command name
    virtual void         InsertCommandName(std::string &genString);
    
@@ -364,7 +378,10 @@ protected:
                                        std::string &lhs, std::string &rhs,
                                        bool checkOp = false);
    
+   // For objects
    GmatBase* FindObject(const std::string &name);
+   // For referencing cloned objects
+   virtual void        HandleReferencesToClones(Parameter *param);
    
    // Method(s) used for ParametersInCommands
    bool                SetWrapperReferences(ElementWrapper &wrapper);

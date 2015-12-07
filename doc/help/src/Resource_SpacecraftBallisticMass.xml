@@ -116,7 +116,9 @@
             <entry><guilabel>Cr</guilabel></entry>
 
             <entry><para>The coefficent of reflectivity used to compute the
-            acceleration due toSRP.</para><variablelist>
+            acceleration due to SRP.  A value of zero means the spacecraft is translucent to incoming radiation.  
+			A value of 1.0 indicates all radiaion is absorbed and all the force is transmitted to the spacecraft. 
+			A value of 2.0 indicates all radiation is reflected and twice the force is transmitted to the spacecraft.</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -819,7 +821,7 @@ Record count       : 2701
       of the <guilabel>DryMass</guilabel> value and the sum of the fuel mass
       in all attached fuel tanks. GMAT’s propagators will not allow the total
       mass of a spacecraft to be negative. However, GMAT will allow the mass
-      of a <guilabel>FuelTank</guilabel> to be negative. See the <xref
+      of a <guilabel>ChemicalTank</guilabel> to be negative. See the <xref
       linkend="FuelTank" xrefstyle="select:title"/> documentation for
       details.</para>
     </refsection>

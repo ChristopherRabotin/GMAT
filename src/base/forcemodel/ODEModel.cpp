@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // *** File Name : ODEModel.cpp
 // *** Created   : October 1, 2002
@@ -713,12 +723,12 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
             ++transientCount;
 
          // Temporary code: prevent multiple finite burns in single force model
-         if (transientCount > 1)
-            throw ODEModelException("Multiple Finite burns are not allowed in "
-                  "a single propagator; try breaking commands of the form"
-                  "\"Propagate prop(sat1, sat2)\" into two synchronized "
-                  "propagators; e.g. \"Propagate Synchronized prop(sat1) "
-                  "prop(sat2)\"\nexiting");
+//         if (transientCount > 1)
+//            throw ODEModelException("Multiple Finite burns are not allowed in "
+//                  "a single propagator; try breaking commands of the form"
+//                  "\"Propagate prop(sat1, sat2)\" into two synchronized "
+//                  "propagators; e.g. \"Propagate Synchronized prop(sat1) "
+//                  "prop(sat2)\"\nexiting");
       }
 
       // Full field models come first to facilitate setting their parameters
@@ -1833,11 +1843,12 @@ void ODEModel::SetInternalCoordinateSystem(const std::string csId,
             centralBodyName);
          internalCoordinateSystems.push_back(cs);
 
-         #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Add
-               (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
-                "cs = earthFixed->Clone()", this);
-         #endif
+         // The pointers are added in CoordinateSystem::CreateLocalCoordinateSystem()
+         // #ifdef DEBUG_MEMORY
+         //    MemoryTracker::Instance()->Add
+         //       (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
+         //        "cs = earthFixed->Clone()", this);
+         // #endif
 
          #ifdef DEBUG_ODEMODEL_INIT
             MessageInterface::ShowMessage("Created %s with description\n\n%s\n", 

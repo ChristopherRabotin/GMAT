@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/02/25
@@ -240,46 +250,46 @@ void ParameterCreateDialog::Create()
    // wxTextCtrl
    mVarClearButton =
       new wxBitmapButton(varPanel, ID_CLEAR_VAR_BUTTON, clearBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    mVarClearButton->SetToolTip(pConfig->Read(_T("ClearVariableHint"), "Clear Variable Fields"));
    
    mVarNameTextCtrl = new wxTextCtrl(varPanel, ID_VARTEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(130,20), wxTE_PROCESS_ENTER);
+                                     wxDefaultPosition, wxSize(130,-1), wxTE_PROCESS_ENTER);
    mVarNameTextCtrl->SetToolTip(pConfig->Read(_T("VariableNameHint")));
 
    // Only numeric value is allowed (LOJ: 2010.11.24)
    mVarValueTextCtrl = new wxTextCtrl(varPanel, ID_VARTEXTCTRL, wxT(""),
-                                  wxDefaultPosition, wxSize(280,20), wxTE_PROCESS_ENTER,
+                                  wxDefaultPosition, wxSize(280,-1), wxTE_PROCESS_ENTER,
                                   wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mVarValueTextCtrl->SetToolTip(pConfig->Read(_T("VariableValueHint")));
    
    mArrClearButton =
       new wxBitmapButton(arrPanel, ID_CLEAR_ARR_BUTTON, clearBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    mArrClearButton->SetToolTip(pConfig->Read(_T("ClearArrayHint"), "Clear Array Fields"));
    
    mArrNameTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(102,20), wxTE_PROCESS_ENTER);
+                                     wxDefaultPosition, wxSize(102,-1), wxTE_PROCESS_ENTER);
    mArrNameTextCtrl->SetToolTip(pConfig->Read(_T("ArrayNameHint")));
    mArrRowTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(50,20), wxTE_PROCESS_ENTER, 
+                                    wxDefaultPosition, wxSize(50,-1), wxTE_PROCESS_ENTER, 
                                     wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mArrRowTextCtrl->SetToolTip(pConfig->Read(_T("ArrayRowValueHint")));
    mArrColTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(50,20), wxTE_PROCESS_ENTER,
+                                    wxDefaultPosition, wxSize(50,-1), wxTE_PROCESS_ENTER,
                                     wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mArrColTextCtrl->SetToolTip(pConfig->Read(_T("ArrayColumnValueHint")));
 
    mStrClearButton =
       new wxBitmapButton(strPanel, ID_CLEAR_STR_BUTTON, clearBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    mStrClearButton->SetToolTip(pConfig->Read(_T("ClearStringHint"), "Clear String Fields"));
    
    mStringNameTextCtrl = new wxTextCtrl(strPanel, ID_STRTEXTCTRL, wxT(""),
-                                        wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
+                                        wxDefaultPosition, wxSize(80,-1), wxTE_PROCESS_ENTER);
    mStringNameTextCtrl->SetToolTip(pConfig->Read(_T("StringNameHint")));
    mStringValueTextCtrl = new wxTextCtrl(strPanel, ID_STRTEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(110,20), wxTE_PROCESS_ENTER);
+                                     wxDefaultPosition, wxSize(110,-1), wxTE_PROCESS_ENTER);
    mStringValueTextCtrl->SetToolTip(pConfig->Read(_T("StringValueHint")));
    
    // wxButton

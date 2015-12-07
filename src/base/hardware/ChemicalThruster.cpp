@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy Shoan/GSFC/GSSB
 // Created: 2014.07.01
@@ -791,9 +801,26 @@ bool ChemicalThruster::CalculateThrustAndIsp()
       Integer tempID = tanks[0]->GetParameterID("Temperature");
       Integer refTempID = tanks[0]->GetParameterID("RefTemperature");
 
-      pressure = tanks[0]->GetRealParameter(pressID);
-      temperatureRatio = tanks[0]->GetRealParameter(tempID) /
-                         tanks[0]->GetRealParameter(refTempID);
+//      pressure = tanks[0]->GetRealParameter(pressID);
+//      temperatureRatio = tanks[0]->GetRealParameter(tempID) /
+//                         tanks[0]->GetRealParameter(refTempID);
+
+      // Build the weighted temperature and pressure
+      Real mixTotal = 0.0;
+      Real pressureSum = 0.0;
+      Real tempSum = 0.0;
+      Real refTempSum = 0.0;
+      for (UnsignedInt i = 0; i < mixRatio.GetSize(); ++i)
+      {
+         mixTotal += mixRatio[i];
+         pressureSum += tanks[i]->GetRealParameter(pressID) * mixRatio[i];
+         tempSum += tanks[i]->GetRealParameter(tempID) * mixRatio[i];
+         refTempSum += tanks[i]->GetRealParameter(refTempID) * mixRatio[i];
+      }
+      pressure = pressureSum / mixTotal;
+      pressure = pressureSum / mixTotal;
+      // Note: numerator and denominator both divide by mixTotal, so dividends cancel
+      temperatureRatio = tempSum / refTempSum;
 
       thrust = cCoefficients[2];
       impulse = kCoefficients[2];

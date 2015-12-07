@@ -206,13 +206,13 @@
         <step>
           <para>In the <guilabel>Resources</guilabel> tree, right-click the
           <guilabel>Hardware</guilabel> folder, point to
-          <guilabel>Add</guilabel> and click <guilabel>Fuel Tank</guilabel>. A
-          new resource called <guilabel>FuelTank1</guilabel> will be
+          <guilabel>Add</guilabel> and click <guilabel>ChemicalTank</guilabel>. A
+          new resource called <guilabel>ChemicalTank1</guilabel> will be
           created.</para>
         </step>
 
         <step>
-          <para>Right-click<guilabel>FuelTank1</guilabel> and click
+          <para>Right-click<guilabel>ChemicalTank1</guilabel> and click
           <guilabel>Rename</guilabel>.</para>
         </step>
 

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -76,7 +86,8 @@ class GMAT_API Moderator
 public:
 
    static Moderator* Instance();
-   bool Initialize(const std::string &startupFile = "", bool isFromGui = false);
+   bool Initialize(const std::string &startupFile = "", bool isFromGui = false,
+         const std::string &suffix = "", const StringArray *forEntries = NULL);
    void Finalize();
    void SetRunReady(bool flag = true);
    void SetShowFinalState(bool flag = true);
@@ -270,7 +281,8 @@ public:
 
    // EventLocator
    EventLocator* CreateEventLocator(const std::string &type,
-                            const std::string &name);
+                                    const std::string &name,
+                                    bool createDefault = false);
    EventLocator* GetEventLocator(const std::string &name);
 
    // Interpolator
@@ -438,6 +450,8 @@ private:
    
    // Object map
    GmatBase* FindObject(const std::string &name);
+   void AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
+                                  Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT);
    bool AddObject(GmatBase *obj);
    void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
                                    bool forFunction,
@@ -449,20 +463,22 @@ private:
    const StringArray& GetSequenceStarters();
    
    // Default objects
-   Spacecraft* GetDefaultSpacecraft();
-   PropSetup*  GetDefaultPropSetup();
-   Burn*       GetDefaultBurn(const std::string &type);
-   Hardware*   GetDefaultHardware(const std::string &type);
-   Solver*     GetDefaultBoundaryValueSolver();
-   Solver*     GetDefaultOptimizer();
-   Subscriber* GetDefaultSubscriber(const std::string &type,
+   Spacecraft*   GetDefaultSpacecraft();
+   PropSetup*    GetDefaultPropSetup();
+   Burn*         GetDefaultBurn(const std::string &type);
+   Hardware*     GetDefaultHardware(const std::string &type);
+   Solver*       GetDefaultBoundaryValueSolver();
+   Solver*       GetDefaultOptimizer();
+   EventLocator* GetDefaultEventLocator();
+   Subscriber*   GetDefaultSubscriber(const std::string &type,
                                     bool addObjects = true,
                                     bool createIfNoneFound = true);
-   Parameter*  GetDefaultX();
-   Parameter*  GetDefaultY();
+   Parameter*    GetDefaultX();
+   Parameter*    GetDefaultY();
    StopCondition* CreateDefaultStopCondition();
    
    // Sandbox
+   void AddFunctionToGlobalObjectMap(Function *func);
    void AddSolarSystemToSandbox(Integer index);
    void AddTriggerManagersToSandbox(Integer index);
    void AddInternalCoordSystemToSandbox(Integer index);
@@ -478,7 +494,8 @@ private:
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
    void ShowMissionSequence(const std::string &msg = "");
    void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
-   
+   std::string WriteObjectInfo(const std::string &title, GmatBase *obj,
+                               bool addEol = true);
    Moderator();
    virtual ~Moderator();
    
@@ -490,11 +507,14 @@ private:
    bool showFinalState;
    bool loadSandboxAndPause;
    Integer objectManageOption;
+   Integer currentSandboxNumber;
+   std::string currentScriptFileName;
    std::vector<Sandbox*> sandboxes;
    std::vector<TriggerManager*> triggerManagers;
    std::vector<GmatCommand*> commands;
    
    ObjectMap *objectMapInUse;
+   ObjectMap *previousObjectMap;
    Function *currentFunction;
    ObjectArray unmanagedFunctions;
    

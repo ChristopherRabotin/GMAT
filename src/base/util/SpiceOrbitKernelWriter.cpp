@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under
 // FDSS Task order 28.
@@ -53,6 +63,7 @@
 
 std::string   SpiceOrbitKernelWriter::TMP_TXT_FILE_NAME = "GMATtmpSPKcmmnt";
 const Integer SpiceOrbitKernelWriter::MAX_FILE_RENAMES  = 1000; // currently unused
+
 //---------------------------------
 // public methods
 //---------------------------------
@@ -63,7 +74,8 @@ const Integer SpiceOrbitKernelWriter::MAX_FILE_RENAMES  = 1000; // currently unu
 //                         Integer                 centerNAIFId,
 //                         const std::string       &fileName,
 //                         Integer                 deg,
-//                         const std::string       &frame)
+//                         const std::string       &frame = "J2000",
+//                         bool                    renameExistingSPK = false)
 //------------------------------------------------------------------------------
 /**
  * This method constructs a SpiceKernelWriter instance.
@@ -76,13 +88,15 @@ const Integer SpiceOrbitKernelWriter::MAX_FILE_RENAMES  = 1000; // currently unu
  * @param    fileName      name of the kernel to generate
  * @param    deg           degree of interpolating polynomials
  * @param    frame         reference frame (default = "J2000")
+ * @param    renameSPK     rename existing SPK file(s) with same name?
+ *                         [true = rename; false = overwrite]
  *
  */
 //------------------------------------------------------------------------------
 SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName,   const std::string &centerName,
                                               Integer                 objNAIFId,  Integer           centerNAIFId,
                                               const std::string       &fileName,  Integer           deg,
-                                              const std::string       &frame) :
+                                              const std::string       &frame,     bool renameExistingSPK) :
    SpiceKernelWriter(),
    objectName      (objName),
    centralBodyName (centerName),
@@ -92,7 +106,10 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    fileFinalized   (false),
    dataWritten     (false),
    tmpTxtFile      (NULL),
-   fm              (NULL)
+   tmpFileOK       (false),
+   appending       (false),
+   fm              (NULL),
+   renameSPK       (renameExistingSPK)
 {
    #ifdef DEBUG_SPK_INIT
       MessageInterface::ShowMessage(
@@ -153,44 +170,62 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    // append to an existing file - this is the most common error returned from spkopn
    if (GmatFileUtil::DoesFileExist(kernelFileName))
    {
-      Integer     fileCounter = 0;
-      bool        done        = false;
-      std::string fileWithBSP = fileName;
-      std::string fileNoBSP   = fileWithBSP.erase(fileWithBSP.rfind(".bsp"));
-      std::stringstream fileRename("");
-      Integer     retCode = 0;
-      while (!done)
+      if (renameSPK)
       {
-         fileRename.str("");
-         fileRename << fileNoBSP << "__" << fileCounter << ".bsp";
-         if (fm->RenameFile(kernelFileName, fileRename.str(), retCode))
+         #ifdef DEBUG_SPK_INIT
+            MessageInterface::ShowMessage(
+                  "SPKOrbitWriter: the file %s exists, will need to rename ... \n",
+                  kernelFileName.c_str());
+         #endif
+         Integer     fileCounter = 0;
+         bool        done        = false;
+         std::string fileWithBSP = fileName;
+         std::string fileNoBSP   = fileWithBSP.erase(fileWithBSP.rfind(".bsp"));
+         std::stringstream fileRename("");
+         Integer     retCode = 0;
+         while (!done)
          {
-            done = true;
-         }
-         else
-         {
-            if (retCode == 0) // if no error from system, but not allowed to overwrite
+            fileRename.str("");
+            fileRename << fileNoBSP << "__" << fileCounter << ".bsp";
+            #ifdef DEBUG_SPK_INIT
+               MessageInterface::ShowMessage(
+                     "SPKOrbitWriter: renaming %s to %s ... \n",
+                     kernelFileName.c_str(), fileRename.str().c_str());
+            #endif
+            if (fm->RenameFile(kernelFileName, fileRename.str(), retCode))
             {
-//               if (fileCounter < MAX_FILE_RENAMES) // no MAX for now
-                  fileCounter++;
-//               else
-//               {
-//                  reset_c(); // reset failure flag in SPICE
-//                  std::string errmsg = "Error renaming existing SPK file  \"";
-//                  errmsg += kernelFileName + "\".  Maximum number of renames exceeded.\n";
-//                  throw UtilityException(errmsg);
-//               }
+               done = true;
             }
             else
             {
-//               reset_c(); // reset failure flag in SPICE
-               std::string errmsg =
-                     "Unknown system error occurred when attempting to rename existing SPK file \"";
-               errmsg += kernelFileName + "\".\n";
-               throw UtilityException(errmsg);
+               if (retCode == 0) // if no error from system, but not allowed to overwrite
+               {
+   //               if (fileCounter < MAX_FILE_RENAMES) // no MAX for now
+                     fileCounter++;
+   //               else
+   //               {
+   //                  reset_c(); // reset failure flag in SPICE
+   //                  std::string errmsg = "Error renaming existing SPK file  \"";
+   //                  errmsg += kernelFileName + "\".  Maximum number of renames exceeded.\n";
+   //                  throw UtilityException(errmsg);
+   //               }
+               }
+               else
+               {
+   //               reset_c(); // reset failure flag in SPICE
+                  std::string errmsg =
+                        "Unknown system error occurred when attempting to rename existing SPK file \"";
+                  errmsg += kernelFileName + "\".\n";
+                  throw UtilityException(errmsg);
+               }
             }
-         }
 
+         }
+      }
+      else
+      {
+         // delete the file
+         remove(kernelFileName.c_str());
       }
    }
    else // otherwise, check to make sure the directory is writable
@@ -258,7 +293,10 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const SpiceOrbitKernelWriter &cop
    fileFinalized     (copy.fileFinalized),
    dataWritten       (copy.dataWritten),
    tmpTxtFile        (copy.tmpTxtFile),
-   fm                (copy.fm)// ??
+   tmpFileOK         (copy.tmpFileOK),
+   appending         (copy.appending),
+   fm                (copy.fm),
+   renameSPK         (copy.renameSPK)
 {
    kernelNameSPICE  = kernelFileName.c_str();
    referenceFrame   = frameName.c_str();
@@ -294,7 +332,10 @@ SpiceOrbitKernelWriter& SpiceOrbitKernelWriter::operator=(const SpiceOrbitKernel
       fileFinalized     = copy.fileFinalized;
       dataWritten       = copy.dataWritten;
       tmpTxtFile        = copy.tmpTxtFile; // ??
+      tmpFileOK         = copy.tmpFileOK;
+      appending         = copy.appending;
       fm                = copy.fm;
+      renameSPK         = copy.renameSPK;
 
       kernelNameSPICE   = kernelFileName.c_str();
       referenceFrame    = frameName.c_str();
@@ -362,6 +403,7 @@ void SpiceOrbitKernelWriter::WriteSegment(const A1Mjd &start, const A1Mjd &end,
       MessageInterface::ShowMessage("In SOKW::WriteSegment, start = %12.10, end = %12.10\n",
             start.Get(), end.Get());
       MessageInterface::ShowMessage("   writing %d states\n", (Integer) states.size());
+      MessageInterface::ShowMessage("   fileOpen = %s\n", (fileOpen? "true": "false"));
    #endif
    // If the file has not been set up yet, open it
    if (!fileOpen)
@@ -427,7 +469,6 @@ void SpiceOrbitKernelWriter::WriteSegment(const A1Mjd &start, const A1Mjd &end,
       delete [] err;
       throw UtilityException(errmsg);
    }
-
 
    dataWritten = true;
 
@@ -531,26 +572,34 @@ void SpiceOrbitKernelWriter::SetBasicMetaData()
 }
 
 //------------------------------------------------------------------------------
-//  FinalizeKernel()
+//  FinalizeKernel(bool done = true, writeMetaData = true)
 //------------------------------------------------------------------------------
 /**
  * This method writes the meta data (comments) to the kernel and then closes it.
  *
  */
 //------------------------------------------------------------------------------
-void SpiceOrbitKernelWriter::FinalizeKernel()
+void SpiceOrbitKernelWriter::FinalizeKernel(bool done, bool writeMetaData)
 {
    #ifdef DEBUG_SPK_WRITING
       MessageInterface::ShowMessage("In FinalizeKernel .... tmpFileOK = %s\n",
             (tmpFileOK? "true" : "false"));
       MessageInterface::ShowMessage("In FinalizeKernel .... kernelFileName = %s\n",
             kernelFileName.c_str());
+      MessageInterface::ShowMessage("In FinalizeKernel .... fileOpen = %s\n",
+            (fileOpen? "true": "false"));
+      MessageInterface::ShowMessage("In FinalizeKernel .... dataWritten = %s\n",
+            (dataWritten? "true": "false"));
    #endif
 
    if ((fileOpen) && (dataWritten)) // should be both or neither are true
    {
       // write all the meta data to the file
-      if (tmpFileOK) WriteMetaData();
+      if (tmpFileOK && (done || writeMetaData)) WriteMetaData();
+      #ifdef DEBUG_SPK_WRITING
+         MessageInterface::ShowMessage("In SOKW::FinalizeKernel ... is it loaded?  %s\n",
+               (IsLoaded(kernelFileName)? "true" : "false"));
+      #endif
       // close the SPK file
       spkcls_c(handle);
       if (failed_c())
@@ -572,11 +621,34 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
          delete [] err;
       }
    }
-   basicMetaData.clear();
-   addedMetaData.clear();
+   if (done)
+   {
+      basicMetaData.clear();
+      addedMetaData.clear();
+      fileFinalized = true;
+      appending     = false;
+   }
+   else
+   {
+      appending  = true;
+   }
    fileOpen      = false;
-   fileFinalized = true;
 }
+
+//------------------------------------------------------------------------------
+//  Integer GetMinNumberOfStates()
+//------------------------------------------------------------------------------
+/**
+ * This method returns the minimum number if states required by SPICE to
+ * so the interpolation.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer SpiceOrbitKernelWriter::GetMinNumberOfStates()
+{
+   return degree+1;
+}
+
 
 //------------------------------------------------------------------------------
 //  WriteMetaData()
@@ -652,13 +724,23 @@ bool SpiceOrbitKernelWriter::OpenFileForWriting()
 {
    // get a file handle here
    SpiceInt        maxChar = MAX_CHAR_COMMENT;
-   std::string     internalFileName = "GMAT-generated SPK file for " + objectName;
-   ConstSpiceChar  *internalSPKName  = internalFileName.c_str();
    #ifdef DEBUG_SPK_INIT
       MessageInterface::ShowMessage("... attempting to open SPK file with  fileName = %s\n",
             kernelFileName.c_str());
+      MessageInterface::ShowMessage("... and appending = %s\n", (appending? "true" : "false"));
+      MessageInterface::ShowMessage("    handle = %d\n", (Integer) handle);
    #endif
-   spkopn_c(kernelNameSPICE, internalSPKName, maxChar, &handle); // CSPICE method to create and open an SPK kernel
+
+   bool fileExists = GmatFileUtil::DoesFileExist(kernelFileName);
+
+   if (appending && fileExists)
+      spkopa_c(kernelNameSPICE, &handle);
+   else
+   {
+      std::string     internalFileName = "GMAT-generated SPK file for " + objectName;
+      ConstSpiceChar  *internalSPKName  = internalFileName.c_str();
+      spkopn_c(kernelNameSPICE, internalSPKName, maxChar, &handle); // CSPICE method to create and open an SPK kernel
+   }
    if (failed_c()) // CSPICE method to detect failure of previous call to CSPICE
    {
       ConstSpiceChar option[]   = "LONG"; // retrieve long error message

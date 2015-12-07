@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -27,6 +37,8 @@
 //#define DEBUG_TARGETER
 //#define DEBUG_START_MODE
 //#define DEBUG_TARGET_COMMANDS
+//#define DEBUG_TARGET_INIT
+//#define DEBUG_TARGET_EXEC
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -470,6 +482,14 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Target::Initialize()
 {
+   #ifdef DEBUG_TARGET_INIT
+   MessageInterface::ShowMessage
+      ("Target::Initialize() entered, theSolver = <%p>'%s', isInitialized = %d\n"
+       "   targeterInFunctionInitialized = %d\n", theSolver, 
+       theSolver ? theSolver->GetName().c_str() : "NULL", isInitialized,
+       targeterInFunctionInitialized);
+   #endif
+   
    GmatBase *mapObj = NULL;
    cloneCount = 0;
 
@@ -506,6 +526,12 @@ bool Target::Initialize()
    if (theSolver != NULL)
       ++cloneCount;
 
+   #ifdef DEBUG_TARGET_INIT
+   MessageInterface::ShowMessage
+      ("Target::Initialize() theSolver <%p>'%s', cloneCount=%d\n", theSolver,
+       theSolver->GetName().c_str(), cloneCount);
+   #endif
+   
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
       (theSolver, theSolver->GetName(), "Target::Initialize()",
@@ -552,7 +578,7 @@ bool Target::Initialize()
    }
 
    bool retval = SolverBranchCommand::Initialize();
-
+   
    if (retval == true) {
       // Targeter specific initialization goes here:
       if (FindObject(solverName) == NULL) 
@@ -566,7 +592,9 @@ bool Target::Initialize()
       retval = theSolver->Initialize();
    }
    
-   targeterInFunctionInitialized = false;
+   // Set this to true for two-mode function parsing (LOJ: 2015.03.09)
+   //targeterInFunctionInitialized = false;
+   targeterInFunctionInitialized = true;
    return retval;
 }
 
@@ -589,7 +617,7 @@ bool Target::Execute()
 {
    #ifdef DEBUG_TARGET_EXEC
    MessageInterface::ShowMessage
-      ("Target::Execute() entered, theSolver=<%p>'%s'\n", (GmatBase*)theSolver,
+      ("\nTarget::Execute() entered, theSolver=<%p>'%s', ", (GmatBase*)theSolver,
        theSolver->GetName().c_str());
    MessageInterface::ShowMessage
       ("maxIter=%d\n",
@@ -597,6 +625,8 @@ bool Target::Execute()
    MessageInterface::ShowMessage
       ("currentFunction=<%p>'%s'\n",
        currentFunction, currentFunction ? ((GmatBase*)currentFunction)->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage
+      ("targeterInFunctionInitialized=%d\n", targeterInFunctionInitialized);
    #endif
    
    // If targeting inside a function, we need to reinitialize since the local solver is
@@ -838,6 +868,7 @@ bool Target::Execute()
    if (!branchExecuting)
    {
       theSolver->AdvanceState();
+      theSolver->ReportProgress(listeners, Solver::UNDEFINED_STATE);
 
       if (theSolver->GetState() == Solver::FINISHED)
       {
@@ -884,5 +915,5 @@ void Target::RunComplete()
    // Free local data (LOJ: 2009.03.17)
    FreeLoopData();
    
-   BranchCommand::RunComplete();
+   SolverBranchCommand::RunComplete();
 }
