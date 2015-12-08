@@ -163,13 +163,7 @@ if(WIN32)
   ADD_DEFINITIONS("-DIONOSPHERE")
   SET(PLUGIN_SRCS ${PLUGIN_SRCS}
     measurement/Ionosphere/Ionosphere.cpp
-    measurement/Ionosphere/cira.c
-    measurement/Ionosphere/igrf.c
-    measurement/Ionosphere/iridreg.c
-    measurement/Ionosphere/irifun.c
-    measurement/Ionosphere/irisub.c
-    measurement/Ionosphere/iritec.c
-    measurement/Ionosphere/loadfiles.c
+    measurement/Ionosphere/iri2007.c
     )
 endif()
 
