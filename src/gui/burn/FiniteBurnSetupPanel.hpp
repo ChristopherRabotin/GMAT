@@ -46,7 +46,6 @@ private:
    FiniteBurn *theBurn;
    
    wxComboBox *mThrusterComboBox;
-   
    wxString thrusterSelected;
    
    // methods inherited from GmatPanel
@@ -56,15 +55,27 @@ private:
    
    // for event handling
    void OnComboBoxChange(wxCommandEvent& event);
+
+   wxArrayString mExcludedThrusterList;
+   wxButton *selectButton;
+   wxButton *removeButton;
+   wxButton *selectAllButton;
+   wxButton *removeAllButton;
+
+   wxListBox *availableThrusterListBox;
+   wxListBox *selectedThrusterListBox;
    
-   // any class wishing to process wxWindows events must use this macro
+   // Event handling
    DECLARE_EVENT_TABLE();
+   void OnButtonClick(wxCommandEvent &event);
    
    // IDs for the controls and the menu commands
    enum
    {     
        ID_TEXT = 81000,
-       ID_COMBOBOX
+       ID_COMBOBOX,
+       ID_LISTBOX,
+       ID_BUTTON
    };
 };
 
