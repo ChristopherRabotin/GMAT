@@ -166,7 +166,7 @@ SPACECRAFT_MODEL_FILE    = VEHICLE_MODEL_PATH/aura.3ds
 SPAD_PATH                = DATA_PATH/vehicle/spad/
 SPAD_SRP_FILE            = SPAD_PATH/SphericalModel.spo
 #-----------------------------------------------------------
-ATMOSPHERE_PATH          = DATA_PATH/atmosphere/
+ATMOSPHERE_PATH          = DATA_PATH/atmosphere/earth
 CSSI_FLUX_FILE           = ATMOSPHERE_PATH/CSSI_2004To2026.txt
 SCHATTEN_FILE            = ATMOSPHERE_PATH/SchattenPredict.txt
 #-----------------------------------------------------------
