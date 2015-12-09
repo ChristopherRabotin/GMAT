@@ -260,13 +260,11 @@ OBJECTS = \
     coordsystem/TOEEqAxes.o \
     coordsystem/TopocentricAxes.o \
     coordsystem/TrueOfDateAxes.o \
-    event/Brent.o \
     event/EventException.o \
     event/EventLocator.o \
     event/LocatedEvent.o \
     executive/ListenerManager.o \
     executive/ListenerManagerInterface.o \
-    event/RootFinder.o \
     executive/Moderator.o \
     executive/PlotInterface.o \
     executive/PlotReceiver.o \
