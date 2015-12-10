@@ -925,9 +925,10 @@ Real Thruster::SetRealParameter(const Integer id, const Real value,
    {
       if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
          mixRatio.SetSize(tankNames.size());
-      if ((index < 0) || (index > mixRatio.GetSize()))
+      if ((index < 0) || (index > mixRatio.GetSize()-1))
          throw HardwareException("Index out of bounds setting the mix ratio on " +
-               instanceName);
+               instanceName + "; there are not enough tanks to support the number "
+            		   "of indices in the ratio");
       mixRatio[index] = value;
       return mixRatio[index];
    }
