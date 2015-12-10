@@ -964,6 +964,36 @@ Gmat::ObjectType FiniteBurn::GetPropertyObjectType(const Integer id) const
    }
 }
 
+
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string& action, const std::string& actionData)
+//------------------------------------------------------------------------------
+/**
+ * Triggers internal actions on the finite burn object.
+ *
+ * The GUI uses this method to clear the thruster list.
+ *
+ * @param action The string describing the requested action
+ * @param actionData Ancillary data that may be needed to execute the action.
+ *
+ * @return true if an action was triggered
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::TakeAction(const std::string& action,
+      const std::string& actionData)
+{
+   bool retval = false;
+   if (action == "ClearThrusterList")
+   {
+      thrusterNames.clear();
+      retval = true;
+   }
+   else
+      retval = Burn::TakeAction(action, actionData);
+
+   return retval;
+}
+
 //------------------------------------------------------------------------------
 // bool FiniteBurn::Initialize()
 //------------------------------------------------------------------------------
@@ -1088,6 +1118,7 @@ bool FiniteBurn::SetThrustersFromSpacecraft()
    
    return true;
 }
+
 
 bool FiniteBurn::ComputeThrottleLogic(Real powerAvailable)
 {
