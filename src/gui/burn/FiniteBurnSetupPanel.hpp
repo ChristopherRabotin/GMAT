@@ -41,20 +41,6 @@ public:
 
 private:
    static const int MAX_PROP_ROW = 5;
-   
-   // member data
-   FiniteBurn *theBurn;
-   
-   wxComboBox *mThrusterComboBox;
-   wxString thrusterSelected;
-   
-   // methods inherited from GmatPanel
-   virtual void Create();
-   virtual void LoadData();
-   virtual void SaveData();
-   
-   // for event handling
-   void OnComboBoxChange(wxCommandEvent& event);
 
    wxArrayString mExcludedThrusterList;
    wxButton *selectButton;
@@ -64,6 +50,16 @@ private:
 
    wxListBox *availableThrusterListBox;
    wxListBox *selectedThrusterListBox;
+   
+   bool dataChanged;
+
+   // member data
+   FiniteBurn *theBurn;
+   
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
    
    // Event handling
    DECLARE_EVENT_TABLE();
