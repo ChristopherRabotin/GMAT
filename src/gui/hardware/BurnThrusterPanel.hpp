@@ -124,6 +124,7 @@ protected:
    wxTextCtrl    *efficiencyTxtCtrl;
    wxTextCtrl    *ispTxtCtrl;
    wxTextCtrl    *constantThrustTxtCtrl;
+   wxTextCtrl    *mixRatioTxtCtrl;
 
    wxString      *thrustModelArray;
 
@@ -131,6 +132,7 @@ protected:
 //   wxButton *kCoefButton;
    
    wxButton *configButton;
+   wxButton *tankSelectorButton;
 
    wxComboBox *coordSysComboBox;
    wxComboBox *originComboBox;

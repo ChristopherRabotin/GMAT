@@ -299,6 +299,16 @@ void BurnThrusterPanel::Create()
    tankComboBox =
       theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    tankComboBox->SetToolTip(pConfig->Read(_T("TankHint")));
+
+   tankSelectorButton = new wxButton(this, ID_BUTTON, gmatwxT(GUI_ACCEL_KEY"Select Tanks"));
+   tankSelectorButton->SetToolTip(pConfig->Read(_T("TankHint")));
+
+   wxStaticText *mixRatioLabel =
+         new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Mix Ratio"));
+   mixRatioTxtCtrl = new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
+         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mixRatioTxtCtrl->SetToolTip(pConfig->Read(_T("DutyCycleHint")));
+
    
    ispLabel = NULL;
    ispTextCtrl = NULL;
@@ -353,8 +363,12 @@ void BurnThrusterPanel::Create()
    
    massSizer->Add(tankLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    massSizer->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   massSizer->Add(tankSelectorButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   massSizer->Add(mixRatioLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   massSizer->Add(mixRatioTxtCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    massSizer->Add(20,20);
    
+
    if (theObject->IsOfType(Gmat::IMPULSIVE_BURN))
    {
       massSizer->Add(ispLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
