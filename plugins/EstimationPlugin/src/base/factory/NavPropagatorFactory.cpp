@@ -29,11 +29,13 @@
  *  for creating Propagator objects exclusive to the Nav code.
  */
 //------------------------------------------------------------------------------
-#include "NavNavPropagatorFactory.hpp"
+#include "NavPropagatorFactory.hpp"
 
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "RungeKutta4.hpp"
+
+#include "MessageInterface.hpp"
 
 
 //---------------------------------
@@ -126,6 +128,10 @@ NavPropagatorFactory::NavPropagatorFactory(StringArray createList) :
 NavPropagatorFactory::NavPropagatorFactory(const NavPropagatorFactory &fact) :
    Factory(fact)
 {
+   if (creatables.empty())
+   {
+      creatables.push_back("RungeKutta4");
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -142,7 +148,11 @@ NavPropagatorFactory::NavPropagatorFactory(const NavPropagatorFactory &fact) :
 //------------------------------------------------------------------------------
 NavPropagatorFactory& NavPropagatorFactory::operator= (const NavPropagatorFactory &fact)
 {
-   Factory::operator=(fact);
+   if (this != &fact)
+   {
+      Factory::operator=(fact);
+   }
+
    return *this;
 }
 

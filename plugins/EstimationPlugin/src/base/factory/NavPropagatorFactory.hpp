@@ -32,11 +32,11 @@
 #ifndef NavPropagatorFactory_hpp
 #define NavPropagatorFactory_hpp
 
-#include "gmatdefs.hpp"
+#include "estimation_defs.hpp"
 #include "Factory.hpp"
 #include "Propagator.hpp"
 
-class GMAT_API NavPropagatorFactory : public Factory
+class ESTIMATION_API NavPropagatorFactory : public Factory
 {
 public:
    Propagator*  CreateObject(const std::string &ofType,

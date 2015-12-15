@@ -31,9 +31,10 @@
 #ifndef RungeKutta4_hpp
 #define RungeKutta4_hpp
 
+#include "estimation_defs.hpp"
 #include "RungeKutta.hpp"
 
-class RungeKutta4: public RungeKutta
+class ESTIMATION_API RungeKutta4: public RungeKutta
 {
 public:
    RungeKutta4(const std::string &name);

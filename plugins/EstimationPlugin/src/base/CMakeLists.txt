@@ -98,6 +98,7 @@ SET(PLUGIN_SRCS
     factory/EventFactory.cpp
     factory/MeasurementFactory.cpp
     factory/MeasurementModelFactory.cpp
+    factory/NavPropagatorFactory.cpp
     factory/ObTypeFactory.cpp
     factory/SignalModelFactory.cpp
     factory/TrackingDataFactory.cpp

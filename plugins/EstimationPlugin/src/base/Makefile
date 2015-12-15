@@ -196,6 +196,7 @@ CPP_OBJECTS = \
     factory/EstimatorHardwareFactory.o \
     factory/MeasurementFactory.o \
     factory/MeasurementModelFactory.o \
+    factory/NavPropagatorFactory.o \
     factory/TrackingDataFactory.o \
     factory/TrackingSystemFactory.o \
     hardware/Sensor.o \
