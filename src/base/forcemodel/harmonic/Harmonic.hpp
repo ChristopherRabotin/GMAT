@@ -96,6 +96,9 @@ protected:
    Real**      N2;      // Temporary
    Real        VR01[361][361];    // Temporary
    Real        VR11[361][361];    // Temporary
+   Real        VR02[361][361];    // Temporary
+   Real        VR12[361][361];    // Temporary
+   Real        VR22[361][361];    // Temporary
    /// Flag used to warn about truncating matrix calculations to 20x20 only once
    static bool matrixTruncationWasPosted;
 

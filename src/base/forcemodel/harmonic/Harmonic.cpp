@@ -259,7 +259,6 @@ void Harmonic::CalculateField1(const Real& jday,  const Real pos[3], const Integ
          sum3 +=     Avv01 * D;
          sum4 +=     Avv11 * D;
 
-         // made changes by TUAN NGUYEN
          // Truncate the gradient at 20x20, if calculated
          if (fillgradient)
          {
@@ -271,18 +270,22 @@ void Harmonic::CalculateField1(const Real& jday,  const Real pos[3], const Integ
                Real H = m<=1 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
                // Correct for normalization
 
-               Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
-               Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
-               Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
-               if (m==0)
-               {
-                  VR02 /= sqrt(Real(2));
-                  VR12 /= sqrt(Real(2));
-                  VR22 /= sqrt(Real(2));
-               }
-               Real Avv02 = VR02 * A[n][m+2];
-               Real Avv12 = VR12 * A[n+1][m+2];
-               Real Avv22 = VR22 * A[n+2][m+2];
+               //Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+               //Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
+               //Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+               //if (m==0)
+               //{
+               //   VR02 /= sqrt(Real(2));
+               //   VR12 /= sqrt(Real(2));
+               //   VR22 /= sqrt(Real(2));
+               //}
+               //Real Avv02 = VR02 * A[n][m+2];
+               //Real Avv12 = VR12 * A[n+1][m+2];
+               //Real Avv22 = VR22 * A[n+2][m+2];
+               Real Avv02 = VR02[n][m] * A[n][m+2];
+               Real Avv12 = VR12[n][m] * A[n+1][m+2];
+               Real Avv22 = VR22[n][m] * A[n+2][m+2];
+
                //Real Vnm = V[n][m];
                //Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
                //Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
@@ -332,8 +335,6 @@ void Harmonic::CalculateField1(const Real& jday,  const Real pos[3], const Integ
       a2 += rr*sum2;
       a3 += rr*sum3;
       a4 -= rr*sum4;
-
-      // made changes by TUAN NGUYEN
       if (fillgradient)
       {
          // Pines Equation 36 (Part of)
@@ -361,8 +362,6 @@ void Harmonic::CalculateField1(const Real& jday,  const Real pos[3], const Integ
    acc[0] = a1+a4*s;
    acc[1] = a2+a4*t;
    acc[2] = a3+a4*u;
-
-   // made changes by TUAN NGUYEN
    if (fillgradient)
    {
       // Pines Equation 37
@@ -445,7 +444,7 @@ void Harmonic::Allocate()
    for (Integer n=0;  n<=NN+2;  ++n)
    {
       V[n][0] = sqrt(Real(2*(2*n+1)));   // Temporary, to make following loop work
-    for (Integer m=1;  m<=n+2 && m<=MM+2;  ++m)
+      for (Integer m=1;  m<=n+2 && m<=MM+2;  ++m)
       {
          V[n][m] = V[n][m-1] / sqrt(Real((n+m)*(n-m+1)));
       }
@@ -464,13 +463,23 @@ void Harmonic::Allocate()
       {
          //VR01[n][m] = V[n][m] / V[n][m+1];
          //VR11[n][m] = V[n][m] / V[n+1][m+1];
-		 VR01[n][m] = sqrt(Real((n-m)*(n+m+1)));
+		   VR01[n][m] = sqrt(Real((n-m)*(n+m+1)));
          VR11[n][m] = sqrt(Real((2*n+1)*(n+m+2)*(n+m+1))/Real((2*n+3)));
-		 if (m==0) 
-		 {
-			 VR01[n][m] /= sqrt(Real(2));
-			 VR11[n][m] /= sqrt(Real(2));
-		 }
+		   if (m==0) 
+		   {
+			   VR01[n][m] /= sqrt(Real(2));
+			   VR11[n][m] /= sqrt(Real(2));
+		   }
+
+         VR02[n][m] = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+         VR12[n][m] = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
+         VR22[n][m] = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+         if (m == 0)
+         {
+            VR02[n][m] /= sqrt(Real(2));
+            VR12[n][m] /= sqrt(Real(2));
+            VR22[n][m] /= sqrt(Real(2));
+         }
       }
 
 
