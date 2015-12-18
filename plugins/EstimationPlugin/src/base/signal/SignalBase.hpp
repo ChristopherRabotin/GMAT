@@ -74,7 +74,10 @@ public:
 
    virtual void         SetPropagator(PropSetup *propagator,
                                       GmatBase *forObj = NULL);
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                 // made changes by TUAN NGUYEN
    virtual void         SetStmRowCount(UnsignedInt rc);
+#endif                                                                      // made changes by TUAN NGUYEN
+
    virtual bool         Initialize();
    virtual void         InitializeSignal(bool chainForwards = false);
 
@@ -125,8 +128,10 @@ protected:
    SignalData                 theData;
    /// Participant data that can be passed to callers
    std::vector<RealArray>     theDataDerivatives;
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                 // made changes by TUAN NGUYEN
    /// Number of rows/columns in teh state transition matrix
    UnsignedInt                stmRowCount;
+#endif                                                                      // made changes by TUAN NGUYEN
 
    // Member data used
    // Coordinate Systems
@@ -201,6 +206,9 @@ protected:
    virtual void               UpdateRotationMatrix(Real atEpoch,
                                     const std::string &whichOne = "All");
 
+   virtual Real               GetCrDerivative(GmatBase *forObj);                                   // made changes by TUAN NGUYEN
+   virtual Real               GetCdDerivative(GmatBase *forObj);                                   // made changes by TUAN NGUYEN
+   virtual void               GetCDerivativeVector(GmatBase *forObj, Rvector &deriv);              // made changes by TUAN NGUYEN
    virtual void               GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
                                  Rvector &deriv);
    virtual void               GetRangeVectorDerivative(GmatBase *forObj, bool wrtR, bool wrtV,

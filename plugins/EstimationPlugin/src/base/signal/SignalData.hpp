@@ -21,11 +21,19 @@
 #ifndef SignalData_hpp
 #define SignalData_hpp
 
+#define NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+
 #include "estimation_defs.hpp"
 #include "gmatdefs.hpp"
 #include "Rvector3.hpp"
 #include "Rmatrix33.hpp"
+
+#ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+#include "Rmatrix.hpp"
+#else
 #include "Rmatrix66.hpp"
+#endif
+
 #include "Rvector6.hpp"
 #include "GmatTime.hpp"
 
@@ -111,6 +119,19 @@ public:
    Real        feasibilityValue;       // Contain elevation angle
 
    // State Transition Matrices for derivatives of light time measurements
+#ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                                                               // made changes by TUAN NGUYEN
+   /// The STM of transmit participant at transmit time t1                                                               // made changes by TUAN NGUYEN
+   Rmatrix tSTM;                                                                                                         // made changes by TUAN NGUYEN
+   /// The STM of receive participant at receive time t2                                                                 // made changes by TUAN NGUYEN
+   Rmatrix rSTM;                                                                                                         // made changes by TUAN NGUYEN
+
+   /// The STM of transmit participant at measurement time tm                                                            // made changes by TUAN NGUYEN
+   ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)     // made changes by TUAN NGUYEN
+   Rmatrix tSTMtm;                                                                                                       // made changes by TUAN NGUYEN
+   /// The STM of receive participant at  measurement time tm                                                            // made changes by TUAN NGUYEN
+   ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)     // made changes by TUAN NGUYEN
+   Rmatrix rSTMtm;                                                                                                       // made changes by TUAN NGUYEN
+#else                                                                                                                    // made changes by TUAN NGUYEN
    /// The STM of transmit participant at transmit time t1
    Rmatrix66 tSTM;
    /// The STM of receive participant at receive time t2
@@ -122,6 +143,7 @@ public:
    /// The STM of receive participant at  measurement time tm
    ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)
    Rmatrix66 rSTMtm;
+#endif                                                                                                                   // made changes by TUAN NGUYEN
 
    /// Rotation matrix from J2K to transmitter coordinate system
    Rmatrix33 tJ2kRotation;

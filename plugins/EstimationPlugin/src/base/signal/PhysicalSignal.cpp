@@ -768,7 +768,6 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
    // Clear derivative data
    theDataDerivatives.clear();
-
    if (logLevel < 2)
    {
       std::stringstream msg;
@@ -776,7 +775,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
             << GetPathDescription(false) << " Signal" << "\n";
       navLog->WriteData(msg.str());
    }
-
+   
    Integer size = obj->GetEstimationParameterSize(forId);
    if (next)
    {
@@ -798,7 +797,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       oneRow.assign(size, 0.0);
       theDataDerivatives.push_back(oneRow);
    }
-
+   
    // Check to see if obj is a participant
    GmatBase *objPtr = NULL;
    if (theData.tNode == obj)
@@ -816,7 +815,6 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
          for (UnsignedInt jj = 0; jj < 3; ++jj)
          {
-            // theDataDerivatives[0][jj] = result[jj];
             // It accumulates derivatives of all signal legs in its path
             if (next)
                theDataDerivatives[0][jj] += result[jj];         
@@ -831,7 +829,6 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
          for (UnsignedInt jj = 0; jj < 3; ++jj)
          {
-            // theDataDerivatives[0][jj] = result[jj];
             // It accumulates derivatives of all signal legs in its path
             if (next)
                theDataDerivatives[0][jj] += result[jj];         
@@ -846,7 +843,6 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
          for (UnsignedInt jj = 0; jj < 6; ++jj)
          {
-            // theDataDerivatives[0][jj] = result[jj];
             // It accumulates derivatives of all signal legs in its path
             if (next)
                theDataDerivatives[0][jj] += result[jj];         
@@ -865,10 +861,19 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
          #endif
       }
+      else if (paramName == "Cr_Epsilon")
+      {
+         Real result = GetCrDerivative(objPtr);
+         theDataDerivatives[0][0] += result;
+      }
+      else if (paramName == "Cd_Epsilon")
+      {
+         Real result = GetCdDerivative(objPtr);
+         theDataDerivatives[0][0] += result;
+      }
    }
    else         // Derivative object is not a participant (neither a GroundStation nor a Spacecraft): such as ErrorModel object
    {
-         //MessageInterface::ShowMessage(" paramName = %s\n", paramName.c_str());
          if (paramName == "Bias")
          {
             if (previous == NULL)
@@ -895,9 +900,8 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                   for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
                      mapIndex != errmodelMap.end(); ++mapIndex)
                   {
-                     for (UnsignedInt j = 0; j < mapIndex->second.size(); ++j)                     // made changes by TUAN NGUYEN
+                     for (UnsignedInt j = 0; j < mapIndex->second.size(); ++j)                       // made changes by TUAN NGUYEN
                      {
-                        //MessageInterface::ShowMessage("Errormodel in map: <%s>   dirivative object: <%s>\n", mapIndex->second.at(j)->GetFullName().c_str(), derivObjName.c_str());
                         if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)                 // made changes by TUAN NGUYEN
                         {
                            found = true;
@@ -933,9 +937,8 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                   for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
                      mapIndex != errmodelMap.end(); ++mapIndex)
                   {
-                     for (UnsignedInt j = 0; j < (mapIndex)->second.size(); ++j)                                 // made changes by TUAN NGUYEN
+                     for (UnsignedInt j = 0; j < (mapIndex)->second.size(); ++j)                     // made changes by TUAN NGUYEN
                      {
-                        //MessageInterface::ShowMessage("Errormodel in map: <%s>   dirivative object: <%s>\n", mapIndex->second.at(j)->GetFullName().c_str(), derivObjName.c_str());
                         if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)                 // made changes by TUAN NGUYEN
                         {
                            found = true;
@@ -964,12 +967,13 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
             MessageInterface::ShowMessage("   Deriv is w.r.t. something "
                      "independent, so zero\n");
          #endif
-            for (UnsignedInt i = 0; i < 3; ++i)
+            // Set 0 to all elements (number of elements is specified by size)  // made changes by TUAN NGUYEN 
+            //for (UnsignedInt i = 0; i < 3; ++i)                               // made changes by TUAN NGUYEN
+            for (UnsignedInt i = 0; i < size; ++i)                              // made changes by TUAN NGUYEN
                theDataDerivatives[0][i] += 0.0;
          }
    }
    
-
 
    if ((parameterID >= 0) && (logLevel < 2))
    {
@@ -1485,7 +1489,6 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
 #endif
 
    retval = true;
-
    return retval;
 }
 
@@ -1538,8 +1541,6 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       theData.corrections[i] = 0.0;
    }
 
-   //theData.correctionIDs.push_back("Troposphere");
-   //theData.corrections.push_back(0.0);
    if (troposphereModel == "HopfieldSaastamoinen")
    {
       if (troposphere == NULL)
@@ -1566,13 +1567,10 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       theData.corrections[i1] = 0.0;
    }
 
-   //theData.correctionIDs.push_back("Ionosphere");
-   //theData.corrections.push_back(0.0);
    if (ionosphereModel == "IRI2007")
    {
       if (ionosphere == NULL)
       {
-         // ionosphere = new Ionosphere(gs->GetName()+"_Ionosphere");                  // made changes by TUAN NGUYEN
          ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();  // made changes by TUAN NGUYEN
       }
       theData.useCorrection.push_back(true);
@@ -1688,8 +1686,6 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
       theData.corrections[i] = 0.0;
    }
 
-   //theData.correctionIDs.push_back("Troposphere");
-   //theData.corrections.push_back(0.0);
    if (troposphereModel == "HopfieldSaastamoinen")
    {
       if (troposphere == NULL)
@@ -1716,8 +1712,6 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
       theData.corrections[i1] = 0.0;
    }
 
-   //theData.correctionIDs.push_back("Ionosphere");
-   //theData.corrections.push_back(0.0);
    if (ionosphereModel == "IRI2007")
    {
       if (ionosphere == NULL)
@@ -1996,119 +1990,6 @@ void PhysicalSignal::AddCorrection(const std::string& modelName,
         correctionType.c_str(), modelName.c_str());
    #endif
    
-//   if (correctionType == "TroposphereModel")
-//   {
-//      if (modelName == "HopfieldSaastamoinen")
-//      {
-//         // Create troposphere model
-//         if (troposphere != NULL)
-//            delete troposphere;
-//         troposphere = new Troposphere(modelName);
-//         if (troposphere == NULL)
-//            throw MeasurementException("Error: Fail to create Troposphere model\n");
-//
-//         #ifdef DEBUG_MEASUREMENT_CORRECTION
-//            MessageInterface::ShowMessage("   Set as troposphere model:   troposphere(%p)\n", troposphere);
-//         #endif
-//       
-//         // Set correction to theData
-//         UnsignedInt i = 0;
-//         for (; i < theData.correctionIDs.size(); ++i)
-//            if (theData.correctionIDs[i] == "Troposphere")
-//               break;
-//         if (i == theData.correctionIDs.size())
-//         {
-//            theData.correctionIDs.push_back("Troposphere");
-//            theData.useCorrection.push_back(true);
-//            theData.corrections.push_back(0.0);
-//         }
-//         else
-//         {
-//            theData.useCorrection[i] = true;
-//            theData.corrections[i] = 0.0;
-//         }
-//      }
-//      else if (modelName == "None")
-//      {
-//         // Set correction to theData
-//         UnsignedInt i = 0;
-//         for (; i < theData.correctionIDs.size(); ++i)
-//         if (theData.correctionIDs[i] == "Troposphere")
-//            break;
-//         if (i < theData.correctionIDs.size())
-//         {
-//            theData.useCorrection[i] = false;
-//            theData.corrections[i] = 0.0;
-//         }
-//      }
-//      else
-//      {
-//         throw MeasurementException("Error: '" + modelName +"' is not a valid name for Troposphere correction.\n"
-//         +"Currently only 'HopfieldSaastamoinen' is allowed for Troposphere.\n");
-//      }
-//   }
-//   else if (correctionType == "IonosphereModel")
-//   {
-//      if (modelName == "IRI2007")
-//      {
-/////// TBD: Determine if there is a more generic way to add these
-//         // Create IRI2007 ionosphere model
-//         #ifdef IONOSPHERE
-//            // Create ionosphere model
-//            if (ionosphere != NULL)
-//               delete ionosphere;
-//            ionosphere = new Ionosphere(modelName);
-//            if (ionosphere == NULL)
-//               throw MeasurementException("Error: Fail to create Ionosphere model\n");
-//
-//            #ifdef DEBUG_MEASUREMENT_CORRECTION
-//               MessageInterface::ShowMessage("   Set as ionosphere model:    ionosphere(%p)\n", ionosphere);
-//            #endif
-//
-//            // Set correction
-//            UnsignedInt i = 0;
-//            for (; i < theData.correctionIDs.size(); ++i)
-//               if (theData.correctionIDs[i] == "Ionosphere")
-//                  break;
-//            if (i == theData.correctionIDs.size())
-//            {
-//               theData.correctionIDs.push_back("Ionosphere");
-//               theData.useCorrection.push_back(true);
-//               theData.corrections.push_back(0.0);
-//            }
-//            else
-//            {
-//               theData.useCorrection[i] = true;
-//               theData.corrections[i] = 0.0;
-//            }
-//         #else
-//            MessageInterface::ShowMessage("Ionosphere IRI2007 model currently is not "
-//                     "available.\nIt will be be added to GMAT in a future release.\n");
-//
-//            throw MeasurementException("Ionosphere IRI2007 model currently is not "
-//               "available.\nIt will be be added to GMAT in a future release.\n");
-//         #endif
-//      }
-//      else if (modelName == "None")
-//      {
-//         // Set correction to theData
-//         UnsignedInt i = 0;
-//         for (; i < theData.correctionIDs.size(); ++i)
-//            if (theData.correctionIDs[i] == "Ionosphere")
-//               break;
-//         if (i < theData.correctionIDs.size())
-//         {
-//            theData.useCorrection[i] = false;
-//            theData.corrections[i] = 0.0;
-//         }
-//      }
-//      else
-//      {
-//         throw MeasurementException("Error: '" + modelName + "' is not a valid name for Ionosphere correction.\n"
-//         +"Currently only 'IRI2007' is allowed for Ionosphere.\n");
-//      }
-//   }
-//   else 
    if (correctionType == "Relativity")
    {
       // Set relativity correction
@@ -2689,25 +2570,12 @@ Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData
       SpecifyBeginEndIndexesOfRampTable();
    }
 
-   //if (t <= (*rampTB)[0].epoch)
-	  // return (*rampTB)[0].rampFrequency;
-   //else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-	  // return (*rampTB)[(*rampTB).size()-1].rampFrequency;
    if (t <= (*rampTB)[beginIndex].epoch)
 	   return (*rampTB)[beginIndex].rampFrequency;
    else if (t >= (*rampTB)[endIndex-1].epoch)
 	   return (*rampTB)[endIndex-1].rampFrequency;
 
    // search for interval which contains time t:
-   //UnsignedInt interval_index = 0;
-   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   //{
-   //   if (t < (*rampTB)[i].epoch)
-	  // {
-   //      interval_index = i-1;      
-		 //  break;
-	  // }
-   //}
    UnsignedInt interval_index = beginIndex;
    for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
@@ -2755,25 +2623,12 @@ Integer PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTa
       SpecifyBeginEndIndexesOfRampTable();
    }
 
-   //if (t <= (*rampTB)[0].epoch)
-   //   return (*rampTB)[0].uplinkBand;
-   //else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-   //   return (*rampTB)[(*rampTB).size()-1].uplinkBand;
    if (t <= (*rampTB)[beginIndex].epoch)
       return (*rampTB)[beginIndex].uplinkBand;
    else if (t >= (*rampTB)[endIndex-1].epoch)
       return (*rampTB)[endIndex-1].uplinkBand;
 
    // search for interval which contains time t:
-   //Real upBand = 0;
-   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   //{
-   //   if (t < (*rampTB)[i].epoch)
-   //   {
-   //      upBand = (*rampTB)[i-1].uplinkBand;
-   //      break;
-   //   }
-   //}
    Real upBand = 0;
    for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {

@@ -78,7 +78,11 @@ MeasureModel::PARAMETER_TYPE[MeasurementParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const std::string &name) :
    GmatBase          (Gmat::MEASUREMENT_MODEL, "SignalBasedMeasurement", name),
-   stmRowCount       (6),
+
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+   stmRowCount       (6),                                                     // made changes by TUAN NGUYEN
+#endif
+
    feasible          (false),
    withLighttime     (true),
    propsNeedInit     (false),          // Only need init if one is set
@@ -171,7 +175,11 @@ MeasureModel::~MeasureModel()
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const MeasureModel& mm) :
    GmatBase          (mm),
-   stmRowCount       (mm.stmRowCount),
+
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+   stmRowCount       (mm.stmRowCount),                          // made changes by TUAN NGUYEN
+#endif
+
    feasible          (false),
    withLighttime     (mm.withLighttime),
    propsNeedInit     (false),
@@ -213,7 +221,11 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       GmatBase::operator=(mm);
 
       theData.clear();
-      stmRowCount         = mm.stmRowCount;
+
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+      stmRowCount         = mm.stmRowCount;             // made changes by TUAN NGUYEN
+#endif
+
       feasible            = false;
       withLighttime       = mm.withLighttime;
       navLog              = mm.navLog;
@@ -800,13 +812,15 @@ void MeasureModel::SetPropagator(PropSetup* ps)
          i != propMap.end(); ++i)
    {
       SpacePoint *obj = i->first;
-      
-      bool updateSTMRowCount = false;
-      if (obj->IsOfType(Gmat::SPACECRAFT))
-      {
-         stmRowCount = obj->GetIntegerParameter("FullSTMRowCount");
-         updateSTMRowCount = true;
-      }
+
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX      
+      bool updateSTMRowCount = false;                                     // made changes by TUAN NGUYEN
+      if (obj->IsOfType(Gmat::SPACECRAFT))                                // made changes by TUAN NGUYEN
+      {                                                                   // made changes by TUAN NGUYEN
+         stmRowCount = obj->GetIntegerParameter("FullSTMRowCount");       // made changes by TUAN NGUYEN
+         updateSTMRowCount = true;                                        // made changes by TUAN NGUYEN
+      }                                                                   // made changes by TUAN NGUYEN
+#endif
 
       if (obj->IsOfType(Gmat::SPACEOBJECT))
       {
@@ -819,14 +833,17 @@ void MeasureModel::SetPropagator(PropSetup* ps)
             for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
             {
                signalPaths[i]->SetPropagator(propagator, obj);
-               if (updateSTMRowCount)
-               {
-                  signalPaths[i]->SetStmRowCount(stmRowCount);
+
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+               if (updateSTMRowCount)                                     // made changes by TUAN NGUYEN
+               {                                                          // made changes by TUAN NGUYEN
+                  signalPaths[i]->SetStmRowCount(stmRowCount);            // made changes by TUAN NGUYEN
+               }                                                          // made changes by TUAN NGUYEN
+#endif
                }
             }
          }
       }
-   }
 }
 
 
@@ -1341,12 +1358,40 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
             sdObj->tLoc = state.GetR();
             sdObj->tVel = state.GetV();
 
-            // transmit participant STM at measurement time tm
+            // Specify transmit participant's STM at measurement time tm
+            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+	   		// Set size for tSTMtm
+            Integer stmRowCount = sdObj->tNode->GetIntegerParameter("FullSTMRowCount");                       // made changes by TUAN NGUYEN
+            if ((sdObj->tSTMtm.GetNumRows() != stmRowCount)||(sdObj->tSTMtm.GetNumColumns() != stmRowCount))  // made changes by TUAN NGUYEN
+               sdObj->tSTMtm.ChangeSize(stmRowCount, stmRowCount, true);                                      // made changes by TUAN NGUYEN
+
+			   // Get start index of STM
+			   const std::vector<ListItem*>* stateMap = propMap[sdObj->tNode]->GetPropStateManager()->GetStateMap();      // made changes by TUAN NGUYEN
+			   UnsignedInt stmStartIndex = -1;                                                                            // made changes by TUAN NGUYEN
+   			for (UnsignedInt index = 0; index < stateMap->size(); ++index)                                             // made changes by TUAN NGUYEN
+	   		{                                                                                                          // made changes by TUAN NGUYEN
+		   	   if (((*stateMap)[index]->object == sdObj->tNode) && ((*stateMap)[index]->elementName == "STM"))         // made changes by TUAN NGUYEN
+			      {
+				   	stmStartIndex = index;
+					   break;                                                                                               // made changes by TUAN NGUYEN
+			      }
+			   }                                                                                                          // made changes by TUAN NGUYEN
+
+   			// Set value for tSTMtm
+            for (UnsignedInt ii = 0; ii < stmRowCount; ++ii)                                          // made changes by TUAN NGUYEN
+               for (UnsignedInt jj = 0; jj < stmRowCount; ++jj)                                       // made changes by TUAN NGUYEN
+                  sdObj->tSTMtm(ii,jj) = propState[stmStartIndex + ii*stmRowCount + jj];              // made changes by TUAN NGUYEN
+            #else                                                                                     // made changes by TUAN NGUYEN
             for (UnsignedInt ii = 0; ii < 6; ++ii)
                for (UnsignedInt jj = 0; jj < 6; ++jj)
                   sdObj->tSTMtm(ii,jj) = propState[6 + ii*stmRowCount + jj];
+            #endif                                                                                    // made changes by TUAN NGUYEN
 
-            // transmit participant STM at transmite time t1
+            // transmit participant STM at transmit time t1
+            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+            if ((sdObj->tSTM.GetNumRows() != sdObj->tSTMtm.GetNumRows())||(sdObj->tSTM.GetNumColumns() != sdObj->tSTMtm.GetNumColumns()))  // made changes by TUAN NGUYEN
+               sdObj->tSTM.ChangeSize(sdObj->tSTMtm.GetNumRows(), sdObj->tSTMtm.GetNumColumns(), true);                                    // made changes by TUAN NGUYEN
+            #endif
             sdObj->tSTM = sdObj->tSTMtm;
          }
 
@@ -1365,11 +1410,39 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
             sdObj->rVel = state.GetV();
 
             // receive participant STM at measurement type tm
+            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+            Integer stmRowCount = sdObj->rNode->GetIntegerParameter("FullSTMRowCount");                       // made changes by TUAN NGUYEN
+			   // Set size for rSTMtm
+            if ((sdObj->rSTMtm.GetNumRows() != stmRowCount)||(sdObj->rSTMtm.GetNumColumns() != stmRowCount))  // made changes by TUAN NGUYEN
+               sdObj->rSTMtm.ChangeSize(stmRowCount, stmRowCount, true);                                      // made changes by TUAN NGUYEN
+
+			   // Get start index of STM
+			   const std::vector<ListItem*>* stateMap = propMap[sdObj->rNode]->GetPropStateManager()->GetStateMap();      // made changes by TUAN NGUYEN
+            UnsignedInt stmStartIndex = -1;                                                                            // made changes by TUAN NGUYEN
+            for (UnsignedInt index = 0; index < stateMap->size(); ++index)                                             // made changes by TUAN NGUYEN
+            {                                                                                                          // made changes by TUAN NGUYEN
+               if (((*stateMap)[index]->object == sdObj->rNode) && ((*stateMap)[index]->elementName == "STM"))         // made changes by TUAN NGUYEN
+               {                                                                                                       // made changes by TUAN NGUYEN
+                  stmStartIndex = index;                                                                               // made changes by TUAN NGUYEN
+                  break;                                                                                               // made changes by TUAN NGUYEN
+               }                                                                                                       // made changes by TUAN NGUYEN
+            }                                                                                                          // made changes by TUAN NGUYEN
+
+			   // Set value for eSTMtm
+            for (UnsignedInt ii = 0; ii < stmRowCount; ++ii)                                          // made changes by TUAN NGUYEN
+               for (UnsignedInt jj = 0; jj < stmRowCount; ++jj)                                       // made changes by TUAN NGUYEN
+                  sdObj->rSTMtm(ii,jj) = propState[stmStartIndex + ii*stmRowCount + jj];              // made changes by TUAN NGUYEN
+            #else                                                                                     // made changes by TUAN NGUYEN
             for (UnsignedInt ii = 0; ii < 6; ++ii)
                for (UnsignedInt jj = 0; jj < 6; ++jj)
                   sdObj->rSTMtm(ii,jj) = propState[6 + ii*stmRowCount + jj];
+            #endif                                                                                    // made changes by TUAN NGUYEN
 
             // receive participant STM at receive time t2
+            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
+            if ((sdObj->rSTM.GetNumRows() != sdObj->rSTMtm.GetNumRows())||(sdObj->rSTM.GetNumColumns() != sdObj->rSTMtm.GetNumColumns()))  // made changes by TUAN NGUYEN
+               sdObj->rSTM.ChangeSize(sdObj->rSTMtm.GetNumRows(), sdObj->rSTMtm.GetNumColumns(), true);                                    // made changes by TUAN NGUYEN
+            #endif
             sdObj->rSTM = sdObj->rSTMtm;
          }
 
@@ -1870,7 +1943,8 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
 {
    // 1. Specify the first signal leg
    PhysicalSignal* fleg = (PhysicalSignal*)signalPaths[pathIndex];
-   SignalData sd = fleg->GetSignalData();
+   SignalData sd;
+   sd = fleg->GetSignalData();
 
 
    // 2. Get frequency from sd.tNode

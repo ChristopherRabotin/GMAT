@@ -61,7 +61,11 @@ SignalBase::SignalBase(const std::string &typeStr, const std::string &name) :
    GmatBase             (Gmat::GENERIC_OBJECT, typeStr, name),
    next                 (NULL),
    previous             (NULL),
+
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                             // made changes by TUAN NGUYEN
    stmRowCount          (6),
+#endif                                                                  // made changes by TUAN NGUYEN
+
    tcs                  (NULL),
    rcs                  (NULL),
    ocs                  (NULL),
@@ -117,7 +121,11 @@ SignalBase::SignalBase(const SignalBase& sb) :
    next                 (NULL),
    previous             (NULL),
    theData              (sb.theData),
+
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                             // made changes by TUAN NGUYEN
    stmRowCount          (sb.stmRowCount),
+#endif                                                                  // made changes by TUAN NGUYEN
+
    tcs                  (NULL),
    rcs                  (NULL),
    ocs                  (NULL),
@@ -154,7 +162,10 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
       GmatBase::operator=(sb);
 
       theData             = sb.theData;
+
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                             // made changes by TUAN NGUYEN
       stmRowCount         = sb.stmRowCount;
+#endif                                                                  // made changes by TUAN NGUYEN
       
       if (tcs) 
          delete tcs;
@@ -531,24 +542,28 @@ void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
 }
 
 
-//------------------------------------------------------------------------------
-// void SetStmRowCount(UnsignedInt rc)
-//------------------------------------------------------------------------------
-/**
- * Updates the state transition matrix size used in the signal propagation
- *
- * @param rc The number of rows/columns in the state transition matrix
- */
-//------------------------------------------------------------------------------
-void SignalBase::SetStmRowCount(UnsignedInt rc)
-{
-   if (rc < 6)
-      throw MeasurementException("In the signal class, cannot set the STM row "
-            "count to the requested size; the STM must have at least 6 rows");
-   stmRowCount = rc;
-   if (next)
-      next->SetStmRowCount(rc);
-}
+// Note that: size of each spacecraft's STM may be different due to it contains                // made changes by TUAN NGUYEN
+// Cr and/or Cd or none of them. Therefore this function can not apply.                        // made changes by TUAN NGUYEN
+#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                                    // made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------               // made changes by TUAN NGUYEN
+// void SetStmRowCount(UnsignedInt rc)                                                         // made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------               // made changes by TUAN NGUYEN
+/**                                                                                            // made changes by TUAN NGUYEN
+ * Updates the state transition matrix size used in the signal propagation                     // made changes by TUAN NGUYEN
+ *                                                                                             // made changes by TUAN NGUYEN
+ * @param rc The number of rows/columns in the state transition matrix                         // made changes by TUAN NGUYEN
+ */                                                                                            // made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------               // made changes by TUAN NGUYEN
+void SignalBase::SetStmRowCount(UnsignedInt rc)                                                // made changes by TUAN NGUYEN
+{                                                                                              // made changes by TUAN NGUYEN
+   if (rc < 6)                                                                                 // made changes by TUAN NGUYEN
+      throw MeasurementException("In the signal class, cannot set the STM row "                // made changes by TUAN NGUYEN
+            "count to the requested size; the STM must have at least 6 rows");                 // made changes by TUAN NGUYEN
+   stmRowCount = rc;                                                                           // made changes by TUAN NGUYEN
+   if (next)                                                                                   // made changes by TUAN NGUYEN
+      next->SetStmRowCount(rc);                                                                // made changes by TUAN NGUYEN
+}                                                                                              // made changes by TUAN NGUYEN
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -1039,6 +1054,111 @@ void SignalBase::CalculateRangeRateVectorObs()
 }
 
 
+// made changes by TUAN NGUYEN
+Real SignalBase::GetCrDerivative(GmatBase *forObj)
+{
+   // Get C derivative vector
+   Rvector dVector;
+   GetCDerivativeVector(forObj, dVector);
+
+   // @todo: It needs to modify code for Cr index whenever a new spacecraft's solve-for is added
+   // Specify Cr index
+   UnsignedInt CrIndex = 0;
+
+   // Get Cr partial derivative
+   Real deriv = dVector[CrIndex];
+   
+   return deriv;
+}
+
+
+// made changes by TUAN NGUYEN
+Real SignalBase::GetCdDerivative(GmatBase *forObj)
+{
+   // Get C derivative vector
+   Rvector dVector;
+   GetCDerivativeVector(forObj, dVector);
+
+   // @todo: It needs to modify code forCd index whenever a new spacecraft's solve-for is added
+   // Specify Cd index
+   StringArray sa = ((Spacecraft*)forObj)->GetStringArrayParameter("SolveFors");   // get spacecraft solve-for variables
+   UnsignedInt i = 0;
+   for (; i < sa.size(); ++i)
+   {
+      if (sa[i] == "Cr")
+         break;
+   }
+
+   UnsignedInt CdIndex = 1;
+   if (i == sa.size())
+      CdIndex = 0;
+
+   // Get Cr partial derivative
+   Real deriv = dVector[CdIndex];
+
+   return deriv;
+}
+
+
+// made changes by TUAN NGUYEN
+void SignalBase::GetCDerivativeVector(GmatBase *forObj,Rvector &deriv)
+{
+   // 1. Calculate phi matrix
+   bool forTransmitter = true;
+   if (theData.rNode == forObj)
+      forTransmitter = false;
+   else
+   {
+      if (theData.tNode != forObj)
+         throw MeasurementException("Cr derivative requested, but "
+         "neither participant is the \"for\" object");
+   }
+   Rmatrix phi = (forTransmitter ? (theData.tSTM*theData.tSTMtm.Inverse()) : (theData.rSTM*theData.rSTMtm.Inverse()));
+
+
+   // 2. Calculate E matrix
+   Integer m = phi.GetNumColumns() - 6;
+   Rmatrix E(3,m);
+   for (Integer i = 0; i < 3; ++i)
+      for (Integer j = 0; j < m; ++j)
+         E(i, j) = phi(i, j+6);
+
+   
+   // 3. Calculate: sign * R * phi
+   Real sign = (forTransmitter ? -1.0 : 1.0);
+
+   Rmatrix33 body2FK5_matrix = (forTransmitter ? theData.tJ2kRotation :
+      theData.rJ2kRotation);
+   Rmatrix tempMatrix(3,m);
+   // tempMatrix = body2FK5_matrix * E;
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < m; ++j)
+      {
+         tempMatrix(i, j) = 0.0;
+         for (Integer k = 0; k < 3; ++k)
+            tempMatrix(i, j) += sign*body2FK5_matrix(i, k) * E(k, j);
+      }
+   }
+
+
+   // 4. Calculate range unit vector
+   Rvector3 rangeVec = theData.rangeVecInertial;
+   Rvector3 unitRange = rangeVec / rangeVec.GetMagnitude();
+
+
+   // 5. Calculate C vector derivative
+   deriv.SetSize(m);
+   for (Integer j = 0; j < m; ++j)
+   {
+      deriv[j] = 0.0;
+      for (Integer i = 0; i < 3; ++i)
+         deriv[j] += unitRange[i]*tempMatrix(i, j);
+   }
+}
+
+
+
 //------------------------------------------------------------------------------
 // void GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
 //       Rvector &deriv)
@@ -1060,9 +1180,9 @@ void SignalBase::GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
       derivMatrix.SetSize(6,6);
    else
       derivMatrix.SetSize(3,3);
-
+   
    GetRangeVectorDerivative(forObj, wrtR, wrtV, derivMatrix);
-
+   
    Rvector3 rangeVec = theData.rangeVecInertial;
    Rvector3 temp;
    Rmatrix33 mPart;
@@ -1299,15 +1419,29 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
                t.GetMjd(), theData.rPrecTime.GetMjd(), dt);
       #endif
       if (dt != 0.0)
+      {
          StepParticipant(dt, false);
+      }
       else
       {
          Rvector6 state;
+
+         #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                             // made changes by TUAN NGUYEN
+         Rmatrix stm;           // state transition matrix.                                     // made changes by TUAN NGUYEN
+         #else                                                                                  // made changes by TUAN NGUYEN
          Rmatrix66 stm;         // state transition matrix. Its default value is I matrix
+         #endif                                                                                 // made changes by TUAN NGUYEN
+
          if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
          {
             state = theData.rNode->GetMJ2000PrecState(theEpoch);
+
             // For a ground station, its STM is I matrix
+            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                             // made changes by TUAN NGUYEN
+            stm.SetSize(6,6,true);
+            for (UnsignedInt i = 0; i < 6; ++i)
+               stm(i,i) = 1.0;
+            #endif
          }
          else
          {
@@ -1322,9 +1456,32 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
             SpacePoint* forcemodelOrigin = theData.rPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
             state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.rPrecTime));                        // made changes by TUAN NGUYEN  fix bug GMT-5364
 
+            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                    // made changes by TUAN NGUYEN
+			   // Set size for stm
+            Integer stmRowCount = theData.rNode->GetIntegerParameter("FullSTMRowCount");  // made changes by TUAN NGUYEN
+            stm.SetSize(stmRowCount, stmRowCount, true);                                  // made changes by TUAN NGUYEN
+
+			   // Get start index of STM
+			   const std::vector<ListItem*>* map = theData.rPropagator->GetPropStateManager()->GetStateMap();     // made changes by TUAN NGUYEN
+            UnsignedInt stmStartIndex = -1;                                                                    // made changes by TUAN NGUYEN
+            for (UnsignedInt index = 0; index < map->size(); ++index)                                          // made changes by TUAN NGUYEN
+	   		{                                                                                                  // made changes by TUAN NGUYEN
+               if (((*map)[index]->object == theData.rNode) && ((*map)[index]->elementName == "STM"))          // made changes by TUAN NGUYEN
+               {                                                                                               // made changes by TUAN NGUYEN
+                  stmStartIndex = index;                                                                       // made changes by TUAN NGUYEN
+                  break;                                                                                       // made changes by TUAN NGUYEN
+               }                                                                                               // made changes by TUAN NGUYEN
+			   }                                                                                                  // made changes by TUAN NGUYEN
+
+			   // Set value for stm
+			   for (UnsignedInt i = 0; i < stmRowCount; ++i)                                 // made changes by TUAN NGUYEN
+               for (UnsignedInt j = 0; j < stmRowCount; ++j)                              // made changes by TUAN NGUYEN
+                  stm(i,j) = pstate[stmStartIndex + i*stmRowCount + j];                   // made changes by TUAN NGUYEN
+            #else                                                                         // made changes by TUAN NGUYEN
             for (UnsignedInt i = 0; i < 6; ++i)
                for (UnsignedInt j = 0; j < 6; ++j)
                   stm(i,j) = pstate[6 + i*stmRowCount + j];
+            #endif                                                                        // made changes by TUAN NGUYEN
          }
 
          theData.rLoc = state.GetR();
@@ -1353,15 +1510,29 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
                t.GetMjd(), theData.tPrecTime.GetMjd(), dt);
       #endif
       if (dt != 0.0)
+      {
          StepParticipant(dt, true);
+      }
       else
       {
          Rvector6 state;
+
+         #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                             // made changes by TUAN NGUYEN
+         Rmatrix stm;         // state transition matrix.                                       // made changes by TUAN NGUYEN
+         #else                                                                                  // made changes by TUAN NGUYEN
          Rmatrix66 stm;         // state transition matrix. Its default value is I matrix
+         #endif                                                                                 // made changes by TUAN NGUYEN
+
          if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
          {
             state = theData.tNode->GetMJ2000PrecState(theEpoch);
-            // For a ground station, its STM is I matrix
+
+            // For a ground station, its STM is a 6x6 I matrix
+            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                             // made changes by TUAN NGUYEN
+            stm.SetSize(6,6,true);
+            for (UnsignedInt i = 0; i < 6; ++i)
+               stm(i,i) = 1.0;
+            #endif
          }
          else
          {
@@ -1376,9 +1547,32 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
             SpacePoint* forcemodelOrigin = theData.tPropagator->GetODEModel()->GetForceOrigin();        // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
             state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.tPrecTime));                        // made changes by TUAN NGUYEN  fix bug GMT-5364
 
+            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                    // made changes by TUAN NGUYEN
+			   // Set size for stm
+            Integer stmRowCount = theData.tNode->GetIntegerParameter("FullSTMRowCount");  // made changes by TUAN NGUYEN
+            stm.SetSize(stmRowCount, stmRowCount, true);                                  // made changes by TUAN NGUYEN
+            
+			   // Get start index of STM
+			   const std::vector<ListItem*>* map = theData.tPropagator->GetPropStateManager()->GetStateMap();     // made changes by TUAN NGUYEN
+            UnsignedInt stmStartIndex = -1;                                                                    // made changes by TUAN NGUYEN
+            for (UnsignedInt index = 0; index < map->size(); ++index)                                          // made changes by TUAN NGUYEN
+            {                                                                                                  // made changes by TUAN NGUYEN
+               if (((*map)[index]->object == theData.tNode) && ((*map)[index]->elementName == "STM"))          // made changes by TUAN NGUYEN
+               {                                                                                               // made changes by TUAN NGUYEN
+                  stmStartIndex = index;                                                                       // made changes by TUAN NGUYEN
+                  break;                                                                                       // made changes by TUAN NGUYEN
+               }                                                                                               // made changes by TUAN NGUYEN
+            }                                                                                                  // made changes by TUAN NGUYEN
+            
+			   // Set value for stm
+            for (UnsignedInt i = 0; i < stmRowCount; ++i)                                 // made changes by TUAN NGUYEN
+               for (UnsignedInt j = 0; j < stmRowCount; ++j)                              // made changes by TUAN NGUYEN
+                  stm(i,j) = pstate[stmStartIndex + i*stmRowCount + j];                   // made changes by TUAN NGUYEN
+            #else                                                                         // made changes by TUAN NGUYEN
             for (UnsignedInt i = 0; i < 6; ++i)
                for (UnsignedInt j = 0; j < 6; ++j)
                   stm(i,j) = pstate[6 + i*stmRowCount + j];
+            #endif                                                                        // made changes by TUAN NGUYEN
          }
 
          theData.tLoc = state.GetR();
@@ -1467,7 +1661,12 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
    
    // 2. Propagate transmiter node (or receiver node) for stepToTake and specify its state
    Rvector6 state;
-   Rmatrix66 stm;
+
+   #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                             // made changes by TUAN NGUYEN
+   Rmatrix stm;         // state transition matrix.                                       // made changes by TUAN NGUYEN
+   #else                                                                                  // made changes by TUAN NGUYEN
+   Rmatrix66 stm;       // state transition matrix.
+   #endif                                                                                 // made changes by TUAN NGUYEN
 
    if (prop)      // Handle spacecraft
    {
@@ -1507,9 +1706,51 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
          state = state + (forcemodelOrigin->GetMJ2000PrecState(theData.rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(theData.rPrecTime));                        // made changes by TUAN NGUYEN  fix bug GMT-5364
       }                                                                                                                                                              // made changes by TUAN NGUYEN  fix bug GMT-5364
 
+      #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                    // made changes by TUAN NGUYEN
+	  // Set size for stm
+      Integer stmRowCount;                                                          // made changes by TUAN NGUYEN
+      if (forTransmitter)                                                           // made changes by TUAN NGUYEN
+         stmRowCount = theData.tNode->GetIntegerParameter("FullSTMRowCount");       // made changes by TUAN NGUYEN
+      else                                                                          // made changes by TUAN NGUYEN
+         stmRowCount = theData.rNode->GetIntegerParameter("FullSTMRowCount");       // made changes by TUAN NGUYEN
+      stm.SetSize(stmRowCount, stmRowCount, true);                                  // made changes by TUAN NGUYEN
+
+      // Get start index of STM
+	   UnsignedInt stmStartIndex = -1;                                                                    // made changes by TUAN NGUYEN
+	   if (forTransmitter)                                                                                // made changes by TUAN NGUYEN
+      {                                                                                                  // made changes by TUAN NGUYEN
+	      const std::vector<ListItem*>* map = theData.tPropagator->GetPropStateManager()->GetStateMap();  // made changes by TUAN NGUYEN
+         for (UnsignedInt index = 0; index < map->size(); ++index)                                       // made changes by TUAN NGUYEN
+		   {                                                                                               // made changes by TUAN NGUYEN
+            if (((*map)[index]->object == theData.tNode) && ((*map)[index]->elementName == "STM"))       // made changes by TUAN NGUYEN
+            {                                                                                            // made changes by TUAN NGUYEN
+               stmStartIndex = index;                                                                    // made changes by TUAN NGUYEN
+               break;                                                                                    // made changes by TUAN NGUYEN
+            }                                                                                            // made changes by TUAN NGUYEN
+		   }                                                                                               // made changes by TUAN NGUYEN
+	   }                                                                                                  // made changes by TUAN NGUYEN
+	   else                                                                                               // made changes by TUAN NGUYEN
+      {                                                                                                  // made changes by TUAN NGUYEN
+         const std::vector<ListItem*>* map = theData.rPropagator->GetPropStateManager()->GetStateMap();  // made changes by TUAN NGUYEN
+         for (UnsignedInt index = 0; index < map->size(); ++index)                                       // made changes by TUAN NGUYEN
+         {                                                                                               // made changes by TUAN NGUYEN
+            if (((*map)[index]->object == theData.rNode) && ((*map)[index]->elementName == "STM"))       // made changes by TUAN NGUYEN
+            {                                                                                            // made changes by TUAN NGUYEN
+               stmStartIndex = index;                                                                    // made changes by TUAN NGUYEN
+               break;                                                                                    // made changes by TUAN NGUYEN
+            }                                                                                            // made changes by TUAN NGUYEN
+         }                                                                                               // made changes by TUAN NGUYEN
+      }                                                                                                  // made changes by TUAN NGUYEN
+
+	  // Set value for stm
+      for (UnsignedInt i = 0; i < stmRowCount; ++i)                                 // made changes by TUAN NGUYEN
+         for (UnsignedInt j = 0; j < stmRowCount; ++j)                              // made changes by TUAN NGUYEN
+            stm(i,j) = outState[stmStartIndex + i*stmRowCount + j];                 // made changes by TUAN NGUYEN
+      #else                                                                         // made changes by TUAN NGUYEN
       for (UnsignedInt i = 0; i < 6; ++i)
          for (UnsignedInt j = 0; j < 6; ++j)
             stm(i,j) = outState[6 + i*stmRowCount + j];
+      #endif                                                                        // made changes by TUAN NGUYEN
 
       // Buffer the STM
       if (forTransmitter)
@@ -1541,7 +1782,12 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
          state = theData.rNode->GetMJ2000PrecState(theData.rPrecTime +
                stepToTake / GmatTimeConstants::SECS_PER_DAY);
       }
-      // For ground station, its STM is I matrix
+      #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                             // made changes by TUAN NGUYEN
+      // For ground station, its STM is a 6x6 I matrix
+      stm.SetSize(6,6,true);
+      for(UnsignedInt i = 0; i < 6; ++i)
+         stm(i,i) = 1.0;
+      #endif
    }
 
    // 3. Set value for SignalData object associated to transmiter node (or receiver node)
