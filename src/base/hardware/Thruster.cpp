@@ -350,6 +350,8 @@ Thruster& Thruster::operator=(const Thruster& th)
    
    localAxesLabels     = th.localAxesLabels;
    tankNames           = th.tankNames;
+
+   mixRatio.SetSize(th.mixRatio.GetSize());
    mixRatio            = th.mixRatio;
    
    // copy tanks
@@ -922,8 +924,15 @@ Real Thruster::SetRealParameter(const Integer id, const Real value,
 {
    if (id == MIXRATIO)
    {
-      if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+      Integer size = 0;
+      if (mixRatio.IsSized())
+         size = mixRatio.GetSize();
+      if ((!mixRatio.IsSized()) || (mixRatio.GetSize() < tankNames.size()))
+      {
          mixRatio.SetSize(tankNames.size());
+         for (Integer i = size; i < mixRatio.GetSize(); ++i)
+            mixRatio[i] = 1.0;
+      }
 
       if ((index < 0) || (index > mixRatio.GetSize()-1))
          throw HardwareException("Index out of bounds setting the mix ratio on " +

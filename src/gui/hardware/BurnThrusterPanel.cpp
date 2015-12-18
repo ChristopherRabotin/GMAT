@@ -46,6 +46,8 @@
 //#define DEBUG_BURNPANEL_SAVE
 //#define DEBUG_BURNPANEL_SAVE_COEFS
 
+#define USE_TANKMIXDIALOG
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -119,7 +121,7 @@ BurnThrusterPanel::~BurnThrusterPanel()
 //   theGuiManager->UnregisterComboBox("FuelTank", tankComboBox);
 
    if (localObject != NULL)
-	 delete localObject;
+      delete localObject;
 }
 
 //-------------------------------
@@ -301,20 +303,21 @@ void BurnThrusterPanel::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
             wxDefaultPosition, wxSize(150,-1), 0);
    tankTxtCtrl->SetToolTip(pConfig->Read(_T("TankHint")));
-   tankTxtCtrl->SetEditable(false);
-//       theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
-//   tankComboBox->SetToolTip(pConfig->Read(_T("TankHint")));
-
-   tankSelectorButton = new wxButton(this, ID_BUTTON, gmatwxT(GUI_ACCEL_KEY"Select Tanks"));
-   tankSelectorButton->SetToolTip(pConfig->Read(_T("TankHint")));
 
    wxStaticText *mixRatioLabel =
          new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Mix Ratio"));
    mixRatioTxtCtrl = new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
          wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mixRatioTxtCtrl->SetToolTip(pConfig->Read(_T("DutyCycleHint")));
+
+#ifdef USE_TANKMIXDIALOG
+   tankTxtCtrl->SetEditable(false);
    mixRatioTxtCtrl->SetEditable(false);
-   
+
+   tankSelectorButton = new wxButton(this, ID_BUTTON, gmatwxT(GUI_ACCEL_KEY"Select Tanks"));
+   tankSelectorButton->SetToolTip(pConfig->Read(_T("TankHint")));
+#endif
+
    ispLabel = NULL;
    ispTextCtrl = NULL;
    ispUnit = NULL;
@@ -368,11 +371,14 @@ void BurnThrusterPanel::Create()
    
    massSizer->Add(tankLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    massSizer->Add(tankTxtCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-//   massSizer->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   massSizer->Add(tankSelectorButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   massSizer->Add(mixRatioLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   massSizer->Add(mixRatioTxtCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+#ifdef USE_TANKMIXDIALOG
+   massSizer->Add(tankSelectorButton, 0, wxALIGN_LEFT | wxALL, bsize);
+#else
    massSizer->Add(20,20);
+#endif
+   massSizer->Add(mixRatioLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+   massSizer->Add(mixRatioTxtCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   massSizer->Add(20, 20);
    
 
    if (theObject->IsOfType(Gmat::IMPULSIVE_BURN))
@@ -577,7 +583,11 @@ void BurnThrusterPanel::LoadData()
       paramID = theObject->GetParameterID("MixRatio");
       Rvector theMix = theObject->GetRvectorParameter(paramID);
       for (Integer i = 0; i < theMix.GetSize(); ++i)
-         mixRatio.push_back(theMix[i]);
+         if (i < tankNames.size())
+            mixRatio.push_back(theMix[i]);
+         if (theMix.GetSize() < tankNames.size())
+            for (Integer i = theMix.GetSize(); i < tankNames.size(); ++i)
+               mixRatio.push_back(1.0);
 
       LoadTankAndMixControl();
       
@@ -698,23 +708,62 @@ void BurnThrusterPanel::LoadData()
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::SaveData()
 {
-   #ifdef DEBUG_BURNPANEL_SAVE
+#ifdef DEBUG_BURNPANEL_SAVE
    MessageInterface::ShowMessage("BurnThrusterPanel::SaveData() entered\n");
-   #endif
+#endif
    // create local copy of mObject
    if (localObject != NULL)
    {
-	   delete localObject;
+      delete localObject;
    }
    localObject = mObject->Clone();
    SaveData(localObject);
-   MessageInterface::ShowMessage("Saving data on %s\n", localObject->GetName().c_str());
+
+#ifndef USE_TANKMIXDIALOG
+   // Temporary code: Parse the strings in the text controls
+   try {
+      std::string tankNameStr = tankTxtCtrl->GetValue().mb_str().data();
+      std::string mixRatioStr = mixRatioTxtCtrl->GetValue().mb_str().data();
+
+      for (UnsignedInt i = 0; i < tankNameStr.size(); ++i)
+      if (tankNameStr[i] == ',')
+         tankNameStr[i] = ' ';
+
+      for (UnsignedInt i = 0; i < mixRatioStr.size(); ++i)
+      if (mixRatioStr[i] == ',')
+         mixRatioStr[i] = ' ';
+
+      std::stringstream names(tankNameStr);
+      std::string tn;
+      tankNames.clear();
+      while (names >> tn)
+         tankNames.push_back(tn);
+
+      Real mr;
+      std::stringstream mixes(mixRatioStr);
+      mixRatio.clear();
+      while (mixes >> mr)
+         mixRatio.push_back(mr);
+
+      if (tankNames.size() != mixRatio.size())
+      {
+         canClose = false;
+         throw GmatBaseException("The number of tanks and the list of mixes must match");
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      return;
+   }
+#endif
+
    localObject->TakeAction("ClearTanks");
+
    for (UnsignedInt i = 0; i < tankNames.size(); ++i)
       localObject->SetStringParameter("Tank", tankNames[i]);
-   for (UnsignedInt i = 0; i < tankNames.size(); ++i)
-      localObject->SetRealParameter("MixRatio",
-            (mixRatio.size() > i ? mixRatio[i] : 1.0), i);
+   for (UnsignedInt i = 0; i < mixRatio.size(); ++i)
+      localObject->SetRealParameter("MixRatio", mixRatio[i], i);
 
    // if no errors, save again
    if (canClose)
@@ -1014,6 +1063,7 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::OnButtonClick(wxCommandEvent &event)
 {  
+#ifdef USE_TANKMIXDIALOG
    if (event.GetEventObject() == tankSelectorButton)
    {
       if (mixRatio.size() < tankNames.size())
@@ -1052,6 +1102,7 @@ void BurnThrusterPanel::OnButtonClick(wxCommandEvent &event)
       }
    }
    else
+#endif
    {
       if (theObject->IsOfType("ChemicalThruster"))
       {
@@ -1209,7 +1260,11 @@ void BurnThrusterPanel::LoadTankAndMixControl()
    for (Integer i = 0; i < mixRatio.size(); ++i)
    {
       if (i > 0)
+#ifdef USE_TANKMIXDIALOG
          ratio << " : ";
+#else
+         ratio << ", ";
+#endif
       ratio << mixRatio[i];
    }
    mixRatioTxtCtrl->SetValue(ratio.str().c_str());
