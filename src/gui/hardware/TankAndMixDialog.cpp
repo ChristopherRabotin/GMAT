@@ -86,7 +86,7 @@ TankAndMixDialog::~TankAndMixDialog()
    #endif
    
    // Unregister GUI components
-//   theGuiManager->UnregisterListBox("CelestialPoint", mBodyListBox);
+   theGuiManager->UnregisterListBox("FuelTank", tankListBox, &selectedTanks);
 }
 
 
@@ -193,7 +193,8 @@ void TankAndMixDialog::OnButton(wxCommandEvent& event)
 {
    if ( event.GetEventObject() == addTankButton )
    {
-      wxString s = tankListBox->GetStringSelection(), t;
+      wxString s = tankListBox->GetStringSelection();
+      wxString t;
       
       if (s.IsEmpty())
          return;
@@ -293,8 +294,11 @@ void TankAndMixDialog::OnButton(wxCommandEvent& event)
 void TankAndMixDialog::OnSelectTank(wxCommandEvent& event)
 {
    wxGridCellCoordsArray cells = tankMixGrid->GetSelectedCells();
-   wxString s = tankMixGrid->GetCellValue(cells[0].GetRow(), cells[0].GetCol());
-   ShowTankOption(s, true);
+   if (cells.size() > 0)
+   {
+      wxString s = tankMixGrid->GetCellValue(cells[0].GetRow(), cells[0].GetCol());
+      ShowTankOption(s, true);
+   }
 }
 
 

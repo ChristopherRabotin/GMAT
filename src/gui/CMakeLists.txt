@@ -159,6 +159,7 @@ SET(GUI_SRCS
     function/MatlabFunctionSetupPanel.cpp
     hardware/BurnThrusterPanel.cpp
     hardware/PowerSystemConfigPanel.cpp
+    hardware/TankAndMixDialog.cpp
     hardware/ThrusterCoefficientDialog.cpp
     hardware/ThrusterConfigPanel.cpp
     mission/DecoratedTree.cpp
