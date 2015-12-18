@@ -356,16 +356,83 @@ TableTemplate<T>::SetSize(int r, int c, bool zeroElements)
 }
 
 //------------------------------------------------------------------------------
+//  virtual void ChangeSize(int r, int c, bool zeroElements);
+//------------------------------------------------------------------------------
+template <class T>
+void
+TableTemplate<T>::ChangeSize(int r, int c, bool zeroElements)
+{
+   // Verify input values
+   if ((r < 0) || (c < 0))
+   {
+      throw TableTemplateExceptions::IllegalSize();
+   }
+
+
+   // Step 1. Copy current table to a temporary buffer
+   T        *saved          = NULL;
+   Integer  oldRows         = rowsD;
+   Integer  oldCols         = colsD;
+
+   if (!zeroElements)
+   {
+      if (oldRows*oldCols != 0)
+      {
+         UnsignedInt size = oldRows*oldCols;
+         saved = new T[size];
+         for(UnsignedInt i = 0; i < size; ++i)
+            saved[i] = elementD[i];
+      }
+   }
+
+
+   // Step 2. Remove the current table
+   if (elementD != NULL)
+      delete [] elementD;
+   elementD = NULL;
+
+
+   // Step 3. Create a new table
+   Integer newSize = r*c;
+   if (newSize != 0)
+   {
+      elementD = new T[newSize];
+   }
+
+
+   // Step 4. Set new size and fill table content by 0
+   init(r,c);
+
+
+   // Step 5. fill all element by its old value
+   if (!zeroElements)
+   {
+      for (Integer ii = 0; ii < oldRows; ii++)
+      {
+         if (ii >= rowsD) break;
+         for (Integer jj = 0; jj < oldCols; jj++)
+         {
+            if (jj >= colsD) break;
+            // set to old values here
+            elementD[(ii * colsD) + jj] = saved[(ii * oldCols) + jj];
+         }
+      }
+      delete saved;
+   }
+}
+
+//------------------------------------------------------------------------------
 //  virtual void GetSize(int &r, int &c) const
 //------------------------------------------------------------------------------
 template <class T>
 void
 TableTemplate<T>::GetSize(int &r, int &c) const 
 {
-   if (isSizedD == false)
-   {
-      throw TableTemplateExceptions::UnsizedTable();
-   }
+   // It will get 0 when the table is unsized                     // made changes by TUAN NGUYEN
+   //if (isSizedD == false)                                       // made changes by TUAN NGUYEN
+   //{                                                            // made changes by TUAN NGUYEN
+   //   throw TableTemplateExceptions::UnsizedTable();            // made changes by TUAN NGUYEN
+   //}                                                            // made changes by TUAN NGUYEN
 
    r = rowsD;
    c = colsD;
@@ -378,10 +445,11 @@ template <class T>
 int
 TableTemplate<T>::GetNumColumns() const 
 {
-   if (isSizedD == false)
-   {
-      throw TableTemplateExceptions::UnsizedTable();
-   }
+   // It will get 0 when the table is unsized                     // made changes by TUAN NGUYEN
+   //if (isSizedD == false)                                       // made changes by TUAN NGUYEN
+   //{                                                            // made changes by TUAN NGUYEN
+   //   throw TableTemplateExceptions::UnsizedTable();            // made changes by TUAN NGUYEN
+   //}                                                            // made changes by TUAN NGUYEN
 
    return colsD;
 }
@@ -393,10 +461,11 @@ template <class T>
 int
 TableTemplate<T>::GetNumRows() const 
 {
-   if (isSizedD == false)
-   {
-      throw TableTemplateExceptions::UnsizedTable();
-   }
+   // It will get 0 when the table is unsized                     // made changes by TUAN NGUYEN
+   //if (isSizedD == false)                                       // made changes by TUAN NGUYEN
+   //{                                                            // made changes by TUAN NGUYEN
+   //   throw TableTemplateExceptions::UnsizedTable();            // made changes by TUAN NGUYEN
+   //}                                                            // made changes by TUAN NGUYEN
 
    return rowsD;
 }
