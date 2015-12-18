@@ -44,6 +44,7 @@
 #include "TrackingDataFactory.hpp"
 #include "ErrorModelFactory.hpp"                      // made changes by TUAN NGUYEN
 #include "EstimationDataFilterFactory.hpp"            // made changes by TUAN NGUYEN
+#include "NavPropagatorFactory.hpp"
 
 #ifndef USE_DATAFILE_PLUGIN
 	#include "DataFileFactory.hpp"
@@ -67,9 +68,9 @@ extern "C"
    Integer GetFactoryCount()
    {
 	   #ifdef USE_DATAFILE_PLUGIN
-   	   return 10;     //8;          // made changes by TUAN NGUYEN 
+   	   return 11;
    	#else 
-   		return 12;    // 10;        // made changes by TUAN NGUYEN
+   		return 13;
       #endif
    }
 
@@ -144,12 +145,16 @@ extern "C"
             factory = new ErrorModelFactory;                      // made changes by TUAN NGUYEN
             break;                                                // made changes by TUAN NGUYEN
 
+         case 10:
+            factory = new NavPropagatorFactory;
+            break;
+
          #ifndef USE_DATAFILE_PLUGIN
-            case 10:
+            case 11:
                factory = new DataFileFactory;
                break;
 
-            case 11:
+            case 12:
                factory = new ObTypeFactory;
                break;
          #endif

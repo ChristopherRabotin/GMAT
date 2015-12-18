@@ -44,6 +44,7 @@ SET(PLUGIN_DIRS
   measurementfile
   measurementmodel
   plugin
+  propagator
   reporter
   signal
   tdmReader
@@ -97,6 +98,7 @@ SET(PLUGIN_SRCS
     factory/EventFactory.cpp
     factory/MeasurementFactory.cpp
     factory/MeasurementModelFactory.cpp
+    factory/NavPropagatorFactory.cpp
     factory/ObTypeFactory.cpp
     factory/SignalModelFactory.cpp
     factory/TrackingDataFactory.cpp
@@ -141,6 +143,7 @@ SET(PLUGIN_SRCS
     measurementfile/RampTableType.cpp
     measurementmodel/MeasureModel.cpp
     plugin/GmatPluginFunctions.cpp
+    propagator/RungeKutta4.cpp
     reporter/ProgressReporter.cpp
     signal/PhysicalSignal.cpp
     signal/SignalBase.cpp

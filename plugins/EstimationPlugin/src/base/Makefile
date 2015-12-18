@@ -103,6 +103,7 @@ HEADERS = -Iinclude \
           -Ifactory \
           -Ihardware \
           -Iplugin \
+          -Ipropagator \
           -Imeasurement \
           -Imeasurement/Ionosphere \
           -Imeasurement/Troposphere \
@@ -195,6 +196,7 @@ CPP_OBJECTS = \
     factory/EstimatorHardwareFactory.o \
     factory/MeasurementFactory.o \
     factory/MeasurementModelFactory.o \
+    factory/NavPropagatorFactory.o \
     factory/TrackingDataFactory.o \
     factory/TrackingSystemFactory.o \
     hardware/Sensor.o \
@@ -226,6 +228,7 @@ CPP_OBJECTS = \
     $(IONOSPHERE_CPP_OBJECTS) \
     $(DATAFILE_OBJECTS) \
     measurementmodel/MeasureModel.o \
+    propagator/RungeKutta4.o \
     reporter/ProgressReporter.o \
     signal/SignalBase.o \
     signal/SignalData.o \
