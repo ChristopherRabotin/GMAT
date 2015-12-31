@@ -73,9 +73,11 @@ protected:
    RealArray   mfCoefs;
    StringArray tCoefNames;
    StringArray mfCoefNames;
+   // Tank settings
+   RealArray   mixRatio;
+   StringArray tankNames;
    
    std::string coordSysName;
-   std::string tankName;
    std::string thrustDir1;
    std::string thrustDir2;
    std::string thrustDir3;
@@ -124,6 +126,8 @@ protected:
    wxTextCtrl    *efficiencyTxtCtrl;
    wxTextCtrl    *ispTxtCtrl;
    wxTextCtrl    *constantThrustTxtCtrl;
+   wxTextCtrl    *tankTxtCtrl;
+   wxTextCtrl    *mixRatioTxtCtrl;
 
    wxString      *thrustModelArray;
 
@@ -131,11 +135,11 @@ protected:
 //   wxButton *kCoefButton;
    
    wxButton *configButton;
+   wxButton *tankSelectorButton;
 
    wxComboBox *coordSysComboBox;
    wxComboBox *originComboBox;
    wxComboBox *axesComboBox;
-   wxComboBox *tankComboBox;
    
    wxStaticText *XLabel;
    wxStaticText *YLabel;
@@ -154,6 +158,8 @@ protected:
    
    wxCheckBox *decMassCheckBox;
    
+   void LoadTankAndMixControl();
+
    DECLARE_EVENT_TABLE();
    
    // IDs for the controls and the menu commands

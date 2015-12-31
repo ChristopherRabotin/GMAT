@@ -106,6 +106,8 @@ protected:
 
    /// the number of segments
    Integer        numSegments;
+   /// in stream
+   std::ifstream ephFile;
 
    // Store a vector of segment pointers
    std::vector<CCSDSEMSegment*>   segments;

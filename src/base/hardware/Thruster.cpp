@@ -169,9 +169,8 @@ Thruster::Thruster(const std::string &typeStr, const std::string &nomme) :
    for (Integer i=DUTY_CYCLE; i < ThrusterParamCount; i++)
       parameterWriteOrder.push_back(i);
 
-   // Initialize mix ratio for a single tank
-   mixRatio.SetSize(1);
-   mixRatio.SetElement(0, 1.0);
+   // Initialize mix ratio for no tanks
+   mixRatio.SetSize(0);
 }
 
 
@@ -351,6 +350,8 @@ Thruster& Thruster::operator=(const Thruster& th)
    
    localAxesLabels     = th.localAxesLabels;
    tankNames           = th.tankNames;
+
+   mixRatio.SetSize(th.mixRatio.GetSize());
    mixRatio            = th.mixRatio;
    
    // copy tanks
@@ -923,8 +924,16 @@ Real Thruster::SetRealParameter(const Integer id, const Real value,
 {
    if (id == MIXRATIO)
    {
-      if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+      Integer size = 0;
+      if (mixRatio.IsSized())
+         size = mixRatio.GetSize();
+      if ((!mixRatio.IsSized()) || (mixRatio.GetSize() < tankNames.size()))
+      {
          mixRatio.SetSize(tankNames.size());
+         for (Integer i = size; i < mixRatio.GetSize(); ++i)
+            mixRatio[i] = 1.0;
+      }
+
       if ((index < 0) || (index > mixRatio.GetSize()-1))
          throw HardwareException("Index out of bounds setting the mix ratio on " +
                instanceName + "; there are not enough tanks to support the number "
@@ -1419,6 +1428,7 @@ bool Thruster::TakeAction(const std::string &action,
    {
       tankNames.clear();
       tanks.clear();
+      mixRatio.SetSize(0);
 
       return true;
    }
@@ -1486,6 +1496,17 @@ bool Thruster::Initialize()
    if (!retval)
       return false;
    
+   if (mixRatio.GetSize() == 0)
+   {
+      mixRatio.SetSize(tankNames.size());
+      for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+         mixRatio[i] = 1.0;
+   }
+   else if (mixRatio.GetSize() != tankNames.size())
+      throw HardwareException("Error in configuring tanks: the mix ratio is "
+            "sized differently from the number of tanks used by thruster " +
+            instanceName);
+
    if (!usingLocalCoordSys)
    {
       if (coordSystem == NULL)
