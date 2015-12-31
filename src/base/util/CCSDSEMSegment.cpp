@@ -236,6 +236,7 @@ CCSDSEMSegment::CCSDSEMSegment(const CCSDSEMSegment &copy) :
    segmentNumber       (copy.segmentNumber),
    dataSize            (copy.dataSize),
    dataType            (copy.dataType),
+   segError            (copy.segError),
    timeSystem          (copy.timeSystem),
    startTime           (copy.startTime),
    stopTime            (copy.stopTime),
@@ -251,6 +252,14 @@ CCSDSEMSegment::CCSDSEMSegment(const CCSDSEMSegment &copy) :
    firstUsable         (copy.firstUsable),
    lastUsable          (copy.lastUsable)
 {
+   for (Integer ii = 0; ii < (Integer) dataStore.size(); ii++)
+   {
+      delete dataStore.at(ii);
+   }
+   dataStore.clear();
+   dataComments.clear();
+   metaComments.clear();
+
    EpochAndData *ed;
    for (Integer jj = 0; jj < (Integer) copy.dataStore.size(); jj++)
    {
@@ -276,6 +285,7 @@ CCSDSEMSegment& CCSDSEMSegment::operator=(const CCSDSEMSegment &copy)
    segmentNumber       = copy.segmentNumber;
    dataSize            = copy.dataSize;
    dataType            = copy.dataType;
+   segError            = copy.segError;
    timeSystem          = copy.timeSystem;
    startTime           = copy.startTime;
    stopTime            = copy.stopTime;
