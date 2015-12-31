@@ -36,6 +36,7 @@
 #include "AttitudeConversionUtility.hpp"
 
 //#define DEBUG_CCSDS_ATTITUDE
+//#define DEBUG_CCSDS_ATTITUDE_INIT
 //#define DEBUG_CCSDS_ATTITUDE_GET_SET
 
 //------------------------------------------------------------------------------
@@ -83,7 +84,10 @@ CCSDSAttitude::CCSDSAttitude(const std::string &attName) :
 CCSDSAttitude::CCSDSAttitude(const CCSDSAttitude& att) :
    Attitude(att)
 {
-   reader = (att.reader)->Clone();
+   if (att.reader)
+      reader = (att.reader)->Clone();
+   else
+      reader = new CCSDSAEMReader();
 }
 
 //------------------------------------------------------------------------------
@@ -104,7 +108,10 @@ CCSDSAttitude& CCSDSAttitude::operator=(const CCSDSAttitude& att)
       return *this;
    Attitude::operator=(att);
    if (reader) delete reader;
-   reader = (att.reader)->Clone();
+   if (att.reader)
+      reader = (att.reader)->Clone();
+   else
+      reader = new CCSDSAEMReader();
    return *this;
 }
 
@@ -133,7 +140,7 @@ CCSDSAttitude::~CCSDSAttitude()
 //---------------------------------------------------------------------------
 bool CCSDSAttitude::Initialize()
 {
-   #ifdef DEBUG_CCSDS_ATTITUDE
+   #ifdef DEBUG_CCSDS_ATTITUDE_INIT
       MessageInterface::ShowMessage("Entering CCSDSAttitude::Initialize\n");
    #endif
    bool isOK = Attitude::Initialize();
@@ -147,9 +154,16 @@ bool CCSDSAttitude::Initialize()
       throw AttitudeException(errmsg);
    }
    
+   #ifdef DEBUG_CCSDS_ATTITUDE_INIT
+      MessageInterface::ShowMessage("In CCSDSAttitude::Initialize, about to call reader which is %sNULL\n",
+            (reader? "NOT " : ""));
+   #endif
    //reader->SetFile(aemFile);
    reader->SetFile(aemFileFullPath);
    reader->Initialize();
+   #ifdef DEBUG_CCSDS_ATTITUDE_INIT
+      MessageInterface::ShowMessage("EXITing CCSDSAttitude::Initialize\n");
+   #endif
    
    return true;
 }
@@ -186,10 +200,16 @@ GmatBase* CCSDSAttitude::Clone() const
 //------------------------------------------------------------------------------
 void CCSDSAttitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 {
+   #ifdef DEBUG_CCSDS_ATTITUDE
+      MessageInterface::ShowMessage("Entering CCSDSAttitude::Compute\n");
+   #endif
    if (!isInitialized || needsReinit)  Initialize();
 
    dcm = reader->GetState(atTime);
    // Currently, no angular velocity is computed for this attitude
+   #ifdef DEBUG_CCSDS_ATTITUDE
+      MessageInterface::ShowMessage("EXITing CCSDSAttitude::Compute\n");
+   #endif
 }
 
 
