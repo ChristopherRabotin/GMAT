@@ -653,6 +653,9 @@ bool Attitude::Initialize()
    MessageInterface::ShowMessage
       ("Attitude::Initialize() this=<%p>'%s' entered, refCS=<%p>\n",
        this, GetName().c_str(), refCS);
+   MessageInterface::ShowMessage
+      ("Attitude::Initialize() isInitialized=%s, needsReinit=%s\n",
+       (isInitialized? "true": "false"), (needsReinit? "true": "false"));
    #endif
    
    if (isInitialized && !needsReinit) return true;
@@ -725,6 +728,11 @@ bool Attitude::Initialize()
    needsReinit           = false;
    inputAttitudeType     = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
    inputAttitudeRateType = GmatAttitude::ANGULAR_VELOCITY_TYPE;
+
+   #ifdef DEBUG_ATTITUDE_INIT
+   MessageInterface::ShowMessage
+      ("Attitude::Initialize() EXITing\n");
+   #endif
    return true;
 }
 
