@@ -644,6 +644,8 @@ void BurnThrusterPanel::LoadData()
          tankLabel->Disable();
          tankTxtCtrl->Disable();
          tankComboBox->Disable();
+         mixRatioTxtCtrl->Disable();
+         mixRatioLabel->Disable();
 
          // g is only used to decrement mass
          gravityAccelLabel->Disable();
@@ -1021,6 +1023,8 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
       tankLabel->Enable();
       tankTxtCtrl->Enable();
       tankComboBox->Enable();
+      mixRatioTxtCtrl->Enable();
+      mixRatioLabel->Enable();
 
       // g is only used to decrement mass
       gravityAccelLabel->Enable();
@@ -1040,6 +1044,8 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
       tankLabel->Disable();
       tankTxtCtrl->Disable();
       tankComboBox->Disable();
+      mixRatioTxtCtrl->Disable();
+      mixRatioLabel->Disable();
 
       // g is only used to decrement mass
       gravityAccelLabel->Disable();
