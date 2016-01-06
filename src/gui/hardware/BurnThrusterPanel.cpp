@@ -908,7 +908,7 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
                {
                   theObject->SetStringParameter(paramID, tankNames[i]);
                   theObject->SetRealParameter(mixID,
-                        (mixRatio.size() < i ? mixRatio[i] : 1.0));
+                        (mixRatio.size() < i ? mixRatio[i] : 1.0), i);
                }
             }
             else
