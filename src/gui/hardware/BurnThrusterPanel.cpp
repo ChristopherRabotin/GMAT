@@ -46,7 +46,6 @@
 //#define DEBUG_BURNPANEL_SAVE
 //#define DEBUG_BURNPANEL_SAVE_COEFS
 
-#define USE_TANKMIXDIALOG
 
 //------------------------------
 // event tables for wxWindows
@@ -326,13 +325,11 @@ void BurnThrusterPanel::Create()
          wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mixRatioTxtCtrl->SetToolTip(pConfig->Read(_T("DutyCycleHint")));
 
-#ifdef USE_TANKMIXDIALOG
    tankTxtCtrl->SetEditable(false);
    mixRatioTxtCtrl->SetEditable(false);
 
    tankSelectorButton = new wxButton(this, ID_BUTTON, gmatwxT(GUI_ACCEL_KEY"Select Tanks"));
    tankSelectorButton->SetToolTip(pConfig->Read(_T("TankHint")));
-#endif
 
    ispLabel = NULL;
    ispTextCtrl = NULL;
@@ -1316,11 +1313,7 @@ void BurnThrusterPanel::LoadTankAndMixControl()
    for (Integer i = 0; i < mixRatio.size(); ++i)
    {
       if (i > 0)
-#ifdef USE_TANKMIXDIALOG
          ratio << " : ";
-#else
-         ratio << ", ";
-#endif
       ratio << mixRatio[i];
    }
    mixRatioTxtCtrl->SetValue(ratio.str().c_str());
