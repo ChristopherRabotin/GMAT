@@ -41,7 +41,7 @@ class BurnThrusterPanel: public GmatPanel
 {
 public:
    BurnThrusterPanel(wxWindow *parent, const wxString &name);
-   ~BurnThrusterPanel();
+   virtual ~BurnThrusterPanel();
    
    // Event Handling
    void OnTextChange(wxCommandEvent &event);
@@ -90,6 +90,8 @@ protected:
 
    bool isThrustModelChanged;
 
+   bool useMixRatio;
+
    // Chemical Thruster
    bool areCCoefsChanged;
    bool areKCoefsChanged;
@@ -100,6 +102,7 @@ protected:
    wxStaticText *originLabel;
    wxStaticText *axisLabel;
    wxStaticText *tankLabel;
+   wxStaticText *mixRatioLabel;
    wxStaticText *gravityAccelLabel;
    wxStaticText *gravityAccelUnit;
    wxStaticText *ispLabel;
@@ -140,7 +143,8 @@ protected:
    wxComboBox *coordSysComboBox;
    wxComboBox *originComboBox;
    wxComboBox *axesComboBox;
-   
+   wxComboBox *tankComboBox;
+
    wxStaticText *XLabel;
    wxStaticText *YLabel;
    wxStaticText *ZLabel;
@@ -159,6 +163,7 @@ protected:
    wxCheckBox *decMassCheckBox;
    
    void LoadTankAndMixControl();
+   void EnableMixRatio(bool activate);
 
    DECLARE_EVENT_TABLE();
    
