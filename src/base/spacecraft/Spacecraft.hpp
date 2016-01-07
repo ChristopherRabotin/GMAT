@@ -218,6 +218,7 @@ public:
    
    virtual bool         Validate();
    virtual bool         Initialize();
+   virtual void         IsManeuvering(bool mnvrFlag);
 
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");

@@ -54,8 +54,7 @@ public:
    TriggerManager(const TriggerManager& tm);
    TriggerManager& operator=(const TriggerManager& tm);
 
-   const Integer GetTriggerType();
-   const std::string GetTriggerTypeString();
+   Integer GetTriggerType();   const std::string GetTriggerTypeString();
 
    virtual TriggerManager* Clone() = 0;
    virtual bool CheckForTrigger() = 0;

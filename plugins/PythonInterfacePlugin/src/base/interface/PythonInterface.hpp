@@ -64,13 +64,11 @@ private:
    bool                       isPythonInitialized;
    /// Number of Python commands referenced in the GMAT script
    Integer                    numPyCommands;
-   /// Identity of the the platform being run
-   char                       *plF;
+   /// Path separator for the platform
+   std::string                plF;
 
    PythonInterface(const std::string &name);
    ~PythonInterface();
-   PythonInterface(const PythonInterface &pi);
-   PythonInterface&     operator=(const PythonInterface &pi);
 
    // Methods inherited from GmatBase
    virtual GmatBase*    Clone() const;

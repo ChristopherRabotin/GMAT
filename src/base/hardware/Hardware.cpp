@@ -356,6 +356,53 @@ Real Hardware::SetRealParameter(const std::string &label, const Real value)
 }
 
 
+Real Hardware::GetRealParameter(const Integer id,
+                                      const Integer index) const
+{
+   return GmatBase::GetRealParameter(id, index);
+}
+
+Real Hardware::SetRealParameter(const Integer id, const Real value,
+                                      const Integer index)
+{
+   return GmatBase::SetRealParameter(id, value, index);
+}
+
+Real Hardware::GetRealParameter(const std::string &label,
+                                      const Integer index) const
+{
+   return GetRealParameter(GetParameterID(label), index);
+}
+
+Real Hardware::SetRealParameter(const std::string &label,
+                                      const Real value,
+                                      const Integer index)
+{
+   return SetRealParameter(GetParameterID(label), value, index);
+}
+
+const Rvector& Hardware::GetRvectorParameter(const Integer id) const
+{
+   return GmatBase::GetRvectorParameter(id);
+}
+
+const Rvector& Hardware::SetRvectorParameter(const Integer id,
+                                         const Rvector &value)
+{
+   return GmatBase::SetRvectorParameter(id, value);
+}
+
+const Rvector& Hardware::GetRvectorParameter(const std::string &label) const
+{
+   return GetRvectorParameter(GetParameterID(label));
+}
+
+const Rvector& Hardware::SetRvectorParameter(const std::string &label,
+                                         const Rvector &value)
+{
+   return SetRvectorParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------
 // This function is used to verify a referenced object is properly set up

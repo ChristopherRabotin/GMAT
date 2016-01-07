@@ -70,6 +70,29 @@ public:
    virtual Real               SetRealParameter(const std::string &label,
                                          const Real value);
 
+   // Unused but implemented so the derived classes can call up the hierarchy
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
+   virtual Real         GetRealParameter(const std::string &label,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value,
+                                         const Integer index);
+
+   virtual const Rvector&
+                        GetRvectorParameter(const Integer id) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const Integer id,
+                                            const Rvector &value);
+   virtual const Rvector&
+                        GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const std::string &label,
+                                            const Rvector &value);
+
 //   virtual bool	 VerifyRefObject(std::string subTypeName, GmatBase* obj); // made changes by Tuan Nguyen
 
    DEFAULT_TO_NO_CLONES
