@@ -41,7 +41,7 @@ installer-internal: gmat.nsi assemble-internal
 	cp -p gmat-internal/GMAT/bin/gmat_startup_file.txt \
 	    gmat-internal/GMAT/bin/gmat_startup_file.wmatlab.txt
 	sed '/libMatlabInterface/s/^\( *PLUGIN\) /#\1/g' \
-	    gmat-internal/GMAT/bin/gmat_startup_file.txt \
+	    gmat-internal/GMAT/bin/gmat_startup_file.wmatlab.txt \
 	    | sed '/libFminconOptimizer/s/^\( *PLUGIN\) /#\1/g' \
 	    | unix2dos \
 	    > gmat-internal/GMAT/bin/gmat_startup_file.txt
@@ -55,7 +55,7 @@ installer-public: gmat.nsi assemble-public
 	cp -p gmat-public/GMAT/bin/gmat_startup_file.txt \
 	    gmat-public/GMAT/bin/gmat_startup_file.wmatlab.txt
 	sed '/libMatlabInterface/s/^\( *PLUGIN\) /#\1/g' \
-	    gmat-public/GMAT/bin/gmat_startup_file.txt \
+	    gmat-public/GMAT/bin/gmat_startup_file.wmatlab.txt \
 	    | sed '/libFminconOptimizer/s/^\( *PLUGIN\) /#\1/g' \
 	    | unix2dos \
 	    > gmat-public/GMAT/bin/gmat_startup_file.txt
