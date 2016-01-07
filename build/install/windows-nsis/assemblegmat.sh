@@ -86,9 +86,12 @@ then
 
     # proprietary plugins
     rm -rf "$dest"/plugins/proprietary/*
-    sed -i '/plugins\/proprietary/s/^\( *PLUGIN\) /#\1/g' \
+    sed '/plugins\/proprietary/s/^\( *PLUGIN\) /#\1/g' \
+        "$dest"/bin/gmat_startup_file.txt \
+        > "$dest"/bin/gmat_startup_file.public.txt
+    unix2dos "$dest"/bin/gmat_startup_file.public.txt
+    mv "$dest"/bin/gmat_startup_file.public.txt \
         "$dest"/bin/gmat_startup_file.txt
-    unix2dos "$dest"/bin/gmat_startup_file.txt
 fi
 
 # Remove git files
