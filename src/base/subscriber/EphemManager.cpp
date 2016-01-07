@@ -418,7 +418,9 @@ void EphemManager::StopRecording(bool done)
          MessageInterface::ShowMessage("In StopRecording, closing ephem file ...");
       #endif
       ephemFile->CloseEphemerisFile(false, true);
-      bool notAllDataWritten = ephemFile->InsufficientSPKData();
+      // Made general method name (LOJ: 2015.11.16)
+      //bool notAllDataWritten = ephemFile->InsufficientSPKData();
+      bool notAllDataWritten = ephemFile->InsufficientDataPoints();
       if (notAllDataWritten)
       {
          std::string warn = "*** WARNING *** Insufficient ephemeris data ";
@@ -444,7 +446,8 @@ void EphemManager::StopRecording(bool done)
          MessageInterface::ShowMessage("-==-==-= Calling CloseEphemerisFile\n");
       #endif
       ephemFile->CloseEphemerisFile(false, true);
-      bool notAllDataWritten = ephemFile->InsufficientSPKData();
+      //bool notAllDataWritten = ephemFile->InsufficientSPKData();
+      bool notAllDataWritten = ephemFile->InsufficientDataPoints();
       if (notAllDataWritten)
       {
          std::string warn = "*** WARNING *** Insufficient ephemeris data ";
@@ -849,7 +852,7 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
    if ((Integer) szObs > 0)
    {
-      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++ )
+      for (unsigned int ii = 0; ii < occultingBodyNames.size(); ii++ )
       {
          CelestialBody *body = solarSys->GetBody(occultingBodyNames.at(ii));
 
@@ -1035,7 +1038,7 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
    if (includeAll)
    {
       StringArray inputKernels = theSc->GetStringArrayParameter("OrbitSpiceKernelName");
-      for (Integer ii = 0; ii < inputKernels.size(); ii++)
+      for (unsigned int ii = 0; ii < inputKernels.size(); ii++)
          inKernels.push_back(inputKernels.at(ii));
    }
    #ifdef DEBUG_EM_COVERAGE
