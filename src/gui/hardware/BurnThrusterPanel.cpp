@@ -643,7 +643,7 @@ void BurnThrusterPanel::LoadData()
          // Tanks needed to apply nontrivial coefficients, so don't disable
          tankLabel->Disable();
          tankTxtCtrl->Disable();
-         tankComboBox->Disable();
+//         tankComboBox->Disable();
          mixRatioTxtCtrl->Disable();
          mixRatioLabel->Disable();
 
@@ -1022,7 +1022,7 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
       // Disabling disabled so no need to enable
       tankLabel->Enable();
       tankTxtCtrl->Enable();
-      tankComboBox->Enable();
+//      tankComboBox->Enable();
       mixRatioTxtCtrl->Enable();
       mixRatioLabel->Enable();
 
@@ -1043,7 +1043,7 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
       // Tanks needed to apply nontrivial coefficients, so don't disable
       tankLabel->Disable();
       tankTxtCtrl->Disable();
-      tankComboBox->Disable();
+//      tankComboBox->Disable();
       mixRatioTxtCtrl->Disable();
       mixRatioLabel->Disable();
 
