@@ -85,6 +85,11 @@ public:
    virtual std::string  GetOnOffParameter(const std::string &label) const;
    virtual bool         SetOnOffParameter(const std::string &label,
                                           const std::string &value);
+
+   virtual bool         GetBooleanParameter(const Integer id) const;                 // made changes by TUAN NGUYEN
+   virtual bool         SetBooleanParameter(const Integer id,                        // made changes by TUAN NGUYEN
+                                            const bool value);                       // made changes by TUAN NGUYEN
+
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
 
@@ -261,6 +266,8 @@ protected:
    Real constMult;
    Real additiveConst;
 
+   /// Flag indicating to reset best RMS when estimation is diverged                      // made changes by TUAN NGUYEN 
+   bool resetBestRMSFlag;                                                                  // made changes by TUAN NGUYEN
 
    /// Number of removed observation data records
    std::map<std::string, UnsignedInt> numRemovedRecords;
@@ -281,6 +288,7 @@ protected:
       MAX_RESIDUAL_MULTIPLIER,
       CONSTANT_MULTIPLIER,
       ADDITIVE_CONSTANT,
+      RESET_BEST_RMS,                         // made changes by TUAN NGUYEN
       CONVERGENT_STATUS,
       EstimatorParamCount
    };

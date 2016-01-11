@@ -67,6 +67,7 @@ Estimator::PARAMETER_TEXT[] =
    "OLSEInitialRMSSigma",
    "OLSEMultiplicativeConstant",
    "OLSEAdditiveConstant",
+   "ResetBestRMSIfDiverging",
    "ConvergentStatus",
 };
 
@@ -83,6 +84,7 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::BOOLEAN_TYPE,
    Gmat::STRING_TYPE,
 };
 
@@ -123,7 +125,8 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    locatingEvent        (false),
    maxResidualMult      (3000.0),
    constMult            (3.0),
-   additiveConst        (0.0)
+   additiveConst        (0.0),
+   resetBestRMSFlag     (false)                          // made changes by TUAN NGUYEN
 {
 
    objectTypeNames.push_back("Estimator");
@@ -189,7 +192,8 @@ Estimator::Estimator(const Estimator& est) :
    locatingEvent        (false),
    maxResidualMult      (est.maxResidualMult),
    constMult            (est.constMult),
-   additiveConst        (est.additiveConst)
+   additiveConst        (est.additiveConst),
+   resetBestRMSFlag     (est.resetBestRMSFlag)                // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("Estimator::Estimator() enter: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
@@ -263,6 +267,7 @@ Estimator& Estimator::operator=(const Estimator& est)
       maxResidualMult      = est.maxResidualMult;
       constMult            = est.constMult;
       additiveConst        = est.additiveConst;
+      resetBestRMSFlag     = est.resetBestRMSFlag;             // made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -999,6 +1004,52 @@ bool Estimator::SetOnOffParameter(const std::string &label,
       const std::string &value)
 {
    return SetOnOffParameter(GetParameterID(label), value);
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* Gets value of a boolean parameter
+*
+* @param id       The id of parameter
+*
+* @return         value of boolean parameter
+*/
+//------------------------------------------------------------------------------
+bool Estimator::GetBooleanParameter(const Integer id) const
+{
+   if (id == RESET_BEST_RMS)
+      return resetBestRMSFlag;
+
+   return Solver::GetBooleanParameter(id);
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+* Sets value to a boolean parameter
+*
+* @param id       The id of parameter
+* @param value    The value used to set to a boolean parameter
+*
+* @return         true if the setting is successed, false otherwise
+*/
+//------------------------------------------------------------------------------
+bool Estimator::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == RESET_BEST_RMS)
+   {
+      resetBestRMSFlag = value;
+      return true;
+   }
+
+   return Solver::SetBooleanParameter(id, value);
 }
 
 

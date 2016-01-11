@@ -762,7 +762,16 @@ void BatchEstimatorInv::Estimate()
    if (iterationsTaken == 0)
       bestResidualRMS = newResidualRMS;
    else
-      bestResidualRMS = GmatMathUtil::Min(bestResidualRMS,newResidualRMS);
+   {
+      // Reset best RMS as needed                                            // made changes by TUAN NGUYEN
+      if (resetBestRMSFlag)                                                  // made changes by TUAN NGUYEN
+      {                                                                      // made changes by TUAN NGUYEN
+         if (estimationStatus == DIVERGING)                                  // made changes by TUAN NGUYEN
+            bestResidualRMS = oldResidualRMS;                                // made changes by TUAN NGUYEN
+      }                                                                      // made changes by TUAN NGUYEN
+
+      bestResidualRMS = GmatMathUtil::Min(bestResidualRMS, newResidualRMS);
+   }
 
    // Solve normal equation
    #ifdef DEBUG_VERBOSE
