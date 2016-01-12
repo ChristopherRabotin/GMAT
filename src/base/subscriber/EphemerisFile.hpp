@@ -48,7 +48,7 @@ public:
    // This method called from GUI
    std::string          GetProperFileName(const std::string &fName,
                                           const std::string &fType,
-                                          bool setFileName);
+                                          bool saveFileName);
    
    virtual void         SetBackgroundGeneration(bool inBackground);
    
@@ -161,6 +161,7 @@ protected:
    bool        firstTimeWriting;
    bool        useFixedStepSize;
    bool        checkForLargeTimeGap;
+   bool        isEphemFileOpened;
    bool        canFinalize;
    
    FileType    fileType;
@@ -193,8 +194,10 @@ protected:
    // Initialization
    void         ValidateParameters(bool forInitialization);
    Real         ConvertInitialAndFinalEpoch();
-   void         CreateEphemerisWriter();
    void         InitializeData(bool saveEpochInfo = false);
+   void         SetFileName();
+   void         CreateEphemerisFile();
+   void         CreateEphemerisWriter();
    
    // Time and data
    bool         HandleEndOfRun();
@@ -227,9 +230,6 @@ protected:
    
    // Time formatting
    std::string  ToUtcGregorian(Real epoch, bool inDays = false, Integer format = 2);
-   
-   // // Error message formatting
-   // void FormatErrorMessage(std::string &ephemMsg, std::string &errMsg);
    
    // Debug output
    void         DebugWriteTime(const std::string &msg, Real epoch, bool inDays = false,

@@ -40,7 +40,7 @@
 
 //#define DEBUG_EPHEMFILE_INSTANCE
 //#define DEBUG_EPHEMFILE_INIT
-//#define DEBUG_EPHEMFILE_OPEN
+//#define DEBUG_EPHEMFILE_CREATE
 //#define DEBUG_EPHEMFILE_SPICE
 //#define DEBUG_EPHEMFILE_BUFFER
 //#define DEBUG_EPHEMFILE_ORBIT
@@ -278,7 +278,7 @@ void EphemWriterSPK::CreateEphemerisFile(bool useDefaultFileName,
                                          const std::string &stType,
                                          const std::string &outFormat)
 {
-   #ifdef DEBUG_EPHEMFILE_OPEN
+   #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
       ("EphemWriterSPK::CreateEphemerisFile() <%p> entered, useDefaultFileName=%d, "
        "outFormat='%s'\n   fullPathFileName='%s'\n", this, useDefaultFileName,
@@ -290,7 +290,7 @@ void EphemWriterSPK::CreateEphemerisFile(bool useDefaultFileName,
    CreateSpiceKernelWriter();
    isEphemFileOpened = true;
    
-   #ifdef DEBUG_EPHEMFILE_OPEN
+   #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
       ("EphemWriterSPK::CreateEphemerisFile() <%p> leaving, writingNewSegment=%d\n   "
        "fullPathFileName='%s'\n", this, writingNewSegment, fullPathFileName.c_str());
@@ -303,17 +303,17 @@ void EphemWriterSPK::CreateEphemerisFile(bool useDefaultFileName,
 //------------------------------------------------------------------------------
 void EphemWriterSPK::CreateSpiceKernelWriter()
 {
-   #ifdef DEBUG_EPHEMFILE_SPICE
+   #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
       ("EphemWriterSPK::CreateSpiceKernelWriter() entered, spkWriter=<%p>, "
-       "isInitialized=%d, firstTimeWriting=%d\n   prevFileName='%s', "
-       "fileName='%s', spacecraft=<%p>\n", spkWriter, isInitialized, firstTimeWriting,
+       "isInitialized=%d, firstTimeWriting=%d\n   prevFileName='%s'\n   "
+       "    fileName='%s', spacecraft=<%p>\n", spkWriter, isInitialized, firstTimeWriting,
        prevFileName.c_str(), fileName.c_str(), spacecraft);
    #endif
    
    if (spacecraft == NULL)
    {
-      #ifdef DEBUG_EPHEMFILE_SPICE
+      #ifdef DEBUG_EPHEMFILE_CREATE
       MessageInterface::ShowMessage
          ("EphemWriterSPK::CreateSpiceKernelWriter() just leaving, spacecraft is not set\n");
       #endif
@@ -350,7 +350,7 @@ void EphemWriterSPK::CreateSpiceKernelWriter()
       Integer objNAIFId = spacecraft->GetIntegerParameter("NAIFId");
       Integer centerNAIFId = (outCoordSystem->GetOrigin())->GetIntegerParameter("NAIFId");
       
-      #ifdef DEBUG_EPHEMFILE_SPICE
+      #ifdef DEBUG_EPHEMFILE_CREATE
       MessageInterface::ShowMessage
          ("   Creating SpiceOrbitKernelWriter with name='%s', centerName='%s', "
           "objNAIFId=%d, centerNAIFId=%d\n   fileName='%s', interpolationOrder=%d\n",
@@ -374,7 +374,7 @@ void EphemWriterSPK::CreateSpiceKernelWriter()
          // Keep from setting a warning
          e.GetMessageType();
          
-         #ifdef DEBUG_EPHEMFILE_SPICE
+         #ifdef DEBUG_EPHEMFILE_CREATE
          MessageInterface::ShowMessage(
             "  Error creating SpiceOrbitKernelWriter: %s", (e.GetFullMessage()).c_str());
          #endif
@@ -392,7 +392,7 @@ void EphemWriterSPK::CreateSpiceKernelWriter()
    #endif
    //=======================================================
    
-   #ifdef DEBUG_EPHEMFILE_SPICE
+   #ifdef DEBUG_EPHEMFILE_CREATE
    MessageInterface::ShowMessage
       ("EphemWriterSPK::CreateSpiceKernelWriter() leaving, spkWriter=<%p>\n",
        spkWriter);

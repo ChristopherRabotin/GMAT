@@ -43,7 +43,7 @@ public:
    EphemerisWriter& operator=(const EphemerisWriter&);
    
    // Methods for this class
-   void  SetFilename(const std::string &currFileName,
+   void  SetFileName(const std::string &currFileName,
                      const std::string &currFullName,
                      const std::string &prevFullName);
    void  SetSpacecraft(Spacecraft *sc);
@@ -70,6 +70,7 @@ public:
    void  HandleEndOfRun();
    // bool  HandlePropDirectionChange();
    
+   bool  IsEphemFileOpened();
    bool  IsFirstTimeWriting();
    bool  IsDataEmpty();
    bool  HasFinalEpochProcessed();

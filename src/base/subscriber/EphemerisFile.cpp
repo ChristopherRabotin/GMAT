@@ -175,6 +175,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    firstTimeWriting     (true),
    useFixedStepSize     (false),
    checkForLargeTimeGap (false),
+   isEphemFileOpened    (false),
    canFinalize          (false),
    fileType             (UNKNOWN_FILE_TYPE)
 {
@@ -325,6 +326,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    firstTimeWriting     (ef.firstTimeWriting),
    useFixedStepSize     (ef.useFixedStepSize),
    checkForLargeTimeGap (ef.checkForLargeTimeGap),
+   isEphemFileOpened    (ef.isEphemFileOpened),
    canFinalize          (ef.canFinalize)
 {
    #ifdef DEBUG_EPHEMFILE_INSTANCE
@@ -392,6 +394,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    firstTimeWriting     = ef.firstTimeWriting;
    useFixedStepSize     = ef.useFixedStepSize;
    checkForLargeTimeGap = ef.checkForLargeTimeGap;
+   isEphemFileOpened    = ef.isEphemFileOpened;
    canFinalize          = ef.canFinalize;
    return *this;
 }
@@ -405,12 +408,12 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
 //------------------------------------------------------------------------------
 std::string EphemerisFile::GetProperFileName(const std::string &fName,
                                              const std::string &fType,
-                                             bool setFileName)
+                                             bool saveFileName)
 {
    #ifdef DEBUG_EPHEMFILE_EXTENSION
    MessageInterface::ShowMessage
       ("EphemerisFile::GetProperFileName() entered, fName='%s', fType='%s', "
-       "setFileName=%d\n", fName.c_str(), fType.c_str(), setFileName);
+       "saveFileName=%d\n", fName.c_str(), fType.c_str(), saveFileName);
    #endif
    
    std::string expFileName = fName;
@@ -430,7 +433,7 @@ std::string EphemerisFile::GetProperFileName(const std::string &fName,
       {
          std::string ofname = expFileName;
          expFileName = GmatStringUtil::Replace(expFileName, parsedExt, defaultExt);
-         if (setFileName)
+         if (saveFileName)
          {
             MessageInterface::ShowMessage
                ("*** WARNING *** %s file extension should be \"%s\", so "
@@ -445,9 +448,9 @@ std::string EphemerisFile::GetProperFileName(const std::string &fName,
       else
       {
          // We don't want to change the extension for other format such as Code-500
-         // but we want to change it if creating new from the GUI. If setFileName
+         // but we want to change it if creating new from the GUI. If saveFileName
          // is set to false, this method is called from the GUI.
-         if (!setFileName)
+         if (!saveFileName)
          {
             expFileName = GmatStringUtil::Replace(expFileName, parsedExt, defaultExt);
          }
@@ -457,7 +460,7 @@ std::string EphemerisFile::GetProperFileName(const std::string &fName,
    {
       std::string ofname = expFileName;
       expFileName = expFileName + defaultExt;
-      if (setFileName)
+      if (saveFileName)
       {
          MessageInterface::ShowMessage
             ("*** WARNING *** %s file extension should be \"%s\", so "
@@ -475,150 +478,6 @@ std::string EphemerisFile::GetProperFileName(const std::string &fName,
       ("EphemerisFile::GetProperFileName() returning '%s'\n", expFileName.c_str());
    #endif
    return expFileName;
-}
-
-
-//------------------------------------------------------------------------------
-// void ValidateParameters(bool forInitialization)
-//------------------------------------------------------------------------------
-void EphemerisFile::ValidateParameters(bool forInitialization)
-{
-   #ifdef DEBUG_EPHEMFILE_INIT
-   MessageInterface::ShowMessage
-      ("EphemerisFile::ValidateParameters() <%p>'%s' entered, forInitialization=%d\n",
-       this, GetName().c_str(), forInitialization);
-   #endif
-   
-   if (fileFormat == "SPK")
-   {
-      if (stateType == "Quaternion")
-         throw SubscriberException
-            ("Currently GMAT only supports writing orbit states in SPK format");
-      
-      if (interpolatorName == "Hermite" && GmatMathUtil::IsEven(interpolationOrder))
-         throw SubscriberException
-            ("The SPK file interpolation order must be an odd number when using "
-             "Hermite interpolator");
-   }
-   else
-   {
-      // check for FileFormat and StateType
-      if ((fileFormat == "CCSDS-OEM" && stateType == "Quaternion") ||
-          (fileFormat == "CCSDS-AEM" && stateType == "Cartesian") ||
-          (fileFormat == "Code-500" && stateType == "Quaternion"))
-         throw SubscriberException
-            ("FileFormat \"" + fileFormat + "\" and StateType " + "\"" + stateType +
-             "\" does not match for the EphemerisFile \"" + GetName() + "\"");
-      
-      // check interpolator type
-      if (stepSize != "IntegratorSteps")
-      {
-         // check for StateType Cartesian and Interpolator
-         if (stateType == "Cartesian" && interpolatorName != "Lagrange")
-            throw SubscriberException
-               ("The Interpolator must be \"Lagrange\" for StateType of \"Cartesian\" for "
-                "the EphemerisFile \"" + GetName() + "\"");
-         
-         // check for StateType Quaternion and Interpolator
-         if (stateType == "Quaternion" && interpolatorName != "SLERP")
-            throw SubscriberException
-               ("The Interpolator must be \"SLERP\" for StateType of \"Quaternion\" for "
-                "the EphemerisFile \"" + GetName() + "\"");
-      }
-      
-      if (fileFormat == "Code-500")
-      {
-         if (!useFixedStepSize)
-            throw SubscriberException
-               ("Code-500 ephemeris file \"" + GetName() + "\" requires fixed step size");
-         
-         // Give default step size for code-500
-         if (stepSize == "IntegratorSteps")
-         {
-            stepSize = "60";
-            stepSizeInSecs = 60.0;
-         }
-      }
-   }
-   
-   // By this time, coordinate system should not be NULL, so check it
-   if (outCoordSystem == NULL)
-      throw SubscriberException
-         ("The CoordinateSystem \"" + outCoordSystemName + "\" has not been set for "
-          "the EphemerisFile \"" + GetName() + "\"");
-   
-   // Do some validation
-   if (fileFormat == "SPK" || fileFormat == "Code-500")
-   {
-      #ifdef DEBUG_EPHEMFILE_INIT
-      MessageInterface::ShowMessage
-         ("   outCoordSystem=<%p>'%s'\n", outCoordSystem, outCoordSystem->GetName().c_str());
-      #endif
-      if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
-      {
-         SubscriberException se;
-         se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
-                       "with MJ2000Eq Axis", fileFormat.c_str(), GetName().c_str());
-         throw se;
-      }
-      
-      // Check for valid central body for Code500 ephem
-      // 1=Earth, 2=Luna(Earth Moon), 3=Sun, 4=Mars, 5=Jupiter, 6=Saturn, 7=Uranus,
-      // 8=Neptune, 9=Pluto, 10=Mercury, 11=Venus
-      if (fileFormat == "Code-500")
-      {
-         std::string origin = outCoordSystem->GetOriginName();
-         if (origin != "Earth" && origin != "Luna" && origin != "Sun" &&
-             origin != "Mars" && origin != "Jupiter" && origin != "Saturn" &&
-             origin != "Uranus" && origin != "Neptune" && origin != "Pluto" &&
-             origin != "Mercury" && origin != "Venus")
-         {
-            SubscriberException se;
-            se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
-                          "with Sun, Planet or Luna(Earth Moon) origin", fileFormat.c_str(),
-                          GetName().c_str());
-            throw se;
-         }
-      }
-   }
-   
-   // Catch invalid initial epoch early if spacecraft is not NULL
-   if (spacecraft != NULL)
-      ConvertInitialAndFinalEpoch();
-   
-   // If for initialization, all other pointers should have been set, so check it
-   if (forInitialization)
-   {
-      // check for NULL pointers
-      if (spacecraft == NULL)
-         throw SubscriberException
-            ("The Spacecraft \"" + spacecraftName + "\" has not been set for "
-             "the EphemerisFile \"" + GetName() + "\"");
-      
-      if (theDataCoordSystem == NULL)
-         throw SubscriberException
-            ("The internal CoordinateSystem which orbit data represents has not been set for "
-             "the EphemerisFile \"" + GetName() + "\"");
-   }
-   
-   if (forInitialization)
-   {
-      #ifdef DEBUG_EPHEMFILE_INIT
-      MessageInterface::ShowMessage
-         ("   spacecraft=<%p>'%s', outCoordSystem=<%p>'%s', theDataCoordSystem=<%p>'%s'\n",
-          spacecraft, spacecraft->GetName().c_str(), outCoordSystem,
-          outCoordSystem->GetName().c_str(), theDataCoordSystem,
-          theDataCoordSystem->GetName().c_str());
-      #endif
-   }
-   
-   // if (ephemWriter)
-   //    ephemWriter->ValidateParameters(forInitialization);
-   
-   #ifdef DEBUG_EPHEMFILE_INIT
-   MessageInterface::ShowMessage
-      ("EphemerisFile::ValidateParameters() <%p>'%s' leaving\n", this, GetName().c_str());
-   #endif
 }
 
 
@@ -1244,13 +1103,27 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       {
          #ifdef DEBUG_EPHEMFILE_INIT
          MessageInterface::ShowMessage
-            ("EphemerisFile::Initialize() <%p>'%s' is already initialized so finish "
-             "it first, if ephemeris file is opened, ephemWriter=<%p>\n", this,
+            ("EphemerisFile::SetStringParameter() <%p>'%s' is already initialized "
+             "so finish it first, if ephemeris file is opened, ephemWriter=<%p>\n", this,
              GetName().c_str(), ephemWriter);
          #endif
          // if (isEphemFileOpened)
          if (ephemWriter)
-            FinishUpWriting();
+         {
+            isEphemFileOpened = ephemWriter->IsEphemFileOpened();
+            #ifdef DEBUG_EPHEMFILE_INIT
+            MessageInterface::ShowMessage
+               ("ephemWriter->IsEphemFileOpened()=%d\n", isEphemFileOpened);
+            #endif
+            if (isEphemFileOpened)
+            {
+               #ifdef DEBUG_EPHEMFILE_INIT
+               MessageInterface::ShowMessage
+                  ("EphemerisFile::SetStringParameter() calling FinishUpWriting()\n");
+               #endif
+               FinishUpWriting();
+            }
+         }
       }
       
       prevFileName = fileName;
@@ -1263,10 +1136,13 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       if (!isInitialized)
          prevFileName = fileName;
       
+      // Set new name to EphemerisWriter
+      SetFileName();
+      
       usingDefaultFileName = false;
       #ifdef DEBUG_EPHEMFILE_SET
       MessageInterface::ShowMessage
-         ("   prevFileName='%s'\n   fileName='%s'\n   fullPathFileName='%s'\n",
+         ("       prevFileName='%s'\n           fileName='%s'\n   fullPathFileName='%s'\n",
           prevFileName.c_str(), fileName.c_str(), fullPathFileName.c_str());
       MessageInterface::ShowMessage
          ("EphemerisFile::SetStringParameter() this=<%p>'%s' returning true\n",
@@ -1560,6 +1436,151 @@ Real EphemerisFile::ConvertInitialAndFinalEpoch()
    return satInitialEpoch;
 }
 
+
+//------------------------------------------------------------------------------
+// void ValidateParameters(bool forInitialization)
+//------------------------------------------------------------------------------
+void EphemerisFile::ValidateParameters(bool forInitialization)
+{
+   #ifdef DEBUG_EPHEMFILE_INIT
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ValidateParameters() <%p>'%s' entered, forInitialization=%d\n",
+       this, GetName().c_str(), forInitialization);
+   #endif
+   
+   if (fileFormat == "SPK")
+   {
+      if (stateType == "Quaternion")
+         throw SubscriberException
+            ("Currently GMAT only supports writing orbit states in SPK format");
+      
+      if (interpolatorName == "Hermite" && GmatMathUtil::IsEven(interpolationOrder))
+         throw SubscriberException
+            ("The SPK file interpolation order must be an odd number when using "
+             "Hermite interpolator");
+   }
+   else
+   {
+      // check for FileFormat and StateType
+      if ((fileFormat == "CCSDS-OEM" && stateType == "Quaternion") ||
+          (fileFormat == "CCSDS-AEM" && stateType == "Cartesian") ||
+          (fileFormat == "Code-500" && stateType == "Quaternion"))
+         throw SubscriberException
+            ("FileFormat \"" + fileFormat + "\" and StateType " + "\"" + stateType +
+             "\" does not match for the EphemerisFile \"" + GetName() + "\"");
+      
+      // check interpolator type
+      if (stepSize != "IntegratorSteps")
+      {
+         // check for StateType Cartesian and Interpolator
+         if (stateType == "Cartesian" && interpolatorName != "Lagrange")
+            throw SubscriberException
+               ("The Interpolator must be \"Lagrange\" for StateType of \"Cartesian\" for "
+                "the EphemerisFile \"" + GetName() + "\"");
+         
+         // check for StateType Quaternion and Interpolator
+         if (stateType == "Quaternion" && interpolatorName != "SLERP")
+            throw SubscriberException
+               ("The Interpolator must be \"SLERP\" for StateType of \"Quaternion\" for "
+                "the EphemerisFile \"" + GetName() + "\"");
+      }
+      
+      if (fileFormat == "Code-500")
+      {
+         if (!useFixedStepSize)
+            throw SubscriberException
+               ("Code-500 ephemeris file \"" + GetName() + "\" requires fixed step size");
+         
+         // Give default step size for code-500
+         if (stepSize == "IntegratorSteps")
+         {
+            stepSize = "60";
+            stepSizeInSecs = 60.0;
+         }
+      }
+   }
+   
+   // By this time, coordinate system should not be NULL, so check it
+   if (outCoordSystem == NULL)
+      throw SubscriberException
+         ("The CoordinateSystem \"" + outCoordSystemName + "\" has not been set for "
+          "the EphemerisFile \"" + GetName() + "\"");
+   
+   // Do some validation
+   if (fileFormat == "SPK" || fileFormat == "Code-500")
+   {
+      #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage
+         ("   outCoordSystem=<%p>'%s'\n", outCoordSystem, outCoordSystem->GetName().c_str());
+      #endif
+      if (!outCoordSystem->AreAxesOfType("MJ2000EqAxes"))
+      {
+         SubscriberException se;
+         se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
+                       "with MJ2000Eq Axis", fileFormat.c_str(), GetName().c_str());
+         throw se;
+      }
+      
+      // Check for valid central body for Code500 ephem
+      // 1=Earth, 2=Luna(Earth Moon), 3=Sun, 4=Mars, 5=Jupiter, 6=Saturn, 7=Uranus,
+      // 8=Neptune, 9=Pluto, 10=Mercury, 11=Venus
+      if (fileFormat == "Code-500")
+      {
+         std::string origin = outCoordSystem->GetOriginName();
+         if (origin != "Earth" && origin != "Luna" && origin != "Sun" &&
+             origin != "Mars" && origin != "Jupiter" && origin != "Saturn" &&
+             origin != "Uranus" && origin != "Neptune" && origin != "Pluto" &&
+             origin != "Mercury" && origin != "Venus")
+         {
+            SubscriberException se;
+            se.SetDetails("%s ephemeris file \"%s\" only allows coordinate system "
+                          "with Sun, Planet or Luna(Earth Moon) origin", fileFormat.c_str(),
+                          GetName().c_str());
+            throw se;
+         }
+      }
+   }
+   
+   // Catch invalid initial epoch early if spacecraft is not NULL
+   if (spacecraft != NULL)
+      ConvertInitialAndFinalEpoch();
+   
+   // If for initialization, all other pointers should have been set, so check it
+   if (forInitialization)
+   {
+      // check for NULL pointers
+      if (spacecraft == NULL)
+         throw SubscriberException
+            ("The Spacecraft \"" + spacecraftName + "\" has not been set for "
+             "the EphemerisFile \"" + GetName() + "\"");
+      
+      if (theDataCoordSystem == NULL)
+         throw SubscriberException
+            ("The internal CoordinateSystem which orbit data represents has not been set for "
+             "the EphemerisFile \"" + GetName() + "\"");
+   }
+   
+   if (forInitialization)
+   {
+      #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage
+         ("   spacecraft=<%p>'%s', outCoordSystem=<%p>'%s', theDataCoordSystem=<%p>'%s'\n",
+          spacecraft, spacecraft->GetName().c_str(), outCoordSystem,
+          outCoordSystem->GetName().c_str(), theDataCoordSystem,
+          theDataCoordSystem->GetName().c_str());
+      #endif
+   }
+   
+   // if (ephemWriter)
+   //    ephemWriter->ValidateParameters(forInitialization);
+   
+   #ifdef DEBUG_EPHEMFILE_INIT
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ValidateParameters() <%p>'%s' leaving\n", this, GetName().c_str());
+   #endif
+}
+
+
 //------------------------------------------------------------------------------
 // void InitializeData(bool saveEpochInfo = true)
 //------------------------------------------------------------------------------
@@ -1588,6 +1609,45 @@ void EphemerisFile::InitializeData(bool saveEpochInfo)
    MessageInterface::ShowMessage
       ("===== EphemerisFile::InitializeData() <%p>'%s' leaving, currEpochInSecs=%.15f, "
        "prevEpochInSecs=%.15f\n", this, GetName().c_str(), currEpochInSecs, prevEpochInSecs);
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// void SetFileName()
+//------------------------------------------------------------------------------
+void EphemerisFile::SetFileName()
+{
+   if (ephemWriter)
+      ephemWriter->SetFileName(fileName, fullPathFileName, prevFileName);
+}
+
+//------------------------------------------------------------------------------
+// void CreateEphemerisFile()
+//------------------------------------------------------------------------------
+void EphemerisFile::CreateEphemerisFile()
+{
+   #ifdef DEBUG_EPHEMFILE_INIT
+   MessageInterface::ShowMessage
+      ("EphemerisFile::CreateEphemerisFile() <%p>'%s' entered, usingDefaultFileName=%d\n"
+       "   stateType='%s', outputFormat='%s', fileFormat='%s'\n", this, GetName().c_str(),
+       usingDefaultFileName, stateType.c_str(), outputFormat.c_str(), fileFormat.c_str());
+   #endif
+   
+   if (ephemWriter)
+   {
+      ephemWriter->CreateEphemerisFile(usingDefaultFileName, stateType, outputFormat);
+      isEphemFileOpened = ephemWriter->IsEphemFileOpened();
+   }
+   
+   // old code:
+   // if (fileType == SPK_ORBIT)
+   //    CreateSpiceKernelWriter();
+   // else if (fileType == CODE500_EPHEM)
+   //    CreateCode500EphemerisFile();
+   
+   #ifdef DEBUG_EPHEMFILE_INIT
+   MessageInterface::ShowMessage
+      ("EphemerisFile::CreateEphemerisFile() <%p>'%s' leaving\n", this, GetName().c_str());
    #endif
 }
 
@@ -1634,16 +1694,18 @@ void EphemerisFile::CreateEphemerisWriter()
       ("   Calling ephemWriter to set objects, create EphemerisFile, and to initialize\n");
    #endif
    GetProperFileName(fileName, fileFormat, true);
-   ephemWriter->SetFilename(fileName, fullPathFileName, prevFileName);
+   SetFileName();
+   //ephemWriter->SetFilename(fileName, fullPathFileName, prevFileName);
    ephemWriter->SetSpacecraft(spacecraft);
    ephemWriter->SetDataCoordSystem(theDataCoordSystem);
    ephemWriter->SetOutCoordSystem(outCoordSystem);
-   ephemWriter->CreateEphemerisFile(usingDefaultFileName, stateType, outputFormat);
    ephemWriter->SetInitialData(initialEpochStr, finalEpochStr, stepSize, stepSizeInSecs,
                                useFixedStepSize, interpolatorName, interpolationOrder);
    ephemWriter->SetInitialTime(initialEpochA1Mjd, finalEpochA1Mjd);
    ephemWriter->SetIsEphemGlobal(IsGlobal());
    ephemWriter->Initialize();
+   CreateEphemerisFile();
+   // ephemWriter->CreateEphemerisFile(usingDefaultFileName, stateType, outputFormat);
    
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
@@ -2514,6 +2576,16 @@ bool EphemerisFile::Distribute(const Real *dat, Integer len)
    // CreateEphmerisWriter will throw an exception if failed to create
    if (ephemWriter == NULL)
       CreateEphemerisWriter();
+   
+   if (!isEphemFileOpened)
+   {
+      #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage
+         ("===> EphemerisFile::Distribute() <%p>'%s' creating EphemerisFile of type '%s'\n",
+          this, GetName().c_str(), fileFormat.c_str());
+      #endif
+      CreateEphemerisFile();
+   }
    
    // If end of run received, finishup writing
    if (isEndOfRun)

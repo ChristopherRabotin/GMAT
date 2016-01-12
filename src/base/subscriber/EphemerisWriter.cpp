@@ -341,16 +341,16 @@ EphemerisWriter& EphemerisWriter::operator=(const EphemerisWriter& ef)
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void SetFilename(const std::string &currFileName, const std::string &currFullName,
+// void SetFileName(const std::string &currFileName, const std::string &currFullName,
 //                  const std::string &prevFullName)
 //------------------------------------------------------------------------------
-void EphemerisWriter::SetFilename(const std::string &currFileName,
+void EphemerisWriter::SetFileName(const std::string &currFileName,
                                   const std::string &currFullName,
                                   const std::string &prevFullName)
 {
    #ifdef DEBUG_EPHEMFILE_SET
    MessageInterface::ShowMessage
-      ("EphemerisWriter::SetFilename() <%p> entered\n   currFileName='%s'\n   "
+      ("EphemerisWriter::SetFileName() <%p> entered\n   currFileName='%s'\n   "
        "currFullName='%s'\n   prevFullName='%s'\n   writingNewSegment=%d\n", this,
        currFileName.c_str(), currFullName.c_str(), prevFullName.c_str(),
        writingNewSegment);
@@ -810,6 +810,14 @@ void EphemerisWriter::CloseEphemerisFile(bool done, bool writeMetaData)
 bool EphemerisWriter::InsufficientDataPoints()
 {
    return insufficientDataPoints;
+}
+
+//------------------------------------------------------------------------------
+// bool IsEphemFileOpened()
+//------------------------------------------------------------------------------
+bool EphemerisWriter::IsEphemFileOpened()
+{
+   return isEphemFileOpened;
 }
 
 //------------------------------------------------------------------------------
