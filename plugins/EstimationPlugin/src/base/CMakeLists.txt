@@ -173,3 +173,29 @@ endif()
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+
+
+
+# ====================================================================
+# Additional link libraries
+TARGET_LINK_LIBRARIES(${TargetName} ${XERCES_LIBRARY})
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+# TBD
+#  if(APPLE)
+#    if(GMAT_MAC_APPBUNDLE_PATH)
+#      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
+#    else()
+#      SET(MAC_BASEPATH ";@loader_path/libwx/") # Separate base/wx dirs
+#    endif()
+#    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+#      "@loader_path/${MAC_BASEPATH}"
+#      )
+#  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/lib/"
+      )
+#  endif()
+endif()
