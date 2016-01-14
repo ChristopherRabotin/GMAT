@@ -217,7 +217,6 @@ else()
   SET(PYTHON_LIBRARY "python34.lib")
 endif()
 
-
 MESSAGE(STATUS "Python Library: " ${PYTHON_LIBRARY})
 
 if(PYTHON_LIB_DIR)
@@ -225,6 +224,27 @@ if(PYTHON_LIB_DIR)
 else()
   MESSAGE(WARNING "Python NOT FOUND. Set PYTHON_LIB_DIR to your Python34.lib library path, and PYTHON_INCLUDE_DIR to the path to Python.h and re-configure.")
 endif()
+
+
+# Find Xerces
+MESSAGE(STATUS "Searching for Xerces")
+SET(XERCES_DIR "${PROJECT_SOURCE_DIR}/depends/Xerces")
+SET(XERCES_LIB_DIR "" CACHE PATH "Path to location of the Xerces library.")
+SET(XERCES_INCLUDE_DIR "" CACHE PATH "Path to location of xercesc folder")
+MESSAGE(STATUS "Please set the Xerces locations")
+
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    SET(XERCES_LIBRARY "xerces-c-3.1")
+  else()
+    SET(XERCES_LIBRARY "xerces-c-3.1")
+  endif()
+else()
+  # Check this for Win
+  SET(XERCES_LIBRARY "xerces-c-3.1.lib")
+endif()
+
 
 # ====================================================================
 # Common build options
