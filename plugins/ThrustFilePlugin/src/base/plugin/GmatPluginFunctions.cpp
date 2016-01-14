@@ -22,6 +22,7 @@
 #include "GmatPluginFunctions.hpp"
 #include "ThrustFileForceFactory.hpp"
 #include "ThrustFileCommandFactory.hpp"
+#include "ThrustFileReaderFactory.hpp"
 #include "MessageInterface.hpp"
 
 // Modify this line to match your factory list:
@@ -40,7 +41,7 @@ extern "C"
    Integer GetFactoryCount()
    {
       // Update this line with the total number of factories you support:
-      return 2;
+      return 3;
    }
    
    //------------------------------------------------------------------------------
@@ -67,6 +68,9 @@ extern "C"
          case 1:
             factory = new ThrustFileCommandFactory;
             break;
+
+         case 2:
+            factory = new ThrustFileReaderFactory;
 
          default:
             break;

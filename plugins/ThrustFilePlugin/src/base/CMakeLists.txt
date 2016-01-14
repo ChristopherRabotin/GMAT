@@ -37,6 +37,7 @@ SET(PLUGIN_SRCS
     datareader/ThrustHistoryFile.cpp
     factory/ThrustFileCommandFactory.cpp
     factory/ThrustFileForceFactory.cpp
+    factory/ThrustFileReaderFactory.cpp
     forcemodel/FileThrust.cpp
     plugin/GmatPluginFunctions.cpp
 )

@@ -23,12 +23,46 @@
 ThrustHistoryFile::ThrustHistoryFile(const std::string& theName) :
    FileReader        ("ThrustHistoryFile", theName)
 {
-   // TODO Auto-generated constructor stub
-
+   objectTypes.push_back(Gmat::INTERFACE);
+   objectTypeNames.push_back("ThrustHistoryFile");
+//   parameterCount = ImpulsiveBurnParamCount;
 }
 
 ThrustHistoryFile::~ThrustHistoryFile()
 {
-   // TODO Auto-generated destructor stub
 }
 
+ThrustHistoryFile::ThrustHistoryFile(const ThrustHistoryFile& thf) :
+   FileReader        (thf)
+{
+}
+
+ThrustHistoryFile& ThrustHistoryFile::operator =(const ThrustHistoryFile& thf)
+{
+   if (this != &thf)
+   {
+      FileReader::operator =(thf);
+   }
+
+   return *this;
+}
+
+GmatBase* ThrustHistoryFile::Clone() const
+{
+   return new ThrustHistoryFile(*this);
+}
+
+bool ThrustHistoryFile::RenameRefObject(Gmat::ObjectType type,
+      const std::string& oldname, const std::string& newname)
+{
+   bool retval = false;
+
+   return retval;
+}
+
+bool ThrustHistoryFile::ReadData()
+{
+   bool retval = false;
+
+   return retval;
+}
