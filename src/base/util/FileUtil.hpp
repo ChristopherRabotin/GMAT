@@ -99,7 +99,7 @@ namespace GmatFileUtil
                            const char *filename2,
                            const char *filename3,
                            int &file1DiffCount, int &file2DiffCount,
-                           int &file3DiffCount);
+                           int &file3DiffCount, bool skipBlankLines = false);
    
    StringArray GMAT_API &CompareTextLines(Integer numDirsToCompare,
                            const std::string &basefilename,
@@ -107,7 +107,7 @@ namespace GmatFileUtil
                            const std::string &filename2,
                            const std::string &filename3,
                            int &file1DiffCount, int &file2DiffCount,
-                           int &file3DiffCount);
+                           int &file3DiffCount, bool skipBlankLines = false);
    
    StringArray GMAT_API &CompareNumericLines(Integer numDirsToCompare,
                            const char *basefilename,
