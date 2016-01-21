@@ -615,8 +615,14 @@ bool SolarFluxReader::LoadPredictData()
    while (!inPredict.eof())
    {
       GmatFileUtil::GetLine(&inPredict, theLine);
-      if (theLine.find("BEGIN_DATA") != std::string::npos)
+
+      // Skip header lines
+      if ((theLine.find("BEGIN_DATA") != std::string::npos) ||
+          ((theLine.find("mean")  != std::string::npos) &&
+           (theLine.find("+2sig") != std::string::npos) &&
+           (theLine.find("-2sig") != std::string::npos)))
          continue;
+
       line = theLine.c_str();
       ++lineCounter;
 
@@ -633,8 +639,17 @@ bool SolarFluxReader::LoadPredictData()
       std::istream_iterator<std::string> beg(buf), end;
       std::vector<std::string> tokens(beg, end);
 
+      // Len 0 is the Windows linefeed line ending on Mac/Linux, so continue
+      if (theLine.length() == 0)
+         continue;
+
       if (tokens.size() < 14)
       {
+         MessageInterface::ShowMessage("Len %d, %d tokens: ", theLine.length(), tokens.size());
+         for (Integer i = 0; i < tokens.size(); ++i)
+            MessageInterface::ShowMessage(" %s", tokens[i].c_str());
+         MessageInterface::ShowMessage("\n");
+
          if (lineList.str() != "")
             lineList << ", ";
          lineList << lineCounter;
@@ -650,6 +665,9 @@ bool SolarFluxReader::LoadPredictData()
 
          if ((month < 1) || (month > 12))
          {
+            #ifdef DEBUG_SCHATTEN_READ
+               MessageInterface::ShowMessage("Bad month: %d Line: \"%s\"\n", month, theLine.c_str());
+            #endif
             if (lineList.str() != "")
                lineList << ", ";
             lineList << lineCounter;
