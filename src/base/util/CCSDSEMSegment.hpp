@@ -59,46 +59,64 @@ public:
    /// Parse a time string read from the EM file and convert it to
    /// a Real (A1Mjd) epoch
    static Real ParseEpoch(const std::string &epochString);
-
+   
    /// class methods
-   CCSDSEMSegment(Integer segNum);
+   CCSDSEMSegment(Integer segNum = 0);
    CCSDSEMSegment(const CCSDSEMSegment &copy);
    CCSDSEMSegment& operator=(const CCSDSEMSegment &copy);
-
+   
    virtual ~CCSDSEMSegment();
 
    virtual CCSDSEMSegment* Clone() const = 0;
 
-   virtual bool    Validate(bool checkData = true);
+   virtual bool         Validate(bool checkData = true);
 
    // A GetState method must be added to child classes, returning the
    // requested state data in the required format/representation
 
    /// Sets a meta data field - assumes fields are all Caps
-   virtual bool    SetMetaData(const std::string &fieldName,
-                               const std::string &value);
-   virtual bool    AddData(Real epoch, Rvector data);
-   virtual bool    AddDataComment(const std::string& comment);
-
-   virtual Integer GetDataSize() const;
-   virtual bool    CoversEpoch(Real theEpoch);
-   virtual Real    GetStartTime() const;
-   virtual Real    GetStopTime() const;
-
+   virtual bool         SetMetaData(const std::string &fieldName,
+                                    const std::string &value);
+   virtual bool         SetMetaDataForWriting(const std::string &fieldName,
+                                              const std::string &value);
+   
+   virtual bool         AddData(Real epoch, Rvector data,
+                                bool justCheckDataSize = false);
+   
+   virtual bool         AddMetaComment(const std::string& comment);
+   virtual bool         AddDataComment(const std::string& comment);
+   virtual void         ClearMetaComments();
+   virtual void         ClearDataComments();
+   virtual void         ClearMetaData();
+   virtual void         ClearDataStore();
+   
+   virtual Integer      GetDataSize() const;
+   virtual bool         CoversEpoch(Real theEpoch);
+   virtual Real         GetStartTime() const;
+   virtual Real         GetStopTime() const;
+   
+   virtual std::string  GetMetaDataForWriting();
+   virtual std::string  GetMetaComments();
+   virtual std::string  GetDataComments();
+   virtual Integer      GetNumberOfDataPoints();
+   virtual bool         GetEpochAndData(Integer index, Real &epoch,
+                                        Rvector &data);
+   
 protected:
+   
    // struct to hold epochs and data
    struct EpochAndData
    {
       Real    epoch;
       // data vector will be allocated/set in the child classes according to
       // the size needed, e.g. an attitude quaternion segment would need
-      // an Rvector of size 4
+      // a Rvector of size 4 and OEM cartesian state would need a Rvector of size 6
       Rvector data;
    };
-
+   
    /// Store the data in a vector
    std::vector<EpochAndData*> dataStore;
-
+   
    // The number of the segment (its position in the file)
    Integer     segmentNumber;
    /// Actual size of the data needed
@@ -110,26 +128,35 @@ protected:
 
    // Required meta data fields
    std::string timeSystem;
+   std::string startTimeStr;
+   std::string stopTimeStr;
    Real        startTime;
    Real        stopTime;
 
    /// Optional meta data fields
+   std::string usableStartTimeStr;
+   std::string usableStopTimeStr;
    Real        usableStartTime;
    Real        usableStopTime;
    // The keyword associated with this item is different depending on the
    // type of Ephmeris Message file; therefore, it is handled in the
    // appropriate child class
    std::string interpolationMethod;
+   std::string interpolationDegreeStr;
    Integer     interpolationDegree;
-
-   /// Unused (but stored for possible future use) meta data fields
-   StringArray metaComments;
+   
+   /// Required meta data fields
    std::string objectName;
    std::string objectID;
    std::string centerName;
-
+   std::string refFrame;
+   
+   /// Optional meta data fields
+   StringArray metaComments;
+   
+   /// Optional data comments after META_STOP and before data block starts
    StringArray dataComments;
-
+   
    // other data
    /// Does the segment contain usable start and stop times?
    bool        usesUsableTimes;

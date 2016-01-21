@@ -1316,15 +1316,15 @@ void EphemerisWriter::WriteMetaData()
 
 
 //------------------------------------------------------------------------------
-// void WriteComments(const std::string &comments, bool ignoreBlankComments = true,
-//                    bool writeKeyword = true)
+// void WriteDataComments(const std::string &comments, bool isErrorMsg,
+//                    bool ignoreBlankComments = true, bool writeKeyword = true)
 //------------------------------------------------------------------------------
 /**
  * Writes comments to specific file.
  */
 //------------------------------------------------------------------------------
-void EphemerisWriter::WriteComments(const std::string &comments, bool ignoreBlankComments,
-                                  bool writeKeyword)
+void EphemerisWriter::WriteDataComments(const std::string &comments, bool isErrorMsg,
+                                    bool ignoreBlankComments, bool writeKeyword)
 {
 }
 

@@ -686,6 +686,9 @@
     <ClCompile Include="..\..\..\src\base\util\CCSDSAEMSegment.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CCSDSEMReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CCSDSEMSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMWriter.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMWriter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
@@ -1406,6 +1409,9 @@
     <ClInclude Include="..\..\..\src\base\util\CCSDSAEMSegment.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CCSDSEMReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CCSDSEMSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMWriter.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMWriter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />

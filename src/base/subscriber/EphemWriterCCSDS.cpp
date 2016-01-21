@@ -47,6 +47,7 @@
 //#define DEBUG_EPHEMFILE_COMMENTS
 //#define DEBUG_EPHEMFILE_HEADER
 //#define DEBUG_EPHEMFILE_METADATA
+//#define DEBUG_TO_TEXT_EPHEM
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -69,6 +70,7 @@
 //------------------------------------------------------------------------------
 EphemWriterCCSDS::EphemWriterCCSDS(const std::string &name, const std::string &type) :
    EphemWriterWithInterpolator(name, type),
+   ccsdsOemWriter       (NULL),
    ccsdsEpochFormat     ("UTC"),
    metaDataStart        (-999.999),
    metaDataStop         (-999.999),
@@ -106,6 +108,9 @@ EphemWriterCCSDS::~EphemWriterCCSDS()
    MessageInterface::ShowMessage
       ("EphemWriterCCSDS::~EphemWriterCCSDS() <%p>'%s' entered\n", this, ephemName.c_str());
    #endif
+
+   if (ccsdsOemWriter)
+      delete ccsdsOemWriter;
    
    // Close CCSDS ephemeris
    dstream.flush();
@@ -127,6 +132,7 @@ EphemWriterCCSDS::~EphemWriterCCSDS()
 //------------------------------------------------------------------------------
 EphemWriterCCSDS::EphemWriterCCSDS(const EphemWriterCCSDS &ef) :
    EphemWriterWithInterpolator(ef),
+   ccsdsOemWriter       (NULL),
    ccsdsEpochFormat     (ef.ccsdsEpochFormat),
    metaDataStart        (ef.metaDataStart),
    metaDataStop         (ef.metaDataStop),
@@ -166,7 +172,11 @@ EphemWriterCCSDS& EphemWriterCCSDS::operator=(const EphemWriterCCSDS& ef)
    continuousSegment    = ef.continuousSegment;
    firstTimeMetaData    = ef.firstTimeMetaData;
    saveMetaDataStart    = ef.saveMetaDataStart;
-
+   
+   if (ccsdsOemWriter)
+      delete ccsdsOemWriter;
+   ccsdsOemWriter = NULL;
+   
    return *this;
 }
 
@@ -211,6 +221,10 @@ bool EphemWriterCCSDS::Initialize()
       ("   useFixedStepSize=%d, interpolateInitialState=%d, interpolateFinalState=%d\n",
        useFixedStepSize, interpolateInitialState, interpolateFinalState);
    #endif
+   
+   // Create CCSDS-OEM writer
+   if (ccsdsOemWriter == NULL)
+      ccsdsOemWriter = new CCSDSOEMWriter;
    
    // Check if interpolator needs to be created
    if (useFixedStepSize || interpolateInitialState || interpolateFinalState)
@@ -394,14 +408,26 @@ bool EphemWriterCCSDS::OpenCcsdsEphemerisFile()
 {
    #ifdef DEBUG_EPHEMFILE_OPEN
    MessageInterface::ShowMessage
-      ("EphemWriterCCSDS::OpenCcsdsEphemerisFile() <%p> entered, fileName = %s\n",
-       this, fullPathFileName.c_str());
+      ("EphemWriterCCSDS::OpenCcsdsEphemerisFile() <%p> entered, fileName = %s\n   "
+       "ccsdsOemWriter=<%p>\n", this, fullPathFileName.c_str(), ccsdsOemWriter);
    #endif
    
    bool retval = false;
    
+   if (ccsdsOemWriter == NULL)
+      ccsdsOemWriter = new CCSDSOEMWriter;
+   
+   retval = ccsdsOemWriter->OpenFile(fullPathFileName);
+   
+   #ifdef DEBUG_EPHEMFILE_OPEN
+   MessageInterface::ShowMessage
+      ("   ccsdsOemWriter->OpenFile() returned %d\n", retval);
+   #endif
+   
+   #ifdef DEBUG_TO_TEXT_EPHEM
    // Open text ephemeris file
-   retval = OpenTextEphemerisFile(fullPathFileName);
+   retval = OpenTextEphemerisFile(fullPathFileName + ".debug.txt");
+   #endif
    
    #ifdef DEBUG_EPHEMFILE_OPEN
    MessageInterface::ShowMessage
@@ -515,7 +541,7 @@ void EphemWriterCCSDS::HandleOrbitData()
 
 
 //------------------------------------------------------------------------------
-// void StartNewSegment(, const std::string &comments, bool saveEpochInfo,
+// void StartNewSegment(const std::string &comments, bool saveEpochInfo,
 //                      bool writeAfterData, bool ignoreBlankComments)
 //------------------------------------------------------------------------------
 /**
@@ -528,8 +554,9 @@ void EphemWriterCCSDS::StartNewSegment(const std::string &comments, bool saveEpo
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
       ("===== EphemWriterCCSDS::StartNewSegment() entered\n   comments='%s'\n   "
-       "saveEpochInfo=%d, writeAfterData=%d, ignoreBlankComments=%d, canFinalize=%d, firstTimeWriting=%d\n",
-       comments.c_str(), saveEpochInfo, writeAfterData, ignoreBlankComments, canFinalize, firstTimeWriting);
+       "saveEpochInfo=%d, writeAfterData=%d, ignoreBlankComments=%d, canFinalize=%d, "
+       "firstTimeWriting=%d\n", comments.c_str(), saveEpochInfo, writeAfterData,
+       ignoreBlankComments, canFinalize, firstTimeWriting);
    #endif
    
    // If no first data has written out yet, just return
@@ -554,8 +581,8 @@ void EphemWriterCCSDS::StartNewSegment(const std::string &comments, bool saveEpo
    // Write comments here
    writeCommentAfterData = writeAfterData;
    currComments = comments;
-   WriteComments(comments, ignoreBlankComments);
-      
+   WriteDataComments(comments, false, ignoreBlankComments);
+   
    #ifdef DEBUG_EPHEMFILE_RESTART
    MessageInterface::ShowMessage
       ("===== EphemWriterCCSDS::StartNewSegment() leaving\n");
@@ -692,8 +719,8 @@ void EphemWriterCCSDS::HandleCcsdsOrbitData(bool writeData, bool &timeToWrite)
       
       if (writingNewSegment)
       {
-         //WriteComments("********** NEW SEGMENT **********");
          #ifdef DEBUG_EPHEMFILE_WRITE
+         //WriteDataComments("********** DEBUG OUTPUT - NEW SEGMENT **********", false);
          DebugWriteTime
             ("********** WRITING NEW SEGMENT AT currEpochInSecs = ", currEpochInSecs, false, 2);
          #endif
@@ -813,8 +840,8 @@ void EphemWriterCCSDS::FinishUpWritingOrbitData()
    
    writeCommentAfterData = false;
    
-   //WriteComments("********** FINAL SEGMENT **********");
    #ifdef DEBUG_EPHEMFILE_WRITE
+   //WriteDataComments("********** DEBUG OUTPUT - FINAL SEGMENT **********", false);
    DebugWriteTime
       ("********** WRITING FINAL SEGMENT AT currEpochInSecs = ", currEpochInSecs, false, 2);
    #endif
@@ -878,34 +905,35 @@ void EphemWriterCCSDS::WriteMetaData()
 
 
 //------------------------------------------------------------------------------
-// void WriteComments(const std::string &comments, bool ignoreBlankComments = true,
-//                    bool writeKeyword = true)
+// void WriteDataComments(const std::string &comments, bool writeCmtsNow,
+//                    bool ignoreBlankComments = true, bool writeKeyword = true)
 //------------------------------------------------------------------------------
 /**
  * Writes comments to specific file.
  */
 //------------------------------------------------------------------------------
-void EphemWriterCCSDS::WriteComments(const std::string &comments, bool ignoreBlankComments,
-                                       bool writeKeyword)
+void EphemWriterCCSDS::WriteDataComments(const std::string &comments, bool writeCmtsNow,
+                                     bool ignoreBlanks, bool writeKeyword)
 {
    #ifdef DEBUG_EPHEMFILE_COMMENTS
    MessageInterface::ShowMessage
-      ("WriteComments() entered, comments='%s', ignoreBlankComments=%d\n",
-       comments.c_str(), ignoreBlankComments);
+      ("WriteDataComments() entered, comments='%s', writeCmtsNow=%d, ignoreBlanks=%d, "
+       "writeKeyword=%d\n",  comments.c_str(), writeCmtsNow, ignoreBlanks,
+       writeKeyword);
    #endif
    
-   if (comments == "" && ignoreBlankComments)
+   if (comments == "" && ignoreBlanks)
    {
       #ifdef DEBUG_EPHEMFILE_COMMENTS
-      MessageInterface::ShowMessage("WriteComments() just leaving\n");
+      MessageInterface::ShowMessage("WriteDataComments() just leaving\n");
       #endif
       return;
    }
    
-   WriteCcsdsComments(comments, writeKeyword);
+   WriteCcsdsDataComments(comments, writeCmtsNow, ignoreBlanks, writeKeyword);
    
    #ifdef DEBUG_EPHEMFILE_COMMENTS
-   MessageInterface::ShowMessage("WriteComments() wrote comment and leaving\n");
+   MessageInterface::ShowMessage("WriteDataComments() wrote comment and leaving\n");
    #endif
 }
 
@@ -921,6 +949,8 @@ void EphemWriterCCSDS::ClearLastCcsdsOemMetaData(const std::string &comments)
        "firstTimeMetaData=%d\n", comments.c_str(), firstTimeMetaData);
    #endif
    
+   
+   #ifdef DEBUG_TO_TEXT_EPHEM
    // Go to beginning of the last meta data position
    #ifdef DEBUG_EPHEMFILE_METADATA
    MessageInterface::ShowMessage
@@ -928,23 +958,29 @@ void EphemWriterCCSDS::ClearLastCcsdsOemMetaData(const std::string &comments)
        (long)metaDataBegPosition, (long)metaDataEndPosition);
    #endif
    dstream.seekp(metaDataBegPosition, std::ios_base::beg);
+   #endif
    
-   std::stringstream ss("");
-   ss << std::endl;
    
    if (comments != "")
-      WriteComments(comments);
+      WriteDataComments(comments, true, true, true);
    
+   
+   #ifdef DEBUG_TO_TEXT_EPHEM
    // Clear with blanks
+   std::stringstream ss("");
+   ss << std::endl;
    long length = (long)metaDataEndPosition - (long)metaDataBegPosition;
    for (long i = 0; i < length; i++)
       ss << " ";
    
    #ifdef DEBUG_EPHEMFILE_METADATA
-   MessageInterface::ShowMessage("   ==> Writing following META data:\n%s\n", ss.str().c_str());
+   MessageInterface::ShowMessage
+      ("   ==> Writing following empty string, length=%d:\n%s\n", length, ss.str().c_str());
    #endif
    
    WriteStringToFile(ss.str());
+   #endif
+   
    
    #ifdef DEBUG_EPHEMFILE_METADATA
    MessageInterface::ShowMessage
@@ -963,6 +999,16 @@ void EphemWriterCCSDS::WriteCcsdsHeader()
    MessageInterface::ShowMessage("EphemWriterCCSDS::WriteCcsdsHeader() entered\n");
    #endif
    
+   // Set header information and then write
+   if (ccsdsOemWriter)
+   {
+      ccsdsOemWriter->SetHeaderForWriting("VERSION_NUMBER", "1.0");
+      ccsdsOemWriter->SetHeaderForWriting("ORIGINATOR", "GMAT USER");
+      ccsdsOemWriter->WriteHeader();
+   }
+
+   
+   #ifdef DEBUG_TO_TEXT_EPHEM
    std::string creationTime = GmatTimeUtil::FormatCurrentTime(2);
    std::string originator = "GMAT USER";
    
@@ -977,7 +1023,8 @@ void EphemWriterCCSDS::WriteCcsdsHeader()
    ss << "ORIGINATOR     = " << originator << std::endl;
    
    WriteStringToFile(ss.str());
-      
+   #endif
+   
    #ifdef DEBUG_EPHEMFILE_HEADER
    MessageInterface::ShowMessage("EphemWriterCCSDS::WriteCcsdsHeader() leaving\n");
    #endif
@@ -1129,7 +1176,9 @@ void EphemWriterCCSDS::WriteCcsdsOemMetaData()
    // Format interpolation order, width of 2 with left justified
    char interpOrdBuff[5];
    sprintf(interpOrdBuff, "%-2d", actualInterpOrder);
+
    
+   #if (defined DEBUG_TO_TEXT_EPHEM) || (defined DEBUG_EPHEMFILE_METADATA)
    std::stringstream ss("");
    ss << std::endl;
    ss << "META_START" << std::endl;
@@ -1145,12 +1194,34 @@ void EphemWriterCCSDS::WriteCcsdsOemMetaData()
    ss << "INTERPOLATION        = " << interpolatorName << std::endl;
    ss << "INTERPOLATION_DEGREE = " << interpOrdBuff << std::endl;
    ss << "META_STOP" << std::endl << std::endl;
-   
    #ifdef DEBUG_EPHEMFILE_METADATA
    MessageInterface::ShowMessage("   ==> Writing following META data:\n%s\n", ss.str().c_str());
    #endif
-   
    WriteStringToFile(ss.str());
+   #endif
+   
+      
+   // Write final meta data with valid start and stop time
+   if (metaDataWriteOption == 2)
+   {
+      if (ccsdsOemWriter)
+      {
+         ccsdsOemWriter->SetMetaDataForWriting("OBJECT_NAME", spacecraftName);
+         ccsdsOemWriter->SetMetaDataForWriting("OBJECT_ID", spacecraftId);
+         ccsdsOemWriter->SetMetaDataForWriting("CENTER_NAME", origin);
+         ccsdsOemWriter->SetMetaDataForWriting("REF_FRAME", csType);
+         ccsdsOemWriter->SetMetaDataForWriting("TIME_SYSTEM", ccsdsEpochFormat);
+         ccsdsOemWriter->SetMetaDataForWriting("START_TIME", metaDataStartStr);
+         ccsdsOemWriter->SetMetaDataForWriting("USEABLE_START_TIME", metaDataStartStr);
+         ccsdsOemWriter->SetMetaDataForWriting("USEABLE_STOP_TIME", metaDataStopStr);
+         ccsdsOemWriter->SetMetaDataForWriting("STOP_TIME", metaDataStopStr);
+         ccsdsOemWriter->SetMetaDataForWriting("INTERPOLATION", interpolatorName);
+         ccsdsOemWriter->SetMetaDataForWriting("INTERPOLATION_DEGREE", interpOrdBuff);
+         ccsdsOemWriter->WriteDataComments();
+         ccsdsOemWriter->WriteMetaData();
+         ccsdsOemWriter->WriteDataSegment();
+      }
+   }
    
    // Save meta data end position
    metaDataEndPosition = dstream.tellp();
@@ -1162,8 +1233,8 @@ void EphemWriterCCSDS::WriteCcsdsOemMetaData()
          #ifdef DEBUG_EPHEMFILE_METADATA
          MessageInterface::ShowMessage("   ==> numData is less than 2, so writing COMMENT\n");
          #endif
-         WriteComments
-            ("There should be at least two data points when writing at integrator steps.\n");
+         WriteDataComments
+            ("There should be at least two data points when writing at integrator steps.\n", true);
       }
    }
    else
@@ -1175,9 +1246,9 @@ void EphemWriterCCSDS::WriteCcsdsOemMetaData()
       // since meta data is written out after data records are written
       std::string comment =
          "                                                                          \n";
-      WriteComments(comment, false, false);
+      WriteDataComments(comment, false, false, false);
    }
-      
+   
    #ifdef DEBUG_EPHEMFILE_METADATA
    MessageInterface::ShowMessage("EphemWriterCCSDS::WriteCcsdsOemMetaData() leaving\n");
    #endif
@@ -1187,6 +1258,12 @@ void EphemWriterCCSDS::WriteCcsdsOemMetaData()
 //------------------------------------------------------------------------------
 // void WriteCcsdsAemMetaData()
 //------------------------------------------------------------------------------
+/**
+ *  Writes CCSDS AEM metadata to a file
+ *
+ * @note This method is currently not used
+ */
+//------------------------------------------------------------------------------
 void EphemWriterCCSDS::WriteCcsdsAemMetaData()
 {
    std::string origin = outCoordSystem->GetOriginName();
@@ -1194,7 +1271,8 @@ void EphemWriterCCSDS::WriteCcsdsAemMetaData()
    GmatBase *cs = (GmatBase*)(spacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""));
    if (cs)
       csType = cs->GetTypeName();
-   
+
+   #ifdef DEBUG_TO_TEXT_EPHEM
    std::stringstream ss("");
    ss << "META_START" << std::endl;
    ss << "OBJECT_NAME = " << spacecraftName << std::endl;
@@ -1212,8 +1290,8 @@ void EphemWriterCCSDS::WriteCcsdsAemMetaData()
    ss << "INTERPOLATION_METHOD = " << interpolatorName << std::endl;
    ss << "INTERPOLATION_DEGREE = " << interpolationOrder << std::endl;
    ss << "META_STOP" << std::endl << std::endl;
-   
    WriteStringToFile(ss.str());
+   #endif
 }
 
 
@@ -1227,9 +1305,13 @@ void EphemWriterCCSDS::WriteCcsdsOemData()
       ("EphemWriterCCSDS::WriteCcsdsOemData() <%p>'%s' entered, a1MjdArray.size()=%d\n",
        this, ephemName.c_str(), a1MjdArray.size());
    #endif
+   
+   bool dataAdded = false;
    for (UnsignedInt i = 0; i < a1MjdArray.size(); i++)
    {
       Real epoch = a1MjdArray[i]->GetReal();
+      
+      #ifdef DEBUG_TO_TEXT_EPHEM
       const Real *outState = stateArray[i]->GetDataVector();
       std::string epochStr = ToUtcGregorian(epoch, true, 2);
       char strBuff[200];
@@ -1238,7 +1320,28 @@ void EphemWriterCCSDS::WriteCcsdsOemData()
               outState[4], outState[5]);
       dstream << strBuff;
       dstream.flush();
+      #endif
+      
+      // Add data points to ccsds writer and then write
+      if (ccsdsOemWriter && ccsdsOemWriter->AddDataForWriting(epoch, *stateArray[i]))
+      {
+         dataAdded = true;
+      }
+      else
+      {
+         dataAdded = false;
+         break;
+      }
    }
+   
+   if (!dataAdded)
+   {
+      SubscriberException se;
+      se.SetDetails("**** ERROR **** Unable to add data points to CCSDS EphemerisFile '%s'\n",
+                    fullPathFileName.c_str());
+      throw se;
+   }
+   
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage
       ("EphemWriterCCSDS::WriteCcsdsOemData() <%p>'%s' leaving\n", this, ephemName.c_str());
@@ -1251,26 +1354,89 @@ void EphemWriterCCSDS::WriteCcsdsOemData()
 //------------------------------------------------------------------------------
 void EphemWriterCCSDS::WriteCcsdsAemData(Real reqEpochInSecs, const Real quat[4])
 {
+   // future work
 }
 
 
 //------------------------------------------------------------------------------
-// void WriteCcsdsComments(const std::string &comments, bool writeKeyword = true)
+// void WriteCcsdsDataComments(const std::string &comments, bool writeCmtsNow,
+//                         bool ignoreBlanks = true, bool writeKeyword = true)
 //------------------------------------------------------------------------------
 /**
- * Writes actual COMMENT section
+ * Writes actual data COMMENT section or blank lines
  *
  * @param  comments  Comments to write
  * @param  writeKeyword  Writes COMMENT keyword followed by comments, 
  *                       writes blank otherwise
  */
 //------------------------------------------------------------------------------
-void EphemWriterCCSDS::WriteCcsdsComments(const std::string &comments, bool writeKeyword)
+void EphemWriterCCSDS::WriteCcsdsDataComments(const std::string &comments, bool writeCmtsNow,
+                                              bool ignoreBlanks, bool writeKeyword)
 {
-   std::string ccsdsComments = "COMMENT  " + comments;
-   if (!writeKeyword)
-      ccsdsComments = "         " + comments;
+   #ifdef DEBUG_EPHEMFILE_COMMENTS
+   MessageInterface::ShowMessage
+      ("EphemWriterCCSDS::WriteCcsdsDataComments() entered, comments='%s', writeCmtsNow=%d, "
+       "ignoreBlanks=%d, writeKeyword=%d\n", comments.c_str(), writeCmtsNow, ignoreBlanks,
+       writeKeyword);
+   #endif
    
+   
+   #ifdef DEBUG_TO_TEXT_EPHEM
+   std::string ccsdsComments = comments;
+   if (writeKeyword)
+      ccsdsComments = "COMMENT  " + comments;
+   else if (!writeCmtsNow)
+      ccsdsComments = "         " + comments;
    WriteStringToFile("\n" + ccsdsComments + "\n");
+   #endif
+   
+   
+   if (ccsdsOemWriter)
+   {
+      std::string cmts = GmatStringUtil::RemoveAllBlanks(comments);
+      MessageInterface::ShowMessage("cmts after removing blanks = '%s'\n", cmts.c_str());
+      if (cmts == "" ||
+          (GmatStringUtil::StartsWith(cmts, "\n") &&
+           GmatStringUtil::EndsWith(cmts, "\n")))
+      {
+         // If writing comments now, write comments as a string without keyword
+         if (writeCmtsNow)
+         {
+            #ifdef DEBUG_EPHEMFILE_COMMENTS
+            MessageInterface::ShowMessage("   ==> Writing blanks without keyword\n");
+            #endif
+            ccsdsOemWriter->WriteString(comments);
+         }
+         else
+         {
+            #ifdef DEBUG_EPHEMFILE_COMMENTS
+            MessageInterface::ShowMessage("   ==> Writing blank line\n");
+            #endif
+            ccsdsOemWriter->WriteBlankLine();
+         }
+      }
+      else
+      {
+         #ifdef DEBUG_EPHEMFILE_COMMENTS
+         MessageInterface::ShowMessage
+            ("   ==> Adding '%s' to data comments\n", comments.c_str());
+         #endif
+         ccsdsOemWriter->AddDataComment(comments);
+         
+         // Write comments if error message
+         if (writeCmtsNow)
+         {
+            #ifdef DEBUG_EPHEMFILE_COMMENTS
+            MessageInterface::ShowMessage
+               ("   ==> Writing '%s' to a ephem file\n", comments.c_str());
+            #endif
+            ccsdsOemWriter->WriteDataComments();
+         }
+      }
+   }
+   #ifdef DEBUG_EPHEMFILE_COMMENTS
+   MessageInterface::ShowMessage
+      ("EphemWriterCCSDS::WriteCcsdsDataComments() leaving\n");
+   #endif
 }
 

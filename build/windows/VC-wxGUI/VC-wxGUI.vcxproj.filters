@@ -2433,6 +2433,15 @@
     <ClCompile Include="..\..\..\src\gui\hardware\TankAndMixDialog.cpp">
       <Filter>Source Files\gui\hardware</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMWriter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMWriter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4633,6 +4642,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\hardware\TankAndMixDialog.hpp">
       <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMWriter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMWriter.hpp">
+      <Filter>Source Files\base\util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

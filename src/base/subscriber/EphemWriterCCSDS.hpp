@@ -30,6 +30,7 @@
 #define EphemWriterCCSDS_hpp
 
 #include "EphemWriterWithInterpolator.hpp"
+#include "CCSDSOEMWriter.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -63,6 +64,8 @@ public:
    
 protected:
 
+   CCSDSOEMWriter *ccsdsOemWriter;
+   
    std::string ccsdsEpochFormat;
    
    /// for meta data and block
@@ -91,12 +94,13 @@ protected:
    // General writing
    void         WriteHeader();
    void         WriteMetaData();
-   void         WriteComments(const std::string &comments,
-                              bool ignoreBlank = true, bool writeKeyword = true);
+   void         WriteDataComments(const std::string &comments, bool writeCmtsNow,
+                              bool ignoreBlanks = true, bool writeKeyword = true);
    
    // CCSDS file writing for debug and actual
    void         WriteCcsdsHeader();
-   void         WriteCcsdsComments(const std::string &comments, bool writeKeyword = true);
+   void         WriteCcsdsDataComments(const std::string &comments, bool writeCmtsNow,
+                                       bool ignoreBlanks = true, bool writeKeyword = true);
    
    // OEM (Orbit Ephemeris Message)
    void         WriteCcsdsOrbitDataSegment();

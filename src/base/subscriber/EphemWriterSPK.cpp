@@ -581,12 +581,12 @@ void EphemWriterSPK::StartNewSegment(const std::string &comments,
       if (!generateInBackground || (numPts >= mnSz))
       {
          if (!writeAfterData)
-            WriteComments(comments, ignoreBlankComments);
-
+            WriteDataComments(comments, false, ignoreBlankComments);
+         
          WriteSpkOrbitDataSegment();
-
+         
          if (writeAfterData)
-            WriteComments(comments, ignoreBlankComments);
+            WriteDataComments(comments, false, ignoreBlankComments);
 
          insufficientDataPoints = false; // there was enough data
          currComments = "";
@@ -767,26 +767,26 @@ void EphemWriterSPK::WriteMetaData()
 
 
 //------------------------------------------------------------------------------
-// void WriteComments(const std::string &comments, bool ignoreBlankComments = true,
-//                    bool writeKeyword = true)
+// void WriteDataComments(const std::string &comments, bool isErrorMsg,
+//                    bool ignoreBlankComments = true, bool writeKeyword = true)
 //------------------------------------------------------------------------------
 /**
  * Writes comments to specific file.
  */
 //------------------------------------------------------------------------------
-void EphemWriterSPK::WriteComments(const std::string &comments, bool ignoreBlankComments,
-                                  bool writeKeyword)
+void EphemWriterSPK::WriteDataComments(const std::string &comments, bool isErrorMsg,
+                                   bool ignoreBlankComments, bool writeKeyword)
 {
    #ifdef DEBUG_EPHEMFILE_COMMENTS
    MessageInterface::ShowMessage
-      ("WriteComments() entered, comments='%s', ignoreBlankComments=%d\n",
+      ("WriteDataComments() entered, comments='%s', ignoreBlankComments=%d\n",
        comments.c_str(), ignoreBlankComments);
    #endif
    
    if (comments == "" && ignoreBlankComments)
    {
       #ifdef DEBUG_EPHEMFILE_COMMENTS
-      MessageInterface::ShowMessage("WriteComments() just leaving\n");
+      MessageInterface::ShowMessage("WriteDataComments() just leaving\n");
       #endif
       return;
    }
@@ -794,7 +794,7 @@ void EphemWriterSPK::WriteComments(const std::string &comments, bool ignoreBlank
    WriteSpkComments(comments);
    
    #ifdef DEBUG_EPHEMFILE_COMMENTS
-   MessageInterface::ShowMessage("WriteComments() wrote comment and leaving\n");
+   MessageInterface::ShowMessage("WriteDataComments() wrote comment and leaving\n");
    #endif
 }
 

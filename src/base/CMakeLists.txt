@@ -474,6 +474,9 @@ SET(BASE_SRCS
     util/CCSDSAEMSegment.cpp
     util/CCSDSEMReader.cpp
     util/CCSDSEMSegment.cpp
+    util/CCSDSEMWriter.cpp
+    util/CCSDSOEMSegment.cpp
+    util/CCSDSOEMWriter.cpp
     util/Date.cpp
     util/DateUtil.cpp
     util/ElapsedTime.cpp

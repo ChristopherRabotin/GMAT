@@ -83,7 +83,7 @@ protected:
    // General writing
    virtual void WriteHeader();
    virtual void WriteMetaData();
-   virtual void WriteComments(const std::string &comments,
+   virtual void WriteDataComments(const std::string &comments, bool isErrorMsg,
                               bool ignoreBlank = true, bool writeKeyword = true);
    
    // SPK file writing
