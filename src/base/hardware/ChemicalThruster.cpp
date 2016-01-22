@@ -818,7 +818,7 @@ bool ChemicalThruster::CalculateThrustAndIsp()
          refTempSum += tanks[i]->GetRealParameter(refTempID) * mixRatio[i];
       }
       pressure = pressureSum / mixTotal;
-      pressure = pressureSum / mixTotal;
+
       // Note: numerator and denominator both divide by mixTotal, so dividends cancel
       temperatureRatio = tempSum / refTempSum;
 
