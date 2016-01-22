@@ -724,6 +724,10 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value)
       // if not the same name push back
       if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end())
          tankNames.push_back(value);
+      else
+         throw HardwareException("The same tank cannot be listed twice for " +
+                     instanceName + "; " + value + " has already been assigned "
+                     "to the thruster");
       return true;
    default:
       return Hardware::SetStringParameter(id, value);
@@ -791,6 +795,23 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
             // Only add the tank if it is not in the list already
             if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end()) 
                tankNames.push_back(value);
+            else
+               throw HardwareException("The same tank cannot be listed "
+                     "multiple times for " + instanceName + "; " + value +
+                     " has been assigned more than once to the thruster");
+
+         // Make certain there are no duplicate names
+         for (Integer i = 0; i < tankNames.size(); ++i)
+         {
+            std::string testName = tankNames[i];
+            for (Integer j = i+1; j < tankNames.size(); ++j)
+            {
+               if (tankNames[j] == testName)
+                  throw HardwareException("The same tank cannot be listed "
+                        "twice for " + instanceName + ", but " + testName +
+                        " is assigned more than one time to the thruster");
+            }
+         }
          
          return true;
       }
@@ -927,17 +948,34 @@ Real Thruster::SetRealParameter(const Integer id, const Real value,
       Integer size = 0;
       if (mixRatio.IsSized())
          size = mixRatio.GetSize();
-      if ((!mixRatio.IsSized()) || (mixRatio.GetSize() < tankNames.size()))
-      {
-         mixRatio.SetSize(tankNames.size());
-         for (Integer i = size; i < mixRatio.GetSize(); ++i)
-            mixRatio[i] = 1.0;
-      }
 
-      if ((index < 0) || (index > mixRatio.GetSize()-1))
+      if ((index < 0) || (index > mixRatio.GetSize()))
+         throw HardwareException("Index out of bounds setting the mix ratio on " +
+               instanceName);
+
+      if (index > tankNames.size() - 1)
          throw HardwareException("Index out of bounds setting the mix ratio on " +
                instanceName + "; there are not enough tanks to support the number "
-            		   "of indices in the ratio");
+                     "of indices in the ratio");
+
+      if (value <= 0.0)
+      {
+         std::stringstream msg;
+         msg << "The value " << value << " for field \"MixRatio\" on object \""
+             << instanceName <<  "\" is not an allowed value.\n"
+             << "The allowed values are: [Real number > 0.0]";
+         throw HardwareException(msg.str());
+      }
+
+      if (index == mixRatio.GetSize())
+      {
+         // Rvector deletes array on resize; gymnastics required to compensate
+         Rvector temp(mixRatio);
+         mixRatio.SetSize(index+1);
+         for (Integer i = 0; i < temp.GetSize(); ++i)
+            mixRatio[i] = temp[i];
+      }
+
       mixRatio[index] = value;
       return mixRatio[index];
    }
