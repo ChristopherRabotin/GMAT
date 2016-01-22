@@ -707,27 +707,13 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value)
          return true;
       }
    case TANK:
-//      if ((tankNames.size() > 0) && (value != tankNames[0]))
-//      {
-//         std::string errmsg;
-//         errmsg =  "The value of \"";
-//         errmsg += value;
-//         errmsg += "\" on Thruster \"";
-//         errmsg += instanceName;
-//         errmsg += "\" is not an allowed value.  GMAT does not currently "
-//               "support more than one tank per thruster; the thruster is "
-//               "already associated with tank \"";
-//         errmsg += tankNames[0];
-//         errmsg += "\".";
-//         throw HardwareException(errmsg);
-//      }
       // if not the same name push back
       if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end())
          tankNames.push_back(value);
-      else
-         throw HardwareException("The same tank cannot be listed twice for " +
-                     instanceName + "; " + value + " has already been assigned "
-                     "to the thruster");
+//      else
+//         throw HardwareException("The same tank cannot be listed twice for " +
+//                     instanceName + "; " + value + " has already been assigned "
+//                     "to the thruster");
       return true;
    default:
       return Hardware::SetStringParameter(id, value);
