@@ -6367,6 +6367,7 @@ void GmatMainFrame::CompareFiles()
    
    wxString baseDir = dlg.GetBaseDirectory();
    wxArrayString compDirs = dlg.GetCompareDirectories();
+   bool skipBlankLines = dlg.SkipBlankLines();
    bool saveCompareResults = dlg.SaveCompareResults();
    wxString saveFileName = dlg.GetSaveFilename();
    wxString basePrefix = dlg.GetBaseString();
@@ -6502,7 +6503,7 @@ void GmatMainFrame::CompareFiles()
          output = GmatFileUtil::CompareTextLines
             (numDirsToCompare, baseFileName.c_str(), filename1.c_str(),
              filename2.c_str(), filename3.c_str(), file1DiffCount,
-             file2DiffCount, file3DiffCount);
+             file2DiffCount, file3DiffCount, skipBlankLines);
       }
       else if (compareOption == 2)
       {

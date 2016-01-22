@@ -657,7 +657,12 @@
     <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp" />
     <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisWriter.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterCCSDS.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterCode500.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterSPK.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterWithInterpolator.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\OrbitPlot.cpp" />
@@ -681,6 +686,9 @@
     <ClCompile Include="..\..\..\src\base\util\CCSDSAEMSegment.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CCSDSEMReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CCSDSEMSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMWriter.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMWriter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
@@ -803,6 +811,7 @@
     <ClCompile Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\hardware\TankAndMixDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp" />
@@ -1369,7 +1378,12 @@
     <ClInclude Include="..\..\..\src\base\stopcond\StopCondition.hpp" />
     <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisWriter.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterCCSDS.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterCode500.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterSPK.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterWithInterpolator.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp" />
@@ -1395,6 +1409,9 @@
     <ClInclude Include="..\..\..\src\base\util\CCSDSAEMSegment.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CCSDSEMReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CCSDSEMSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMWriter.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMWriter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
@@ -1523,6 +1540,7 @@
     <ClInclude Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\hardware\TankAndMixDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\mission\DecoratedTree.hpp" />

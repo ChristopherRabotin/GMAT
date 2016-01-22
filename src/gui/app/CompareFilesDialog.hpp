@@ -40,6 +40,7 @@ public:
    ~CompareFilesDialog();
    
    bool CompareFiles() { return mCompareFiles; }
+   bool SkipBlankLines() { return mSkipBlankLinesForTextCompare; }
    bool SaveCompareResults() { return mSaveCompareResults; }
    Real GetCompareTolerance() { return mTolerance; }
    Integer GetCompareOption() { return mCompareOption; }
@@ -72,6 +73,7 @@ protected:
    
    wxRadioBox *mCompareOptionRadioBox;
    wxComboBox *mCompareDirsComboBox;
+   wxCheckBox *mSkipBlankLinesCheckBox;
    wxCheckBox *mSaveResultCheckBox;
    
    wxButton *mBaseDirButton;
@@ -103,6 +105,7 @@ protected:
 private:
 
    bool mCompareFiles;
+   bool mSkipBlankLinesForTextCompare;
    bool mSaveCompareResults;
    bool mHasDir1;
    bool mHasDir2;

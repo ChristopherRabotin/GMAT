@@ -46,7 +46,6 @@
 //#define DEBUG_BURNPANEL_SAVE
 //#define DEBUG_BURNPANEL_SAVE_COEFS
 
-#define USE_TANKMIXDIALOG
 
 //------------------------------
 // event tables for wxWindows
@@ -108,6 +107,7 @@ BurnThrusterPanel::BurnThrusterPanel(wxWindow *parent, const wxString &name)
    mfCoefNames.clear();
    thrustModel          = "";
    isThrustModelChanged = false;
+   useMixRatio = true;
 }
 
 
@@ -118,7 +118,7 @@ BurnThrusterPanel::~BurnThrusterPanel()
 {
    theGuiManager->UnregisterComboBox("CoordinateSystem", coordSysComboBox);
    theGuiManager->UnregisterComboBox("CelestialBody", originComboBox);
-//   theGuiManager->UnregisterComboBox("FuelTank", tankComboBox);
+   theGuiManager->UnregisterComboBox("FuelTank", tankComboBox);
 
    if (localObject != NULL)
       delete localObject;
@@ -299,24 +299,37 @@ void BurnThrusterPanel::Create()
    //Tank
    tankLabel =
       new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Tanks"));
+
+   // Use one or the other of these, depending on if mix ratios are active
    tankTxtCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
             wxDefaultPosition, wxSize(150,-1), 0);
    tankTxtCtrl->SetToolTip(pConfig->Read(_T("TankHint")));
+   
+   tankComboBox =
+      theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
+   tankComboBox->SetToolTip(pConfig->Read(_T("TankHint")));
 
-   wxStaticText *mixRatioLabel =
+   // Sizer for the tank widgets
+   wxBoxSizer *tankSizer = new wxBoxSizer(wxVERTICAL);
+   tankSizer->Add(tankTxtCtrl, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL,
+         bsize);
+   tankSizer->Add(tankComboBox, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL,
+         bsize);
+   // Default to using mix ratio
+   tankComboBox->Hide();
+
+   mixRatioLabel =
          new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Mix Ratio"));
    mixRatioTxtCtrl = new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
          wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mixRatioTxtCtrl->SetToolTip(pConfig->Read(_T("DutyCycleHint")));
 
-#ifdef USE_TANKMIXDIALOG
    tankTxtCtrl->SetEditable(false);
    mixRatioTxtCtrl->SetEditable(false);
 
    tankSelectorButton = new wxButton(this, ID_BUTTON, gmatwxT(GUI_ACCEL_KEY"Select Tanks"));
    tankSelectorButton->SetToolTip(pConfig->Read(_T("TankHint")));
-#endif
 
    ispLabel = NULL;
    ispTextCtrl = NULL;
@@ -370,15 +383,16 @@ void BurnThrusterPanel::Create()
    massSizer->Add(20,20);
    
    massSizer->Add(tankLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
-   massSizer->Add(tankTxtCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-#ifdef USE_TANKMIXDIALOG
+
+   // Add in the sizer for the tank controls here
+   massSizer->Add(tankSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+//   massSizer->Add(tankTxtCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+//   massSizer->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+
    massSizer->Add(tankSelectorButton, 0, wxALIGN_LEFT | wxALL, bsize);
-#else
-   massSizer->Add(20,20);
-#endif
    massSizer->Add(mixRatioLabel, 0, wxALIGN_LEFT | wxALL, bsize);
    massSizer->Add(mixRatioTxtCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
-   massSizer->Add(20, 20);
+   massSizer->Add(20, 0);
    
 
    if (theObject->IsOfType(Gmat::IMPULSIVE_BURN))
@@ -580,23 +594,58 @@ void BurnThrusterPanel::LoadData()
       paramID = theObject->GetParameterID("Tank");
       tankNames = theObject->GetStringArrayParameter(paramID);
 
-      paramID = theObject->GetParameterID("MixRatio");
-      Rvector theMix = theObject->GetRvectorParameter(paramID);
-      for (Integer i = 0; i < theMix.GetSize(); ++i)
-         if (i < tankNames.size())
-            mixRatio.push_back(theMix[i]);
-         if (theMix.GetSize() < tankNames.size())
-            for (Integer i = theMix.GetSize(); i < tankNames.size(); ++i)
-               mixRatio.push_back(1.0);
+      if (useMixRatio)
+      {
+         paramID = theObject->GetParameterID("MixRatio");
+         Rvector theMix = theObject->GetRvectorParameter(paramID);
+         for (Integer i = 0; i < theMix.GetSize(); ++i)
+            if (i < tankNames.size())
+               mixRatio.push_back(theMix[i]);
+            if (theMix.GetSize() < tankNames.size())
+               for (Integer i = theMix.GetSize(); i < tankNames.size(); ++i)
+                  mixRatio.push_back(1.0);
 
-      LoadTankAndMixControl();
+         LoadTankAndMixControl();
+      }
+      else
+      {
+         if (tankNames.empty())
+         {
+            if (theGuiManager->GetNumFuelTank() > 0)
+            {
+               tankComboBox->Insert("No Fuel Tank Selected", 0);
+               tankComboBox->SetSelection(0);
+            }
+         }
+         else
+         {
+            tankComboBox->SetValue(STD_TO_WX_STRING(tankNames[0].c_str()));
+            isTankEmpty = false;
+         }
+
+         tankTxtCtrl->SetEditable(true);
+         if (tankNames.size() > 0)
+         {
+            if (tankNames.size() > 1)
+               MessageInterface::ShowMessage("Only one tank name is allowed");
+            tankTxtCtrl->SetValue(tankNames[0].c_str());
+         }
+         mixRatioTxtCtrl->Hide();
+         tankTxtCtrl->Hide();
+         tankComboBox->Show();
+         tankSelectorButton->Hide();
+         mixRatioLabel->Hide();
+      }
       
       // Disable tank combo box if decrement mass is not checked
       if (!decMassCheckBox->IsChecked())
       {
          // Tanks needed to apply nontrivial coefficients, so don't disable
-         //tankLabel->Disable();
-         //tankComboBox->Disable();
+         tankLabel->Disable();
+         tankTxtCtrl->Disable();
+//         tankComboBox->Disable();
+         mixRatioTxtCtrl->Disable();
+         mixRatioLabel->Disable();
 
          // g is only used to decrement mass
          gravityAccelLabel->Disable();
@@ -718,52 +767,26 @@ void BurnThrusterPanel::SaveData()
    }
    localObject = mObject->Clone();
    SaveData(localObject);
-
-#ifndef USE_TANKMIXDIALOG
-   // Temporary code: Parse the strings in the text controls
-   try {
-      std::string tankNameStr = tankTxtCtrl->GetValue().mb_str().data();
-      std::string mixRatioStr = mixRatioTxtCtrl->GetValue().mb_str().data();
-
-      for (UnsignedInt i = 0; i < tankNameStr.size(); ++i)
-      if (tankNameStr[i] == ',')
-         tankNameStr[i] = ' ';
-
-      for (UnsignedInt i = 0; i < mixRatioStr.size(); ++i)
-      if (mixRatioStr[i] == ',')
-         mixRatioStr[i] = ' ';
-
-      std::stringstream names(tankNameStr);
-      std::string tn;
-      tankNames.clear();
-      while (names >> tn)
-         tankNames.push_back(tn);
-
-      Real mr;
-      std::stringstream mixes(mixRatioStr);
-      mixRatio.clear();
-      while (mixes >> mr)
-         mixRatio.push_back(mr);
-
-      if (tankNames.size() != mixRatio.size())
-      {
-         canClose = false;
-         throw GmatBaseException("The number of tanks and the list of mixes must match");
-      }
-   }
-   catch (BaseException &e)
-   {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
-      return;
-   }
-#endif
-
    localObject->TakeAction("ClearTanks");
 
-   for (UnsignedInt i = 0; i < tankNames.size(); ++i)
-      localObject->SetStringParameter("Tank", tankNames[i]);
-   for (UnsignedInt i = 0; i < mixRatio.size(); ++i)
-      localObject->SetRealParameter("MixRatio", mixRatio[i], i);
+   if (useMixRatio)
+   {
+      for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+         localObject->SetStringParameter("Tank", tankNames[i]);
+      for (UnsignedInt i = 0; i < mixRatio.size(); ++i)
+         localObject->SetRealParameter("MixRatio", mixRatio[i], i);
+   }
+   else
+   {
+      #ifdef DEBUG_BURNPANEL_SAVE
+         MessageInterface::ShowMessage("Setting tank to '%s'\n",
+               tankTxtCtrl->GetValue().mb_str().data());
+      #endif
+      std::string tankName = tankComboBox->GetValue().mb_str().data();
+      if ((tankName != "No Fuel Tank Selected") &&
+          (tankName != "No Fuel Tank Available"))
+         localObject->SetStringParameter("Tank", tankName);
+   }
 
    // if no errors, save again
    if (canClose)
@@ -776,7 +799,7 @@ void BurnThrusterPanel::SaveData()
 
    
 //------------------------------------------------------------------------------
-// void SaveData()
+// void SaveData(GmatBase *theObject)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::SaveData(GmatBase *theObject)
 {
@@ -878,14 +901,30 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
       {
          isTankChanged = false;
          paramID = theObject->GetParameterID("Tank");
-         Integer mixID   = theObject->GetParameterID("MixRatio");
          if (theObject->TakeAction("ClearTanks", ""))
-            for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+         {
+            if (useMixRatio)
             {
-               theObject->SetStringParameter(paramID, tankNames[i]);
-               theObject->SetRealParameter(mixID,
-                     (mixRatio.size() < i ? mixRatio[i] : 1.0));
+               Integer mixID   = theObject->GetParameterID("MixRatio");
+               for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+               {
+                  theObject->SetStringParameter(paramID, tankNames[i]);
+                  theObject->SetRealParameter(mixID,
+                        (mixRatio.size() < i ? mixRatio[i] : 1.0), i);
+               }
             }
+            else
+            {
+               #ifdef DEBUG_BURNPANEL_SAVE
+                  MessageInterface::ShowMessage("Setting tank to '%s'\n",
+                        tankTxtCtrl->GetValue().mb_str().data());
+               #endif
+               std::string tankName = tankComboBox->GetValue().mb_str().data();
+               if ((tankName != "No Fuel Tank Selected") &&
+                   (tankName != "No Fuel Tank Available"))
+                  localObject->SetStringParameter("Tank", tankName);
+            }
+         }
       }
 
       if (theObject->IsOfType(Gmat::THRUSTER))
@@ -968,6 +1007,8 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::OnTextChange(wxCommandEvent &event)
 {
+   if (event.GetEventObject() == tankTxtCtrl)
+      isTankChanged = true;
    EnableUpdate(true);
 }
 
@@ -979,8 +1020,11 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
    if (decMassCheckBox->IsChecked())
    {
       // Disabling disabled so no need to enable
-      //tankLabel->Enable();
-      //tankComboBox->Enable();
+      tankLabel->Enable();
+      tankTxtCtrl->Enable();
+//      tankComboBox->Enable();
+      mixRatioTxtCtrl->Enable();
+      mixRatioLabel->Enable();
 
       // g is only used to decrement mass
       gravityAccelLabel->Enable();
@@ -997,8 +1041,11 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
    else
    {
       // Tanks needed to apply nontrivial coefficients, so don't disable
-      //tankLabel->Disable();
-      //tankComboBox->Disable();
+      tankLabel->Disable();
+      tankTxtCtrl->Disable();
+//      tankComboBox->Disable();
+      mixRatioTxtCtrl->Disable();
+      mixRatioLabel->Disable();
 
       // g is only used to decrement mass
       gravityAccelLabel->Disable();
@@ -1026,6 +1073,20 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
       UpdateOriginAxes();      
       isCoordSysChanged =  true;
       coordSysName = coordSysComboBox->GetStringSelection().c_str();
+      EnableUpdate(true);
+   }
+   else if (event.GetEventObject() == tankComboBox)
+   {
+      isTankChanged = true;
+      std::string tankName = tankComboBox->GetStringSelection().WX_TO_STD_STRING;
+      if (tankName == "No Fuel Tank Selected")
+         tankNames.clear();
+      
+      // remove "No Tank Selected" once tank is selected
+      int pos = tankComboBox->FindString("No Fuel Tank Selected");
+      if (pos != wxNOT_FOUND)
+         tankComboBox->Delete(pos);
+      
       EnableUpdate(true);
    }
    else if (event.GetEventObject() == axesComboBox)
@@ -1063,7 +1124,6 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::OnButtonClick(wxCommandEvent &event)
 {  
-#ifdef USE_TANKMIXDIALOG
    if (event.GetEventObject() == tankSelectorButton)
    {
       if (mixRatio.size() < tankNames.size())
@@ -1102,7 +1162,6 @@ void BurnThrusterPanel::OnButtonClick(wxCommandEvent &event)
       }
    }
    else
-#endif
    {
       if (theObject->IsOfType("ChemicalThruster"))
       {
@@ -1238,7 +1297,7 @@ void BurnThrusterPanel::EnableDataForThrustModel(const std::string &tModel)
 
 
 //------------------------------------------------------------------------------
-// void BurnThrusterPanel::LoadTankAndMixControl()
+// void LoadTankAndMixControl()
 //------------------------------------------------------------------------------
 /**
  * Updates the tank and mix text controls
@@ -1260,12 +1319,23 @@ void BurnThrusterPanel::LoadTankAndMixControl()
    for (Integer i = 0; i < mixRatio.size(); ++i)
    {
       if (i > 0)
-#ifdef USE_TANKMIXDIALOG
          ratio << " : ";
-#else
-         ratio << ", ";
-#endif
       ratio << mixRatio[i];
    }
    mixRatioTxtCtrl->SetValue(ratio.str().c_str());
+}
+
+
+//------------------------------------------------------------------------------
+// void BurnThrusterPanel::EnableMixRatio(bool activate)
+//------------------------------------------------------------------------------
+/**
+ * Method used to turn the mix ration controls on or off
+ *
+ * @param activate true to use a mix ratio, false to disable it.
+ */
+//------------------------------------------------------------------------------
+void BurnThrusterPanel::EnableMixRatio(bool activate)
+{
+   useMixRatio = activate;
 }

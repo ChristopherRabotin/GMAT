@@ -45,6 +45,7 @@ done
 # File sources
 gmatshare='//mesa-file.gsfc.nasa.gov/595/GMAT'
 buildpath="$gmatshare/Builds/windows/VS2013_build_32/LatestCompleteVersion"
+libpath="$gmatshare/Builds/windows/vc_lib"
 
 # Validate build
 exepath="$buildpath/bin/GMAT.exe"
@@ -67,6 +68,10 @@ fi
 # Copy build files
 cp -pRv "$buildpath"/* "$dest"
 
+# Copy VC libs
+cp -av "$libpath/msvcp120.dll" "$dest/bin"
+cp -av "$libpath/msvcr120.dll" "$dest/bin"
+
 # Remove Windows hidden files
 find "$dest" -iname thumbs.db -delete
     
@@ -81,9 +86,12 @@ then
 
     # proprietary plugins
     rm -rf "$dest"/plugins/proprietary/*
-    sed -i '/plugins\/proprietary/s/^\( *PLUGIN\) /#\1/g' \
+    sed '/plugins\/proprietary/s/^\( *PLUGIN\) /#\1/g' \
+        "$dest"/bin/gmat_startup_file.txt \
+        > "$dest"/bin/gmat_startup_file.public.txt
+    unix2dos "$dest"/bin/gmat_startup_file.public.txt
+    mv "$dest"/bin/gmat_startup_file.public.txt \
         "$dest"/bin/gmat_startup_file.txt
-    unix2dos "$dest"/bin/gmat_startup_file.txt
 fi
 
 # Remove git files
