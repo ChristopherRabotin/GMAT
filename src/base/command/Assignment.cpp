@@ -2423,7 +2423,18 @@ ElementWrapper* Assignment::RunMathTree()
             Real rval = -9999.9999;
             rval = topNode->Evaluate();
             
+            if (GmatMathUtil::IsNaN(rval))
+            {
+               CommandException ce;
+               ce.SetDetails("Cannot set \"%s\" to \"%s\". The RHS does not "
+                             "evaluate to a real number.",
+                             rhs.c_str(), lhs.c_str());
+               throw ce;
+            }
+
             #ifdef DEBUG_ASSIGNMENT_EXEC
+            MessageInterface::ShowMessage("   Returned %f (%s)\n",
+                              rval, GmatStringUtil::ToString(rval).c_str());
             MessageInterface::ShowMessage("   Returned %f\n", rval);
             MessageInterface::ShowMessage("   Creating NumberWrapper for output\n");
             #endif
