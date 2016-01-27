@@ -70,6 +70,7 @@
 #include "MarkPoint.hpp"      // for MarkPoint command
 //#include "Global.hpp"         // for Global command
 #include "Create.hpp"         // for Create command
+#include "Display.hpp"        // for Display command
 
 //******************************************************************************
 // ElseIf does not work yet. (2008.08.29)
@@ -184,6 +185,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
 //        return new Global;
     else if (ofType == "Create")
         return new Create;
+    else if (ofType == "Display")
+        return new Display;
    // add more here .......
    else 
    {
@@ -217,6 +220,7 @@ CommandFactory::CommandFactory() :
 //      creatables.push_back("CallGmatFunction");
       creatables.push_back("ClearPlot");
       creatables.push_back("Create");
+      creatables.push_back("Display");
       creatables.push_back("Else");
 #ifdef __INCLUDE_ELSEIF__
       creatables.push_back("ElseIf");
@@ -270,6 +274,11 @@ CommandFactory::CommandFactory() :
       
       // These commands only works in object setup mode and inside a GmatFunction
       unviewables.push_back("Create");
+
+      // Temporarily make this unviewable until GUI is ready for testing
+      // Display will only work from script
+      // LOJ (2016.01.25)
+      unviewables.push_back("Display");
       
       // CallFunction is parent command of CallGmatFunction and CallMatlabFunction
       unviewables.push_back("CallFunction");

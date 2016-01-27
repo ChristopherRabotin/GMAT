@@ -53,8 +53,7 @@ public:
    virtual ~StringObjectWrapper();
    
    virtual ElementWrapper*     Clone() const;
-
-
+   virtual std::string         ToString();
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual const StringArray& GetRefObjectNames();

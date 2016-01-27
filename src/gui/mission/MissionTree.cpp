@@ -1123,7 +1123,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
       #if DEBUG_MISSION_TREE
       MessageInterface::ShowMessage
          ("MissionTree::UpdateCommandTree() leaving, command '%s' ignored\n",
-          cmdTypeName.c_str());
+          cmdTypeName.WX_TO_C_STRING);
       #endif
       return mNewTreeId;
    }
@@ -1149,7 +1149,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
       ("MissionTree::UpdateCommandTree() leaving, command <%s>'%s' added to tree\n",
-       cmdTypeName.c_str(), cmd->GetName().c_str());
+       cmdTypeName.WX_TO_C_STRING, cmd->GetName().c_str());
    #endif
    
    return mNewTreeId;
@@ -4441,6 +4441,12 @@ void MissionTree::CreateCommandCounterMap()
       cmdCounterMap.insert(std::make_pair(cmd, 0));
    }
    
+   // Temporarily add Display to cmdCounterMap so that it will work for script
+   // even though cannot add Display from the GUI.
+   // Remove this after Display command is removed from the unviewables list in
+   // the CommandFactory (LOJ: 2016.01.27)
+   cmdCounterMap.insert(std::make_pair("Display", 0));  
+   
    // Add command counter that has different display name
    cmdCounterMap.insert(std::make_pair("GMAT", 0));  
    cmdCounterMap.insert(std::make_pair("BeginScript", 0));  
@@ -4458,7 +4464,7 @@ void MissionTree::CreateCommandCounterMap()
    MessageInterface::ShowMessage("===> cmdCounterMap = \n");
    for (std::map<wxString, int>::iterator pos = cmdCounterMap.begin();
         pos != cmdCounterMap.end(); ++pos)
-      MessageInterface::ShowMessage("   '%s'\n", (pos->first).c_str());
+      MessageInterface::ShowMessage("   '%s'\n", (pos->first).WX_TO_C_STRING);
    #endif
 }
 
@@ -4638,7 +4644,7 @@ int MissionTree::GetCommandCounter(GmatCommand *cmd)
 {
    int cmdCounter = 99;
    wxString cmdTypeName = cmd->GetTypeName().c_str();
-      
+   
    // If command found in the map then increment the counter first
    if (cmdCounterMap.find(cmdTypeName) != cmdCounterMap.end())
    {
@@ -4650,7 +4656,7 @@ int MissionTree::GetCommandCounter(GmatCommand *cmd)
       #ifdef DEBUG_COMMAND_COUNTER
       MessageInterface::ShowMessage
          ("**** Cannot increment the counter for the command '%s'. "
-          "It is not found in the map.\n",  cmdTypeName.c_str());
+          "It is not found in the map.\n",  cmdTypeName.WX_TO_C_STRING);
       #endif
    }
    

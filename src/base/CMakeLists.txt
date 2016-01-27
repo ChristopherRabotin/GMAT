@@ -127,6 +127,7 @@ SET(BASE_SRCS
     command/ClearPlot.cpp
     command/ConditionalBranch.cpp
     command/Create.cpp
+    command/Display.cpp
     command/Else.cpp
     command/EndFiniteBurn.cpp
     command/EndFor.cpp

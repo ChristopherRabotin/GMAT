@@ -2442,6 +2442,9 @@
     <ClCompile Include="..\..\..\src\base\util\CCSDSOEMWriter.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Display.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4651,6 +4654,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\CCSDSOEMWriter.hpp">
       <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Display.hpp">
+      <Filter>Source Files\base\command</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

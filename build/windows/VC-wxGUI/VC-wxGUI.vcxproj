@@ -342,6 +342,7 @@
     <ClCompile Include="..\..\..\src\base\command\CommandUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\command\ConditionalBranch.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Create.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Display.cpp" />
     <ClCompile Include="..\..\..\src\base\command\Else.cpp" />
     <ClCompile Include="..\..\..\src\base\command\ElseIf.cpp" />
     <ClCompile Include="..\..\..\src\base\command\EndFiniteBurn.cpp" />
@@ -1054,6 +1055,7 @@
     <ClInclude Include="..\..\..\src\base\command\CommandUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\command\ConditionalBranch.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Create.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Display.hpp" />
     <ClInclude Include="..\..\..\src\base\command\Else.hpp" />
     <ClInclude Include="..\..\..\src\base\command\ElseIf.hpp" />
     <ClInclude Include="..\..\..\src\base\command\EndFiniteBurn.hpp" />

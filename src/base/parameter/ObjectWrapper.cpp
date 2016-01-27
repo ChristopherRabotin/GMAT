@@ -134,7 +134,7 @@ ElementWrapper* ObjectWrapper::Clone() const
 //------------------------------------------------------------------------------
 std::string ObjectWrapper::ToString()
 {
-   return theObject->GetGeneratingString(Gmat::NO_COMMENTS);
+   return theObject->GetGeneratingString(Gmat::MATLAB_STRUCT);
 }
 
 
