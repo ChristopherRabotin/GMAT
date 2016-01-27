@@ -211,7 +211,7 @@ bool Divide::ValidateInputs()
       else
          retval = false; 
    else
-      retval = true;
+      retval = false;
    
    #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
