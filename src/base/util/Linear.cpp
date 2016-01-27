@@ -482,7 +482,7 @@ std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
    ss.width(w);
    ss.precision(p);
    ss.setf(std::ios::left);
-   
+
    if (isShowPointSet)
       ss.setf(std::ios::showpoint);
    else
@@ -513,7 +513,83 @@ std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
       sval = GmatStringUtil::Replace(sval, "e-0", "e-");
    if ((sval.find("e+0") != sval.npos) && (sval.size() - sval.find("e+0")) == 5)
       sval = GmatStringUtil::Replace(sval, "e+0", "e+");
+   return sval;
+}
 
+
+std::string GmatRealUtil::RealToString(const Real &rval, bool useCurrentFormat,
+   bool scientific, bool showPoint,
+   Integer precision, Integer width)
+{
+   Integer p = precision;
+   Integer w = width;
+   bool isScientific = scientific;
+   bool isShowPointSet = showPoint;
+
+   if (useCurrentFormat)
+   {
+      GmatGlobal *global = GmatGlobal::Instance();
+      p = global->GetDataPrecision();
+      w = global->GetDataWidth();
+      isScientific = global->IsScientific();
+      isShowPointSet = global->ShowPoint();
+   }
+
+   std::stringstream ss("");
+   ss.width(w);
+   ss.precision(p);
+   ss.setf(std::ios::left);
+
+   if (isShowPointSet)
+      ss << std::showpoint;
+   else
+      ss << std::noshowpoint;
+
+   if (isScientific)
+      ss << std::scientific;
+   else
+      ss << std::fixed;
+
+   ss << rval;
+
+   // How do I specify 2 digints of the exponent? (LOJ: 2010.05.03)
+   // (This is what I got from internet search)
+   // There is no way to configure using C++ manipulators only.
+   // The reason is in the C library. C++ specifies that 'scientific' shall
+   // cause the output to be the same as %e (or %E if 'uppercase' is set) in
+   // fprintf. In C++ %e causes output of as many digits in the exponent as
+   // necessary to represent the exponent. On your system 'double' has
+   // probably three digits of the exponent.
+   // So manually remove extra 0 in the exponent of scientific notation.
+   // ex) 1.23456e-015 to 1.23456e-15
+
+   std::string sval = ss.str();
+
+   if (isScientific)
+   {
+      if ((sval.find("e-0") != sval.npos) && (sval.size() - sval.find("e-0")) == 5)
+         sval = GmatStringUtil::Replace(sval, "e-0", "e-");
+      if ((sval.find("e+0") != sval.npos) && (sval.size() - sval.find("e+0")) == 5)
+         sval = GmatStringUtil::Replace(sval, "e+0", "e+");
+   }
+   else
+   {
+      // This part is added due to no showpoint option of stringstream not working  
+      if (!isShowPointSet)
+      {
+         std::string::size_type pos = sval.find_last_of(".");
+         if (pos != std::string::npos)
+         {
+            std::string::size_type i = sval.size() - 1;
+            for (; sval.at(i) == '0'; --i);
+
+            if (sval.at(i) == '.')
+               --i;
+
+            sval = sval.substr(0, i + 1);
+         }
+      }
+   }
    return sval;
 }
 

@@ -1213,6 +1213,24 @@ std::string GmatStringUtil::ReplaceChainedUnaryOperators(const std::string &str)
 }
 
 
+// made changes by TUAN NGUYEN
+std::string GmatStringUtil::RealToString(const Real &val, Integer precision,
+   bool showPoint, Integer width)
+{
+   return GmatRealUtil::RealToString(val, false, false, showPoint, precision, width);
+}
+
+
+// made changes by TUAN NGUYEN
+std::string GmatStringUtil::RealToString(const Real &val, bool useCurrentFormat,
+   bool scientific, bool showPoint,
+   Integer precision, Integer width)
+{
+   return GmatRealUtil::RealToString(val, useCurrentFormat, scientific, showPoint,
+      precision, width);
+}
+
+
 //------------------------------------------------------------------------------
 // std::string ToString(const bool &val)
 //------------------------------------------------------------------------------
