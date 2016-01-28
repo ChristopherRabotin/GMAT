@@ -4441,11 +4441,9 @@ void MissionTree::CreateCommandCounterMap()
       cmdCounterMap.insert(std::make_pair(cmd, 0));
    }
    
-   // Temporarily add Display to cmdCounterMap so that it will work for script
-   // even though cannot add Display from the GUI.
-   // Remove this after Display command is removed from the unviewables list in
-   // the CommandFactory (LOJ: 2016.01.27)
-   cmdCounterMap.insert(std::make_pair("Display", 0));  
+   // Display is now removed from the unviewable list in the CommandFactory
+   // so commented out (LOJ: 2016.01.28)
+   //cmdCounterMap.insert(std::make_pair("Display", 0));  
    
    // Add command counter that has different display name
    cmdCounterMap.insert(std::make_pair("GMAT", 0));  

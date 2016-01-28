@@ -275,10 +275,8 @@ CommandFactory::CommandFactory() :
       // These commands only works in object setup mode and inside a GmatFunction
       unviewables.push_back("Create");
 
-      // Temporarily make this unviewable until GUI is ready for testing
-      // Display will only work from script
-      // LOJ (2016.01.25)
-      unviewables.push_back("Display");
+      // Commented out. If this breaks lots of GUI testing uncomment this
+      //unviewables.push_back("Display");
       
       // CallFunction is parent command of CallGmatFunction and CallMatlabFunction
       unviewables.push_back("CallFunction");
