@@ -218,15 +218,43 @@ bool Multiply::ValidateInputs()
        "type2=%d, row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
    #endif
    
+   bool leftNumeric  = (type1 == Gmat::REAL_TYPE) || (type1 == Gmat::RMATRIX_TYPE);
+   bool rightNumeric = (type2 == Gmat::REAL_TYPE) || (type2 == Gmat::RMATRIX_TYPE);
+
+   if (!leftNumeric && (!rightNumeric))
+   {
+      std::string errmsg = "Invalid operand types (";
+      errmsg += PARAM_TYPE_STRING[type1] + ", ";
+      errmsg += PARAM_TYPE_STRING[type2] + ") for multiplication operator.\n";
+      throw MathException(errmsg);
+   }
+   else if (!leftNumeric)
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type1] + ") for multiplication operator.\n";
+      throw MathException(errmsg);
+   }
+   else if (!rightNumeric)
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type2] + ") for multiplication operator.\n";
+      throw MathException(errmsg);
+   }
+
    if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
       retval = true;
    else if ((type1 == Gmat::RMATRIX_TYPE) && (type2 == Gmat::RMATRIX_TYPE))
+   {
       if (col1 == row2)
          retval = true;
       else if ((row1 == 1 && col1 == 1) || (row2 == 1 && col2 == 1))
          retval = true;
       else
          retval = false;
+   }
+   else if (((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::RMATRIX_TYPE)) ||
+            ((type2 == Gmat::REAL_TYPE) && (type1 == Gmat::RMATRIX_TYPE)))
+      return true;
    else
       retval = false;
    
