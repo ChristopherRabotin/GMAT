@@ -194,11 +194,12 @@ Rmatrix33 CCSDSAEMQuaternionSegment::GetState(Real atEpoch)
 //------------------------------------------------------------------------------
 // Adds an epoch/data pair to the dataStore.
 //------------------------------------------------------------------------------
-bool CCSDSAEMQuaternionSegment::AddData(Real epoch, Rvector data)
+bool CCSDSAEMQuaternionSegment::AddData(Real epoch, Rvector data,
+                                        bool justCheckDataSize)
 {
    // First, check for data size and ordering
-   CCSDSAEMSegment::AddData(epoch, data);
-
+   CCSDSAEMSegment::AddData(epoch, data, justCheckDataSize);
+   
    if (!ValidateQuaternion(data))
    {
       std::string errmsg = segError;

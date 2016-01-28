@@ -61,7 +61,7 @@ public:
    static Real ParseEpoch(const std::string &epochString);
    
    /// class methods
-   CCSDSEMSegment(Integer segNum = 0);
+   CCSDSEMSegment(Integer segNum);
    CCSDSEMSegment(const CCSDSEMSegment &copy);
    CCSDSEMSegment& operator=(const CCSDSEMSegment &copy);
    

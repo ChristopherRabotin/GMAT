@@ -581,6 +581,11 @@ bool CCSDSEMSegment::SetMetaDataForWriting(const std::string &fieldName,
 //------------------------------------------------------------------------------
 bool CCSDSEMSegment::AddData(Real epoch, Rvector data, bool justCheckDataSize)
 {
+   #ifdef DEBUG_ADD_DATA
+   MessageInterface::ShowMessage
+      ("CCSDSEMSegment::AddData() entered, epoch=%f, justCheckDataSize=%d, "
+       "dataStore.size()=%d\n", epoch, justCheckDataSize, dataStore.size());
+   #endif
    if (data.GetSize() != dataSize)
    {
       std::ostringstream errmsg("");
@@ -594,7 +599,13 @@ bool CCSDSEMSegment::AddData(Real epoch, Rvector data, bool justCheckDataSize)
    // Since OEM allows backward propagation, just return if only checking
    // for the data size
    if (justCheckDataSize)
+   {
+      #ifdef DEBUG_ADD_DATA
+      MessageInterface::ShowMessage
+         ("CCSDSEMSegment::AddData() returning true, skipping epoch check\n");
+      #endif
       return true;
+   }
    
    if ((epoch < startTime) || (epoch > stopTime))
    {
@@ -616,6 +627,9 @@ bool CCSDSEMSegment::AddData(Real epoch, Rvector data, bool justCheckDataSize)
          throw UtilityException(errmsg);
       }
    }
+   #ifdef DEBUG_ADD_DATA
+   MessageInterface::ShowMessage("CCSDSEMSegment::AddData() returning true\n");
+   #endif
    return true;
 }
 
@@ -688,6 +702,11 @@ void CCSDSEMSegment::ClearMetaData()
 //------------------------------------------------------------------------------
 void CCSDSEMSegment::ClearDataStore()
 {
+   #ifdef DEBUG_CLEAR_DATA
+   MessageInterface::ShowMessage
+      ("CCSDSEMSegment::ClearDataStore() entered, dataStore.size() = %d\n",
+       dataStore.size());
+   #endif
    ClearDataComments();
    for (Integer ii = 0; ii < (Integer) dataStore.size(); ii++)
       delete dataStore.at(ii);
@@ -893,6 +912,7 @@ bool CCSDSEMSegment::GetUsableIndexRange(Integer &first, Integer &last)
    #ifdef DEBUG_USABLE
       MessageInterface::ShowMessage("In GetUsableIndexRange, usableStart = %12.10f, usableStop = %12.10f\n",
             usableStartTime, usableStopTime);
+      MessageInterface::ShowMessage("   dataStore.size() = %d\n", dataStore.size());
    #endif
    // If we are not using usableStartTime and usableStopTime, the range
    // covers the entire startTime-stopTime span
