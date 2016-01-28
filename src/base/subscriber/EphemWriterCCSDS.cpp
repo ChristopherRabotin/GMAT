@@ -1004,9 +1004,9 @@ void EphemWriterCCSDS::WriteCcsdsHeader()
    {
       ccsdsOemWriter->SetHeaderForWriting("VERSION_NUMBER", "1.0");
       ccsdsOemWriter->SetHeaderForWriting("ORIGINATOR", "GMAT USER");
-      ccsdsOemWriter->WriteHeader();
+      ccsdsOemWriter->WriteHeader("CCSDS_OEM_VERS");
    }
-
+   
    
    #ifdef DEBUG_TO_TEXT_EPHEM
    std::string creationTime = GmatTimeUtil::FormatCurrentTime(2);

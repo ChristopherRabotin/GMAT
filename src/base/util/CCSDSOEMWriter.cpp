@@ -223,10 +223,13 @@ bool CCSDSOEMWriter::WriteDataSegment()
 /**
  * Sets meta data for writing. Once meta data is written to a file it will be
  * cleared.
+ *
+ * @param fieldName Metadata field name to be set
+ * @param value Value to set to the field
  */
 //------------------------------------------------------------------------------
 bool CCSDSOEMWriter::SetMetaDataForWriting(const std::string &fieldName,
-                                          const std::string &value)
+                                           const std::string &value)
 {
    #ifdef DEBUG_META_DATA
    MessageInterface::ShowMessage("CCSDSOEMWriter::SetMetaDataForWriting() entered\n");
@@ -246,6 +249,8 @@ bool CCSDSOEMWriter::SetMetaDataForWriting(const std::string &fieldName,
 /**
  * Adds meta comment for writing. Once meta data is written to a file it will be
  * cleared.
+ *
+ * @param comment comment to be added to the metadata comments
  */
 //------------------------------------------------------------------------------
 bool CCSDSOEMWriter::AddMetaComment(const std::string& comment)
@@ -268,6 +273,8 @@ bool CCSDSOEMWriter::AddMetaComment(const std::string& comment)
 /**
  * Adds data comment for writing. Once data segment is written to a file it will be
  * cleared.
+ *
+ * @param comment comment to be added to the data comments
  */
 //------------------------------------------------------------------------------
 bool CCSDSOEMWriter::AddDataComment(const std::string& comment)
@@ -290,6 +297,9 @@ bool CCSDSOEMWriter::AddDataComment(const std::string& comment)
 /**
  * Adds data to a data store for writing. Once data segment is written to a
  * file the data store will be cleared.
+ *
+ * @epoch Epoch of data to be added to the CCSDS data store
+ * @data Data to be added to the CCSDS data store
  */
 //------------------------------------------------------------------------------
 bool CCSDSOEMWriter::AddDataForWriting(Real epoch, Rvector &data)
@@ -308,6 +318,10 @@ bool CCSDSOEMWriter::AddDataForWriting(Real epoch, Rvector &data)
 
 //------------------------------------------------------------------------------
 // void ClearMetaComments()
+//------------------------------------------------------------------------------
+/**
+ * Clears meta data comments
+ */
 //------------------------------------------------------------------------------
 void CCSDSOEMWriter::ClearMetaComments()
 {

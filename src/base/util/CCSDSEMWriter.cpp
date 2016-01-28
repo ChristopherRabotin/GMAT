@@ -43,10 +43,6 @@
 // -----------------------------------------------------------------------------
 // static data
 // -----------------------------------------------------------------------------
-// const std::string CCSDSEMWriter::META_START = "META_START";
-// const std::string CCSDSEMWriter::META_STOP  = "META_STOP";
-// const std::string CCSDSEMWriter::DATA_START = "DATA_START";
-// const std::string CCSDSEMWriter::DATA_STOP  = "DATA_STOP";
 
 // -----------------------------------------------------------------------------
 // public methods
@@ -102,6 +98,12 @@ CCSDSEMWriter::~CCSDSEMWriter()
 // -----------------------------------------------------------------------------
 // bool OpenFile(const std::string &filename)
 // -----------------------------------------------------------------------------
+/**
+ * Opens CCSDS output file for writing.
+ *
+ * @filename File name to open
+ */
+// -----------------------------------------------------------------------------
 bool CCSDSEMWriter::OpenFile(const std::string &filename)
 {
    #ifdef DEBUG_EM_FILE
@@ -148,6 +150,9 @@ bool CCSDSEMWriter::OpenFile(const std::string &filename)
 //------------------------------------------------------------------------------
 /**
  * Sets EM header data for writing. It does not validate the input value.
+ *
+ * @param fieldName Header field name to be set
+ * @param value Value to set to the field
  */
 //------------------------------------------------------------------------------
 bool CCSDSEMWriter::SetHeaderForWriting(const std::string &fieldName,
@@ -170,9 +175,18 @@ bool CCSDSEMWriter::SetHeaderForWriting(const std::string &fieldName,
 }
 
 //------------------------------------------------------------------------------
-// bool WriteHeader()
+// bool WriteHeader(const std::string &versionFieldName)
 //------------------------------------------------------------------------------
-bool CCSDSEMWriter::WriteHeader()
+/**
+ * Formats and writes header to a file. If output stream is not opened,
+ * it just returns false.
+ *
+ * @versionFieldName The version keyword to be written out
+ *                   For OEM, it should be "CCSDS_OEM_VERS" but it
+ *                   doesn't validate the input
+ */
+//------------------------------------------------------------------------------
+bool CCSDSEMWriter::WriteHeader(const std::string &versionFieldName)
 {
    if (!emOutStream.is_open())
       return false;
@@ -180,7 +194,8 @@ bool CCSDSEMWriter::WriteHeader()
    creationTime = GmatTimeUtil::FormatCurrentTime(2);
    
    std::stringstream ss("");
-   ss << "CCSDS_OEM_VERS = " << versionNumber << std::endl;
+   ss << versionFieldName << " = " << versionNumber << std::endl;
+   //ss << "CCSDS_OEM_VERS = " << versionNumber << std::endl;
    for (unsigned int i = 0; i < headerComments.size(); i++)
       ss << "COMMENT  " << headerComments[i] << std::endl;
    ss << "CREATION_DATE  = " << creationTime << std::endl;
@@ -196,6 +211,10 @@ bool CCSDSEMWriter::WriteHeader()
 //------------------------------------------------------------------------------
 // bool WriteBlankLine()
 //------------------------------------------------------------------------------
+/**
+ * Writes blank line to a file.
+ */
+//------------------------------------------------------------------------------
 bool CCSDSEMWriter::WriteBlankLine()
 {
    if (!emOutStream.is_open())
@@ -209,21 +228,36 @@ bool CCSDSEMWriter::WriteBlankLine()
 //------------------------------------------------------------------------------
 // bool WriteString(const std::string &str)
 //------------------------------------------------------------------------------
+/**
+ * Writes input string to a file.
+ */
+//------------------------------------------------------------------------------
 bool CCSDSEMWriter::WriteString(const std::string &str)
 {
+   #ifdef DEBUG_WRITE_STRING
    MessageInterface::ShowMessage
-      ("===> CCSDSEMWriter::WriteString() entered, str='%s'\n", str.c_str());
+      ("CCSDSEMWriter::WriteString() entered, str='%s'\n", str.c_str());
+   #endif
    
    if (!emOutStream.is_open())
       return false;
    
    emOutStream << str << std::endl;
    emOutStream.flush();
+   
+   #ifdef DEBUG_WRITE_STRING
+   MessageInterface::ShowMessage
+      ("CCSDSEMWriter::WriteString() returning true\n");
+   #endif
    return true;
 }
 
 //------------------------------------------------------------------------------
 // void ClearHeaderComments()
+//------------------------------------------------------------------------------
+/**
+ * Clears header comments.
+ */
 //------------------------------------------------------------------------------
 void CCSDSEMWriter::ClearHeaderComments()
 {
@@ -233,6 +267,10 @@ void CCSDSEMWriter::ClearHeaderComments()
 
 //------------------------------------------------------------------------------
 // void ClearHeader()
+//------------------------------------------------------------------------------
+/**
+ * Clears header information.
+ */
 //------------------------------------------------------------------------------
 void CCSDSEMWriter::ClearHeader()
 {

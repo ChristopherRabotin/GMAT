@@ -50,7 +50,7 @@ public:
    virtual bool         OpenFile(const std::string &filename);
    virtual bool         SetHeaderForWriting(const std::string &fieldName,
                                             const std::string &value);   
-   virtual bool         WriteHeader();
+   virtual bool         WriteHeader(const std::string &versionFieldName);
    virtual bool         WriteBlankLine();
    virtual bool         WriteString(const std::string &str);
    virtual void         ClearHeaderComments();
