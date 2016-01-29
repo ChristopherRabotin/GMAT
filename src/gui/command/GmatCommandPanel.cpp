@@ -190,6 +190,10 @@ void GmatCommandPanel::SaveData()
       std::string cmdStr = commandTextCtrl->GetValue().WX_TO_STD_STRING;
       theCommand->SetGeneratingString(cmdStr);
       theCommand->InterpretAction();
+      
+      // Now validate command and create element wrappers
+      if (!theGuiInterpreter->ValidateCommand(theCommand))
+         canClose = false;
    }
    catch (BaseException &e)
    {
