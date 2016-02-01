@@ -47,7 +47,7 @@ endif()
 # Note that CMAKE_BUILD_TYPE is initialized to "" on the initial cmake-gui
 # run, so we check for that and set the default appropriately
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Debug, Beta, Release, RelWithDebInfo, or MinSizeRel" FORCE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
 endif()
 
 # Set default GMAT installation location
@@ -70,8 +70,6 @@ if(APPLE)
     if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
       (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
       SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd.app/Contents")
-    elseif(${CMAKE_BUILD_TYPE} STREQUAL "Beta")
-      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT_Beta.app/Contents")
     else()
       SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT.app/Contents")
     endif()
