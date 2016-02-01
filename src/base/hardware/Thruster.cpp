@@ -1153,14 +1153,17 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          // copy constructor)
          for (UnsignedInt i=0; i<tanks.size(); i++)
          {
-            if (tanks[i]->GetName() == name)
+            if (tanks[i]->IsOfType(Gmat::FUEL_TANK))
             {
-               #ifdef DEBUG_THRUSTER_REF_OBJ
-               MessageInterface::ShowMessage
-                  ("   <%p>'%s' will replace the old tank <%p>'%s'\n", obj,
-                   obj->GetName().c_str(), tanks[i], tanks[i]->GetName().c_str());
-               #endif
-               tanks[i] = (FuelTank*)obj;
+               if (tanks[i]->GetName() == name)
+               {
+                  #ifdef DEBUG_THRUSTER_REF_OBJ
+                  MessageInterface::ShowMessage
+                     ("   <%p>'%s' will replace the old tank <%p>'%s'\n", obj,
+                      obj->GetName().c_str(), tanks[i], tanks[i]->GetName().c_str());
+                  #endif
+                  tanks[i] = (FuelTank*)obj;
+               }
             }
          }
       }
