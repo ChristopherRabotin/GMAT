@@ -83,6 +83,8 @@ protected:
    Integer     thinningFrequency;
    /// Record count;
    Integer     recCount;
+   /// Start time window. It is used for thinMode = "T"
+   GmatEpoch   startTimeWindow;
 
    /// List of tracking configs used for data filter                                          // made changes by TUAN NGUYEN
    StringArray tkConfigList;                                                                  // made changes by TUAN NGUYEN
