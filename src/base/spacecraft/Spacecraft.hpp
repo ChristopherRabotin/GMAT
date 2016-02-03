@@ -596,6 +596,9 @@ protected:
    /// List of hardware objects used in the spacecraft
    ObjectArray       hardwareList;
 
+   /// list of to-be-deleted obsolete objects
+   ObjectArray       obsoleteObjects;
+
    Real              UpdateTotalMass();
    Real              UpdateTotalMass() const;
    bool              ApplyTotalMass(Real newMass);

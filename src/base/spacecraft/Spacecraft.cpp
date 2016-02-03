@@ -651,6 +651,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    hardwareNames     = a.hardwareNames;
 //   hardwareList      = a.hardwareList;
 
+   obsoleteObjects.clear();
    // set cloned hardware
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
    
@@ -760,6 +761,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    hardwareNames     = a.hardwareNames;
 //   hardwareList      = a.hardwareList;
+
+   obsoleteObjects.clear();
 
    // delete attached hardware, such as tanks and thrusters
    #ifdef DEBUG_SPACECRAFT
@@ -2046,9 +2049,25 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                }
                catch (BaseException &)
                {
+                  #ifdef DEBUG_SC_REF_OBJECT
+                  MessageInterface::ShowMessage
+                     ("Spacecraft::SetRefObject() EXCEPTION thrown in AttachTanksToThrusters\n");
+                  #endif
                }
             }
          }
+         // Now we can delete the obsolete objects since they should not be
+         // pointed to anymore
+         for (unsigned int ii = 0; ii < obsoleteObjects.size(); ii++)
+         {
+            #ifdef DEBUG_SC_REF_OBJECT
+            MessageInterface::ShowMessage
+               ("Spacecraft::SetRefObject() deleting obsolete object %s<%p>\n",
+                     obsoleteObjects.at(ii)->GetName().c_str(), obsoleteObjects.at(ii));
+            #endif
+            delete obsoleteObjects.at(ii);
+         }
+         obsoleteObjects.clear();
          return retval;
       }
 
@@ -2071,6 +2090,18 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                }
             }
          }
+         // Now we can delete the obsolete objects since they should not be
+         // pointed to anymore
+         for (unsigned int ii = 0; ii < obsoleteObjects.size(); ii++)
+         {
+            #ifdef DEBUG_SC_REF_OBJECT
+            MessageInterface::ShowMessage
+               ("Spacecraft::SetRefObject() deleting obsolete object %s<%p>\n",
+                     obsoleteObjects.at(ii)->GetName().c_str(), obsoleteObjects.at(ii));
+            #endif
+            delete obsoleteObjects.at(ii);
+         }
+         obsoleteObjects.clear();
          return retval;
       }
 
@@ -2083,7 +2114,20 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       // set on hardware
       if (obj->GetType() == Gmat::HARDWARE)
       {
-         return SetHardware(obj, hardwareNames, hardwareList);
+         bool retval = SetHardware(obj, hardwareNames, hardwareList);
+         // Now we can delete the obsolete objects since they should not be
+         // pointed to anymore
+         for (unsigned int ii = 0; ii < obsoleteObjects.size(); ii++)
+         {
+            #ifdef DEBUG_SC_REF_OBJECT
+            MessageInterface::ShowMessage
+               ("Spacecraft::SetRefObject() deleting obsolete object %s<%p>\n",
+                     obsoleteObjects.at(ii)->GetName().c_str(), obsoleteObjects.at(ii));
+            #endif
+            delete obsoleteObjects.at(ii);
+         }
+         obsoleteObjects.clear();
+         return retval;
       }
 
       return false;
@@ -5854,6 +5898,9 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
             ("      The hardware name '%s' found\n", objName.c_str());
          #endif
 
+//         bool isFound = false;
+//         ObjectArray::iterator i;
+//         for (i = hwArray.begin(); i != hwArray.end(); ++i)
          for (ObjectArray::iterator i = hwArray.begin(); i != hwArray.end(); ++i)
          {
             #ifdef DEBUG_SC_REF_OBJECT
@@ -5869,16 +5916,27 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
                if (old->IsOfType(Gmat::THRUSTER))
                   isFiring = old->GetBooleanParameter("IsFiring");
                hwArray.erase(i);
+//               isFound = true;
                #ifdef DEBUG_MEMORY
                MemoryTracker::Instance()->Remove
                   (old, old->GetName(), "Spacecraft::SetHardware()",
                    "deleting old cloned " + objType, this);
                #endif
-               delete old;
+//               delete old;
+               // we don't want to delete this here, as it may still be pointed to.
+               // this will be deleted later on in SetRefObject
+               #ifdef DEBUG_SC_REF_OBJECT
+               MessageInterface::ShowMessage
+                  ("      Adding pointer %s<%p> to obsoleteObjects\n",
+                        objName.c_str(), old);
+               #endif
+               obsoleteObjects.push_back(old);
                old = NULL;
                break;
             }
          }
+//         if (isFound)
+//            hwArray.erase(i);
 
          // clone and push the hardware to the list
          GmatBase *clonedObj = obj->Clone();
