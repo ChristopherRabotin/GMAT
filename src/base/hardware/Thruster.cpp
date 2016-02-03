@@ -1148,13 +1148,33 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
       else if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
       {
+         #ifdef DEBUG_THRUSTER_REF_OBJ
+         MessageInterface::ShowMessage
+            ("   ------ the tank pointer of name %s was NOT found in the array (of size %d)\n",
+                  name.c_str(), (Integer) tanks.size());
+         #endif
          // Replace old tank with new one. We don't want to delete the
          // old tank here since Spacecraft owns it (tank is not cloned in the
          // copy constructor)
          for (UnsignedInt i=0; i<tanks.size(); i++)
          {
+            #ifdef DEBUG_THRUSTER_REF_OBJ
+            if (!tanks[i])
+               MessageInterface::ShowMessage("--- tank pointer is : NULL\n");
+            else
+               MessageInterface::ShowMessage("--- tank pointer is : %p\n", tanks[i]);
+            std::string theType = PARAM_TYPE_STRING[tanks[i]->GetType()];
+            MessageInterface::ShowMessage
+               ("   ---- tanks %d type is %s\n", (Integer) i, theType.c_str());
+            #endif
             if (tanks[i]->IsOfType(Gmat::FUEL_TANK))
             {
+               #ifdef DEBUG_THRUSTER_REF_OBJ
+               std::string theType = PARAM_TYPE_STRING[tanks[i]->GetType()];
+               MessageInterface::ShowMessage
+                  ("   ---- tanks %d name is %s, name = %s\n",
+                        tanks[i]->GetName().c_str(), name.c_str());
+               #endif
                if (tanks[i]->GetName() == name)
                {
                   #ifdef DEBUG_THRUSTER_REF_OBJ
