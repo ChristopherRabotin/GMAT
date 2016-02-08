@@ -65,6 +65,13 @@ void BeginFileThrust::SetTransientForces(std::vector<PhysicalModel*>* tf)
 {
 }
 
+bool BeginFileThrust::InterpretAction()
+{
+   bool retval = true;
+
+   return retval;
+}
+
 bool BeginFileThrust::Initialize()
 {
    bool retval = false;

@@ -35,6 +35,7 @@ SET(PLUGIN_SRCS
     command/BeginFileThrust.cpp
     command/EndFileThrust.cpp
     datareader/ThrustHistoryFile.cpp
+    datareader/ThrustSegment.cpp
     factory/ThrustFileCommandFactory.cpp
     factory/ThrustFileForceFactory.cpp
     factory/ThrustFileReaderFactory.cpp

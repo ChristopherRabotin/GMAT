@@ -19,6 +19,8 @@
 
 
 #include "EndFileThrust.hpp"
+#include "MessageInterface.hpp"
+
 
 EndFileThrust::EndFileThrust(const std::string &name) :
    GmatCommand             ("EndFileThrust"),
@@ -64,6 +66,14 @@ bool EndFileThrust::RenameRefObject(const Gmat::ObjectType type,
 
 void EndFileThrust::SetTransientForces(std::vector<PhysicalModel*>* tf)
 {
+}
+
+bool EndFileThrust::InterpretAction()
+{
+   bool retval = true;
+      MessageInterface::ShowMessage("EndFileThrust::InterpretAction() for "
+            "line \"%s\"\n", generatingString.c_str());
+   return retval;
 }
 
 bool EndFileThrust::Initialize()

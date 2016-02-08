@@ -20,6 +20,7 @@
 
 #include "ThrustFileReaderFactory.hpp"
 #include "ThrustHistoryFile.hpp"
+#include "ThrustSegment.hpp"
 #include "MessageInterface.hpp"
 
 
@@ -27,6 +28,7 @@ ThrustFileReaderFactory::ThrustFileReaderFactory() :
    Factory           (Gmat::INTERFACE)
 {
    creatables.push_back("ThrustHistoryFile");
+   creatables.push_back("ThrustSegment");
 }
 
 ThrustFileReaderFactory::~ThrustFileReaderFactory()
@@ -40,6 +42,7 @@ ThrustFileReaderFactory::ThrustFileReaderFactory(
    if (creatables.empty())
    {
       creatables.push_back("ThrustHistoryFile");
+      creatables.push_back("ThrustSegment");
    }
 }
 
@@ -53,6 +56,7 @@ ThrustFileReaderFactory& ThrustFileReaderFactory::operator =(
       if (creatables.empty())
       {
          creatables.push_back("ThrustHistoryFile");
+         creatables.push_back("ThrustSegment");
       }
    }
    return *this;
@@ -65,17 +69,8 @@ GmatBase* ThrustFileReaderFactory::CreateObject(const std::string& ofType,
 
    if (ofType == "ThrustHistoryFile")
       retval = new ThrustHistoryFile(withName);
-
-   if (retval != NULL)
-   {
-      if (retval->IsOfType("ThrustHistoryFile") == false)
-      {
-         delete retval;
-         retval = NULL;
-         MessageInterface::ShowMessage("The Reader Factory can only create "
-               "DataReader subobjects; %s is not a DataReader\n", ofType.c_str());
-      }
-   }
+   if (ofType == "ThrustSegment")
+      retval = new ThrustSegment(withName);
 
    return retval;
 }

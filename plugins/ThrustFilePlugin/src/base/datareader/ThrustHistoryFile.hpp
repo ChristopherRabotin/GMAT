@@ -37,7 +37,76 @@ public:
    virtual GmatBase* Clone() const;
    virtual bool ReadData();
 
+   virtual std::string  GetParameterText(const Integer id) const;
+//   virtual std::string  GetParameterUnit(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const char *value);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const char *value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value,
+                                           const Integer index);
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id,
+                                                const Integer index) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label,
+                                                const Integer index) const;
+
    DEFAULT_TO_NO_CLONES
+
+protected:
+   struct thrustPoint
+   {
+      Real epoch;
+      Real magnitude;
+      Real vector[3];
+   };
+
+   struct thrustProfile
+   {
+      std::vector<thrustPoint> nodes;
+   };
+
+   struct thrustHistory
+   {
+      std::string blockName;
+      thrustProfile profile;
+   };
+
+   /// Name for the thrust history file
+   std::string thrustFileName;
+   /// Data blocks from the file
+   std::vector<thrustHistory> blocks;
+   /// Scripted block names
+   StringArray blockNames;
+   /// Mass source for each block
+   std::map<std::string, StringArray> massSources;
 
    /// Parameter IDs
    enum

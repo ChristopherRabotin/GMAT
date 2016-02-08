@@ -41,6 +41,7 @@ public:
                                         const std::string &newName);
 
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
+   virtual bool         InterpretAction();
    virtual bool         Initialize();
    virtual bool         Execute();
 
