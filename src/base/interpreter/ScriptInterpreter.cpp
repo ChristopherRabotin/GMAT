@@ -2470,7 +2470,8 @@ bool ScriptInterpreter::IsOneWordCommand(const std::string &str)
    bool retval = false;
    
    if ((str.find("End")                  != str.npos  &&
-        str.find("EndFiniteBurn")        == str.npos) ||
+       (str.find("EndFiniteBurn")        == str.npos) &&
+       (str.find("EndFileThrust")        == str.npos)) ||
        (str.find("BeginScript")          != str.npos) ||
        (str.find("NoOp")                 != str.npos) ||
        (str.find("BeginMissionSequence") != str.npos) ||
