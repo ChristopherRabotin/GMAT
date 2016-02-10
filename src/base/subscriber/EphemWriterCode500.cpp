@@ -780,8 +780,6 @@ void EphemWriterCode500::WriteCode500OrbitDataSegment(bool canFinish)
       {
          ClearOrbitData();
          code500WriteFailed = true;
-         dstream.flush();
-         dstream.close();
          #ifdef DEBUG_CODE500_DATA_SEGMENT
          MessageInterface::ShowMessage("**** ERROR **** " + e.GetFullMessage());
          #endif
@@ -839,9 +837,4 @@ void EphemWriterCode500::FinalizeCode500Ephemeris()
    MessageInterface::ShowMessage("EphemWriterCode500::FinalizeCode500Ephemeris() leaving\n");
    #endif
 }
-
-
-//--------------------------------------
-// methods inherited from Subscriber
-//--------------------------------------
 

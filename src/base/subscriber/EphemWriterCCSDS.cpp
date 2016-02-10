@@ -1394,7 +1394,9 @@ void EphemWriterCCSDS::WriteCcsdsDataComments(const std::string &comments, bool 
    if (ccsdsOemWriter)
    {
       std::string cmts = GmatStringUtil::RemoveAllBlanks(comments);
+      #ifdef DEBUG_EPHEMFILE_COMMENTS
       MessageInterface::ShowMessage("cmts after removing blanks = '%s'\n", cmts.c_str());
+      #endif
       if (cmts == "" ||
           (GmatStringUtil::StartsWith(cmts, "\n") &&
            GmatStringUtil::EndsWith(cmts, "\n")))
