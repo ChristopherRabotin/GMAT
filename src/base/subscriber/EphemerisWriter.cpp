@@ -862,9 +862,10 @@ bool EphemerisWriter::CheckInitialAndFinalEpoch()
 {
    #ifdef DEBUG_EPHEMFILE_WRITE
    MessageInterface::ShowMessage
-      ("\nEphemerisWriter::CheckInitialAndFinalEpoch() entered, currEpochInDays=%.15f\n   "
+      ("\nEphemerisWriter::CheckInitialAndFinalEpoch() <%p>'%s' entered, currEpochInDays=%.15f\n   "
        "initialEpochA1Mjd=%.15f, finalEpochA1Mjd=%.15f, finalEpochReached=%d, finalEpochProcessed=%d\n",
-       currEpochInDays, initialEpochA1Mjd, finalEpochA1Mjd, finalEpochReached, finalEpochProcessed);
+       this, ephemName.c_str(), currEpochInDays, initialEpochA1Mjd, finalEpochA1Mjd,
+       finalEpochReached, finalEpochProcessed);
    #endif
    
    // Check initial and final epoch for writing, dat[0] is epoch

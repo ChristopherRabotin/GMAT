@@ -130,7 +130,8 @@ protected:
    //@note Should match FileType in EphemerisFile.hpp for now
    enum FileType
    {
-      CCSDS_OEM, CCSDS_AEM, SPK_ORBIT, SPK_ATTITUDE, CODE500_EPHEM, UNKNOWN_FILE_TYPE
+      CCSDS_OEM, CCSDS_AEM, SPK_ORBIT, SPK_ATTITUDE, CODE500_EPHEM,
+      STK_TIMEPOSVEL, UNKNOWN_FILE_TYPE
    };
    
    std::string ephemName;
@@ -141,7 +142,7 @@ protected:
    // Maximum segment size used for bufferring data
    UnsignedInt maxSegmentSize;
    
-   Spacecraft *spacecraft;
+   Spacecraft       *spacecraft;
    CoordinateSystem *dataCoordSystem;
    CoordinateSystem *outCoordSystem;
    

@@ -869,7 +869,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    {
       // Create panel if Report or Compare Report or Event Report
       if (itemType == GmatTree::OUTPUT_REPORT ||
-          itemType == GmatTree::OUTPUT_CCSDS_OEM_FILE ||
+          itemType == GmatTree::OUTPUT_TEXT_EPHEM_FILE ||
           itemType == GmatTree::OUTPUT_COMPARE_REPORT ||
           itemType == GmatTree::OUTPUT_EVENT_REPORT)
          newChild = CreateNewOutput(item->GetTitle(), item->GetName(), itemType);
@@ -1637,18 +1637,18 @@ void GmatMainFrame::RemoveOutput(const wxString &name)
 	  if (GmatAppData::Instance()->GetOutputTree() != NULL)
 		GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_REPORT, name, true);
    }
-   else if (IsChildOpen(name, GmatTree::OUTPUT_CCSDS_OEM_FILE, false))
+   else if (IsChildOpen(name, GmatTree::OUTPUT_TEXT_EPHEM_FILE, false))
    {
-      RemoveChild(name, GmatTree::OUTPUT_CCSDS_OEM_FILE);
+      RemoveChild(name, GmatTree::OUTPUT_TEXT_EPHEM_FILE);
 	  if (GmatAppData::Instance()->GetOutputTree() != NULL)
-		GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_CCSDS_OEM_FILE, name, true);
+		GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_TEXT_EPHEM_FILE, name, true);
    }
    else if (IsChildOpen(name, GmatTree::OUTPUT_EVENT_REPORT, false))
       RemoveChild(name, GmatTree::OUTPUT_EVENT_REPORT);
    else if (GmatAppData::Instance()->GetOutputTree() != NULL)
    {
       GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_REPORT, name, true);
-      GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_CCSDS_OEM_FILE, name, true);
+      GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_TEXT_EPHEM_FILE, name, true);
    }
    
    #ifdef DEBUG_REMOVE_CHILD
@@ -4528,7 +4528,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
    switch (itemType)
    {
    case GmatTree::OUTPUT_REPORT:
-   case GmatTree::OUTPUT_CCSDS_OEM_FILE:
+   case GmatTree::OUTPUT_TEXT_EPHEM_FILE:
       {
          Integer x = 0.0;
          Integer y = 0.0;

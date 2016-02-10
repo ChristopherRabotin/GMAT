@@ -21,6 +21,7 @@
 // Author: Linda Jun / NASA
 // Created: 2009.09.02
 // Modified: 2015.11.18 Refactored EphemerisFile
+//           2016.02.05 Added STK EphemerisTimePosVel format
 //
 /**
  * Base class for writing spacecraft orbit states to an ephemeris file.
@@ -42,6 +43,7 @@
 #include "EphemWriterCCSDS.hpp"
 #include "EphemWriterSPK.hpp"
 #include "EphemWriterCode500.hpp"
+#include "EphemWriterSTK.hpp"
 #include <sstream>                   // for <<, std::endl
 
 
@@ -156,6 +158,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    writeEphemeris       (true),
    usingDefaultFileName (true),
    generateInBackground (false),
+   allowMultipleSegments(true),
    prevPropName         (""),
    currPropName         (""),
    interpolationOrder   (7),
@@ -209,6 +212,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    //fileFormatList.push_back("CCSDS-AEM");
    fileFormatList.push_back("SPK");
    fileFormatList.push_back("Code-500");
+   fileFormatList.push_back("STK-TimePosVel");
    
    epochFormatList.clear();
    epochFormatList.push_back("UTCGregorian");
@@ -307,6 +311,8 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    outputFormat         (ef.outputFormat),
    writeEphemeris       (ef.writeEphemeris),
    usingDefaultFileName (ef.usingDefaultFileName),
+   generateInBackground (ef.generateInBackground),
+   allowMultipleSegments(ef.allowMultipleSegments),
    prevPropName         (ef.prevPropName),
    currPropName         (ef.currPropName),
    interpolationOrder   (ef.interpolationOrder),
@@ -375,6 +381,8 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    outputFormat         = ef.outputFormat;
    writeEphemeris       = ef.writeEphemeris;
    usingDefaultFileName = ef.usingDefaultFileName;
+   generateInBackground = ef.generateInBackground;
+   allowMultipleSegments= ef.allowMultipleSegments;
    prevPropName         = ef.prevPropName;
    currPropName         = ef.currPropName;
    interpolationOrder   = ef.interpolationOrder;
@@ -424,6 +432,8 @@ std::string EphemerisFile::GetProperFileName(const std::string &fName,
       defaultExt = ".oem";
    else if (fType == "CCSDS-AEM")
       defaultExt = ".aem";
+   else if (fType == "STK-TimePosVel")
+      defaultExt = ".e";
    
    std::string parsedExt = GmatFileUtil::ParseFileExtension(fName, true);
    if (parsedExt != "" && parsedExt != defaultExt)
@@ -569,9 +579,16 @@ bool EphemerisFile::Initialize()
       fileType = SPK_ATTITUDE;
    else if (fileFormat == "Code-500")
       fileType = CODE500_EPHEM;
+   else if (fileFormat == "STK-TimePosVel")
+      fileType = STK_TIMEPOSVEL;
    else
       throw SubscriberException
          ("FileFormat \"" + fileFormat + "\" is not valid");
+   
+   // Find out if multiple segments allowed
+   allowMultipleSegments = true;
+   if (fileType == CODE500_EPHEM || fileType == STK_TIMEPOSVEL)
+      allowMultipleSegments = false;
    
    // Do some validation
    ValidateParameters(true);
@@ -704,8 +721,9 @@ bool EphemerisFile::TakeAction(const std::string &action,
       toggleStatus = 2;
       writeEphemeris = false;
       // If toggle off, finish writing ephemeris and restart interpolation
-      //LOJ: Write continuous ephemeris if CODE500_EPHEM
-      if (fileType != CODE500_EPHEM)
+      //LOJ: Write continuous ephemeris if CODE500_EPHEM or STK_TIMEPOSVEL
+      //if (fileType != CODE500_EPHEM && fileType != STK_TIMEPOSVEL)
+      if (allowMultipleSegments)
       {
          StartNewSegment("", false, true, true);
       }
@@ -1071,8 +1089,9 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
    #ifdef DEBUG_EPHEMFILE_SET
    MessageInterface::ShowMessage
       ("EphemerisFile::SetStringParameter() this=<%p>'%s' entered, id=%d, "
-       "value='%s'\n   isInitialized=%d, firstTimeWriting=%d\n", this, GetName().c_str(),
-       id, value.c_str(), isInitialized, firstTimeWriting);
+       "value='%s'\n   isInitialized=%d, firstTimeWriting=%d, fileFormat='%s'\n",
+       this, GetName().c_str(), id, value.c_str(), isInitialized, firstTimeWriting,
+       fileFormat.c_str());
    #endif
    
    switch (id)
@@ -1158,7 +1177,7 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
          fileFormat = value;
          
          // Code to link interpolator selection to file type
-         if (fileFormat == "CCSDS-OEM")
+         if (fileFormat == "CCSDS-OEM" || fileFormat == "STK-TimePosVel")
             interpolatorName = "Lagrange";
          else if (fileFormat == "SPK")
             interpolatorName = "Hermite";
@@ -1168,7 +1187,6 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
             // Also set default fixed step size to 60.0
             stepSize = "60.0";
             useFixedStepSize = true;
-            //createInterpolator = true;
          }
          return true;
       }
@@ -1224,7 +1242,8 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
    // Interpolator is now set along with file format (bug 2219); if the parm is
    // passed in, just ensure compatibility
    case INTERPOLATOR:
-      if (fileFormat == "CCSDS-OEM" || fileFormat == "Code-500")
+      if (fileFormat == "CCSDS-OEM" || fileFormat == "Code-500" ||
+          fileFormat == "STK-TimePosVel")
       {
          if (value != "Lagrange")
             throw SubscriberException("Cannot set interpolator \"" + value +
@@ -1239,9 +1258,16 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
                   "\"; SPK ephemerides require \"Hermite\" interpolators");
       }
       else
-         throw SubscriberException("The interpolator \"" + value +
-               "\" on the EphemerisFile named \"" + instanceName +
-               "\" cannot be set; set the file format to set the interpolator");
+      {
+         SubscriberException se;
+         se.SetDetails("The interpolator \"%s\" on the EphemerisFile named \"%s\" "
+                       "cannot be set; File format \"%s\" is unknown format\n",
+                       value.c_str(), instanceName.c_str(), fileFormat.c_str());
+         throw se;
+         // throw SubscriberException("The interpolator \"" + value +
+         //       "\" on the EphemerisFile named \"" + instanceName +
+         //       "\" cannot be set; set the file format to set the interpolator");
+      }
       return true;
    case STATE_TYPE:
       if (find(stateTypeList.begin(), stateTypeList.end(), value) !=
@@ -1384,8 +1410,9 @@ Real EphemerisFile::ConvertInitialAndFinalEpoch()
 {
    #ifdef DEBUG_CONVERT_INITIAL_FINAL_EPOCH
    MessageInterface::ShowMessage
-      ("EphemerisFile::ConvertInitialAndFinalEpoch() <%p>'%s' entered\n",
-       this, GetName().c_str());
+      ("EphemerisFile::ConvertInitialAndFinalEpoch() <%p>'%s' entered, epochFormat='%s'\n"
+       "     initialEpochStr = '%s'\n       finalEpochStr = '%s'\n", this, GetName().c_str(),
+       epochFormat.c_str(), initialEpochStr.c_str(), finalEpochStr.c_str());
    #endif
    
    // Convert initial and final epoch to A1ModJulian format if needed.
@@ -1429,9 +1456,11 @@ Real EphemerisFile::ConvertInitialAndFinalEpoch()
    
    #ifdef DEBUG_CONVERT_INITIAL_FINAL_EPOCH
    MessageInterface::ShowMessage
-      ("EphemerisFile::ConvertInitialAndFinalEpoch() <%p>'%s' returning "
-       "initialEpochA1Mjd=%.15f, finalEpochA1Mjd=%.15f, satInitialEpoch=%.15f\n",
-       this, GetName().c_str(), initialEpochA1Mjd, finalEpochA1Mjd, satInitialEpoch);
+      ("   initialEpochA1Mjd = %.15f\n     finalEpochA1Mjd = %.15f\n     satInitialEpoch = %.15f\n",
+       initialEpochA1Mjd, finalEpochA1Mjd, satInitialEpoch);
+   MessageInterface::ShowMessage
+      ("EphemerisFile::ConvertInitialAndFinalEpoch() <%p>'%s' returning\n", this,
+       GetName().c_str());
    #endif
    return satInitialEpoch;
 }
@@ -1639,12 +1668,6 @@ void EphemerisFile::CreateEphemerisFile()
       isEphemFileOpened = ephemWriter->IsEphemFileOpened();
    }
    
-   // old code:
-   // if (fileType == SPK_ORBIT)
-   //    CreateSpiceKernelWriter();
-   // else if (fileType == CODE500_EPHEM)
-   //    CreateCode500EphemerisFile();
-   
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("EphemerisFile::CreateEphemerisFile() <%p>'%s' leaving\n", this, GetName().c_str());
@@ -1681,10 +1704,13 @@ void EphemerisFile::CreateEphemerisWriter()
       ephemWriter = new EphemWriterSPK(GetName(), fileFormat);
    else if (fileFormat == "Code-500")
       ephemWriter = new EphemWriterCode500(GetName(), fileFormat);
+   else if (fileFormat == "STK-TimePosVel")
+      ephemWriter = new EphemWriterSTK(GetName(), fileFormat);
    else
    {
       SubscriberException se;
-      se.SetDetails("Cannot create an EphemerisFile with unknown file format of '%s'\n");
+      se.SetDetails("Cannot create an EphemerisFile with unknown file format of '%s'\n",
+                    fileFormat.c_str());
       throw se;
    }
    
@@ -1695,7 +1721,6 @@ void EphemerisFile::CreateEphemerisWriter()
    #endif
    GetProperFileName(fileName, fileFormat, true);
    SetFileName();
-   //ephemWriter->SetFilename(fileName, fullPathFileName, prevFileName);
    ephemWriter->SetSpacecraft(spacecraft);
    ephemWriter->SetDataCoordSystem(theDataCoordSystem);
    ephemWriter->SetOutCoordSystem(outCoordSystem);
@@ -1705,7 +1730,6 @@ void EphemerisFile::CreateEphemerisWriter()
    ephemWriter->SetIsEphemGlobal(IsGlobal());
    ephemWriter->Initialize();
    CreateEphemerisFile();
-   // ephemWriter->CreateEphemerisFile(usingDefaultFileName, stateType, outputFormat);
    
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
@@ -2901,8 +2925,9 @@ void EphemerisFile::HandleManeuvering(GmatBase *originator, bool maneuvering,
          ("EphemerisFile::HandleManeuvering() Calling FinishUpWriting()\n");
       #endif
       
-      //LOJ: Write continuous ephemeris if CODE500_EPHEM
-      if (fileType != CODE500_EPHEM)
+      //LOJ: Write continuous ephemeris if CODE500_EPHEM or STK_TIMEPOSVEL
+      //if (fileType != CODE500_EPHEM && fileType != STK_TIMEPOSVEL)
+      if (allowMultipleSegments)
       {
          FinishUpWriting();
          
@@ -3013,8 +3038,9 @@ void EphemerisFile::HandlePropagatorChange(GmatBase *provider, Real epochInMjd)
                         #endif
                         
                         // Write any data in the buffer (fixes missing lines for GMT-3745)
-                        //LOJ: Write continuous ephemeris if CODE500_EPHEM
-                        if (fileType != CODE500_EPHEM)
+                        //LOJ: Write continuous ephemeris if CODE500_EPHEM or STK_TIMEPOSVEL
+                        //if (fileType != CODE500_EPHEM && fileType != STK_TIMEPOSVEL)
+                        if (allowMultipleSegments)
                         {
                            FinishUpWriting();
                            
@@ -3148,8 +3174,9 @@ void EphemerisFile::HandleSpacecraftPropertyChange(GmatBase *originator, Real ep
       #endif
       
       // Write any data in the buffer
-      //LOJ: Write continuous ephemeris if CODE500_EPHEM
-      if (fileType != CODE500_EPHEM)
+      //LOJ: Write continuous ephemeris if CODE500_EPHEM or STK_TIMEPOSVEL
+      //if (fileType != CODE500_EPHEM && fileType != STK_TIMEPOSVEL)
+      if (allowMultipleSegments)
       {
          FinishUpWriting();
          

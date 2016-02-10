@@ -113,12 +113,13 @@ protected:
    
    enum FileType
    {
-      CCSDS_OEM, CCSDS_AEM, SPK_ORBIT, SPK_ATTITUDE, CODE500_EPHEM, UNKNOWN_FILE_TYPE
+      CCSDS_OEM, CCSDS_AEM, SPK_ORBIT, SPK_ATTITUDE, CODE500_EPHEM,
+      STK_TIMEPOSVEL, UNKNOWN_FILE_TYPE
    };
    
-   Spacecraft             *spacecraft;
-   CoordinateSystem       *outCoordSystem;
-   EphemerisWriter        *ephemWriter;
+   Spacecraft        *spacecraft;
+   CoordinateSystem  *outCoordSystem;
+   EphemerisWriter   *ephemWriter;
    
    /// ephemeris full file name including the path
    std::string fullPathFileName;
@@ -135,9 +136,10 @@ protected:
    std::string stateType;
    std::string outCoordSystemName;
    std::string outputFormat;
-   bool writeEphemeris;
-   bool usingDefaultFileName;
-   bool generateInBackground;
+   bool        writeEphemeris;
+   bool        usingDefaultFileName;
+   bool        generateInBackground;
+   bool        allowMultipleSegments;
    /// for propagator change
    std::string prevPropName;
    std::string currPropName;

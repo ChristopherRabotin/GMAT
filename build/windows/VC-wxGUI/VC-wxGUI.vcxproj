@@ -663,6 +663,7 @@
     <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterCCSDS.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterCode500.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterSPK.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterSTK.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterWithInterpolator.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp" />
@@ -726,6 +727,7 @@
     <ClCompile Include="..\..\..\src\base\util\SpiceOrbitKernelReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\STKEphemerisFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SunSync.cpp" />
@@ -1385,6 +1387,7 @@
     <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterCCSDS.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterCode500.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterSPK.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterSTK.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterWithInterpolator.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp" />
@@ -1454,6 +1457,7 @@
     <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\STKEphemerisFile.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SunSync.hpp" />

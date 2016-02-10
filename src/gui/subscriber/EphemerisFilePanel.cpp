@@ -751,7 +751,7 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
    {
       // Added check for fileFormat since only coordinate system with MJ2000Eq axis
       // should be shown for format other than CCSDS-OEM (for GMT-4452 fix - LOJ: 2014.04.01)
-      if (fileFormat == "CCSDS-OEM")
+      if (fileFormat == "CCSDS-OEM" || fileFormat == "STK-TimePosVel")
          valueString = allCoordSystemComboBox->GetValue();
       else
          valueString = onlyMj2000EqComboBox->GetValue();
@@ -1114,7 +1114,7 @@ void EphemerisFilePanel::OnBrowse(wxCommandEvent &event)
 void EphemerisFilePanel::ShowCoordSystems(const wxString &fileType)
 {
    bool showAll = false;
-   if (fileType == "CCSDS-OEM")
+   if (fileType == "CCSDS-OEM" || fileType == "STK-TimePosVel")
       showAll = true;
    
    #ifdef DEBUG_CS
@@ -1188,7 +1188,8 @@ void EphemerisFilePanel::ShowInterpolatorAndStepSize(const wxString &fileType)
       interpolatorComboBox->SetValue("Hermite");
       allStepSizeComboBox->Enable(false);
    }
-   else if (fileType == "CCSDS-OEM" || fileType == "Code-500")
+   else if (fileType == "CCSDS-OEM" || fileType == "Code-500" ||
+            fileType == "STK-TimePosVel")
    {
       interpolatorComboBox->SetValue("Lagrange");
       allStepSizeComboBox->Enable(true);

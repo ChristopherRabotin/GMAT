@@ -448,6 +448,7 @@ SET(BASE_SRCS
     subscriber/EphemWriterCCSDS.cpp
     subscriber/EphemWriterCode500.cpp
     subscriber/EphemWriterSPK.cpp
+    subscriber/EphemWriterSTK.cpp
     subscriber/EphemWriterWithInterpolator.cpp
     subscriber/EphemManager.cpp
     subscriber/MessageWindow.cpp
@@ -502,6 +503,7 @@ SET(BASE_SRCS
     util/StringTokenizer.cpp
     util/StringUtil.cpp
     util/SPADFileReader.cpp
+    util/STKEphemerisFile.cpp
     util/TextParser.cpp
     util/TimeSystemConverter.cpp
     util/TimeTypes.cpp

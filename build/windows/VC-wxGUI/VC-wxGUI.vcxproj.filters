@@ -2445,6 +2445,12 @@
     <ClCompile Include="..\..\..\src\base\command\Display.cpp">
       <Filter>Source Files\base\command</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\STKEphemerisFile.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterSTK.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4657,6 +4663,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\command\Display.hpp">
       <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\STKEphemerisFile.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterSTK.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
