@@ -22,6 +22,8 @@
 
 #include "ThrustFileDefs.hpp"
 #include "FileReader.hpp"
+#include "ThrustSegment.hpp"
+
 
 class ThrustHistoryFile: public FileReader
 {
@@ -81,30 +83,13 @@ public:
    DEFAULT_TO_NO_CLONES
 
 protected:
-   struct thrustPoint
-   {
-      Real epoch;
-      Real magnitude;
-      Real vector[3];
-   };
-
-   struct thrustProfile
-   {
-      std::vector<thrustPoint> nodes;
-   };
-
-   struct thrustHistory
-   {
-      std::string blockName;
-      thrustProfile profile;
-   };
 
    /// Name for the thrust history file
    std::string thrustFileName;
    /// Data blocks from the file
-   std::vector<thrustHistory> blocks;
+   std::vector<ThrustSegment*> segments;
    /// Scripted block names
-   StringArray blockNames;
+   StringArray segmentNames;
    /// Mass source for each block
    std::map<std::string, StringArray> massSources;
 
@@ -112,7 +97,7 @@ protected:
    enum
    {
       FILENAME = GmatBaseParamCount,
-      BLOCKID,
+      SEGMENTS,
       MASS_SOURCE,
       ThrustHistoryFileParamCount,
    };

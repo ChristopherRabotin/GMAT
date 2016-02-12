@@ -24,7 +24,7 @@
 const std::string ThrustHistoryFile::PARAMETER_LABEL[ThrustHistoryFileParamCount - GmatBaseParamCount] =
 {
       "FileName",                         // FILENAME
-      "SetPoints",                        // BLOCKID,
+      "AddThrustSegment",                 // SEGMENTS,
       "MassSource"                        // MASS_SOURCE,
 };
 
@@ -152,11 +152,11 @@ bool ThrustHistoryFile::SetStringParameter(const Integer id, const char* value)
       return true;
    }
 
-   if (id == BLOCKID)
+   if (id == SEGMENTS)
    {
       MessageInterface::ShowMessage("Block string %s\n", value);
-      if (find(blockNames.begin(), blockNames.end(), value) == blockNames.end())
-         blockNames.push_back(value);
+      if (find(segmentNames.begin(), segmentNames.end(), value) == segmentNames.end())
+         segmentNames.push_back(value);
       return true;
    }
 
@@ -180,11 +180,11 @@ bool ThrustHistoryFile::SetStringParameter(const Integer id,
       return true;
    }
 
-   if (id == BLOCKID)
+   if (id == SEGMENTS)
    {
       MessageInterface::ShowMessage("Block string %s\n", value.c_str());
-      if (find(blockNames.begin(), blockNames.end(), value) == blockNames.end())
-         blockNames.push_back(value);
+      if (find(segmentNames.begin(), segmentNames.end(), value) == segmentNames.end())
+         segmentNames.push_back(value);
       return true;
    }
 
