@@ -165,7 +165,7 @@ bool EphemWriterSTK::Initialize()
    
    // Set maximum segment size
    maxSegmentSize = 1000;
-      
+   
    // Check if interpolator needs to be created
    if (useFixedStepSize || interpolateInitialState || interpolateFinalState)
       createInterpolator = true;
@@ -326,6 +326,11 @@ void EphemWriterSTK::CreateSTKEphemerisFile()
       if (stkEphemFile->OpenForWrite(fullPathFileName, "TimePosVel"))
       {
          stkEphemFile->SetVersion(stkVersion);
+         if (useFixedStepSize)
+         {
+            stkEphemFile->SetHeaderForWriting("InterpolationMethod", interpolatorName);
+            stkEphemFile->SetInterpolationOrder(interpolationOrder);
+         }
          stkEphemFile->SetHeaderForWriting("CentralBody", centralBody);
          stkEphemFile->SetHeaderForWriting("CoordinateSystem", csTypeName);
       }
@@ -751,6 +756,7 @@ void EphemWriterSTK::WriteSTKOrbitDataSegment(bool canFinish)
       MessageInterface::ShowMessage
          ("   Writing start=%.15f, end=%.15f\n", start->GetReal(), end->GetReal());
       MessageInterface::ShowMessage("There are %d epochs and states:\n", a1MjdArray.size());
+      #ifdef DEBUG_STK_DATA_SEGMENT_MORE
       for (unsigned int ii = 0; ii < a1MjdArray.size(); ii++)
       {
          A1Mjd *tm = a1MjdArray[ii];
@@ -761,6 +767,7 @@ void EphemWriterSTK::WriteSTKOrbitDataSegment(bool canFinish)
             ("[%3d] %12.10f  %s  %s\n", ii, time, ToUtcGregorian(time, true).c_str(),
              (sv->ToString(format, 6)).c_str());
       }
+      #endif
       #endif
       
       stkWriteFailed = false;

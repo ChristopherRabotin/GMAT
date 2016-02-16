@@ -587,7 +587,7 @@ bool EphemerisFile::Initialize()
    
    // Find out if multiple segments allowed
    allowMultipleSegments = true;
-   if (fileType == CODE500_EPHEM || fileType == STK_TIMEPOSVEL)
+   if (fileType == CODE500_EPHEM)
       allowMultipleSegments = false;
    
    // Do some validation
