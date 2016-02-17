@@ -100,6 +100,18 @@ Linux users can create a launcher for either the command line application or
 the GUI application by following the instructions for that process for their
 Linux distribution.
 
+MATLAB interface note for Linux users:
+
+If the Matlab interface does not work with the GmatConsole command line 
+application (or the Gmat_Beta GUI), you may need to set the library load 
+path to include the path to your installed Matlab libraries.  For example, 
+if MATLAB is installed in the /usr/local/MATLAB/R2015b folder and the GMAT 
+console application is not loading the MATLAB plugin, you may need to 
+update the library path before starting the application, like this:
+
+export LD_LIBRARY_PATH=/usr/local/MATLAB/R2015b/bin/glnxa64:./libwx:$LD_LIBRARY_PATH 
+./GmatConsole
+
 
 MAC
 
@@ -118,9 +130,18 @@ or by double-clicking the GMAT_Beta.app in the Finder.
 
 MATLAB interface note for Mac users:
 
-To use the Matlab interface with the Mac application, you must open the 
-gmat_startup_file.txt and edit the MATLAB_APP_PATH field to point to the 
-location of your MATLAB installation. 
+To use the Matlab interface with the Mac GMAT_Beta.app application, 
+you must open the gmat_startup_file.txt and edit the MATLAB_APP_PATH field 
+to point to the location of your MATLAB installation. 
+
+If the Matlab interface does not work with the GmatConsole command line 
+application, you may need to set up your Terminal so that the system can
+load the Matlab libraries.  For example, if you are using a .bashrc, you
+may need to add something like this:
+
+export MATLAB = <your MATLAB app location here>
+export DYLD_LIBRARY_PATH=$MATLAB/bin/maci64:$DYLD_LIBRARY_PATH
+
 
 -----------------------------------------------------------------------
                            Documentation
