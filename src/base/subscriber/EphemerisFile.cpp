@@ -607,9 +607,20 @@ bool EphemerisFile::Initialize()
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage("   useFixedStepSize=%d\n", useFixedStepSize);
    #endif
-
+   
    // Set solver iteration option to none. We only writes solutions to a file
    mSolverIterOption = SI_NONE;
+   
+   // Delete old file to avoid showing old file contents in the GUI output tree
+   // when it is toggled off or not writing ephemeris file in the current run.
+   if (GmatFileUtil::DoesFileExist(fullPathFileName))
+   {
+      #ifdef DEBUG_EPHEMFILE_INIT
+      MessageInterface::ShowMessage
+         ("   Removing the existing \"%s\" file\n", fullPathFileName.c_str());
+      #endif
+      remove(fullPathFileName.c_str());
+   }
    
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
@@ -1683,7 +1694,7 @@ void EphemerisFile::CreateEphemerisWriter()
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("EphemerisFile::CreateEphemerisWriter() <%p>'%s' entered, ephemWriter=<%p>, "
-       "fileFormat='%s', fileName='%s'\n", this, GetName().c_str(), ephemWriter,
+       "fileFormat='%s',\n   fileName='%s'\n", this, GetName().c_str(), ephemWriter,
        fileFormat.c_str(), fileName.c_str());
    #endif
    
@@ -1734,7 +1745,7 @@ void EphemerisFile::CreateEphemerisWriter()
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
       ("EphemerisFile::CreateEphemerisWriter() <%p>'%s' leaving, ephemWriter=<%p>, "
-       "fileFormat='%s', fileName='%s'\n", this, GetName().c_str(), ephemWriter,
+       "fileFormat='%s',\n   fileName='%s'\n", this, GetName().c_str(), ephemWriter,
        fileFormat.c_str(), fileName.c_str());
    #endif
 }
