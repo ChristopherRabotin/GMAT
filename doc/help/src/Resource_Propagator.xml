@@ -1425,7 +1425,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Units</term>
 
                     <listitem>
-                      <para>W/m^2/Hz</para>
+                      <para>10^-22 W/m^2/Hz</para>
                     </listitem>
                   </varlistentry>
 
@@ -1483,7 +1483,7 @@ Propagate aProp(aSat) {aSat.ElapsedDays = .2}</code></programlisting>
                     <term>Units</term>
 
                     <listitem>
-                      <para>W/m^2/Hz</para>
+                      <para>10^-22 W/m^2/Hz</para>
                     </listitem>
                   </varlistentry>
 

@@ -141,6 +141,93 @@ ElementWrapper* ObjectPropertyWrapper::Clone() const
    return new ObjectPropertyWrapper(*this);
 }
 
+//------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return ObjectPropertyWrapper value converted to std::string.
+ */
+//------------------------------------------------------------------------------
+std::string ObjectPropertyWrapper::ToString()
+{
+   if (object == NULL)
+      throw ParameterException
+         ("ObjectPropertyWrapper::ToString() The object is NULL");
+   
+   // Get property data type
+   Gmat::ParameterType dataType = GetDataType();
+   std::string retval;
+   
+   switch (dataType)
+   {
+   case Gmat::BOOLEAN_TYPE:
+   {
+      bool bval = EvaluateBoolean();
+      retval = "true";
+      if (!bval)
+         retval = "false";
+      break;
+   }
+   case Gmat::INTEGER_TYPE:
+   {
+      Integer ival = EvaluateInteger();
+      retval = GmatStringUtil::ToString(ival);
+      break;
+   }
+   case Gmat::REAL_TYPE:
+   {
+      Real rval = EvaluateReal();
+      retval = GmatStringUtil::ToString(rval);
+      break;
+   }
+   case Gmat::RMATRIX_TYPE:
+   {
+      Rmatrix rmat = EvaluateArray();
+      retval = rmat.ToString();
+      break;
+   }
+   case Gmat::RVECTOR_TYPE:
+   {
+      Rvector rvec = EvaluateRvector();
+      retval = rvec.ToString();
+      break;
+   }
+   case Gmat::STRING_TYPE:
+   case Gmat::ENUMERATION_TYPE:
+   case Gmat::COLOR_TYPE:
+   case Gmat::FILENAME_TYPE:
+   {
+      std::string sval = EvaluateString();
+      if (dataType == Gmat::STRING_TYPE || dataType == Gmat::FILENAME_TYPE)
+      {
+         if (!GmatStringUtil::IsEnclosedWith(sval, "'"))
+            sval = "'" + sval + "'";
+      }
+      retval = sval;
+      break;
+   }
+   case Gmat::ON_OFF_TYPE:
+   {
+      std::string sval = EvaluateOnOff();
+      retval = sval;
+      break;
+   }
+   case Gmat::OBJECT_TYPE:
+   {
+      retval = EvaluateString();
+      break;
+   }
+   default:
+   {
+      GmatBaseException be;
+      be.SetDetails("ObjectPropertyWrapper::ToString() the parameter type %d is "
+                    "unknown for \"%s\"", propID, description.c_str());
+      throw be;
+   }
+   }
+   
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetDataType() const
@@ -531,7 +618,7 @@ std::string ObjectPropertyWrapper::EvaluateString() const
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::STRING_TYPE || propType == Gmat::ON_OFF_TYPE ||
        propType == Gmat::ENUMERATION_TYPE || propType == Gmat::ENUMERATION_TYPE ||
-       propType == Gmat::FILENAME_TYPE)
+       propType == Gmat::FILENAME_TYPE || propType == Gmat::COLOR_TYPE)
       return object->GetStringParameter(propID);
    else
       throw GmatBaseException
@@ -714,8 +801,7 @@ bool ObjectPropertyWrapper::SetObject(GmatBase *obj)
  * @return The ID
  */
 //------------------------------------------------------------------------------
-const Integer ObjectPropertyWrapper::GetPropertyId()
-{
+Integer ObjectPropertyWrapper::GetPropertyId(){
    return propID;
 }
 

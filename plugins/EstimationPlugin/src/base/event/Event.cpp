@@ -279,8 +279,7 @@ void Event::FixState()
  * @return The epoch
  */
 //-----------------------------------------------------------------------------
-const GmatEpoch Event::GetFixedEpoch()
-{
+GmatEpoch Event::GetFixedEpoch(){
    return fixedEpoch;
 }
 

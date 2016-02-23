@@ -78,8 +78,7 @@ public:
    virtual Real Evaluate() = 0;
    virtual void FixState(GmatBase* obj, bool LockState = false);
    virtual void FixState();
-   virtual const GmatEpoch GetFixedEpoch();
-   virtual Real GetFixedTimestep();
+   virtual GmatEpoch GetFixedEpoch();   virtual Real GetFixedTimestep();
    virtual Real GetVarTimestep();
    virtual void SetFixedTimestep(Real step);
    virtual void SetVarTimestep(Real step);

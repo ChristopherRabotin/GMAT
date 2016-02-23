@@ -801,9 +801,26 @@ bool ChemicalThruster::CalculateThrustAndIsp()
       Integer tempID = tanks[0]->GetParameterID("Temperature");
       Integer refTempID = tanks[0]->GetParameterID("RefTemperature");
 
-      pressure = tanks[0]->GetRealParameter(pressID);
-      temperatureRatio = tanks[0]->GetRealParameter(tempID) /
-                         tanks[0]->GetRealParameter(refTempID);
+//      pressure = tanks[0]->GetRealParameter(pressID);
+//      temperatureRatio = tanks[0]->GetRealParameter(tempID) /
+//                         tanks[0]->GetRealParameter(refTempID);
+
+      // Build the weighted temperature and pressure
+      Real mixTotal = 0.0;
+      Real pressureSum = 0.0;
+      Real tempSum = 0.0;
+      Real refTempSum = 0.0;
+      for (UnsignedInt i = 0; i < mixRatio.GetSize(); ++i)
+      {
+         mixTotal += mixRatio[i];
+         pressureSum += tanks[i]->GetRealParameter(pressID) * mixRatio[i];
+         tempSum += tanks[i]->GetRealParameter(tempID) * mixRatio[i];
+         refTempSum += tanks[i]->GetRealParameter(refTempID) * mixRatio[i];
+      }
+      pressure = pressureSum / mixTotal;
+
+      // Note: numerator and denominator both divide by mixTotal, so dividends cancel
+      temperatureRatio = tempSum / refTempSum;
 
       thrust = cCoefficients[2];
       impulse = kCoefficients[2];

@@ -52,8 +52,7 @@ public:
    // operator = for assignment
    const CoordinateSystem& operator=(const CoordinateSystem &coordSys);
    // operator == for equality testing
-   const bool operator==(const CoordinateSystem &coordSys);
-   // destructor
+   bool operator==(const CoordinateSystem &coordSys);   // destructor
    virtual ~CoordinateSystem();
    
    AxisSystem* GetAxisSystem();

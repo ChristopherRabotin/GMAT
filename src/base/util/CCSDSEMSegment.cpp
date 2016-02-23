@@ -214,6 +214,7 @@ CCSDSEMSegment::CCSDSEMSegment(Integer segNum) :
    objectName          (UNSET_STRING),
    objectID            (UNSET_STRING),
    centerName          (UNSET_STRING),
+   refFrame            (UNSET_STRING),
    usesUsableTimes     (false),
    checkLagrangeOrder  (false),
    firstUsable         (-999),
@@ -236,6 +237,7 @@ CCSDSEMSegment::CCSDSEMSegment(const CCSDSEMSegment &copy) :
    segmentNumber       (copy.segmentNumber),
    dataSize            (copy.dataSize),
    dataType            (copy.dataType),
+   segError            (copy.segError),
    timeSystem          (copy.timeSystem),
    startTime           (copy.startTime),
    stopTime            (copy.stopTime),
@@ -246,11 +248,20 @@ CCSDSEMSegment::CCSDSEMSegment(const CCSDSEMSegment &copy) :
    objectName          (copy.objectName),
    objectID            (copy.objectID),
    centerName          (copy.centerName),
+   refFrame            (copy.refFrame),
    usesUsableTimes     (copy.usesUsableTimes),
    checkLagrangeOrder  (copy.checkLagrangeOrder),
    firstUsable         (copy.firstUsable),
    lastUsable          (copy.lastUsable)
 {
+   for (Integer ii = 0; ii < (Integer) dataStore.size(); ii++)
+   {
+      delete dataStore.at(ii);
+   }
+   dataStore.clear();
+   dataComments.clear();
+   metaComments.clear();
+
    EpochAndData *ed;
    for (Integer jj = 0; jj < (Integer) copy.dataStore.size(); jj++)
    {
@@ -276,6 +287,7 @@ CCSDSEMSegment& CCSDSEMSegment::operator=(const CCSDSEMSegment &copy)
    segmentNumber       = copy.segmentNumber;
    dataSize            = copy.dataSize;
    dataType            = copy.dataType;
+   segError            = copy.segError;
    timeSystem          = copy.timeSystem;
    startTime           = copy.startTime;
    stopTime            = copy.stopTime;
@@ -286,6 +298,7 @@ CCSDSEMSegment& CCSDSEMSegment::operator=(const CCSDSEMSegment &copy)
    objectName          = copy.objectName;
    objectID            = copy.objectID;
    centerName          = copy.centerName;
+   refFrame            = copy.refFrame;
    usesUsableTimes     = copy.usesUsableTimes;
    checkLagrangeOrder  = copy.checkLagrangeOrder;
    firstUsable         = copy.firstUsable;
@@ -467,6 +480,11 @@ bool CCSDSEMSegment::SetMetaData(const std::string &fieldName,
       centerName = value;
       return true;
    }
+   else if (fieldName == "REF_FRAME")
+   {
+      refFrame = value;
+      return true;
+   }
    // @todo - check for this:
    // "The TIME_SYSTEM value must remain fixed within an AEM."
    else if (fieldName == "TIME_SYSTEM")
@@ -517,11 +535,57 @@ bool CCSDSEMSegment::SetMetaData(const std::string &fieldName,
 }
 
 //------------------------------------------------------------------------------
+// Sets the corresponding meta data for the input field name for writing
+//------------------------------------------------------------------------------
+bool CCSDSEMSegment::SetMetaDataForWriting(const std::string &fieldName,
+                                           const std::string &value)
+{
+   #ifdef DEBUG_EM_SET_META
+   MessageInterface::ShowMessage(
+      "Entering EMSegment::SetMetaDataForWriting with field %s and value %s\n",
+      fieldName.c_str(), value.c_str());
+   #endif
+   
+   bool retval = true;
+   if (fieldName == "COMMENT")
+      metaComments.push_back(value);
+   else if (fieldName == "OBJECT_NAME")
+      objectName = value;
+   else if (fieldName == "OBJECT_ID")
+      objectID = value;
+   else if (fieldName == "CENTER_NAME")
+      centerName = value;
+   else if (fieldName == "REF_FRAME")
+      refFrame = value;
+   else if (fieldName == "TIME_SYSTEM")
+      timeSystem = value;
+   else if (fieldName == "START_TIME")
+      startTimeStr = value;
+   else if (fieldName == "USEABLE_START_TIME")
+      usableStartTimeStr = value;
+   else if (fieldName == "USEABLE_STOP_TIME")
+      usableStopTimeStr = value;
+   else if (fieldName == "STOP_TIME")
+      stopTimeStr = value;
+   else if (fieldName == "INTERPOLATION_DEGREE")
+      interpolationDegreeStr = value;
+   else
+      retval = false;
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
 // Adds an epoch/data pair to the dataStore.
 // At this level, it just checks for errors in data size or epoch order.
 //------------------------------------------------------------------------------
-bool CCSDSEMSegment::AddData(Real epoch, Rvector data)
+bool CCSDSEMSegment::AddData(Real epoch, Rvector data, bool justCheckDataSize)
 {
+   #ifdef DEBUG_ADD_DATA
+   MessageInterface::ShowMessage
+      ("CCSDSEMSegment::AddData() entered, epoch=%f, justCheckDataSize=%d, "
+       "dataStore.size()=%d\n", epoch, justCheckDataSize, dataStore.size());
+   #endif
    if (data.GetSize() != dataSize)
    {
       std::ostringstream errmsg("");
@@ -531,6 +595,18 @@ bool CCSDSEMSegment::AddData(Real epoch, Rvector data)
       errmsg << " elements.\n";
       throw UtilityException(errmsg.str());
    }
+   
+   // Since OEM allows backward propagation, just return if only checking
+   // for the data size
+   if (justCheckDataSize)
+   {
+      #ifdef DEBUG_ADD_DATA
+      MessageInterface::ShowMessage
+         ("CCSDSEMSegment::AddData() returning true, skipping epoch check\n");
+      #endif
+      return true;
+   }
+   
    if ((epoch < startTime) || (epoch > stopTime))
    {
       std::ostringstream errmsg("");
@@ -551,6 +627,18 @@ bool CCSDSEMSegment::AddData(Real epoch, Rvector data)
          throw UtilityException(errmsg);
       }
    }
+   #ifdef DEBUG_ADD_DATA
+   MessageInterface::ShowMessage("CCSDSEMSegment::AddData() returning true\n");
+   #endif
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// Adds a metadata comment for the following data block
+//------------------------------------------------------------------------------
+bool CCSDSEMSegment::AddMetaComment(const std::string& comment)
+{
+   metaComments.push_back(comment);
    return true;
 }
 
@@ -561,6 +649,68 @@ bool CCSDSEMSegment::AddDataComment(const std::string& comment)
 {
    dataComments.push_back(comment);
    return true;
+}
+
+//------------------------------------------------------------------------------
+// Clears metadata comments
+//------------------------------------------------------------------------------
+void CCSDSEMSegment::ClearMetaComments()
+{
+   metaComments.clear();
+}
+
+//------------------------------------------------------------------------------
+// Clears data comments
+//------------------------------------------------------------------------------
+void CCSDSEMSegment::ClearDataComments()
+{
+   dataComments.clear();
+}
+
+//------------------------------------------------------------------------------
+// void ClearMetaData()
+//------------------------------------------------------------------------------
+/**
+ * Clears meta comments and data
+ */
+//------------------------------------------------------------------------------
+void CCSDSEMSegment::ClearMetaData()
+{
+   ClearMetaComments();
+   
+   objectName             = UNSET_STRING;
+   objectID               = UNSET_STRING;
+   centerName             = UNSET_STRING;
+   refFrame               = UNSET_STRING;
+   timeSystem             = UNSET_STRING;
+   startTimeStr           = UNSET_STRING;
+   usableStartTimeStr     = UNSET_STRING;
+   usableStopTimeStr      = UNSET_STRING;
+   stopTimeStr            = UNSET_STRING;
+   interpolationMethod    = UNSET_STRING;
+   interpolationDegreeStr = UNSET_STRING;
+   
+   startTime              = UNSET_REAL;
+   stopTime               = UNSET_REAL;
+   usableStartTime        = UNSET_REAL;
+   usableStopTime         = UNSET_REAL;
+   interpolationDegree    = UNSET_INTEGER;
+}
+
+//------------------------------------------------------------------------------
+// Clears data comments and data store
+//------------------------------------------------------------------------------
+void CCSDSEMSegment::ClearDataStore()
+{
+   #ifdef DEBUG_CLEAR_DATA
+   MessageInterface::ShowMessage
+      ("CCSDSEMSegment::ClearDataStore() entered, dataStore.size() = %d\n",
+       dataStore.size());
+   #endif
+   ClearDataComments();
+   for (Integer ii = 0; ii < (Integer) dataStore.size(); ii++)
+      delete dataStore.at(ii);
+   dataStore.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -618,6 +768,65 @@ Real CCSDSEMSegment::GetStopTime() const
 {
 //   if (usesUsableTimes) return usableStopTime;
    return stopTime;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetMetaDataForWriting()
+//------------------------------------------------------------------------------
+std::string CCSDSEMSegment::GetMetaDataForWriting()
+{
+   return "";
+}
+
+//------------------------------------------------------------------------------
+// std::string GetMetaComments()
+//------------------------------------------------------------------------------
+std::string CCSDSEMSegment::GetMetaComments()
+{
+   std::string comments;
+   for (unsigned int i = 0; i < metaComments.size(); i++)
+      comments += "COMMENT  " + metaComments[i] + "\n";
+   
+   return comments;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetDataComments()
+//------------------------------------------------------------------------------
+std::string CCSDSEMSegment::GetDataComments()
+{
+   std::string comments;
+   if (dataComments.size() > 0)
+   {
+      for (unsigned int i = 0; i < dataComments.size(); i++)
+         comments += "COMMENT  " + dataComments[i] + "\n";
+      comments += "\n";
+   }
+   
+   return comments;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetNumberOfDataPoints()
+//------------------------------------------------------------------------------
+Integer CCSDSEMSegment::GetNumberOfDataPoints()
+{
+   return dataStore.size();
+}
+
+//------------------------------------------------------------------------------
+// bool GetEpochAndData(Integer index, Real &epoch, Rvector &data)
+//------------------------------------------------------------------------------
+bool CCSDSEMSegment::GetEpochAndData(Integer index, Real &epoch, Rvector &data)
+{
+   if (index >= 0 && index < (Integer)dataStore.size())
+   {
+      epoch = dataStore[index]->epoch;
+      data = dataStore[index]->data;
+      return true;
+   }
+   
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -703,6 +912,7 @@ bool CCSDSEMSegment::GetUsableIndexRange(Integer &first, Integer &last)
    #ifdef DEBUG_USABLE
       MessageInterface::ShowMessage("In GetUsableIndexRange, usableStart = %12.10f, usableStop = %12.10f\n",
             usableStartTime, usableStopTime);
+      MessageInterface::ShowMessage("   dataStore.size() = %d\n", dataStore.size());
    #endif
    // If we are not using usableStartTime and usableStopTime, the range
    // covers the entire startTime-stopTime span

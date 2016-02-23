@@ -518,6 +518,11 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    if (theFunction != NULL)
       cmd->SetCurrentFunction(theFunction);
    
+   // Allow ObjectProperty in Assignment and Display command (LOJ: 2016.01.26)
+   // Should we allow in Report command also?
+   if (cmd->IsOfType("Assignment") || cmd->IsOfType("Display"))
+      allowObjectProperty = true;
+   
    // Handle Assignment command (LHS = RHS) separately
    if (cmd->IsOfType("Assignment"))
    {

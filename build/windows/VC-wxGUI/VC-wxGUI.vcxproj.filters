@@ -1182,9 +1182,6 @@
     <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp">
       <Filter>Source Files\base\stopcond</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp">
-      <Filter>Source Files\base\subscriber</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClCompile>
@@ -2415,6 +2412,45 @@
     <ClCompile Include="..\..\..\src\gui\rendering\SurfaceBase.cpp">
       <Filter>Source Files\gui\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisWriter.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterCCSDS.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterCode500.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterSPK.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterWithInterpolator.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\TankAndMixDialog.cpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMWriter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMWriter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Display.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\STKEphemerisFile.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterSTK.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -3319,9 +3355,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp">
       <Filter>Source Files\base\stopcond</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp">
-      <Filter>Source Files\base\subscriber</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp">
       <Filter>Source Files\base\subscriber</Filter>
@@ -4597,6 +4630,45 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\rendering\SurfaceBase.hpp">
       <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisWriter.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterCCSDS.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterCode500.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterSPK.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterWithInterpolator.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\TankAndMixDialog.hpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMWriter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMWriter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Display.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\STKEphemerisFile.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterSTK.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

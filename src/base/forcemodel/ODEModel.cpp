@@ -732,12 +732,12 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
             ++transientCount;
 
          // Temporary code: prevent multiple finite burns in single force model
-         if (transientCount > 1)
-            throw ODEModelException("Multiple Finite burns are not allowed in "
-                  "a single propagator; try breaking commands of the form"
-                  "\"Propagate prop(sat1, sat2)\" into two synchronized "
-                  "propagators; e.g. \"Propagate Synchronized prop(sat1) "
-                  "prop(sat2)\"\nexiting");
+//         if (transientCount > 1)
+//            throw ODEModelException("Multiple Finite burns are not allowed in "
+//                  "a single propagator; try breaking commands of the form"
+//                  "\"Propagate prop(sat1, sat2)\" into two synchronized "
+//                  "propagators; e.g. \"Propagate Synchronized prop(sat1) "
+//                  "prop(sat2)\"\nexiting");
       }
 
       // Full field models come first to facilitate setting their parameters

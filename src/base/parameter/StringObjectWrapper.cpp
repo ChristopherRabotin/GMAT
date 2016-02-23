@@ -145,6 +145,23 @@ ElementWrapper* StringObjectWrapper::Clone() const
 
 
 //------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return StringObjectWrapper value converted to std::string.
+ */
+//------------------------------------------------------------------------------
+std::string StringObjectWrapper::ToString()
+{
+   std::string sval = stringVar->ToString();
+   if (!GmatStringUtil::IsEnclosedWith(sval, "'"))
+      sval = "'" + sval + "'";
+   
+   return sval;
+}
+
+
+//------------------------------------------------------------------------------
 //  Gmat::ParameterType GetDataType() const
 //------------------------------------------------------------------------------
 /**

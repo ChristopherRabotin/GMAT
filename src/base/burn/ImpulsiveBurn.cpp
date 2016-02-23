@@ -531,7 +531,6 @@ bool ImpulsiveBurn::TakeAction(const std::string &action,
 {
    if (action == "ClearTanks")
    {
-      MessageInterface::ShowMessage("Clearing tanks\n");
       tankNames.clear();
       tankMap.clear();
       return true;

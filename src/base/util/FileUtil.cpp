@@ -71,6 +71,7 @@ using namespace GmatStringUtil;
 //#define DEBUG_ABSOLUTE_PATH
 //#define DEBUG_FILE_CHECK
 //#define DEBUG_TMPDIR
+//#define DEBUG_SKIP_BLANK_LINES
 
 //------------------------------------------------------------------------------
 // std::string GetGmatPath()
@@ -2233,11 +2234,11 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
                                             const char *filename2,
                                             const char *filename3,
                                             int &file1DiffCount, int &file2DiffCount,
-                                            int &file3DiffCount)
+                                            int &file3DiffCount, bool skipBlankLines)
 {
    return CompareTextLines(numDirsToCompare, std::string(basefilename), std::string(filename1),
                            std::string(filename2), std::string(filename3),
-                           file1DiffCount, file2DiffCount, file3DiffCount);
+                           file1DiffCount, file2DiffCount, file3DiffCount, skipBlankLines);
 }
 
 
@@ -2254,7 +2255,7 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
                                         const std::string &filename2,
                                         const std::string &filename3,
                                         int &file1DiffCount, int &file2DiffCount,
-                                        int &file3DiffCount)
+                                        int &file3DiffCount, bool skipBlankLines)
 {
    #if DBGLVL_COMPARE_FILES
    MessageInterface::ShowMessage
@@ -2307,8 +2308,35 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
       baseIn.getline(buffer, BUFFER_SIZE-1);
       line0 = buffer;
       
+      if (skipBlankLines)
+      {
+         // Get next non-blank line
+         if (GmatStringUtil::IsBlank(line0, true))
+         {
+            #ifdef DEBUG_SKIP_BLANK_LINES
+            MessageInterface::ShowMessage
+               ("==> line0 '%s' has only blanks\n", line0.c_str());
+            #endif
+            line0 = "";
+            bool blankFound = true;
+            while (!baseIn.eof() && blankFound)
+            {
+               baseIn.getline(buffer, BUFFER_SIZE-1);
+               line0 = buffer;
+               blankFound = GmatStringUtil::IsBlank(line0, true);
+               #ifdef DEBUG_SKIP_BLANK_LINES
+               MessageInterface::ShowMessage
+                  ("    while loop: line0 '%s' has %s\n", line0.c_str(),
+                   blankFound ? "only blanks" : "non-blanks");
+               #endif
+               if (blankFound)
+                  line0 = "";
+            }
+         }
+      }
+      
       #if DBGLVL_COMPARE_FILES > 2
-      MessageInterface::ShowMessage("===> base file: line = %s\n", buffer);
+      MessageInterface::ShowMessage("===> base file: line = %s\n", line0);
       #endif
       
       //----------------------------------------------------
@@ -2317,8 +2345,35 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
       in1.getline(buffer, BUFFER_SIZE-1);
       line1 = buffer;
       
+      if (skipBlankLines)
+      {
+         // Get next non-blank line
+         if (GmatStringUtil::IsBlank(line1, true))
+         {
+            #ifdef DEBUG_SKIP_BLANK_LINES
+            MessageInterface::ShowMessage
+               ("==> line1 '%s' has only blanks\n", line1.c_str());
+            #endif
+            line1 = "";
+            bool blankFound = true;
+            while (!in1.eof() && blankFound)
+            {
+               in1.getline(buffer, BUFFER_SIZE-1);
+               line1 = buffer;
+               blankFound = GmatStringUtil::IsBlank(line1, true);
+               #ifdef DEBUG_SKIP_BLANK_LINES
+               MessageInterface::ShowMessage
+                  ("    while loop: line1 '%s' has %s\n", line1.c_str(),
+                   blankFound ? "only blanks" : "non-blanks");
+               #endif
+               if (blankFound)
+                  line1 = "";
+            }
+         }
+      }
+      
       #if DBGLVL_COMPARE_FILES > 2
-      MessageInterface::ShowMessage("===>    file 1: line = %s\n", buffer);
+      MessageInterface::ShowMessage("===>    file 1: line = %s\n", line1);
       #endif
       
       if (line0 != line1)
@@ -2335,6 +2390,24 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
          in2.getline(buffer, BUFFER_SIZE-1);
          line2 = buffer;
       
+         if (skipBlankLines)
+         {
+            // Get next non-blank line
+            if (GmatStringUtil::IsBlank(line2, true))
+            {
+               line2 = "";
+               bool blankFound = true;
+               while (!in2.eof() && blankFound)
+               {
+                  in2.getline(buffer, BUFFER_SIZE-1);
+                  line2 = buffer;
+                  blankFound = GmatStringUtil::IsBlank(line2, true);
+                  if (blankFound)
+                     line2 = "";
+               }
+            }
+         }
+         
          #if DBGLVL_COMPARE_FILES > 2
          MessageInterface::ShowMessage("===>    file 2: line = %s\n", buffer);
          #endif
@@ -2353,7 +2426,25 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
       {
          in3.getline(buffer, BUFFER_SIZE-1);
          line3 = buffer;
-      
+         
+         if (skipBlankLines)
+         {
+            // Get next non-blank line
+            if (GmatStringUtil::IsBlank(line3, true))
+            {
+               line3 = "";
+               bool blankFound = true;
+               while (!in3.eof() && blankFound)
+               {
+                  in3.getline(buffer, BUFFER_SIZE-1);
+                  line3 = buffer;
+                  blankFound = GmatStringUtil::IsBlank(line3, true);
+                  if (blankFound)
+                     line3 = "";
+               }
+            }
+         }
+         
          #if DBGLVL_COMPARE_FILES > 2
          MessageInterface::ShowMessage("===>    file 3: line = %s\n", buffer);
          #endif

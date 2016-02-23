@@ -2272,6 +2272,9 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    
    //std::string absPath = relPath;
    std::string absPath;
+   bool        startsWithSeparator = false;
+   if ((relPath[0] == '\\') || (relPath[0] == '/'))
+      startsWithSeparator = true;
    StringTokenizer st(relPath, "/\\");
    StringArray allNames = st.GetAllTokens();
    StringArray pathNames;
@@ -2328,6 +2331,9 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    }
    
    absPath = "";
+   // For paths that already started with the separator (were already absolute paths)
+   if (startsWithSeparator)
+      absPath += mPathSeparator;
    for (UnsignedInt i = 0; i < pathNames.size(); i++)
    {
       if (i < pathNames.size() - 1)
@@ -2561,7 +2567,7 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
    while (pos != mGmatFunctionPaths.end())
    {
       MessageInterface::ShowMessage
-         ("   mGmatFunctionPaths = %s\n", (*pos).c_str());
+         ("------   mGmatFunctionPaths = %s\n", (*pos).c_str());
       ++pos;
    }
    #endif
@@ -2764,8 +2770,8 @@ void FileManager::AddPythonModulePath(const std::string& path)
 	
 
 #ifdef DEBUG_FUNCTION_PATH
-	pos = mPythonFunctionPaths.begin();
-	while (pos != mPythonFunctionPaths.end())
+	pos = mPythonModulePaths.begin();
+	while (pos != mPythonModulePaths.end())
 	{
 		MessageInterface::ShowMessage
 			("   mPythonModulePaths=%s\n", (*pos).c_str());
@@ -2817,6 +2823,58 @@ std::string FileManager::GetLastFilePathMessage()
 const StringArray& FileManager::GetPluginList()
 {
    return mPluginList;
+}
+
+
+//------------------------------------------------------------------------------
+// void AdjustSettings(const std::string &suffix, const StringArray &forEntries)
+//------------------------------------------------------------------------------
+/**
+ * Appends a suffix to a list of settings stored in the file manager
+ *
+ * @param suffix The suffix to be appended to the setting
+ * @param forEntries A list of entries that receive the suffix
+ */
+//------------------------------------------------------------------------------
+void FileManager::AdjustSettings(const std::string &suffix,
+      const StringArray &forEntries)
+{
+   std::string temp;
+   for (UnsignedInt i = 0; i < forEntries.size(); ++i)
+   {
+      // Adjust if path
+      temp = mPathMap[forEntries[i]];
+      if (temp != "")
+      {
+         std::string trailingSlash = "";
+         if ((temp[temp.length()-1] == '/') || (temp[temp.length()-1] == '\\'))
+         {
+            trailingSlash = temp.substr(temp.length()-1);
+            temp = temp.substr(0, temp.length()-1);
+         }
+         temp += suffix;
+         temp += trailingSlash;
+         mPathMap[forEntries[i]] = temp;
+      }
+      else // Adjust if file
+      {
+         FileInfo *tempFI = mFileMap[forEntries[i]];
+         temp = tempFI->mFile;
+         std::string extension = "";
+
+         if (temp.find(".") != std::string::npos)
+         {
+            extension = temp.substr(temp.find("."));
+            temp = temp.substr(0, temp.find("."));
+         }
+
+         if (temp != "")
+         {
+            temp += suffix + extension;
+            tempFI->mFile = temp;
+         }
+      }
+   }
 }
 
 //---------------------------------
@@ -2871,6 +2929,7 @@ std::string FileManager::GetFunctionPath(FunctionType type,
       fullPath = ConvertToAbsPath(pathName) + funcName1;
 
       #ifdef DEBUG_FUNCTION_PATH
+      MessageInterface::ShowMessage("   pathName='%s'\n", pathName.c_str());
       MessageInterface::ShowMessage("   fullPath='%s'\n", fullPath.c_str());
       #endif
 

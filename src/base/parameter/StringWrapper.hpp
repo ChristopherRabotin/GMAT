@@ -43,7 +43,7 @@ public:
    virtual ~StringWrapper();
    
    virtual ElementWrapper*     Clone() const;
-
+   virtual std::string         ToString();
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual Real         EvaluateReal() const;
@@ -54,7 +54,7 @@ public:
    
 protected:  
    
-   // the bool value
+   // The string value
    std::string value;
    
    virtual void         SetupWrapper();

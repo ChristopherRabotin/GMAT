@@ -383,8 +383,8 @@ Target 'Target Flyby' DC1 {SolveMode = Solve, ExitMode = DiscardAndContinue, Sho
    Vary 'Vary LST.B' DC1(LST.Element3 = -0.09078959728280001, {Perturbation = 1e-004, Lower = -.5, Upper = .5, MaxStep = .01, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
    Maneuver 'Apply LST' LST(MMSRef);
    Propagate 'Prop to Periselene' LunarSB(MMSRef) {MMSRef.Luna.Periapsis};
-   Achieve 'Achieve BdotT' DC1(MMSRef.MoonMJ2000Eq.BdotT = 150000, {Tolerance = .00001});
-   Achieve 'Acheive BdotR' DC1(MMSRef.MoonMJ2000Eq.BdotR = -10000, {Tolerance = .00001});
+   Achieve 'Achieve BdotT' DC1(MMSRef.MoonMJ2000Eq.BdotT = 150000, {Tolerance = .001});
+   Achieve 'Acheive BdotR' DC1(MMSRef.MoonMJ2000Eq.BdotR = -10000, {Tolerance = .001});
 EndTarget;  % For targeter DC1
 
 

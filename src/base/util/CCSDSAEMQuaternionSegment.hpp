@@ -53,7 +53,8 @@ public:
 
    virtual bool             SetMetaData(const std::string &fieldName,
                                         const std::string &value);
-   virtual bool             AddData(Real epoch, Rvector data);
+   virtual bool             AddData(Real epoch, Rvector data,
+                                    bool justCheckDataSize = false);
 
 protected:
    // Required metadata fields for a Quaternion Attitude Ephemeris Message

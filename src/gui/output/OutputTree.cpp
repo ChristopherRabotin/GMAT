@@ -139,7 +139,7 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name, bool 
    case GmatTree::OUTPUT_XY_PLOT:
       parentId = mXyPlotItem;
       break;
-   case GmatTree::OUTPUT_CCSDS_OEM_FILE:
+   case GmatTree::OUTPUT_TEXT_EPHEM_FILE:
    case GmatTree::OUTPUT_REPORT:
    case GmatTree::OUTPUT_EVENT_REPORT:
 	{
@@ -154,7 +154,7 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name, bool 
 		}
 		switch (type)
 		{
-         case GmatTree::OUTPUT_CCSDS_OEM_FILE:
+         case GmatTree::OUTPUT_TEXT_EPHEM_FILE:
 				parentId = mEphemFileItem;
 				break;
 			case GmatTree::OUTPUT_REPORT:
@@ -331,10 +331,11 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
       else if (objTypeName == "EphemerisFile")
          //&& sub->GetBooleanParameter("WriteEphemeris"))
       {
-         if (sub->GetStringParameter("FileFormat") == "CCSDS-OEM")
+         if ((sub->GetStringParameter("FileFormat") == "CCSDS-OEM") ||
+             (sub->GetStringParameter("FileFormat") == "STK-TimePosVel"))
          {
-            AppendItem(mEphemFileItem, objName, GmatTree::OUTPUT_ICON_CCSDS_OEM_FILE, -1,
-                       new GmatTreeItemData(objName, GmatTree::OUTPUT_CCSDS_OEM_FILE));
+            AppendItem(mEphemFileItem, objName, GmatTree::OUTPUT_ICON_TEXT_EPHEM_FILE, -1,
+                       new GmatTreeItemData(objName, GmatTree::OUTPUT_TEXT_EPHEM_FILE));
          }
       }
       else if (objTypeName == "OrbitView" &&

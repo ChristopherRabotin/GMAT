@@ -88,7 +88,9 @@ public:
                                      const std::string &name = "");
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
-   
+   virtual bool         TakeAction(const std::string &action,
+                               const std::string &actionData = "");
+
    virtual bool         Initialize();
    
    virtual GmatBase*    Clone() const;

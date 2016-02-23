@@ -57,10 +57,6 @@
 #include "SubscriberFactory.hpp"
 #include "CalculatedPointFactory.hpp"
 #include "MathFactory.hpp"
-
-//#include "ErrorModelFactory.hpp"                                     // made changes by TUAN NGUYEN
-//#include "DataFilterFactory.hpp"                                     // made changes by TUAN NGUYEN
-
 #include "Interface.hpp"
 #include "XyPlot.hpp"
 #include "OrbitPlot.hpp"
@@ -84,6 +80,11 @@
 #include <sstream>                  // for stringstream
 #include <algorithm>                // for sort(), set_difference()
 #include <ctime>                    // for clock()
+
+
+#ifdef CREATE_OUTPUT_FOLDER
+#include <sys/stat.h>               // for mkdir
+#endif
 
 // This symbol is only needed for static link build
 #ifdef __INCLUDE_BUILTIN_PLUGINS__
@@ -190,9 +191,11 @@ Moderator* Moderator::Instance()
 
 
 //------------------------------------------------------------------------------
-// bool Initialize(const std::string &startupFile, bool fromGui = false)
+// bool Initialize(const std::string &startupFile, bool fromGui = false,
+//      const std::string &suffix, const StringArray *forEntries)
 //------------------------------------------------------------------------------
-bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
+bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
+      const std::string &suffix, const StringArray *forEntries)
 {
    #if DEBUG_INITIALIZE
    MessageInterface::ShowMessage
@@ -210,6 +213,21 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       // Read startup file, Set Log file
       theFileManager = FileManager::Instance();
       theFileManager->ReadStartupFile(startupFile);
+      if ((suffix != "") && (forEntries != NULL))
+      {
+         theFileManager->AdjustSettings(suffix, *forEntries);
+
+         #ifdef CREATE_OUTPUT_FOLDER
+            // Create the output path if it does not exist
+            std::string outPath = theFileManager->GetPathname("OUTPUT_PATH");
+            if (theFileManager->DoesDirectoryExist(outPath, true) == false)
+            {
+               mkdir(outPath.c_str(), S_IRWXU | S_IRWXG);
+            }
+         #endif
+         MessageInterface::SetLogFile(theFileManager->GetAbsPathname("LOG_FILE"));
+         MessageInterface::ShowMessage("Logging to %s\n", theFileManager->GetAbsPathname("LOG_FILE").c_str());
+      }
       
       MessageInterface::ShowMessage("Moderator is creating core engine...\n");
       
@@ -260,8 +278,6 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new StopConditionFactory());
       theFactoryManager->RegisterFactory(new SubscriberFactory());
       theFactoryManager->RegisterFactory(new CelestialBodyFactory());
-//      theFactoryManager->RegisterFactory(new ErrorModelFactory());                   // made changes by TUAN NGUYEN
-//      theFactoryManager->RegisterFactory(new DataFilterFactory());                   // made changes by TUAN NGUYEN
       
       #ifdef __INCLUDE_BUILTIN_PLUGINS__
       ForStaticLinkBuild::RegisterBuiltinPluginFactories(theFactoryManager);

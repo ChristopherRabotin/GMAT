@@ -643,7 +643,7 @@ void GmatMdiChildFrame::SaveChildPositionAndSize()
    #endif
 
    if ((mItemType == GmatTree::OUTPUT_REPORT)  ||
-       (mItemType == GmatTree::OUTPUT_CCSDS_OEM_FILE ) ||
+       (mItemType == GmatTree::OUTPUT_TEXT_EPHEM_FILE ) ||
        (mItemType == GmatTree::OUTPUT_ORBIT_VIEW) ||
        (mItemType == GmatTree::OUTPUT_XY_PLOT) ||
        (mItemType == GmatTree::OUTPUT_GROUND_TRACK_PLOT)

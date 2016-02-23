@@ -22,8 +22,7 @@
 // Created: 2009/09/02
 //
 /**
- * Writes a spacecraft orbit states or attitude to an ephemeris file either
- * CCSDS or SPK format.
+ * Base class for writing spacecraft orbit states to an ephemeris file.
  */
 //------------------------------------------------------------------------------
 #ifndef EphemerisFile_hpp
@@ -31,14 +30,11 @@
 
 #include "Subscriber.hpp"
 #include "Spacecraft.hpp"
+#include "EphemerisWriter.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
-#include "Interpolator.hpp"
 #include <iostream>
 #include <fstream>
-
-class SpiceOrbitKernelWriter;
-class Code500EphemerisFile;
 
 class GMAT_API EphemerisFile : public Subscriber
 {
@@ -48,19 +44,19 @@ public:
    EphemerisFile(const EphemerisFile &);
    EphemerisFile& operator=(const EphemerisFile&);
    
-   // methods for this class
-   virtual std::string  GetProperFileName(const std::string &fName,
+   // Methods for this class
+   // This method called from GUI
+   std::string          GetProperFileName(const std::string &fName,
                                           const std::string &fType,
-                                          bool setFileName);
-   virtual void         SetProperFileExtension();
-   virtual void         ValidateParameters(bool forInitialization);
+                                          bool saveFileName);
+   
    virtual void         SetBackgroundGeneration(bool inBackground);
    
    // Need to be able to close background SPKs and leave ready for appending
    // Finalization
-   void                 CloseEphemerisFile(bool done = true, bool writeMetaData = true);
-   bool                 InsufficientSPKData();
-
+   virtual void         CloseEphemerisFile(bool done = true, bool writeMetaData = true);
+   virtual bool         InsufficientDataPoints();
+   
    // methods inherited from Subscriber
    virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    
@@ -112,30 +108,19 @@ public:
    
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
-   
-   
+      
 protected:
-
+   
    enum FileType
    {
       CCSDS_OEM, CCSDS_AEM, SPK_ORBIT, SPK_ATTITUDE, CODE500_EPHEM,
+      STK_TIMEPOSVEL, UNKNOWN_FILE_TYPE
    };
    
-   // Maximum segment size used for bufferring data
-   UnsignedInt            maxSegmentSize;
+   Spacecraft        *spacecraft;
+   CoordinateSystem  *outCoordSystem;
+   EphemerisWriter   *ephemWriter;
    
-   Spacecraft             *spacecraft;
-   CoordinateSystem       *outCoordSystem;
-   Interpolator           *interpolator;     // owned object
-   SpiceOrbitKernelWriter *spkWriter;        // owned object
-   Code500EphemerisFile   *code500EphemFile; // owned object
-   
-   // for buffering ephemeris data
-   EpochArray  a1MjdArray;
-   StateArray  stateArray;
-   
-   /// ephemeris output path from the startup file
-   std::string outputPath;
    /// ephemeris full file name including the path
    std::string fullPathFileName;
    std::string spacecraftName;
@@ -144,90 +129,43 @@ protected:
    std::string fileName;
    std::string fileFormat;
    std::string epochFormat;
-   std::string ccsdsEpochFormat;
-   std::string initialEpoch;
-   std::string finalEpoch;
+   std::string initialEpochStr;
+   std::string finalEpochStr;
    std::string stepSize;
    std::string interpolatorName;
    std::string stateType;
    std::string outCoordSystemName;
    std::string outputFormat;
-   bool writeEphemeris;
-   bool usingDefaultFileName;
-   bool generateInBackground;
+   bool        writeEphemeris;
+   bool        usingDefaultFileName;
+   bool        generateInBackground;
+   bool        allowMultipleSegments;
    /// for propagator change
    std::string prevPropName;
    std::string currPropName;
-   /// for comments
-   std::string currComments;
-   
-   /// for meta data and block
-   Real        metaDataStart;
-   Real        metaDataStop;
-   std::string metaDataStartStr;
-   std::string metaDataStopStr;
-   Integer     writeMetaDataOption;
-   std::ofstream::pos_type metaDataBegPosition;
-   std::ofstream::pos_type metaDataEndPosition;
    
    Integer     interpolationOrder;
-   Integer     interpolatorStatus;
-   Integer     initialCount;
-   Integer     waitCount;
-   Integer     afterFinalEpochCount;
    Integer     toggleStatus;
    Integer     propIndicator;
    Real        prevPropDirection;
    Real        currPropDirection;
-   Real        stepSizeInA1Mjd;
-   Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
    Real        finalEpochA1Mjd;
    Real        blockBeginA1Mjd;
-   Real        nextOutEpochInSecs;
-   Real        nextReqEpochInSecs;
    Real        currEpochInDays;
    Real        currEpochInSecs;
    Real        prevEpochInSecs;
-   Real        prevProcTime;
-   Real        lastEpochWrote;
-   Real        attEpoch;
    Real        maneuverEpochInDays;
    Real        eventEpochInSecs;
    Real        currState[6];
-   Real        attQuat[4];
-   RealArray   epochsOnWaiting;
+   Real        stepSizeInSecs;
    
    bool        firstTimeWriting;
-   bool        firstTimeMetaData;
-   bool        saveMetaDataStart;
-   bool        writingNewSegment;
-   bool        continuousSegment;
    bool        useFixedStepSize;
-   bool        interpolateInitialState;
-   bool        interpolateFinalState;
-   bool        createInterpolator;
-   bool        writeOrbit;
-   bool        writeAttitude;
-   bool        finalEpochReached;
-   bool        handleFinalEpoch;
-   bool        finalEpochProcessed;
-   bool        writeDataInDataCS;
-   bool        processingLargeStep;
-   bool        spkWriteFailed;
-   bool        code500WriteFailed;
-   bool        writeCommentAfterData;
    bool        checkForLargeTimeGap;
    bool        isEphemFileOpened;
+   bool        canFinalize;
    
-   CoordinateConverter coordConverter;
-   
-   /// number of SPK segments that have been written
-   Integer     numSPKSegmentsWritten;
-   /// Indicates whether or not there was data 'left over' that was not enough
-   /// to write to the background SPK
-   bool        insufficientSPKData;
-
    FileType    fileType;
    
    /// for maneuver handling
@@ -254,45 +192,30 @@ protected:
    static StringArray interpolatorTypeList;
    /// Avilable output format list
    static StringArray outputFormatList;
-      
-   // Initialization
-   void         InitializeData(bool saveEpochInfo = false);
-   void         CreateInterpolator();
-   void         CreateEphemerisFile();
-   void         CreateSpiceKernelWriter();
-   void         CreateCode500EphemerisFile();
-   bool         OpenTextEphemerisFile();
    
-//   // Finalization
-//   void         CloseEphemerisFile();
+   // Initialization
+   void         ValidateParameters(bool forInitialization);
+   Real         ConvertInitialAndFinalEpoch();
+   void         InitializeData(bool saveEpochInfo = false);
+   void         SetFileName();
+   void         CreateEphemerisFile();
+   void         CreateEphemerisWriter();
    
    // Time and data
-   Real         ConvertInitialAndFinalEpoch();
-   bool         CheckInitialAndFinalEpoch();
-   void         HandleSpkOrbitData(bool writeData, bool timeToWrite);
-   void         HandleCcsdsOrbitData(bool writeData, bool timeToWrite);
-   void         HandleCode500OrbitData(bool writeDatda, bool timeToWrite);
-   void         HandleWriteOrbit();
+   bool         HandleEndOfRun();
+   bool         SkipFunctionData();
+   bool         RetrieveData(const Real *dat);
+   void         HandlePropDirectionChange();
    
-   // Interpolation
-   void         RestartInterpolation(const std::string &comments = "",
-                                     bool saveEpochInfo = false,
-                                     bool writeAfterData = true,
-                                     bool canFinalize = false,
-                                     bool ignoreBlankComments = true);
-   bool         IsTimeToWrite(Real epochInSecs, const Real state[6]);
-   void         WriteOrbit(Real reqEpochInSecs, const Real state[6]);
-   void         WriteOrbitAt(Real reqEpochInSecs, const Real state[6]);
-   void         GetAttitude();
-   void         WriteAttitude();
-   void         FinishUpWriting(bool canFinalize = true);
-   void         FinishUpWritingCCSDS(bool canFinalize = true);
-   void         FinishUpWritingSPK(bool canFinalize = true);
-   void         FinishUpWritingCode500(bool canFinalize = true);
+   bool         IsBackwardPropAllowed();
+   bool         ProcessOrbitData();
    
-   void         ProcessFinalDataOnWaiting(bool canFinalize = true);
-   void         ProcessEpochsOnWaiting(bool checkFinalEpoch = false,
-                                       bool checkEventEpoch = false);
+   void         HandleOrbitData();
+   void         StartNewSegment(const std::string &comments,
+                                bool saveEpochInfo,
+                                bool writeAfterData,
+                                bool ignoreBlankComments);
+   void         FinishUpWriting();
    bool         SetEpoch(Integer id, const std::string &value,
                          const StringArray &allowedValues);
    bool         SetStepSize(Integer id, const std::string &value,
@@ -301,88 +224,33 @@ protected:
                             const StringArray &allowedValues,
                             const std::string &additionalMsg = "");
    std::string  ToString(const StringArray &strList);
-   
-   // General writing
-   void         WriteString(const std::string &str);
-   void         WriteHeader();
-   void         WriteMetaData();
-   void         WriteComments(const std::string &comments,
-                              bool ignoreBlank = true, bool writeKeyword = true);
-   
-   // General data buffering
-   void         BufferOrbitData(Real epochInDays, const Real state[6]);
-   void         ClearOrbitData();
-   
-   // CCSDS file writing for debug and actual
-   bool         OpenCcsdsEphemerisFile();
-   void         ClearLastCcsdsOemMetaData(const std::string &comments = "");
-   void         WriteCcsdsHeader();
-   void         WriteCcsdsOrbitDataSegment();
-   void         WriteCcsdsOemMetaData();
-   void         WriteOrbitData(Real reqEpochInSecs, const Real state[6]);
-   void         WriteCcsdsAemMetaData();
-   void         WriteCcsdsAemData(Real reqEpochInSecs, const Real quat[4]);
-   void         WriteCcsdsComments(const std::string &comments, bool writeKeyword = true);
-   
-   // CCSDS file actual writing (subclass should overwrite this methods)
-   virtual bool OpenRealCcsdsEphemerisFile();
-   virtual void WriteRealCcsdsHeader();
-   virtual void WriteRealCcsdsOrbitDataSegment();
-   virtual void WriteRealCcsdsOemMetaData();
-   virtual void WriteRealCcsdsAemMetaData();
-   virtual void WriteRealCcsdsAemData(Real reqEpochInSecs, const Real quat[4]);
-   virtual void WriteRealCcsdsComments(const std::string &comments);
-   
-   // SPK file writing
-   void         WriteSpkHeader(); // This is for debug
-   void         WriteSpkOrbitDataSegment();
-   void         WriteSpkOrbitMetaData();
-   void         WriteSpkComments(const std::string &comments);
-   void         FinalizeSpkFile(bool done = true, bool writeMetaData = true);
-   
-   // Code500 file writing
-   void         WriteCode500OrbitDataSegment(bool canFinalize = false);
-   void         FinalizeCode500Ephemeris();
-   
-   // Epoch handling
-   RealArray::iterator
-                FindEpochOnWaiting(Real epochInSecs, const std::string &msg);
-   void         RemoveEpochAlreadyWritten(Real epochInSecs, const std::string &msg);
-   void         AddNextEpochToWrite(Real epochInSecs, const std::string &msg);
+   std::string  GetBackwardPropWarning();
    
    // Event checking
    bool         IsEventFeasible(bool checkForNoData = true);
-   
-   // CoordinateSystem conversion
-   void         ConvertState(Real epochInDays, const Real inState[6],
-                             Real outState[6]);
+   void         SetEventEpoch();
    
    // Time formatting
    std::string  ToUtcGregorian(Real epoch, bool inDays = false, Integer format = 2);
-   
-   // Error message formatting
-   void FormatErrorMessage(std::string &ephemMsg, std::string &errMsg);
    
    // Debug output
    void         DebugWriteTime(const std::string &msg, Real epoch, bool inDays = false,
                                Integer format = 2);
    void         DebugWriteOrbit(const std::string &msg, Real epoch, const Real state[6],
-                                bool inDays = false, bool logOnly = false);
+                                bool inDays = false);
    void         DebugWriteOrbit(const std::string &msg, A1Mjd *epochInDays,
-                                Rvector6 *state, bool logOnly = false);
-   void         DebugWriteEpochsOnWaiting(const std::string &msg = "");
-   
+                                Rvector6 *state);
    // Deprecated field
    void         WriteDeprecatedMessage(Integer id) const;
    
    // methods inherited from Subscriber
    virtual bool Distribute(Integer len);
-   virtual bool Distribute(const Real * dat, Integer len);
-   virtual void HandleManeuvering(GmatBase *originator, bool maneuvering, Real epoch,
+   virtual bool Distribute(const Real *dat, Integer len);
+   void         HandleManeuvering(GmatBase *originator, bool maneuvering, Real epoch,
                                   const StringArray &satNames,
                                   const std::string &desc);
-   virtual void HandlePropagatorChange(GmatBase *provider, Real epochInMjd);
-   virtual void HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
+   void         HandlePropagatorChange(GmatBase *provider, Real epochInMjd);
+   void         HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
                                                const std::string &satName,
                                                const std::string &desc);
    enum

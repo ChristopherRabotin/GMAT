@@ -127,6 +127,7 @@ SET(BASE_SRCS
     command/ClearPlot.cpp
     command/ConditionalBranch.cpp
     command/Create.cpp
+    command/Display.cpp
     command/Else.cpp
     command/EndFiniteBurn.cpp
     command/EndFor.cpp
@@ -444,6 +445,12 @@ SET(BASE_SRCS
     spacecraft/TextTrajectoryFile.cpp
     stopcond/StopCondition.cpp
     subscriber/EphemerisFile.cpp
+    subscriber/EphemerisWriter.cpp
+    subscriber/EphemWriterCCSDS.cpp
+    subscriber/EphemWriterCode500.cpp
+    subscriber/EphemWriterSPK.cpp
+    subscriber/EphemWriterSTK.cpp
+    subscriber/EphemWriterWithInterpolator.cpp
     subscriber/EphemManager.cpp
     subscriber/MessageWindow.cpp
     subscriber/TextEphemFile.cpp
@@ -470,6 +477,9 @@ SET(BASE_SRCS
     util/CCSDSAEMSegment.cpp
     util/CCSDSEMReader.cpp
     util/CCSDSEMSegment.cpp
+    util/CCSDSEMWriter.cpp
+    util/CCSDSOEMSegment.cpp
+    util/CCSDSOEMWriter.cpp
     util/Date.cpp
     util/DateUtil.cpp
     util/ElapsedTime.cpp
@@ -495,6 +505,7 @@ SET(BASE_SRCS
     util/StringTokenizer.cpp
     util/StringUtil.cpp
     util/SPADFileReader.cpp
+    util/STKEphemerisFile.cpp
     util/TextParser.cpp
     util/TimeSystemConverter.cpp
     util/TimeTypes.cpp
