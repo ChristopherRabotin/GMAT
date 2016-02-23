@@ -23,8 +23,12 @@
 #include "ThrustFileDefs.hpp"
 #include "FileReader.hpp"
 #include "ThrustSegment.hpp"
+#include "ThfDataSegment.hpp"
+#include "FileThrust.hpp"
 
-
+/**
+ * Container for the thrust history file functionality
+ */
 class ThrustHistoryFile: public FileReader
 {
 public:
@@ -80,6 +84,11 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
 
+   void SetSegmentData(ThfDataSegment seg);
+
+   virtual bool         Initialize();
+   FileThrust*          GetForce();
+
    DEFAULT_TO_NO_CLONES
 
 protected:
@@ -87,18 +96,30 @@ protected:
    /// Name for the thrust history file
    std::string thrustFileName;
    /// Data blocks from the file
-   std::vector<ThrustSegment*> segments;
+   std::vector<ThrustSegment> segments;
    /// Scripted block names
    StringArray segmentNames;
    /// Mass source for each block
    std::map<std::string, StringArray> massSources;
+
+   StringArray keywords;
+   StringArray dataStartKeys;
+   StringArray interpolationTypes;
+
+   FileThrust theForce;
+
+   bool CheckDataStart(std::string theLine, ThfDataSegment &theSegment);
+   bool SetHeaderField(std::string theLine, ThfDataSegment &theSegment);
+   bool ReadThrustProfile(ThfDataSegment &theSegment);
+   void MapField(const std::string &key, const std::string &datum,
+         ThfDataSegment &theSegment);
+   void ValidateSegment(ThfDataSegment &theSegment);
 
    /// Parameter IDs
    enum
    {
       FILENAME = GmatBaseParamCount,
       SEGMENTS,
-      MASS_SOURCE,
       ThrustHistoryFileParamCount,
    };
 

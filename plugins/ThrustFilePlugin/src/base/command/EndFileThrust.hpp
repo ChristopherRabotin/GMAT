@@ -40,14 +40,30 @@ public:
                                         const std::string &oldName,
                                         const std::string &newName);
 
+   virtual bool TakeAction(const std::string &action,
+                           const std::string &actionData = "");
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                                        const std::string &name);
+
+   virtual const std::string&
+                        GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
+
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
-   virtual bool         InterpretAction();
    virtual bool         Initialize();
    virtual bool         Execute();
 
    DEFAULT_TO_NO_CLONES
 
 protected:
+   /// Name of the ThrustHistoryFile reader
+   std::string thrustFileReader;
    /// The FileThrust that is available for the force models
    FileThrust *burnForce;
    /// The vector of forces managed by the Sandbox

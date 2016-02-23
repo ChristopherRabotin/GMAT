@@ -22,6 +22,7 @@
 
 #include "ThrustFileDefs.hpp"
 #include "PhysicalModel.hpp"
+#include "ThrustSegment.hpp"
 
 class FileThrust: public PhysicalModel
 {
@@ -40,12 +41,12 @@ public:
                                             const std::string &name);
    virtual const StringArray&
                            GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool            SetRefObject(GmatBase *obj,
-                              const Gmat::ObjectType type,
-                              const std::string &name = "");
-   virtual bool            SetRefObject(GmatBase *obj,
-                              const Gmat::ObjectType type,
-                              const std::string &name, const Integer index);
+//   virtual bool            SetRefObject(GmatBase *obj,
+//                              const Gmat::ObjectType type,
+//                              const std::string &name = "");
+//   virtual bool            SetRefObject(GmatBase *obj,
+//                              const Gmat::ObjectType type,
+//                              const std::string &name, const Integer index);
    virtual bool            RenameRefObject(const Gmat::ObjectType type,
                                            const std::string &oldName,
                                            const std::string &newName);
@@ -57,8 +58,10 @@ public:
 
    virtual bool            IsTransient();
    virtual bool            DepletesMass();
-//   virtual void            SetPropList(ObjectArray *soList);
+   virtual void            SetSegmentList(std::vector<ThrustSegment>* segs);
+   void                    SetPropList(ObjectArray *soList);
    virtual bool            Initialize();
+
    virtual bool            GetDerivatives(Real * state, Real dt, Integer order,
                                           const Integer id = -1);
    virtual Rvector6        GetDerivativesForSpacecraft(Spacecraft *sc);
@@ -89,11 +92,18 @@ protected:
    Integer                       cartIndex;
    /// Flag indicating if the Cartesian state should be populated
    bool                          fillCartesian;
+   /// Flag to toggle thrust vs accel
+   bool                          dataIsThrust;
+
+   /// The segment data from the thrust history file
+   std::vector<ThrustSegment>    *segments;
 
    /// Start index for the dm/dt data
    Integer                       mDotIndex;
    /// Flag indicating if any thrusters are set to deplete mass
    bool                          depleteMass;
+
+   void ComputeAccelerationMassFlow(const GmatEpoch atEpoch, Real burnData[4]);
 };
 
 #endif /* FileThrust_hpp */

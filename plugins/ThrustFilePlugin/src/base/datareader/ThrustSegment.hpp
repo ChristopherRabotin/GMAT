@@ -23,6 +23,7 @@
 
 #include "GmatBase.hpp"
 #include "CoordinateSystem.hpp"
+#include "ThfDataSegment.hpp"
 
 class ThrustSegment : public GmatBase
 {
@@ -126,38 +127,28 @@ public:
                                             const bool value,
                                             const Integer index);
 
+   void                 SetDataSegment(ThfDataSegment theData);
+
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
+   /// The data from the file
+   ThfDataSegment segData;
+
 private:
-   /// Structure for the thrust profile data points
-   struct ThrustPoint
-   {
-      Real time;
-      Real magnitude;
-      Real vector[3];
-      Real mdot;
-
-      // constructor, destructor, copy constructor, assignment operator
-      ThrustPoint();
-      ~ThrustPoint();
-      ThrustPoint(const ThrustPoint& tp);
-      ThrustPoint& operator=(const ThrustPoint& tp);
-   };
-
-   /// Start epoch for the data, in string form
-   std::string epochString;
-   /// A.1. epoch matching epochString; 0.0 if the epoch is floating
-   GmatEpoch startEpoch;
-   /// Name of the coordinate system used for the data
-   std::string coordinateSystemName;
-   /// Coordinate system used for the data
-   CoordinateSystem *cs;
-   /// Method of interpolation used for this segment
-   std::string interpolationMethod;
-
-   /// The thrust profile data, node by node
-   std::vector<ThrustPoint> profile;
+   // Object fields
+   /// The trust scale factor
+   Real thrustScaleFactor;
+   /// Standard deviation for the TSF
+   Real tsfSigma;
+   /// Mass flow flag
+   bool depleteMass;
+   /// Mass flow scale factor
+   Real massFlowFactor;
+   /// Sources of mass flow
+   StringArray massSource;
+   /// Solve for parameters
+   StringArray solveFors;
 
    /// Parameter IDs
    enum

@@ -24,6 +24,7 @@
 #include "ThrustFileDefs.hpp"
 #include "GmatCommand.hpp"
 #include "FileThrust.hpp"
+#include "ThrustHistoryFile.hpp"
 #include "PhysicalModel.hpp"
 #include "Spacecraft.hpp"
 
@@ -37,12 +38,30 @@ public:
    BeginFileThrust& operator=(const BeginFileThrust& bft);
 
    virtual GmatBase* Clone() const;
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+
+   virtual bool         TakeAction(const std::string &action,
+                           const std::string &actionData = "");
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                        const std::string &name);
+
+   virtual GmatBase*    GetGmatObject(const Gmat::ObjectType type,
+                                  const std::string objName = "");
+
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+   virtual const std::string&
+                        GetGeneratingString(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
 
    virtual void SetTransientForces(std::vector<PhysicalModel*> *tf);
-   virtual bool InterpretAction();
    virtual bool Initialize();
    virtual bool Execute();
 
@@ -53,6 +72,10 @@ protected:
    FileThrust *burnForce;
    /// The vector of forces managed by the Sandbox
    std::vector<PhysicalModel*>   *transientForces;
+   /// Name of the thrust history file object
+   std::string thfName;
+   /// The thrust history file object
+   ThrustHistoryFile *thrustFile;
    /// The names of the spacecraft that get maneuvered
    StringArray                   satNames;
    /// The spacecraft that get maneuvered

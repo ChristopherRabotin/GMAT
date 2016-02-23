@@ -59,13 +59,10 @@ const Gmat::ParameterType ThrustSegment::PARAMETER_TYPE[ThrustSegmentParamCount 
  */
 //------------------------------------------------------------------------------
 ThrustSegment::ThrustSegment(const std::string &name) :
-   GmatBase                (Gmat::INTERFACE, "ThrustSegment", name),
-   epochString             ("01 Jan 2000 11:59:28.000"),
-   startEpoch              (21545.0),
-   coordinateSystemName    ("EarthMJ2000Eq"),
-   cs                      (NULL),
-   interpolationMethod     ("None")
+   GmatBase                (Gmat::INTERFACE, "ThrustSegment", name)
 {
+   objectTypes.push_back(Gmat::INTERFACE);
+   objectTypeNames.push_back("ThrustSegment");
 }
 
 //------------------------------------------------------------------------------
@@ -89,18 +86,9 @@ ThrustSegment::~ThrustSegment()
  */
 //------------------------------------------------------------------------------
 ThrustSegment::ThrustSegment(const ThrustSegment& ts) :
-   GmatBase                (ts),
-   epochString             (ts.epochString),
-   startEpoch              (ts.startEpoch),
-   coordinateSystemName    (ts.coordinateSystemName),
-   cs                      (ts.cs),
-   interpolationMethod     (ts.interpolationMethod)
+   GmatBase                (ts)
 {
-   for (UnsignedInt i = 0; i < ts.profile.size(); ++i)
-   {
-      ThrustPoint tp = ts.profile[i];
-      profile.push_back(tp);
-   }
+   segData = ts.segData;
 }
 
 //------------------------------------------------------------------------------
@@ -119,19 +107,7 @@ ThrustSegment& ThrustSegment::operator=(const ThrustSegment& ts)
    if (this != &ts)
    {
       GmatBase::operator =(ts);
-
-      epochString          = ts.epochString;
-      startEpoch           = ts.startEpoch;
-      coordinateSystemName = ts.coordinateSystemName;
-      cs                   = ts.cs;
-      interpolationMethod  = ts.interpolationMethod;
-
-      profile.clear();
-      for (UnsignedInt i = 0; i < ts.profile.size(); ++i)
-      {
-         ThrustPoint tp = ts.profile[i];
-         profile.push_back(tp);
-      }
+      segData = ts.segData;
    }
 
    return *this;
@@ -251,6 +227,10 @@ std::string ThrustSegment::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool ThrustSegment::IsParameterReadOnly(const Integer id) const
 {
+   if (id == TSF_SIGMA)
+      if (solveFors.size() == 0)
+         return true;
+
    return GmatBase::IsParameterReadOnly(id);
 }
 
@@ -283,6 +263,15 @@ bool ThrustSegment::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 Real ThrustSegment::GetRealParameter(const Integer id) const
 {
+   if (id == THRUSTSCALEFACTOR)
+      return thrustScaleFactor;
+
+   if (id == TSF_SIGMA)
+      return tsfSigma;
+
+   if (id == MASSFLOWSCALEFACTOR)
+      return massFlowFactor;
+
    return GmatBase::GetRealParameter(id);
 }
 
@@ -301,6 +290,27 @@ Real ThrustSegment::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real ThrustSegment::SetRealParameter(const Integer id, const Real value)
 {
+   if (id == THRUSTSCALEFACTOR)
+   {
+      if (value > 0.0)
+         thrustScaleFactor = value;
+      return thrustScaleFactor;
+   }
+
+   if (id == TSF_SIGMA)
+   {
+      if (value > 0.0)
+         tsfSigma = value;
+      return tsfSigma;
+   }
+
+   if (id == MASSFLOWSCALEFACTOR)
+   {
+      if (value > 0.0)
+         massFlowFactor = value;
+      return massFlowFactor;
+   }
+
    return GmatBase::SetRealParameter(id, value);
 }
 
@@ -526,6 +536,15 @@ std::string ThrustSegment::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool ThrustSegment::SetStringParameter(const Integer id, const char *value)
 {
+   if (id == MASSSOURCE)
+   {
+      if (find(massSource.begin(), massSource.end(), value) == massSource.end())
+      {
+         massSource.push_back(value);
+      }
+      return true;
+   }
+
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -543,6 +562,24 @@ bool ThrustSegment::SetStringParameter(const Integer id, const char *value)
 //------------------------------------------------------------------------------
 bool ThrustSegment::SetStringParameter(const Integer id, const std::string &value)
 {
+   if (id == MASSSOURCE)
+   {
+      if (find(massSource.begin(), massSource.end(), value) == massSource.end())
+      {
+         massSource.push_back(value);
+      }
+      return true;
+   }
+
+   if (id == SOLVEFORS)
+   {
+      if (find(solveFors.begin(), solveFors.end(), value) == solveFors.end())
+      {
+         solveFors.push_back(value);
+      }
+      return true;
+   }
+
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -562,6 +599,20 @@ bool ThrustSegment::SetStringParameter(const Integer id, const std::string &valu
 //------------------------------------------------------------------------------
 std::string ThrustSegment::GetStringParameter(const Integer id, const Integer index) const
 {
+   if (id == MASSSOURCE)
+   {
+      if ((index >= 0) && (index < massSource.size()))
+         return massSource[index];
+      return "";
+   }
+
+   if (id == SOLVEFORS)
+   {
+      if ((index >= 0) && (index < solveFors.size()))
+         return solveFors[index];
+      return "";
+   }
+
    return GmatBase::GetStringParameter(id, index);
 }
 
@@ -582,6 +633,39 @@ std::string ThrustSegment::GetStringParameter(const Integer id, const Integer in
 //------------------------------------------------------------------------------
 bool ThrustSegment::SetStringParameter(const Integer id, const char *value, const Integer index)
 {
+   if (index < 0)
+      return false;     // Throw here?
+
+   if (id == MASSSOURCE)
+   {
+      if (index < massSource.size())
+      {
+         massSource[index] == value;
+      }
+      else if (index == massSource.size())
+      {
+         massSource.push_back(value);
+      }
+      else
+         return false;     // Throw here?
+      return true;
+   }
+
+   if (id == SOLVEFORS)
+   {
+      if (index < solveFors.size())
+      {
+         solveFors[index] == value;
+      }
+      else if (index == solveFors.size())
+      {
+         solveFors.push_back(value);
+      }
+      else
+         return false;     // Throw here?
+      return true;
+   }
+
    return GmatBase::SetStringParameter(id, value, index);
 }
 
@@ -602,6 +686,39 @@ bool ThrustSegment::SetStringParameter(const Integer id, const char *value, cons
 //------------------------------------------------------------------------------
 bool ThrustSegment::SetStringParameter(const Integer id, const std::string &value, const Integer index)
 {
+   if (index < 0)
+      return false;     // Throw here?
+
+   if (id == MASSSOURCE)
+   {
+      if (index < massSource.size())
+      {
+         massSource[index] == value;
+      }
+      else if (index == massSource.size())
+      {
+         massSource.push_back(value);
+      }
+      else
+         return false;     // Throw here?
+      return true;
+   }
+
+   if (id == SOLVEFORS)
+   {
+      if (index < solveFors.size())
+      {
+         solveFors[index] == value;
+      }
+      else if (index == solveFors.size())
+      {
+         solveFors.push_back(value);
+      }
+      else
+         return false;     // Throw here?
+      return true;
+   }
+
    return GmatBase::SetStringParameter(id, value, index);
 }
 
@@ -709,6 +826,12 @@ bool ThrustSegment::SetStringParameter(const std::string &label, const std::stri
 //------------------------------------------------------------------------------
 const StringArray& ThrustSegment::GetStringArrayParameter(const Integer id) const
 {
+   if (id == MASSSOURCE)
+      return massSource;
+
+   if (id == SOLVEFORS)
+      return solveFors;
+
    return GmatBase::GetStringArrayParameter(id);
 }
 
@@ -781,6 +904,9 @@ const StringArray& ThrustSegment::GetStringArrayParameter(const std::string &lab
 //------------------------------------------------------------------------------
 bool ThrustSegment::GetBooleanParameter(const Integer id) const
 {
+   if (id == TSF_MASSFLOW)
+      return depleteMass;
+
    return GmatBase::GetBooleanParameter(id);
 }
 
@@ -799,6 +925,12 @@ bool ThrustSegment::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool ThrustSegment::SetBooleanParameter(const Integer id, const bool value)
 {
+   if (id == TSF_MASSFLOW)
+   {
+      depleteMass = value;
+      return depleteMass;
+   }
+
    return GmatBase::SetBooleanParameter(id, value);
 }
 
@@ -916,76 +1048,16 @@ bool ThrustSegment::SetBooleanParameter(const std::string &label, const bool val
 }
 
 
-
-// Convenience methods for the thrust profile data structure
-
 //------------------------------------------------------------------------------
-// ThrustPoint() :
+// void SetDataSegment(ThfDataSegment theData)
 //------------------------------------------------------------------------------
 /**
- * Constructor
- */
-//------------------------------------------------------------------------------
-ThrustSegment::ThrustPoint::ThrustPoint() :
-   time           (0.0),
-   magnitude      (0.0),
-   mdot           (0.0)
-
-{
-   vector[0] = vector[1] = vector[2] = 0.0;
-}
-
-//------------------------------------------------------------------------------
-// ~ThrustPoint()
-//------------------------------------------------------------------------------
-/**
- * Destructor
- */
-//------------------------------------------------------------------------------
-ThrustSegment::ThrustPoint::~ThrustPoint()
-{
-}
-
-//------------------------------------------------------------------------------
-// ThrustPoint(const ThrustPoint& tp)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor
+ * Adds the data from a history file into the segment
  *
- * @param tp The point copied to this make one
+ * @param theData The loaded data
  */
 //------------------------------------------------------------------------------
-ThrustSegment::ThrustPoint::ThrustPoint(const ThrustPoint& tp) :
-   time        (tp.time),
-   magnitude   (tp.magnitude),
-   mdot        (tp.mdot)
+void ThrustSegment::SetDataSegment(ThfDataSegment theData)
 {
-   vector[0] = tp.vector[0];
-   vector[1] = tp.vector[1];
-   vector[2] = tp.vector[2];
-}
-
-//------------------------------------------------------------------------------
-// ThrustSegment::ThrustPoint& operator=(const ThrustPoint& tp)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator
- *
- * @param tp The point copied to this one
- *
- * @return This point, set to match tp
- */
-//------------------------------------------------------------------------------
-ThrustSegment::ThrustPoint& ThrustSegment::ThrustPoint::operator=(const ThrustPoint& tp)
-{
-   if (this != &tp)
-   {
-      time = tp.time;
-      magnitude = tp.magnitude;
-      vector[0] = tp.vector[0];
-      vector[1] = tp.vector[1];
-      vector[2] = tp.vector[2];
-      mdot = tp.mdot;
-   }
-   return *this;
+   segData = theData;
 }

@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Jan 14, 2016
 /**
- * 
+ * Factory used to create Thrust History File components
  */
 //------------------------------------------------------------------------------
 
@@ -24,6 +24,13 @@
 #include "MessageInterface.hpp"
 
 
+//------------------------------------------------------------------------------
+// ThrustFileReaderFactory()
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+//------------------------------------------------------------------------------
 ThrustFileReaderFactory::ThrustFileReaderFactory() :
    Factory           (Gmat::INTERFACE)
 {
@@ -31,10 +38,26 @@ ThrustFileReaderFactory::ThrustFileReaderFactory() :
    creatables.push_back("ThrustSegment");
 }
 
+//------------------------------------------------------------------------------
+// ThrustFileReaderFactory::~ThrustFileReaderFactory()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 ThrustFileReaderFactory::~ThrustFileReaderFactory()
 {
 }
 
+//------------------------------------------------------------------------------
+// ThrustFileReaderFactory(const ThrustFileReaderFactory& elf)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param elf The factory copied here
+ */
+//------------------------------------------------------------------------------
 ThrustFileReaderFactory::ThrustFileReaderFactory(
       const ThrustFileReaderFactory& elf) :
    Factory        (elf)
@@ -46,7 +69,18 @@ ThrustFileReaderFactory::ThrustFileReaderFactory(
    }
 }
 
-ThrustFileReaderFactory& ThrustFileReaderFactory::operator =(
+//------------------------------------------------------------------------------
+// ThrustFileReaderFactory& operator=(const ThrustFileReaderFactory& elf)
+//------------------------------------------------------------------------------
+/**
+ * Assignment opertor
+ *
+ * @param elf The factory copied here
+ *
+ * @return This factory, matching elf
+ */
+//------------------------------------------------------------------------------
+ThrustFileReaderFactory& ThrustFileReaderFactory::operator=(
       const ThrustFileReaderFactory& elf)
 {
    if (this != &elf)
@@ -62,6 +96,18 @@ ThrustFileReaderFactory& ThrustFileReaderFactory::operator =(
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const std::string& ofType, const std::string& withName)
+//------------------------------------------------------------------------------
+/**
+ * Object instantiator
+ *
+ * @param ofType The object type requested
+ * @param withName The name of the new object
+ *
+ * @return A new object of the specified type
+ */
+//------------------------------------------------------------------------------
 GmatBase* ThrustFileReaderFactory::CreateObject(const std::string& ofType,
       const std::string& withName)
 {
