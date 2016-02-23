@@ -70,9 +70,6 @@ PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                   = ../plugins/proprietary/libSNOptimizer
 PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
 
-# Thinking Systems plugins
-PLUGIN                 = ../plugins/proprietary/libTsiParameters
-
 #-----------------------------------------------------------
 # Directory/file paths
 #-----------------------------------------------------------
