@@ -23,8 +23,8 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_BEGIN_MANEUVER
-#define DEBUG_BEGIN_MANEUVER_EXE
-#define DEBUG_INITIALIZATION
+//#define DEBUG_BEGIN_MANEUVER_EXE
+//#define DEBUG_INITIALIZATION
 
 BeginFileThrust::BeginFileThrust(const std::string &name) :
    GmatCommand             ("BeginFileThrust"),
@@ -363,7 +363,10 @@ bool BeginFileThrust::Execute()
    // Tell active spacecraft that they are now firing
    for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)
    {
-      MessageInterface::ShowMessage("Setting maneuvering state on %s\n", (*s)->GetName().c_str());
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("Setting maneuvering state on %s\n",
+               (*s)->GetName().c_str());
+      #endif
       (*s)->IsManeuvering(true);
    }
 

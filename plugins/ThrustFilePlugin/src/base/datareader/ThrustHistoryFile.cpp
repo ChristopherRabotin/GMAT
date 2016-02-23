@@ -27,11 +27,12 @@
 // Classes/namespaces needed for conversions
 #include "TimeSystemConverter.hpp"
 #include "GmatConstants.hpp"
+#include "FileManager.hpp"
 
 #include "MessageInterface.hpp"
 
-#define DEBUG_FILE_DATA
-#define DEBUG_FILE_READ
+//#define DEBUG_FILE_DATA
+//#define DEBUG_FILE_READ
 
 
 
@@ -160,7 +161,18 @@ bool ThrustHistoryFile::ReadData()
    TextParser parser;
 
    theStream = new std::ifstream();
+
+   // Check for the file.  If it is not found on teh raw file name, use the
+   // file manager to build an alternative path and check there.
    theStream->open(thrustFileName.c_str());
+   if (!theStream->is_open())
+   {
+      FileManager *fm = FileManager::Instance();
+      std::string thePath = fm->GetPathname(FileManager::OUTPUT_PATH);
+      thePath += thrustFileName;
+      theStream->open(thePath.c_str());
+   }
+
    if (theStream->is_open())
    {
       #ifdef DEBUG_FILE_READ
@@ -651,8 +663,10 @@ bool ThrustHistoryFile::ReadThrustProfile(ThfDataSegment& theSegment)
                      endName + ") than the name name of the current segment, \"" +
                      theSegment.segmentName + "\"");
 
-            MessageInterface::ShowMessage("Data end found on line '%s'\n",
-                  theLine.str().c_str());
+            #ifdef DEBUG_FILE_READ
+               MessageInterface::ShowMessage("Data end found on line '%s'\n",
+                     theLine.str().c_str());
+            #endif
             endFound = true;
          }
       }

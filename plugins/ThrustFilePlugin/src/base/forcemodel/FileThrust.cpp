@@ -327,9 +327,10 @@ void FileThrust::SetSegmentList(std::vector<ThrustSegment> *segs)
 //------------------------------------------------------------------------------
 void FileThrust::SetPropList(ObjectArray *soList)
 {
-   MessageInterface::ShowMessage("FileThrust::SetPropList called with %d "
-         "objects\n", soList->size());
-
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("FileThrust::SetPropList called with %d "
+            "objects\n", soList->size());
+   #endif
    spacecraft.clear();
    for (ObjectArray::iterator i = soList->begin(); i != soList->end(); ++i)
       spacecraft.push_back(*i);
@@ -346,7 +347,9 @@ void FileThrust::SetPropList(ObjectArray *soList)
 //------------------------------------------------------------------------------
 bool FileThrust::Initialize()
 {
-MessageInterface::ShowMessage("Initializing FileThrust\n");
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Initializing FileThrust\n");
+   #endif
 
    bool retval = false;
 
