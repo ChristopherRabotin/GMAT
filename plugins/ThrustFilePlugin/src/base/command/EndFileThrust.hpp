@@ -22,6 +22,7 @@
 
 #include "ThrustFileDefs.hpp"
 #include "GmatCommand.hpp"
+#include "ThrustHistoryFile.hpp"
 #include "FileThrust.hpp"
 #include "PhysicalModel.hpp"
 #include "Spacecraft.hpp"
@@ -62,12 +63,16 @@ public:
    DEFAULT_TO_NO_CLONES
 
 protected:
-   /// Name of the ThrustHistoryFile reader
-   std::string thrustFileReader;
    /// The FileThrust that is available for the force models
    FileThrust *burnForce;
    /// The vector of forces managed by the Sandbox
    std::vector<PhysicalModel*>   *transientForces;
+   /// Name of the thrust history file object
+   std::string thfName;
+   /// Name of the FileBurn object used to set the maneuver details
+   std::string burnName;
+   /// The thrust history file object
+   ThrustHistoryFile *thrustFile;
    /// The names of the spacecraft that get maneuvered
    StringArray                   satNames;
    /// The spacecraft that get maneuvered
