@@ -28,8 +28,8 @@
 
 BeginFileThrust::BeginFileThrust(const std::string &name) :
    GmatCommand             ("BeginFileThrust"),
-   transientForces         (NULL),
    burnForce               (NULL),
+   transientForces         (NULL),
    thfName                 (""),
    thrustFile              (NULL)
 {
@@ -43,8 +43,8 @@ BeginFileThrust::~BeginFileThrust()
 
 BeginFileThrust::BeginFileThrust(const BeginFileThrust& bft) :
    GmatCommand             (bft),
-   transientForces         (NULL),
    burnForce               (NULL),
+   transientForces         (bft.transientForces),
    thfName                 (bft.thfName),
    thrustFile              (NULL),
    satNames                (bft.satNames)
@@ -58,6 +58,8 @@ BeginFileThrust& BeginFileThrust::operator=(const BeginFileThrust& bft)
    {
       GmatCommand::operator =(bft);
 
+      burnForce =NULL;
+      transientForces = bft.transientForces;
       thfName = bft.thfName;
       thrustFile = NULL;
       satNames = bft.satNames;
