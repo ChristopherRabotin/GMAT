@@ -21,10 +21,19 @@ if(NOT EXISTS ${F2C_DIR})
   RETURN()
 endif()
 
+if(NOT XERCES_LIB_DIR)
+  MESSAGE(WARNING "Skipping Estimation: Xerces missing")
+  RETURN()
+endif()
+
 SET(TargetName GmatEstimation)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
+
+# ====================================================================
+# extra include directory for header file
+INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
 
 # ====================================================================
 # list of directories containing source/header files
@@ -173,3 +182,18 @@ endif()
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# ====================================================================
+# Additional link libraries
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
+  else()
+    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
+  endif()
+else()
+  set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
+endif()
+
+TARGET_LINK_LIBRARIES(${TargetName} ${XERCES_LIB})
