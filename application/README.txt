@@ -128,6 +128,15 @@ executed in the bin folder:
 
 or by double-clicking the GMAT_Beta.app in the Finder.
 
+Python Interface note for Mac users:
+
+Currently, GMAT will only be able to interface with Python if your Python
+is installed into a specific directory: 
+/Library/Frameworks/Python.framework/Versions/3.4
+
+GMAT will be updated for a future release to allow use of a 
+Python installation elsewhere.
+
 MATLAB interface note for Mac users:
 
 To use the Matlab interface with the Mac GMAT_Beta.app application, 
