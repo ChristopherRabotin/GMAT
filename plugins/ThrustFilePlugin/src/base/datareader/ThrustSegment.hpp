@@ -128,12 +128,16 @@ public:
                                             const Integer index);
 
    void                 SetDataSegment(ThfDataSegment theData);
+   bool                 DepletesMass();
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
    /// The data from the file
    ThfDataSegment segData;
+
+   /// Sources of mass flow
+   StringArray massSource;
 
 private:
    // Object fields
@@ -143,10 +147,10 @@ private:
    Real tsfSigma;
    /// Mass flow flag
    bool depleteMass;
+   /// Apply both scale factors to mass flow
+   bool useMassAndThrustFactor;
    /// Mass flow scale factor
    Real massFlowFactor;
-   /// Sources of mass flow
-   StringArray massSource;
    /// Solve for parameters
    StringArray solveFors;
 

@@ -37,11 +37,7 @@ public:
    ThrustHistoryFile(const ThrustHistoryFile& thf);
    ThrustHistoryFile& operator=(const ThrustHistoryFile& thf);
 
-   virtual bool RenameRefObject(Gmat::ObjectType type, const std::string& oldname,
-         const std::string &newname);
-
-   virtual GmatBase* Clone() const;
-   virtual bool ReadData();
+   virtual GmatBase*    Clone() const;
 
    virtual std::string  GetParameterText(const Integer id) const;
 //   virtual std::string  GetParameterUnit(const Integer id) const;
@@ -84,7 +80,20 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
 
-   void SetSegmentData(ThfDataSegment seg);
+   // for Ref. objects
+   virtual bool         HasRefObjectTypeArray();
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+
+
+   virtual bool         ReadData();
 
    virtual bool         Initialize();
    FileThrust*          GetForce();
@@ -108,6 +117,7 @@ protected:
 
    FileThrust theForce;
 
+   void SetSegmentData(ThfDataSegment seg);
    bool CheckDataStart(std::string theLine, ThfDataSegment &theSegment);
    bool SetHeaderField(std::string theLine, ThfDataSegment &theSegment);
    bool ReadThrustProfile(ThfDataSegment &theSegment);

@@ -57,6 +57,9 @@ public:
       SPLINE
    };
 
+   //-------------------------------------------------
+   // Data parsed from the file
+   //-------------------------------------------------
    // Header fields
    /// Name of the segment
    std::string segmentName;
@@ -80,12 +83,28 @@ public:
    InterpolationType massIntType;
    /// Segment modeling behavior
    std::string modelFlag;
-
    /// Thrust or acceleration?
    bool modelThrust;
-
    /// The thrust profile data, node by node
    std::vector<ThrustPoint> profile;
+
+   //-------------------------------------------------
+   // Data passed from the ThrustSegment Object
+   //-------------------------------------------------
+   /// Thrust scale factor
+   Real thrustScaleFactor;
+   /// Mass flow scale factor
+   Real massFlowScaleFactor;
+   /// Flag indicating is the mass flow includes the thrust scale factor
+   bool includeThrustFactorInMassFlow;
+   /// List of tanks that are used for mass flow
+   StringArray tanks;
+
+//   // Estimation settings
+//   /// Standard dev. for the thrust scale factor
+//   Real tsfSigma;
+//   /// List of solve-for parameters
+//   StringArray solveFors;
 };
 
 #endif /* ThfDataSegment_hpp */

@@ -25,6 +25,8 @@
 #include <sstream>               // for stringstream
 
 
+//#define DEBUG_FILETHRUST_EXE
+//#define DEBUG_MASS_FLOW
 
 //------------------------------------------------------------------------------
 // FileThrust(const std::string &name)
@@ -40,6 +42,7 @@ FileThrust::FileThrust(const std::string &name) :
    satCount                (0),
    cartIndex               (-1),
    fillCartesian           (true),
+   dataIsThrust            (true),
    segments                (NULL),
    mDotIndex               (-1),
    depleteMass             (false)
@@ -74,6 +77,7 @@ FileThrust::FileThrust(const FileThrust& ft) :
    satCount                (ft.satCount),
    cartIndex               (ft.cartIndex),
    fillCartesian           (ft.fillCartesian),
+   dataIsThrust            (ft.dataIsThrust),
    segments                (ft.segments),
    mDotIndex               (ft.mDotIndex),
    depleteMass             (ft.depleteMass)
@@ -101,6 +105,7 @@ FileThrust& FileThrust::operator=(const FileThrust& ft)
       satCount      = ft.satCount;
       cartIndex     = ft.cartIndex;
       fillCartesian = ft.fillCartesian;
+      dataIsThrust  = ft.dataIsThrust;
       segments      = ft.segments;
       mDotIndex     = ft.mDotIndex;
       depleteMass   = ft.depleteMass;
@@ -316,6 +321,27 @@ bool FileThrust::DepletesMass()
 void FileThrust::SetSegmentList(std::vector<ThrustSegment> *segs)
 {
    segments = segs;
+   depleteMass = false;
+
+   // Activate mass flow if any segment identifies it as used
+   for (UnsignedInt i = 0; i < segments->size(); ++i)
+      depleteMass |= segments->at(i).DepletesMass();
+
+   #ifdef DEBUG_SEGMENTS
+      // Dump seg list here
+      MessageInterface::ShowMessage("%d segments in the list\n", segments->size());
+      for (UnsignedInt i = 0; i < segments->size(); ++i)
+      {
+         MessageInterface::ShowMessage("%d:  %s\n", i,
+               segments->at(i).GetName().c_str());
+         MessageInterface::ShowMessage("     TSF:   %lf\n", i,
+               segments->at(i).GetRealParameter("ThrustScaleFactor"));
+         MessageInterface::ShowMessage("     MFSF:  %lf\n", i,
+               segments->at(i).GetRealParameter("MassFlowScaleFactor"));
+         MessageInterface::ShowMessage("     Tanks: %d\n", i,
+               segments->at(i).GetStringArrayParameter("MassSource").size());
+      }
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -406,7 +432,7 @@ bool FileThrust::Initialize()
  *                      integrator samples other state values during
  *                      propagation.  (For example, the Runge-Kutta integrators
  *                      do this during the stage calculations.)
- * @param dt            Additional time increment for the derivatitive
+ * @param dt            Additional time increment for the derivative
  *                      calculation; defaults to 0.
  * @param order         The order of the derivative to be taken (first
  *                      derivative, second derivative, etc)
@@ -419,8 +445,9 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
 {
    bool retval = true;
 
-   #ifdef DEBUG_FILETHRUST_EXECUTION
-      MessageInterface::ShowMessage("Supplying derivative data from a THF\n");
+   #ifdef DEBUG_FILETHRUST_EXE
+      MessageInterface::ShowMessage("Supplying derivative data from a THF, %s\n",
+            (depleteMass ? "including mass flow" : "without mass flow"));
    #endif
 
    if (fillCartesian)
@@ -453,7 +480,7 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
          // Just a convenience
          sat = (SpaceObject*)(*sc);
 
-         #ifdef DEBUG_FINITETHRUST_EXE
+         #ifdef DEBUG_FILETHRUST_EXE
             MessageInterface::ShowMessage("   Checking spacecraft %s\n",
                sat->GetName().c_str());
          #endif
@@ -462,7 +489,7 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
              mySpacecraft.end())
          {
 
-            #ifdef DEBUG_FINITETHRUST_EXE
+            #ifdef DEBUG_FILETHRUST_EXE
                MessageInterface::ShowMessage("   Maneuvering %s\n",
                      (*sc)->GetName().c_str());
             #endif
@@ -476,15 +503,11 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
             Real now = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
             ComputeAccelerationMassFlow(now, burnData);
 
-            #ifdef DEBUG_FINITETHRUST_EXE
-               MessageInterface::ShowMessage("%s ",(*fb)->GetName().c_str());
-            #endif
-
-            // Factor used to convert m/s^2 to km/s^2, and to divide out mass if modeling thrust
+             // Factor used to convert m/s^2 to km/s^2, and to divide out mass if modeling thrust
             Real factor = 0.001;
             if (dataIsThrust)
             {
-               // todo: replace with an int
+               // todo: replace string label with an int ID
                Real mass = sat->GetRealParameter("TotalMass");
                factor /= mass;
             }
@@ -501,10 +524,14 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
 
             if (depleteMass)
             {
+               // Set the mass flow flag on sat's tanks
+               FuelTank *tank = (FuelTank*)(sat->GetRefObject(Gmat::FUEL_TANK, activeTankName));
+               tank->SetFlowWithoutThruster(true);
+
                if (order != 1)
                   throw ODEModelException("Mass depletion cannot be "
                         "performed with the selected propagator.");
-               mDot += burnData[3];
+               mDot -= burnData[3];
                #ifdef DEBUG_MASS_FLOW
                   MessageInterface::ShowMessage("  mDot =  %.12lf\n",
                         mDot);
@@ -528,7 +555,11 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
 
                if (mloc >= 0)
                {
-                  deriv[mloc+i]   = mDot;  // Is this right???
+                  #ifdef DEBUG_MASS_FLOW
+                     MessageInterface::ShowMessage("Setting mdot in deriv[%d] "
+                           "to %le\n", mloc+i, mDot);
+                  #endif
+                  deriv[mloc+i] = mDot;
                }
             }
             else
@@ -543,42 +574,32 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
          }
          else
          {
-            // Zero any burn contribution that is not made for this spacecraft
-            if (order == 1)
-            {
-               // dr/dt = v
-                  deriv[i6]     =
-                  deriv[1 + i6] =
-                  deriv[2 + i6] =
-                  deriv[3 + i6] =
-                  deriv[4 + i6] =
-               deriv[5 + i6] = 0.0;
-            }
-            else
-            {
-               deriv[ i6 ] = 0.0;
-               deriv[i6+1] = 0.0;
-               deriv[i6+2] = 0.0;
-               deriv[i6+3] = 0.0;
-               deriv[i6+4] = 0.0;
-               deriv[i6+5] = 0.0;
-            }
+            deriv[ i6 ] =
+            deriv[i6+1] =
+            deriv[i6+2] =
+            deriv[i6+3] =
+            deriv[i6+4] =
+            deriv[i6+5] = 0.0;
          }
          ++i;
       }
    }
 
-   #ifdef DEBUG_FINITETHRUST_EXE
+   #ifdef DEBUG_FILETHRUST_EXE
       //ShowDerivative("FiniteThrust::GetDerivatives() AFTER compute", state,
       //               satCount);
       MessageInterface::ShowMessage
-         ("     deriv[1:3] = [%18le %18le %18le]\n     deriv[4:6] = [%18le %18le %18le]\n",
-          deriv[0], deriv[1], deriv[2], deriv[3], deriv[4], deriv[5]);
+         ("     deriv[1:3] = [%18le %18le %18le]\n"
+          "     deriv[4:6] = [%18le %18le %18le]\n"
+          "     mdot       = %18le\n",
+          deriv[0], deriv[1], deriv[2], deriv[3], deriv[4], deriv[5],
+          (depleteMass ? deriv[mDotIndex] : 0.0));
       MessageInterface::ShowMessage("FiniteThrust::GetDerivatives finished\n");
    #endif
 
    return retval;
 }
+
 
 Rvector6 FileThrust::GetDerivativesForSpacecraft(Spacecraft* sc)
 {
@@ -701,10 +722,14 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
          // If at the end point; use its data
          if ((*segments)[index].segData.endEpoch == atEpoch)
          {
+//            Real tsf, msf;
+//            tsf = (*segments)[index].segData.thrustScaleFactor;
+
             Integer i = (*segments)[index].segData.profile.size()-1;
             burnData[0] = (*segments)[index].segData.profile[i].vector[0];
             burnData[1] = (*segments)[index].segData.profile[i].vector[1];
             burnData[2] = (*segments)[index].segData.profile[i].vector[2];
+            burnData[3] = (*segments)[index].segData.profile[i].mdot;
          }
          else
          {
@@ -716,8 +741,13 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
                   burnData[0] = (*segments)[index].segData.profile[i].vector[0];
                   burnData[1] = (*segments)[index].segData.profile[i].vector[1];
                   burnData[2] = (*segments)[index].segData.profile[i].vector[2];
+                  burnData[3] = (*segments)[index].segData.profile[i].mdot;
                }
             }
+         }
+         if (burnData[3] != 0.0)
+         {
+            activeTankName = (*segments)[index].massSource[0];
          }
       }
       else throw ODEModelException("The " +

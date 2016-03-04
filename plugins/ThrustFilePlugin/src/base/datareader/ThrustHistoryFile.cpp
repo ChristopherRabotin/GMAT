@@ -36,13 +36,15 @@
 
 
 
-const std::string ThrustHistoryFile::PARAMETER_LABEL[ThrustHistoryFileParamCount - GmatBaseParamCount] =
+const std::string ThrustHistoryFile::
+PARAMETER_LABEL[ThrustHistoryFileParamCount - GmatBaseParamCount] =
 {
       "FileName",                         // FILENAME
       "AddThrustSegment",                 // SEGMENTS,
 };
 
-const Gmat::ParameterType ThrustHistoryFile::PARAMETER_TYPE[ThrustHistoryFileParamCount - GmatBaseParamCount] =
+const Gmat::ParameterType ThrustHistoryFile::
+PARAMETER_TYPE[ThrustHistoryFileParamCount - GmatBaseParamCount] =
 {
       Gmat::FILENAME_TYPE,
       Gmat::STRINGARRAY_TYPE,
@@ -90,13 +92,22 @@ ThrustHistoryFile::ThrustHistoryFile(const std::string& theName) :
 // ~ThrustHistoryFile()
 //------------------------------------------------------------------------------
 /**
- * Desturctor
+ * Destructor
  */
 //------------------------------------------------------------------------------
 ThrustHistoryFile::~ThrustHistoryFile()
 {
 }
 
+//------------------------------------------------------------------------------
+// ThrustHistoryFile::ThrustHistoryFile(const ThrustHistoryFile& thf) :
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param thf The ThrustHistoryFile object used to make this one
+ */
+//------------------------------------------------------------------------------
 ThrustHistoryFile::ThrustHistoryFile(const ThrustHistoryFile& thf) :
    FileReader           (thf),
    thrustFileName       (thf.thrustFileName),
@@ -110,6 +121,17 @@ ThrustHistoryFile::ThrustHistoryFile(const ThrustHistoryFile& thf) :
 {
 }
 
+//------------------------------------------------------------------------------
+// ThrustHistoryFile& operator=(const ThrustHistoryFile& thf)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param thf The ThrustHistoryFile object used to set up this one
+ *
+ * @return This ThrustHistoryFile, set to match thf
+ */
+//------------------------------------------------------------------------------
 ThrustHistoryFile& ThrustHistoryFile::operator =(const ThrustHistoryFile& thf)
 {
    if (this != &thf)
@@ -129,21 +151,605 @@ ThrustHistoryFile& ThrustHistoryFile::operator =(const ThrustHistoryFile& thf)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Creates a new ThrustHistoryFile that looks like this one
+ *
+ * @return The new object
+ */
+//------------------------------------------------------------------------------
 GmatBase* ThrustHistoryFile::Clone() const
 {
    return new ThrustHistoryFile(*this);
 }
 
+//------------------------------------------------------------------------------
+// bool ThrustHistoryFile::RenameRefObject(Gmat::ObjectType type,
+//       const std::string& oldname, const std::string& newname)
+//------------------------------------------------------------------------------
+/**
+ * Resets the name for a referenced object
+ *
+ * @param type The type of the object being renamed
+ * @param oldname The previous name of the reference
+ * @param newname The new name for the object
+ *
+ * @return true if a name was changed
+ */
+//------------------------------------------------------------------------------
 bool ThrustHistoryFile::RenameRefObject(Gmat::ObjectType type,
       const std::string& oldname, const std::string& newname)
 {
    bool retval = false;
 
+   for (UnsignedInt i = 0; i < segmentNames.size(); ++i)
+   {
+      if (segmentNames[i] == oldname)
+      {
+         segmentNames[i] = newname;
+         retval = true;
+      }
+   }
+
+   for (UnsignedInt i = 0; i < segments.size(); ++i)
+   {
+      if (segments[i].GetName() == oldname)
+      {
+         segments[i].SetName(newname);
+         retval = true;
+      }
+   }
+
    return retval;
 }
 
+
 //------------------------------------------------------------------------------
-// bool ThrustHistoryFile::ReadData()
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the script label for a parameter
+ *
+ * @param id The parameter's ID
+ *
+ * @return The script string
+ */
+//------------------------------------------------------------------------------
+std::string ThrustHistoryFile::GetParameterText(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < ThrustHistoryFileParamCount)
+      return PARAMETER_LABEL[id - GmatBaseParamCount];
+   return GmatBase::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string& str) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieved the parameter ID for a parameter label
+ *
+ * @param str The scripting used for the parameter
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+Integer ThrustHistoryFile::GetParameterID(const std::string& str) const
+{
+   Integer id = -1;
+
+   for (Integer i = GmatBaseParamCount; i < ThrustHistoryFileParamCount; i++)
+    {
+       if (str == PARAMETER_LABEL[i - GmatBaseParamCount])
+       {
+          id = i;
+          break;
+       }
+    }
+
+    if (id != -1)
+    {
+       #ifdef DEBUG_BURN_PARAM
+       MessageInterface::ShowMessage("Burn::GetParameterID() returning %d\n", id);
+       #endif
+
+       return id;
+    }
+
+    return GmatBase::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the type of a parameter
+ *
+ * @param id The ID of the parameter
+ *
+ * @return The type of the parameter
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType ThrustHistoryFile::GetParameterType(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < ThrustHistoryFileParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+
+   return GmatBase::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string describing the type of a parameter
+ *
+ * @param id The ID of the parameter
+ *
+ * @return The type of the parameter
+ */
+//------------------------------------------------------------------------------
+std::string ThrustHistoryFile::GetParameterTypeString(const Integer id) const
+{
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ *
+ * @return The string stored for this parameter, or throw ab=n exception if
+ *         there is no string association.
+ */
+//------------------------------------------------------------------------------
+std::string ThrustHistoryFile::GetStringParameter(const Integer id) const
+{
+   if (id == FILENAME)
+      return thrustFileName;
+
+   return FileReader::GetStringParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetStringParameter(const Integer id, const char* value)
+{
+   if (id == FILENAME)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Setting ThrustHistoryFile %s\n", value);
+      #endif
+      thrustFileName = value;
+      return true;
+   }
+
+   if (id == SEGMENTS)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Adding ThrustHistoryFile segment %s\n",
+               value);
+      #endif
+
+      if (find(segmentNames.begin(), segmentNames.end(), value) ==
+            segmentNames.end())
+         segmentNames.push_back(value);
+      return true;
+   }
+
+   return FileReader::SetStringParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetStringParameter(const Integer id,
+      const std::string& value)
+{
+   if (id == FILENAME)
+   {
+      thrustFileName = value;
+      return true;
+   }
+
+   if (id == SEGMENTS)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Block string %s\n", value.c_str());
+      #endif
+
+      if (find(segmentNames.begin(), segmentNames.end(), value) == segmentNames.end())
+         segmentNames.push_back(value);
+      return true;
+   }
+
+   return FileReader::SetStringParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free
+ *              version to add the value to the end of the array.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+//------------------------------------------------------------------------------
+std::string ThrustHistoryFile::GetStringParameter(const Integer id,
+      const Integer index) const
+{
+   return FileReader::GetStringParameter(id, index);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value,
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new string for this parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free
+ *              version to add the value to the end of the array.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetStringParameter(const Integer id, const char* value,
+      const Integer index)
+{
+   return FileReader::SetStringParameter(id, value, index);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value,
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new string for this parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free
+ *              version to add the value to the end of the array.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetStringParameter(const Integer id,
+      const std::string& value, const Integer index)
+{
+   return FileReader::SetStringParameter(id, value, index);
+}
+
+//---------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param id The integer ID for the parameter.
+ *
+ * @return The requested StringArray; throws if the parameter is not a
+ *         StringArray.
+ */
+//------------------------------------------------------------------------------
+const StringArray& ThrustHistoryFile::GetStringArrayParameter(
+      const Integer id) const
+{
+   if (id == SEGMENTS)
+      return segmentNames;
+
+   return FileReader::GetStringArrayParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const Integer id,
+//                                             const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index The index when multiple StringArrays are supported.
+ *
+ * @return The requested StringArray; throws if the parameter is not a
+ *         StringArray.
+ */
+//------------------------------------------------------------------------------
+const StringArray& ThrustHistoryFile::GetStringArrayParameter(const Integer id,
+      const Integer index) const
+{
+   return FileReader::GetStringArrayParameter(id, index);
+}
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param label The (string) label for the parameter.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+//------------------------------------------------------------------------------
+std::string ThrustHistoryFile::GetStringParameter(
+      const std::string& label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param value The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetStringParameter(const std::string& label,
+      const char* value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param value The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetStringParameter(const std::string& label,
+      const std::string& value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label,
+//                                 const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param index Index for parameters in arrays.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+//------------------------------------------------------------------------------
+std::string ThrustHistoryFile::GetStringParameter(const std::string& label,
+      const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value,
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param value The new string for this parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free
+ *              version to add the value to the end of the array.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetStringParameter(const std::string& label,
+      const std::string& value, const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param label The (string) label for the parameter.
+ *
+ * @return The requested StringArray; throws if the parameter is not a
+ *         StringArray.
+ */
+//------------------------------------------------------------------------------
+const StringArray& ThrustHistoryFile::GetStringArrayParameter(
+      const std::string& label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const std::string &label,
+//                                             const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param label The (string) label for the parameter.
+ * @param index Which string array if more than one is supported.
+ *
+ * @return The requested StringArray; throws if the parameter is not a
+ *         StringArray.
+ */
+//------------------------------------------------------------------------------
+const StringArray& ThrustHistoryFile::GetStringArrayParameter(
+      const std::string& label, const Integer index) const
+{
+   return GetStringArrayParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether GetRefObjectTypeArray() is implemented.
+ *
+ * @return true if an array will be returned
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::HasRefObjectTypeArray()
+{
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Returns the types of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @return The types of the reference object.
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& ThrustHistoryFile::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+
+   // Get ref. object types from the parent class
+   FileReader::GetRefObjectTypeArray();
+
+   // Add ref. object types from this class if not already added
+   if (find(refObjectTypes.begin(), refObjectTypes.end(), Gmat::INTERFACE) ==
+       refObjectTypes.end())
+      refObjectTypes.push_back(Gmat::INTERFACE);
+
+   return refObjectTypes;
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param type reference object type.
+ *
+ * @return The names of the reference object.
+ */
+//------------------------------------------------------------------------------
+const StringArray& ThrustHistoryFile::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::INTERFACE)
+   {
+      FileReader::GetRefObjectNameArray(type);
+      refObjectNames.insert(refObjectNames.begin(), segmentNames.begin(),
+            segmentNames.end());
+      return refObjectNames;
+   }
+
+   return FileReader::GetRefObjectNameArray(type);
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                                   const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * Sets the name of the reference object.
+ *
+ * @param type type of the reference object.
+ * @param name name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool ThrustHistoryFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                  const std::string &name)
+{
+   switch (type)
+   {
+   case Gmat::INTERFACE:
+      {
+         if (!obj->IsOfType("ThrustSegment"))
+            throw InterfaceException("ThrustHistoryFile object segment "
+                  "references must be ThrustSegment objects, but " +
+                  obj->GetName() + "is not a ThrustSegment.");
+
+         // Look through the Segments for the passed in object
+         Integer index = -1;
+         for (UnsignedInt i = 0; i < segments.size(); ++i)
+         {
+            if (segments[i].GetName() == name)
+               index = i;
+         }
+         if (index == -1)
+         {
+            ThrustSegment newSeg(*((ThrustSegment*)obj));
+            segments.push_back(newSeg);
+         }
+         else
+         {
+            // Pass in the segment data, but don't mess with the file data
+            ThfDataSegment theData = segments[index].segData;
+            segments[index] = *((ThrustSegment*)obj);
+            segments[index].segData = theData;
+         }
+         return true;
+      }
+
+   default:
+      return FileReader::SetRefObject(obj, type, name);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool ReadData()
 //------------------------------------------------------------------------------
 /**
  * Parser for the Thrust History File
@@ -273,212 +879,6 @@ bool ThrustHistoryFile::ReadData()
 }
 
 
-std::string ThrustHistoryFile::GetParameterText(const Integer id) const
-{
-   if (id >= GmatBaseParamCount && id < ThrustHistoryFileParamCount)
-      return PARAMETER_LABEL[id - GmatBaseParamCount];
-   return GmatBase::GetParameterText(id);
-}
-
-Integer ThrustHistoryFile::GetParameterID(const std::string& str) const
-{
-   Integer id = -1;
-
-   for (Integer i = GmatBaseParamCount; i < ThrustHistoryFileParamCount; i++)
-    {
-       if (str == PARAMETER_LABEL[i - GmatBaseParamCount])
-       {
-          id = i;
-          break;
-       }
-    }
-
-    if (id != -1)
-    {
-       #ifdef DEBUG_BURN_PARAM
-       MessageInterface::ShowMessage("Burn::GetParameterID() returning %d\n", id);
-       #endif
-
-       return id;
-    }
-
-    return GmatBase::GetParameterID(str);
-}
-
-Gmat::ParameterType ThrustHistoryFile::GetParameterType(const Integer id) const
-{
-   if (id >= GmatBaseParamCount && id < ThrustHistoryFileParamCount)
-      return PARAMETER_TYPE[id - GmatBaseParamCount];
-
-   return GmatBase::GetParameterType(id);
-}
-
-std::string ThrustHistoryFile::GetParameterTypeString(const Integer id) const
-{
-   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-}
-
-std::string ThrustHistoryFile::GetStringParameter(const Integer id) const
-{
-   if (id == FILENAME)
-      return thrustFileName;
-
-   return FileReader::GetStringParameter(id);
-}
-
-bool ThrustHistoryFile::SetStringParameter(const Integer id, const char* value)
-{
-   if (id == FILENAME)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Setting ThrustHistoryFile %s\n", value);
-      #endif
-      thrustFileName = value;
-      return true;
-   }
-
-   if (id == SEGMENTS)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Adding ThrustHistoryFile segment %s\n",
-               value);
-      #endif
-
-      if (find(segmentNames.begin(), segmentNames.end(), value) == segmentNames.end())
-         segmentNames.push_back(value);
-      return true;
-   }
-
-   return FileReader::SetStringParameter(id, value);
-}
-
-bool ThrustHistoryFile::SetStringParameter(const Integer id,
-      const std::string& value)
-{
-   if (id == FILENAME)
-   {
-      thrustFileName = value;
-      return true;
-   }
-
-   if (id == SEGMENTS)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("Block string %s\n", value.c_str());
-      #endif
-
-      if (find(segmentNames.begin(), segmentNames.end(), value) == segmentNames.end())
-         segmentNames.push_back(value);
-      return true;
-   }
-
-   return FileReader::SetStringParameter(id, value);
-}
-
-std::string ThrustHistoryFile::GetStringParameter(const Integer id,
-      const Integer index) const
-{
-   return FileReader::GetStringParameter(id, index);
-}
-
-bool ThrustHistoryFile::SetStringParameter(const Integer id, const char* value,
-      const Integer index)
-{
-   return FileReader::SetStringParameter(id, value, index);
-}
-
-bool ThrustHistoryFile::SetStringParameter(const Integer id,
-      const std::string& value, const Integer index)
-{
-   return FileReader::SetStringParameter(id, value, index);
-}
-
-const StringArray& ThrustHistoryFile::GetStringArrayParameter(
-      const Integer id) const
-{
-   return FileReader::GetStringArrayParameter(id);
-}
-
-const StringArray& ThrustHistoryFile::GetStringArrayParameter(const Integer id,
-      const Integer index) const
-{
-   return FileReader::GetStringArrayParameter(id, index);
-}
-
-std::string ThrustHistoryFile::GetStringParameter(
-      const std::string& label) const
-{
-   return GetStringParameter(GetParameterID(label));
-}
-
-bool ThrustHistoryFile::SetStringParameter(const std::string& label,
-      const char* value)
-{
-   return SetStringParameter(GetParameterID(label), value);
-}
-
-bool ThrustHistoryFile::SetStringParameter(const std::string& label,
-      const std::string& value)
-{
-   return SetStringParameter(GetParameterID(label), value);
-}
-
-std::string ThrustHistoryFile::GetStringParameter(const std::string& label,
-      const Integer index) const
-{
-   return GetStringParameter(GetParameterID(label), index);
-}
-
-bool ThrustHistoryFile::SetStringParameter(const std::string& label,
-      const std::string& value, const Integer index)
-{
-   return SetStringParameter(GetParameterID(label), value, index);
-}
-
-const StringArray& ThrustHistoryFile::GetStringArrayParameter(
-      const std::string& label) const
-{
-   return GetStringArrayParameter(GetParameterID(label));
-}
-
-const StringArray& ThrustHistoryFile::GetStringArrayParameter(
-      const std::string& label, const Integer index) const
-{
-   return GetStringArrayParameter(GetParameterID(label), index);
-}
-
-
-//------------------------------------------------------------------------------
-// void SetSegmentData(ThfDataSegment seg)
-//------------------------------------------------------------------------------
-/**
- *
- *
- * @param
- *
- * @return
- */
-//------------------------------------------------------------------------------
-void ThrustHistoryFile::SetSegmentData(ThfDataSegment seg)
-{
-   bool segmentFound = false;
-
-   for (UnsignedInt i = 0; i < segments.size(); ++i)
-      if (segments[i].GetName() == seg.segmentName)
-      {
-         segments[i].SetDataSegment(seg);
-      }
-
-   // Segment was not found, so add it
-   if (!segmentFound)
-   {
-      ThrustSegment newSegment(seg.segmentName);
-      newSegment.SetDataSegment(seg);
-      segments.push_back(newSegment);
-   }
-}
-
-
 //------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
@@ -525,6 +925,7 @@ bool ThrustHistoryFile::CheckDataStart(std::string theLine,
          #endif
          // @todo  Sanity check theLine to be sure it's not gorp
          theSegment.modelFlag = dataStartKeys[i];
+
          retval = true;
       }
    }
@@ -614,6 +1015,54 @@ void ThrustHistoryFile::MapField(const std::string &key,
    }
 }
 
+
+//------------------------------------------------------------------------------
+// FileThrust* GetForce()
+//------------------------------------------------------------------------------
+/**
+ * Returns the transient force pointer for the thrust associated with the file
+ *
+ * @return The force pointer. Ownership for the force remains with this object.
+ */
+//------------------------------------------------------------------------------
+FileThrust* ThrustHistoryFile::GetForce()
+{
+   // Make sure that the force has access to the data
+   theForce.SetSegmentList(&segments);
+   return &theForce;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSegmentData(ThfDataSegment seg)
+//------------------------------------------------------------------------------
+/**
+ * Passes the data segment from a file to a ThrustSegment
+ *
+ * @param seg The segment data
+ */
+//------------------------------------------------------------------------------
+void ThrustHistoryFile::SetSegmentData(ThfDataSegment seg)
+{
+   bool segmentFound = false;
+
+   for (UnsignedInt i = 0; i < segments.size(); ++i)
+      if (segments[i].GetName() == seg.segmentName)
+      {
+         segments[i].SetDataSegment(seg);
+         segmentFound = true;
+      }
+
+   // Segment was not found, so add it
+   if (!segmentFound)
+   {
+      ThrustSegment newSegment(seg.segmentName);
+      newSegment.SetDataSegment(seg);
+      segments.push_back(newSegment);
+   }
+}
+
+
 //------------------------------------------------------------------------------
 // bool ReadThrustProfile(ThfDataSegment& theSegment)
 //------------------------------------------------------------------------------
@@ -630,9 +1079,13 @@ bool ThrustHistoryFile::ReadThrustProfile(ThfDataSegment& theSegment)
    bool retval = true; //false;
 
    // If mass flow is modeled, the modelFlag will contain the string "MassRate"
-   bool includeMass = (theSegment.modelFlag.find("MassRate") == std::string::npos);
+   bool includeMass = !(theSegment.modelFlag.find("MassRate") == std::string::npos);
    Integer dataCount = (includeMass ? 5 : 4);
-
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("ModelFlag %s, Include Mass = %s, "
+            "dataCount = %d\n", theSegment.modelFlag.c_str(),
+            (includeMass ? "true" : "false"), dataCount);
+   #endif
    TextParser parser;
    std::stringstream theLine;
    char filedata[2048];
@@ -641,9 +1094,9 @@ bool ThrustHistoryFile::ReadThrustProfile(ThfDataSegment& theSegment)
    while (!theStream->eof() && !endFound)
    {
       theLine.str("");
+      theLine.clear();
       theStream->getline(filedata, 2048);
       theLine.str(filedata);
-      theLine.clear();
 
       if (theLine.str().find("EndThrust") != std::string::npos)
       {
@@ -693,21 +1146,6 @@ bool ThrustHistoryFile::ReadThrustProfile(ThfDataSegment& theSegment)
    return retval;
 }
 
-//------------------------------------------------------------------------------
-// FileThrust* GetForce()
-//------------------------------------------------------------------------------
-/**
- * Returns the transient force pointer for the thrust associated with the file
- *
- * @return The force pointer. Ownership for the force remains with this object.
- */
-//------------------------------------------------------------------------------
-FileThrust* ThrustHistoryFile::GetForce()
-{
-   // Make sure that the force has access to the data
-   theForce.SetSegmentList(&segments);
-   return &theForce;
-}
 
 //------------------------------------------------------------------------------
 // void ValidateSegment(ThfDataSegment& theSegment)
@@ -802,19 +1240,19 @@ void ThrustHistoryFile::ValidateSegment(ThfDataSegment& theSegment)
 
    #ifdef DEBUG_FILE_READ
       MessageInterface::ShowMessage("Segment data after processing\n");
-      MessageInterface::ShowMessage("   Segment Name:  %s\n",
+      MessageInterface::ShowMessage("   Segment Name:      %s\n",
             theSegment.segmentName.c_str());
-      MessageInterface::ShowMessage("   Start Epoch:   %s\n",
+      MessageInterface::ShowMessage("   Start Epoch:       %s\n",
             theSegment.startEpochString.c_str());
-      MessageInterface::ShowMessage("   >>>        :   %.12lf\n",
+      MessageInterface::ShowMessage("   >>>        :       %.12lf\n",
             theSegment.startEpoch);
-      MessageInterface::ShowMessage("   Coord System:  %s\n",
+      MessageInterface::ShowMessage("   Coord System:      %s\n",
             theSegment.csName.c_str());
-      MessageInterface::ShowMessage("   Interpolator:  %s\n",
+      MessageInterface::ShowMessage("   Interpolator:      %s\n",
             theSegment.interpolationMethod.c_str());
-      MessageInterface::ShowMessage("   Mass Flow:     %s\n",
+      MessageInterface::ShowMessage("   Mdot Interpolator: %s\n",
             theSegment.massFlowInterpolationMethod.c_str());
-      MessageInterface::ShowMessage("   Mode:          %s\n",
+      MessageInterface::ShowMessage("   Mode:              %s\n",
             theSegment.modelFlag.c_str());
 
       MessageInterface::ShowMessage("   Data:\n");

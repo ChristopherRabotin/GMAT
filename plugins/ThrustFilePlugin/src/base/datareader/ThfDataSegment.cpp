@@ -41,7 +41,10 @@ ThfDataSegment::ThfDataSegment() :
    massFlowInterpolationMethod   ("None"),
    massIntType                   (NONE),
    modelFlag                     ("ModelThrustOnly"),
-   modelThrust                   (true)
+   modelThrust                   (true),
+   thrustScaleFactor             (1.0),
+   massFlowScaleFactor           (1.0),
+   includeThrustFactorInMassFlow (false)
 {
 }
 
@@ -68,7 +71,11 @@ ThfDataSegment::ThfDataSegment(const ThfDataSegment& ds) :
    massFlowInterpolationMethod   (ds.massFlowInterpolationMethod),
    massIntType                   (ds.massIntType),
    modelFlag                     (ds.modelFlag),
-   modelThrust                   (ds.modelThrust)
+   modelThrust                   (ds.modelThrust),
+   thrustScaleFactor             (ds.thrustScaleFactor),
+   massFlowScaleFactor           (ds.massFlowScaleFactor),
+   includeThrustFactorInMassFlow (ds.includeThrustFactorInMassFlow),
+   tanks                         (ds.tanks)
 {
    for (UnsignedInt i = 0; i < ds.profile.size(); ++i)
    {
@@ -93,6 +100,11 @@ ThfDataSegment& ThfDataSegment::operator =(const ThfDataSegment& ds)
       massIntType                 =  ds.massIntType;
       modelFlag                   =  ds.modelFlag;
       modelThrust                 =  ds.modelThrust;
+      thrustScaleFactor           =  ds.thrustScaleFactor;
+      massFlowScaleFactor         =  ds.massFlowScaleFactor;
+      includeThrustFactorInMassFlow
+                                  =  ds.includeThrustFactorInMassFlow;
+      tanks                       =  ds.tanks;
 
       profile.clear();
       for (UnsignedInt i = 0; i < ds.profile.size(); ++i)

@@ -102,6 +102,8 @@ protected:
    Integer                       mDotIndex;
    /// Flag indicating if any thrusters are set to deplete mass
    bool                          depleteMass;
+   /// Name of the tank that is supplying fuel (just 1 for now)
+   std::string                   activeTankName;
 
    void ComputeAccelerationMassFlow(const GmatEpoch atEpoch, Real burnData[4]);
 };

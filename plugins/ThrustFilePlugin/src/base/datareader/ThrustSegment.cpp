@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include "ThrustSegment.hpp"
+#include "MessageInterface.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -59,7 +60,12 @@ const Gmat::ParameterType ThrustSegment::PARAMETER_TYPE[ThrustSegmentParamCount 
  */
 //------------------------------------------------------------------------------
 ThrustSegment::ThrustSegment(const std::string &name) :
-   GmatBase                (Gmat::INTERFACE, "ThrustSegment", name)
+   GmatBase                (Gmat::INTERFACE, "ThrustSegment", name),
+   thrustScaleFactor       (1.0),
+   tsfSigma                (1.0e-8),
+   depleteMass             (false),
+   useMassAndThrustFactor  (false),
+   massFlowFactor          (1.0)
 {
    objectTypes.push_back(Gmat::INTERFACE);
    objectTypeNames.push_back("ThrustSegment");
@@ -86,9 +92,15 @@ ThrustSegment::~ThrustSegment()
  */
 //------------------------------------------------------------------------------
 ThrustSegment::ThrustSegment(const ThrustSegment& ts) :
-   GmatBase                (ts)
+   GmatBase                (ts),
+   thrustScaleFactor       (ts.thrustScaleFactor),
+   tsfSigma                (ts.tsfSigma),
+   depleteMass             (ts.depleteMass),
+   useMassAndThrustFactor  (ts.useMassAndThrustFactor),
+   massFlowFactor          (ts.massFlowFactor)
 {
    segData = ts.segData;
+   massSource = ts.massSource;
 }
 
 //------------------------------------------------------------------------------
@@ -106,8 +118,15 @@ ThrustSegment& ThrustSegment::operator=(const ThrustSegment& ts)
 {
    if (this != &ts)
    {
-      GmatBase::operator =(ts);
-      segData = ts.segData;
+      GmatBase::operator=(ts);
+
+      thrustScaleFactor      = ts.thrustScaleFactor;
+      tsfSigma               = ts.tsfSigma;
+      depleteMass            = ts.depleteMass;
+      useMassAndThrustFactor = ts.useMassAndThrustFactor;
+      massFlowFactor         = ts.massFlowFactor;
+      segData                = ts.segData;
+      massSource             = ts.massSource;
    }
 
    return *this;
@@ -648,6 +667,7 @@ bool ThrustSegment::SetStringParameter(const Integer id, const char *value, cons
       }
       else
          return false;     // Throw here?
+
       return true;
    }
 
@@ -701,6 +721,7 @@ bool ThrustSegment::SetStringParameter(const Integer id, const std::string &valu
       }
       else
          return false;     // Throw here?
+
       return true;
    }
 
@@ -905,7 +926,7 @@ const StringArray& ThrustSegment::GetStringArrayParameter(const std::string &lab
 bool ThrustSegment::GetBooleanParameter(const Integer id) const
 {
    if (id == TSF_MASSFLOW)
-      return depleteMass;
+      return useMassAndThrustFactor;
 
    return GmatBase::GetBooleanParameter(id);
 }
@@ -927,8 +948,8 @@ bool ThrustSegment::SetBooleanParameter(const Integer id, const bool value)
 {
    if (id == TSF_MASSFLOW)
    {
-      depleteMass = value;
-      return depleteMass;
+      useMassAndThrustFactor = value;
+      return useMassAndThrustFactor;
    }
 
    return GmatBase::SetBooleanParameter(id, value);
@@ -1060,4 +1081,22 @@ bool ThrustSegment::SetBooleanParameter(const std::string &label, const bool val
 void ThrustSegment::SetDataSegment(ThfDataSegment theData)
 {
    segData = theData;
+   if (segData.modelFlag.find("MassRate") != std::string::npos)
+      depleteMass = true;
+   else
+      depleteMass = false;
+}
+
+//------------------------------------------------------------------------------
+// bool ThrustSegment::DepletesMass()
+//------------------------------------------------------------------------------
+/**
+ * Access method to check to see if the segment should deplete mass
+ *
+ * @return True if mass should be depleted, false if not.
+ */
+//------------------------------------------------------------------------------
+bool ThrustSegment::DepletesMass()
+{
+   return depleteMass;
 }
