@@ -130,7 +130,7 @@ or by double-clicking the GMAT_Beta.app in the Finder.
 
 Python Interface note for Mac users:
 
-Currently, GMAT will only be able to interface with Python if your Python
+Currently, GMAT will only be able to interface with Python if your Python 
 is installed into a specific directory: 
 /Library/Frameworks/Python.framework/Versions/3.4
 
@@ -145,11 +145,12 @@ to point to the location of your MATLAB installation.
 
 If the Matlab interface does not work with the GmatConsole command line 
 application, you may need to set up your Terminal so that the system can
-load the Matlab libraries.  For example, if you are using a .bashrc, you
-may need to add something like this:
+load the Matlab libraries and start up MATLAB.  For example, if you 
+are using a .bashrc, you may need to add something like this:
 
 export MATLAB = <your MATLAB app location here>
 export DYLD_LIBRARY_PATH=$MATLAB/bin/maci64:$DYLD_LIBRARY_PATH
+export PATH=$PATH:$MATLAB/bin
 
 
 -----------------------------------------------------------------------
