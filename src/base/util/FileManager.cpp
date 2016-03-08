@@ -103,6 +103,7 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "VEHICLE_MODEL_PATH",
    "SPAD_PATH",
    "ATMOSPHERE_PATH",
+   "FILE_UPDATE_PATH",
    
    // Output path
    "OUTPUT_PATH",
@@ -141,6 +142,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "CONSTELLATION_FILE",
    "SPACECRAFT_MODEL_FILE",
    "SPAD_SRP_FILE",
+   "CSSI_FLUX_FILE",
+   "SCHATTEN_FILE",
    "HELP_FILE",};
 
 FileManager* FileManager::theInstance = NULL;
@@ -829,6 +832,55 @@ bool FileManager::RenameFile(const std::string &oldName,
    else // it exists but we are not to overwrite it
       return false;
 }
+
+
+//------------------------------------------------------------------------------
+// bool CopyFile(const std::string &oldName, const std::string &newName,
+//                 Integer &retCode, bool overwriteIfExists = false)
+//------------------------------------------------------------------------------
+bool FileManager::CopyFile(const std::string &oldName,
+                             const std::string &newName,
+                             Integer &retCode, bool overwriteIfExists)
+{
+   retCode = 0;
+   if (oldName == newName) return true;
+
+   bool oldExists = DoesFileExist(oldName);
+   bool newExists = DoesFileExist(newName);
+   #ifdef DEBUG_FILE_RENAME
+      MessageInterface::ShowMessage("FM::Copy, old file (%s) exists = %s\n",
+            oldName.c_str(), (oldExists? "true" : "false"));
+      MessageInterface::ShowMessage("FM::Copy, new file (%s) exists = %s\n",
+            newName.c_str(), (newExists? "true" : "false"));
+   #endif
+   // if a file with the old name does not exist, we cannot do anything
+   if (!oldExists)
+   {
+      std::string errmsg = "Error copying file \"";
+      errmsg += oldName + "\" to \"";
+      errmsg += newName + "\": file \"";
+      errmsg += oldName + "\" does not exist.\n";
+      throw UtilityException(errmsg);
+   }
+
+   // if a file with the new name does not exist, or exists but we are
+   // supposed to overwrite it, try to do the rename
+   if ((!newExists) || (newExists && overwriteIfExists))
+   {
+      #ifdef DEBUG_FILE_RENAME
+         MessageInterface::ShowMessage("FM::Copy, attempting to copy %s to %s\n",
+               oldName.c_str(), newName.c_str());
+      #endif
+      std::ifstream src(oldName.c_str(), std::ios::binary);
+      std::ofstream dest(newName.c_str(), std::ios::binary);
+      dest << src.rdbuf();
+      retCode = src && dest;
+      return retCode == 1;
+   }
+   else // it exists but we are not to overwrite it
+      return false;
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetStartupFileDir()
@@ -1568,6 +1620,18 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    mPathWrittenOuts.push_back("TIME_PATH");
 
    //---------------------------------------------
+   // write the ATMOSPHERE_PATH and CSSI FLUX file next
+   //---------------------------------------------
+   #ifdef DEBUG_WRITE_STARTUP_FILE
+   MessageInterface::ShowMessage("   .....Writing ATMOSPHERE path\n");
+   #endif
+   outStream << std::setw(22) << "ATMOSPHERE_PATH" << " = " << mPathMap["ATMOSPHERE_PATH"] << "\n";
+   WriteFiles(outStream, "CSSI_FLUX_");
+   WriteFiles(outStream, "SCHATTEN_");
+   outStream << "#-----------------------------------------------------------\n";
+   mPathWrittenOuts.push_back("ATMOSPHERE_PATH");
+
+   //---------------------------------------------
    // write *_POT_PATH and files next
    //---------------------------------------------
    #ifdef DEBUG_WRITE_STARTUP_FILE
@@ -2198,7 +2262,7 @@ std::string FileManager::GetAbsPathname(const FileType type)
 // std::string GetAbsPathname(const std::string &typeName)
 //------------------------------------------------------------------------------
 /**
- * Retrives full pathname for the type name.
+ * Retrieves full pathname for the type name.
  *
  * @param <type> file type name of which filename to be returned.
  *
@@ -3261,6 +3325,7 @@ void FileManager::RefreshFiles()
    //-------------------------------------------------------
    AddFileType("ROOT_PATH", "../");
    AddFileType("DATA_PATH", "ROOT_PATH/data");
+   AddFileType("FILE_UPDATE_PATH", "ROOT_PATH/data");
    
    //-------------------------------------------------------
    // add default output paths and files
@@ -3335,6 +3400,11 @@ void FileManager::RefreshFiles()
    AddFileType("TIME_PATH", "DATA_PATH/time/");
    AddFileType("LEAP_SECS_FILE", "TIME_PATH/tai-utc.dat");
    AddFileType("LSK_FILE", "TIME_PATH/naif0010.tls");
+
+   // atmosphere path and files
+   AddFileType("ATMOSPHERE_PATH", "DATA_PATH/atmosphere/earth/");
+   AddFileType("CSSI_FLUX_FILE", "ATMOSPHERE_PATH/CSSI_2004To2026.txt");
+   AddFileType("SCHATTEN_FILE", "ATMOSPHERE_PATH/SchattenPredict.txt");
    
    // gui config file path
    AddFileType("GUI_CONFIG_PATH", "DATA_PATH/gui_config/");

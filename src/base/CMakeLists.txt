@@ -485,10 +485,12 @@ SET(BASE_SRCS
     util/ElapsedTime.cpp
     util/EopFile.cpp
     util/FileManager.cpp
+    util/FileUpdaterSVN.cpp
     util/FileUtil.cpp
     util/GmatGlobal.cpp
     util/GmatTime.cpp
     util/GregorianDate.cpp
+    util/IFileUpdater.cpp
     util/LeapSecsFileReader.cpp
     util/Linear.cpp
     util/MemoryTracker.cpp

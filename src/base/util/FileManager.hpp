@@ -76,6 +76,7 @@ public:
       VEHICLE_MODEL_PATH,
       SPAD_PATH,
       ATMOSPHERE_PATH,
+      FILE_UPDATE_PATH,
       
       // Output path
       OUTPUT_PATH,
@@ -116,6 +117,8 @@ public:
       CONSTELLATION_FILE,
       SPACECRAFT_MODEL_FILE,
       SPAD_SRP_FILE,
+      CSSI_FLUX_FILE,
+      SCHATTEN_FILE,
       HELP_FILE,
       FileTypeCount,
    };
@@ -149,6 +152,8 @@ public:
    bool DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true);
    bool DoesFileExist(const std::string &filename);
    bool RenameFile(const std::string &oldName, const std::string &newName,
+                   Integer &retCode, bool overwriteIfExists = false);
+   bool CopyFile(const std::string &oldName, const std::string &newName,
                    Integer &retCode, bool overwriteIfExists = false);
    bool ValidatePaths();
    

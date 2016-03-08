@@ -67,6 +67,7 @@
 #include "EopFile.hpp"
 #include "ItrfCoefficientsFile.hpp"
 #include "LeapSecsFileReader.hpp"
+#include "IFileUpdater.hpp"
 // plug-in code
 #include "DynamicLibrary.hpp"
 #include "TriggerManager.hpp"
@@ -88,6 +89,7 @@ public:
    static Moderator* Instance();
    bool Initialize(const std::string &startupFile = "", bool isFromGui = false,
          const std::string &suffix = "", const StringArray *forEntries = NULL);
+   bool UpdateDataFiles();
    void Finalize();
    void SetRunReady(bool flag = true);
    void SetShowFinalState(bool flag = true);

@@ -86,6 +86,7 @@ INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 # source files
 SET(GUI_SRCS 
     app/AboutDialog.cpp
+    app/FileUpdateDialog.cpp
     app/GmatApp.cpp
     app/GmatAppData.cpp
     app/CompareFilesDialog.cpp
