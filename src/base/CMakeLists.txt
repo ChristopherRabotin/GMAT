@@ -38,6 +38,21 @@ if(GMAT_USE_SPICE)
 endif()
 
 # ====================================================================
+# Additional link libraries (xerces)
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
+  else()
+    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
+  endif()
+else()
+  set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
+endif()
+
+LINK_LIBRARIES(${XERCES_LIB})
+
+# ====================================================================
 # F2C
 MESSAGE("-- Use F2C version of MSISE.")
 SET(MSISE_SRCS "solarsys/msise90_sub.c")
@@ -89,6 +104,10 @@ ENDFOREACH(currdir)
 # ====================================================================
 # Include directories for header files
 INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
+
+# ====================================================================
+# extra include directory for header file (LOJ)
+INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
 
 # ====================================================================
 # source files
