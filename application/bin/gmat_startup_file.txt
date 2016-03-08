@@ -98,6 +98,7 @@ MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
 PYTHON_MODULE_PATH       = ROOT_PATH/userfunctions/python
 #-----------------------------------------------------------
 DATA_PATH              = ROOT_PATH/data/
+FILE_UPDATE_PATH       = ROOT_PATH/data/
 #-----------------------------------------------------------
 PLANETARY_EPHEM_SPK_PATH = DATA_PATH/planetary_ephem/spk/
 PLANETARY_SPK_FILE     = PLANETARY_EPHEM_SPK_PATH/DE421AllPlanets.bsp
