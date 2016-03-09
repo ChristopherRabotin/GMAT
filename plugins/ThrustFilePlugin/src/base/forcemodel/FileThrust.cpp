@@ -27,6 +27,8 @@
 
 //#define DEBUG_FILETHRUST_EXE
 //#define DEBUG_MASS_FLOW
+//#define DEBUG_SEGMENTS
+//#define DEBUG_REF_OBJECTS
 
 //------------------------------------------------------------------------------
 // FileThrust(const std::string &name)
@@ -46,7 +48,8 @@ FileThrust::FileThrust(const std::string &name) :
    massFlowWarningNeeded   (true),
    segments                (NULL),
    mDotIndex               (-1),
-   depleteMass             (false)
+   depleteMass             (false),
+   coordSystem             (NULL)
 {
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("FileThrust");
@@ -74,7 +77,7 @@ FileThrust::~FileThrust()
 //------------------------------------------------------------------------------
 FileThrust::FileThrust(const FileThrust& ft) :
    PhysicalModel           (ft),
-   mySpacecraft            (ft.mySpacecraft),
+   spacecraftNames         (ft.spacecraftNames),
    satCount                (ft.satCount),
    cartIndex               (ft.cartIndex),
    fillCartesian           (ft.fillCartesian),
@@ -82,7 +85,10 @@ FileThrust::FileThrust(const FileThrust& ft) :
    massFlowWarningNeeded   (true),
    segments                (ft.segments),
    mDotIndex               (ft.mDotIndex),
-   depleteMass             (ft.depleteMass)
+   depleteMass             (ft.depleteMass),
+   activeTankName          (ft.activeTankName),
+   csNames                 (ft.csNames),
+   coordSystem             (NULL)
 {
 }
 
@@ -103,7 +109,7 @@ FileThrust& FileThrust::operator=(const FileThrust& ft)
    {
       PhysicalModel::operator=(ft);
 
-      mySpacecraft = ft.mySpacecraft;
+      spacecraftNames = ft.spacecraftNames;
       satCount      = ft.satCount;
       cartIndex     = ft.cartIndex;
       fillCartesian = ft.fillCartesian;
@@ -111,6 +117,9 @@ FileThrust& FileThrust::operator=(const FileThrust& ft)
       segments      = ft.segments;
       mDotIndex     = ft.mDotIndex;
       depleteMass   = ft.depleteMass;
+      activeTankName = ft.activeTankName;
+      csNames       = ft.csNames;
+      coordSystem   = NULL;
 
       massFlowWarningNeeded = true;
    }
@@ -162,9 +171,27 @@ void FileThrust::Clear(const Gmat::ObjectType type)
 {
    if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACECRAFT))
    {
-      mySpacecraft.clear();
+      spacecraftNames.clear();
       spacecraft.clear();
    }
+}
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ *
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& FileThrust::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   return refObjectTypes;
 }
 
 //------------------------------------------------------------------------------
@@ -187,8 +214,15 @@ bool FileThrust::SetRefObjectName(const Gmat::ObjectType type,
 {
    if (type == Gmat::SPACECRAFT)
    {
-      if (find(mySpacecraft.begin(), mySpacecraft.end(), name) == mySpacecraft.end())
-         mySpacecraft.push_back(name);
+      if (find(spacecraftNames.begin(), spacecraftNames.end(), name) == spacecraftNames.end())
+         spacecraftNames.push_back(name);
+      return true;
+   }
+
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      if (find(csNames.begin(), csNames.end(), name) == csNames.end())
+         csNames.push_back(name);
       return true;
    }
 
@@ -209,30 +243,133 @@ bool FileThrust::SetRefObjectName(const Gmat::ObjectType type,
 const StringArray& FileThrust::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
-   if (type == Gmat::SPACECRAFT)
-      return mySpacecraft;
+   #ifdef DEBUG_REF_OBJECTS
+      MessageInterface::ShowMessage("FileThrust::GetRefObjectNameArray called "
+            "for type %d\n", type);
+   #endif
+   PhysicalModel::GetRefObjectNameArray(type);
 
-   return PhysicalModel::GetRefObjectNameArray(type);
+   if ((type == Gmat::SPACECRAFT) || (type == Gmat::UNKNOWN_OBJECT))
+      refObjectNames.insert(refObjectNames.begin(), spacecraftNames.begin(),
+            spacecraftNames.end());
+
+   if ((type == Gmat::COORDINATE_SYSTEM) || (type == Gmat::UNKNOWN_OBJECT))
+      refObjectNames.insert(refObjectNames.begin(), csNames.begin(),
+            csNames.end());
+
+   #ifdef DEBUG_REF_OBJECTS
+      MessageInterface::ShowMessage("  Returning %d names\n",
+            refObjectNames.size());
+   #endif
+
+   return refObjectNames;
 }
 
-//bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
-//      const std::string& name)
-//{
-//   bool retval = false;
-//   return retval;
-//}
-//
-//bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
-//      const std::string& name, const Integer index)
-//{
-//   bool retval = false;
-//   return retval;
-//}
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets referenced object pointers.
+ *
+ * @param obj The object.
+ * @param type The type of the object.
+ * @param name The object's name.
+ *
+ * @return true if the object is set, false if not.
+ */
+//------------------------------------------------------------------------------
+bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+      const std::string& name)
+{
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      MessageInterface::ShowMessage("Setting cs named %s\n", name.c_str());
+
+      bool retval = false;
+
+      if (obj->IsOfType("CoordinateSystem") == false)
+         throw ODEModelException(
+            "FileThrust::SetRefObject cannot use objects of type " +
+            obj->GetTypeName());
+      if (find(csNames.begin(), csNames.end(), name) != csNames.end())
+      {
+         // Pass the CS to each segment that needs it
+         for (UnsignedInt i = 0; i < segments->size(); ++i)
+         {
+            if (segments->at(i).segData.csName == name)
+            {
+               segments->at(i).segData.cs = (CoordinateSystem*)obj;
+               retval = true;
+            }
+         }
+      }
+      return retval;
+   }
+
+   return PhysicalModel::SetRefObject(obj, type, name);
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//       const std::string &name, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets referenced object pointers in an object array.
+ *
+ * @param obj The object.
+ * @param type The type of the object.
+ * @param name The object's name.
+ * @param index The index of the object in the array
+ *
+ * @return true if the object is set, false if not.
+ */
+//------------------------------------------------------------------------------
+bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+      const std::string& name, const Integer index)
+{
+   MessageInterface::ShowMessage("Setting %s\n", name.c_str());
+   return PhysicalModel::SetRefObject(obj, type, name, index);
+}
 
 
+//------------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type, const std::string &oldName,
+//       const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * Changes the name for reference objects
+ *
+ * @param type The type of the object.
+ * @param oldName The object's name before the change.
+ * @param newName The object's proposed name after the change.
+ *
+ * @return true if a change was made, false if not
+ */
+//------------------------------------------------------------------------------
 bool FileThrust::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
+   if (type == Gmat::SPACECRAFT)
+   {
+      for (UnsignedInt i = 0; i < spacecraftNames.size(); ++i)
+      {
+         if (spacecraftNames[i] == oldName)
+            spacecraftNames[i] = newName;
+      }
+      return true;
+   }
+
+   if (type == Gmat::COORDINATE_SYSTEM)
+   {
+      for (UnsignedInt i = 0; i < csNames.size(); ++i)
+      {
+         if (csNames[i] == oldName)
+            csNames[i] = newName;
+      }
+      return true;
+   }
+
    return PhysicalModel::RenameRefObject(type, oldName, newName);
 }
 
@@ -327,9 +464,17 @@ void FileThrust::SetSegmentList(std::vector<ThrustSegment> *segs)
    segments = segs;
    depleteMass = false;
 
-   // Activate mass flow if any segment identifies it as used
+   // Activate mass flow if any segment needs it and collect ref objects
+   csNames.clear();
    for (UnsignedInt i = 0; i < segments->size(); ++i)
+   {
       depleteMass |= segments->at(i).DepletesMass();
+
+      // Collect the names of all of the coordinate systems needed
+      std::string name = segments->at(i).segData.csName;
+      if (find(csNames.begin(), csNames.end(), name) == csNames.end())
+         csNames.push_back(name);
+   }
 
    #ifdef DEBUG_SEGMENTS
       // Dump seg list here
@@ -338,12 +483,14 @@ void FileThrust::SetSegmentList(std::vector<ThrustSegment> *segs)
       {
          MessageInterface::ShowMessage("%d:  %s\n", i,
                segments->at(i).GetName().c_str());
-         MessageInterface::ShowMessage("     TSF:   %lf\n", i,
+         MessageInterface::ShowMessage("     TSF:   %lf\n",
                segments->at(i).GetRealParameter("ThrustScaleFactor"));
-         MessageInterface::ShowMessage("     MFSF:  %lf\n", i,
+         MessageInterface::ShowMessage("     MFSF:  %lf\n",
                segments->at(i).GetRealParameter("MassFlowScaleFactor"));
-         MessageInterface::ShowMessage("     Tanks: %d\n", i,
+         MessageInterface::ShowMessage("     Tanks: %d\n",
                segments->at(i).GetStringArrayParameter("MassSource").size());
+         MessageInterface::ShowMessage("     CS: %s\n",
+               segments->at(i).segData.csName.c_str());
       }
    #endif
 }
@@ -395,12 +542,12 @@ bool FileThrust::Initialize()
 
    if (isInitialized)
    {
-      if ((segments != NULL) && (mySpacecraft.size() > 0))
+      if ((segments != NULL) && (spacecraftNames.size() > 0))
       {
          // set up the indices into the state vector that match spacecraft
          Integer satIndex, stateIndex;
-         for (StringArray::iterator satName = mySpacecraft.begin();
-              satName != mySpacecraft.end(); ++satName)
+         for (StringArray::iterator satName = spacecraftNames.begin();
+              satName != spacecraftNames.end(); ++satName)
          {
             satIndex = 0;
             stateIndex = 0;
@@ -498,8 +645,8 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
                sat->GetName().c_str());
          #endif
 
-         if (find(mySpacecraft.begin(), mySpacecraft.end(), sat->GetName()) !=
-             mySpacecraft.end())
+         if (find(spacecraftNames.begin(), spacecraftNames.end(), sat->GetName()) !=
+             spacecraftNames.end())
          {
 
             #ifdef DEBUG_FILETHRUST_EXE
@@ -727,6 +874,7 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
          // Factor used to convert m/s^2 to km/s^2, and to divide out mass if modeling thrust
          dataIsThrust = (*segments)[i].segData.modelThrust;
          (*segments)[i].GetScaleFactors(scaleFactors);
+         coordSystem = (*segments)[i].segData.cs;
          break;
       }
    }
@@ -813,6 +961,9 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
             }
          }
       }
+
+      if (coordSystem != NULL)
+         ConvertDirectionToInertial(burnData, burnData, atEpoch);
    }
 }
 
@@ -933,4 +1084,34 @@ void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
 {
    throw ODEModelException("The cubic spline interpolation method is not yet "
          "implemented");
+}
+
+
+//------------------------------------------------------------------------------
+// void ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epoch)
+//------------------------------------------------------------------------------
+/*
+ * Converts thrust direction to inertial frame
+ *
+ * @param dir  Thrust/accel direction in internal frame
+ * @param dirInertial  Thrust direction in inertial frame
+ * @param epoch  Epoch to be used for conversion
+ */
+//------------------------------------------------------------------------------
+void FileThrust::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epoch)
+{
+   MessageInterface::ShowMessage("Rotating into a new frame\n");
+   Real inDir[6], outDir[6];
+   for (Integer i=0; i<3; i++)
+      inDir[i] = dir[i];
+   for (Integer i=3; i<6; i++)
+      inDir[i] = 0.0;
+
+   // Now rotate to base system axes, we don't want to translate so
+   // set coincident to true
+   coordSystem->ToBaseSystem(epoch, inDir, outDir, true);
+
+   dirInertial[0] = outDir[0];
+   dirInertial[1] = outDir[1];
+   dirInertial[2] = outDir[2];
 }

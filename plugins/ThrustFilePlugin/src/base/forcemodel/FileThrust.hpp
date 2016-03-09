@@ -37,16 +37,18 @@ public:
 
    virtual void            Clear(const Gmat::ObjectType
                                  type = Gmat::UNKNOWN_OBJECT);
+   virtual const ObjectTypeArray&
+                           GetRefObjectTypeArray();
    virtual bool            SetRefObjectName(const Gmat::ObjectType type,
                                             const std::string &name);
    virtual const StringArray&
                            GetRefObjectNameArray(const Gmat::ObjectType type);
-//   virtual bool            SetRefObject(GmatBase *obj,
-//                              const Gmat::ObjectType type,
-//                              const std::string &name = "");
-//   virtual bool            SetRefObject(GmatBase *obj,
-//                              const Gmat::ObjectType type,
-//                              const std::string &name, const Integer index);
+   virtual bool            SetRefObject(GmatBase *obj,
+                              const Gmat::ObjectType type,
+                              const std::string &name = "");
+   virtual bool            SetRefObject(GmatBase *obj,
+                              const Gmat::ObjectType type,
+                              const std::string &name, const Integer index);
    virtual bool            RenameRefObject(const Gmat::ObjectType type,
                                            const std::string &oldName,
                                            const std::string &newName);
@@ -59,7 +61,7 @@ public:
    virtual bool            IsTransient();
    virtual bool            DepletesMass();
    virtual void            SetSegmentList(std::vector<ThrustSegment>* segs);
-   void                    SetPropList(ObjectArray *soList);
+   virtual void            SetPropList(ObjectArray *soList);
    virtual bool            Initialize();
 
    virtual bool            GetDerivatives(Real * state, Real dt, Integer order,
@@ -81,7 +83,7 @@ protected:
 //   /// Names for the FiniteBurn objects used for this force
 //   StringArray                   burnNames;
    /// Names of the spacecraft accessed by this force
-   StringArray                   mySpacecraft;
+   StringArray                   spacecraftNames;
    /// Propagated objects used in the ODEModel
    ObjectArray                   spacecraft;
    /// Indexes (in the spacecraft vector) for the Spacecraft used by this force
@@ -106,6 +108,10 @@ protected:
    bool                          depleteMass;
    /// Name of the tank that is supplying fuel (just 1 for now)
    std::string                   activeTankName;
+   /// List of coordinate systems used in the segments
+   StringArray                   csNames;
+   /// Current coordinate system, used when coversion is needed
+   CoordinateSystem              *coordSystem;
 
    // 5 raw data elements: 3 thrust/accel components, mdot, interpolation method
    Real dataBlock[5];
@@ -116,6 +122,8 @@ protected:
    void GetSegmentData(Integer atIndex, GmatEpoch atEpoch);
    void LinearInterpolate(Integer atIndex, GmatEpoch atEpoch);
    void SplineInterpolate(Integer atIndex, GmatEpoch atEpoch);
+
+   void ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epoch);
 };
 
 #endif /* FileThrust_hpp */
