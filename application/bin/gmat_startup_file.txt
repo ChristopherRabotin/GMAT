@@ -55,6 +55,7 @@ PLUGIN                 = ../plugins/libMatlabInterface
 PLUGIN                 = ../plugins/libFminconOptimizer
 PLUGIN                 = ../plugins/libDataInterface
 PLUGIN                 = ../plugins/libProductionPropagators
+PLUGIN                 = ../plugins/libThrustFile
 
 PLUGIN                  = ./libCInterface
 PLUGIN                  = ../plugins/libGmatEstimation
@@ -63,15 +64,13 @@ PLUGIN                  = ../plugins/libExtraPropagators
 PLUGIN                  = ../plugins/libPolyhedronGravity
 PLUGIN                  = ../plugins/libSaveCommand
 PLUGIN                = ../plugins/libGmatFunction
+
 # Internal-only plugins
 PLUGIN                 = ../plugins/proprietary/libMarsGRAM
 PLUGIN                 = ../plugins/proprietary/libMsise86
 PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                   = ../plugins/proprietary/libSNOptimizer
 PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-
-# Thinking Systems plugins
-PLUGIN                 = ../plugins/proprietary/libTsiParameters
 
 #-----------------------------------------------------------
 # Directory/file paths
