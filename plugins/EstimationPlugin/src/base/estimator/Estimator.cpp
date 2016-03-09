@@ -105,6 +105,7 @@ Estimator::PARAMETER_TYPE[] =
 //------------------------------------------------------------------------------
 Estimator::Estimator(const std::string &type, const std::string &name) :
    Solver               (type, name),
+   solarSystem          (NULL),                          // made changes by TUAN NGUYEN
    absoluteTolerance    (1.0e-3),
    relativeTolerance    (1.0e-4),
    propagatorName       (""),
@@ -169,6 +170,7 @@ Estimator::~Estimator()
 //------------------------------------------------------------------------------
 Estimator::Estimator(const Estimator& est) :
    Solver               (est),
+   solarSystem          (est.solarSystem),                       // made changes by TUAN NGUYEN
    measurementNames     (est.measurementNames),
    modelNames           (est.modelNames),
    solveForStrings      (est.solveForStrings),
@@ -234,6 +236,8 @@ Estimator& Estimator::operator=(const Estimator& est)
    {
       Solver::operator=(est);
 
+      solarSystem = est.solarSystem;                        // made changes by TUAN NGUYEN
+
       measurementNames = est.measurementNames;
       modelNames       = est.modelNames;
       solveForStrings  = est.solveForStrings;
@@ -271,6 +275,13 @@ Estimator& Estimator::operator=(const Estimator& est)
    }
 
    return *this;
+}
+
+
+// made changes by TUAN NGUYEN
+void Estimator::SetSolarSystem(SolarSystem *ss)
+{
+   solarSystem = ss;
 }
 
 
@@ -665,6 +676,19 @@ Real Estimator::SetRealParameter(const Integer id, const Real value)
 
    return Solver::SetRealParameter(id, value);
 }
+
+
+Real Estimator::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+
+Real Estimator::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const

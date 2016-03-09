@@ -598,7 +598,7 @@ ObservationData* GmatObType::ReadObservation()
 
    if (currentObs.typeName == "Range_KM")
    {
-      currentObs.unit = "Km";
+      currentObs.unit = "km";
    }
    else if (currentObs.typeName == "Doppler")
    {
@@ -610,7 +610,7 @@ ObservationData* GmatObType::ReadObservation()
    {                                                                      // made changes by TUAN NGUYEN
       theLine >> currentObs.uplinkBand;                                   // made changes by TUAN NGUYEN
       theLine >> currentObs.dopplerCountInterval;                         // made changes by TUAN NGUYEN
-      currentObs.unit = "Km/s";                                           // made changes by TUAN NGUYEN
+      currentObs.unit = "km/s";                                           // made changes by TUAN NGUYEN
    }                                                                      // made changes by TUAN NGUYEN
    else if (currentObs.typeName == "TDRSDoppler_HZ")
    {
