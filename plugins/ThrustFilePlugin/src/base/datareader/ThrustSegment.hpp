@@ -130,6 +130,8 @@ public:
    void                 SetDataSegment(ThfDataSegment theData);
    bool                 DepletesMass();
 
+   void                 GetScaleFactors(Real scaleFactors[2]);
+
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 

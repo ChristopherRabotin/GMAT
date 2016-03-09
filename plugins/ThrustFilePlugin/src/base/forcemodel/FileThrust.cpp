@@ -43,6 +43,7 @@ FileThrust::FileThrust(const std::string &name) :
    cartIndex               (-1),
    fillCartesian           (true),
    dataIsThrust            (true),
+   massFlowWarningNeeded   (true),
    segments                (NULL),
    mDotIndex               (-1),
    depleteMass             (false)
@@ -78,6 +79,7 @@ FileThrust::FileThrust(const FileThrust& ft) :
    cartIndex               (ft.cartIndex),
    fillCartesian           (ft.fillCartesian),
    dataIsThrust            (ft.dataIsThrust),
+   massFlowWarningNeeded   (true),
    segments                (ft.segments),
    mDotIndex               (ft.mDotIndex),
    depleteMass             (ft.depleteMass)
@@ -109,6 +111,8 @@ FileThrust& FileThrust::operator=(const FileThrust& ft)
       segments      = ft.segments;
       mDotIndex     = ft.mDotIndex;
       depleteMass   = ft.depleteMass;
+
+      massFlowWarningNeeded = true;
    }
 
    return *this;
@@ -381,6 +385,14 @@ bool FileThrust::Initialize()
 
    isInitialized = PhysicalModel::Initialize();
 
+   // Zero the data containers
+   for (Integer i = 0; i < 5; ++i)
+   {
+      dataBlock[i] = 0.0;
+      dataSet[i][0] = dataSet[i][1] = dataSet[i][2] =
+      dataSet[i][3] = dataSet[i][4] = 0.0;
+   }
+
    if (isInitialized)
    {
       if ((segments != NULL) && (mySpacecraft.size() > 0))
@@ -404,6 +416,7 @@ bool FileThrust::Initialize()
             }
          }
 
+         massFlowWarningNeeded = true;
          retval = true;
       }
       else
@@ -525,8 +538,10 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
             if (depleteMass)
             {
                // Set the mass flow flag on sat's tanks
-               FuelTank *tank = (FuelTank*)(sat->GetRefObject(Gmat::FUEL_TANK, activeTankName));
-               tank->SetFlowWithoutThruster(true);
+               FuelTank *tank = (FuelTank*)(sat->GetRefObject(
+                     Gmat::FUEL_TANK, activeTankName));
+               if (tank != NULL)
+                  tank->SetFlowWithoutThruster(true);
 
                if (order != 1)
                   throw ODEModelException("Mass depletion cannot be "
@@ -698,6 +713,8 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
    // Start from nothin'
    burnData[0] = burnData[1] = burnData[2] = burnData[3] = 0.0;
 
+   Real scaleFactors[2];
+
    // Find the segment with data covering the input epoch.  Note that if
    // segments overlap, we use the data in the first segment covering the epoch
    Integer index = -1;
@@ -709,49 +726,211 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
          index = i;
          // Factor used to convert m/s^2 to km/s^2, and to divide out mass if modeling thrust
          dataIsThrust = (*segments)[i].segData.modelThrust;
+         (*segments)[i].GetScaleFactors(scaleFactors);
          break;
       }
    }
 
    if (index != -1)
    {
-      Real offset = atEpoch - (*segments)[index].segData.startEpoch;
-
-      if ((*segments)[index].segData.accelIntType == ThfDataSegment::NONE)
+      // Interpolate the thrust/acceleration
+      switch ((*segments)[index].segData.accelIntType)
       {
-         // If at the end point; use its data
-         if ((*segments)[index].segData.endEpoch == atEpoch)
-         {
-//            Real tsf, msf;
-//            tsf = (*segments)[index].segData.thrustScaleFactor;
+      case ThfDataSegment::LINEAR:
+         LinearInterpolate(index, atEpoch);
+         burnData[0] = dataBlock[0] * scaleFactors[0];
+         burnData[1] = dataBlock[1] * scaleFactors[0];
+         burnData[2] = dataBlock[2] * scaleFactors[0];
+         break;
 
-            Integer i = (*segments)[index].segData.profile.size()-1;
-            burnData[0] = (*segments)[index].segData.profile[i].vector[0];
-            burnData[1] = (*segments)[index].segData.profile[i].vector[1];
-            burnData[2] = (*segments)[index].segData.profile[i].vector[2];
-            burnData[3] = (*segments)[index].segData.profile[i].mdot;
-         }
-         else
+      case ThfDataSegment::SPLINE:
+         SplineInterpolate(index, atEpoch);
+         burnData[0] = dataBlock[0] * scaleFactors[0];
+         burnData[1] = dataBlock[1] * scaleFactors[0];
+         burnData[2] = dataBlock[2] * scaleFactors[0];
+         break;
+
+      case ThfDataSegment::NONE:
+      default:
+         GetSegmentData(index, atEpoch);
+         burnData[0] = dataBlock[0] * scaleFactors[0];
+         burnData[1] = dataBlock[1] * scaleFactors[0];
+         burnData[2] = dataBlock[2] * scaleFactors[0];
+         break;
+      }
+
+      if ((*segments)[index].segData.massIntType == (Integer)dataBlock[4])
+      {
+         burnData[3] = dataBlock[3] * scaleFactors[1];
+      }
+      else
+      {
+         // Interpolate the mass flow, usind data already collected
+         switch ((*segments)[index].segData.massIntType)
          {
-            for (UnsignedInt i = 0; i < (*segments)[index].segData.profile.size()-1; ++i)
-            {
-               if (((*segments)[index].segData.profile[i].time <= offset) &&
-                   ((*segments)[index].segData.profile[i+1].time > offset))
-               {
-                  burnData[0] = (*segments)[index].segData.profile[i].vector[0];
-                  burnData[1] = (*segments)[index].segData.profile[i].vector[1];
-                  burnData[2] = (*segments)[index].segData.profile[i].vector[2];
-                  burnData[3] = (*segments)[index].segData.profile[i].mdot;
-               }
-            }
-         }
-         if (burnData[3] != 0.0)
-         {
-            activeTankName = (*segments)[index].massSource[0];
+         case ThfDataSegment::LINEAR:
+            LinearInterpolate(index, atEpoch);
+            burnData[3] = dataBlock[3] * scaleFactors[1];
+            break;
+
+         case ThfDataSegment::SPLINE:
+            SplineInterpolate(index, atEpoch);
+            burnData[3] = dataBlock[3] * scaleFactors[1];
+            break;
+
+         case ThfDataSegment::NONE:
+         default:
+            GetSegmentData(index, atEpoch);
+            burnData[3] = dataBlock[3] * scaleFactors[1];
+            break;
          }
       }
-      else throw ODEModelException("The " +
-            (*segments)[index].segData.interpolationMethod +
-            " interpolation method is not yet implemented");
+
+      if (burnData[3] != 0.0)
+      {
+         #ifdef DEBUG_MASS_FLOW
+            MessageInterface::ShowMessage("Accessing segment %d at epoch "
+                  "%.12lf; [3] = %le\n", index, atEpoch, burnData[3]);
+            MessageInterface::ShowMessage("   %d mass sources\n",
+                  (*segments)[index].massSource.size());
+         #endif
+         if (segments->size() > index)
+         {
+            if ((*segments)[index].massSource.size() > 0)
+               activeTankName = (*segments)[index].massSource[0];
+            else
+            {
+               if (massFlowWarningNeeded)
+               {
+                  MessageInterface::ShowMessage("Warning: The Thrust History "
+                        "File force %s cannot deplete mass: no mass source "
+                        "is identified\n", instanceName.c_str());
+                  massFlowWarningNeeded = false;
+               }
+               burnData[3] = 0.0;
+               depleteMass = false;
+               massFlowWarningNeeded = false;
+            }
+         }
+      }
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the segment data for the segment containing the input epoch
+ *
+ * @param atIndex Index of the segment containing the data
+ * @param atEpoch The epoch of the requested data
+ */
+//------------------------------------------------------------------------------
+void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
+{
+   // If at the end point; use its data
+   if ((*segments)[atIndex].segData.endEpoch == atEpoch)
+   {
+      Integer i = (*segments)[atIndex].segData.profile.size()-1;
+      dataBlock[0] = (*segments)[atIndex].segData.profile[i].vector[0];
+      dataBlock[1] = (*segments)[atIndex].segData.profile[i].vector[1];
+      dataBlock[2] = (*segments)[atIndex].segData.profile[i].vector[2];
+      dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
+      dataBlock[4] = (*segments)[atIndex].segData.profile[i].time;
+   }
+   else
+   {
+      Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
+      for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
+      {
+         if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
+             ((*segments)[atIndex].segData.profile[i+1].time > offset))
+         {
+            dataBlock[0] = (*segments)[atIndex].segData.profile[i].vector[0];
+            dataBlock[1] = (*segments)[atIndex].segData.profile[i].vector[1];
+            dataBlock[2] = (*segments)[atIndex].segData.profile[i].vector[2];
+            dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
+            dataBlock[4] = ThfDataSegment::NONE;
+         }
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves linearly interpolated segment data for the input epoch
+ *
+ * @param atIndex Index of the segment containing the data
+ * @param atEpoch The epoch of the requested data
+ */
+//------------------------------------------------------------------------------
+void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
+{
+   GetSegmentData(atIndex, atEpoch);
+
+   if ((*segments)[atIndex].segData.endEpoch == atEpoch)
+   {
+      return;
+   }
+
+   Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
+   for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
+   {
+      if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
+          ((*segments)[atIndex].segData.profile[i+1].time > offset))
+      {
+         dataSet[0][0] = dataBlock[0];
+         dataSet[0][1] = dataBlock[1];
+         dataSet[0][2] = dataBlock[2];
+         dataSet[0][3] = dataBlock[3];
+         dataSet[0][4] = (*segments)[atIndex].segData.profile[i].time;
+
+         dataSet[1][0] = (*segments)[atIndex].segData.profile[i+1].vector[0];
+         dataSet[1][1] = (*segments)[atIndex].segData.profile[i+1].vector[1];
+         dataSet[1][2] = (*segments)[atIndex].segData.profile[i+1].vector[2];
+         dataSet[1][3] = (*segments)[atIndex].segData.profile[i+1].mdot;
+         dataSet[1][4] = (*segments)[atIndex].segData.profile[i+1].time;
+      }
+   }
+
+   Real pct = (offset - dataSet[0][4]) / (dataSet[1][4] - dataSet[0][4]);
+
+   dataBlock[0] = dataSet[0][0] + pct * (dataSet[1][0] - dataSet[0][0]);
+   dataBlock[1] = dataSet[0][1] + pct * (dataSet[1][1] - dataSet[0][1]);
+   dataBlock[2] = dataSet[0][2] + pct * (dataSet[1][2] - dataSet[0][2]);
+   dataBlock[3] = dataSet[0][3] + pct * (dataSet[1][3] - dataSet[0][3]);
+   dataBlock[4] = ThfDataSegment::LINEAR;
+
+   #ifdef DEBUG_INTERPOLATION
+      MessageInterface::ShowMessage("Linear Interpolating to offset %.12lf "
+            "using t, vector, mdot:\n", offset);
+      MessageInterface::ShowMessage("   %.12lf [%.12le  %.12le  %.12le] "
+            "%.12le\n   %.12lf [%.12le  %.12le  %.12le] %.12le\n",
+            dataSet[0][4], dataSet[0][0], dataSet[0][1], dataSet[0][2],
+            dataSet[0][3], dataSet[1][4], dataSet[1][0], dataSet[1][1],
+            dataSet[1][2], dataSet[1][3]);
+
+      MessageInterface::ShowMessage("-> %.12lf [%.12le  %.12le  %.12le] "
+            "%.12le\n", offset, dataBlock[0], dataBlock[1], dataBlock[2], dataBlock[3]);
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// void SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves spline interpolated segment data for the input epoch
+ *
+ * @param atIndex Index of the segment containing the data
+ * @param atEpoch The epoch of the requested data
+ */
+//------------------------------------------------------------------------------
+void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
+{
+   throw ODEModelException("The cubic spline interpolation method is not yet "
+         "implemented");
 }

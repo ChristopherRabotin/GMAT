@@ -69,6 +69,8 @@ ThrustSegment::ThrustSegment(const std::string &name) :
 {
    objectTypes.push_back(Gmat::INTERFACE);
    objectTypeNames.push_back("ThrustSegment");
+   parameterCount = ThrustSegmentParamCount;
+
 }
 
 //------------------------------------------------------------------------------
@@ -1099,4 +1101,20 @@ void ThrustSegment::SetDataSegment(ThfDataSegment theData)
 bool ThrustSegment::DepletesMass()
 {
    return depleteMass;
+}
+
+//------------------------------------------------------------------------------
+// void GetScaleFactors(Real scaleFactors[2])
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the thrust scale factor and mass flow scale factor
+ *
+ * @param scaleFactors Array for the return data
+ */
+//------------------------------------------------------------------------------
+void ThrustSegment::GetScaleFactors(Real scaleFactors[2])
+{
+   scaleFactors[0] = thrustScaleFactor;
+   scaleFactors[1] = (useMassAndThrustFactor ?
+         massFlowFactor * thrustScaleFactor : massFlowFactor);
 }

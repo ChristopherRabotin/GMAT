@@ -22,6 +22,15 @@
 #include "MessageInterface.hpp"
 
 
+//------------------------------------------------------------------------------
+// EndFileThrust(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ *
+ * @param name The name of the command
+ */
+//------------------------------------------------------------------------------
 EndFileThrust::EndFileThrust(const std::string &name) :
    GmatCommand             ("EndFileThrust"),
    burnForce               (NULL),
@@ -34,10 +43,26 @@ EndFileThrust::EndFileThrust(const std::string &name) :
    physicsBasedCommand = true;
 }
 
+//------------------------------------------------------------------------------
+// ~EndFileThrust()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 EndFileThrust::~EndFileThrust()
 {
 }
 
+//------------------------------------------------------------------------------
+// EndFileThrust(const EndFileThrust& eft) :
+//------------------------------------------------------------------------------
+/**
+ * Copy Constructor
+ *
+ * @param eft The command copied here
+ */
+//------------------------------------------------------------------------------
 EndFileThrust::EndFileThrust(const EndFileThrust& eft) :
    GmatCommand             (eft),
    burnForce               (NULL),
@@ -49,6 +74,17 @@ EndFileThrust::EndFileThrust(const EndFileThrust& eft) :
 {
 }
 
+//------------------------------------------------------------------------------
+// EndFileThrust& operator=(const EndFileThrust& eft)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param The command copied here
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
 EndFileThrust& EndFileThrust::operator =(const EndFileThrust& eft)
 {
    if (this != &eft)
@@ -67,11 +103,34 @@ EndFileThrust& EndFileThrust::operator =(const EndFileThrust& eft)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Creates a copy of this command
+ *
+ * @return The copy
+ */
+//------------------------------------------------------------------------------
 GmatBase* EndFileThrust::Clone() const
 {
    return new EndFileThrust(*this);
 }
 
+//------------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+//       const std::string& newName)
+//------------------------------------------------------------------------------
+/**
+ * Manages changes to names for reference objects
+ *
+ * @param type The type of the object changing names
+ * @param oldname The old name of the object
+ * @param The new object name
+ *
+ * @return true if a name change happened
+ */
+//------------------------------------------------------------------------------
 bool EndFileThrust::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
@@ -98,11 +157,32 @@ bool EndFileThrust::RenameRefObject(const Gmat::ObjectType type,
 }
 
 
+//------------------------------------------------------------------------------
+// void SetTransientForces(std::vector<PhysicalModel*>* tf)
+//------------------------------------------------------------------------------
+/**
+ * Sets the list of transient forces
+ *
+ * @param tf The list
+ */
+//------------------------------------------------------------------------------
 void EndFileThrust::SetTransientForces(std::vector<PhysicalModel*>* tf)
 {
    transientForces = tf;
 }
 
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string& action, const std::string& actionData)
+//------------------------------------------------------------------------------
+/**
+ * Performs custom actions in teh command
+ *
+ * @param action The action to be taken
+ * @param actionData Information needed to implement the action
+ *
+ * @return true if an action was taken
+ */
+//------------------------------------------------------------------------------
 bool EndFileThrust::TakeAction(const std::string& action,
       const std::string& actionData)
 {
@@ -121,6 +201,17 @@ bool EndFileThrust::TakeAction(const std::string& action,
    return false;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a reference object
+ *
+ * @param type The type of the object
+ *
+ * @return The name
+ */
+//------------------------------------------------------------------------------
 std::string EndFileThrust::GetRefObjectName(const Gmat::ObjectType type) const
 {
    switch (type)
@@ -140,6 +231,15 @@ std::string EndFileThrust::GetRefObjectName(const Gmat::ObjectType type) const
    return GmatCommand::GetRefObjectName(type);
 }
 
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * retrieves a list of reference object types
+ *
+ * @return The types of reference object used
+ */
+//------------------------------------------------------------------------------
 const ObjectTypeArray& EndFileThrust::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
@@ -149,6 +249,17 @@ const ObjectTypeArray& EndFileThrust::GetRefObjectTypeArray()
    return refObjectTypes;
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of the names of reference objects used.
+ *
+ * @param type The type of reference object names wanted
+ *
+ * @return The list of reference objects
+ */
+//------------------------------------------------------------------------------
 const StringArray& EndFileThrust::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
@@ -170,6 +281,18 @@ const StringArray& EndFileThrust::GetRefObjectNameArray(
    return refObjectNames;
 }
 
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const std::string& name)
+//------------------------------------------------------------------------------
+/**
+ * Sets the name for a reference object
+ *
+ * @param type The type of the reference object
+ * @param name The reference object name
+ *
+ * @return true if the reference was set
+ */
+//------------------------------------------------------------------------------
 bool EndFileThrust::SetRefObjectName(const Gmat::ObjectType type,
       const std::string& name)
 {
@@ -218,6 +341,20 @@ bool EndFileThrust::SetRefObjectName(const Gmat::ObjectType type,
    return GmatCommand::SetRefObjectName(type, name);
 }
 
+//------------------------------------------------------------------------------
+// const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//       const std::string& prefix, const std::string& useName)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the sctring used to script this command
+ *
+ * @param mode The mode used to generate the string
+ * @param prefix A prefix for the string
+ * @param useName The name to use for the object type
+ *
+ * @return The string
+ */
+//------------------------------------------------------------------------------
 const std::string& EndFileThrust::GetGeneratingString(Gmat::WriteMode mode,
       const std::string& prefix, const std::string& useName)
 {
@@ -329,7 +466,7 @@ bool EndFileThrust::Execute()
 
             if (numberFound != satNames.size())
                MessageInterface::ShowMessage("*** WARNING *** Turning off the "
-                     "finite burn %s, but the EndFiniteBurn command did not "
+                     "file thrust %s, but the EndFileThrust command did not "
                      "list all of the spacecraft that are no longer "
                      "maneuvering.\n", burnName.c_str());
 

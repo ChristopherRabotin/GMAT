@@ -94,6 +94,8 @@ protected:
    bool                          fillCartesian;
    /// Flag to toggle thrust vs accel
    bool                          dataIsThrust;
+   /// Flag used to warn once that  then go silent if mass flow is missing tank
+   bool                          massFlowWarningNeeded;
 
    /// The segment data from the thrust history file
    std::vector<ThrustSegment>    *segments;
@@ -105,7 +107,15 @@ protected:
    /// Name of the tank that is supplying fuel (just 1 for now)
    std::string                   activeTankName;
 
+   // 5 raw data elements: 3 thrust/accel components, mdot, interpolation method
+   Real dataBlock[5];
+   /// dataSet is (up to) 5 dataBlock sets, with the last element set to time
+   Real dataSet[5][5];
+
    void ComputeAccelerationMassFlow(const GmatEpoch atEpoch, Real burnData[4]);
+   void GetSegmentData(Integer atIndex, GmatEpoch atEpoch);
+   void LinearInterpolate(Integer atIndex, GmatEpoch atEpoch);
+   void SplineInterpolate(Integer atIndex, GmatEpoch atEpoch);
 };
 
 #endif /* FileThrust_hpp */

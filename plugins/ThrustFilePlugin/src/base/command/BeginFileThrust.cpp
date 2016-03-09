@@ -26,6 +26,16 @@
 //#define DEBUG_BEGIN_MANEUVER_EXE
 //#define DEBUG_INITIALIZATION
 
+
+//------------------------------------------------------------------------------
+// BeginFileThrust(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ *
+ * @param name The name of the command
+ */
+//------------------------------------------------------------------------------
 BeginFileThrust::BeginFileThrust(const std::string &name) :
    GmatCommand             ("BeginFileThrust"),
    burnForce               (NULL),
@@ -37,10 +47,26 @@ BeginFileThrust::BeginFileThrust(const std::string &name) :
    physicsBasedCommand = true;
 }
 
+//------------------------------------------------------------------------------
+// ~BeginFileThrust()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 BeginFileThrust::~BeginFileThrust()
 {
 }
 
+//------------------------------------------------------------------------------
+// BeginFileThrust(const EndFileThrust& bft) :
+//------------------------------------------------------------------------------
+/**
+ * Copy Constructor
+ *
+ * @param bft The command copied here
+ */
+//------------------------------------------------------------------------------
 BeginFileThrust::BeginFileThrust(const BeginFileThrust& bft) :
    GmatCommand             (bft),
    burnForce               (NULL),
@@ -52,6 +78,17 @@ BeginFileThrust::BeginFileThrust(const BeginFileThrust& bft) :
    sats.clear();
 }
 
+//------------------------------------------------------------------------------
+// BeginFileThrust& operator=(const BeginFileThrust& bft)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param The command copied here
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
 BeginFileThrust& BeginFileThrust::operator=(const BeginFileThrust& bft)
 {
    if (this != &bft)
@@ -69,11 +106,29 @@ BeginFileThrust& BeginFileThrust::operator=(const BeginFileThrust& bft)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Creates a copy of this command
+ *
+ * @return The copy
+ */
+//------------------------------------------------------------------------------
 GmatBase* BeginFileThrust::Clone() const
 {
    return new BeginFileThrust(*this);
 }
 
+//------------------------------------------------------------------------------
+// void SetTransientForces(std::vector<PhysicalModel*>* tf)
+//------------------------------------------------------------------------------
+/**
+ * Sets the list of transient forces
+ *
+ * @param tf The list
+ */
+//------------------------------------------------------------------------------
 void BeginFileThrust::SetTransientForces(std::vector<PhysicalModel*>* tf)
 {
    #ifdef DEBUG_TRANSIENT_FORCES
@@ -83,7 +138,18 @@ void BeginFileThrust::SetTransientForces(std::vector<PhysicalModel*>* tf)
    transientForces = tf;
 }
 
-
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string& action, const std::string& actionData)
+//------------------------------------------------------------------------------
+/**
+ * Performs custom actions in teh command
+ *
+ * @param action The action to be taken
+ * @param actionData Information needed to implement the action
+ *
+ * @return true if an action was taken
+ */
+//------------------------------------------------------------------------------
 bool BeginFileThrust::TakeAction(const std::string& action,
       const std::string& actionData)
 {
@@ -102,6 +168,17 @@ bool BeginFileThrust::TakeAction(const std::string& action,
    return false;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a reference object
+ *
+ * @param type The type of the object
+ *
+ * @return The name
+ */
+//------------------------------------------------------------------------------
 std::string BeginFileThrust::GetRefObjectName(const Gmat::ObjectType type) const
 {
    switch (type)
@@ -121,6 +198,15 @@ std::string BeginFileThrust::GetRefObjectName(const Gmat::ObjectType type) const
    return GmatCommand::GetRefObjectName(type);
 }
 
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * retrieves a list of reference object types
+ *
+ * @return The types of reference object used
+ */
+//------------------------------------------------------------------------------
 const ObjectTypeArray& BeginFileThrust::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
@@ -129,6 +215,17 @@ const ObjectTypeArray& BeginFileThrust::GetRefObjectTypeArray()
    return refObjectTypes;
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of the names of reference objects used.
+ *
+ * @param type The type of reference object names wanted
+ *
+ * @return The list of reference objects
+ */
+//------------------------------------------------------------------------------
 const StringArray& BeginFileThrust::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
@@ -151,6 +248,18 @@ const StringArray& BeginFileThrust::GetRefObjectNameArray(
    return refObjectNames;
 }
 
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const std::string& name)
+//------------------------------------------------------------------------------
+/**
+ * Sets the name for a reference object
+ *
+ * @param type The type of the reference object
+ * @param name The reference object name
+ *
+ * @return true if the reference was set
+ */
+//------------------------------------------------------------------------------
 bool BeginFileThrust::SetRefObjectName(const Gmat::ObjectType type,
       const std::string& name)
 {
@@ -200,6 +309,19 @@ bool BeginFileThrust::SetRefObjectName(const Gmat::ObjectType type,
    return GmatCommand::SetRefObjectName(type, name);
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* GetGmatObject(const Gmat::ObjectType type,
+//       const std::string objName)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a GMAT object
+ *
+ * @param type The type of the requested object
+ * @param objName The name of the object
+ *
+ * @return The object
+ */
+//------------------------------------------------------------------------------
 GmatBase* BeginFileThrust::GetGmatObject(const Gmat::ObjectType type,
       const std::string objName)
 {
@@ -208,6 +330,20 @@ GmatBase* BeginFileThrust::GetGmatObject(const Gmat::ObjectType type,
    return GmatCommand::GetGmatObject(type, objName);
 }
 
+//------------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
+//       const std::string& newName)
+//------------------------------------------------------------------------------
+/**
+ * Manages changes to names for reference objects
+ *
+ * @param type The type of the object changing names
+ * @param oldname The old name of the object
+ * @param The new object name
+ *
+ * @return true if a name change happened
+ */
+//------------------------------------------------------------------------------
 bool BeginFileThrust::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
@@ -225,6 +361,20 @@ bool BeginFileThrust::RenameRefObject(const Gmat::ObjectType type,
    return true;
 }
 
+//------------------------------------------------------------------------------
+// const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//       const std::string& prefix, const std::string& useName)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the sctring used to script this command
+ *
+ * @param mode The mode used to generate the string
+ * @param prefix A prefix for the string
+ * @param useName The name to use for the object type
+ *
+ * @return The string
+ */
+//------------------------------------------------------------------------------
 const std::string& BeginFileThrust::GetGeneratingString(Gmat::WriteMode mode,
       const std::string& prefix, const std::string& useName)
 {
@@ -347,6 +497,7 @@ bool BeginFileThrust::Initialize()
    }
    return retval;
 }
+
 
 //------------------------------------------------------------------------------
 // bool Execute()
