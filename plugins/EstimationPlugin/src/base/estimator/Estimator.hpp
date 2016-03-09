@@ -49,6 +49,8 @@ public:
    Estimator(const Estimator& est);
    Estimator& operator=(const Estimator& est);
 
+   virtual void         SetSolarSystem(SolarSystem *ss);       // made changes by TUAN NGUYEN
+
    virtual bool         Initialize();
    bool                 Reinitialize();                        // made changes by TUAN NGUYEN
    virtual void         CompleteInitialization();
@@ -67,6 +69,9 @@ public:
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                        const Real value);
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -274,6 +279,9 @@ protected:
 
    /// A string as a line/lines buffer to store a line/lines for writing to report file
    std::string linesBuff;
+
+   /// Solar system         // It needs to display information of central bodies in estimation report file      // made changes by TUAN NGUYEN
+   SolarSystem *solarSystem;                                                                                    // made changes by TUAN NGUYEN                  
 
    /// Parameters associated with the Estimators
    enum
