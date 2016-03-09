@@ -194,6 +194,8 @@ if(UNIX)
   endif()
 else()
   set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
+  set(WS2_32_LIB Ws2_32)
 endif()
 
 TARGET_LINK_LIBRARIES(${TargetName} ${XERCES_LIB})
+TARGET_LINK_LIBRARIES(${TargetName} ${WS2_32_LIB})
