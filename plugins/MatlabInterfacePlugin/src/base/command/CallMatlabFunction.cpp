@@ -1115,6 +1115,11 @@ void CallMatlabFunction::UpdateObject(GmatBase *obj, char *buffer)
    
    StringTokenizer st(buffer, "=\n");
    StringArray tokens = st.GetAllTokens();
+
+   // Mac/Linux sometimes return wuth the MATLAB prompt at head of the string
+   if (tokens[0] == ">> ")
+      tokens.erase(tokens.begin());
+
    int numTokens = tokens.size();
    
    #ifdef DEBUG_UPDATE_OBJECT

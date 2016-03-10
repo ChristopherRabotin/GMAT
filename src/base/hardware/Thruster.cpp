@@ -763,17 +763,6 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
    {
    case TANK:
       {
-//         if (index > 0)
-//         {
-//            std::string errmsg;
-//            errmsg =  "The value of \"";
-//            errmsg += value;
-//            errmsg += "\" on Thruster \"";
-//            errmsg += instanceName;
-//            errmsg += "\" is not an allowed value.  GMAT does not currently "
-//                  "support more than one tank per thruster";
-//            throw HardwareException(errmsg);
-//         }
 
          if (index < (Integer)tankNames.size())
             tankNames[index] = value;
@@ -1348,6 +1337,11 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //      else
       if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
       {
+         #ifdef DEBUG_THRUSTER_REF_OBJ
+         MessageInterface::ShowMessage
+            ("   ------ the tank pointer of name %s was NOT found in the array (of size %d)\n",
+                  name.c_str(), (Integer) tanks.size());
+         #endif
          // Replace old tank with new one. We don't want to delete the
          // old tank here since Spacecraft owns it (tank is not cloned in the
          // copy constructor)

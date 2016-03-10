@@ -648,6 +648,9 @@ protected:
    /// Internal flag used to relax constraint for Cr
    bool              constrainCr;
 
+   /// list of to-be-deleted obsolete objects
+   ObjectArray       obsoleteObjects;
+
    Real              UpdateTotalMass();
    Real              UpdateTotalMass() const;
    bool              ApplyTotalMass(Real newMass);

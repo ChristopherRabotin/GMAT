@@ -158,10 +158,16 @@ bool Transpose::ValidateInputs()
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
+   if ((type1 != Gmat::REAL_TYPE) && (type1 != Gmat::RMATRIX_TYPE))
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type1] + ") for transpose operator.\n";
+      throw MathException(errmsg);
+   }
+   
    // Transpose of matrix or scalar is allowed, so set retval to true
    // LOJ: 2012.01.19
    retval = true;
-   
    /*
    if (type1 == Gmat::RMATRIX_TYPE)
       retval = true;

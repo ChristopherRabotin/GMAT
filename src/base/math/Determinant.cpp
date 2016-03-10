@@ -135,6 +135,16 @@ bool Determinant::ValidateInputs()
    // Get the type(Real or Matrix), # rows and # columns of the left node
    leftNode->GetOutputInfo(type1, row1, col1);
    
+   if ((type1 != Gmat::REAL_TYPE) && (type1 != Gmat::RMATRIX_TYPE))
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type1] + ") for determinant operator.\n";
+      throw MathException(errmsg);
+   }
+
+   if ((type1 == Gmat::RMATRIX_TYPE) && (row1 != col1))
+      throw MathException("Determinant only supports a square matrix.\n");
+
    return true;
 }
 
