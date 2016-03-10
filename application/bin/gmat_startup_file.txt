@@ -42,33 +42,36 @@
 # Plugins
 #-----------------------------------------------------------
 # Default plugins
-PLUGIN                   = ../plugins/libDataInterface
-PLUGIN                 = ../plugins/libEphemPropagator
-PLUGIN                 = ../plugins/libEventLocator
-PLUGIN                 = ../plugins/libFormation
-PLUGIN                   = ../plugins/libGmatFunction
-PLUGIN                   = ../plugins/libNewParameters
-PLUGIN                   = ../plugins/libProductionPropagators
-PLUGIN                   = ../plugins/libPythonInterface
-PLUGIN                 = ../plugins/libStation
-PLUGIN                 = ../plugins/libMatlabInterface
-PLUGIN                 = ../plugins/libFminconOptimizer
-PLUGIN                 = ../plugins/libDataInterface
-PLUGIN                 = ../plugins/libProductionPropagators
-
-PLUGIN                  = ./libCInterface
+PLUGIN                  = ../plugins/libDataInterface
+PLUGIN                  = ../plugins/libEphemPropagator
+PLUGIN                  = ../plugins/libEventLocator
+PLUGIN                  = ../plugins/libFormation
+PLUGIN                  = ../plugins/libGmatFunction
+PLUGIN                  = ../plugins/libNewParameters
+PLUGIN                  = ../plugins/libProductionPropagators
+PLUGIN                  = ../plugins/libPythonInterface
+PLUGIN                  = ../plugins/libStation
+PLUGIN                  = ../plugins/libMatlabInterface
+PLUGIN                  = ../plugins/libFminconOptimizer
+PLUGIN                  = ../plugins/libDataInterface
+PLUGIN                  = ../plugins/libProductionPropagators
 PLUGIN                  = ../plugins/libGmatEstimation
+
+# Alpha plugins (disabled by default)
+PLUGIN                  = ./libCInterface
 PLUGIN                  = ../plugins/libGeometricMeasurements
 PLUGIN                  = ../plugins/libExtraPropagators
 PLUGIN                  = ../plugins/libPolyhedronGravity
 PLUGIN                  = ../plugins/libSaveCommand
-PLUGIN                = ../plugins/libGmatFunction
+PLUGIN                  = ../plugins/libGmatFunction
+PLUGIN                  = ../plugins/libThrustFile
+
 # Internal-only plugins
-PLUGIN                 = ../plugins/proprietary/libMarsGRAM
-PLUGIN                 = ../plugins/proprietary/libMsise86
-PLUGIN                 = ../plugins/proprietary/libNRLMsise00
-PLUGIN                   = ../plugins/proprietary/libSNOptimizer
-PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+PLUGIN                  = ../plugins/proprietary/libMarsGRAM
+PLUGIN                  = ../plugins/proprietary/libMsise86
+PLUGIN                  = ../plugins/proprietary/libNRLMsise00
+PLUGIN                  = ../plugins/proprietary/libSNOptimizer
+PLUGIN                  = ../plugins/proprietary/libVF13Optimizer
 
 #-----------------------------------------------------------
 # Directory/file paths
