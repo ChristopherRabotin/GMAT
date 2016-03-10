@@ -215,7 +215,7 @@ void ScriptPanel::SaveData()
    #ifdef DEBUG_SCRIPTPANEL_SAVE
    MessageInterface::ShowMessage
       ("ScriptPanel::SaveData() entered\n   mScriptFilename = '%s'\n   "
-       "      mFilename = '%s'\n", mScriptFilename.c_str(), mFilename.c_str());
+       "      mFilename = '%s'\n", mScriptFilename.WX_TO_C_STRING, mFilename.WX_TO_C_STRING);
    #endif
    
    GmatAppData *gmatAppData = GmatAppData::Instance();
@@ -237,7 +237,7 @@ void ScriptPanel::SaveData()
    #ifdef DEBUG_SCRIPTPANEL_SAVE
    MessageInterface::ShowMessage
       ("ScriptPanel::SaveData() leaving\n   mScriptFilename = '%s'\n   "
-       "      mFilename = '%s'\n", mScriptFilename.c_str(), mFilename.c_str());
+       "      mFilename = '%s'\n", mScriptFilename.WX_TO_C_STRING, mFilename.WX_TO_C_STRING);
    #endif
 }
 
