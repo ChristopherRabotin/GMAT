@@ -37,6 +37,7 @@
 //#define DEBUG_RENAME 1
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CONFIG_SS 1
+//#define DEBUG_CONFIG_ADD
 //#define DEBUG_CONFIG_ADD_CLONE 1
 //#define DEBUG_CONFIG_REMOVE
 //#define DEBUG_CONFIG_REMOVE_MORE
@@ -609,7 +610,7 @@ void ConfigManager::AddCalculatedPoint(CalculatedPoint *cp)
  * @param mModel Pointer to the MeasurementModel instance.
  */
 //------------------------------------------------------------------------------
-void ConfigManager::AddMeasurementModel(MeasurementModel *mModel)
+void ConfigManager::AddMeasurementModel(MeasurementModelBase *mModel)
 {
    if (mModel == NULL)
       throw ConfigManagerException("Cannot add NULL MeasurementModel object");
@@ -705,6 +706,58 @@ void ConfigManager::AddMeasurement(CoreMeasurement *meas)
          "should be hidden inside of a MeasurementModel", name.c_str());
    AddObject(obj);
 }
+
+
+//------------------------------------------------------------------------------
+// void AddErrorModel(ErrorModel *errorModel)
+//------------------------------------------------------------------------------
+/**
+ * Adds a ErrorModel to the configuration.
+ *
+ * @param errorModel Pointer to the ErrorModel instance.
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::AddErrorModel(ErrorModel *errorModel)                              // made changes by TUAN NGUYEN
+{                                                                                      // made changes by TUAN NGUYEN
+   if (errorModel == NULL)                                                             // made changes by TUAN NGUYEN
+      throw ConfigManagerException("Cannot add NULL ErrorModel object");               // made changes by TUAN NGUYEN
+
+   GmatBase *obj = (GmatBase*)errorModel;                                              // made changes by TUAN NGUYEN
+   std::string name = obj->GetName();                                                  // made changes by TUAN NGUYEN
+   if (name == "")                                                                     // made changes by TUAN NGUYEN
+      throw ConfigManagerException("Unnamed objects cannot be managed");               // made changes by TUAN NGUYEN
+
+   if (!obj->IsOfType(Gmat::ERROR_MODEL))                                              // made changes by TUAN NGUYEN
+      throw ConfigManagerException(name + " is not an ErrorModel");                    // made changes by TUAN NGUYEN
+
+   AddObject(obj);                                                                     // made changes by TUAN NGUYEN
+}                                                                                      // made changes by TUAN NGUYEN
+
+
+//------------------------------------------------------------------------------
+// void AddDataFilter(DataFilter *filter)
+//------------------------------------------------------------------------------
+/**
+ * Adds a DataFilter to the configuration.
+ *
+ * @param filter Pointer to the DataFilter instance.
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::AddDataFilter(DataFilter *filter)                                  // made changes by TUAN NGUYEN
+{                                                                                      // made changes by TUAN NGUYEN
+   if (filter == NULL)                                                                 // made changes by TUAN NGUYEN
+      throw ConfigManagerException("Cannot add NULL DataFilter object");               // made changes by TUAN NGUYEN
+
+   GmatBase *obj = (GmatBase*)filter;                                                  // made changes by TUAN NGUYEN
+   std::string name = obj->GetName();                                                  // made changes by TUAN NGUYEN
+   if (name == "")                                                                     // made changes by TUAN NGUYEN
+      throw ConfigManagerException("Unnamed objects cannot be managed");               // made changes by TUAN NGUYEN
+
+   if (!obj->IsOfType(Gmat::DATA_FILTER))                                              // made changes by TUAN NGUYEN
+      throw ConfigManagerException(name + " is not a DataFilter");                     // made changes by TUAN NGUYEN
+
+   AddObject(obj);                                                                     // made changes by TUAN NGUYEN
+}                                                                                      // made changes by TUAN NGUYEN
 
 
 //------------------------------------------------------------------------------
@@ -2399,28 +2452,79 @@ CalculatedPoint* ConfigManager::GetCalculatedPoint(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// MeasurementModel* GetMeasurementModel(const std::string &name)
+// MeasurementModelBase* GetMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Retrieves a MeasurementModel from the configuration
+ * Retrieves a measurement model from the configuration
  *
  * @param name The name of the MeasurementModel
  *
  * @return A pointer to the MeasurementModel, or NULL if it was not found
  */
 //------------------------------------------------------------------------------
-MeasurementModel* ConfigManager::GetMeasurementModel(const std::string &name)
+MeasurementModelBase* ConfigManager::GetMeasurementModel(const std::string &name)
 {
-   MeasurementModel *mm = NULL;
+   MeasurementModelBase *mm = NULL;
    if (mapping.find(name) != mapping.end())
    {
       if (mapping[name]->IsOfType(Gmat::MEASUREMENT_MODEL))
       {
-         mm = (MeasurementModel *)mapping[name];
+         mm = (MeasurementModelBase *)mapping[name];
       }
    }
    return mm;
 }
+
+
+//------------------------------------------------------------------------------
+// ErrorModel* GetErrorModel(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an error model from the configuration
+ *
+ * @param name The name of the ErrorModel
+ *
+ * @return A pointer to the ErrorModel, or NULL if it was not found
+ */
+//------------------------------------------------------------------------------
+ErrorModel* ConfigManager::GetErrorModel(const std::string &name)                 // made changes by TUAN NGUYEN
+{                                                                                 // made changes by TUAN NGUYEN
+   ErrorModel *erm = NULL;                                                        // made changes by TUAN NGUYEN
+   if (mapping.find(name) != mapping.end())                                       // made changes by TUAN NGUYEN
+   {                                                                              // made changes by TUAN NGUYEN
+      if (mapping[name]->IsOfType(Gmat::ERROR_MODEL))                             // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         erm = (ErrorModel *)mapping[name];                                       // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+   }                                                                              // made changes by TUAN NGUYEN
+   return erm;                                                                    // made changes by TUAN NGUYEN
+}                                                                                 // made changes by TUAN NGUYEN
+
+
+//------------------------------------------------------------------------------
+// DataFilter* GetDataFilter(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a DataFilter from the configuration
+ *
+ * @param name The name of the DataFilter
+ *
+ * @return A pointer to the DataFilter, or NULL if it was not found
+ */
+//------------------------------------------------------------------------------
+DataFilter* ConfigManager::GetDataFilter(const std::string &name)                 // made changes by TUAN NGUYEN
+{                                                                                 // made changes by TUAN NGUYEN
+   DataFilter *df = NULL;                                                         // made changes by TUAN NGUYEN
+   if (mapping.find(name) != mapping.end())                                       // made changes by TUAN NGUYEN
+   {                                                                              // made changes by TUAN NGUYEN
+      if (mapping[name]->IsOfType(Gmat::DATA_FILTER))                             // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         df = (DataFilter *)mapping[name];                                        // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+   }                                                                              // made changes by TUAN NGUYEN
+   return df;                                                                     // made changes by TUAN NGUYEN
+}                                                                                 // made changes by TUAN NGUYEN
+
 
 //------------------------------------------------------------------------------
 // TrackingSystem* GetTrackingSystem(const std::string &name)

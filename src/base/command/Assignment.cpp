@@ -2481,6 +2481,8 @@ ElementWrapper* Assignment::RunMathTree()
             rval = topNode->Evaluate();
             
             #ifdef DEBUG_RUN_MATH_TREE
+            MessageInterface::ShowMessage("   Returned %f (%s)\n",
+                              rval, GmatStringUtil::ToString(rval).c_str());
             MessageInterface::ShowMessage("   Returned %f\n", rval);
             MessageInterface::ShowMessage("   Creating NumberWrapper for output\n");
             #endif

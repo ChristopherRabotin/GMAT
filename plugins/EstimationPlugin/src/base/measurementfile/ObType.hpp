@@ -38,6 +38,8 @@
 #include "GmatBase.hpp"
 #include "MeasurementData.hpp"
 #include "ObservationData.hpp"
+///// TBD: Determine if there is a more generic way to add these
+#include "RampTableData.hpp"
 
 
 /**
@@ -62,8 +64,9 @@ public:
    virtual bool      Finalize();
 
    void              SetStreamName(std::string name);
+   std::string       GetStreamName();
 
-   // Abstract methods
+   /// Abstract methods used for observation data only:
    /**
     * Method used to add a measurement to the stream.
     */
@@ -73,6 +76,11 @@ public:
     */
    virtual ObservationData *
                      ReadObservation() = 0;
+
+///// TBD: Determine if there is a more generic way to add these
+   /// Method used for frequency ramp table only: 
+   virtual RampTableData *
+                     ReadRampTableData() = 0;
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES

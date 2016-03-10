@@ -31,7 +31,7 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_TROPOSPHERE_CORRECTION
+//#define DEBUG_TROPOSPHERE_CORRECTION
 
 //------------------------------------------------------------------------------
 // static data
@@ -239,10 +239,10 @@ RealArray Troposphere::Correction()
 	  MessageInterface::ShowMessage("Troposphere::Correction: Cannot obtain Earth radius\n");
       throw MeasurementException("Troposphere::Correction: Cannot obtain Earth radius\n");
    }
-   Real Re = earth->GetEquatorialRadius()*GmatMathConstants::KM_TO_M;			// get Erath radius in meters
+   Real Re = earth->GetEquatorialRadius()*GmatMathConstants::KM_TO_M;			// get Earth radius in meters
 
 #ifdef DEBUG_TROPOSPHERE_CORRECTION
-   MessageInterface::ShowMessage("Troposphere::Correction():\n");
+//   MessageInterface::ShowMessage("Troposphere::Correction():\n");
    MessageInterface::ShowMessage("   temperature = %f K ,  pressure = %f hPa,  humidity = %f\n", temperature, pressure, humidityFraction);
    MessageInterface::ShowMessage("   range = %lfm ,  elevationAngle = %lf radian,  waveLenght = %lfm\n", range, elevationAngle, waveLength);
    MessageInterface::ShowMessage("   earth radius = %lf m\n",Re);

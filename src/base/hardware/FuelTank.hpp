@@ -92,61 +92,28 @@ public:
    virtual bool         Initialize();
    virtual bool         Validate() = 0;
    
+   void                 SetFlowWithoutThruster(bool directFlowAllowed);
+   bool                 NoThrusterNeeded();
+
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    /// Mass of the fuel in the tank
    Real                 fuelMass;
-//   /// Tank pressure
-//   Real                 pressure;
-//   /// Fuel temperature
-//   Real                 temperature;
-//   /// Reference temperature
-//   Real                 refTemperature;
-//   /// Tank volume
-//   Real                 volume;
-//   /// Fuel density
-//   Real                 density;
-//   /// Flag indicating if the tank is pressure regulated or blow-down
-//   bool                 pressureRegulated; // deprecated
    /// Flag indicating if negative fuel mass is allowed
    bool                 allowNegativeFuelMass;
-//   /// Pressure model used
-//   Integer              pressureModel;
-//
-//   // Parameters used for internal calculations
-//
-//   /// Pressurant volume, a calculated parameter
-//   Real                 gasVolume;
-//   /// Baseline product of the pressure and temperature
-//   Real                 pvBase;
-   
+   /// Flag used to allow direct mass flow, for instance for thrust history file
+   bool                 noThrusterNeeded;
+
    virtual void         UpdateTank()         = 0;
    virtual void         DepleteFuel(Real dm) = 0;
    
-//   /// Pressure model list
-//   enum
-//   {
-//      TPM_PRESSURE_REGULATED,
-//      TPM_BLOW_DOWN
-//   };
-//
-//   /// Availabel pressure model list
-//   static StringArray   pressureModelList;
-//   //static const std::string pressureModelList[2];
 public:
    /// Published parameters for generic fuel tanks
    enum
    {
       ALLOW_NEGATIVE_FUEL_MASS = HardwareParamCount,
       FUEL_MASS,
-//      PRESSURE,
-//      TEMPERATURE,
-//      REFERENCE_TEMPERATURE,
-//      VOLUME,
-//      FUEL_DENSITY,
-//      PRESSURE_MODEL,
-//      PRESSURE_REGULATED,  // deprecated
       FuelTankParamCount
    };
    

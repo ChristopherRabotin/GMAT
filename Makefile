@@ -11,7 +11,8 @@
 # This file is really just a convenience.  In eclipse, it's useful to have a
 # root level file that calls into the source tree.
 
-BUILD_64BIT = 0
+BUILD_64BIT = 1
+BUILD_THREADS=1
 
 ifeq ($(PLATFORM), )
 PLATFORM = windows

@@ -76,6 +76,13 @@ namespace GmatStringUtil
                            const std::string &to);
    GMAT_API std::string ReplaceChainedUnaryOperators(const std::string &str);
    
+   GMAT_API std::string RealToString(const Real &val, bool useCurrentFormat = true,
+      bool scientific = false, bool showPoint = true,
+      Integer precision = GmatGlobal::DATA_PRECISION,
+      Integer width = GmatGlobal::DATA_WIDTH);                                                       // made changes by TUAN NGUYEN
+   GMAT_API std::string RealToString(const Real &val, Integer precision, bool showPoint = false,
+      Integer width = 1);                                                                            // made changes by TUAN NGUYEN
+
    GMAT_API std::string ToString(const bool &val);
    GMAT_API std::string ToString(const Real &val, Integer precision, bool showPoint = false,
                            Integer width = 1);
@@ -212,6 +219,16 @@ namespace GmatStringUtil
    GMAT_API void WriteStringArray(const StringArray &strArray,
                                   const std::string &desc = "",
                                   const std::string &prefix = "");
+
+
+   enum AlignmentType
+   {
+      LEFT,
+      RIGHT,
+      CENTER,
+   };
+   
+   GMAT_API std::string GetAlignmentString(const std::string inputString, UnsignedInt len, AlignmentType alignment = LEFT); 
    
    // Wide string handling
    GMAT_API std::wstring StringToWideString(const std::string &str);

@@ -35,13 +35,13 @@
 class ESTIMATION_API Receiver: public RFHardware
 {
 public:
-	Receiver(const std::string &name);
-	virtual ~Receiver();
-	Receiver(const Receiver& recei);
-	Receiver& operator=(const Receiver& recei);
+   Receiver(const std::string &name);
+   virtual ~Receiver();
+   Receiver(const Receiver& recei);
+   Receiver& operator=(const Receiver& recei);
 
-	virtual GmatBase* Clone() const;
-	virtual void      Copy(const GmatBase* recei);
+   virtual GmatBase* Clone() const;
+   virtual void      Copy(const GmatBase* recei);
 
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
@@ -92,20 +92,20 @@ public:
 
    virtual bool         Initialize();
 
-   virtual Real			GetDelay(Integer whichOne=0);
-   virtual bool 			SetDelay(Real delay, Integer whichOne=0);
-   virtual bool 			IsFeasible(Integer whichOne=0);
-   virtual Integer 		GetSignalCount();
-   virtual bool			IsTransmitted(Integer whichOne=0);
-   virtual Signal*		GetSignal(Integer whichOne=0);
-   virtual bool 			SetSignal(Signal* s,Integer whichOne=0);
+   virtual Real         GetDelay(Integer whichOne=0);
+   virtual bool         SetDelay(Real delay, Integer whichOne=0);
+   virtual bool         IsFeasible(Integer whichOne=0);
+   virtual Integer      GetSignalCount();
+   virtual bool         IsTransmitted(Integer whichOne=0);
+   virtual Signal*      GetSignal(Integer whichOne=0);
+   virtual bool         SetSignal(Signal* s,Integer whichOne=0);
 
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   std::string	frequencyModel;
-   Real			centerFrequency;
-   Real 			bandwidth;
+   std::string   frequencyModel;
+   Real          centerFrequency;
+   Real          bandwidth;
 
    /// Published parameters for the RF hardware
    enum

@@ -50,7 +50,7 @@ else()
   set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
 endif()
 
-LINK_LIBRARIES(optimized ${XERCES_LIB})
+LINK_LIBRARIES(${XERCES_LIB})
 
 # ====================================================================
 # F2C
@@ -447,6 +447,7 @@ SET(BASE_SRCS
     solarsys/ExponentialAtmosphere.cpp
     solarsys/JacchiaRobertsAtmosphere.cpp
     solarsys/LibrationPoint.cpp
+    solarsys/MediaCorrectionInterface.cpp
     solarsys/Moon.cpp
     solarsys/Msise90Atmosphere.cpp
     solarsys/PlanetaryEphemException.cpp
@@ -515,9 +516,12 @@ SET(BASE_SRCS
     util/ElapsedTime.cpp
     util/EopFile.cpp
     util/FileManager.cpp
+    util/FileUpdaterSVN.cpp
     util/FileUtil.cpp
     util/GmatGlobal.cpp
+    util/GmatTime.cpp
     util/GregorianDate.cpp
+    util/IFileUpdater.cpp
     util/LeapSecsFileReader.cpp
     util/Linear.cpp
     util/MemoryTracker.cpp

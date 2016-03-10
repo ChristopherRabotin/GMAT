@@ -66,7 +66,7 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index,
-                         Integer quantity);
+                         Integer quantity, Integer sizeOfType);
 
    virtual const StringArray& GetRefObjectNameArray(
          const Gmat::ObjectType type);

@@ -61,7 +61,7 @@ public:
    virtual void         SetSolarSystem(SolarSystem *ss);
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    CoordinateSystem*    GetInternalCoordSystem();
-   
+
    EphemManager*        GetEphemManager();
 
    std::string          GetModelFile();
@@ -160,6 +160,23 @@ public:
                                          const Real value,
                                          const Integer index);
    
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+//   virtual Integer      GetIntegerParameter(const Integer id,
+//                                            const Integer index) const;
+//   virtual Integer      SetIntegerParameter(const Integer id,
+//                                            const Integer value,
+//                                            const Integer index);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
+//   virtual Integer      GetIntegerParameter(const std::string &label,
+//                                            const Integer index) const;
+//   virtual Integer      SetIntegerParameter(const std::string &label,
+//                                            const Integer value,
+//                                            const Integer index);
+
    virtual const Rvector& GetRvectorParameter(const Integer id) const;
    virtual const Rvector& GetRvectorParameter(const std::string &label) const;
    virtual const Rvector& SetRvectorParameter(const Integer id,
@@ -245,19 +262,23 @@ public:
    virtual Integer         GetPropItemSize(const Integer item);
    virtual bool            PropItemNeedsFinalUpdate(const Integer item);
 
+   virtual Integer         GetEstimationParameterID(const std::string &param);
+   virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
    virtual bool            IsEstimationParameterValid(const Integer id);
    virtual Integer         GetEstimationParameterSize(const Integer id);
    virtual Real*           GetEstimationParameterValue(const Integer id);
 
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
+   virtual Integer         GetStmRowId(const Integer forRow);
    virtual Integer         HasParameterCovariances(Integer parameterId);
 
    // Cloned object update management
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
    virtual void UpdateClonedObjectParameter(GmatBase *obj,
-                                            Integer updatedParameterId);
+         Integer updatedParameterId);
 
    virtual void      UpdateElementLabels();
    virtual void      UpdateElementLabels(const std::string &displayStateType);
@@ -296,6 +317,9 @@ protected:
       ATTITUDE,
       ORBIT_STM,
       ORBIT_A_MATRIX,
+      FULL_STM,
+      FULL_A_MATRIX,
+      FULL_STM_ROWCOUNT,
 //      ORBIT_COVARIANCE,
 
       // SPAD SRP parameters
@@ -314,6 +338,10 @@ protected:
 
       // Hardware for spacecraft
       ADD_HARDWARE,
+      SOLVEFORS,                                                    // made changes by TUAN NGUYEN
+      STMELEMENTS,
+      CD_EPSILON,
+      CR_EPSILON,
       // The filename used for the spacecraft's model 
       MODEL_FILE,
       MODEL_FILE_FULL_PATH, // read-only
@@ -471,7 +499,7 @@ protected:
    StringArray       stateElementUnits;
    /// Possible state representations
    StringArray       representations;
-   
+
    // The ID of the model that the spacecraft uses, and the filename as well
    std::string          modelFile;   
    int                  modelID;
@@ -532,7 +560,7 @@ protected:
    bool              epochSet;
    /// Flag indicating whether or not unique state element found
    bool              uniqueStateTypeFound;
-   
+
    /// coordinate system map to be used for Thrusters for now
    std::map<std::string, CoordinateSystem*> coordSysMap;
 
@@ -570,10 +598,18 @@ protected:
    bool              csSet;
    bool              isThrusterSettingMode;
 
-   /// The orbit State Transition Matrix
-   Rmatrix           orbitSTM;
-   /// The orbit State A Matrix
-   Rmatrix           orbitAMatrix;
+//   /// The orbit State Transition Matrix
+//   Rmatrix           orbitSTM;
+//   /// The orbit State A Matrix
+//   Rmatrix           orbitAMatrix;
+   /// The full State Transition Matrix used for propagation
+   Rmatrix           fullSTM;
+   /// The full State A Matrix
+   Rmatrix           fullAMatrix;
+   /// full STM number of rows (and columns)
+   Integer           fullSTMRowCount;
+   /// Mapping of the rows/columns in the STM
+   IntegerArray      stmIndices;
 
    /// The name of the SPAD SRP file
    std::string       spadSRPFile;
@@ -597,6 +633,24 @@ protected:
    /// List of hardware objects used in the spacecraft
    ObjectArray       hardwareList;
 
+   // Solve-for parameters                                               // made changes by TUAN NGUYEN
+   /// List of solve-for parameters in Spacecraft object                 // made changes by TUAN NGUYEN
+   StringArray       solveforNames;                                      // made changes by TUAN NGUYEN
+   /// List of STM parameters in Spacecraft object
+   StringArray       stmElementNames;
+
+   /// Epsilon value used when solving for the Cd parameter
+   Real              cdEpsilon;
+   /// Epsilon value used when solving for the Cr parameter
+   Real              crEpsilon;
+   /// Internal flag used to relax constraint for Cd
+   bool              constrainCd;
+   /// Internal flag used to relax constraint for Cr
+   bool              constrainCr;
+
+   /// list of to-be-deleted obsolete objects
+   ObjectArray       obsoleteObjects;
+
    Real              UpdateTotalMass();
    Real              UpdateTotalMass() const;
    bool              ApplyTotalMass(Real newMass);
@@ -604,7 +658,8 @@ protected:
                                         bool deleteThrusters, bool deletePowerSystem,
                                         bool otherHardware);
    void              CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                       const ObjectArray &thrs, PowerSystem *pwr);
+                                       const ObjectArray &thrs, PowerSystem *pwr,
+                                       const ObjectArray &otherHw);        // made changes on 09/23/2014
    void              AttachTanksToThrusters();
    bool              SetHardware(GmatBase *obj, StringArray &hwNames,
                                  ObjectArray &hwArray);

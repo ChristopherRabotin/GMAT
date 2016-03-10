@@ -209,18 +209,26 @@ namespace Gmat
       // Estimation types
       MEASUREMENT_MODEL,   // May be replaced by TrackingSystem
       CORE_MEASUREMENT,    // For the measurement primitives
+      ERROR_MODEL,         // Error model used in a measurement            // made changes by TUAN NGUYEN  
       
       TRACKING_DATA,
       TRACKING_SYSTEM,
       DATASTREAM,          // For DataFile container objects      
       DATA_FILE,           // For DataFile objects
       OBTYPE,              // For the specific observation types
+
+      // Data filters
+      DATA_FILTER,         // for data filter                              // made changes by TUAN NGUYEN
       
       INTERFACE,           // MatlabInterface and other Interfaces
       MEDIA_CORRECTION,    // For media correction model
       SENSOR,              // For RFHardwares and Antennas
       RF_HARDWARE,
       ANTENNA,
+      
+      GENERIC_OBJECT,      // Used for user defined objects that do not fall 
+                           // into any of the above categories, and for 
+                           // internal objects that users don't access
       
       UNKNOWN_OBJECT
    };
@@ -306,7 +314,7 @@ namespace Gmat
       UNKNOWN_STATE = -1,
       CARTESIAN_STATE = 3700,          // Integrable state representations
       EQUINOCTIAL_STATE,
-      ORBIT_STATE_TRANSITION_MATRIX,   // 6x6 STM for the orbit
+      ORBIT_STATE_TRANSITION_MATRIX,   // STM for the orbit
       ORBIT_A_MATRIX,
       MASS_FLOW,                       // m dot
       PREDEFINED_STATE_MAX,

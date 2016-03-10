@@ -34,34 +34,35 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "SolarSystem.hpp"
+#include "MediaCorrectionInterface.hpp"
 
 
-class ESTIMATION_API MediaCorrection: public GmatBase
+class ESTIMATION_API MediaCorrection: public MediaCorrectionInterface		//public GmatBase
 {
 public:
-	MediaCorrection(const std::string &typeStr,
+   MediaCorrection(const std::string &typeStr,
 						const std::string &nomme = "");
-	virtual ~MediaCorrection();
+   virtual ~MediaCorrection();
    MediaCorrection(const MediaCorrection& mdc);
    MediaCorrection& operator=(const MediaCorrection& mc);
    virtual GmatBase*    Clone() const;
 
-	virtual bool SetModel(Integer mod);
-	virtual bool SetModelName(std::string modName);
+   virtual bool SetModel(Integer mod);
+   virtual bool SetModelName(std::string modName);
 
    virtual void SetSolarSystem(SolarSystem *ss);
 
-	virtual RealArray Correction();
+   virtual RealArray Correction();
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-	Integer model;
-	std::string modelName;
+   Integer model;
+   std::string modelName;
 
-	SolarSystem *solarSystem;
+   SolarSystem *solarSystem;
 };
 
 #endif /* MediaCorrection_hpp */

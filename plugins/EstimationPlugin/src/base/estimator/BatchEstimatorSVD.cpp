@@ -322,7 +322,7 @@ void BatchEstimatorSVD::Accumulate()
    nextMeasurementEpoch = measManager.GetEpoch();
    FindTimeStep();
 
-   if (currentEpoch < nextMeasurementEpoch)
+   if (currentEpoch <= nextMeasurementEpoch)			// change the same as in BatchEstimatorInv.cpp 
       currentState = PROPAGATING;
    else
       currentState = ESTIMATING;

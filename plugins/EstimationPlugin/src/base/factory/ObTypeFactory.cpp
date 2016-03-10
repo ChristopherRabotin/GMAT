@@ -23,7 +23,7 @@
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: 2009/06/19
-//
+// 
 /**
  * Factory used to create ObType objects
  */
@@ -32,8 +32,20 @@
 
 #include "ObTypeFactory.hpp"
 
+#define INCLUDE_TDM
+
+
 // Supported ObTypes
 #include "GmatObType.hpp"
+#ifdef INCLUDE_TDM
+   #include "TdmObType.hpp"
+#endif
+
+/// TBD: Are these needed?
+#include "GmatODType.hpp"
+#include "GmatODDopplerType.hpp"
+#include "RampTableType.hpp"
+
 
 
 //-----------------------------------------------------------------------------
@@ -49,6 +61,12 @@ ObTypeFactory::ObTypeFactory() :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
+	   creatables.push_back("GMAT_OD");
+	   creatables.push_back("GMAT_ODDoppler");
+	   creatables.push_back("GMAT_RampTable");
+#ifdef INCLUDE_TDM
+      creatables.push_back("TDM");
+#endif
    }
 }
 
@@ -80,6 +98,12 @@ ObTypeFactory::ObTypeFactory(StringArray createList) :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
+	   creatables.push_back("GMAT_OD");
+	   creatables.push_back("GMAT_ODDoppler");
+	   creatables.push_back("GMAT_RampTable");
+#ifdef INCLUDE_TDM
+      creatables.push_back("TDM");
+#endif
    }
 }
 
@@ -99,6 +123,12 @@ ObTypeFactory::ObTypeFactory(const ObTypeFactory& fact) :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
+	   creatables.push_back("GMAT_OD");
+	   creatables.push_back("GMAT_ODDoppler");
+	   creatables.push_back("GMAT_RampTable");
+#ifdef INCLUDE_TDM
+      creatables.push_back("TDM");
+#endif
    }
 }
 
@@ -123,6 +153,12 @@ ObTypeFactory& ObTypeFactory::operator= (const ObTypeFactory& fact)
       if (creatables.empty())
       {
          creatables.push_back("GMATInternal");
+		   creatables.push_back("GMAT_OD");
+		   creatables.push_back("GMAT_ODDoppler");
+		   creatables.push_back("GMAT_RampTable");
+#ifdef INCLUDE_TDM
+         creatables.push_back("TDM");
+#endif
       }
    }
 
@@ -149,6 +185,16 @@ ObType* ObTypeFactory::CreateObType(const std::string &ofType,
 
    if (ofType == "GMATInternal")
       retval = new GmatObType(withName);
+   else if (ofType == "GMAT_OD")
+      retval = new GmatODType(withName);
+   else if (ofType == "GMAT_ODDoppler")
+      retval = new GmatODDopplerType(withName);
+   else if (ofType == "GMAT_RampTable")
+      retval = new RampTableType(withName);
+#ifdef INCLUDE_TDM
+   if (ofType == "TDM")
+      retval = new TdmObType(withName);
+#endif
 
    return retval;
 }

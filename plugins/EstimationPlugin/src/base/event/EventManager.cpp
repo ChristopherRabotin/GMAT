@@ -295,6 +295,7 @@ Real EventManager::FindRoot(Integer whichOne)
          MessageInterface::ShowMessage("   Calling RootFinder to check the "
                "current event list\n");
       #endif
+
       rootTime = locater.Locate(eventList);
 
       ((Event*)events[whichOne])->Evaluate();

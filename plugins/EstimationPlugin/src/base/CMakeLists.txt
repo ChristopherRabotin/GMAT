@@ -21,14 +21,45 @@ if(NOT EXISTS ${F2C_DIR})
   RETURN()
 endif()
 
+if(NOT XERCES_LIB_DIR)
+  MESSAGE(WARNING "Skipping Estimation: Xerces missing")
+  RETURN()
+endif()
+
 SET(TargetName GmatEstimation)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
 
 # ====================================================================
+# extra include directory for header file
+INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
+
+# ====================================================================
 # list of directories containing source/header files
-SET(PLUGIN_DIRS command estimator event factory hardware include measurement measurement/Ionosphere measurement/Troposphere measurementfile plugin trackingsystem)
+SET(PLUGIN_DIRS
+  adapter
+  command
+  datafilter
+  errormodel
+  estimator
+  event
+  factory
+  hardware
+  include
+  measurement
+  measurement/Ionosphere
+  measurement/Troposphere
+  measurementfile
+  measurementmodel
+  plugin
+  propagator
+  reporter
+  signal
+  tdmReader
+  trackingfile
+  trackingsystem
+  )
 
 # ====================================================================
 # Include F2C
@@ -37,8 +68,20 @@ INCLUDE_DIRECTORIES(${F2C_DIR})
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
+    adapter/DopplerAdapter.cpp
+    adapter/DSNRangeAdapter.cpp
+    adapter/GNDopplerAdapter.cpp
+    adapter/PointRangeRateAdapterKps.cpp
+    adapter/RangeAdapterKm.cpp
+    adapter/RangeRateAdapterKps.cpp
+    adapter/TDRSDopplerAdapter.cpp
+    adapter/TrackingDataAdapter.cpp
     command/RunEstimator.cpp
     command/RunSimulator.cpp
+    datafilter/DataFilter.cpp
+    datafilter/StatisticAcceptFilter.cpp
+    datafilter/StatisticRejectFilter.cpp
+    errormodel/ErrorModel.cpp
     estimator/BatchEstimator.cpp
     estimator/BatchEstimatorInv.cpp
     estimator/BatchEstimatorSVD.cpp
@@ -54,14 +97,19 @@ SET(PLUGIN_SRCS
     event/EventException.cpp
     event/EventManager.cpp
     event/LightTimeCorrection.cpp
+    factory/AdapterFactory.cpp
     factory/DataFileFactory.cpp
+    factory/ErrorModelFactory.cpp
     factory/EstimationCommandFactory.cpp
+    factory/EstimationDataFilterFactory.cpp
     factory/EstimatorFactory.cpp
     factory/EstimatorHardwareFactory.cpp
     factory/EventFactory.cpp
     factory/MeasurementFactory.cpp
     factory/MeasurementModelFactory.cpp
+    factory/NavPropagatorFactory.cpp
     factory/ObTypeFactory.cpp
+    factory/SignalModelFactory.cpp
     factory/TrackingDataFactory.cpp
     factory/TrackingSystemFactory.cpp
     hardware/Antenna.cpp
@@ -78,10 +126,12 @@ SET(PLUGIN_SRCS
     measurement/MeasurementData.cpp
     measurement/MeasurementManager.cpp
     measurement/MeasurementModel.cpp
+    measurement/MeasurementModelBase.cpp
     measurement/MediaCorrection.cpp
     measurement/OpticalAngles.cpp
     measurement/OpticalAzEl.cpp
     measurement/PhysicalMeasurement.cpp
+    measurement/RandomNumber.cpp
     measurement/SnTwoWayRange.cpp
     measurement/TDRSSTwoWayRange.cpp
     measurement/TrackingData.cpp
@@ -92,9 +142,27 @@ SET(PLUGIN_SRCS
     measurementfile/DataFile.cpp
     measurementfile/DataFileAdapter.cpp
     measurementfile/GmatObType.cpp
-    measurementfile/ObType.cpp
+    measurementfile/GmatData.cpp
+    measurementfile/GmatObType.cpp
+    measurementfile/GmatODDopplerType.cpp
+    measurementfile/GmatODType.cpp
     measurementfile/ObservationData.cpp
+    measurementfile/ObType.cpp
+    measurementfile/RampTableData.cpp
+    measurementfile/RampTableType.cpp
+    measurementmodel/MeasureModel.cpp
     plugin/GmatPluginFunctions.cpp
+    propagator/RungeKutta4.cpp
+    reporter/ProgressReporter.cpp
+    signal/PhysicalSignal.cpp
+    signal/SignalBase.cpp
+    signal/SignalData.cpp
+    signal/SinglePointSignal.cpp
+    tdmReader/TdmErrorHandler.cpp
+    tdmReader/TdmObType.cpp
+    tdmReader/TdmReadWriter.cpp
+    trackingfile/TFSMagicNumbers.cpp
+    trackingfile/TrackingFileSet.cpp
     trackingsystem/DSNTrackingSystem.cpp
     trackingsystem/OpticalTrackingSystem.cpp
     trackingsystem/TDRSSTrackingSystem.cpp
@@ -107,15 +175,25 @@ if(WIN32)
   ADD_DEFINITIONS("-DIONOSPHERE")
   SET(PLUGIN_SRCS ${PLUGIN_SRCS}
     measurement/Ionosphere/Ionosphere.cpp
-    measurement/Ionosphere/cira.c
-    measurement/Ionosphere/igrf.c
-    measurement/Ionosphere/iridreg.c
-    measurement/Ionosphere/irifun.c
-    measurement/Ionosphere/irisub.c
-    measurement/Ionosphere/iritec.c
+    measurement/Ionosphere/iri2007.c
     )
 endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# ====================================================================
+# Additional link libraries
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
+  else()
+    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
+  endif()
+else()
+  set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
+endif()
+
+TARGET_LINK_LIBRARIES(${TargetName} ${XERCES_LIB})

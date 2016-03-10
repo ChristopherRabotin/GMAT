@@ -72,6 +72,10 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
@@ -88,6 +92,11 @@ public:
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value,
                                            const Integer index);
+
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id,
+                                         const std::string &value);
+
    virtual const StringArray& GetPropertyEnumStrings(const Integer id) const;
 
    virtual bool         TakeAction(const std::string &action,
@@ -98,10 +107,20 @@ protected:
    std::string             estEpochFormat;
    /// The estimation epoch.  "FromParticipants" means use the spacecraft epoch.
    std::string             estEpoch;
+
    /// RMS residual value from the previous pass through the data
    Real                    oldResidualRMS;
-   /// RMS residual value froooom the current pass through the data
+   /// RMS residual value from the current pass through the data
    Real                    newResidualRMS;
+   /// The best RMS residual
+   Real                    bestResidualRMS;
+   /// Predicted RMS residual
+   Real predictedRMS;
+   /// Number consecutive iterations diverging
+   Integer numDivIterations;
+   /// Flag to indicate weightedRMS or predictedRMS
+   bool chooseRMSP;
+
    /// Flag set when an a priori estimate is available
    bool                    useApriori;
    /// The most recently computed state vector changes
@@ -110,16 +129,35 @@ protected:
    Rmatrix                 weights;
    /// Flag used to indicate propagation to estimation epoch is executing
    bool                    advanceToEstimationEpoch;
-   /// Flag indicating convergence
-   bool                    converged;
+
+//   /// Estimation status
+//   Integer                 estimationStatus;         // This variable is moved to Estimator class
+
+   // String to show reason of convergence
+   std::string convergenceReason;
    /// Buffer of the participants for the outer batch loop
    ObjectArray             outerLoopBuffer;
+   /// Inversion algorithm used 
+   std::string             inversionType;
+
+   /// Maximum consecutive divergences
+   Integer               maxConsDivergences;
+
+   /// particicpants column lenght. It is used for writing report file               // made changes by TUAN NGUYEN
+   Integer                pcolumnLen;                                                // made changes by TUAN NGUYEN
+
+   /// Variables used for statistics calculation
+   std::map<std::string, std::map<std::string, Real> > statisticsTable;       // this table is for groundstation and measurement type
+   std::map<std::string, std::map<std::string, Real> > statisticsTable1;      // this table is for measurement type only
 
    /// Parameter IDs for the BatchEstimators
    enum
    {
       ESTIMATION_EPOCH_FORMAT = EstimatorParamCount,
       ESTIMATION_EPOCH,
+//     USE_PRIORI_ESTIMATE,
+      INVERSION_ALGORITHM,
+      MAX_CONSECUTIVE_DIVERGENCES,
       BatchEstimatorParamCount,
    };
 
@@ -145,12 +183,34 @@ protected:
    /// Abstract method that performs the estimation in derived classes
    virtual void            Estimate() = 0;
 
-   virtual bool            TestForConvergence(std::string &reason);
+   virtual Integer         TestForConvergence(std::string &reason);
    virtual void            WriteToTextFile(Solver::SolverState state =
                                               Solver::UNDEFINED_STATE);
 
    // progress string for reporting
    virtual std::string    GetProgressString();
+
+   Integer SchurInvert(Real *SUM1, Integer array_size);
+   Integer CholeskyInvert(Real *SUM1, Integer array_size);
+
+   virtual bool            DataFilter();
+
+private:
+//   bool                    IsReuseableType(const std::string& value);
+   
+   void                   WriteScript();                                                                            // made changes by TUAN NGUYEN
+   void                   WriteHeader();
+   void                   WriteSummary(Solver::SolverState sState);
+   void                   WriteConclusion();
+   std::string            GetElementFullName(ListItem* infor, bool isInternalCS) const;
+   Rmatrix                CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap);                       // made changes by TUAN NGUYEN
+
+   std::map<GmatBase*, Rvector6> 
+                          CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
+   std::map<GmatBase*, Rvector6> 
+                          CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
+   Rmatrix66              CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);      // made changes by TUAN NGUYEN
+
 };
 
 #endif /* BatchEstimator_hpp */

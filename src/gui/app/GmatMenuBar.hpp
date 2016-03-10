@@ -134,6 +134,7 @@ namespace GmatMenu
       MENU_HELP_FORUM,
       MENU_HELP_ISSUE,
       MENU_HELP_FEEDBACK,
+      MENU_HELP_UPDATE,
       
       // it is important for the id corresponding to the "About" command to have
       // this standard value as otherwise it won't be handled properly under Mac

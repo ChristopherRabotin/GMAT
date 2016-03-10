@@ -64,6 +64,8 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;            // made changes by TUAN NGUYEN
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
@@ -129,6 +131,9 @@ protected:
    /// Turnaround ratio at the target spacecraft
    Real turnaround;
 
+   /// Turnaround ratio which is built in on station's tracking system
+   Real M2R;                  // M2R maybe equal the value of turnaround; sometime it is set to 0
+
    // Light time events
    /// Uplink leg for the start signal
    LightTimeCorrection  uplinkLegS;
@@ -146,8 +151,9 @@ protected:
    /// Enumeration defining the MeasurementModel's scriptable parameters
    enum
    {
-       AveragingInterval = PhysicalMeasurementParamCount,
-       AveragedDopplerParamCount
+      AveragingInterval = PhysicalMeasurementParamCount,
+      BuildInTurnAroundRatio,
+      AveragedDopplerParamCount
    };
 
    // Start with the parameter IDs and associates strings

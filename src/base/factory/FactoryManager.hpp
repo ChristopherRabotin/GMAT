@@ -58,8 +58,10 @@
 #include "MathNode.hpp"
 #include "Attitude.hpp"
 
-class MeasurementModel;
+class MeasurementModelBase;
 class CoreMeasurement;
+class ErrorModel;                             // made changes by TUAN NGUYEN
+class DataFilter;                             // made changes by TUAN NGUYEN
 class DataFile;
 class ObType;
 class TrackingSystem;
@@ -136,6 +138,12 @@ public:
    CoreMeasurement*       CreateMeasurement(const std::string &ofType,
                                             const std::string &withName = "");
 
+   ErrorModel*            CreateErrorModel(const std::string &ofType,               // made changes by TUAN NGUYEN
+                                            const std::string &withName = "");      // made changes by TUAN NGUYEN
+
+   DataFilter*            CreateDataFilter(const std::string &ofType,               // made changes by TUAN NGUYEN
+                                            const std::string &withName = "");      // made changes by TUAN NGUYEN
+
    ObType*                CreateObType(const std::string &ofType,
                                        const std::string &withName = "");
    
@@ -149,7 +157,8 @@ public:
                                          const std::string &withName = "");
    CoordinateSystem*      CreateCoordinateSystem(const std::string &withName = "");
 
-   MeasurementModel*      CreateMeasurementModel(const std::string &withName);
+   MeasurementModelBase*  CreateMeasurementModel(const std::string &ofType,
+                                                 const std::string &withName);
    DataFile*              CreateDataFile(const std::string &ofType,
                                          const std::string &withName);
    TrackingSystem*        CreateTrackingSystem(const std::string &ofType,

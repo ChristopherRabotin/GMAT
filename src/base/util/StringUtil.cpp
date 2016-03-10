@@ -1216,6 +1216,24 @@ std::string GmatStringUtil::ReplaceChainedUnaryOperators(const std::string &str)
 }
 
 
+// made changes by TUAN NGUYEN
+std::string GmatStringUtil::RealToString(const Real &val, Integer precision,
+   bool showPoint, Integer width)
+{
+   return GmatRealUtil::RealToString(val, false, false, showPoint, precision, width);
+}
+
+
+// made changes by TUAN NGUYEN
+std::string GmatStringUtil::RealToString(const Real &val, bool useCurrentFormat,
+   bool scientific, bool showPoint,
+   Integer precision, Integer width)
+{
+   return GmatRealUtil::RealToString(val, useCurrentFormat, scientific, showPoint,
+      precision, width);
+}
+
+
 //------------------------------------------------------------------------------
 // std::string ToString(const bool &val)
 //------------------------------------------------------------------------------
@@ -5839,6 +5857,35 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
 }
 
 
+std::string GmatStringUtil::GetAlignmentString(const std::string inputString, 
+											  UnsignedInt len, 
+											  AlignmentType adjust)
+{
+   std::string s1, retVal;
+   s1.assign(len,' ');
+   
+   switch(adjust)
+   {
+   case LEFT:
+	  retVal = (inputString + s1).substr(0,len);
+	  break;
+
+   case RIGHT:
+      retVal = s1 + inputString;
+	  retVal = retVal.substr(retVal.length()-len, len);
+	  break;
+
+   case CENTER:
+      retVal = s1 + inputString + s1;
+	  retVal = retVal.substr((len + s1.length())/2 , len);
+      break;
+   }
+
+//   MessageInterface::ShowMessage("retVal=<%s>\n", retVal.c_str());
+
+   return retVal;
+}
+
 //------------------------------------------------------------------------------
 // std::wstring StringToWideString(const std::string &str)
 //------------------------------------------------------------------------------
@@ -5863,6 +5910,11 @@ std::wstring GmatStringUtil::StringToWideString(const std::string &str)
    // std::wstring wstr(size_needed, 0);
    // MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size_needed);
    // return wstr;
+
+
+
+
+
 
    // Method 3 (Windows only):
    // int len;
@@ -5917,4 +5969,83 @@ std::string GmatStringUtil::WideStringToString(const wchar_t *wchar)
    std::wstring wstr(wchar);
    return WideStringToString(wstr);
 }
+
+
+////------------------------------------------------------------------------------
+//// std::wstring StringToWideString(const std::string &str)
+////------------------------------------------------------------------------------
+///**
+// * Converts narrow string (std::string) to wide string (std::wstring).
+// */
+////------------------------------------------------------------------------------
+//std::wstring GmatStringUtil::StringToWideString(const std::string &str)
+//{
+//   // Convert an ASCII string to a Unicode String
+//   // Method 1 (cross-platform):
+//   std::wstring wstrTo;
+//   wchar_t *wszTo = new wchar_t[str.length() + 1];
+//   wszTo[str.size()] = L'\0';
+//   int num = std::mbstowcs(wszTo, str.c_str(), str.length());
+//   wstrTo = wszTo;
+//   delete[] wszTo;
+//   return wstrTo;
+//   
+//   // Method 2 (Windows only):
+//   // int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+//   // std::wstring wstr(size_needed, 0);
+//   // MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size_needed);
+//   // return wstr;
+//   // Method 3 (Windows only):
+//   // int len;
+//   // int slength = (int)s.length() + 1;
+//   // len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
+//   // wchar_t* buf = new wchar_t[len];
+//   // MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+//   // std::wstring wstr(buf);
+//   // delete[] buf;
+//   // return wstr;
+//
+//}
+
+
+////------------------------------------------------------------------------------
+//// std::string WideStringToString(const std::wstring &wstr)
+////------------------------------------------------------------------------------
+///**
+// * Converts wide string (std::wstring) to narrow string (std::string).
+// */
+////------------------------------------------------------------------------------
+//std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
+//{
+//   // Convert a Unicode string to an ASCII String
+//   // Method 1 (cross-platform):
+//   std::string strTo;
+//   char *szTo = new char[wstr.length() + 1];
+//   szTo[wstr.size()] = '\0';
+//   int num = std::wcstombs(szTo, wstr.c_str(), wstr.length());
+//
+//   strTo = szTo;
+//   delete[] szTo;
+//   return strTo;
+//   
+//   // Method 2 (Windows only):
+//   // int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+//   // std::string strTo(size_needed, 0);
+//   // WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+//   // return strTo;
+//}
+
+
+////------------------------------------------------------------------------------
+//// std::string WideStringToString(const wchar_t *wchar)
+////------------------------------------------------------------------------------
+///**
+// * Converts wide string (wchar_t*) to narrow string (std::string).
+// */
+////------------------------------------------------------------------------------
+//std::string GmatStringUtil::WideStringToString(const wchar_t *wchar)
+//{
+//   std::wstring wstr(wchar);
+//   return WideStringToString(wstr);
+//}
 

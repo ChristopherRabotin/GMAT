@@ -67,6 +67,7 @@
 #include "EopFile.hpp"
 #include "ItrfCoefficientsFile.hpp"
 #include "LeapSecsFileReader.hpp"
+#include "IFileUpdater.hpp"
 // plug-in code
 #include "DynamicLibrary.hpp"
 #include "TriggerManager.hpp"
@@ -88,6 +89,7 @@ public:
    static Moderator* Instance();
    bool Initialize(const std::string &startupFile = "", bool isFromGui = false,
          const std::string &suffix = "", const StringArray *forEntries = NULL);
+   bool UpdateDataFiles();
    void Finalize();
    void SetRunReady(bool flag = true);
    void SetShowFinalState(bool flag = true);
@@ -251,8 +253,9 @@ public:
    PropSetup* GetPropSetup(const std::string &name);
    
    // MeasurementModel
-   MeasurementModel* CreateMeasurementModel(const std::string &name);
-   MeasurementModel* GetMeasurementModel(const std::string &name);
+   MeasurementModelBase* CreateMeasurementModel(const std::string &type,
+         const std::string &name);
+   MeasurementModelBase* GetMeasurementModel(const std::string &name);
    
    // TrackingSystem
    TrackingSystem* CreateTrackingSystem(const std::string &type,
@@ -399,6 +402,7 @@ public:
    
    // Sandbox
    void ClearAllSandboxes();
+   Sandbox* GetSandbox(Integer sandboxNum = 1);                                         // made changes by TUAN NGUYEN
    GmatBase* GetInternalObject(const std::string &name, Integer sandboxNum = 1);
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);

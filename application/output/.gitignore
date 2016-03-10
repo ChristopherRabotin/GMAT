@@ -5,6 +5,13 @@
 /*.truth
 /*.txt
 /*.VF13Status
+/STEREOB_short.script
+/STEREOB-TDMRange-EditedData.script
+/STEREO_B_rng-edited.tdm
+/STEREO_B_rng_short.tdm
 *.bsp
 *.truth_file
 *.rmp
+/NavData/
+*.rmp
+/stuff/

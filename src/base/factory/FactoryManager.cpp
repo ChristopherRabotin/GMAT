@@ -117,6 +117,7 @@ GmatBase* FactoryManager::CreateObject(const Gmat::ObjectType generalType,
                                        const std::string &withName)
 {
    Factory* f = FindFactory(generalType, ofType);
+   
    if (f != NULL)
       return f->CreateObject(ofType,withName);
    return NULL;
@@ -647,6 +648,55 @@ CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
    return NULL;
 }
 
+
+//------------------------------------------------------------------------------
+// ErrorModel* FactoryManager::CreateErrorModel(const std::string &ofType,
+//                                          const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates an ErrorModel object
+ *
+ * @param ofType The type of ErrorModel object
+ * @param withName The name of ErrorModel object.  This should be an
+ *                 empty string in the current implementation.
+ *
+ * @return The pointer to the new object
+ */
+//------------------------------------------------------------------------------
+ErrorModel* FactoryManager::CreateErrorModel(const std::string &ofType,                 // made changes by TUAN NGUYEN
+                                         const std::string &withName)                   // made changes by TUAN NGUYEN
+{                                                                                       // made changes by TUAN NGUYEN
+   Factory* f = FindFactory(Gmat::ERROR_MODEL, ofType);                                 // made changes by TUAN NGUYEN
+   if (f != NULL)                                                                       // made changes by TUAN NGUYEN
+      return f->CreateErrorModel(ofType, withName);                                     // made changes by TUAN NGUYEN
+   return NULL;                                                                         // made changes by TUAN NGUYEN
+}                                                                                       // made changes by TUAN NGUYEN
+
+
+//------------------------------------------------------------------------------
+// DataFilter* FactoryManager::CreateDataFilter(
+//              const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates a DataFilter object
+ *
+ * @param ofType The type of DataFilter object
+ * @param withName The name of DataFilter object.  This should be an
+ *                 empty string in the current implementation.
+ *
+ * @return The pointer to the new object
+ */
+//------------------------------------------------------------------------------
+DataFilter* FactoryManager::CreateDataFilter(const std::string &ofType,                 // made changes by TUAN NGUYEN
+                                         const std::string &withName)                   // made changes by TUAN NGUYEN
+{                                                                                       // made changes by TUAN NGUYEN
+   Factory* f = FindFactory(Gmat::DATA_FILTER, ofType);                                 // made changes by TUAN NGUYEN
+   if (f != NULL)                                                                       // made changes by TUAN NGUYEN
+      return f->CreateDataFilter(ofType, withName);                                     // made changes by TUAN NGUYEN
+   return NULL;                                                                         // made changes by TUAN NGUYEN
+}                                                                                       // made changes by TUAN NGUYEN
+
+
 TrackingSystem* FactoryManager::CreateTrackingSystem(const std::string &ofType,
          const std::string &withName)
 {
@@ -720,21 +770,22 @@ Interface* FactoryManager::CreateInterface(const std::string &ofType,
 }
 
 //------------------------------------------------------------------------------
-// MeasurementModel* CreateMeasurementModel(const std::string &withName)
+// MeasurementModelBase* CreateMeasurementModel(const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * Create an object of type MeasurementModel, with the name withName.
+ * Create an object of type MeasurementModelBase, with the name withName.
  *
  * @param withName name of the new MeasurementModel object.
  *
  * @return pointer to the newly-created MeasurementModel object
  */
 //------------------------------------------------------------------------------
-MeasurementModel* FactoryManager::CreateMeasurementModel(const std::string &withName)
+MeasurementModelBase* FactoryManager::CreateMeasurementModel(const std::string &ofType,
+      const std::string &withName)
 {
-   Factory* f = FindFactory(Gmat::MEASUREMENT_MODEL, "MeasurementModel");
+   Factory* f = FindFactory(Gmat::MEASUREMENT_MODEL, ofType);
    if (f != NULL)
-      return f->CreateMeasurementModel("MeasurementModel", withName);
+      return f->CreateMeasurementModel(ofType, withName);
    return NULL;
 }
 

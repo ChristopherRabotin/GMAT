@@ -1,0 +1,65 @@
+% Script Test Case for Build 0.1
+%
+%----- Create the spacecraft
+Create Spacecraft ODSat;
+GMAT ODSat.DateFormat = UTCGregorian;
+GMAT ODSat.Epoch = '01 Jan 2000 11:59:28.000';
+GMAT ODSat.CoordinateSystem = EarthMJ2000Eq;
+GMAT ODSat.DisplayStateType = Cartesian;
+GMAT ODSat.X = 6648.927;
+GMAT ODSat.Y = -335.169;
+GMAT ODSat.Z = 2789.137;
+GMAT ODSat.VX = -0.34697109;
+GMAT ODSat.VY = 7.092177415;
+GMAT ODSat.VZ = 2.14549075;
+GMAT ODSat.Id = 'ODSatID';
+
+%----- Create the ground station
+Create GroundStation Maui;
+GMAT Maui.CentralBody = Earth;
+GMAT Maui.StateType = Cartesian;
+GMAT Maui.HorizonReference = Sphere;
+GMAT Maui.Id = MauiID;
+GMAT Maui.X = -4450.8;
+GMAT Maui.Y =  2676.1;
+GMAT Maui.Z = -3691.38;
+
+%----- Create the data file
+Create DataFile MauiMeasData
+MauiMeasData.Filename = Maui_USNRange.gmd
+MauiMeasData.Format  = GMATInternal
+
+%----- Create the propagator
+Create ForceModel ODProp_ForceModel;
+GMAT ODProp_ForceModel.CentralBody = Earth;
+GMAT ODProp_ForceModel.PointMasses = {Earth};
+Create Propagator ODProp;
+GMAT ODProp.FM = ODProp_ForceModel;
+GMAT ODProp.Type = PrinceDormand78;
+ODProp.MinStep = 0.0;
+
+%----- Create a range measurement between Maui and ODSat
+Create MeasurementModel RangeMeasurement
+RangeMeasurement.ObservationData = MauiMeasData;
+RangeMeasurement.Type   = USNTwoWayRange;
+RangeMeasurement.Participants = { Maui, ODSat };
+
+%----- Create the estimator
+
+Create BatchEstimatorInv BatchEst;
+GMAT BatchEst.ShowProgress = true;
+GMAT BatchEst.ReportStyle = 'Normal';
+GMAT BatchEst.ReportFile = 'USNEstimator.data';
+GMAT BatchEst.MaximumIterations = 15;
+GMAT BatchEst.Measurements = {RangeMeasurement};
+GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState'}; %, 'RangeMeasurement.Bias'};
+GMAT BatchEst.AbsoluteTol = 1e-05;
+GMAT BatchEst.RelativeTol = 1e-06;
+GMAT BatchEst.Propagator = ODProp;
+GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
+GMAT BatchEst.OLSEInitialRMSSigma = 3e45;
+BatchEst.OLSEMultiplicativeConstant = 4
+
+%------ Run the measurement simulator
+BeginMissionSequence
+RunEstimator BatchEst;

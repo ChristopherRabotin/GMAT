@@ -1331,6 +1331,12 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
 }
 
 
+std::string ScriptInterpreter::GetScriptFileName()
+{
+   return scriptFilename;
+}
+
+
 //------------------------------------------------------------------------------
 // bool WriteScript()
 //------------------------------------------------------------------------------
@@ -1589,6 +1595,26 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    #endif
    if (objs.size() > 0)
       WriteObjects(objs, "DataInterfaces", mode);
+
+   //---------------------------------------------                               // made changes by TUAN NGUYEN
+   // ErrorModel Objects                                                         // made changes by TUAN NGUYEN
+   //---------------------------------------------                               // made changes by TUAN NGUYEN
+   objs = theModerator->GetListOfObjects(Gmat::ERROR_MODEL);                     // made changes by TUAN NGUYEN
+   #ifdef DEBUG_SCRIPT_WRITING                                                   // made changes by TUAN NGUYEN
+   MessageInterface::ShowMessage("   Found %d ErrorModels\n", objs.size());      // made changes by TUAN NGUYEN
+   #endif                                                                        // made changes by TUAN NGUYEN
+   if (objs.size() > 0)                                                          // made changes by TUAN NGUYEN
+      WriteObjects(objs, "ErrorModels", mode);                                   // made changes by TUAN NGUYEN
+
+   //---------------------------------------------                               // made changes by TUAN NGUYEN
+   // DataFilter Objects                                                         // made changes by TUAN NGUYEN
+   //---------------------------------------------                               // made changes by TUAN NGUYEN
+   objs = theModerator->GetListOfObjects(Gmat::DATA_FILTER);                     // made changes by TUAN NGUYEN
+   #ifdef DEBUG_SCRIPT_WRITING                                                   // made changes by TUAN NGUYEN
+   MessageInterface::ShowMessage("   Found %d DataFilters\n", objs.size());      // made changes by TUAN NGUYEN
+   #endif                                                                        // made changes by TUAN NGUYEN
+   if (objs.size() > 0)                                                          // made changes by TUAN NGUYEN
+      WriteObjects(objs, "DataFilters", mode);                                   // made changes by TUAN NGUYEN
 
    //---------------------------------------------
    // Measurement Models and Tracking Data/Systems
@@ -2460,7 +2486,8 @@ bool ScriptInterpreter::IsOneWordCommand(const std::string &str)
    bool retval = false;
    
    if ((str.find("End")                  != str.npos  &&
-        str.find("EndFiniteBurn")        == str.npos) ||
+       (str.find("EndFiniteBurn")        == str.npos) &&
+       (str.find("EndFileThrust")        == str.npos)) ||
        (str.find("BeginScript")          != str.npos) ||
        (str.find("NoOp")                 != str.npos) ||
        (str.find("BeginMissionSequence") != str.npos) ||

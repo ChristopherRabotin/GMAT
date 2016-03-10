@@ -32,6 +32,7 @@
 
 
 #include "MeasurementData.hpp"
+#include "MessageInterface.hpp"
 
 
 //-----------------------------------------------------------------------------
@@ -42,14 +43,25 @@
  */
 //-----------------------------------------------------------------------------
 MeasurementData::MeasurementData() :
-   type        (Gmat::UNKNOWN_MEASUREMENT),
-   typeName    ("Unknown"),
-   uniqueID    (-1),
-   epochSystem (TimeConverterUtil::A1MJD),
-   epoch       (0.0),
-   isFeasible  (false),
-   covariance  (NULL),
-   eventCount  (0)
+   type             (Gmat::UNKNOWN_MEASUREMENT),
+   typeName         ("Unknown"),
+   uniqueID         (-1),
+   epochSystem      (TimeConverterUtil::A1MJD),
+   epoch            (0.0),
+   isFeasible       (false),
+   unfeasibleReason ("N"),
+   feasibilityValue (0.0),
+   covariance       (NULL),
+   eventCount       (0),
+   uplinkBand       (0),
+   uplinkFreq       (0.0),
+   rangeModulo      (1.0),
+   dopplerCountInterval	(1.0e-10),
+   tdrsNode4Freq    (0.0),                             // made changes by TUAN NGUYEN
+   tdrsNode4Band    (0),                               // made changes by TUAN NGUYEN
+   tdrsServiceID    ("SA1"),                           // made changes by TUAN NGUYEN
+   tdrsSMARID       (0),                               // made changes by TUAN NGUYEN
+   tdrsDataFlag     (0)                                // made changes by TUAN NGUYEN
 {
 }
 
@@ -65,6 +77,14 @@ MeasurementData::~MeasurementData()
 {
 }
 
+void MeasurementData::CleanUp()
+{
+   if (covariance)
+      delete covariance;
+   covariance = NULL;
+
+   participantIDs.clear();
+}
 
 //-----------------------------------------------------------------------------
 // MeasurementData(const MeasurementData& md)
@@ -77,16 +97,28 @@ MeasurementData::~MeasurementData()
  */
 //-----------------------------------------------------------------------------
 MeasurementData::MeasurementData(const MeasurementData& md) :
-   type           (md.type),
-   typeName       (md.typeName),
-   uniqueID       (md.uniqueID),
-   epochSystem    (md.epochSystem),
-   epoch          (md.epoch),
-   participantIDs (md.participantIDs),
-   value          (md.value),
-   isFeasible     (md.isFeasible),
-   covariance     (md.covariance),
-   eventCount     (md.eventCount)
+   type             (md.type),
+   typeName         (md.typeName),
+   uniqueID         (md.uniqueID),
+   epochSystem      (md.epochSystem),
+   epoch            (md.epoch),
+   participantIDs   (md.participantIDs),
+   value            (md.value),
+   isFeasible       (md.isFeasible),
+   unfeasibleReason (md.unfeasibleReason),
+   feasibilityValue (md.feasibilityValue),
+   covariance       (md.covariance),
+   eventCount       (md.eventCount),
+///// TBD: Do these go here?
+   uplinkBand       (md.uplinkBand),
+   uplinkFreq       (md.uplinkFreq),
+   rangeModulo      (md.rangeModulo),
+   dopplerCountInterval	(md.dopplerCountInterval),
+   tdrsNode4Freq    (md.tdrsNode4Freq),                        // made changes by TUAN NGUYEN
+   tdrsNode4Band    (md.tdrsNode4Band),                        // made changes by TUAN NGUYEN
+   tdrsServiceID    (md.tdrsServiceID),                        // made changes by TUAN NGUYEN
+   tdrsSMARID       (md.tdrsSMARID),                           // made changes by TUAN NGUYEN
+   tdrsDataFlag     (md.tdrsDataFlag)                          // made changes by TUAN NGUYEN
 {
 }
 
@@ -107,16 +139,27 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
 
    if (&md != this)
    {
-      type            = md.type;
-      typeName        = md.typeName;
-      uniqueID        = md.uniqueID;
-      epochSystem     = md.epochSystem;
-      epoch           = md.epoch;
-      participantIDs  = md.participantIDs;
-      value           = md.value;
-      isFeasible      = md.isFeasible;
-      covariance      = md.covariance;
-      eventCount      = md.eventCount;
+      type             = md.type;
+      typeName         = md.typeName;
+      uniqueID         = md.uniqueID;
+      epochSystem      = md.epochSystem;
+      epoch            = md.epoch;
+      participantIDs   = md.participantIDs;
+      value            = md.value;
+      isFeasible       = md.isFeasible;
+	   unfeasibleReason = md.unfeasibleReason;
+	   feasibilityValue = md.feasibilityValue;
+      covariance       = md.covariance;
+      eventCount       = md.eventCount;
+	   uplinkBand       = md.uplinkBand;
+	   uplinkFreq       = md.uplinkFreq;
+	   rangeModulo      = md.rangeModulo;
+	   dopplerCountInterval = md.dopplerCountInterval;
+      tdrsNode4Freq    = md.tdrsNode4Freq;                     // made changes by TUAN NGUYEN
+      tdrsNode4Band    = md.tdrsNode4Band;                     // made changes by TUAN NGUYEN
+      tdrsServiceID    = md.tdrsServiceID;                     // made changes by TUAN NGUYEN
+      tdrsSMARID       = md.tdrsSMARID;                        // made changes by TUAN NGUYEN
+      tdrsDataFlag     = md.tdrsDataFlag;                      // made changes by TUAN NGUYEN
    }
 
    return *this;
