@@ -112,7 +112,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(F2C_VC32)\include;$(CSPICE_VC32)\include;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\CInterfacePlugin\src\base\include;..\..\..\plugins\CInterfacePlugin\src\base\factory;..\..\..\plugins\CInterfacePlugin\src\base\command;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\command;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\Station;..\..\..\plugins\DataInterfacePlugin\src\base\include;..\..\..\plugins\DataInterfacePlugin\src\base\factory;..\..\..\plugins\DataInterfacePlugin\src\base\datainterface;..\..\..\plugins\DataInterfacePlugin\src\base\datareader;..\..\..\plugins\DataInterfacePlugin\src\base\command;..\..\..\plugins\NewParameterPlugin\src\base\include;..\..\..\plugins\NewParameterPlugin\src\base\factory;..\..\..\plugins\NewParameterPlugin\src\base\parameter;..\..\..\build\windows;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN_30)\include\msvc;$(WXWIN_30)\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\plugin;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(F2C_VC32)\include;$(CSPICE_VC32)\include;$(XERCES_VC32)\src;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\CInterfacePlugin\src\base\include;..\..\..\plugins\CInterfacePlugin\src\base\factory;..\..\..\plugins\CInterfacePlugin\src\base\command;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\adapter;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\datafilter;..\..\..\plugins\EstimationPlugin\src\base\errormodel;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\measurementmodel;..\..\..\plugins\EstimationPlugin\src\base\reporter;..\..\..\plugins\EstimationPlugin\src\base\signal;..\..\..\plugins\EstimationPlugin\src\base\tdmReader;..\..\..\plugins\EstimationPlugin\src\base\trackingfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\command;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\Station;..\..\..\plugins\DataInterfacePlugin\src\base\include;..\..\..\plugins\DataInterfacePlugin\src\base\factory;..\..\..\plugins\DataInterfacePlugin\src\base\datainterface;..\..\..\plugins\DataInterfacePlugin\src\base\datareader;..\..\..\plugins\DataInterfacePlugin\src\base\command;..\..\..\plugins\NewParameterPlugin\src\base\include;..\..\..\plugins\NewParameterPlugin\src\base\factory;..\..\..\plugins\NewParameterPlugin\src\base\parameter;..\..\..\build\windows;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN_30)\include\msvc;$(WXWIN_30)\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\plugin;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__WIN32__;__WXMSW__;__INCLUDE_BUILTIN_PLUGINS__;__USE_MATLAB__;__USE_SPICE__;__USE_STC_EDITOR__;__DISABLE_EMAIL__;DEBUG_MEMORY_DISABLE;DEBUG_TRACE_DISABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -127,7 +127,7 @@
       </AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wxbase30u.lib;wxmsw30u_core.lib;wxmsw30u_adv.lib;wxmsw30u_gl.lib;cspice.lib;libeng.lib;libmx.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxbase30u.lib;wxmsw30u_core.lib;wxmsw30u_adv.lib;wxmsw30u_gl.lib;cspice.lib;libeng.lib;libmx.lib;libmat.lib;$(XERCES_VC32)\Build\Win32\VC12\Release\xerces-c_3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(MATLAB32)\extern\lib\win32\microsoft;$(WXWIN_30)\lib\vc_lib;$(CSPICE_VC32)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -204,8 +204,19 @@
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\factory\EphemPropFactory.cpp" />
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\EphemerisPropagator.cpp" />
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\SPKPropagator.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DopplerAdapter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DSNRangeAdapter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\GNDopplerAdapter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\PointRangeRateAdapterKps.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\RangeAdapterKm.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\RangeRateAdapterKps.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\TDRSDopplerAdapter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\TrackingDataAdapter.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\command\RunEstimator.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\command\RunSimulator.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\DataFilter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticAcceptFilter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticRejectFilter.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimator.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimatorInv.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimatorSVD.cpp" />
@@ -240,33 +251,46 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\B3_obtype.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\DataFile.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\DataFileAdapter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatData.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatObType.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatODDopplerType.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatODType.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\ObservationData.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\ObType.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\RampTableData.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\RampTableType.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementmodel\MeasureModel.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\AveragedDoppler.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\CoreMeasurement.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayDoppler.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayRange.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\cira.c" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\igrf.c" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\Ionosphere.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iridreg.c" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irifun.c" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irisub.c" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iritec.c" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iri2007.c" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementData.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementManager.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementModel.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementModelBase.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MediaCorrection.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAngles.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAzEl.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\PhysicalMeasurement.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\RandomNumber.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\SnTwoWayRange.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TDRSSTwoWayRange.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TrackingData.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere\Troposphere.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TwoWayRange.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\USNTwoWayRange.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\reporter\ProgressReporter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\signal\PhysicalSignal.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SignalBase.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SignalData.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SinglePointSignal.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmErrorHandler.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmObType.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmReadWriter.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingfile\TFSMagicNumbers.cpp" />
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingfile\TrackingFileSet.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\DSNTrackingSystem.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\OpticalTrackingSystem.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\TDRSSTrackingSystem.cpp" />
@@ -567,6 +591,7 @@
     <ClCompile Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\LibrationPoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Moon.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Msise90Atmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\msise90_sub.c" />
@@ -710,11 +735,14 @@
     <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
     <ClCompile Include="..\..\..\src\base\util\EopFile.cpp" />
     <ClCompile Include="..\..\..\src\base\util\FileManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\FileUpdaterSVN.cpp" />
     <ClCompile Include="..\..\..\src\base\util\FileUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Frozen.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GravityFileUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\IFileUpdater.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Linear.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MemoryTracker.cpp" />
@@ -756,6 +784,7 @@
     <ClCompile Include="..\..\..\src\gui\app\AboutDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\CompareFilesDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\CompareTextDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\FileUpdateDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GmatApp.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GmatAppData.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GmatConnection.cpp" />
@@ -928,8 +957,19 @@
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\factory\EphemPropFactory.hpp" />
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\EphemerisPropagator.hpp" />
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\SPKPropagator.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DopplerAdapter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DSNRangeAdapter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\GNDopplerAdapter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\PointRangeRateAdapterKps.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\RangeAdapterKm.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\RangeRateAdapterKps.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\TDRSDopplerAdapter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\TrackingDataAdapter.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\command\RunEstimator.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\command\RunSimulator.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\DataFilter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticAcceptFilter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticRejectFilter.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimator.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimatorInv.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\estimator\BatchEstimatorSVD.hpp" />
@@ -964,35 +1004,48 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\B3_obtype.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\DataFile.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\DataFileAdapter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatData.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatObType.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatODDopplerType.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatODType.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\ObservationData.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\ObType.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\RampTableData.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\RampTableType.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementmodel\MeasureModel.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\AveragedDoppler.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\CoreMeasurement.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayDoppler.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\DSNTwoWayRange.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\EstimationDefs.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\cira.h" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\igrf.h" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\Ionosphere.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iridreg.h" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irifun.h" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irisub.h" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iritec.h" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iri2007.h" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementData.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementException.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementManager.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementModel.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementModelBase.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MediaCorrection.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAngles.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAzEl.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\PhysicalMeasurement.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\RandomNumber.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\SnTwoWayRange.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TDRSSTwoWayRange.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TrackingData.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere\Troposphere.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TwoWayRange.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\USNTwoWayRange.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\reporter\ProgressReporter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\signal\PhysicalSignal.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SignalBase.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SignalData.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SinglePointSignal.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmErrorHandler.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmObType.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmReadWriter.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingfile\TFSMagicNumbers.hpp" />
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingfile\TrackingFileSet.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\DSNTrackingSystem.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\OpticalTrackingSystem.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingsystem\TDRSSTrackingSystem.hpp" />
@@ -1295,6 +1348,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\LibrationPoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Moon.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Msise90Atmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp" />
@@ -1450,11 +1504,14 @@
     <ClInclude Include="..\..\..\src\base\util\EopFile.hpp" />
     <ClInclude Include="..\..\..\src\base\util\FileManager.hpp" />
     <ClInclude Include="..\..\..\src\base\util\FileTypes.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\FileUpdaterSVN.hpp" />
     <ClInclude Include="..\..\..\src\base\util\FileUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Frozen.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GravityFileUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\IFileUpdater.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Linear.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MessageInterface.hpp" />
@@ -1500,6 +1557,7 @@
     <ClInclude Include="..\..\..\src\gui\app\AboutDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\CompareFilesDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\CompareTextDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\FileUpdateDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GmatApp.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GmatAppData.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GmatConnection.hpp" />
