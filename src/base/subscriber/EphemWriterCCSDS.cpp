@@ -48,6 +48,7 @@
 //#define DEBUG_EPHEMFILE_HEADER
 //#define DEBUG_EPHEMFILE_METADATA
 //#define DEBUG_TO_TEXT_EPHEM
+//#define DEBUG_CCSDS_DATA_SEGMENT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -1040,7 +1041,7 @@ void EphemWriterCCSDS::WriteCcsdsHeader()
 //------------------------------------------------------------------------------
 void EphemWriterCCSDS::WriteCcsdsOrbitDataSegment()
 {
-   #ifdef DEBUG_EPHEMFILE_CCSDS
+   #ifdef DEBUG_CCSDS_DATA_SEGMENT
    MessageInterface::ShowMessage
       ("=====> EphemWriterCCSDS::WriteCcsdsOrbitDataSegment() <%p>'%s' entered\n   "
        "metaDataWriteOption=%d, saveMetaDataStart=%d, firstTimeMetaData=%d, "
@@ -1053,7 +1054,7 @@ void EphemWriterCCSDS::WriteCcsdsOrbitDataSegment()
    {
       if (metaDataWriteOption == 1)
       {
-         #ifdef DEBUG_EPHEMFILE_CCSDS
+         #ifdef DEBUG_CCSDS_DATA_SEGMENT
          MessageInterface::ShowMessage("***** array is empty so writing dummy meta data time\n");
          #endif
          metaDataStartStr = "YYYY-MM-DDTHH:MM:SS.SSS";
@@ -1061,7 +1062,7 @@ void EphemWriterCCSDS::WriteCcsdsOrbitDataSegment()
          WriteCcsdsOemMetaData();
       }
       
-      #ifdef DEBUG_EPHEMFILE_CCSDS
+      #ifdef DEBUG_CCSDS_DATA_SEGMENT
       MessageInterface::ShowMessage
          ("=====> EphemWriterCCSDS::WriteCcsdsOrbitDataSegment() leaving, array is empty\n");
       #endif
@@ -1098,7 +1099,7 @@ void EphemWriterCCSDS::WriteCcsdsOrbitDataSegment()
       dstream.seekp(0, std::ios_base::end);
    }
    
-   #ifdef DEBUG_EPHEMFILE_CCSDS
+   #ifdef DEBUG_CCSDS_DATA_SEGMENT
    MessageInterface::ShowMessage
       ("=====> Writing %d CCSDS orbit data points\n", a1MjdArray.size());
    DebugWriteTime("   First data, metaDataStart = ", metaDataStart, true);
@@ -1108,7 +1109,7 @@ void EphemWriterCCSDS::WriteCcsdsOrbitDataSegment()
    // Clear orbit buffer
    ClearOrbitData();
    
-   #ifdef DEBUG_EPHEMFILE_CCSDS
+   #ifdef DEBUG_CCSDS_DATA_SEGMENT
    MessageInterface::ShowMessage
       ("=====> EphemWriterCCSDS::WriteCcsdsOrbitDataSegment() <%p>'%s' leaving\n",
        this, ephemName.c_str());

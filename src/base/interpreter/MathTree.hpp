@@ -91,7 +91,9 @@ public:
                                         const std::string &newName);
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
-
+   virtual const StringArray& 
+                        GetWrapperObjectNameArray(bool completeSet = false);
+   
    DEFAULT_TO_NO_CLONES
 
 protected:
@@ -110,6 +112,8 @@ protected:
    StringArray theParamArray;
    StringArray theAllParamArray;
    StringArray theGmatFunctionNames;
+   StringArray theWrapperNames;
+   
    std::vector<Function*> theFunctions;
    std::vector<MathNode*> nodesToDelete;
    

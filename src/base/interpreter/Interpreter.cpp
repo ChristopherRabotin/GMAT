@@ -1041,28 +1041,25 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       #endif
       
       // If object to be managed, give warning if name already exist
-      //if (manage == 1)
       if (manage == 1 || manage == 2)
       {
-//         if ((name != "EarthMJ2000Eq") &&
-//             (name != "EarthMJ2000Ec") &&
-//             (name != "EarthFixed")    &&
-//             (name != "EarthICRF"))
-//         {
-            obj = FindObject(name, type);
-            // Since System Parameters are created automatically as they are referenced,
-            // do not give warning if creating a system parameter
-            if (obj != NULL && ((obj->GetType() != Gmat::PARAMETER) ||
-                                (obj->GetType() == Gmat::PARAMETER &&
-                                 (!obj->IsOfType("SystemParameter")))))
-            {
-               InterpreterException ex("");
-               ex.SetDetails("%s object named \"%s\" already exists",
-                             type.c_str(), name.c_str());
-               HandleError(ex, true, true, showWarning);
-               return obj;
-            }
-//         }
+         obj = FindObject(name, type);
+         // Since System Parameters are created automatically as they are referenced,
+         // do not give warning if creating a system parameter
+         if (obj != NULL && ((obj->GetType() != Gmat::PARAMETER) ||
+                             (obj->GetType() == Gmat::PARAMETER &&
+                              (!obj->IsOfType("SystemParameter")))))
+         {
+            // Parse array name in case it is array declaration
+            std::string arrName = GmatStringUtil::GetArrayName(name, "[]");
+            MessageInterface::ShowMessage
+               ("==> name='%s', arrName='%s'\n", name.c_str(), arrName.c_str());
+            InterpreterException ex("");
+            ex.SetDetails("%s object named \"%s\" already exists, so ignoring",
+                          type.c_str(), arrName.c_str());
+            HandleError(ex, true, true, showWarning);
+            return obj;
+         }
       }
    }
    #ifdef DEBUG_CREATE_CELESTIAL_BODY

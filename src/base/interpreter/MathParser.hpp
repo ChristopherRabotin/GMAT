@@ -132,6 +132,7 @@ private:
       MATRIX_FUNCTION,
       MATRIX_OP,
       UNIT_CONVERSION,
+      BUILTIN_FUNCTION,
       GMAT_FUNCTION,
    };
    
@@ -139,7 +140,8 @@ private:
    StringArray  matrixFuncList;
    StringArray  matrixOpList;
    StringArray  unitConvList;
-   StringArray  gmatFuncList;
+   StringArray  builtinFuncList;
+   StringArray  gmatFuncList;     // This is dynamically built 
 };
 
 

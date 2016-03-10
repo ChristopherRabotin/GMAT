@@ -732,6 +732,9 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             break;
          }
       case Gmat::RMATRIX_TYPE:
+         #ifdef DEBUG_EW_SET_VALUE
+         MessageInterface::ShowMessage("   lhs is Rmatrix type\n");
+         #endif
          if (rhsDataType == Gmat::RMATRIX_TYPE ||
              rhsDataType == Gmat::RVECTOR_TYPE)
          {

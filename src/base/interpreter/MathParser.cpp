@@ -220,7 +220,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       {
          #if DEBUG_PARSE_EQUATION
          MessageInterface::ShowMessage
-            ("MathParser::IsEquation() 1 Throwng exception - Invalid number or invalid scientific notation\n");
+            ("MathParser::IsEquation() 1 Throwing exception - Invalid number or invalid scientific notation\n");
          #endif
          throw MathException("Invalid number or math equation");
       }
@@ -239,60 +239,128 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       // If [] found as in sat.Quaternion = [1.0 0.0 0.0 0.0], return false
       if (str1.find_first_of("[]") != str1.npos)
       {
-         #if DEBUG_PARSE_EQUATION
-         MessageInterface::ShowMessage
-            ("MathParser::IsEquation(%s) returning false, found []\n", str.c_str());
-         #endif
-         return false;
+         if (GmatStringUtil::IsEnclosedWithBrackets(str1))
+         {
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("MathParser::IsEquation(%s) returning false, enclosed with []\n", str.c_str());
+            #endif
+            return false;
+         }
       }
       
+      bool isFunctionCall = false;
       // If invalid number found in the equation, check for more invalid math equation
       if (errCode <= -4)
       {
          // Check if any invalid math operators found
+         #if DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage("   Checking for any invalid math operators\n");
+         #endif
          if (!GmatStringUtil::IsMathEquation(str1, true))
          {
             #if DEBUG_PARSE_EQUATION
             MessageInterface::ShowMessage
-               ("MathParser::IsEquation() 2 Throwng exception - Invalid number or math equation\n");
+               ("MathParser::IsEquation() 2 Throwing exception - Invalid number or math equation\n");
             #endif
             throw MathException("Invalid number or math equation");
          }
          else
          {
             // Check for invalid names without removing spaces first
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("   It is valid math equation. Checking for any invalid names\n");
+            #endif
             if (!GmatStringUtil::AreAllNamesValid(str1, true))
             {
-               #if DEBUG_PARSE_EQUATION
-               MessageInterface::ShowMessage
-                  ("MathParser::IsEquation() 3 Throwng exception - Invalid number or math equation\n");
-               #endif
-               throw MathException("Invalid number or math equation");
+               bool isValid = false;
+               // Check if valid string literal is passed to a function
+               if (str1.find("'") != str1.npos)
+               {
+                  #if DEBUG_PARSE_EQUATION
+                  MessageInterface::ShowMessage
+                     ("   String literal found, check if it is string function call\n");
+                  #endif
+                  isValid = GmatStringUtil::IsValidFunctionCall(str1);
+               }
+               if (isValid)
+                  isFunctionCall = true;
+               
+               if (!isValid)
+               {
+                  #if DEBUG_PARSE_EQUATION
+                  MessageInterface::ShowMessage
+                     ("MathParser::IsEquation() 3 Throwing exception - Invalid number or names\n");
+                  #endif
+                  throw MathException("Invalid number or names in math equation");
+               }
             }
-            
-            // Remove spaces in the equation
-            str1 = RemoveSpaceInMathEquation(str1);
-            #if DEBUG_PARSE_EQUATION
-            MessageInterface::ShowMessage
-               ("   Checking for any errors in the equation\n   After removing "
-                "spaces in math eq, str1=<%s>\n", str1.c_str());
-            #endif
-            
-            // Remove chained plus or minus signs
-            str1 = GmatStringUtil::ReplaceChainedUnaryOperators(str1);
-            #if DEBUG_PARSE_EQUATION
-            MessageInterface::ShowMessage
-               ("   After replacing chained unary +- signs, str1=<%s>\n", str1.c_str());
-            #endif
-            
-            if (!GmatStringUtil::IsMathEquation(str1, false, true))
+            else
             {
                #if DEBUG_PARSE_EQUATION
                MessageInterface::ShowMessage
-                  ("MathParser::IsEquation() 3 Throwng exception - Invalid number or math equation\n");
+                  ("   All names are valid, check for invalid function call\n");
                #endif
-               throw MathException("Invalid number or math equation");
+               
+               // Do prelimary check if it is string function call. String litereral
+               // can be passed to string function such as '   my string ...' (LOJ: 2016.02.16)
+               StringArray callItems = GmatStringUtil::ParseFunctionCall(str1);
+               #if DEBUG_PARSE_EQUATION
+               for (unsigned int i = 0; i < callItems.size(); i++)
+                  MessageInterface::ShowMessage("   callItems[%d] = '%s'\n", i, callItems[i].c_str());
+               #endif
+               // Make function call to true if there is at least one argument
+               if (callItems.size() > 1)
+                  isFunctionCall = true;
             }
+            
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("   <%s> %s a function call\n", str1.c_str(), isFunctionCall ? "is" : "is not");
+            #endif
+            
+            // If it is not a function call, remove spaces in the equation
+            if (!isFunctionCall)
+            {
+               str1 = RemoveSpaceInMathEquation(str1);
+               #if DEBUG_PARSE_EQUATION
+               MessageInterface::ShowMessage
+                  ("   Checking for any errors in the equation\n   After removing "
+                   "spaces in math eq, str1=<%s>\n", str1.c_str());
+               #endif
+               
+               // Remove chained plus or minus signs
+               str1 = GmatStringUtil::ReplaceChainedUnaryOperators(str1);
+               #if DEBUG_PARSE_EQUATION
+               MessageInterface::ShowMessage
+                  ("   After replacing chained unary +- signs, str1=<%s>\n", str1.c_str());
+               #endif
+               
+               if (!GmatStringUtil::IsMathEquation(str1, false, true))
+               {
+                  #if DEBUG_PARSE_EQUATION
+                  MessageInterface::ShowMessage
+                     ("MathParser::IsEquation() 4 Throwing exception - Invalid number or math equation\n");
+                  #endif
+                  throw MathException("Invalid number or math equation");
+               }
+            }
+         }
+      }
+      
+      // First check for string function which does not need math equation checking
+      if (isFunctionCall)
+      {
+         std::string builtinFuncName = GetFunctionName(BUILTIN_FUNCTION, str1, left);
+         if (builtinFuncName != "")
+         {
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("MathParser::IsEquation(%s) returning true, '%s' is built-in function\n",
+                str1.c_str(), builtinFuncName.c_str());
+            #endif
+            return true;
          }
       }
       
@@ -321,7 +389,7 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       {
          #if DEBUG_PARSE_EQUATION
          MessageInterface::ShowMessage
-            ("MathParser::IsEquation() 4 Throwng exception - Invalid number or math equation\n");
+            ("MathParser::IsEquation() 5 Throwing exception - Invalid number or math equation\n");
          #endif
          throw MathException("Incomplete math equation");
       }
@@ -653,6 +721,27 @@ MathNode* MathParser::Parse(const std::string &str)
       ("MathParser::Parse() newEq=%s\n", newEq.c_str());
    #endif
    
+   // First check for string function which does not need math equation checking
+   std::string left = "";
+   std::string builtinFuncName = GetFunctionName(BUILTIN_FUNCTION, newEq, left);
+   #if DEBUG_PARSE
+   MessageInterface::ShowMessage("   builtinFuncName='%s'\n", builtinFuncName.c_str());
+   #endif
+   if (builtinFuncName != "")
+   {
+      #if DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("   '%s' is built-in string function, use original string\n", builtinFuncName.c_str());
+      #endif
+      MathNode *topNode = CreateNode(builtinFuncName, str);
+      #if DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("MathParser::Parse() newEq<%s> is a buit-in string function, so returning "
+          "node of %s<%p>\n", newEq.c_str(), builtinFuncName.c_str(), topNode);
+      #endif
+      return topNode;
+   }
+   
    // Check for invalid math symbols
    if (!GmatStringUtil::IsMathEquation(newEq, true))
       throw MathException("Invalid math equation");
@@ -673,7 +762,13 @@ MathNode* MathParser::Parse(const std::string &str)
             if (GmatStringUtil::IsMathOperator(nextCh) || nextCh == ')' || nextCh == ',')
                continue;
             else
+            {
+               #if DEBUG_PARSE
+               MessageInterface::ShowMessage
+                  ("   Invalid next character after transpose found, nextCh = '%c'\n", nextCh);
+               #endif
                throw MathException("Invalid math equation after transpose");
+            }
          }
       }
    }
@@ -3082,6 +3177,18 @@ bool MathParser::IsParenPartOfFunction(const std::string &str)
    }
    
    #if DEBUG_FUNCTION
+   MessageInterface::ShowMessage("   Checking internal StringFunction list...\n");
+   #endif
+   if (HasFunctionName(str1, builtinFuncList))
+   {
+      #if DEBUG_FUNCTION
+      MessageInterface::ShowMessage
+         ("MathParser::IsParenPartOfFunction() returning true, StringFunction found\n");
+      #endif
+      return true;
+   }
+   
+   #if DEBUG_FUNCTION
    MessageInterface::ShowMessage
       ("MathParser::IsParenPartOfFunction() returning false, no function found\n");
    #endif
@@ -3177,6 +3284,11 @@ std::string MathParser::GetFunctionName(UnsignedInt functionType,
    case UNIT_CONVERSION:
       {
          BuildFunction(str, unitConvList, fnName, left);
+         break;
+      }
+   case BUILTIN_FUNCTION:
+      {
+         BuildFunction(str, builtinFuncList, fnName, left);
          break;
       }
    case GMAT_FUNCTION:
@@ -3508,15 +3620,18 @@ void MathParser::BuildAllFunctionList()
    realFuncList.push_back("asin");
    realFuncList.push_back("atan");
    realFuncList.push_back("atan2");
+   realFuncList.push_back("ceil");
    realFuncList.push_back("cos");
    realFuncList.push_back("exp");
+   realFuncList.push_back("fix");
+   realFuncList.push_back("floor");
    realFuncList.push_back("log");
    realFuncList.push_back("log10");
    realFuncList.push_back("sin");
    realFuncList.push_back("tan");
    realFuncList.push_back("sqrt");
    
-   // Functions for matrix
+   // Functions for matrix and vector
    matrixFuncList.push_back("det");
    matrixFuncList.push_back("inv");
    matrixFuncList.push_back("norm");
@@ -3528,9 +3643,18 @@ void MathParser::BuildAllFunctionList()
    unitConvList.push_back("rad2Deg");
    unitConvList.push_back("radToDeg");
    
+   // Builtin functions taking more than 1 input argument with Real or String
+   // cannot be used with operators
+   builtinFuncList.push_back("cross");
+   builtinFuncList.push_back("diag");
+   builtinFuncList.push_back("min");
+   builtinFuncList.push_back("mod");
+   builtinFuncList.push_back("strcat");
+   builtinFuncList.push_back("sprintf");
+   
    // Matrix Operators
-   matrixOpList.push_back("'");
-   matrixOpList.push_back("^(-1)");
+   matrixOpList.push_back("'");      // transpose()
+   matrixOpList.push_back("^(-1)");  // inv()
    
 }
 

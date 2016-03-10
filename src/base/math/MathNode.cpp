@@ -48,7 +48,8 @@ MathNode::MathNode(const std::string &typeStr, const std::string &nomme) :
    isFunction      (false),
    isFunctionInput (false),
    elementType     (Gmat::REAL_TYPE),
-   realValue       (REAL_PARAMETER_UNDEFINED)
+   realValue       (REAL_PARAMETER_UNDEFINED),
+   stringValue     (STRING_PARAMETER_UNDEFINED)
 {
    objectTypes.push_back(Gmat::MATH_NODE);
    objectTypeNames.push_back("MathNode");   
@@ -163,11 +164,19 @@ void MathNode::SetMathWrappers(WrapperMap *wrapperMap)
 }
 
 //---------------------------------------------------------------------------
-// GmatBase EvaluateObject()
+// GmatBase* EvaluateObject()
 //---------------------------------------------------------------------------
 GmatBase* MathNode::EvaluateObject()
 {
    return NULL;
+}
+
+//---------------------------------------------------------------------------
+// std::string EvaluateString()
+//---------------------------------------------------------------------------
+std::string MathNode::EvaluateString()
+{
+   return STRING_PARAMETER_UNDEFINED;
 }
 
 //---------------------------------------------------------------------------
