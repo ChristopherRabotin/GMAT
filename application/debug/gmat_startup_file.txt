@@ -53,6 +53,7 @@ PLUGIN                   = ./plugins/libPythonInterfaced
 PLUGIN                   = ./plugins/libStationd
 PLUGIN                   = ./plugins/libMatlabInterfaced
 PLUGIN                   = ./plugins/libFminconOptimizerd
+PLUGIN                   = ./plugins/libThrustFiled
 
 # Alpha plugins (disabled by default)
 #PLUGIN                  = ./libCInterfaced

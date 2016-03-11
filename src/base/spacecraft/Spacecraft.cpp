@@ -707,6 +707,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    hardwareNames     = a.hardwareNames;
 //   hardwareList      = a.hardwareList;
 
+   obsoleteObjects.clear();
    // set cloned hardware
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);            // made changes on 09/23/2014
 
@@ -816,6 +817,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    hardwareNames     = a.hardwareNames;
 //   hardwareList      = a.hardwareList;
+
+   obsoleteObjects.clear();
 
    // delete attached hardware, such as tanks and thrusters
    #ifdef DEBUG_SPACECRAFT
@@ -2124,9 +2127,25 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                }
                catch (BaseException &)
                {
+                  #ifdef DEBUG_SC_REF_OBJECT
+                  MessageInterface::ShowMessage
+                     ("Spacecraft::SetRefObject() EXCEPTION thrown in AttachTanksToThrusters\n");
+                  #endif
                }
             }
          }
+         // Now we can delete the obsolete objects since they should not be
+         // pointed to anymore
+         for (unsigned int ii = 0; ii < obsoleteObjects.size(); ii++)
+         {
+            #ifdef DEBUG_SC_REF_OBJECT
+            MessageInterface::ShowMessage
+               ("Spacecraft::SetRefObject() deleting obsolete object %s<%p>\n",
+                     obsoleteObjects.at(ii)->GetName().c_str(), obsoleteObjects.at(ii));
+            #endif
+            delete obsoleteObjects.at(ii);
+         }
+         obsoleteObjects.clear();
          return retval;
       }
 
@@ -2149,6 +2168,18 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                }
             }
          }
+         // Now we can delete the obsolete objects since they should not be
+         // pointed to anymore
+         for (unsigned int ii = 0; ii < obsoleteObjects.size(); ii++)
+         {
+            #ifdef DEBUG_SC_REF_OBJECT
+            MessageInterface::ShowMessage
+               ("Spacecraft::SetRefObject() deleting obsolete object %s<%p>\n",
+                     obsoleteObjects.at(ii)->GetName().c_str(), obsoleteObjects.at(ii));
+            #endif
+            delete obsoleteObjects.at(ii);
+         }
+         obsoleteObjects.clear();
          return retval;
       }
 
@@ -2161,7 +2192,20 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       // set on hardware
       if (obj->GetType() == Gmat::HARDWARE)
       {
-         return SetHardware(obj, hardwareNames, hardwareList);
+         bool retval = SetHardware(obj, hardwareNames, hardwareList);
+         // Now we can delete the obsolete objects since they should not be
+         // pointed to anymore
+         for (unsigned int ii = 0; ii < obsoleteObjects.size(); ii++)
+         {
+            #ifdef DEBUG_SC_REF_OBJECT
+            MessageInterface::ShowMessage
+               ("Spacecraft::SetRefObject() deleting obsolete object %s<%p>\n",
+                     obsoleteObjects.at(ii)->GetName().c_str(), obsoleteObjects.at(ii));
+            #endif
+            delete obsoleteObjects.at(ii);
+         }
+         obsoleteObjects.clear();
+         return retval;
       }
 
       return false;
@@ -5965,15 +6009,17 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
             newMass, massChange);
    #endif
 
-   // Find the active thruster(s)
-   ObjectArray active;
+   // Find the active thruster(s) and THF tanks
+   ObjectArray activeThrusters;
+   ObjectArray thrustHistoryTanks;
+
    RealArray   flowrate;
    Real        totalFlow = 0.0, rate;
    for (ObjectArray::iterator i = thrusters.begin(); i != thrusters.end(); ++i)
    {
       if ((*i)->GetBooleanParameter("IsFiring"))
       {
-         active.push_back(*i);
+         activeThrusters.push_back(*i);
          rate = ((Thruster*)(*i))->CalculateMassFlow();
          #ifdef DEBUG_MASS_FLOW
             MessageInterface::ShowMessage("Thruster %s returned %12.10f\n",
@@ -5983,40 +6029,60 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
          totalFlow += rate;
       }
    }
-//   if (GmatMathUtil::IsEqual(totalFlow, 0.0))
-//   {
-////      MessageInterface::ShowMessage("Total Flow is zero!!!\n");  // temporary
-//      return true;
-//   }
 
-   // Divide the mass flow evenly between the tanks on each active thruster
-   Real numberFiring = active.size();
-   if ((numberFiring <= 0) && (massChange != 0.0))
+   for (ObjectArray::iterator i = tanks.begin(); i != tanks.end(); ++i)
+   {
+      if (((FuelTank*)(*i))->NoThrusterNeeded())
+      {
+         thrustHistoryTanks.push_back(*i);
+      }
+   }
+
+   // Divide the mass flow between the tanks on each activeThrusters thruster
+   UnsignedInt numberFiring = activeThrusters.size();
+   UnsignedInt numberDraining = thrustHistoryTanks.size();
+
+   if ((numberFiring <= 0) && (numberDraining <= 0) && (massChange != 0.0))
    {
       std::stringstream errmsg;
       errmsg.precision(15);
       errmsg << "Mass update " << massChange
              << " requested for " << instanceName
-             << " but there are no active thrusters";
+             << " but there are no active thrusters or thrust file tanks";
+      throw SpaceObjectException(errmsg.str());
+   }
+
+   // For now, don't allow both modes
+   if ((numberFiring > 0) && (numberDraining > 0))
+   {
+      std::stringstream errmsg;
+      errmsg.precision(15);
+      errmsg << "Mass update " << massChange
+             << " requested for " << instanceName
+             << " from thrusters and from a thrust file.  That mode is not "
+             << "currently supported.";
       throw SpaceObjectException(errmsg.str());
    }
 
    Real dm;
-   for (UnsignedInt i = 0; i < active.size(); ++i)
+
+   // todo: Check: This loop needs to be updated to split apart the flow based on plumbing
+   for (UnsignedInt i = 0; i < activeThrusters.size(); ++i)
    {
-      // Change the mass in each attached tank based on the thruster mix ratios
-      ObjectArray usedTanks = active[i]->GetRefObjectArray(Gmat::HARDWARE);
-      if (!GmatMathUtil::IsEqual(totalFlow, 0.0))
+      // Change the mass in each attached tank
+      ObjectArray usedTanks = activeThrusters[i]->GetRefObjectArray(Gmat::HARDWARE);
+      
+      if (!GmatMathUtil::IsEqual(totalFlow,0.0))
       {
          dm = massChange * flowrate[i] / totalFlow;
 
          #ifdef DEBUG_MASS_FLOW
             MessageInterface::ShowMessage("flowrate = %12.10f, totalFlow = %12.10f\n",
                   flowrate[i], totalFlow);
-            MessageInterface::ShowMessage("%.12le from %s = [ ", dm, active[i]->GetName().c_str());
+            MessageInterface::ShowMessage("%.12le from %s = [ ", dm, activeThrusters[i]->GetName().c_str());
          #endif
 
-         Rvector mixRatio = active[i]->GetRvectorParameter("MixRatio");
+            Rvector mixRatio = activeThrusters[i]->GetRvectorParameter("MixRatio");
          Real mixTotal = 0.0;
          for (UnsignedInt imix = 0; imix < mixRatio.GetSize(); ++imix)
             mixTotal += mixRatio[imix];
@@ -6031,9 +6097,31 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
          }
       }
       #ifdef DEBUG_MASS_FLOW
-               MessageInterface::ShowMessage(" ] ");
+         MessageInterface::ShowMessage(" ] ");
       #endif
    }
+
+   if (thrustHistoryTanks.size() > 0)
+   {
+      #ifdef DEBUG_MASS_FLOW
+         MessageInterface::ShowMessage("Depleting mass thruster free: [");
+      #endif
+
+      dm = massChange / thrustHistoryTanks.size();
+      for (UnsignedInt i = 0; i < thrustHistoryTanks.size(); ++i)
+      {
+         #ifdef DEBUG_MASS_FLOW
+            MessageInterface::ShowMessage(" %.12le ", dm);
+         #endif
+
+         thrustHistoryTanks[i]->SetRealParameter("FuelMass",
+               thrustHistoryTanks[i]->GetRealParameter("FuelMass") + dm);
+      }
+      #ifdef DEBUG_MASS_FLOW
+         MessageInterface::ShowMessage(" ] ");
+      #endif
+   }
+
    #ifdef DEBUG_MASS_FLOW
       MessageInterface::ShowMessage("\n");
    #endif
@@ -6428,6 +6516,9 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
             ("      The hardware name '%s' found\n", objName.c_str());
          #endif
 
+//         bool isFound = false;
+//         ObjectArray::iterator i;
+//         for (i = hwArray.begin(); i != hwArray.end(); ++i)
          for (ObjectArray::iterator i = hwArray.begin(); i != hwArray.end(); ++i)
          {
             #ifdef DEBUG_SC_REF_OBJECT
@@ -6443,16 +6534,27 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
                if (old->IsOfType(Gmat::THRUSTER))
                   isFiring = old->GetBooleanParameter("IsFiring");
                hwArray.erase(i);
+//               isFound = true;
                #ifdef DEBUG_MEMORY
                MemoryTracker::Instance()->Remove
                   (old, old->GetName(), "Spacecraft::SetHardware()",
                    "deleting old cloned " + objType, this);
                #endif
-               delete old;
+//               delete old;
+               // we don't want to delete this here, as it may still be pointed to.
+               // this will be deleted later on in SetRefObject
+               #ifdef DEBUG_SC_REF_OBJECT
+               MessageInterface::ShowMessage
+                  ("      Adding pointer %s<%p> to obsoleteObjects\n",
+                        objName.c_str(), old);
+               #endif
+               obsoleteObjects.push_back(old);
                old = NULL;
                break;
             }
          }
+//         if (isFound)
+//            hwArray.erase(i);
 
          // clone and push the hardware to the list
          GmatBase *clonedObj = obj->Clone();

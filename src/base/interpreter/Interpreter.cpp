@@ -3340,6 +3340,8 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       retval = AssembleCreateCommand(cmd, desc);
    else if (type == "Save" || type == "Global")
       retval = SetCommandRefObjects(cmd, desc);
+   else if (cmd->IsOfType("BurnCommand") && type != "Maneuver")
+      retval = AssembleFiniteBurnCommand(cmd, desc);
    else
       retval = false;
    

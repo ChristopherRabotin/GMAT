@@ -124,7 +124,19 @@ bool Negate::ValidateInputs()
    if (leftNode == NULL)
       throw MathException("Negate() - Missing input arguments.\n");
    
-   // it can be any type
+   Integer type1, row1, col1; // Left node
+
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+
+   // it can be any numeric type
+   if ((type1 != Gmat::REAL_TYPE) && (type1 != Gmat::RMATRIX_TYPE))
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type1] + ") for negation operator.\n";
+      throw MathException(errmsg);
+   }
+
    return true;
    //return leftNode->ValidateInputs();
 }
