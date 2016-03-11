@@ -3560,16 +3560,25 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
          paramValues.push_back(gs->GetStringParameter("CentralBody"));
          paramValues.push_back(gs->GetStringParameter("StateType"));
          paramValues.push_back(gs->GetStringParameter("HorizonReference"));
-         ss.str(""); ss << gs->GetRealParameter("Location1"); paramValues.push_back(ss.str());
-         ss.str(""); ss << gs->GetRealParameter("Location2"); paramValues.push_back(ss.str());
-         ss.str(""); ss << gs->GetRealParameter("Location3"); paramValues.push_back(ss.str());
+         ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Location1"), false, false, false, 8); paramValues.push_back(ss.str());
+         ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Location2"), false, false, false, 8); paramValues.push_back(ss.str());
+         ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Location3"), false, false, false, 8); paramValues.push_back(ss.str());
          paramValues.push_back(gs->GetStringParameter("Id"));
-         ss.str(""); ss << gs->GetRealParameter("MinimumElevationAngle"); paramValues.push_back(ss.str());
+         ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("MinimumElevationAngle"), false, false, false, 8); paramValues.push_back(ss.str());
          paramValues.push_back(gs->GetStringParameter("IonosphereModel"));
          paramValues.push_back(gs->GetStringParameter("TroposphereModel"));
-         ss.str(""); ss << gs->GetRealParameter("Temperature"); paramValues.push_back(ss.str());
-         ss.str(""); ss << gs->GetRealParameter("Pressure"); paramValues.push_back(ss.str());
-         ss.str(""); ss << gs->GetRealParameter("Humidity"); paramValues.push_back(ss.str());
+         if (gs->GetStringParameter("TroposphereModel") != "None")
+         {
+            ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Temperature"), false, false, false, 8); paramValues.push_back(ss.str());
+            ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Pressure"), false, false, false, 8); paramValues.push_back(ss.str());
+            ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Humidity"), false, false, false, 8); paramValues.push_back(ss.str());
+         }
+         else
+         {
+            paramValues.push_back("");         // Temperature
+            paramValues.push_back("");         // Pressure
+            paramValues.push_back("");         // Humidity
+         }
 
          StringArray emList = gs->GetStringArrayParameter("ErrorModels");
          if (emList.size() == 0)
@@ -3736,8 +3745,8 @@ void BatchEstimator::WriteReportFileHeaderPart4_3()
       // 2.2.2. Fill in parameter's value
       paramValues.push_back(em->GetName());                                                         // Name
       paramValues.push_back(em->GetStringParameter("Type"));                                        // Measurement Type
-      ss.str(""); ss << em->GetRealParameter("NoiseSigma"); paramValues.push_back(ss.str());        // Noise Sigma
-      ss.str(""); ss << em->GetRealParameter("Bias"); paramValues.push_back(ss.str());              // Bias
+      ss.str(""); ss << GmatStringUtil::RealToString(em->GetRealParameter("NoiseSigma"), false, false, false, 8); paramValues.push_back(ss.str());        // Noise Sigma
+      ss.str(""); ss << GmatStringUtil::RealToString(em->GetRealParameter("Bias"), false, false, false, 8); paramValues.push_back(ss.str());              // Bias
       ss.str(""); ss << 0.1; paramValues.push_back(ss.str());                                       // Bias Sigma
 
       StringArray sfList = em->GetStringArrayParameter("SolveFors");
@@ -3861,9 +3870,9 @@ void BatchEstimator::WriteReportFileHeaderPart5()
    textFile << "\n";
    
    textFile << " Planetary Ephemeris                                 " << solarSystem->GetStringParameter("EphemerisSource") << "\n";
-   textFile << " Solar Irradiance (W/m^2 at 1 AU)                     1358.0\n";
-   textFile << " Speed of Light   (km/sec)                           " << GmatStringUtil::RealToString(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0, false, false, false, 5) << "\n";
-   textFile << " Universal Gravitational Constant(km^3/kg*sec^2)     " << GmatStringUtil::RealToString(GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT, false, true, true, 8) << "\n";
+   textFile << " Solar Irradiance (W/m^2 at 1 AU)                    1358.0\n";
+   textFile << " Speed of Light   (km/sec)                           " << GmatStringUtil::RealToString(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0, false, false, false, 6) << "\n";
+   textFile << " Universal Gravitational Constant(km^3/kg*sec^2)     " << GmatStringUtil::RealToString(GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT, false, true, false, 8) << "\n";
    textFile << "\n";
 
    // 2. Write information about central bodies to report file
@@ -3931,10 +3940,10 @@ void BatchEstimator::WriteReportFileHeaderPart5()
 
       // Set value to paramValues
       paramValues.push_back(cb->GetName());                                                                                 // Central Body
-      ss.str(""); ss << cb->GetRealParameter(cb->GetParameterID("Mu")); paramValues.push_back(ss.str());                    // Gravitational Constant
-      ss.str(""); ss << cb->GetRealParameter(cb->GetParameterID("EquatorialRadius")); paramValues.push_back(ss.str());      // Mean Equatorial Radius
-      ss.str(""); ss << 1.0 / cb->GetRealParameter(cb->GetParameterID("Flattening")); paramValues.push_back(ss.str());      // Inverse Flattening Cofficient
-      ss.str(""); ss << cb->GetRealParameter(cb->GetParameterID("RotationRate")); paramValues.push_back(ss.str());          // Rotation Rate
+      ss.str(""); ss << GmatStringUtil::RealToString(cb->GetRealParameter(cb->GetParameterID("Mu")), false, false, false, 8); paramValues.push_back(ss.str());                    // Gravitational Constant
+      ss.str(""); ss << GmatStringUtil::RealToString(cb->GetRealParameter(cb->GetParameterID("EquatorialRadius")), false, false, false, 8); paramValues.push_back(ss.str());      // Mean Equatorial Radius
+      ss.str(""); ss << GmatStringUtil::RealToString(1.0 / cb->GetRealParameter(cb->GetParameterID("Flattening")), false, false, false, 8); paramValues.push_back(ss.str());      // Inverse Flattening Cofficient
+      ss.str(""); ss << GmatStringUtil::RealToString(cb->GetRealParameter(cb->GetParameterID("RotationRate")), false, false, false, 8); paramValues.push_back(ss.str());          // Rotation Rate
 
       Integer valueLen = 0;
       for (Integer j = 0; j < paramValues.size(); ++j)
@@ -4099,8 +4108,7 @@ void BatchEstimator::WritePageHeader()
       textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type           Edit          Observed(O)         Computed (C)       Residual (O-C)   Elev. Participants\n";
    else
    {
-      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type           Edit          Observed(O)         Computed (C)       Residual (O-C)   Elev. Participants\n";
-      
+      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type          Units   " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)             Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size() - 1; ++i)
          textFile << "                         ";
