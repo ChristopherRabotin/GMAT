@@ -174,6 +174,7 @@ protected:
 
    std::stringstream textFile0;
    std::stringstream textFile1;
+   std::stringstream textFile1_1;
    std::stringstream textFile2;
    std::stringstream textFile3;
    std::stringstream textFile4;
@@ -226,7 +227,7 @@ protected:
 private:
 //   bool                    IsReuseableType(const std::string& value);
    
-   void                   WriteScript();                                                                            // made changes by TUAN NGUYEN
+//   void                   WriteScript();                                                                            // made changes by TUAN NGUYEN
    void                   WriteHeader();
    void                   WriteSummary(Solver::SolverState sState);
    void                   WriteConclusion();
@@ -262,6 +263,8 @@ private:
    std::map<GmatBase*, Rvector6> 
                           CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
    Rmatrix66              CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);      // made changes by TUAN NGUYEN
+   std::map<GmatBase*, RealArray>
+                          CalculateAncillaryElements(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
 
 
    std::string            GetFileCreateTime(std::string fileName);
