@@ -102,9 +102,8 @@ const ArrayWrapper& ArrayWrapper::operator=(const ArrayWrapper &aw)
       return *this;
    
    ElementWrapper::operator=(aw);
-   array        = aw.array;  
-   arrayName    = aw.arrayName;
-
+   array      = aw.array;  
+   arrayName  = aw.arrayName;
    return *this;
 }
 
@@ -346,11 +345,11 @@ const Rmatrix& ArrayWrapper::EvaluateArray() const
 bool ArrayWrapper::SetArray(const Rmatrix &toValue)
 {
    #ifdef DEBUG_ARRAY_WRAPPER
-      MessageInterface::ShowMessage(
-         "ArrayWrapper::SetArray called on array %s\n", 
-         arrayName.c_str());
+   MessageInterface::ShowMessage
+      ("ArrayWrapper::SetArray() '%s' entered, arrayName='%s', toValue = %s\n",
+       description.c_str(), arrayName.c_str(), toValue.ToString(12, 1, true).c_str());
    #endif
-      
+   
    if (array == NULL)
       throw ParameterException(
       "Cannot set value of Array - object pointer is NULL\n");
@@ -364,6 +363,7 @@ bool ArrayWrapper::SetArray(const Rmatrix &toValue)
       #ifdef DEBUG_ARRAY_WRAPPER
       MessageInterface::ShowMessage("     array.row = %d,   array.col = %d\n", row1, col1);
       MessageInterface::ShowMessage("   toValue.row = %d, toValue.col = %d\n", row2, col2);
+      MessageInterface::ShowMessage("   allowOneDimArraySetting = %d\n", allowOneDimArraySetting);
       #endif
       // Allow to set matrix with 1xN or Nx1 (LOJ: 2016.03.09)
       // Make a new matrix the same size as array
@@ -372,7 +372,8 @@ bool ArrayWrapper::SetArray(const Rmatrix &toValue)
       {
          newMat = toValue;
       }
-      else if (row1 == col2 && col1 == row2)
+      else if ((row1 == col2 && col1 == row2) && (col1 == 1) &&
+               allowOneDimArraySetting)
       {
          // Allow 1xN or Nx1 assignment
          Rvector newVal = toValue.GetRowOrColumn();
@@ -399,9 +400,19 @@ bool ArrayWrapper::SetArray(const Rmatrix &toValue)
       errmsg += "\n";
       throw ParameterException(errmsg);
    }
+
+   #ifdef DEBUG_ARRAY_WRAPPER
+   MessageInterface::ShowMessage
+      ("ArrayWrapper::SetArray() '%s' returning true\n", description.c_str());
+   #endif
+   
    return true;
 }
 
+
+//============================
+// protected
+//============================
 //---------------------------------------------------------------------------
 //  void SetupWrapper()
 //---------------------------------------------------------------------------

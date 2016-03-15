@@ -59,7 +59,9 @@ public:
    virtual ~ElementWrapper();
    
    virtual std::string        ToString();
-
+   virtual void               AllowOneDimArraySetting(bool allow);
+   virtual bool               IsOneDimArraySettingAllowed();
+   
    // Abstract to !!force!! implementation in derived classes
    /// todo: Remove implementation in .cpp file, since all it does is throw;
    ///       this is the better approach because it FORCES the developers to
@@ -160,6 +162,9 @@ protected:
    StringArray           refObjectNames;
    
    Gmat::WrapperDataType wrapperType;
+   
+   /// flag indicating if one dimentional row or column vector can be set each other
+   bool allowOneDimArraySetting;
 
 //---------------------------------------------------------------------------
 //  void SetupWrapper()

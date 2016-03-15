@@ -1225,7 +1225,11 @@ bool Assignment::Execute()
          #ifdef DEBUG_ASSIGNMENT_EXEC
          MessageInterface::ShowMessage("   Calling RunMathTree()\n");
          #endif
+         
          outWrapper = RunMathTree();
+         if (outWrapper->IsOneDimArraySettingAllowed())
+            lhsWrapper->AllowOneDimArraySetting(true);
+         
          #ifdef DEBUG_ASSIGNMENT_EXEC
          MessageInterface::ShowMessage
             ("   Calling ElementWrapper::SetValue() to set value to LHS\n");
@@ -2523,10 +2527,18 @@ ElementWrapper* Assignment::RunMathTree()
             outArray->SetRmatrix(rmat);
             
             #ifdef DEBUG_RUN_MATH_TREE
-            MessageInterface::ShowMessage("   Creating ArrayWrapper for output\n");
+            MessageInterface::ShowMessage
+               ("   Creating ArrayWrapper for output, topNodeType='%s', topNodeName='%s'\n",
+                topNode->GetTypeName().c_str(), topNode->GetName().c_str());
             #endif
             
             outWrapper = new ArrayWrapper();
+            
+            // Allow setting one dimential row or column vector to each other
+            // for Cross() function (LOJ: 2016.03.14)
+            if (topNode->GetTypeName() == "Cross3")
+               outWrapper->AllowOneDimArraySetting(true);
+            
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Add
                (outWrapper, "outWrapper", "Assignment::RunMathTree()",
