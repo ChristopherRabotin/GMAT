@@ -5877,7 +5877,7 @@ std::string GmatStringUtil::GetAlignmentString(const std::string inputString,
 
    case CENTER:
       retVal = s1 + inputString + s1;
-	  retVal = retVal.substr((len + s1.length())/2 , len);
+	  retVal = retVal.substr((len + inputString.length())/2 , len);
       break;
    }
 

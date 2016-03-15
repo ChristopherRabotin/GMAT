@@ -46,6 +46,8 @@
 //#define DEBUG_INVERSION
 //#define DEBUG_STM
 
+#define NEW_REPORTFILE_FORMAT
+
 //------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
 //------------------------------------------------------------------------------
@@ -151,18 +153,18 @@ void  BatchEstimatorInv::Copy(const GmatBase* orig)
 //------------------------------------------------------------------------------
 void BatchEstimatorInv::Accumulate()
 {
-   #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("BatchEstimator state is ACCUMULATING\n");
-   #endif
+#ifdef WALK_STATE_MACHINE
+   MessageInterface::ShowMessage("BatchEstimator state is ACCUMULATING\n");
+#endif
 
-   #ifdef DEBUG_ACCUMULATION
-      MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
-   #endif
+#ifdef DEBUG_ACCUMULATION
+   MessageInterface::ShowMessage("Entered BatchEstimatorInv::Accumulate()\n");
+#endif
 
    // Measurements are possible!
    const MeasurementData *calculatedMeas;
    std::vector<RealArray> stateDeriv;
-   
+
    for (UnsignedInt i = 0; i < hTilde.size(); ++i)
       hTilde[i].clear();
    hTilde.clear();
@@ -170,82 +172,158 @@ void BatchEstimatorInv::Accumulate()
    // Get state map, measurement models, and measurement data
    const std::vector<ListItem*> *stateMap = esm.GetStateMap();
    modelsToAccess = measManager.GetValidMeasurementList();            // Get valid measurement models
-   const ObservationData *currentObs =  measManager.GetObsData();      // Get current observation data
+   const ObservationData *currentObs = measManager.GetObsData();      // Get current observation data
 
-   
+
    // Get ground station and measurement type from current observation data
    std::string gsName = currentObs->participantIDs[0];
    std::string typeName = currentObs->typeName;
    std::string keyword = gsName + " " + typeName;
-   
+
+   bool found = false;
+   UnsignedInt indexKey = 0;
+   for (; indexKey < stationAndType.size(); ++indexKey)
+   {
+      if (stationAndType[indexKey] == keyword)
+      {
+         sumAllRecords[indexKey] += 1;            // count for the total records
+         found = true;
+         break;
+      }
+   }
+   if (!found)
+   {
+      // create a statistics record for a new combination of station and measuement type 
+      stationAndType.push_back(keyword);
+      stationsList.push_back(gsName);
+      measTypesList.push_back(typeName);
+      sumAllRecords.push_back(1);                // set total records to 1 at the first time
+      sumAcceptRecords.push_back(0);
+      sumResidual.push_back(0.0);
+      sumResidualSquare.push_back(0.0);
+      sumWeightResidualSquare.push_back(0.0);
+
+      sumSERecords.push_back(0);
+      sumSEResidual.push_back(0.0);
+      sumSEResidualSquare.push_back(0.0);
+      sumSEWeightResidualSquare.push_back(0.0);
+   }
+
+
    // Set initial value for 2 statistics tables
-   if (statisticsTable["TOTAL NUM RECORDS"].find(keyword) ==  statisticsTable["TOTAL NUM RECORDS"].end())
+   if (statisticsTable["TOTAL NUM RECORDS"].find(keyword) == statisticsTable["TOTAL NUM RECORDS"].end())
       statisticsTable["TOTAL NUM RECORDS"][keyword] = 0.0;
-   if (statisticsTable["ACCEPTED RECORDS"].find(keyword) ==  statisticsTable["ACCEPTED RECORDS"].end())
+   if (statisticsTable["ACCEPTED RECORDS"].find(keyword) == statisticsTable["ACCEPTED RECORDS"].end())
       statisticsTable["ACCEPTED RECORDS"][keyword] = 0.0;
-   if (statisticsTable["WEIGHTED RMS"].find(keyword) ==  statisticsTable["WEIGHTED RMS"].end())
+   if (statisticsTable["WEIGHTED RMS"].find(keyword) == statisticsTable["WEIGHTED RMS"].end())
       statisticsTable["WEIGHTED RMS"][keyword] = 0.0;
-   if (statisticsTable["MEAN RESIDUAL"].find(keyword) ==  statisticsTable["MEAN RESIDUAL"].end())
+   if (statisticsTable["MEAN RESIDUAL"].find(keyword) == statisticsTable["MEAN RESIDUAL"].end())
       statisticsTable["MEAN RESIDUAL"][keyword] = 0.0;
-   if (statisticsTable["STANDARD DEVIATION"].find(keyword) ==  statisticsTable["STANDARD DEVIATION"].end())
+   if (statisticsTable["STANDARD DEVIATION"].find(keyword) == statisticsTable["STANDARD DEVIATION"].end())
       statisticsTable["STANDARD DEVIATION"][keyword] = 0.0;
 
-   if (statisticsTable1["TOTAL NUM RECORDS"].find(typeName) ==  statisticsTable1["TOTAL NUM RECORDS"].end())
+   if (statisticsTable1["TOTAL NUM RECORDS"].find(typeName) == statisticsTable1["TOTAL NUM RECORDS"].end())
       statisticsTable1["TOTAL NUM RECORDS"][typeName] = 0.0;
-   if (statisticsTable1["ACCEPTED RECORDS"].find(typeName) ==  statisticsTable1["ACCEPTED RECORDS"].end())
+   if (statisticsTable1["ACCEPTED RECORDS"].find(typeName) == statisticsTable1["ACCEPTED RECORDS"].end())
       statisticsTable1["ACCEPTED RECORDS"][typeName] = 0.0;
-   if (statisticsTable1["WEIGHTED RMS"].find(typeName) ==  statisticsTable1["WEIGHTED RMS"].end())
+   if (statisticsTable1["WEIGHTED RMS"].find(typeName) == statisticsTable1["WEIGHTED RMS"].end())
       statisticsTable1["WEIGHTED RMS"][typeName] = 0.0;
-   if (statisticsTable1["MEAN RESIDUAL"].find(typeName) ==  statisticsTable1["MEAN RESIDUAL"].end())
+   if (statisticsTable1["MEAN RESIDUAL"].find(typeName) == statisticsTable1["MEAN RESIDUAL"].end())
       statisticsTable1["MEAN RESIDUAL"][typeName] = 0.0;
-   if (statisticsTable1["STANDARD DEVIATION"].find(typeName) ==  statisticsTable1["STANDARD DEVIATION"].end())
+   if (statisticsTable1["STANDARD DEVIATION"].find(typeName) == statisticsTable1["STANDARD DEVIATION"].end())
       statisticsTable1["STANDARD DEVIATION"][typeName] = 0.0;
 
    // count total number of observation data for a pair of groundstation and measurement type
    statisticsTable["TOTAL NUM RECORDS"][keyword] += 1;
    statisticsTable1["TOTAL NUM RECORDS"][typeName] += 1;
 
-   #ifdef DEBUG_ACCUMULATION
-      MessageInterface::ShowMessage("StateMap size is %d\n", stateMap->size());
-      MessageInterface::ShowMessage("Found %d models\n", modelsToAccess.size());
+#ifdef DEBUG_ACCUMULATION
+   MessageInterface::ShowMessage("StateMap size is %d\n", stateMap->size());
+   MessageInterface::ShowMessage("Found %d models\n", modelsToAccess.size());
 
-      MessageInterface::ShowMessage("Observation data O: epoch = %.12lf   type = <%s>", currentObs->epoch, currentObs->typeName.c_str());
-      for(UnsignedInt i=0; i < currentObs->participantIDs.size(); ++i)
-         MessageInterface::ShowMessage("   %s", currentObs->participantIDs[i].c_str());
+   MessageInterface::ShowMessage("Observation data O: epoch = %.12lf   type = <%s>", currentObs->epoch, currentObs->typeName.c_str());
+   for(UnsignedInt i=0; i < currentObs->participantIDs.size(); ++i)
+      MessageInterface::ShowMessage("   %s", currentObs->participantIDs[i].c_str());
 
-      MessageInterface::ShowMessage("   O = %.12lf", currentObs->value[0]);
-      
-      if ((currentObs->typeName == "DSNRange")||(currentObs->typeName == "DSNTwoWayRange"))
-         MessageInterface::ShowMessage("   range modulo = %lf\n", currentObs->rangeModulo);
-      MessageInterface::ShowMessage("\n");
-   #endif
+   MessageInterface::ShowMessage("   O = %.12lf", currentObs->value[0]);
+
+   if ((currentObs->typeName == "DSNRange")||(currentObs->typeName == "DSNTwoWayRange"))
+      MessageInterface::ShowMessage("   range modulo = %lf\n", currentObs->rangeModulo);
+   MessageInterface::ShowMessage("\n");
+#endif
 
    std::stringstream sLine;
    char s[1000];
    std::string times;
    Real temp;
-   TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch,"","UTCGregorian", temp, times, 1); 
+
+   // Write to report file iteration number, record number, and time:
+   TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch, "", "UTCGregorian", temp, times, 1);
    if (textFileMode == "Normal")
-      sprintf(&s[0],"%4d  %8d   %s   ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str());
+   {
+#ifdef NEW_REPORTFILE_FORMAT
+      sprintf(&s[0], "%4d %6d  %s  ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str());
+#else
+      sprintf(&s[0], "%4d  %8d   %s   ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str());
+#endif
+
+   }
    else
    {
-      Real timeTAI = TimeConverterUtil::Convert(currentObs->epoch,currentObs->epochSystem,TimeConverterUtil::TAIMJD); 
-     sprintf(&s[0],"%4d  %8d   %s  %.12lf        ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str(), timeTAI);
+      Real timeTAI = TimeConverterUtil::Convert(currentObs->epoch, currentObs->epochSystem, TimeConverterUtil::TAIMJD);
+#ifdef NEW_REPORTFILE_FORMAT
+      sprintf(&s[0], "%4d   %6d  %s  %.12lf ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str(), timeTAI);
+#else
+      sprintf(&s[0],"%4d  %8d   %s  %.12lf        ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str(), timeTAI);
+#endif
    }
    sLine << s;
 
+
+#ifdef NEW_REPORTFILE_FORMAT
+   std::string ss;
+   if (textFileMode == "Normal")
+   {
+      // Write to report file measurement type name:
+      std::string ss = currentObs->typeName + "                    ";
+      sLine << ss.substr(0, 18) << " ";
+   }
+   else
+   {
+      // Write to report file measurement type name and its unit:
+      ss = currentObs->typeName + "                    ";
+      sLine << ss.substr(0, 20) << " ";
+
+      ss = currentObs->unit + "    ";
+      sLine << ss.substr(0, 4) << " ";
+   }
+#else
+   // Write to report file measurement type name and its unit:
    std::string ss = currentObs->typeName + "                    ";
    sLine << ss.substr(0,20) << " ";
 
    ss = currentObs->unit + "    ";
    sLine << ss.substr(0,4) << " ";
+#endif
 
+
+#ifdef NEW_REPORTFILE_FORMAT
+   if (textFileMode != "Normal")
+   {
+      // Write to report file all participants in signal path:
+      ss = "";
+      for(UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
+         ss = ss + currentObs->participantIDs[n] + (((n+1) == currentObs->participantIDs.size())?"":",");
+      sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen);                                          // made changes by TUAN NGUYEN
+   }
+#else
+   // Write to report file all participants in signal path:
    ss = "";
    for(UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
       ss = ss + currentObs->participantIDs[n] + (((n+1) == currentObs->participantIDs.size())?"":",");
-   //ss = ss + "                    ";                                                                   // made changes by TUAN NGUYEN
-   //sLine << ss.substr(0,20) << " ";                                                                    // made changes by TUAN NGUYEN
    sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen);                                          // made changes by TUAN NGUYEN
+#endif
+
 
    if (modelsToAccess.size() == 0)
    {
@@ -253,16 +331,43 @@ void BatchEstimatorInv::Accumulate()
       numRemovedRecords["U"]++;
       measManager.GetObsDataObject()->inUsed = false;
       measManager.GetObsDataObject()->removedReason = "U";
-      sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 10, GmatStringUtil::LEFT);
 
-      //std::string ss = measManager.GetObsDataObject()->removedReason = "U";
-      //ss = ss + "    ";
-      //ss = ss.substr(0,4);
-      //sLine << ss << "     ";
+#ifdef NEW_REPORTFILE_FORMAT
+      if (textFileMode == "Normal")
+      {
+         // Write to report file edit status:
+         sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 6, GmatStringUtil::LEFT);
+
+         // Write to report file O-value, C-value, O-C, unit, elevation angle, and participants 
+         sprintf(&s[0], "%19.6lf                  N/A                  N/A  ", currentObs->value[0]);
+         sLine << s;
+         //ss = currentObs->unit + "    ";
+         //sLine << ss.substr(0, 4) << " ";
+         //sprintf(&s[0], "N/A   ");
+         sLine << "N/A   ";
+
+         ss = "";
+         for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
+            ss = ss + currentObs->participantIDs[n] + (((n + 1) == currentObs->participantIDs.size()) ? "" : ",");
+         sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen);
+      }
+      else
+      {
+         // Write to report file edit status:
+         sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 10, GmatStringUtil::LEFT);
+
+         // This line crashes on Linux, so comment out there
+         sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A                  N/A", currentObs->value_orig[0], currentObs->value[0]);
+         sLine << s;
+      }
+#else
+      // Write to report file edit status:
+      sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 10, GmatStringUtil::LEFT);
 
 	  // This line crashes on Linux, so comment out there
       sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A                  N/A", currentObs->value_orig[0], currentObs->value[0]);
       sLine << s;
+#endif
 
 
       if (textFileMode != "Normal")
@@ -293,13 +398,42 @@ void BatchEstimatorInv::Accumulate()
             numRemovedRecords["B"]++;
          else
             numRemovedRecords[ss]++;
-         //ss = ss + "    ";
-         //ss = ss.substr(0,4);
-         //sLine << ss << "     ";
+
+#ifdef NEW_REPORTFILE_FORMAT
+         if (textFileMode == "Normal")
+         {
+            // Write to report file edit status:
+            sLine << GmatStringUtil::GetAlignmentString(ss, 6, GmatStringUtil::LEFT);
+
+            // Write to report file O-value, C-value, O-C, unit, elevation angle, and participants 
+            sprintf(&s[0], "%19.6lf                  N/A                  N/A  ", currentObs->value[0]);
+            sLine << s;
+            //ss = currentObs->unit + "    ";
+            //sLine << ss.substr(0, 4) << " ";
+            sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
+            sLine << s << " ";
+
+            ss = "";
+            for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
+               ss = ss + currentObs->participantIDs[n] + (((n + 1) == currentObs->participantIDs.size()) ? "" : ",");
+            sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen);
+         }
+         else
+         {
+            // Write to report file edit status:
+            sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
+
+            sprintf(&s[0], "%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->feasibilityValue);
+            sLine << s;
+         }
+#else
+         // Write to report file edit status:
          sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
 
-         sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->feasibilityValue);
+         sprintf(&s[0], "%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->feasibilityValue);
          sLine << s;
+#endif
+
 
          if (textFileMode != "Normal")
          {
@@ -345,20 +479,49 @@ void BatchEstimatorInv::Accumulate()
             else
                numRemovedRecords[ss]++;
 
-            // Write report for this observation data for case data record is removed
-            //ss = ss + "    ";
-            //ss = ss.substr(0,4);
-            //sLine << ss << "     ";
-            sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
-
             Real ocDiff = currentObs->value[0]-calculatedMeas->value[0];
             Real weight;
             if ((*(calculatedMeas->covariance))(0,0) != 0.0)
                weight = 1.0 / (*(calculatedMeas->covariance))(0,0);
             else
                weight = 1.0;
-            sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+
+#ifdef NEW_REPORTFILE_FORMAT
+            if (textFileMode == "Normal")
+            {
+               // Write to report file edit status:
+               sLine << GmatStringUtil::GetAlignmentString(ss, 6, GmatStringUtil::LEFT);
+
+               // Write O-value, C-value, and O-C
+               sprintf(&s[0], "%19.6lf  %19.6lf   %18.6lf  ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
+               sLine << s;
+               //// Write to report file unit:
+               //ss = currentObs->unit + "    ";
+               //sLine << ss.substr(0, 4) << " ";
+               // Write to report file elevation angle:
+               sprintf(&s[0], "%6.2lf ", calculatedMeas->feasibilityValue);
+               sLine << s;
+
+               ss = "";
+               for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
+                  ss = ss + currentObs->participantIDs[n] + (((n + 1) == currentObs->participantIDs.size()) ? "" : ",");
+               sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen);
+            }
+            else
+            {
+               // Write to report file edit status:
+               sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
+
+               sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+               sLine << s;
+            }
+#else
+            // Write to report file edit status:
+            sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
+
+            sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
             sLine << s;
+#endif
 
             if (textFileMode != "Normal")
             {
@@ -562,12 +725,43 @@ void BatchEstimatorInv::Accumulate()
             
                // Write report for this observation data for case data record is removed
                std::string ss = currentObs->removedReason;
-               //ss = ss.substr(0,4);
-               //sLine << ss << "     ";
+
+#ifdef NEW_REPORTFILE_FORMAT
+               if (textFileMode == "Normal")
+               {
+                  // Write to report file edit status:
+                  sLine << GmatStringUtil::GetAlignmentString(ss, 6, GmatStringUtil::LEFT);
+
+                  // Write to report file O-value, C-value, O-C, 
+                  sprintf(&s[0], "%19.6lf  %19.6lf   %18.6lf  ", currentObs->value[k], calculatedMeas->value[k], ocDiff);
+                  sLine << s;
+                  //// Write to report file unit:
+                  //ss = currentObs->unit + "    ";
+                  //sLine << ss.substr(0, 4) << " ";
+                  // Write to report file elevation angle:
+                  sprintf(&s[0], "%6.2lf ", calculatedMeas->feasibilityValue);
+                  sLine << s;
+
+                  ss = "";
+                  for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
+                     ss = ss + currentObs->participantIDs[n] + (((n + 1) == currentObs->participantIDs.size()) ? "" : ",");
+                  sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen);
+               }
+               else
+               {
+                  // Write to report file edit status:
+                  sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
+
+                  sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+                  sLine << s;
+               }
+#else
+               // Write to report file edit status:
                sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
 
-               sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+               sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
                sLine << s;
+#endif
             
                if (textFileMode != "Normal")
                {
@@ -615,6 +809,14 @@ void BatchEstimatorInv::Accumulate()
             statisticsTable1["WEIGHTED RMS"][typeName] += weight*ocDiff*ocDiff;                    // sum of weighted residual square
             statisticsTable1["MEAN RESIDUAL"][typeName] += ocDiff;                                 // sum of residual
             statisticsTable1["STANDARD DEVIATION"][typeName] += ocDiff*ocDiff;                     // sum of residual square
+
+            
+            sumAcceptRecords[indexKey] += 1;                             // sum of all accepted records
+            sumResidual[indexKey] += ocDiff;                             // sum of residual
+            Real ocDiff2 = ocDiff*ocDiff;
+            sumResidualSquare[indexKey] += ocDiff2;                      // sum of residual square
+            sumWeightResidualSquare[indexKey] += weight*ocDiff2;         // sum of weigth residual square
+
 
             #ifdef DEBUG_ACCUMULATION_RESULTS
                MessageInterface::ShowMessage("Observed measurement value:\n");

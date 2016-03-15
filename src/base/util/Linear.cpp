@@ -551,6 +551,7 @@ std::string GmatRealUtil::RealToString(const Real &rval, bool useCurrentFormat,
       ss << std::fixed;
 
    ss << rval;
+   
 
    // How do I specify 2 digints of the exponent? (LOJ: 2010.05.03)
    // (This is what I got from internet search)
@@ -563,33 +564,35 @@ std::string GmatRealUtil::RealToString(const Real &rval, bool useCurrentFormat,
    // So manually remove extra 0 in the exponent of scientific notation.
    // ex) 1.23456e-015 to 1.23456e-15
 
-   std::string sval = ss.str();
+   std::string sval = GmatStringUtil::Trim(ss.str());
+   
+   if ((sval.find("e-0") != std::string::npos) && (sval.size() - sval.find("e-0")) == 5)
+      sval = GmatStringUtil::Replace(sval, "e-0", "e-");
+   else if ((sval.find("e+0") != std::string::npos) && (sval.size() - sval.find("e+0")) == 5)
+      sval = GmatStringUtil::Replace(sval, "e+0", "e+");
 
-   if (isScientific)
+   // This part is added due to no showpoint option of stringstream not working  
+   if (!isShowPointSet)
    {
-      if ((sval.find("e-0") != sval.npos) && (sval.size() - sval.find("e-0")) == 5)
-         sval = GmatStringUtil::Replace(sval, "e-0", "e-");
-      if ((sval.find("e+0") != sval.npos) && (sval.size() - sval.find("e+0")) == 5)
-         sval = GmatStringUtil::Replace(sval, "e+0", "e+");
-   }
-   else
-   {
-      // This part is added due to no showpoint option of stringstream not working  
-      if (!isShowPointSet)
+      std::string::size_type pos = sval.find('e');
+      std::string exp = ((pos == std::string::npos) ? "" : sval.substr(pos));
+      sval = ((pos == std::string::npos) ? sval : sval.substr(0, pos));
+         
+      pos = sval.find_last_of(".");
+      if (pos != std::string::npos)
       {
-         std::string::size_type pos = sval.find_last_of(".");
-         if (pos != std::string::npos)
-         {
-            std::string::size_type i = sval.size() - 1;
-            for (; sval.at(i) == '0'; --i);
+         std::string::size_type i = sval.size() - 1;
+         for (; sval.at(i) == '0'; --i);
 
-            if (sval.at(i) == '.')
-               --i;
+         if (sval.at(i) == '.')
+            --i;
 
-            sval = sval.substr(0, i + 1);
-         }
+         sval = sval.substr(0, i + 1);
       }
+
+      sval = sval + exp;
    }
+
    return sval;
 }
 

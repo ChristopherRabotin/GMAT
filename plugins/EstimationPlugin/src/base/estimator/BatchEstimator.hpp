@@ -75,6 +75,9 @@ public:
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id,
                                             const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -96,6 +99,9 @@ public:
    virtual std::string  GetOnOffParameter(const Integer id) const;
    virtual bool         SetOnOffParameter(const Integer id,
                                          const std::string &value);
+   virtual std::string  GetOnOffParameter(const std::string &label) const;
+   virtual bool         SetOnOffParameter(const std::string &label,
+                                          const std::string &value);
 
    virtual const StringArray& GetPropertyEnumStrings(const Integer id) const;
 
@@ -150,6 +156,29 @@ protected:
    std::map<std::string, std::map<std::string, Real> > statisticsTable;       // this table is for groundstation and measurement type
    std::map<std::string, std::map<std::string, Real> > statisticsTable1;      // this table is for measurement type only
 
+   // Statistics information for all combination of station and measurement type
+   StringArray  stationAndType;          // combination of station and type
+   StringArray  stationsList;            // station
+   StringArray  measTypesList;           // measurement type
+   IntegerArray sumAllRecords;           // total number of records
+   IntegerArray sumAcceptRecords;        // total all accepted records
+   RealArray    sumResidual;             // sum of all O-C of accepted records
+   RealArray    sumResidualSquare;       // sum of all (O-C)^2 of accepted records
+   RealArray    sumWeightResidualSquare; // sum of all [W*(O-C)]^2 of accepted records
+
+   // Statisrics information for sigma edited records
+   IntegerArray sumSERecords;               // total all sigma edited records
+   RealArray    sumSEResidual;              // sum of all O-C of all sigma edited records
+   RealArray    sumSEResidualSquare;        // sum of all (O-C)^2 of  all sigma edited records
+   RealArray    sumSEWeightResidualSquare;  // sum of all [W*(O-C)]^2 of all sigma edited records
+
+   std::stringstream textFile0;
+   std::stringstream textFile1;
+   std::stringstream textFile1_1;
+   std::stringstream textFile2;
+   std::stringstream textFile3;
+   std::stringstream textFile4;
+
    /// Parameter IDs for the BatchEstimators
    enum
    {
@@ -198,11 +227,35 @@ protected:
 private:
 //   bool                    IsReuseableType(const std::string& value);
    
-   void                   WriteScript();                                                                            // made changes by TUAN NGUYEN
+//   void                   WriteScript();                                                                            // made changes by TUAN NGUYEN
    void                   WriteHeader();
    void                   WriteSummary(Solver::SolverState sState);
    void                   WriteConclusion();
+
+   void                   WriteReportFileHeaderPart1();                               // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart2();                               // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart3();                               // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart4_1();                             // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart4_2();                             // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart4_3();                             // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart4();                               // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart5();                               // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart6();                               // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeader();                                    // made changes by TUAN NGUYEN
+
+   void                   WriteIterationHeader();                                     // made changes by TUAN NGUYEN
+   void                   WritePageHeader();                                          // made changes by TUAN NGUYEN
+   
+   void                   WriteIterationSummaryPart1(Solver::SolverState sState);     // made changes by TUAN NGUYEN
+   void                   WriteIterationSummaryPart2(Solver::SolverState sState);     // made changes by TUAN NGUYEN
+   void                   WriteIterationSummaryPart3(Solver::SolverState sState);     // made changes by TUAN NGUYEN
+   void                   WriteIterationSummaryPart4(Solver::SolverState sState);     // made changes by TUAN NGUYEN
+   void                   WriteReportFileSummary(Solver::SolverState sState);         // made changes by TUAN NGUYEN
+   
    std::string            GetElementFullName(ListItem* infor, bool isInternalCS) const;
+   std::string            GetElementUnit(ListItem* infor) const;                          // made changes by TUAN NGUYEN
+   std::string            GetUnit(std::string type);                                      // made changes by TUAN NGUYEN
+   Integer                GetElementPrecision(std::string unit) const;                    // made changes by TUAN NGUYEN
    Rmatrix                CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap);                       // made changes by TUAN NGUYEN
 
    std::map<GmatBase*, Rvector6> 
@@ -210,7 +263,16 @@ private:
    std::map<GmatBase*, Rvector6> 
                           CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
    Rmatrix66              CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);      // made changes by TUAN NGUYEN
+   std::map<GmatBase*, RealArray>
+                          CalculateAncillaryElements(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
 
+
+   std::string            GetFileCreateTime(std::string fileName);
+   std::string            CTime(const time_t* time);
+   std::string            GetOperatingSystemName();
+   std::string            GetOperatingSystemVersion();
+   std::string            GetHostName();
+   std::string            GetUserID();
 };
 
 #endif /* BatchEstimator_hpp */

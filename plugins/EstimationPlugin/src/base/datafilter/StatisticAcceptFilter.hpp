@@ -81,10 +81,17 @@ protected:
    /// Data thinning
    std::string thinMode;
    Integer     thinningFrequency;
-   /// Record count;
-   Integer     recCount;
-   /// Start time window. It is used for thinMode = "T"
-   GmatEpoch   startTimeWindow;
+   ///// Record count;
+   //Integer     recCount;
+
+   /// Record count map.  It contains record count for all measurement configs                 // made changes by TUAN NGUYEN
+   std::map<std::string,Integer> recCountMap;                                                  // made changes by TUAN NGUYEN
+
+   ///// Start time window. It is used for thinMode = "T"
+   //GmatEpoch   startTimeWindow;
+
+   /// Start time window map. It is used for thinMode = "T"                                   // made changes by TUAN NGUYEN
+   std::map<std::string,GmatEpoch>   startTimeWindowMap;                                      // made changes by TUAN NGUYEN
 
    /// List of tracking configs used for data filter                                          // made changes by TUAN NGUYEN
    StringArray tkConfigList;                                                                  // made changes by TUAN NGUYEN
