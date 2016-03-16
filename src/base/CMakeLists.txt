@@ -350,6 +350,9 @@ SET(BASE_SRCS
     math/Sqrt.cpp
     math/StringFunction.cpp
     math/Strcat.cpp
+    math/Strcmp.cpp
+    math/Strfind.cpp
+    math/Strrep.cpp
     math/Subtract.cpp
     math/Tan.cpp
     math/Tanh.cpp

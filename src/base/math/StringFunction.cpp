@@ -114,9 +114,6 @@ bool StringFunction::ValidateInputs()
        GetTypeName().c_str(), desc.c_str());
    #endif
    
-   Integer type1 = Gmat::STRING_TYPE;
-   Integer row1 = 1;
-   Integer col1 = 1;
    bool retval = true;
    
    // Validate inputs
@@ -139,12 +136,11 @@ bool StringFunction::ValidateInputs()
    if (!GmatStringUtil::EndsWith(items[1], ")"))
       throw MathException("Invalid calling syntax to " + GetTypeName() + "() in " +
                           desc);
-      
+   
    #ifdef DEBUG_VALIDATE_INPUT
    MessageInterface::ShowMessage
-      ("StringFunction::ValidateInputs() <%p><%s> returning %s, "
-       "type=%d, row=%d, col=%d\n", this, GetTypeName().c_str(),
-       retval ? "true" : "false", type1, row1, col1);
+      ("StringFunction::ValidateInputs() <%p><%s> returning %s\n",
+       this, GetTypeName().c_str(), retval ? "true" : "false");
    #endif
    
    return retval;

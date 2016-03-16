@@ -2595,6 +2595,15 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iri2007.c">
       <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Strcmp.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Strfind.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Strrep.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4936,6 +4945,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iri2007.h">
       <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Strcmp.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Strfind.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Strrep.hpp">
+      <Filter>Source Files\base\math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,5 @@
-//$Id$
 //------------------------------------------------------------------------------
-//                                   StringFunction
+//                              Strrep
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -19,33 +18,32 @@
 // governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number NNG04CC06P.
+// number S-67573-G
 //
 // Author: Linda Jun
 // Created: 2016.02.17
 //
 /**
- * Defines the string functions base class.
+ * Declares Strrep class.
  */
 //------------------------------------------------------------------------------
+#ifndef Strrep_hpp
+#define Strrep_hpp
 
-#ifndef StringFunction_hpp
-#define StringFunction_hpp
+#include "StringFunction.hpp"
 
-#include "BuiltinFunction.hpp"
-
-class GMAT_API StringFunction : public BuiltinFunction
+class GMAT_API Strrep : public StringFunction
 {
 public:
-   StringFunction(const std::string &typeStr, const std::string &name);
-   virtual ~StringFunction();
-   StringFunction(const StringFunction &sf);
-   StringFunction& operator=(const StringFunction &sf);
+   Strrep(const std::string &name);
+   virtual ~Strrep();
+   Strrep(const Strrep &copy);
    
-   virtual bool ValidateInputs(); 
-   virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
+   // inherited from GmatBase
+   virtual GmatBase* Clone() const;
    
-protected:
+   // inherited from MathNode
+   virtual std::string EvaluateString();
 };
 
-#endif //StringFunction_hpp
+#endif // Strrep_hpp

@@ -30,6 +30,7 @@
 //------------------------------------------------------------------------------
 
 #include "BuiltinFunction.hpp"
+#include "MathException.hpp"
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
@@ -292,3 +293,27 @@ const StringArray& BuiltinFunction::GetWrapperObjectNameArray(bool completeSet)
    #endif
    return inputNames;
 }
+
+//=================================
+// protected
+//=================================
+
+//------------------------------------------------------------------------------
+// void ValidateWrappers()
+//------------------------------------------------------------------------------
+void BuiltinFunction::ValidateWrappers()
+{
+   for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
+   {
+      ElementWrapper *wrapper = inputArgWrappers[i];
+      #ifdef DEBUG_EVALUATE
+      MessageInterface::ShowMessage
+         ("   inputArgWrappers[%d] = <%p>, desc = '%s'\n", i, wrapper,
+          wrapper ? wrapper->GetDescription().c_str() : "NULL");
+      #endif
+      
+      if (wrapper == NULL)
+         throw MathException("Error evaluating \"" + GetName() + "() function");
+   }
+}
+

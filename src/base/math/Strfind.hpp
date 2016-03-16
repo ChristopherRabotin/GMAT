@@ -1,6 +1,5 @@
-//$Id$
 //------------------------------------------------------------------------------
-//                                   StringFunction
+//                              Strfind
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -19,33 +18,33 @@
 // governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number NNG04CC06P.
+// number S-67573-G
 //
 // Author: Linda Jun
 // Created: 2016.02.17
 //
 /**
- * Defines the string functions base class.
+ * Declares Strfind class.
  */
 //------------------------------------------------------------------------------
+#ifndef Strfind_hpp
+#define Strfind_hpp
 
-#ifndef StringFunction_hpp
-#define StringFunction_hpp
+#include "StringFunction.hpp"
 
-#include "BuiltinFunction.hpp"
-
-class GMAT_API StringFunction : public BuiltinFunction
+class GMAT_API Strfind : public StringFunction
 {
 public:
-   StringFunction(const std::string &typeStr, const std::string &name);
-   virtual ~StringFunction();
-   StringFunction(const StringFunction &sf);
-   StringFunction& operator=(const StringFunction &sf);
+   Strfind(const std::string &name);
+   virtual ~Strfind();
+   Strfind(const Strfind &copy);
    
-   virtual bool ValidateInputs(); 
+   // inherited from GmatBase
+   virtual GmatBase* Clone() const;
+   
+   // inherited from MathNode
    virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
-   
-protected:
+   virtual Real Evaluate();
 };
 
-#endif //StringFunction_hpp
+#endif // Strfind_hpp

@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                                  Strcat
+//                                  Strrep
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -25,13 +25,13 @@
 // Created: 2016.02.17
 //
 /**
- * Implements Strcat class for string concatenation.
+ * Implements Strrep class for string concatenation.
  */
 //------------------------------------------------------------------------------
 
-#include "Strcat.hpp"
-#include "MathException.hpp"
+#include "Strrep.hpp"
 #include "ElementWrapper.hpp"
+#include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_EVALUATE
@@ -41,40 +41,40 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Strcat()
+// Strrep()
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-Strcat::Strcat(const std::string &name)
-   : StringFunction("Strcat", name)
+Strrep::Strrep(const std::string &name)
+   : StringFunction("Strrep", name)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// ~Strcat()
+// ~Strrep()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-Strcat::~Strcat()
+Strrep::~Strrep()
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  Strcat(const Strcat &copy)
+//  Strrep(const Strrep &copy)
 //------------------------------------------------------------------------------
 /**
- * Constructs the Strcat object (copy constructor).
+ * Constructs the Strrep object (copy constructor).
  * 
  * @param <copy> Object that is copied
  */
 //------------------------------------------------------------------------------
-Strcat::Strcat(const Strcat &copy) :
+Strrep::Strrep(const Strrep &copy) :
    StringFunction      (copy)
 {
 }
@@ -84,53 +84,48 @@ Strcat::Strcat(const Strcat &copy) :
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * Clone of the Strcat operation.
+ * Clone of the Strrep operation.
  *
- * @return clone of the Strcat operation.
+ * @return clone of the Strrep operation.
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Strcat::Clone() const
+GmatBase* Strrep::Clone() const
 {
-   return (new Strcat(*this));
+   return (new Strrep(*this));
 }
 
 //------------------------------------------------------------------------------
 // std;:string EvaluateString()
 //------------------------------------------------------------------------------
 /**
- * @return the Strcat of left node
+ * modifiedStr = strrep(origStr, oldSubstr, newSubstr)
+ * Replaces all occurrences of the string oldSubstr within string origStr with
+ * the string newSubstr. Returns modified string.
  *
  */
 //------------------------------------------------------------------------------
-std::string Strcat::EvaluateString()
+std::string Strrep::EvaluateString()
 {
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
-      ("Strcat::EvaluateString() <%p>'%s' entered\n", this, GetName().c_str());
+      ("Strrep::EvaluateString() <%p>'%s' entered\n", this, GetName().c_str());
    #endif
-   std::string result;
+   
+   if (inputArgWrappers.size() != 3)
+      throw MathException(GetTypeName() + "() function requires three input arguments");
 
    ValidateWrappers();
    
-   // for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
-   // {
-   //    ElementWrapper *wrapper = inputArgWrappers[i];
-   //    #ifdef DEBUG_EVALUATE
-   //    MessageInterface::ShowMessage
-   //       ("   inputArgWrappers[%d] = <%p>, desc = '%s'\n", i, wrapper,
-   //        wrapper ? wrapper->GetDescription().c_str() : "NULL");
-   //    #endif
-      
-   //    if (wrapper == NULL)
-   //       throw MathException("Error evaluating \"" + GetName() + "() function");
-      
-   //    result = result + wrapper->EvaluateString();
-   // }
+   std::string str = inputArgWrappers[0]->EvaluateString();
+   std::string oldStr = inputArgWrappers[1]->EvaluateString();
+   std::string newStr = inputArgWrappers[2]->EvaluateString();
+   
+   std::string result = GmatStringUtil::Replace(str, oldStr, newStr, 0);
    
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
-      ("Strcat::EvaluateString() <%p>'%s' returning '%s'\n", this,
+      ("Strrep::EvaluateString() <%p>'%s' returning '%s'\n", this,
        GetName().c_str(), result.c_str());
    #endif
    return result;

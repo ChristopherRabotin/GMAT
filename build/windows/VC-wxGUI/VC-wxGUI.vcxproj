@@ -565,7 +565,10 @@
     <ClCompile Include="..\..\..\src\base\math\Sprintf.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Sqrt.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Strcat.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Strcmp.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Strfind.cpp" />
     <ClCompile Include="..\..\..\src\base\math\StringFunction.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Strrep.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Subtract.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Tan.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Tanh.cpp" />
@@ -1321,7 +1324,10 @@
     <ClInclude Include="..\..\..\src\base\math\Sprintf.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Sqrt.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Strcat.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Strcmp.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Strfind.hpp" />
     <ClInclude Include="..\..\..\src\base\math\StringFunction.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Strrep.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Subtract.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Tan.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Tanh.hpp" />

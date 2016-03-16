@@ -3649,8 +3649,11 @@ void MathParser::BuildAllFunctionList()
    builtinFuncList.push_back("diag");
    builtinFuncList.push_back("min");
    builtinFuncList.push_back("mod");
-   builtinFuncList.push_back("strcat");
    builtinFuncList.push_back("sprintf");
+   builtinFuncList.push_back("strcat");
+   builtinFuncList.push_back("strcmp");
+   builtinFuncList.push_back("strfind");
+   builtinFuncList.push_back("strrep");
    
    // Matrix Operators
    matrixOpList.push_back("'");      // transpose()

@@ -143,20 +143,8 @@ std::string Sprintf::EvaluateString()
    MessageInterface::ShowMessage
       ("Sprintf::EvaluateString() <%p>'%s' entered\n", this, GetName().c_str());
    #endif
-   
-   // Do some validation
-   for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
-   {
-      ElementWrapper *wrapper = inputArgWrappers[i];
-      #ifdef DEBUG_EVALUATE
-      MessageInterface::ShowMessage
-         ("   inputArgWrappers[%d] = <%p>, desc = '%s'\n", i, wrapper,
-          wrapper ? wrapper->GetDescription().c_str() : "NULL");
-      #endif
-      
-      if (wrapper == NULL)
-         throw MathException("Error evaluating \"" + GetName());
-   }
+
+   ValidateWrappers();
    
    std::string result;
    int numArgs = inputArgWrappers.size() - 1;
@@ -178,8 +166,9 @@ std::string Sprintf::EvaluateString()
    
    if (numPercentSign != numArgs)
    {
-      throw MathException("Error evaluating \"" + GetName() +
-                          ". Number of formatting spec and argment doesn't match.");
+      throw MathException
+         ("Error evaluating \"" + GetName() +
+          "() function. Number of formatting spec and argment doesn't match.");
    }
    
    StringArray specArray;
@@ -268,7 +257,7 @@ std::string Sprintf::EvaluateString()
             ("***** Invalid format specifier found in Sprintf::EvaluateString()\n");
          #endif
          throw MathException("Error evaluating \"" + GetName() +
-                             ". Invalid format specifier found");
+                             "() function. Invalid format specifier found");
       }
    }
    
@@ -333,8 +322,8 @@ std::string Sprintf::EvaluateString()
          {
             std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
             throw MathException
-               ("Error evaluating \"" + GetName() + ". The data type \"" + typeStr +
-                "\" is not compatible with format spec in sprintf()");
+               ("Error evaluating \"" + GetName() + "() function. The data type \"" +
+                typeStr + "\" is not compatible with format spec in sprintf()");
          }
       }
    }

@@ -1096,7 +1096,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
             MessageInterface::ShowMessage
                ("==> name='%s', arrName='%s'\n", name.c_str(), arrName.c_str());
             InterpreterException ex("");
-            ex.SetDetails("%s object named \"%s\" already exists, so ignoring",
+            ex.SetDetails("%s object named \"%s\" already exists, so ignored",
                           type.c_str(), arrName.c_str());
             HandleError(ex, true, true, showWarning);
             return obj;

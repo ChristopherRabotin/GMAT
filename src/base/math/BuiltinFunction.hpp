@@ -32,9 +32,7 @@
 #ifndef BuiltinFunction_hpp
 #define BuiltinFunction_hpp
 
-#include "GmatBase.hpp"
 #include "MathNode.hpp"
-#include "MathException.hpp"
 
 class GMAT_API BuiltinFunction : public MathNode
 {
@@ -71,9 +69,8 @@ protected:
    WrapperMap *theWrapperMap;
    WrapperArray inputArgWrappers;
    WrapperArray outputArgWrappers;
-   void SetWrapperObjectNames(const std::string &name);
-   void SetWrapperObject(GmatBase *obj, const std::string &name);
-   ElementWrapper* FindWrapper(const std::string &name);
+   
+   void ValidateWrappers();
 };
 
 #endif //BuiltinFunction_hpp

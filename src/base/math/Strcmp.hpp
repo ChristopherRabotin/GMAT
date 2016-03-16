@@ -1,6 +1,5 @@
-//$Id$
 //------------------------------------------------------------------------------
-//                                   StringFunction
+//                              Strcmp
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -19,33 +18,33 @@
 // governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number NNG04CC06P.
+// number S-67573-G
 //
 // Author: Linda Jun
 // Created: 2016.02.17
 //
 /**
- * Defines the string functions base class.
+ * Declares Strcmp class.
  */
 //------------------------------------------------------------------------------
+#ifndef Strcmp_hpp
+#define Strcmp_hpp
 
-#ifndef StringFunction_hpp
-#define StringFunction_hpp
+#include "StringFunction.hpp"
 
-#include "BuiltinFunction.hpp"
-
-class GMAT_API StringFunction : public BuiltinFunction
+class GMAT_API Strcmp : public StringFunction
 {
 public:
-   StringFunction(const std::string &typeStr, const std::string &name);
-   virtual ~StringFunction();
-   StringFunction(const StringFunction &sf);
-   StringFunction& operator=(const StringFunction &sf);
+   Strcmp(const std::string &name);
+   virtual ~Strcmp();
+   Strcmp(const Strcmp &copy);
    
-   virtual bool ValidateInputs(); 
+   // inherited from GmatBase
+   virtual GmatBase* Clone() const;
+   
+   // inherited from MathNode
    virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
-   
-protected:
+   virtual Real Evaluate();
 };
 
-#endif //StringFunction_hpp
+#endif // Strcmp_hpp

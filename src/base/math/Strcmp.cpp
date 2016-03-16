@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                                  Strcat
+//                                  Strcmp
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -25,15 +25,15 @@
 // Created: 2016.02.17
 //
 /**
- * Implements Strcat class for string concatenation.
+ * Implements Strcmp class for string concatenation.
  */
 //------------------------------------------------------------------------------
 
-#include "Strcat.hpp"
-#include "MathException.hpp"
+#include "Strcmp.hpp"
 #include "ElementWrapper.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_INPUT_OUTPUT
 //#define DEBUG_EVALUATE
 
 //---------------------------------
@@ -41,40 +41,40 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Strcat()
+// Strcmp()
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-Strcat::Strcat(const std::string &name)
-   : StringFunction("Strcat", name)
+Strcmp::Strcmp(const std::string &name)
+   : StringFunction("Strcmp", name)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// ~Strcat()
+// ~Strcmp()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-Strcat::~Strcat()
+Strcmp::~Strcmp()
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  Strcat(const Strcat &copy)
+//  Strcmp(const Strcmp &copy)
 //------------------------------------------------------------------------------
 /**
- * Constructs the Strcat object (copy constructor).
+ * Constructs the Strcmp object (copy constructor).
  * 
  * @param <copy> Object that is copied
  */
 //------------------------------------------------------------------------------
-Strcat::Strcat(const Strcat &copy) :
+Strcmp::Strcmp(const Strcmp &copy) :
    StringFunction      (copy)
 {
 }
@@ -84,54 +84,79 @@ Strcat::Strcat(const Strcat &copy) :
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * Clone of the Strcat operation.
+ * Clone of the Strcmp operation.
  *
- * @return clone of the Strcat operation.
+ * @return clone of the Strcmp operation.
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Strcat::Clone() const
+GmatBase* Strcmp::Clone() const
 {
-   return (new Strcat(*this));
+   return (new Strcmp(*this));
 }
 
+
 //------------------------------------------------------------------------------
-// std;:string EvaluateString()
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+//------------------------------------------------------------------------------
+void Strcmp::GetOutputInfo(Integer &type, Integer &rowCount,
+                           Integer &colCount)
+{
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Strcmp::GetOutputInfo() <%p><%s><%s> entered\n", this,
+       GetTypeName().c_str(), GetName().c_str());
+   #endif
+   
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Strcmp::GetOutputInfo() <%p><%s> leaving, type=%d, "
+       "rowCount=%d, colCount=%d\n", this, GetTypeName().c_str(), 
+       type, rowCount, colCount);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// Real Evaluate()
 //------------------------------------------------------------------------------
 /**
- * @return the Strcat of left node
+ * strcmp(s1, s2)
+ * Compares strings s1 and s2 and returns 1 (true) if the two are identical.
+ * Otherwise, returns 0 (false).
  *
  */
 //------------------------------------------------------------------------------
-std::string Strcat::EvaluateString()
+Real Strcmp::Evaluate()
 {
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
-      ("Strcat::EvaluateString() <%p>'%s' entered\n", this, GetName().c_str());
+      ("Strcmp::Evaluate() <%p>'%s' entered\n", this, GetName().c_str());
    #endif
-   std::string result;
+   
+   if (inputArgWrappers.size() != 2)
+      throw MathException(GetTypeName() + "() function requires two input arguments");
 
    ValidateWrappers();
    
-   // for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
-   // {
-   //    ElementWrapper *wrapper = inputArgWrappers[i];
-   //    #ifdef DEBUG_EVALUATE
-   //    MessageInterface::ShowMessage
-   //       ("   inputArgWrappers[%d] = <%p>, desc = '%s'\n", i, wrapper,
-   //        wrapper ? wrapper->GetDescription().c_str() : "NULL");
-   //    #endif
-      
-   //    if (wrapper == NULL)
-   //       throw MathException("Error evaluating \"" + GetName() + "() function");
-      
-   //    result = result + wrapper->EvaluateString();
-   // }
+   std::string s1 = inputArgWrappers[0]->EvaluateString();
+   std::string s2 = inputArgWrappers[1]->EvaluateString();
+   
+   Real result;
+   
+   if (s1 == s2)
+      result = 1.0;
+   else
+      result = 0.0;
    
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
-      ("Strcat::EvaluateString() <%p>'%s' returning '%s'\n", this,
-       GetName().c_str(), result.c_str());
+      ("Strcmp::Evaluate() <%p>'%s' returning %f\n", this,
+       GetName().c_str(), result);
    #endif
    return result;
 }

@@ -66,6 +66,9 @@
 #include "Sprintf.hpp"
 #include "Sqrt.hpp"
 #include "Strcat.hpp"
+#include "Strcmp.hpp"
+#include "Strfind.hpp"
+#include "Strrep.hpp"
 #include "Subtract.hpp"
 #include "Tan.hpp"
 #include "Transpose.hpp"
@@ -186,10 +189,16 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
       mathNode = new FunctionRunner(withName);
    
    // String functions
-   else if (newType == "Strcat")
-      mathNode = new Strcat(withName);
    else if (newType == "Sprintf")
       mathNode = new Sprintf(withName);
+   else if (newType == "Strcat")
+      mathNode = new Strcat(withName);
+   else if (newType == "Strcmp")
+      mathNode = new Strcmp(withName);
+   else if (newType == "Strfind")
+      mathNode = new Strfind(withName);
+   else if (newType == "Strrep")
+      mathNode = new Strrep(withName);
    
    return mathNode;
 }
@@ -340,8 +349,11 @@ void MathFactory::BuildCreatables()
    creatables.push_back("Rad2Deg");
    
    // String functions
-   creatables.push_back("Strcat");  // For sring concatenation eg, strcat(a, b, 'string literal')
    creatables.push_back("Sprintf"); // For formatted string output using sprintf function
+   creatables.push_back("Strcat");  // For sring concatenation eg, strcat(a, b, 'string literal')
+   creatables.push_back("Strcmp");  // For sring comparison eg, strcmp(a, 'string literal')
+   creatables.push_back("Strfind"); // For sring find eg, strfind(a, 'string literal')
+   creatables.push_back("Strrep");  // For sring replacement eg, strrep(a, 'string literal')
    
    // GmatFunction
    creatables.push_back("FunctionRunner");  

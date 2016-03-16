@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                                  Strcat
+//                                  Strfind
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -25,15 +25,15 @@
 // Created: 2016.02.17
 //
 /**
- * Implements Strcat class for string concatenation.
+ * Implements Strfind class for string concatenation.
  */
 //------------------------------------------------------------------------------
 
-#include "Strcat.hpp"
-#include "MathException.hpp"
+#include "Strfind.hpp"
 #include "ElementWrapper.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_INPUT_OUTPUT
 //#define DEBUG_EVALUATE
 
 //---------------------------------
@@ -41,40 +41,40 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Strcat()
+// Strfind()
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-Strcat::Strcat(const std::string &name)
-   : StringFunction("Strcat", name)
+Strfind::Strfind(const std::string &name)
+   : StringFunction("Strfind", name)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// ~Strcat()
+// ~Strfind()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-Strcat::~Strcat()
+Strfind::~Strfind()
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  Strcat(const Strcat &copy)
+//  Strfind(const Strfind &copy)
 //------------------------------------------------------------------------------
 /**
- * Constructs the Strcat object (copy constructor).
+ * Constructs the Strfind object (copy constructor).
  * 
  * @param <copy> Object that is copied
  */
 //------------------------------------------------------------------------------
-Strcat::Strcat(const Strcat &copy) :
+Strfind::Strfind(const Strfind &copy) :
    StringFunction      (copy)
 {
 }
@@ -84,54 +84,86 @@ Strcat::Strcat(const Strcat &copy) :
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * Clone of the Strcat operation.
+ * Clone of the Strfind operation.
  *
- * @return clone of the Strcat operation.
+ * @return clone of the Strfind operation.
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Strcat::Clone() const
+GmatBase* Strfind::Clone() const
 {
-   return (new Strcat(*this));
+   return (new Strfind(*this));
+}
+
+
+//------------------------------------------------------------------------------
+// void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+//------------------------------------------------------------------------------
+void Strfind::GetOutputInfo(Integer &type, Integer &rowCount,
+                            Integer &colCount)
+{
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Strfind::GetOutputInfo() <%p><%s><%s> entered\n", this,
+       GetTypeName().c_str(), GetName().c_str());
+   #endif
+   
+   type = Gmat::REAL_TYPE;
+   rowCount = 1;
+   colCount = 1;
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Strfind::GetOutputInfo() <%p><%s> leaving, type=%d, "
+       "rowCount=%d, colCount=%d\n", this, GetTypeName().c_str(), 
+       type, rowCount, colCount);
+   #endif
 }
 
 //------------------------------------------------------------------------------
-// std;:string EvaluateString()
+// Real Evaluate()
 //------------------------------------------------------------------------------
 /**
- * @return the Strcat of left node
+ *  k = strfind(str, pattern)
+ *  Searches str for first occurrences of pattern and returns starting index
+ *  of pattern. If pattern is not found it returns -1.
  *
  */
 //------------------------------------------------------------------------------
-std::string Strcat::EvaluateString()
+Real Strfind::Evaluate()
 {
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
-      ("Strcat::EvaluateString() <%p>'%s' entered\n", this, GetName().c_str());
+      ("Strfind::Evaluate() <%p>'%s' entered\n", this, GetName().c_str());
    #endif
-   std::string result;
-
+   
+   if (inputArgWrappers.size() != 2)
+      throw MathException(GetTypeName() + "() requires two input arguments");
+   
    ValidateWrappers();
    
-   // for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
-   // {
-   //    ElementWrapper *wrapper = inputArgWrappers[i];
-   //    #ifdef DEBUG_EVALUATE
-   //    MessageInterface::ShowMessage
-   //       ("   inputArgWrappers[%d] = <%p>, desc = '%s'\n", i, wrapper,
-   //        wrapper ? wrapper->GetDescription().c_str() : "NULL");
-   //    #endif
-      
-   //    if (wrapper == NULL)
-   //       throw MathException("Error evaluating \"" + GetName() + "() function");
-      
-   //    result = result + wrapper->EvaluateString();
-   // }
+   std::string str = inputArgWrappers[0]->EvaluateString();
+   std::string pattern = inputArgWrappers[1]->EvaluateString();
+   
+   std::string::size_type patternPos = str.find(pattern);
+   Real result;
    
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
-      ("Strcat::EvaluateString() <%p>'%s' returning '%s'\n", this,
-       GetName().c_str(), result.c_str());
+      ("   str = '%s', pattern = '%s'\n", str.c_str(), pattern.c_str());
+   MessageInterface::ShowMessage("   patternPos = %u\n", patternPos);
+   #endif
+   
+   // If pattern found, set starting index to result
+   if (patternPos != str.npos)
+      result = Real(patternPos);
+   else
+      result = -1;
+   
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("Strfind::Evaluate() <%p>'%s' returning %f\n", this,
+       GetName().c_str(), result);
    #endif
    return result;
 }
