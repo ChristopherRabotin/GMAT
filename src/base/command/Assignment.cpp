@@ -450,7 +450,8 @@ bool Assignment::InterpretAction()
    rhs = chunks[1]; 
    
    #ifdef DEBUG_ASSIGNMENT_IA
-   MessageInterface::ShowMessage("Checking if LHS has single quote or invalid brackets\n");
+   MessageInterface::ShowMessage
+      ("Checking if LHS has single quote or invalid brackets\n");
    #endif
    // check if there is single quote in LHS(loj: 2008.07.22)
    if (lhs.find("'") != lhs.npos)
@@ -521,9 +522,11 @@ bool Assignment::InterpretAction()
    if (!isRhsString)
    {
       #ifdef DEBUG_ASSIGNMENT_IA
-      MessageInterface::ShowMessage("Calling MathParser::IsEquation()\n");
+      MessageInterface::ShowMessage
+         ("Creating MathParser with configObjectMap = <%p>\nCalling MathParser::IsEquation()\n",
+          configObjectMap);
       #endif
-      MathParser mp = MathParser();
+      MathParser mp = MathParser(configObjectMap);
       if (mp.IsEquation(rhs, false))
       {
          // Parse RHS if equation

@@ -69,6 +69,7 @@
 //#define DEBUG_STRING_INSIDE
 //#define DEBUG_PARSE_EQUATION
 //#define DEBUG_FUNCTION_NAME
+//#define DEBUG_FIND_MATCHING_BRACKET
 
 //------------------------------------------------------------------------------
 // std::string RemoveAll(const std::string &str, char ch, Integer start = 0)
@@ -3129,7 +3130,7 @@ void GmatStringUtil::FindMatchingParen(const std::string &str, Integer &openPare
                                        Integer &closeParen, bool &isOuterParen,
                                        Integer start)
 {
-   #if DEBUG_STRING_UTIL
+   #ifdef DEBUG_FIND_MATCHING_BRACKET
    MessageInterface::ShowMessage
       ("FindMatchingParen() start=%d, str=%s\n", start, str.c_str());
    #endif
@@ -3158,11 +3159,11 @@ void GmatStringUtil::FindMatchingParen(const std::string &str, Integer &openPare
             break;
       }
    }
-
+   
    if (openParen == 0 && closeParen == length-1)
       isOuterParen = true;
-
-   #if DEBUG_STRING_UTIL
+   
+   #ifdef DEBUG_FIND_MATCHING_BRACKET
    MessageInterface::ShowMessage
       ("FindMatchingParen() str=%s, openParen=%d, closeParen=%d, isOuterParen=%d\n",
        str.c_str(), openParen, closeParen, isOuterParen);
@@ -3191,7 +3192,7 @@ void GmatStringUtil::FindMatchingBracket(const std::string &str, Integer &openBr
                                          Integer &closeBracket, bool &isOuterBracket,
                                          const std::string &bracket, Integer start)
 {
-   #if DEBUG_STRING_UTIL
+   #ifdef DEBUG_FIND_MATCHING_BRACKET
    MessageInterface::ShowMessage
       ("FindMatchingBracket() start=%d, str=%s\n", start, str.c_str());
    #endif
@@ -3224,7 +3225,7 @@ void GmatStringUtil::FindMatchingBracket(const std::string &str, Integer &openBr
    if (openBracket == 0 && closeBracket == length-1)
       isOuterBracket = true;
 
-   #if DEBUG_STRING_UTIL
+   #ifdef DEBUG_FIND_MATCHING_BRACKET
    MessageInterface::ShowMessage
       ("FindMatchingBracket() str=%s, openBracket=%d, closeBracket=%d, "
        "isOuterBracket=%d\n", str.c_str(), openBracket, closeBracket,

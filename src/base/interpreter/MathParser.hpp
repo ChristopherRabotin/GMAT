@@ -47,7 +47,7 @@ class GMAT_API MathParser
 {
 public:
    
-   MathParser();
+   MathParser(ObjectMap *objMap);
    MathParser(const MathParser &copy);
    MathParser& operator=(const MathParser &right);
    virtual ~MathParser();
@@ -66,6 +66,7 @@ protected:
    
 private:
    
+   ObjectMap    *theObjectMap;
    std::string  originalEquation;
    std::string  theEquation;
    std::string  powerOpStr;
@@ -134,6 +135,7 @@ private:
       UNIT_CONVERSION,
       BUILTIN_FUNCTION,
       GMAT_FUNCTION,
+      ANY_FUNCTION
    };
    
    StringArray  realFuncList;

@@ -2261,8 +2261,13 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
 
    if (!inCommandMode)
    {
+      #ifdef DEBUG_PARSE_ASSIGNMENT
+      MessageInterface::ShowMessage
+         ("   Creating MathParser with theObjectMap = <%p>\n", theObjectMap);
+      #endif
+      
       // check for math operators/functions
-      MathParser mp = MathParser();
+      MathParser mp = MathParser(theObjectMap);
       
       try
       {

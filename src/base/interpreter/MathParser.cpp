@@ -88,8 +88,9 @@
  * @param <nomme>   Name for the object
  */
 //------------------------------------------------------------------------------
-MathParser::MathParser()
+MathParser::MathParser(ObjectMap *objMap)
 {
+   theObjectMap = objMap;
    theGmatFuncCount = 0;
    powerOpStr = "^";
    inverseOpStr = "$";
@@ -352,6 +353,68 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       // First check for string function which does not need math equation checking
       if (isFunctionCall)
       {
+         #if 1
+         
+         
+         #if DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage("   Check if it has any math function name\n");
+         #endif
+         
+         // Check if function name is user defined Variable or Array name (GMT-3043)
+         std::string anyFuncName = GetFunctionName(ANY_FUNCTION, str1, left);
+         
+         #if DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage("   anyFuncName = '%s'\n", anyFuncName.c_str());
+         #endif
+                  
+         if (anyFuncName != "")
+         {
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage("   theObjectMap = <%p>\n", theObjectMap);
+            #endif
+            if (theObjectMap != NULL && theObjectMap->find(anyFuncName) != theObjectMap->end())
+            {
+               GmatBase *obj = (*theObjectMap)[anyFuncName];
+               if (obj)
+               {
+                  #if DEBUG_PARSE_EQUATION
+                  MessageInterface::ShowMessage
+                     ("   the object <%p><%s>'%s' found in the ObjectMap\n",
+                      obj, obj->GetTypeName().c_str(),
+                      obj->GetName().c_str());
+                  #endif
+                  
+                  // If object is an Array check if it has valid index
+                  if (obj->IsOfType(Gmat::ARRAY))
+                  {
+                     if (GmatStringUtil::IsSimpleArrayElement(str1))
+                     {
+                        #if DEBUG_PARSE_EQUATION
+                        MessageInterface::ShowMessage
+                           ("MathParser::IsEquation(%s) returning false, RHS is an Array\n",
+                            str.c_str());
+                        #endif
+                        return false;
+                     }
+                  }
+                  
+                  std::string objTypeName = obj->GetTypeName();
+                  #if DEBUG_PARSE_EQUATION
+                  MessageInterface::ShowMessage
+                     ("   Invalid indexing used with object type '%s' named '%s'\n",
+                      objTypeName.c_str(), anyFuncName.c_str());
+                  #endif
+                  throw MathException
+                     ("Invalid indexing used with object type \"" +
+                      objTypeName + "\" named \"" + anyFuncName + "\"");
+               }
+            }
+         }
+         #endif
+         
+         
+         // Check if builtin function name found. Since builtin function cannot
+         // used with math operators no further checking is needed.
          std::string builtinFuncName = GetFunctionName(BUILTIN_FUNCTION, str1, left);
          if (builtinFuncName != "")
          {
@@ -3271,6 +3334,23 @@ std::string MathParser::GetFunctionName(UnsignedInt functionType,
    
    switch (functionType)
    {
+   case ANY_FUNCTION:
+      {
+         BuildFunction(str, realFuncList, fnName, left);
+         if (fnName != "")
+            break;
+         BuildFunction(str, matrixFuncList, fnName, left);
+         if (fnName != "")
+            break;
+         BuildFunction(str, unitConvList, fnName, left);
+         if (fnName != "")
+            break;
+         BuildFunction(str, builtinFuncList, fnName, left);
+         if (fnName != "")
+            break;
+         BuildFunction(str, gmatFuncList, fnName, left);
+         break;
+      }
    case MATH_FUNCTION:
       {
          BuildFunction(str, realFuncList, fnName, left);
@@ -3367,7 +3447,7 @@ void MathParser::BuildFunction(const std::string &str, const StringArray &fnList
    
    #if DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("MathParser::BuildFunction() entered, str='%s', function count=%d\n",
+      ("MathParser::BuildFunction() entered, str='%s', number of functions=%d\n",
        str.c_str(), count);
    #endif
    
@@ -3375,9 +3455,10 @@ void MathParser::BuildFunction(const std::string &str, const StringArray &fnList
       return;
    
    std::string::size_type functionIndex = str.npos;
-   
+   std::string str1 = GmatStringUtil::Trim(str);
    // Check if function name is in the function list
-   std::string fname = GmatStringUtil::ParseFunctionName(str);
+   //std::string fname = GmatStringUtil::ParseFunctionName(str);
+   std::string fname = GmatStringUtil::ParseFunctionName(str1);
    
    #if DEBUG_FUNCTION > 1
    MessageInterface::ShowMessage("   fname = '%s'\n", fname.c_str());
@@ -3385,8 +3466,25 @@ void MathParser::BuildFunction(const std::string &str, const StringArray &fnList
    
    if (find(fnList.begin(), fnList.end(), fname) != fnList.end())
    {
-      fnName = fname;
-      functionIndex = str.find(fname + "(");
+      //fnName = fname;
+      std::string nameToCheck = fname;
+      std::string::size_type openParen = str1.find_first_of('(');
+      if (openParen != fname.npos)
+      {
+         // Check if there are only spaces between function name and open parenthesis
+         std::string str2 = str.substr(fname.size(), openParen-fname.size());
+         str2 = GmatStringUtil::RemoveAllBlanks(str2);
+         #if DEBUG_FUNCTION > 1
+         MessageInterface::ShowMessage("   OpenParen found at %u\n", openParen);
+         MessageInterface::ShowMessage("   After removing blanks, str2 = '%s'\n", str2.c_str());
+         #endif
+         if (str2 == "")
+         {
+            fnName = fname;
+            //functionIndex = str.find(fname + "(");
+            functionIndex = str.find(nameToCheck);
+         }
+      }
    }
    else
    {

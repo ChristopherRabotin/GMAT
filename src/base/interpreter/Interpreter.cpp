@@ -171,7 +171,8 @@ Interpreter::Interpreter(SolarSystem *ss, ObjectMap *objMap)
    #ifdef DEBUG_INTERP
    MessageInterface::ShowMessage
       ("Interpreter::Interpreter() initialized=%d, theModerator=%p, theReadWriter=%p, "
-       "theValidator=%p\n", initialized, theModerator, theReadWriter, theValidator);
+       "theValidator=%p, theObjectMap=%p\n", initialized, theModerator, theReadWriter,
+       theValidator, theObjectMap);
    #endif
 }
 
@@ -2304,6 +2305,15 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    // Now assemble command
    try
    {
+      // Set resource object map to command so that InterpretAction() can do
+      // some validation. (LOJ: 2016.03.17)
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("   => Now calling %s->SetConfiguredObjectMap(), theObjectMap=<%p>\n",
+          type1.c_str(), theObjectMap);
+      #endif
+      cmd->SetConfiguredObjectMap(theObjectMap);
+      
       #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage
          ("   => Now calling %s->InterpretAction()\n", type1.c_str());
