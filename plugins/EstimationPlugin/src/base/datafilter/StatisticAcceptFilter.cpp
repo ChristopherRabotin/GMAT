@@ -403,6 +403,17 @@ bool StatisticAcceptFilter::SetStringParameter(const std::string &label,
 }
 
 
+//------------------------------------------------------------------------------
+// Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* Retrieves an integer parameter
+*
+* @param id   Parameter ID
+*
+* @return     The parameter value
+*/
+//------------------------------------------------------------------------------
 Integer StatisticAcceptFilter::GetIntegerParameter(const Integer id) const
 {
    if (id == THINNING_FREQUENCY)
@@ -412,6 +423,18 @@ Integer StatisticAcceptFilter::GetIntegerParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+* Set value to an integer parameter
+*
+* @param id     Parameter ID
+* @param value  Value which is set to the parameter
+*
+* @return     The parameter value
+*/
+//------------------------------------------------------------------------------
 Integer StatisticAcceptFilter::SetIntegerParameter(const Integer id, const Integer value)
 {
    if (id == THINNING_FREQUENCY)
@@ -433,18 +456,52 @@ Integer StatisticAcceptFilter::SetIntegerParameter(const Integer id, const Integ
 }
 
 
+//------------------------------------------------------------------------------
+// Integer GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+* Retrieves an integer parameter
+*
+* @param label   Name of the parameter
+*
+* @return        The parameter value
+*/
+//------------------------------------------------------------------------------
 Integer StatisticAcceptFilter::GetIntegerParameter(const std::string &label) const
 {
    return GetIntegerParameter(GetParameterID(label));
 }
 
 
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+* Set value to an integer parameter
+*
+* @param label     Parameter's name
+* @param value     Value which is set to the parameter
+*
+* @return          The parameter value
+*/
+//------------------------------------------------------------------------------
 Integer StatisticAcceptFilter::SetIntegerParameter(const std::string &label, const Integer value)
 {
    return SetIntegerParameter(GetParameterID(label), value);
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetTrackingConfigs(StringArray tkconfigs)
+//------------------------------------------------------------------------------
+/**
+* Set value to an integer parameter
+*
+* @param tkconfigs     A list of tracking configuration
+*
+* @return              true if the setting is successfull
+*/
+//------------------------------------------------------------------------------
 bool StatisticAcceptFilter::SetTrackingConfigs(StringArray tkconfigs)
 {
    tkConfigList = tkconfigs;
@@ -452,6 +509,19 @@ bool StatisticAcceptFilter::SetTrackingConfigs(StringArray tkconfigs)
 }
 
 
+//------------------------------------------------------------------------------
+// ObservationData* FilteringData(ObservationData* dataObject, Integer& rejectedReason)
+//------------------------------------------------------------------------------
+/**
+* This function is used to filter data
+*
+* @param dataObject        An input data record
+* @param rejectedReason    Reason the record is rejected 
+*
+* @return                  NULL if the input data record is rejected, 
+*                          the input data record otherwise 
+*/
+//------------------------------------------------------------------------------
 ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
 #ifdef DEBUG_DATA_FILTER
@@ -566,6 +636,15 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
 }
    
 
+//------------------------------------------------------------------------------
+// StringArray GetAllAvailableThinModes()
+//------------------------------------------------------------------------------
+/**
+* Retrieves a list of all available thin modes
+*
+* @return        A list of all available thin modes
+*/
+//------------------------------------------------------------------------------
 StringArray StatisticAcceptFilter::GetAllAvailableThinModes()
 {
    StringArray nameList;
@@ -576,6 +655,15 @@ StringArray StatisticAcceptFilter::GetAllAvailableThinModes()
 }
 
 
+//------------------------------------------------------------------------------
+// bool IsThin(ObservationData* dataObject)
+//------------------------------------------------------------------------------
+/**
+* Verify a data record to be satisfied thinning criteria
+*
+* @return        true if it is satisfied, false otherwise
+*/
+//------------------------------------------------------------------------------
 bool StatisticAcceptFilter::IsThin(ObservationData* dataObject)
 {
    bool isAccepted = false;
