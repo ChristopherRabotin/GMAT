@@ -381,8 +381,8 @@ bool DopplerAdapter::SetStringParameter(const std::string& label,
 //------------------------------------------------------------------------------
 Integer DopplerAdapter::SetIntegerParameter(const Integer id, const Integer value)
 {
-   adapterS->SetRealParameter(id, value);
-   return RangeAdapterKm::SetRealParameter(id, value);
+   adapterS->SetIntegerParameter(id, value);
+   return RangeAdapterKm::SetIntegerParameter(id, value);
 }
 
 
