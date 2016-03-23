@@ -462,7 +462,7 @@ Integer TrackingFileSet::SetIntegerParameter(const Integer id, const Integer val
       return tdrsSMARID;
    }
 
-   return MeasurementModelBase::SetRealParameter(id, value);
+   return MeasurementModelBase::SetIntegerParameter(id, value);
 }
 
 
