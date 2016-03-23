@@ -1634,7 +1634,7 @@ void Estimator::UpdateClonedObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 void Estimator::UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
 {
-#ifdef DEBUG_CLONED_PARAMETER UPDATES
+#ifdef DEBUG_CLONED_PARAMETER_UPDATES
    MessageInterface::ShowMessage("Estimator updating parameter %d (%s) using "
          "object %s\n", updatedParameterId, obj->GetParameterText(updatedParameterId).c_str(),
          obj->GetName().c_str());
