@@ -95,7 +95,8 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    rampTB               (NULL),
    beginIndex           (0),
    endIndex             (0),
-   withMediaCorrection  (true)                     // made changes by TUAN NGUYEN
+   withMediaCorrection  (true),                     // made changes by TUAN NGUYEN
+   errMsg               ("")                        // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter default constructor <%p>\n", this);
@@ -180,7 +181,8 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    endIndex             (ma.endIndex),
    rampTableNames       (ma.rampTableNames),
    forObjects           (ma.forObjects),                        // made changes by TUAN NGUYEN
-   withMediaCorrection  (ma.withMediaCorrection)                // made changes by TUAN NGUYEN
+   withMediaCorrection  (ma.withMediaCorrection),               // made changes by TUAN NGUYEN
+   errMsg               (ma.errMsg)                             // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter copy constructor  from <%p> to <%p>\n", &ma, this);
@@ -234,6 +236,7 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       rampTableNames     = ma.rampTableNames;
       forObjects         = ma.forObjects;              // made changes by TUAN NGUYEN
       withMediaCorrection = ma.withMediaCorrection;    // made changes by TUAN NGUYEN
+      errMsg             = ma.errMsg;                  // made changes by TUAN NGUYEN
 
       if (calcData)
       {
@@ -388,7 +391,7 @@ Integer TrackingDataAdapter::SetIntegerParameter(const Integer id, const Integer
       return freqBand;
    }
 
-   return MeasurementModelBase::SetRealParameter(id, value);
+   return MeasurementModelBase::SetIntegerParameter(id, value);
 }
 
 
@@ -1488,9 +1491,9 @@ StringArray* TrackingDataAdapter::DecomposePathString(const std::string &value)
 // void SetMultiplierFactor(Real mult)
 //------------------------------------------------------------------------------
 /**
- * Set value for multiplier
+ * Set value to multiplier
  *
- * @param value     Real value used to set to multiplier
+ * @param mult     Value used to set to multiplier
  */
 //------------------------------------------------------------------------------
 void TrackingDataAdapter::SetMultiplierFactor(Real mult)
@@ -1503,9 +1506,9 @@ void TrackingDataAdapter::SetMultiplierFactor(Real mult)
 // Real GetMultiplierFactor()
 //------------------------------------------------------------------------------
 /**
- * Get value for multiplier
+ * Get value of multiplier
  *
- * @param value     value of multiplier
+ * @return     Value of multiplier
  */
 //------------------------------------------------------------------------------
 Real TrackingDataAdapter::GetMultiplierFactor()
@@ -1514,6 +1517,21 @@ Real TrackingDataAdapter::GetMultiplierFactor()
 }
 
 
+//------------------------------------------------------------------------------
+// void ComputeMeasurementBias(const std::string biasName, 
+//                             const std::string measType, Integer numTrip)
+//------------------------------------------------------------------------------
+/**
+* Get measurement bias
+*
+* @param biasName      Name of the measurement bias. In this case is "Bias"      
+* @param measType      Measurement type of this tracking data
+* @param numTrip       Number of ways signal travel such as 1-way, 2-ways, 
+*                      or 3-ways 
+*
+* @return              Value of bias
+*/
+//------------------------------------------------------------------------------
 void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, const std::string measType, Integer numTrip)
 {
    // Get signal data
@@ -1626,6 +1644,22 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
 }
 
 
+//------------------------------------------------------------------------------
+// void ComputeMeasurementNoiseSigma(const std::string noiseSigmaName, 
+//                                   const std::string measType, Integer numTrip)
+//------------------------------------------------------------------------------
+/**
+* Get measurement noise sigma
+*
+* @param noisSigmaName      Name of the measurement noise sigma. In this case is 
+*                           "NoisSigma"
+* @param measType           Measurement type of this tracking data
+* @param numTrip            NumTrip shown number of ways signal travel such as 
+*                           1-way, 2-ways, or 3-ways
+*
+* @return                   Value of noise sigma
+*/
+//------------------------------------------------------------------------------
 void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSigmaName, const std::string measType, Integer numTrip)
 {
    // Get signal data
@@ -1689,6 +1723,15 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
 }
 
 
+//----------------------------------------------------------------------------------
+// void ComputeMeasurementErrorCovarianceMatrix()
+//----------------------------------------------------------------------------------
+/**
+* This function is used to set value to covariance matrix associated to this 
+* tracking data.
+*
+*/
+//----------------------------------------------------------------------------------
 void TrackingDataAdapter::ComputeMeasurementErrorCovarianceMatrix()
 {
    // Get signal data
@@ -1718,7 +1761,16 @@ void TrackingDataAdapter::ComputeMeasurementErrorCovarianceMatrix()
 }
 
 
-
+//----------------------------------------------------------------------------------
+// void BeginEndIndexesOfRampTable(Integer & err)
+//----------------------------------------------------------------------------------
+/**
+* This function is used to specify the indexes of the first and the last record 
+* associated to this tracking data.
+*
+* @param err      Error number
+*/
+//----------------------------------------------------------------------------------
 void TrackingDataAdapter::BeginEndIndexesOfRampTable(Integer & err)
 {
    // 1. Get search key
@@ -1744,6 +1796,19 @@ void TrackingDataAdapter::BeginEndIndexesOfRampTable(Integer & err)
    searchkey = gsID + " " + scID + " ";
 
    // 2. Search for the beginning index
+   if (rampTB == NULL)                                                                      // made changes by TUAN NGUYEN
+   {                                                                                        // made changes by TUAN NGUYEN
+      err = 2;                                                                              // made changes by TUAN NGUYEN
+      errMsg = "Error: No ramp table was set for " + GetName() + "\n";                      // made changes by TUAN NGUYEN
+      throw MeasurementException("Error: No ramp table was set for " + GetName() + "\n");   // made changes by TUAN NGUYEN
+   }                                                                                        // made changes by TUAN NGUYEN
+   else if ((*rampTB).size() == 0)                                                          // made changes by TUAN NGUYEN
+   {                                                                                        // made changes by TUAN NGUYEN
+      err = 3;                                                                              // made changes by TUAN NGUYEN
+      errMsg = "Error: Ramp table has no data record.\n";                                   // made changes by TUAN NGUYEN
+      throw MeasurementException("Error: Ramp table has no data record.\n");                // made changes by TUAN NGUYEN
+   }                                                                                        // made changes by TUAN NGUYEN
+
    beginIndex = 0;
    for(; beginIndex < (*rampTB).size(); ++beginIndex)
    {
@@ -1760,42 +1825,59 @@ void TrackingDataAdapter::BeginEndIndexesOfRampTable(Integer & err)
    }
 
    // 4. Verify number of data records
-   if ((endIndex - beginIndex) < 2)
+   if ((endIndex - beginIndex) == 0)
    {
       err = 3;
       std::stringstream ss;
-      ss << "Error: Ramp table has " << (endIndex - beginIndex) << " frequency data records for uplink signal from "<< gsName << " to " << scName << ". It needs at least 2 records\n";
+      ss << "Error: Ramp table has no frequency data records for uplink signal from " << gsName << " to " << scName << ". It needs at least 1 record.\n";
+      errMsg = ss.str();
       throw MeasurementException(ss.str());
    }
 }
 
 
-
-
+//------------------------------------------------------------------------------
+// Real RampedFrequencyIntergration(Real t0, Real delta_t, Integer& err)
+//------------------------------------------------------------------------------
+/**
+* Calculate the tetegration of ramped frequency in range from time t0 to time t1
+*
+* @param t1         The end time for integration (unit: A1Mjd)
+* @param delta_t    Elapse time (unit: second)
+* @param err        Error number
+*
+* @return The integration of ramped frequency.
+* Assumptions: ramp table had been sorted by epoch
+*/
+//------------------------------------------------------------------------------
 Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err)
 {
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
    MessageInterface::ShowMessage("Enter PhysicalMeasurement::IntegralRampedFrequency()\n");
 #endif
 
+   // Verify ramp table and elpase time
    err = 0;
    if (delta_t < 0)
    {
       err = 1;
+      errMsg = "Error: Elapse time has to be a non negative number\n";
       throw MeasurementException("Error: Elapse time has to be a non negative number\n");
    }
 
    if (rampTB == NULL)
    {
       err = 2;
+      errMsg = "Error: No ramp table available for measurement calculation\n";
       throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    }
    
-   if ((*rampTB).size() < 2)
+   if ((*rampTB).size() == 0)
    {
       err = 3;
       std::stringstream ss;
-      ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
+      ss << "Error: Ramp table has no data record. It needs at least 1 record.\n";
+      errMsg = ss.str();
       throw MeasurementException(ss.str());
    }
    
@@ -1804,68 +1886,63 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
 
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
    Real time_min = (*rampTB)[beginIndex].epoch;
-   Real time_max = (*rampTB)[endIndex-1].epoch;
+   //Real time_max = (*rampTB)[endIndex-1].epoch;
 
+   //if ((t1 < time_min)||(t1 > time_max))
+   //{
+   //   char s[200];
+   //   sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
+   //   std::string st(&s[0]);
+   //   err = 4;
+   //   throw MeasurementException(st);
+   //}
 
-#ifdef RAMP_TABLE_EXPANDABLE
-   Real correct_val = 0;
+   //
+   //if ((t0 < time_min)||(t0 > time_max))
+   //{
+   //   char s[200];
+   //   sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
+   //   std::string st(&s[0]);
+   //   err = 5;
+   //   throw MeasurementException(st);
+   //}
+
+   // Verify t0 and t1 are not out of range of ramp table
    if (t1 < time_min)
    {
-      // t0 and t1 < time_min
-      //return delta_t*(*rampTB)[0].rampFrequency;
-      return delta_t*(*rampTB)[beginIndex].rampFrequency;
-   }
-   else if (t1 > time_max)
-   {
-      if (t0 < time_min)
-      {
-         // t0 < time_min < time_max < t1
-         //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-         correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-         t0 = time_min;
-      }
-      else if (t0 > time_max)
-      {
-         // t0 and t1 > time_max
-         //return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
-         return delta_t*(*rampTB)[endIndex-1].rampFrequency;
-      }
-      else
-      {
-         // time_min <= t0 <= time_max < t1
-         //correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
-         correct_val = (*rampTB)[endIndex -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
-         t1 = time_max;
-      }
-   }
-   else
-   {
-      if (t0 < time_min)
-      {
-         // t0 < time_min <= t1 <= time_max
-         //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-         correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-         t0 = time_min;
-      }
-   }
-#endif
+      // Convert t1 and time_min from A1Mjd to TAIMjd
+      Real t1TAI, tminTAI;
+      std::string tais;
+      Real a1Time = t1;
+      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
+      a1Time = time_min;
+      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
-   if ((t1 < time_min)||(t1 > time_max))
-   {
+      // Generate error message
       char s[200];
-      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
+      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , +%c) of ramp table\n", t1TAI, tminTAI);
       std::string st(&s[0]);
       err = 4;
+      errMsg = st;
       throw MeasurementException(st);
    }
 
-   
-   if ((t0 < time_min)||(t0 > time_max))
+   if (t0 < time_min)
    {
+      // Convert t0 and time_min from A1Mjd to TAIMjd
+      Real t0TAI, tminTAI;
+      std::string tais;
+      Real a1Time = t0;
+      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
+      a1Time = time_min;
+      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+
+      // Generate error message
       char s[200];
-      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
+      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , +Inf) of ramp table\n", t0TAI, tminTAI);
       std::string st(&s[0]);
       err = 5;
+      errMsg = st;
       throw MeasurementException(st);
    }
 
@@ -1874,7 +1951,8 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    MessageInterface::ShowMessage(" End epoch t3   = %.15lf A1Mjd\n", t1);
    MessageInterface::ShowMessage(" elapse time   = %.15lf s\n", delta_t);
 #endif
-   // search for end interval:
+
+   // Search for start index of the interval containing t1
    UnsignedInt end_interval = beginIndex;
    for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
@@ -1893,31 +1971,30 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    MessageInterface::ShowMessage(" Based frequency = %.15le\n", basedFreq);
 #endif
 
-   // search for end interval:
+   // Integration of the frequency from t0 to t1:
    Real f0, f1, f_dot;
    Real value1;
    Real interval_len;
 
    Real value = 0.0;
    Real dt = delta_t;
-   Integer i = end_interval;
-   while (dt > 0)
+   for (Integer i = end_interval; dt > 0.0; --i)
    {
-      f_dot = (*rampTB)[i].rampRate;
-
-      // Specify lenght of the current interval
+      // Specify lenght of the "current" interval, f0, and f_dot
       if (i == end_interval)
          interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
       else
          interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
 
-      f0 = (*rampTB)[i].rampFrequency;
+      f0    = (*rampTB)[i].rampFrequency;
+      f_dot = (*rampTB)[i].rampRate;
       if (dt < interval_len)
       {
          f0 = f0 + f_dot*(interval_len - dt);
          interval_len = dt;
       }
-      // Specify frequency at the end of the current interval
+
+      // Specify f1
       f1 = f0 + f_dot*interval_len;
 
       // Take integral for the current interval
@@ -1932,8 +2009,6 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
 
       // Specify dt 
       dt = dt - interval_len;
-
-      i--;
    }
    Real rel_val = value;
    value = value + basedFreq*delta_t;
@@ -1943,11 +2018,6 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    MessageInterface::ShowMessage("Exit PhysicalMeasurement::IntegralRampedFrequency()\n");
 #endif
 
-#ifdef RAMP_TABLE_EXPANDABLE
-   return value + correct_val;
-#else
    return value;
-#endif
-
 }
 

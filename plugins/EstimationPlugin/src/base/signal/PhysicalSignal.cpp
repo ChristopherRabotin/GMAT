@@ -2517,6 +2517,11 @@ void PhysicalSignal::SpecifyBeginEndIndexesOfRampTable()
    searchkey = gsID + " " + scID + " ";
    
    // 2. Search for the beginning index
+   if (rampTable == NULL)                                                                   // made changes by TUAN NGUYEN
+      throw MeasurementException("Error: No ramp table was set for " + GetName() + "\n");   // made changes by TUAN NGUYEN
+   else if ((*rampTable).size() == 0)                                                       // made changes by TUAN NGUYEN
+      throw MeasurementException("Error: Ramp table has no data records.\n");               // made changes by TUAN NGUYEN
+
    beginIndex = 0;
    for(; beginIndex < (*rampTable).size(); ++beginIndex)
    {
@@ -2533,10 +2538,10 @@ void PhysicalSignal::SpecifyBeginEndIndexesOfRampTable()
    }
    
    // 4. Verify number of data records
-   if ((endIndex - beginIndex) < 2)
+   if ((endIndex - beginIndex) == 0)
    {
       std::stringstream ss;
-      ss << "Error: Ramp table has " << (endIndex - beginIndex) << " frequency data records for uplink signal from "<< gsName << " to " << scName << ". It needs at least 2 records\n";
+      ss << "Error: Ramp table has no frequency data records for uplink signal from "<< gsName << " to " << scName << ". It needs at least 1 record.\n";
       throw MeasurementException(ss.str());
    }
 }
@@ -2629,7 +2634,7 @@ Integer PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTa
       return (*rampTB)[endIndex-1].uplinkBand;
 
    // search for interval which contains time t:
-   Real upBand = 0;
+   Integer upBand = 0;
    for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
       if (t < (*rampTB)[i].epoch)

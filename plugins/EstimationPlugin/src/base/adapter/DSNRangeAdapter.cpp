@@ -792,28 +792,31 @@ Real DSNRangeAdapter::GetFrequencyFactor(Real frequency)
 // Real RampedFrequencyIntergration(Real t0, Real delta_t)
 //------------------------------------------------------------------------------
 /**
- * Calculate the tetegration of ramped frequency in range from time t0 to time t1
+ * Calculate the integration of frequency factor in range from time t0 to time t1
  *
  * @param t1         The end time for integration (unit: A1Mjd)
  * @param delta_t    Elapse time (unit: second)
  * @param err        Error number
  *
- * @return The integration of ramped frequency.
+ * @return The integration of frequency factor.
  * Assumptions: ramp table had been sorted by epoch 
  */
 //------------------------------------------------------------------------------
 Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err)
 {
+   // Verify ramp table and elpase time
    err = 0;
    if (delta_t < 0)
    {
       err = 1;
+      errMsg = "Error: Elapse time has to be a non negative number\n";
       throw MeasurementException("Error: Elapse time has to be a non negative number\n");
    }
 
    if (rampTB == NULL)
    {
       err = 2;
+      errMsg = "Error: No ramp table available for measurement calculation\n";
       throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    }
    
@@ -821,7 +824,8 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    {
       err = 3;
       std::stringstream ss;
-      ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
+      ss << "Error: Ramp table has no data records. It needs at least 1 record.\n";
+      errMsg = ss.str();
       throw MeasurementException(ss.str());
    }
 
@@ -831,70 +835,65 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
 
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
    Real time_min = (*rampTB)[beginIndex].epoch;
-   Real time_max = (*rampTB)[endIndex-1].epoch;
 
-#ifdef RAMP_TABLE_EXPANDABLE
-   Real correct_val = 0;
+   //if ((t1 < time_min)||(t1 > time_max))
+   //{
+   //   char s[200];
+   //   sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
+   //   std::string st(&s[0]);
+   //   err = 4;
+   //   throw MeasurementException(st);
+   //}
+
+   //if ((t0 < time_min)||(t0 > time_max))
+   //{
+   //   char s[200];
+   //   sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
+   //   std::string st(&s[0]);
+   //   err = 5;
+   //   throw MeasurementException(st);
+   //}
+
    if (t1 < time_min)
    {
-      // t0 and t1 < time_min
-      //return delta_t*(*rampTB)[0].rampFrequency;
-      return delta_t*(*rampTB)[beginIndex].rampFrequency;
-   }
-   else if (t1 > time_max)
-   {
-     if (t0 < time_min)
-     {
-        // t0 < time_min < time_max < t1
-        //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-        correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-        t0 = time_min;
-     }
-     else if (t0 > time_max)
-     {
-        // t0 and t1 > time_max
-        //return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
-        return delta_t*(*rampTB)[endIndex-1].rampFrequency;
-     }
-     else
-     {
-        // time_min <= t0 <= time_max < t1
-        //correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
-        correct_val = (*rampTB)[endIndex -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
-        t1 = time_max;
-     }
-   }
-   else
-   {
-     if (t0 < time_min)
-     {
-        // t0 < time_min <= t1 <= time_max
-        //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-        correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-        t0 = time_min;
-     }
-   }
-#endif
+      // Convert t1 and time_min from A1Mjd to TAIMjd
+      Real t1TAI, tminTAI;
+      std::string tais;
+      Real a1Time = t1;
+      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t1TAI, tais);
+      a1Time = time_min;
+      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
 
-   if ((t1 < time_min)||(t1 > time_max))
-   {
+      // Generate error message
       char s[200];
-      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
+      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf, +Inf) of ramp table\n", t1TAI, tminTAI);
       std::string st(&s[0]);
       err = 4;
+      errMsg = st;
       throw MeasurementException(st);
    }
 
-   if ((t0 < time_min)||(t0 > time_max))
+   if (t0 < time_min)
    {
+      // Convert t0 and time_min from A1Mjd to TAIMjd
+      Real t0TAI, tminTAI;
+      std::string tais;
+      Real a1Time = t0;
+      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", t0TAI, tais);
+      a1Time = time_min;
+      TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", tminTAI, tais);
+
+      // Generate error message
       char s[200];
-      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
+      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf, +Inf) of ramp table\n", t0TAI, tminTAI);
       std::string st(&s[0]);
       err = 5;
+      errMsg = st;
       throw MeasurementException(st);
    }
 
-   // search for end interval:
+
+   // Search for end interval:
    UnsignedInt end_interval = beginIndex;
    for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
@@ -905,8 +904,7 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
       }
    }
 
-
-   // search for end interval:
+   // Integration of the frequency from t0 to t1:
    Real f0, f1, f_dot;
    Real value1;
    Real interval_len;
@@ -915,11 +913,8 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    Real basedFreqFactor = GetFrequencyFactor(basedFreq);
    Real value = 0.0;
    Real dt = delta_t;
-   Integer i = end_interval;
-   while (dt > 0)
+   for (Integer i = end_interval; dt > 0; --i)
    {
-      f_dot = (*rampTB)[i].rampRate;
-
       // Specify frequency at the begining and lenght of the current interval   
       if (i == end_interval)
          interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
@@ -927,6 +922,7 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
          interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
 
       f0 = (*rampTB)[i].rampFrequency;
+      f_dot = (*rampTB)[i].rampRate;
       if (dt < interval_len)
       {
          f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);
@@ -940,26 +936,11 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
       value1 = ((GetFrequencyFactor(f0) + GetFrequencyFactor(f1))/2 - basedFreqFactor) * interval_len;
       value  = value + value1;
 
-//     MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf  %.12lf     f1 = %.12lf   %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, GetFrequencyFactor(f0), f1, GetFrequencyFactor(f1), (f0+f1)/2, interval_len);
-//      MessageInterface::ShowMessage("interval i = %d: Start: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
-//      (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
-//      MessageInterface::ShowMessage("interval i = %d:   End: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n\n", i+1,
-//      (*rampTB)[i+1].epoch,  (*rampTB)[i+1].uplinkBand, (*rampTB)[i+1].rampType, (*rampTB)[i+1].rampFrequency, (*rampTB)[i+1].rampRate);
-
-
       // Specify dt 
       dt = dt - interval_len;
-
-      i--;
    }
    value = value + basedFreqFactor*delta_t;
 
-//   MessageInterface::ShowMessage("value = %.12lf\n", value);
-
-#ifdef RAMP_TABLE_EXPANDABLE
-   return value + correct_val;
-#else
    return value;
-#endif
 }
 
