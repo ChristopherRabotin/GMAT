@@ -4136,7 +4136,7 @@ void BatchEstimator::WritePageHeader()
    /// 4.1. Write page header
    textFile << "\n";
    if (textFileMode == "Normal")
-      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type           Edit          Observed(O)         Computed (C)       Residual (O-C)   Elev. Participants\n";
+      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type           Edit          Observed(O)         Computed (C)       Residual (O-C)  Elev.  Participants\n";
    else
    {
       textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type          Units   " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)             Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
@@ -5193,7 +5193,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 
 
       // 4. Specify maximum len of elements' names (Cartisian element names)
-      Integer max_len = 15;
+      Integer max_len = 27;         // 27 is the maximum lenght of ancillary element names
       for (int i = 0; i < map->size(); ++i)
       {
          std::stringstream ss;
@@ -5238,10 +5238,9 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
       max_len = max(max_len, len);
 
 
-
       // 7. Write state information
       textFile3   << " " << GmatStringUtil::GetAlignmentString("State Component", max_len + 4, GmatStringUtil::LEFT)
-         << "Units         Apriori State      Current State      Standard Dev.     Previous State  Current-Apriori   Current-Previous\n";
+         << "Units         Current State      Apriori State      Standard Dev.     Previous State    Current-Apriori   Current-Previous\n";
       textFile3 << "\n";
       textFile3.precision(8);
 
@@ -5305,8 +5304,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
          textFile3 << " ";
          textFile3 << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 1, GmatStringUtil::LEFT);
          textFile3 << GmatStringUtil::GetAlignmentString(unit, 8, GmatStringUtil::LEFT);
-         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                    // apriori state
          textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                    // current state
+         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                    // apriori state
          if (covar(i, i) >= 0.0)
             textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(covar(i, i)), false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);          // standard deviation
          else
@@ -5389,8 +5388,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             textFile3 << " ";
             textFile3 << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 1, GmatStringUtil::LEFT);
             textFile3 << GmatStringUtil::GetAlignmentString(unitList[i], 8, GmatStringUtil::LEFT);
-            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // apriori state
             textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // current state
+            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // apriori state
             if (stdArr[i] >= 0.0)
                textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(stdArr[i], false, true, true, 8, 18)), 19, GmatStringUtil::RIGHT);                       // standard deviation
             else
@@ -5442,8 +5441,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
          unitLen = max(unitLen, units[i].size());
       }
 
-      textFile3 << " " << GmatStringUtil::GetAlignmentString("Ancillary Elements", nameLen + 4, GmatStringUtil::LEFT)
-         << "Units         Apriori State      Current State      Standard Dev.     Previous State  Current-Apriori   Current-Previous\n";
+      textFile3 << " " << GmatStringUtil::GetAlignmentString("Ancillary Elements", max_len + 4, GmatStringUtil::LEFT)
+         << "Units         Current State      Apriori State      Standard Dev.     Previous State    Current-Apriori   Current-Previous\n";
       textFile3 << "\n";
 
       // Specify value of all elements:
@@ -5463,7 +5462,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             int precision = GetElementPrecision(units[i]);
 
             textFile3 << GmatStringUtil::GetAlignmentString("", 4, GmatStringUtil::LEFT);
-            textFile3 << GmatStringUtil::GetAlignmentString(nameList1[i], nameLen + 1, GmatStringUtil::LEFT);
+            textFile3 << GmatStringUtil::GetAlignmentString(nameList1[i], max_len + 1, GmatStringUtil::LEFT);
             textFile3 << GmatStringUtil::GetAlignmentString(units[i], 8, GmatStringUtil::LEFT);
             if (currentAE[i] == 0.0)
             {
@@ -5472,8 +5471,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             }
             else
             {
-               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // apriori state
                textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // current state
+               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // apriori state
                //if (stdArr[i] >= 0.0)
                //   textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(stdArr[i], false, true, true, 8, 18)), 19, GmatStringUtil::RIGHT);                       // standard deviation
                //else
