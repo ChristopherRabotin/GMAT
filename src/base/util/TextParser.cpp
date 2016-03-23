@@ -296,36 +296,90 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          {
             theBlockType = Gmat::ASSIGNMENT_BLOCK;
             noCommentLine = i;
-
+            
+            #if DEBUG_TP_EVAL_BLOCK > 1
+            MessageInterface::ShowMessage("   It is assignment block\n");
+            #endif
+            
             // check for CallFunction
             // ex) [a b c] = function(d, e, f);
-
+            
             //if (str.find("[") != str.npos) // Is this checking enough?
-
+            
             // check for RVECTOR_TYPE or UNSIGNED_INTARRAY_TYPE setting
             // ex) opengl.OrbitColor = [100 200 300 ];
             //     opengl.ViewPointVectorVector = [0, 0, 50000];
-
+            
+            // Check for string function (LOJ: 2016.02.29)
+            // ex) result = sprintf('x = %f', x);
+            
             std::string::size_type index1 = str.find("[");
             if (index1 != str.npos)
             {
+               #if DEBUG_TP_EVAL_BLOCK > 1
+               MessageInterface::ShowMessage("   [ not found\n");
+               #endif
                std::string::size_type index2 = str.find("=");
+               
+               #if DEBUG_TP_EVAL_BLOCK > 1
+               MessageInterface::ShowMessage("   = %s found\n", index2 == str.npos ? "not" : "");
+               #endif
                if (index2 == str.npos || index2 > index1)
                {
                   theBlockType = Gmat::COMMAND_BLOCK;
                   isFunctionCall = true;
                }
             }
+            
+            
+            // //==============================================================
+            // #if 0
+            // // Make sure % is not part of string literal
+            // #if 1
+            // std::string::size_type percentSignPos;
+            // std::string noInline = str;
+            // bool inlineCommentFound = !GmatStringUtil::IsStringInsideSymbols(str, "%", "'", percentSignPos);
+            // if (!inlineCommentFound)
+            //    noInline = str.substr(0, percentSignPos);
+            // MessageInterface::ShowMessage("   ==> noInline = '%s'\n", noInline.c_str());
+            // #else
+            // std::string::size_type percentSignPos = str.find("%");
+            // std::string noInline = str;
+            // bool inlineCommentFound = false;
+            // if (percentSignPos != str.npos)
+            // {
+            //    std::string::size_type quote1 = str.find("'");
+            //    if (quote1 != str.npos)
+            //    {
+            //       std::string::size_type quote2 = str.find("'", quote1 + 1);
+            //       MessageInterface::ShowMessage
+            //          ("   percentSignPos=%u, quote1=%u, quote2=%u\n", percentSignPos, quote1, quote2);
+            //       if (quote2 != str.npos)
+            //       {
+            //          if (percentSignPos > quote1 && percentSignPos < quote2)
+            //          {
+            //             MessageInterface::ShowMessage("==> percent sign is part of string literal\n");
+            //             inlineCommentFound = false;
+            //          }
+            //       }
+            //    }
+            //    if (!inlineCommentFound)
+            //       noInline = str.substr(0, percentSignPos);
+            //    MessageInterface::ShowMessage("   ==> noInline = '%s'\n", noInline.c_str());
+            // }
+            // #endif
+            
+            // #endif
+            // //==============================================================
 
-            /// @todo: This is a work around for a call function with
-            /// without any return parameters.  It should be updated in
-            /// the design to handle this situation.
-            std::string::size_type commentPos = str.find("%");
-            std::string noInline = str;
-            if (commentPos != str.npos)
-               noInline = str.substr(0, commentPos);
-
-            // Since we are allowed to pass string literal, string literal can
+            
+            
+            #if DEBUG_TP_EVAL_BLOCK > 1
+            MessageInterface::ShowMessage
+               ("   Checking if there is one of math symbols: -+*/^=<>\n");
+            #endif
+            
+            // Since we allow to pass string literal, string literal can
             // be anything letters including equal sign, so we need additional checking.
             // String literals are enclosed with single quotes (loj: 2008.05.19)
             // See if it has equal sign and math symbols not in quotes.
@@ -336,6 +390,9 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             }
             else
             {
+               #if DEBUG_TP_EVAL_BLOCK > 1
+               MessageInterface::ShowMessage("   Math symbol found\n");
+               #endif
                // There is math symbol, so make it assignment command,
                // so that [out] = GmatFunc(x) + 1 can be parsed (see GMT-3325).
                // Check if [] has only one output
@@ -365,22 +422,39 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             }
          }
          
+         #if DEBUG_TP_EVAL_BLOCK
+         MessageInterface::ShowMessage("   noCommentLine=%d\n", noCommentLine);
+         #endif
+         
          if (noCommentLine >= 0)
-         {
+         {           
+            std::string::size_type percentSignPos;
+            std::string noInline = str;
+            bool inlineCommentFound = false;
+            inlineCommentFound = !GmatStringUtil::IsStringInsideSymbols(str, "%", "'", percentSignPos);
+            // If percent sign not found, inline comment not found
+            if (percentSignPos == str.npos)
+               inlineCommentFound = false;
+            if (!inlineCommentFound)
+               noInline = str.substr(0, percentSignPos);
+            
             // if % found in the no-comment line, it is inline comment
-            index3 = str.find("%", index2);
-
+            //index3 = str.find("%", index2);
+            
             #if DEBUG_TP_EVAL_BLOCK
             MessageInterface::ShowMessage
-            ("   index1=%d, index2=%u, index3=%u\n", index1, index2, index3);
+               ("   index1=%d, index2=%u, percentSignPos=%u\n", index1, index2, percentSignPos);
+            MessageInterface::ShowMessage
+               ("   inlineCommentFound=%d, noInline='%s'\n", inlineCommentFound, noInline.c_str());
             #endif
-
-            // if inline comment
-            if (index3 != str.npos)
+            
+            // // if inline comment
+            // if (index3 != str.npos)
+            if (inlineCommentFound)
             {
                // find last non-blank
-               index4 = str.find_last_not_of(whiteSpace, index3-1);
-
+               index4 = str.find_last_not_of(whiteSpace, percentSignPos-1);
+               
                // remove eol char from inlineComment
                inlineComment = str.substr(index4+1);
                inlineComment = inlineComment.substr(0, inlineComment.size()-1);
@@ -1168,8 +1242,39 @@ StringArray TextParser::SeparateBy(const std::string &chunk, const std::string &
 {
    #ifdef GMAT_TP_SEPARATEBY
    MessageInterface::ShowMessage
-      ("TextParser::SeparateBy() chunk='%s', delim='%s'\n", chunk.c_str(), delim.c_str());
+      ("TextParser::SeparateBy() entered, chunk='%s', delim='%s'\n", chunk.c_str(), delim.c_str());
    #endif
+   
+   std::string::size_type index1 = chunk.find(delim);
+   if (index1 != chunk.npos)
+   {
+      std::string::size_type quote1 = chunk.find("'");
+      if (quote1 != chunk.npos)
+      {
+         std::string::size_type quote2 = chunk.find("'", quote1 + 1);
+         #ifdef GMAT_TP_SEPARATEBY
+         MessageInterface::ShowMessage
+            ("   index1=%u, quote1=%u, quote2=%u\n", index1, quote1, quote2);
+         #endif
+         if (quote2 != chunk.npos)
+         {
+            if (index1 < quote1 || index1 > quote2)
+            {
+               StringArray parts;
+               parts.push_back(chunk.substr(0, index1));
+               parts.push_back(chunk.substr(index1+1));
+               #ifdef GMAT_TP_SEPARATEBY
+               MessageInterface::ShowMessage
+                  ("TextParser::SeparateBy() returning:\n");
+               for (unsigned int i=0; i<parts.size(); i++)
+                  MessageInterface::ShowMessage
+                     ("   parts[%d]=%s\n", i, parts[i].c_str());
+               #endif
+               return parts;
+            }
+         }
+      }
+   }
    
    StringTokenizer st(chunk, delim);
    StringArray parts = st.GetAllTokens();

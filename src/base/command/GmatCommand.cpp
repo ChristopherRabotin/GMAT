@@ -148,6 +148,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    next                 (NULL),
    previous             (NULL),
    level                (-1),   // Not set
+   configObjectMap      (NULL),
    objectMap            (NULL),
    globalObjectMap      (NULL),
    solarSys             (NULL),
@@ -302,6 +303,7 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    next                 (NULL),
    previous             (NULL),
    level                (-1),   // Not set
+   configObjectMap      (c.configObjectMap),
    objectMap            (c.objectMap),
    globalObjectMap      (c.globalObjectMap),
    solarSys             (c.solarSys),
@@ -370,6 +372,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    objects             = c.objects;
    association         = c.association;
    
+   configObjectMap     = c.configObjectMap;
    objectMap           = c.objectMap;
    globalObjectMap     = c.globalObjectMap;
    solarSys            = c.solarSys;
@@ -953,6 +956,21 @@ std::string GmatCommand::GetSummaryName()
    return summaryName;
 }
 
+
+//------------------------------------------------------------------------------
+//  void SetObjectMap(ObjectMap *objMap)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Interpre to set the local resource store used by the GmatCommand
+ * for InterpretAction()
+ * 
+ * @param map Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetConfiguredObjectMap(ObjectMap *map)
+{
+   configObjectMap = map;
+}
 
 //------------------------------------------------------------------------------
 //  void SetObjectMap(std::map<std::string, GmatBase *> *map)

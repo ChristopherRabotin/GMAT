@@ -1132,6 +1132,13 @@ Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
 //------------------------------------------------------------------------------
 // GmatBase* EvaluateObject(FunctionManager *callingFM)
 //------------------------------------------------------------------------------
+/**
+ * Returns reference object pointer so that object can be assigned in a math
+ * equation when GmatFunction returns an object. It used only allow GmatFunction
+ * returning numeric values in a math equation. For example,
+ * "sc = MyFunction(sc)" will work.
+ */
+//------------------------------------------------------------------------------
 GmatBase* FunctionManager::EvaluateObject(FunctionManager *callingFM)
 {
    if (currentFunction == NULL)

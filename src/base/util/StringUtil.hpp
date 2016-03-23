@@ -107,6 +107,7 @@ namespace GmatStringUtil
    GMAT_API std::string RemoveInlineComment(const std::string &str, const std::string &cmStr);
    GMAT_API std::string MakeCommentLines(const std::string &str, bool breakAtCr = false);
    GMAT_API std::string ParseFunctionName(const std::string &str);
+   GMAT_API StringArray ParseFunctionCall(const std::string &str);
    GMAT_API std::string AddEnclosingString(const std::string &str, const std::string &enStr);
    GMAT_API std::string GetInvalidNameMessageFormat();
    
@@ -182,6 +183,7 @@ namespace GmatStringUtil
    GMAT_API bool IsParenEmpty(const std::string &str);
    GMAT_API bool AreAllBracketsBalanced(const std::string &str, const std::string &allPairs);
    GMAT_API bool AreAllNamesValid(const std::string &str, bool blankNameIsOk = false);
+   GMAT_API bool IsValidFunctionCall(const std::string &str);
    GMAT_API bool IsOuterParen(const std::string &str);
    GMAT_API bool IsCommaPartOfArray(const std::string &str, Integer start = 0);
    GMAT_API bool IsBracketPartOfArray(const std::string &str, const std::string &bracketPairs,
@@ -204,6 +206,8 @@ namespace GmatStringUtil
    GMAT_API bool IsBlank(const std::string &str, bool ignoreEol = false);
    GMAT_API bool HasMissingQuote(const std::string &str, const std::string &quote,
                                  bool ignoreSpaceAfterQuote = true);
+   GMAT_API bool IsStringInsideSymbols(const std::string &str, const std::string &reqStr,
+                                       const std::string &symbol, std::string::size_type &reqStrPos);
    GMAT_API bool IsMathEquation(const std::string &str, bool checkInvalidOpOnly = false,
                                 bool blankNameIsOk = false);
    GMAT_API bool IsMathOperator(const char &ch);

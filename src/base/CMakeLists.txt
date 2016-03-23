@@ -316,12 +316,18 @@ SET(BASE_SRCS
     math/Asinh.cpp
     math/Atan.cpp
     math/Atan2.cpp
+    math/BuiltinFunction.cpp
+    math/Ceil.cpp
     math/Cos.cpp
     math/Cosh.cpp
+    math/Cross3.cpp
     math/DegToRad.cpp
     math/Determinant.cpp
+    math/Diag.cpp
     math/Divide.cpp
     math/Exp.cpp
+    math/Fix.cpp
+    math/Floor.cpp
     math/FunctionRunner.cpp
     math/Log.cpp
     math/Log10.cpp
@@ -330,14 +336,23 @@ SET(BASE_SRCS
     math/MathException.cpp
     math/MathFunction.cpp
     math/MathNode.cpp
+    math/Min.cpp
+    math/Mod.cpp
     math/Multiply.cpp
     math/Negate.cpp
     math/Norm.cpp
+    math/NumericFunction.cpp
     math/Power.cpp
     math/RadToDeg.cpp
     math/Sin.cpp
     math/Sinh.cpp
+    math/Sprintf.cpp
     math/Sqrt.cpp
+    math/StringFunction.cpp
+    math/Strcat.cpp
+    math/Strcmp.cpp
+    math/Strfind.cpp
+    math/Strrep.cpp
     math/Subtract.cpp
     math/Tan.cpp
     math/Tanh.cpp

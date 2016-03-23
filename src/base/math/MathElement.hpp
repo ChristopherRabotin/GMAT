@@ -50,7 +50,6 @@ public:
    MathElement& operator=(const MathElement &me);
    
    // for math elemement wrappers
-   ////void                 SetMathWrappers(std::map<std::string, ElementWrapper*> *wrapperMap);
    virtual void         SetMathWrappers(WrapperMap *wrapperMap);
    
    // Inherited (MathNode) methods

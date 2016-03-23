@@ -171,7 +171,8 @@ Interpreter::Interpreter(SolarSystem *ss, ObjectMap *objMap)
    #ifdef DEBUG_INTERP
    MessageInterface::ShowMessage
       ("Interpreter::Interpreter() initialized=%d, theModerator=%p, theReadWriter=%p, "
-       "theValidator=%p\n", initialized, theModerator, theReadWriter, theValidator);
+       "theValidator=%p, theObjectMap=%p\n", initialized, theModerator, theReadWriter,
+       theValidator, theObjectMap);
    #endif
 }
 
@@ -1081,29 +1082,26 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       #endif
       
       // If object to be managed, give warning if name already exist
-      //if (manage == 1)
       if (manage == 1 || manage == 2)
       {
-//         if ((name != "EarthMJ2000Eq") &&
-//             (name != "EarthMJ2000Ec") &&
-//             (name != "EarthFixed")    &&
-//             (name != "EarthICRF"))
-//         {
-            obj = FindObject(name, type);
+         obj = FindObject(name, type);
             
-            // Since System Parameters are created automatically as they are referenced,
-            // do not give warning if creating a system parameter
-            if (obj != NULL && ((obj->GetType() != Gmat::PARAMETER) ||
-                                (obj->GetType() == Gmat::PARAMETER &&
-                                 (!obj->IsOfType("SystemParameter")))))
-            {
-               InterpreterException ex("");
-               ex.SetDetails("%s object named \"%s\" already exists",
-                             type.c_str(), name.c_str());
-               HandleError(ex, true, true, showWarning);
-               return obj;
-            }
-//         }
+         // Since System Parameters are created automatically as they are referenced,
+         // do not give warning if creating a system parameter
+         if (obj != NULL && ((obj->GetType() != Gmat::PARAMETER) ||
+                             (obj->GetType() == Gmat::PARAMETER &&
+                              (!obj->IsOfType("SystemParameter")))))
+         {
+            // Parse array name in case it is array declaration
+            std::string arrName = GmatStringUtil::GetArrayName(name, "[]");
+            MessageInterface::ShowMessage
+               ("==> name='%s', arrName='%s'\n", name.c_str(), arrName.c_str());
+            InterpreterException ex("");
+            ex.SetDetails("%s object named \"%s\" already exists, so ignored",
+                          type.c_str(), arrName.c_str());
+            HandleError(ex, true, true, showWarning);
+            return obj;
+         }
       }
    }
    #ifdef DEBUG_CREATE_CELESTIAL_BODY
@@ -1119,7 +1117,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       if (currentFunction == NULL)
          throw InterpreterException
             ("Parsing function object but current function pointer is NULL\n");
-   
+      
       ObjectMap *functionMap = currentFunction->GetFunctionObjectMap();
       theModerator->SetObjectMap(functionMap);
    }
@@ -1258,7 +1256,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(spacePointList.begin(), spacePointList.end(), type) != 
                spacePointList.end())
          obj = (GmatBase*)theModerator->CreateSpacePoint(type, name);
-      
+   
       // Handle TrackingSystems
       else if (find(trackingSystemList.begin(), trackingSystemList.end(), type) !=
                trackingSystemList.end())
@@ -1298,7 +1296,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
             obj = theModerator->CreateOtherObject(objType, type, name);
          else
             obj = NULL;
-   }
+      }
    }
    
    
@@ -2307,6 +2305,15 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    // Now assemble command
    try
    {
+      // Set resource object map to command so that InterpretAction() can do
+      // some validation. (LOJ: 2016.03.17)
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("   => Now calling %s->SetConfiguredObjectMap(), theObjectMap=<%p>\n",
+          type1.c_str(), theObjectMap);
+      #endif
+      cmd->SetConfiguredObjectMap(theObjectMap);
+      
       #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage
          ("   => Now calling %s->InterpretAction()\n", type1.c_str());
@@ -7836,7 +7843,7 @@ bool Interpreter::SetDataStreamProperty(GmatBase *obj,
 		 {
 			obj->SetStringParameter("Format", value1);									   // fix Bug 12 in ticket GMT-4314
             retval = obj->SetRefObject(obs, Gmat::OBTYPE);
-		 }
+      }
       }
       else
          throw InterpreterException("Failed to create a " + value +
@@ -10069,12 +10076,12 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       }
       else
       {
-      InterpreterException ex
+         InterpreterException ex
             ("Cannot find GmatFunction file \"" + funcPath +
              "\" referenced in the caller of \"" + fName + "\"\n");
-      HandleError(ex, false);
-      retval = false;
-   }
+         HandleError(ex, false);
+         retval = false;
+      }
    }
    
    // check for no extension of .gmf or wrong extension

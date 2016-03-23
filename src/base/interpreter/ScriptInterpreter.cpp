@@ -2037,7 +2037,7 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
          if (chunks[1].find("../") == currentBlock.npos &&
              chunks[1].find("..\\") == currentBlock.npos)
          {
-            InterpreterException ex("Found invalid syntax \"..\"");
+            InterpreterException ex("Found invalid syntax \"..\" during command parsing");
             HandleError(ex);
             return false;
          }
@@ -2105,9 +2105,13 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       if (chunks[1].find("../") == currentBlock.npos &&
           chunks[1].find("..\\") == currentBlock.npos)
       {
-         InterpreterException ex("Found invalid syntax \"..\"");
-         HandleError(ex);
-         return false;
+         // Check if it is enclosed with quotes
+         if (!GmatStringUtil::IsEnclosedWith(chunks[1], "'"))
+         {
+            InterpreterException ex("Found invalid syntax \"..\" during assignment command parsing");
+            HandleError(ex);
+            return false;
+         }
       }
    }
    
@@ -2164,6 +2168,7 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       else if (lhs.find_first_of("=~<>[]{}\"") != lhs.npos ||
                rhs.find_first_of("=~<>\"") != rhs.npos)
       {
+         bool isOk = true;
          if (lhs == "")
          {
             cmd = rhs.substr(0, rhs.find_first_of(" "));
@@ -2174,20 +2179,31 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
             {
                part = (cmd == "" ? lhs : cmd);
                ex.SetDetails("\"" + part + "\" is not a valid assignment");
+               isOk = false;
             }
          }
          else
          {
             // Check for invalid symbols and brackets in lhs and rhs
             if (lhs.find_first_of("=~<>[]{}\"") != lhs.npos)
+            {
+               isOk = false;
                ex.SetDetails("\"" + lhs + "\" is not a valid LHS of assignment");
+            }
             
             if (rhs.find_first_of("=~<>\"") != rhs.npos)
-               ex.SetDetails("\"" + rhs + "\" is not a valid RHS of assignment");
+            {
+               isOk = GmatStringUtil::IsValidFunctionCall(rhs);
+               if (!isOk)
+                  ex.SetDetails("\"" + rhs + "\" is not a valid RHS of assignment");
+            }
          }
          
-         HandleError(ex);
-         return false;
+         if (!isOk)
+         {
+            HandleError(ex);
+            return false;
+         }
       }
       else
       {
@@ -2245,8 +2261,13 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
 
    if (!inCommandMode)
    {
+      #ifdef DEBUG_PARSE_ASSIGNMENT
+      MessageInterface::ShowMessage
+         ("   Creating MathParser with theObjectMap = <%p>\n", theObjectMap);
+      #endif
+      
       // check for math operators/functions
-      MathParser mp = MathParser();
+      MathParser mp = MathParser(theObjectMap);
       
       try
       {

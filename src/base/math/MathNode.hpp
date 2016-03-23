@@ -65,6 +65,9 @@ public:
 
    // for function node returning object
    virtual GmatBase*    EvaluateObject();
+
+   // for function node returning string
+   virtual std::string  EvaluateString();
    
    // abstract methods
    virtual bool         ValidateInputs() = 0;
@@ -94,6 +97,7 @@ protected:
    
    Real realValue;
    Rmatrix matrix;
+   std::string stringValue;
    
 };
 
