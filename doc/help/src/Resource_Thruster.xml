@@ -2185,15 +2185,13 @@
           <row>
             <entry><guilabel>Tank</guilabel></entry>
 
-            <entry><para><guilabel>ChemicalTank</guilabel> from which the
-            <guilabel>ChemicalThruster</guilabel> draws propellant from. In a
-            script command, an empty list, e.g., <literal>Thruster1.Tank =
-            {}</literal>, is NOT allowed. Via the script, if you wish to
-            indicate that no <guilabel>ChemicalTank</guilabel> is associated
-            with a <guilabel>ChemicalThruster</guilabel>, do not include
-            commands such as <literal>Thruster1.Tank = ...</literal> in your
-            script. This field cannot be modified in the Mission Sequence.
-            </para> <variablelist>
+            <entry><para>A list of<guilabel> ChemicalTank(s)</guilabel> from
+            which the thruster draws propellant from. In the script, an empty
+            list, e.g., <literal>Thruster1.Tank = {}</literal>, is NOT
+            allowed. Via the script, if you wish to indicate that no tank is
+            associated with a thruster, do not include commands such as
+            <literal>Thruster1.Tank = ...</literal> in your script. This field
+            cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -2206,8 +2204,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>User defined list of<guilabel>
-                    ChemicalTank(s)</guilabel>.</para>
+                    <para>User defined list of tank(s).</para>
                   </listitem>
                 </varlistentry>
 
@@ -2650,24 +2647,25 @@
       of Pressure, in kPa, and Temperature, in degrees Celsius, are calculated
       using the following polynomials.</para>
 
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_Thruster_GUI_1.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
-    <screenshot>
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_Thruster_GUI_2.png"
-                     scalefit="1" width="100%"/>
-        </imageobject>
-      </mediaobject>
-    </screenshot>
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_Thruster_GUI_1.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
+
+      <screenshot>
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Resource_Thruster_GUI_2.png"
+                       scalefit="1" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </screenshot>
 
       <para>The thrust, T, output in Newtons, is scaled by the <guimenu>Duty
       Cycle</guimenu> and <guimenu>Thrust Scale Factor</guimenu>. The thrust
