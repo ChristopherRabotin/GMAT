@@ -27,10 +27,10 @@ classdef CoverageChecker < handle
             obj.pointGroup = pointGroup;
             obj.spaceCraft = spaceCraft;
             obj.centralBody = Earth();
-            obj.timeSeriesData = cell(1,obj.pointGroup.numPoints);
-            obj.dateData = cell(1,obj.pointGroup.numPoints);
+            obj.timeSeriesData = cell(1,obj.pointGroup.GetNumPoints());
+            obj.dateData = cell(1,obj.pointGroup.GetNumPoints());
             obj.timeIdx = 0;
-            obj.numEventsPerPoint = zeros(1,obj.pointGroup.numPoints);
+            obj.numEventsPerPoint = zeros(1,obj.pointGroup.GetNumPoints());
         end
         
         function vec = CheckPointCoverage(obj)
@@ -39,11 +39,12 @@ classdef CoverageChecker < handle
             bodyFixedState = obj.GetEarthFixedSatState(currentDate);
             covCount = 0;
             vec = [];
-            for pointIdx = 1:obj.pointGroup.numPoints
+            for pointIdx = 1:obj.pointGroup.GetNumPoints()
                 % Compute range vector
-                rangeVec = bodyFixedState - obj.pointGroup.testPointsArray{pointIdx};
+                pointVec = obj.pointGroup.GetPointPositionVector(pointIdx);
+                rangeVec = bodyFixedState - pointVec;
                 % Check in view
-                dotProd = rangeVec'*obj.pointGroup.testPointsArray{pointIdx};
+                dotProd = rangeVec'*pointVec;
                 % Simple line of site test
                 if dotProd > 0
                     covCount = covCount + 1;
@@ -74,7 +75,7 @@ classdef CoverageChecker < handle
             coverageEvents = {};
             numCoverageEvents = 0;
             
-            for pointIdx = 1:obj.pointGroup.numPoints
+            for pointIdx = 1:obj.pointGroup.GetNumPoints()
                 %  Only perform if there are interval events (2 or more events)
                 isEnd = false;
                 if obj.numEventsPerPoint(pointIdx) >= 2

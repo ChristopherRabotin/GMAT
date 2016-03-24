@@ -2,20 +2,24 @@ classdef PointGroup < handle
     %UNTITLED4 Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties
-        % Integer.  The number of points in the point group
-        numPoints
+    properties (Access = public)
+
+    end
+    
+    properties (Access = private)
         % String. The name of the model used to create points
         modelName
-        % std:vec of 3x1 arrays.  The cartesian coordinates of grid points
-        testPointsArray
         % Real array length num points. Latitude coordinates of grid points
         latVec
         % Real array length num points. Longitude coordinates of grid points
         lonVec
+        % std:vec of 3x1 arrays. The cartesian coordinates of grid points
+        testPointsArray
+        % Integer.  The number of points in the point group
+        numPoints
     end
     
-    methods
+    methods (Access = public)
         
         function obj = PointGroup(modelName,numPoints)
             % Class constructor
@@ -31,6 +35,54 @@ classdef PointGroup < handle
             obj.latVec = zeros(1,obj.numPoints);
             obj.lonVec = zeros(1,obj.numPoints);
         end
+        
+        function posVec = GetPointPositionVector(obj,poiIndex)
+            % Returns body fixed location of point given point index
+            posVec = obj.testPointsArray{poiIndex};
+        end
+        
+        function numPoints = GetNumPoints(obj)
+            % Returns number of points
+            numPoints = obj.numPoints;
+        end      
+        
+        %%  Plotting used for testing.  Not used in C++
+        function figHandle = PlotAllTestPoints(obj)
+            %  Used to visualize points. not needed in GMAT.
+            %  DO NOT CONVERT TO C++
+            [xSphere,ySphere,zSphere] = sphere(25);
+            figHandle = figure(100);
+            surf(xSphere,ySphere,zSphere,'EdgeColor',[0.784 0.816 0.831])
+            colormap('white')
+            hold on
+            for pointIdx = 1:obj.numPoints
+                plot3(obj.testPointsArray{pointIdx}(1),obj.testPointsArray{pointIdx}(2),...
+                    obj.testPointsArray{pointIdx}(3),'k.','MarkerSize',2);
+            end
+            axis equal
+        end
+        
+        function PlotSelectedTestPoints(obj,pointIds)
+            %  Used to visualize points. not needed in GMAT.
+            %  DO NOT CONVERT TO C++
+            %PlotAllTestPoints(obj)
+            AddPlotSelectedTestPoints(obj,pointIds)
+            %axis equal
+        end
+        
+        function AddPlotSelectedTestPoints(obj,pointIds)
+            %  Used to visualize points. not needed in GMAT.
+            %  DO NOT CONVERT TO C++
+            for pointIdx = 1:length(pointIds)
+                plotIdx = pointIds(pointIdx);
+                plot3(obj.testPointsArray{plotIdx}(1),obj.testPointsArray{plotIdx}(2),...
+                    obj.testPointsArray{plotIdx}(3),'Color',[0 .5 0],'Marker','*','MarkerSize',3);
+            end
+        end
+        
+    end
+    
+    methods (Access = private)
         
         function ComputeTestPoints(obj,modelName)
             %  Computes surface grid points
@@ -103,42 +155,10 @@ classdef PointGroup < handle
                 end
             end
         end
-        
-        %%  Plotting used for testing.  Not used in C++
-        function figHandle = PlotAllTestPoints(obj)
-            %  Used to visualize points. not needed in GMAT.
-            %  DO NOT CONVERT TO C++
-            [xSphere,ySphere,zSphere] = sphere(25);
-            figHandle = figure(100);
-            surf(xSphere,ySphere,zSphere,'EdgeColor',[0.784 0.816 0.831])
-            colormap('white')
-            hold on
-            for pointIdx = 1:obj.numPoints
-                plot3(obj.testPointsArray{pointIdx}(1),obj.testPointsArray{pointIdx}(2),...
-                    obj.testPointsArray{pointIdx}(3),'k.','MarkerSize',2);
-            end
-            axis equal
-        end
-        
-        function PlotSelectedTestPoints(obj,pointIds)
-            %  Used to visualize points. not needed in GMAT.
-            %  DO NOT CONVERT TO C++
-            %PlotAllTestPoints(obj)
-            AddPlotSelectedTestPoints(obj,pointIds)
-            %axis equal
-        end
-        
-        function AddPlotSelectedTestPoints(obj,pointIds)
-            %  Used to visualize points. not needed in GMAT.
-            %  DO NOT CONVERT TO C++
-            for pointIdx = 1:length(pointIds)
-                plotIdx = pointIds(pointIdx);
-                plot3(obj.testPointsArray{plotIdx}(1),obj.testPointsArray{plotIdx}(2),...
-                    obj.testPointsArray{plotIdx}(3),'Color',[0 .5 0],'Marker','*','MarkerSize',3);
-            end
-        end
-        
     end
-    
 end
+
+
+
+
 

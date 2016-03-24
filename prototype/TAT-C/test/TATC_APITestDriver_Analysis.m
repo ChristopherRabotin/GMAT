@@ -61,15 +61,15 @@ coverageEvents = covChecker.ProcessCoverageDate();
 %%  Compute coverate stats.  Shows how R-M might use data for coverage analysis
 
 % Create Lat\Lon Grid
-for pointIdx = 1:pGroup.numPoints
-    vec = pGroup.testPointsArray{pointIdx};
+for pointIdx = 1:pGroup.GetNumPoints()
+    vec = pGroup.GetPointPositionVector(pointIdx);
     lonVec(pointIdx,1) = atan2(vec(2),vec(1))*180/pi;
     latVec(pointIdx,1) = asin(vec(3)/norm(vec))*180/pi;
 end
 
 % Compute total coverage statistics from all coverage events
-totalCoverageDuration = zeros(pGroup.numPoints,1);
-numPassVec = zeros(pGroup.numPoints,1);
+totalCoverageDuration = zeros(pGroup.GetNumPoints(),1);
+numPassVec = zeros(pGroup.GetNumPoints(),1);
 minPassVec = numPassVec;
 maxPassVec = numPassVec;
 for eventIdx = 1:length(coverageEvents)
@@ -77,7 +77,7 @@ for eventIdx = 1:length(coverageEvents)
     poiIndex = currEvent.poiIndex;
     eventDuration = (currEvent.endDate.GetJulianDate() - currEvent.startDate.GetJulianDate())*24;
     totalCoverageDuration(poiIndex) = totalCoverageDuration(poiIndex) + eventDuration;
-    vec = pGroup.testPointsArray{pointIdx};
+    vec = pGroup.GetPointPositionVector(pointIdx);
     %     lat = atan2(vec(2),vec(1))*180/pi;
     %     lon = asin(vec(3)/norm(vec));
     %     Z(lat,lon) = totalCoverageDuration;
@@ -111,12 +111,12 @@ disp('  ')
 format short g
 data = [latVec,lonVec, numPassVec, totalCoverageDuration, minPassVec, maxPassVec];
 headerCount = 1;
-for passIdx = 1:10:pGroup.numPoints
+for passIdx = 1:10:pGroup.GetNumPoints()
     disp('       lat (deg)    lon (deg)     numPasses   totalDur    minDur      maxDur')
     dataEnd = passIdx + 9;
     disp(data(passIdx:dataEnd,:))
 end
-if dataEnd + 1 < pGroup.numPoints
+if dataEnd + 1 < pGroup.GetNumPoints()
  disp('       lat (deg)    lon (deg)     numPasses   totalDur    minDur      maxDur')
  disp(data(dataEnd + 1 :end,:))
 end
