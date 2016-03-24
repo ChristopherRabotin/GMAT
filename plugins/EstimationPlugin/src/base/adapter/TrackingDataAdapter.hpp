@@ -188,6 +188,8 @@ public:
 
    virtual StringArray  GetParticipants(Integer forPathIndex);                                             // made changes by TUAN NGUYEN
 
+   std::string          GetErrorMessage(){ return errMsg; };                                               // made changes by TUAN NGUYEN
+
 protected:
    /// The ordered list of participants in the measurement
    std::vector<StringArray*> participantLists;
@@ -236,8 +238,8 @@ protected:
 
    /// Ramped frequency table used to calculate ramped frequency measurements
    std::vector<RampTableData>*rampTB;
-   UnsignedInt               beginIndex;
-   UnsignedInt               endIndex;
+   UnsignedInt               beginIndex;        // specify index of the first element in ramp table used for this tracking data adapter 
+   UnsignedInt               endIndex;          // specify index of the last element in ramp table used for this tracking data adapter
 
    /// Name of the frequency ramp table that supplied or receives data
    StringArray               rampTableNames;
@@ -260,6 +262,9 @@ protected:
 
    /// A list of all objects used for measurement calculation (specificly it contains solver-for objects and consider objects)    // made changes by TUAN NGUYEN
    ObjectArray               forObjects;                                                                                          // made changes by TUAN NGUYEN
+
+   /// Store the error message whenever an error occurs during measurement calculation       // made changes by TUAN NGUYEN
+   std::string               errMsg;                                                         // made changes by TUAN NGUYEN
 
    /// Parameter IDs for the TrackingDataAdapter
    enum
@@ -292,7 +297,6 @@ protected:
 
    void                 BeginEndIndexesOfRampTable(Integer & err);
    virtual Real         IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);
-
 };
 
 #endif /* TrackingDataAdapter_hpp */

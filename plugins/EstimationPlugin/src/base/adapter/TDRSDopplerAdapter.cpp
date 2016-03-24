@@ -519,11 +519,11 @@ Integer TDRSDopplerAdapter::SetIntegerParameter(const Integer id, const Integer 
    }
 
 
-   adapterSL->SetRealParameter(id, value);
-   adapterSS->SetRealParameter(id, value);
-   adapterES->SetRealParameter(id, value);
+   adapterSL->SetIntegerParameter(id, value);
+   adapterSS->SetIntegerParameter(id, value);
+   adapterES->SetIntegerParameter(id, value);
 
-   return RangeAdapterKm::SetRealParameter(id, value);
+   return RangeAdapterKm::SetIntegerParameter(id, value);
 }
 
 

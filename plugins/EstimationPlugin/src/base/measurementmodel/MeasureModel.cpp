@@ -2028,7 +2028,7 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
       throw MeasurementException(ss.str());
    }
 
-   Real freqBand;
+   Integer freqBand;
    Real frequency;
    if (sd.tNode->IsOfType(Gmat::GROUND_STATION))
    {

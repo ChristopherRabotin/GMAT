@@ -2520,7 +2520,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                std::string tais;
                TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
                char s[1000];
-               sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[j]->GetName().c_str(), taiTime);
+               sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[j]->GetName().c_str(), taiTime);
                throw MeasurementException(s);
             }
          }
@@ -2578,13 +2578,14 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
                if (measurements[i].unfeasibleReason == "R")
                {
-                  Real a1Time = measurements[i].epoch;
-                  Real taiTime;
-                  std::string tais;
-                  TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-                  char s[1000];
-                  sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
-                  throw MeasurementException(s); 
+               //   Real a1Time = measurements[i].epoch;
+               //   Real taiTime;
+               //   std::string tais;
+               //   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
+               //   char s[1000];
+               //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
+               //   throw MeasurementException(s); 
+                  throw MeasurementException(adapters[i]->GetErrorMessage());
                }
             }
          }
@@ -2596,13 +2597,14 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
             if (measurements[i].unfeasibleReason == "R")
             {
-               Real a1Time = measurements[i].epoch;
-               Real taiTime;
-               std::string tais;
-               TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-               char s[1000];
-               sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
-               throw MeasurementException(s);
+            //   Real a1Time = measurements[i].epoch;
+            //   Real taiTime;
+            //   std::string tais;
+            //   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
+            //   char s[1000];
+            //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
+            //   throw MeasurementException(s);
+               throw MeasurementException(adapters[i]->GetErrorMessage());
             }
          }
 

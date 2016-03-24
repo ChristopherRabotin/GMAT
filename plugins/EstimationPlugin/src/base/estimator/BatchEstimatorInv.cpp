@@ -733,13 +733,13 @@ void BatchEstimatorInv::Accumulate()
                   sLine << GmatStringUtil::GetAlignmentString(ss, 6, GmatStringUtil::LEFT);
 
                   // Write to report file O-value, C-value, O-C, 
-                  sprintf(&s[0], "%19.6lf  %19.6lf   %18.6lf  ", currentObs->value[k], calculatedMeas->value[k], ocDiff);
+                  sprintf(&s[0], "%19.6lf  %19.6lf   %18.6lf ", currentObs->value[k], calculatedMeas->value[k], ocDiff);
                   sLine << s;
                   //// Write to report file unit:
                   //ss = currentObs->unit + "    ";
                   //sLine << ss.substr(0, 4) << " ";
                   // Write to report file elevation angle:
-                  sprintf(&s[0], "%6.2lf ", calculatedMeas->feasibilityValue);
+                  sprintf(&s[0], "%6.2lf  ", calculatedMeas->feasibilityValue);
                   sLine << s;
 
                   ss = "";

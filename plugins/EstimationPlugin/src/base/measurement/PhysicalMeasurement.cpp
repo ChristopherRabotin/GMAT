@@ -996,7 +996,7 @@ Integer PhysicalMeasurement::GetUplinkBandFromRampTable(Real t)
    //      break;
    //   }
    //}
-   Real upBand = 0;
+   Integer upBand = 0;
    for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
       if (t < (*rampTB)[i].epoch)
