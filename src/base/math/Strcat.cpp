@@ -113,20 +113,17 @@ std::string Strcat::EvaluateString()
 
    ValidateWrappers();
    
-   // for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
-   // {
-   //    ElementWrapper *wrapper = inputArgWrappers[i];
-   //    #ifdef DEBUG_EVALUATE
-   //    MessageInterface::ShowMessage
-   //       ("   inputArgWrappers[%d] = <%p>, desc = '%s'\n", i, wrapper,
-   //        wrapper ? wrapper->GetDescription().c_str() : "NULL");
-   //    #endif
+   for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
+   {
+      ElementWrapper *wrapper = inputArgWrappers[i];
+      #ifdef DEBUG_EVALUATE
+      MessageInterface::ShowMessage
+         ("   inputArgWrappers[%d] = <%p>, desc = '%s'\n", i, wrapper,
+          wrapper ? wrapper->GetDescription().c_str() : "NULL");
+      #endif
       
-   //    if (wrapper == NULL)
-   //       throw MathException("Error evaluating \"" + GetName() + "() function");
-      
-   //    result = result + wrapper->EvaluateString();
-   // }
+      result = result + wrapper->EvaluateString();
+   }
    
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
