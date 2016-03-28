@@ -47,7 +47,7 @@
 //------------------------------------------------------------------------------
 IonosphereCorrectionModel* IonosphereCorrectionModel::instance = NULL;
 
-const Real Ionosphere::NUM_OF_INTERVALS = 20;
+const Real Ionosphere::NUM_OF_INTERVALS = 100; // 20;
 const Real Ionosphere::IONOSPHERE_MAX_ATTITUDE = 2000.0;
 
 
@@ -460,9 +460,10 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    
    // Upper and lower integration limits
    //real hbeg = (real)(pos1.GetMagnitude() - earthRadius); // 0
-   if (hbeg < 1.0)
-      hbeg = 1.0;         // If height is less than 1.0km then set it to 1.0km
 
+//   if (hbeg < 1.0)
+//      hbeg = 1.0;         // If height is less than 1.0km then set it to 1.0km
+   // Accept height less than 1.0 Km and below sea level (0.0)
    real hend = hbeg;
    real hstp = 1.0;
    
@@ -492,8 +493,8 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
       throw MeasurementException("Ionosphere data files not found\n");
 
    real density = outf[20+1];
-   if (density < 0)
-      density = 0;
+   if (density < 0.0)
+      density = 0.0;
 
 #ifdef DEBUG_IONOSPHERE_ELECT_DENSITY
    MessageInterface::ShowMessage("              Electron density at that time and location = %le electrons per m3.\n", density);

@@ -49700,7 +49700,7 @@ L1937:
     integer s_wsfe(cilist *), do_fio(integer *, char *, ftnlen), e_wsfe();
 
     /* Local variables */
-    static real ionoindx[722];
+    static real ionoindx[2000];
     integer i__, inum_vals__, jj;
     real zi;
     integer num;
@@ -49715,7 +49715,7 @@ L1937:
     integer iupy;
     static integer iyst;
     integer imend, iyend;
-    static real indrz[722];
+    static real indrz[2000];
     integer iytmp;
     static integer iymst, iymend;
     integer nrdaym;
@@ -49748,6 +49748,7 @@ L1937:
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
 /*     parameter (MAXRECORDLEN_IGRZ = 722) */
+/*           real         ionoindx(722),indrz(722) */
     /* Parameter adjustments */
     --ig;
     --rz;

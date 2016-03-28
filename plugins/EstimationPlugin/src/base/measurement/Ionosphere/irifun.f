@@ -5817,7 +5817,9 @@ c----------------------------------------------------------------
 
            integer      yr, mm, day, iflag, iyst, iyend,iymst
            integer      imst,iymend
-           real         ionoindx(722),indrz(722)
+c           real         ionoindx(722),indrz(722)
+           real         ionoindx(MAXRECORDLEN_IGRZ)
+           real         indrz(MAXRECORDLEN_IGRZ)
            real         ig(3),rz(3)
 
            common /iounit/konsol
