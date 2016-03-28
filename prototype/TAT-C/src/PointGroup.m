@@ -1,10 +1,5 @@
 classdef PointGroup < handle
-    %UNTITLED4 Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties (Access = public)
-
-    end
+    %POINTGROUP. Computes and stores grid points on a sphere.
     
     properties (Access = private)
         % String. The name of the model used to create points
@@ -23,11 +18,37 @@ classdef PointGroup < handle
         
         function obj = PointGroup(modelName,numPoints)
             % Class constructor
+            % Inputs:  string modelName, int numPoints
             obj.numPoints = numPoints;
             obj.modelName = modelName;
             obj.DimensionArrays();
             obj.ComputeTestPoints('Helical')
         end
+        
+        function posVec = GetPointPositionVector(obj,poiIndex)
+            % Returns body fixed location of point given point index
+            % Inputs. int poiIndex
+            % Outputs. Rvector 3x1 containing the position.
+            posVec = obj.testPointsArray{poiIndex};
+        end
+        
+        function [lat,lon] = GetLatAndLon(obj,poiIndex)
+            % Returns body fixed location of point given point index
+            % Inputs. int poiIndex
+            % Outputs. double lat, double lon
+            lat = obj.latVec(poiIndex);
+            lon = obj.lonVec(poiIndex);
+        end
+        
+        function numPoints = GetNumPoints(obj)
+            % Returns number of points
+            % Ouput: int numPoints
+            numPoints = obj.numPoints;
+        end
+        
+    end
+    
+    methods (Access = private)
         
         function DimensionArrays(obj)
             % Pre-dimensions arrays based on user's number of points
@@ -36,56 +57,10 @@ classdef PointGroup < handle
             obj.lonVec = zeros(1,obj.numPoints);
         end
         
-        function posVec = GetPointPositionVector(obj,poiIndex)
-            % Returns body fixed location of point given point index
-            posVec = obj.testPointsArray{poiIndex};
-        end
-        
-        function numPoints = GetNumPoints(obj)
-            % Returns number of points
-            numPoints = obj.numPoints;
-        end      
-        
-        %%  Plotting used for testing.  Not used in C++
-        function figHandle = PlotAllTestPoints(obj)
-            %  Used to visualize points. not needed in GMAT.
-            %  DO NOT CONVERT TO C++
-            [xSphere,ySphere,zSphere] = sphere(25);
-            figHandle = figure(100);
-            surf(xSphere,ySphere,zSphere,'EdgeColor',[0.784 0.816 0.831])
-            colormap('white')
-            hold on
-            for pointIdx = 1:obj.numPoints
-                plot3(obj.testPointsArray{pointIdx}(1),obj.testPointsArray{pointIdx}(2),...
-                    obj.testPointsArray{pointIdx}(3),'k.','MarkerSize',2);
-            end
-            axis equal
-        end
-        
-        function PlotSelectedTestPoints(obj,pointIds)
-            %  Used to visualize points. not needed in GMAT.
-            %  DO NOT CONVERT TO C++
-            %PlotAllTestPoints(obj)
-            AddPlotSelectedTestPoints(obj,pointIds)
-            %axis equal
-        end
-        
-        function AddPlotSelectedTestPoints(obj,pointIds)
-            %  Used to visualize points. not needed in GMAT.
-            %  DO NOT CONVERT TO C++
-            for pointIdx = 1:length(pointIds)
-                plotIdx = pointIds(pointIdx);
-                plot3(obj.testPointsArray{plotIdx}(1),obj.testPointsArray{plotIdx}(2),...
-                    obj.testPointsArray{plotIdx}(3),'Color',[0 .5 0],'Marker','*','MarkerSize',3);
-            end
-        end
-        
-    end
-    
-    methods (Access = private)
-        
         function ComputeTestPoints(obj,modelName)
             %  Computes surface grid points
+            %  Inputs: string modelName
+            
             % Place first point at north pole
             if (obj.numPoints >= 1)
                 % One Point at North Pole
@@ -112,6 +87,7 @@ classdef PointGroup < handle
         
         function ComputeHelicalPoints(obj,numPoints)
             % Build a set of evenly spaced points using Helical algorithm
+            % Inputs: int, numPoints
             
             % Determine how many longitude "bands" and fill them in
             numDiscreteLatitudes = floor(sqrt((numPoints+1)*pi/4));
@@ -153,6 +129,41 @@ classdef PointGroup < handle
                     obj.latVec(1,pointIdx) = discreteLatitudes(latIdx);
                     obj.lonVec(1,pointIdx) = currentLongitude;
                 end
+            end
+        end
+    end
+    
+    methods (Access = public)
+        %%  All methods here are specific to MATLAB and are placed here for that reason
+        %  They are NOT needed in C++
+        function figHandle = PlotAllTestPoints(obj)
+            %  Used to visualize points. not needed in GMAT.
+            %  DO NOT CONVERT TO C++
+            [xSphere,ySphere,zSphere] = sphere(25);
+            figHandle = figure(100);
+            surf(xSphere,ySphere,zSphere,'EdgeColor',[0.784 0.816 0.831])
+            colormap('white')
+            hold on
+            for pointIdx = 1:obj.numPoints
+                plot3(obj.testPointsArray{pointIdx}(1),obj.testPointsArray{pointIdx}(2),...
+                    obj.testPointsArray{pointIdx}(3),'k.','MarkerSize',2);
+            end
+            axis equal
+        end
+        
+        function PlotSelectedTestPoints(obj,pointIds)
+            %  Used to visualize points. not needed in GMAT.
+            %  DO NOT CONVERT TO C++
+            AddPlotSelectedTestPoints(obj,pointIds)
+        end
+        
+        function AddPlotSelectedTestPoints(obj,pointIds)
+            %  Used to visualize points. not needed in GMAT.
+            %  DO NOT CONVERT TO C++
+            for pointIdx = 1:length(pointIds)
+                plotIdx = pointIds(pointIdx);
+                plot3(obj.testPointsArray{plotIdx}(1),obj.testPointsArray{plotIdx}(2),...
+                    obj.testPointsArray{plotIdx}(3),'Color',[0 .5 0],'Marker','*','MarkerSize',3);
             end
         end
     end

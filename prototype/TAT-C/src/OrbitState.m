@@ -2,7 +2,7 @@ classdef OrbitState < handle
     %ORBITSTATE: A utility for managing the orbit state
     %   Detailed explanation goes here
     
-    properties
+    properties (Access = private)
         % Array of  doubles. The current state in cartesian format
         currentState = [7100 0 2000 0 7.4 1]';
         % Double. The gravitational parameter for the central body
@@ -13,7 +13,7 @@ classdef OrbitState < handle
         
         function obj = SetKeplerianState(obj,SMA,ECC,INC,RAAN,AOP,TA)
             % Sets the Keplerian state
-            obj.currentState = obj.ConvertKepToCart(SMA,ECC,INC,AOP,RAAN,TA);
+            obj.currentState = obj.ConvertKepToCart(SMA,ECC,INC,RAAN,AOP,TA);
         end
         
         function obj = SetKeplerianVectorState(obj,kepVector)
@@ -30,7 +30,7 @@ classdef OrbitState < handle
         
         function SetGravParam(obj,mu)
             % Sets the gravitational parameter
-           obj.gravParam = mu; 
+            obj.gravParam = mu;
         end
         
         function kepState = GetKeplerianState(obj)
@@ -42,6 +42,10 @@ classdef OrbitState < handle
             % Returns the Cartesian state
             cartState = obj.currentState;
         end
+        
+    end
+    
+    methods (Access = private)
         
         function cartVec = ConvertKepToCart(obj,a,e,i,Om,om,nu)
             % Converts from Cartesian to Keplerian
@@ -102,7 +106,7 @@ classdef OrbitState < handle
             
             %  Determine Inclination
             INC     = acos(hv(3)/h);
-                        
+            
             %=== Elliptic equatorial
             if ( INC <= 1e-11 && ECC > 1e-11 )
                 

@@ -51,8 +51,8 @@ classdef Propagator
         function obj = Propagator(Sat)
             % Class constructor.  Requires a spacecraft.
             obj.Spacecraft = Sat;
-            obj = obj.SetOrbitState(Sat.orbitState);
-            obj = obj.SetReferenceEpoch(Sat.orbitEpoch);
+            obj = obj.SetOrbitState(Sat.GetOrbitState());
+            obj = obj.SetReferenceEpoch(Sat.GetOrbitEpoch);
             obj = ComputeOrbitRates(obj);
         end
         
@@ -67,8 +67,10 @@ classdef Propagator
             % Propgate and return cartesian state given AbsoluteDate
             propDuration = (date.GetJulianDate - obj.refEpoch)*86400;
             orbElem = PropOrbElements(obj,propDuration);
-            obj.Spacecraft.orbitState.SetKeplerianVectorState(orbElem);
-            cartState = obj.Spacecraft.orbitState.GetCartesianState();
+            % Get the pointer to the orbit state
+            ptrOrbitState = obj.Spacecraft.GetOrbitState();
+            ptrOrbitState.SetKeplerianVectorState(orbElem);
+            cartState = ptrOrbitState.GetCartesianState();
         end
         
     end
@@ -204,8 +206,7 @@ classdef Propagator
             J2 = obj.gravParamJ2;
             e = obj.orbitECC;
             p = obj.SemiParameter();
-            obj.meanMotionRate = n + 3/2*J2*(obj.bodyRadius/p)^2*n/...
-                sqrt(1-e^2)*(cos(obj.orbitINC)^2*(e^2 + 4) - 1);
+            obj.meanMotionRate = n - 0.75*n*J2*(obj.bodyRadius/p)^2*sqrt(1-e^2)*(3*sin(obj.orbitINC)^2 - 2);
         end
         
         function obj = ComputeArgPerRate(obj)

@@ -37,7 +37,9 @@ classdef Earth
         end
         
         function R = FixedToTopoRMat(~,gdLat,gdLon)
-            % Rotate position vector from inertial to body fixed
+            % Computes rotation matrix from inertial to topocentric
+            % Inputs: int gdLat, int gdLon (geodedic coordinates of topo
+            % system).
             zHat = [cos(gdLat)*cos(gdLon);cos(gdLat)*sin(gdLon);sin(gdLat)];
             kHat = [0 0 1]';
             yHat = cross(kHat,zHat);

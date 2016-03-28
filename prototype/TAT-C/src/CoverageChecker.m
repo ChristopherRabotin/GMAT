@@ -35,7 +35,7 @@ classdef CoverageChecker < handle
         
         function vec = CheckPointCoverage(obj)
             % Check coverage given a spacecraft location in body fixed coordinates
-            currentDate = obj.spaceCraft.orbitEpoch.GetJulianDate();
+            currentDate = obj.spaceCraft.GetJulianDate();
             bodyFixedState = obj.GetEarthFixedSatState(currentDate);
             covCount = 0;
             vec = [];
@@ -59,13 +59,13 @@ classdef CoverageChecker < handle
         function vec = AccumulateCoverageData(obj)
             %  Accumulates coverage data after propagation update
             obj.timeIdx = obj.timeIdx + 1;
-            obj.dateData{obj.timeIdx} = obj.spaceCraft.orbitEpoch.GetJulianDate();
+            obj.dateData{obj.timeIdx} = obj.spaceCraft.GetJulianDate();
             vec = CheckPointCoverage(obj);
         end
         
         function bodyFixedState = GetEarthFixedSatState(obj,jDate)
             % Converts state from Earth interial to Earth fixed
-            inertialState = obj.spaceCraft.orbitState.GetCartesianState();
+            inertialState = obj.spaceCraft.GetCartesianState();
             %  TODO.  Handle differences in units of points and states.
             bodyFixedState = obj.centralBody.GetBodyFixedState(...
                 inertialState(1:3,1),jDate)/6378.1373;
