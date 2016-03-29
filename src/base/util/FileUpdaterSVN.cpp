@@ -37,6 +37,7 @@
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
 
+#include "errno.h"
 // Other include files, declarations, and non-Xerces-C++ initializations.
 
 using namespace xercesc;
@@ -180,7 +181,7 @@ void FileUpdaterSVN::CopyVersionedFiles()
    catch (UtilityException &e)
    {
          MessageInterface::ShowMessage("Cannot copy versioned file: %s",
-            e.GetFullMessage());
+            e.GetFullMessage().c_str());
    }
 }
 
@@ -214,7 +215,7 @@ bool FileUpdaterSVN::SaveUpdateScript( const std::string &filename )
    std::vector<IFileUpdater::repoFile>::iterator it;
    std::string cmd;
    std::ofstream outputFile;
-   outputFile.open(filename);
+   outputFile.open(filename.c_str());
    FileManager *fm = FileManager::Instance();
    std::string versionDir = fm->GetAbsPathname(FileManager::FILE_UPDATE_PATH);
    bool isEmpty = true;
