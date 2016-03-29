@@ -57,6 +57,7 @@
 #include <ctime>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <algorithm>                   // for min and max
 
 
 // This is used for getting computer operating system name and version // made changes by TUAN NGUYEN
@@ -2719,14 +2720,14 @@ std::string BatchEstimator::GetOperatingSystemName()
    if (uname(&uts) == -1)
       throw GmatBaseException("Error: cannot get OS information\n");
    
-   osName.assign(*uts.sysname)
+   osName.assign(uts.sysname);
 #else
    #ifdef __APPLE__
    struct utsname uts;
    if (uname(&uts) == -1)
       throw GmatBaseException("Error: cannot get OS information\n");
 
-   osName.assign(*uts.sysname)
+   osName.assign(uts.sysname);
 
    #endif
 #endif
@@ -2756,14 +2757,14 @@ std::string BatchEstimator::GetOperatingSystemVersion()
    if (uname(&uts) == -1)
       throw GmatBaseException("Error: cannot get OS information\n");
 
-   osVersion.assign(*uts.version)
+   osVersion.assign(uts.version);
 #else
 #ifdef __APPLE__
    struct utsname uts;
    if (uname(&uts) == -1)
       throw GmatBaseException("Error: cannot get OS information\n");
 
-   osVersion.assign(*uts.version)
+   osVersion.assign(uts.version);
 
 #endif
 #endif
@@ -2949,7 +2950,7 @@ void BatchEstimator::WriteReportFileHeaderPart2()
    paramNames.push_back("SRPArea  (m^2)");
    Integer nameLen = 0;
    for (UnsignedInt i = 0; i < paramNames.size(); ++i)
-      nameLen = max(nameLen, paramNames[i].size());
+      nameLen = std::max(nameLen, (Integer)(paramNames[i].size()));
    
 
    // 3. Write a table containing spacecraft initial condition:
@@ -3081,7 +3082,7 @@ void BatchEstimator::WriteReportFileHeaderPart3()
 
    Integer nameLen = 0;
    for (UnsignedInt i = 0; i < paramNames.size(); ++i)
-      nameLen = max(nameLen, paramNames[i].size());
+      nameLen = std::max(nameLen, (Integer)(paramNames[i].size()));
 
 
    // 3. Write table containing force model information for each spacecraft
@@ -3391,7 +3392,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
    
    Integer nameLen = 0;
    for (Integer i = 0; i < paramNames.size(); ++i)
-      nameLen = max(nameLen, paramNames[i].size());
+      nameLen = std::max(nameLen, (Integer)(paramNames[i].size()));
    
    // 3. Set values to rowContent
    Integer colCount = 0;
@@ -3461,7 +3462,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
       // 3.2. Set values to rowContent
       Integer valueLen = 0;
       for (Integer j = 0; j < paramNames.size(); ++j)
-         valueLen = max(valueLen, paramValues[j].size());
+         valueLen = std::max(valueLen, (Integer)(paramValues[j].size()));
 
       std::string s;
       for (Integer j = 0; j < paramNames.size(); ++j)
@@ -3544,7 +3545,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
 
    Integer nameLen = 0;
    for (Integer i = 0; i < paramNames.size(); ++i)
-      nameLen = max(nameLen, paramNames[i].size());
+      nameLen = std::max(nameLen, (Integer)(paramNames[i].size()));
    
 
    // 3. Write table containing ground stations' information
@@ -3742,7 +3743,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_3()
    
    Integer nameLen = 0;
    for (Integer i = 0; i < paramNames.size(); ++i)
-      nameLen = max(nameLen, paramNames[i].size());
+      nameLen = std::max(nameLen, (Integer)(paramNames[i].size()));
 
    // 2.2. Set value to paramValues
    Integer colCount = 0;
@@ -3960,7 +3961,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
 
    Integer nameLen = 0;
    for (Integer i = 0; i < paramNames.size(); ++i)
-      nameLen = max(nameLen, paramNames[i].size());
+      nameLen = std::max(nameLen, (Integer)(paramNames[i].size()));
 
    std::stringstream ss;
    Integer colCount = 0;
@@ -3978,7 +3979,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
 
       Integer valueLen = 0;
       for (Integer j = 0; j < paramValues.size(); ++j)
-         valueLen = max(valueLen, paramValues[j].size());
+         valueLen = std::max(valueLen, (Integer)(paramValues[j].size()));
 
       // Set value for rowContent
       if (colCount == 0)
@@ -4092,7 +4093,7 @@ void BatchEstimator::WriteReportFileHeaderPart6()
    // 4. Write to text file
    Integer nameLen = 0;
    for (Integer i = 0; i < sa1.size(); ++i)
-      nameLen = max(nameLen, sa1[i].size());
+      nameLen = std::max(nameLen, (Integer)(sa1[i].size()));
 
    for (Integer i = 0; i < sa1.size(); ++i)
    {
@@ -5209,7 +5210,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
          }
          else
             ss << GetElementFullName((*map)[i], false);
-         max_len = max(max_len, ss.str().size());
+         max_len = std::max(max_len, (Integer)(ss.str().size()));
       }
 
       
@@ -5233,9 +5234,9 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
       for (std::map<GmatBase*, Rvector6>::iterator i = aprioriKeplerianStateMap.begin(); i != aprioriKeplerianStateMap.end(); ++i)
       {
          Integer csNameSize = ((Spacecraft*)(i->first))->GetRefObject(Gmat::COORDINATE_SYSTEM, "")->GetName().size();
-         len = max(len, i->first->GetName().size() + csNameSize + 6);
+         len = std::max(len, (Integer)(i->first->GetName().size() + csNameSize + 6));
       }
-      max_len = max(max_len, len);
+      max_len = std::max(max_len, len);
 
 
       // 7. Write state information
@@ -5437,8 +5438,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
       Integer unitLen = 0;
       for (Integer i = 0; i < nameList1.size(); ++i)
       {
-         nameLen = max(nameLen, nameList1[i].size());
-         unitLen = max(unitLen, units[i].size());
+         nameLen = std::max(nameLen, (Integer)(nameList1[i].size()));
+         unitLen = std::max(unitLen, (Integer)(units[i].size()));
       }
 
       textFile3 << " " << GmatStringUtil::GetAlignmentString("Ancillary Elements", max_len + 4, GmatStringUtil::LEFT)
@@ -5552,7 +5553,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
       {
 
          textFile4 << "               ";
-         for (Integer i = startIndex; i < min(startIndex + MAX_COLUMNS, finalCovariance.GetNumColumns()); ++i)
+         for (Integer i = startIndex; i < std::min(startIndex + MAX_COLUMNS, finalCovariance.GetNumColumns()); ++i)
          {
             textFile4 << GmatStringUtil::ToString(i + 1, 3);
             if (i < finalCovariance.GetNumColumns() -1)
@@ -5564,7 +5565,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
          for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
          {
             textFile4 << "  " << GmatStringUtil::ToString(i + 1, indexLen) << "  ";
-            for (Integer j = startIndex; j < min(startIndex + MAX_COLUMNS, finalCovariance.GetNumColumns()); ++j)
+            for (Integer j = startIndex; j < std::min(startIndex + MAX_COLUMNS, finalCovariance.GetNumColumns()); ++j)
             {
                textFile4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(finalCovariance(i, j), false, true, true, 12, 20), 21, GmatStringUtil::RIGHT);
             }
@@ -5579,7 +5580,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
       for (Integer startIndex = 0; startIndex < finalCovariance.GetNumColumns(); startIndex += MAX_COLUMNS)
       {
          textFile4 << "                 ";
-         for (Integer i = startIndex; i < min(startIndex+MAX_COLUMNS,finalCovariance.GetNumColumns()); ++i)
+         for (Integer i = startIndex; i < std::min(startIndex+MAX_COLUMNS,finalCovariance.GetNumColumns()); ++i)
          {
             textFile4 << GmatStringUtil::ToString(i + 1, 3);
             if (i < finalCovariance.GetNumColumns() - 1)
@@ -5590,7 +5591,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
          for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
          {
             textFile4 << "  " << GmatStringUtil::ToString(i + 1, indexLen) << "  ";
-            for (Integer j = startIndex; j < min(startIndex+MAX_COLUMNS,finalCovariance.GetNumColumns()); ++j)
+            for (Integer j = startIndex; j < std::min(startIndex+MAX_COLUMNS,finalCovariance.GetNumColumns()); ++j)
             {
                char s[100];
                sprintf(&s[0], " %20.12lf\0", finalCovariance(i, j) / sqrt(finalCovariance(i, i)*finalCovariance(j, j)));
@@ -5656,7 +5657,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
          for (Integer startIndex = 0; startIndex < finalCovariance.GetNumColumns(); startIndex += MAX_COLUMNS)
          {
             textFile4 << "               ";
-            for (Integer i = startIndex; i < min(startIndex+MAX_COLUMNS,finalKeplerCovariance.GetNumColumns()); ++i)
+            for (Integer i = startIndex; i < std::min(startIndex+MAX_COLUMNS,finalKeplerCovariance.GetNumColumns()); ++i)
             {
                textFile4 << GmatStringUtil::ToString(i + 1, 3);
                if (i < finalCovariance.GetNumColumns() - 1)
@@ -5667,7 +5668,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
             for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
             {
                textFile4 << "  " << GmatStringUtil::ToString(i + 1, indexLen) << "  ";
-               for (Integer j = startIndex; j < min(startIndex+MAX_COLUMNS,finalKeplerCovariance.GetNumColumns()); ++j)
+               for (Integer j = startIndex; j < std::min(startIndex+MAX_COLUMNS,finalKeplerCovariance.GetNumColumns()); ++j)
                {
                   textFile4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(finalKeplerCovariance(i, j), false, true, true, 12, 20), 21, GmatStringUtil::RIGHT);
                }
@@ -5683,7 +5684,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
          for (Integer startIndex = 0; startIndex < finalCovariance.GetNumColumns(); startIndex += MAX_COLUMNS)
          {
             textFile4 << "                 ";
-            for (Integer i = startIndex; i < min(startIndex+MAX_COLUMNS,finalKeplerCovariance.GetNumColumns()); ++i)
+            for (Integer i = startIndex; i < std::min(startIndex+MAX_COLUMNS,finalKeplerCovariance.GetNumColumns()); ++i)
             {
                textFile4 << GmatStringUtil::ToString(i + 1, 3);
                if (i < finalCovariance.GetNumColumns() - 1)
@@ -5694,7 +5695,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
             for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
             {
                textFile4 << "  " << GmatStringUtil::ToString(i + 1, indexLen) << "  ";
-               for (Integer j = startIndex; j < min(startIndex+MAX_COLUMNS,finalKeplerCovariance.GetNumColumns()); ++j)
+               for (Integer j = startIndex; j < std::min(startIndex+MAX_COLUMNS,finalKeplerCovariance.GetNumColumns()); ++j)
                {
                   char s[100];
                   sprintf(&s[0], " %20.12lf\0", finalKeplerCovariance(i, j) / sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j)));
@@ -5749,7 +5750,7 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          }
          else
             ss << GetElementFullName((*map)[i], false);
-         max_len = max(max_len, ss.str().length());
+         max_len = std::max(max_len, (Integer)(ss.str().length()));
       }
 
       // Calculate Keplerian state for apriori, previous, current states:
