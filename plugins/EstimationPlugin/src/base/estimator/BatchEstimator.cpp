@@ -980,23 +980,15 @@ void BatchEstimator::CompleteInitialization()
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
       MessageInterface::ShowMessage("advanceToEstimationEpoch = %s\n", (advanceToEstimationEpoch?"true":"false"));
    #endif
-
+   
    if (advanceToEstimationEpoch == false)
    {
       PropagationStateManager *psm = propagator->GetPropStateManager();
 
       ObjectArray satArray;
       esm.GetStateObjects(satArray, Gmat::SPACECRAFT);
-
-      estimationState              = esm.GetState();
-      stateSize = estimationState->GetSize();
-      
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("GmatState got from propagator: size = %d   epoch = %.12lf   [", gs->GetSize(), gs->GetEpoch());
-         for (UnsignedInt k=0; k < gs->GetSize(); ++k)
-            MessageInterface::ShowMessage("%.12lf,  ", (*gs)[k]);
-         MessageInterface::ShowMessage("]\n");
-      #endif
+      estimationState = esm.GetState();
+      stateSize       = estimationState->GetSize();
 
       Estimator::CompleteInitialization();
       
@@ -1035,21 +1027,12 @@ void BatchEstimator::CompleteInitialization()
       for (UnsignedInt i = 0; i < adapters.size(); ++i)                                        // made changes by TUAN NGUYEN
          adapters[i]->SetUsedForObjects(objects);                                              // made changes by TUAN NGUYEN
 
-
+      
       // Now load up the observations
       measManager.PrepareForProcessing(false);
       
 ///// Check for more generic approach
-      measManager.LoadRampTables();
-
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("GmatState got from propagator: size = %d [", gs->GetSize());
-         for (UnsignedInt zz=0; zz < gs->GetSize(); ++zz)
-            MessageInterface::ShowMessage("%lf,  ", (*gs)[zz]);
-         MessageInterface::ShowMessage("]\n");
-
-         MessageInterface::ShowMessage("currentEpoch = %.15lf  estimationEpoch = %.15lf\n", currentEpoch, estimationEpoch);
-      #endif
+      measManager.LoadRampTables();      
 
       if (!GmatMathUtil::IsEqual(currentEpoch, estimationEpoch))
       {
@@ -1096,7 +1079,7 @@ void BatchEstimator::CompleteInitialization()
          for (UnsignedInt j = 0; j <  stateSize; ++j)
             information(i,j) = 0.0;
    }
-
+   
    residuals.SetSize(stateSize);
    x0bar.SetSize(stateSize);
 
@@ -1131,7 +1114,7 @@ void BatchEstimator::CompleteInitialization()
    isInitialized = true;
    numDivIterations = 0;                       // It need to reset its value when starting estimatimation calculation
 
-
+   
    // Get list of signal paths and specify the length of participants' column           // made changes by TUAN NGUYEN
    pcolumnLen = 12;                                                                     // made changes by TUAN NGUYEN
    std::vector<StringArray> signalPaths = measManager.GetSignalPathList();              // made changes by TUAN NGUYEN
@@ -1151,13 +1134,11 @@ void BatchEstimator::CompleteInitialization()
       }                                                                                 // made changes by TUAN NGUYEN
       if (pcolumnLen < len)                                                             // made changes by TUAN NGUYEN
          pcolumnLen = len;                                                              // made changes by TUAN NGUYEN
-   }                                                                                    // made changes by TUAN NGUYEN
-   pcolumnLen += 3;                                                                     // made changes by TUAN NGUYEN
-
+   }                                                                                    // made changes by TUAN NGUYEN   
 
    WriteToTextFile();
    ReportProgress();
-
+   
    numRemovedRecords["U"] = 0;
    numRemovedRecords["R"] = 0;
    numRemovedRecords["B"] = 0;
@@ -2115,15 +2096,15 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
    // Only write to report file when ReportStyle is Normal or Verbose
 //   if ((textFileMode != "Normal")&&(textFileMode != "Verbose"))
 //      return;
-
+   
    GmatState outputEstimationState;
 
    if (!showProgress)
       return;
-
+   
    if (!textFile.is_open())
       OpenSolverTextFile();
-
+   
    Solver::SolverState theState = sState;
    if (sState == Solver::UNDEFINED_STATE)
       theState = currentState;
@@ -2131,7 +2112,7 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
    textFile.setf(std::ios::fixed, std::ios::floatfield);
-
+   
    switch (theState)
    {
       case INITIALIZING:
@@ -2142,12 +2123,14 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
          WriteHeader();
 #endif
          break;
+
       case ACCUMULATING:
          if ((measManager.GetCurrentRecordNumber() != 0) && (GmatMathUtil::Mod(measManager.GetCurrentRecordNumber(), 80) < 0.001))
             WritePageHeader();
          textFile << linesBuff;
          textFile.flush();
          break;
+
       case ESTIMATING:
 #ifdef NEW_REPORTFILE_FORMAT
          WriteReportFileSummary(theState);
@@ -2155,6 +2138,7 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
          WriteSummary(theState);
 #endif
          break;
+
       case CHECKINGRUN:
 #ifdef NEW_REPORTFILE_FORMAT
          WriteReportFileSummary(theState);
@@ -2633,10 +2617,10 @@ void BatchEstimator::WriteHeader()
 
    /// 5. Write report header
    if (textFileMode == "Normal")
-      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << "Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
    else
    {
-      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << "Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size()-1; ++i)
          textFile << "                         ";
@@ -3524,7 +3508,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
 void BatchEstimator::WriteReportFileHeaderPart4_2()
 {
    StringArray paramNames, paramValues, rowContent;
-
+   
    // 2. Fill in parameter's name
    paramNames.push_back("Name");
    paramNames.push_back("Central Body");
@@ -3546,7 +3530,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
    for (Integer i = 0; i < paramNames.size(); ++i)
       nameLen = max(nameLen, paramNames[i].size());
    
-
+   
    // 3. Write table containing ground stations' information
    textFile << GmatStringUtil::GetAlignmentString("", 66) + "Ground Station Configuration\n";
    textFile << "\n";
@@ -3566,7 +3550,6 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
          GroundstationInterface *gs = (GroundstationInterface *)obj;
          gsName = participantNames[i];
 
-         
          // 3.2. Fill in parameter's value
          paramValues.push_back(gs->GetName());
          paramValues.push_back(gs->GetStringParameter("CentralBody"));
@@ -3579,6 +3562,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
          ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("MinimumElevationAngle"), false, false, false, 8); paramValues.push_back(ss.str());
          paramValues.push_back(gs->GetStringParameter("IonosphereModel"));
          paramValues.push_back(gs->GetStringParameter("TroposphereModel"));
+
          if (gs->GetStringParameter("TroposphereModel") != "None")
          {
             ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Temperature"), false, false, false, 8); paramValues.push_back(ss.str());
@@ -3612,18 +3596,20 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             else
             {
                for (Integer j = 0; j < emList.size(); ++j)
+               {
                   paramValues.push_back(emList[j]);
-
+               }
+               
                // Insert blank lines to paramNames and rowContent
-               StringArray::iterator pos1 = paramNames.begin() + (paramNames.size() - 1) + maxNumErrorModels;
-               paramNames.insert(pos1, emList.size()- maxNumErrorModels, "");
-
+               StringArray::iterator pos1 = paramNames.begin() + (paramNames.size() - 1);
+               paramNames.insert(pos1, emList.size() - maxNumErrorModels, "");
+               
                if (colCount != 0)
                {
-                  StringArray::iterator pos2 = rowContent.begin() + (paramNames.size() - 1) + maxNumErrorModels;
-                  rowContent.insert(pos2, emList.size()-maxNumErrorModels, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
+                  StringArray::iterator pos2 = rowContent.begin() + (paramNames.size() - 1);
+                  rowContent.insert(pos2, emList.size() - maxNumErrorModels, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
                }
-
+               
                maxNumErrorModels = emList.size();
             }
          }
@@ -3644,7 +3630,6 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 22, GmatStringUtil::LEFT)+"  ");
          }
          
-
          // 3.5. Beak up columns in a table
          if ((nameLen+3+ colCount*24) > (160-24))
          {
@@ -3675,7 +3660,6 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             paramNames.push_back("Measurement Error Models");
          }
          
-
          // 3.6. Clear paramValues and paramUnits
          paramValues.clear();
       }
@@ -3784,12 +3768,12 @@ void BatchEstimator::WriteReportFileHeaderPart4_3()
                   paramValues.push_back(sfList[j]);                                               // Solve Fors
 
             // Insert blank lines to paramNames and rowContent
-            StringArray::iterator pos1 = paramNames.begin() + (paramNames.size() - 1) + maxNumSolveFors;
+            StringArray::iterator pos1 = paramNames.begin() + (paramNames.size() - 1);
             paramNames.insert(pos1, sfList.size() - maxNumSolveFors, "");
 
             if (colCount != 0)
             {
-               StringArray::iterator pos2 = rowContent.begin() + (paramNames.size() - 1) + maxNumSolveFors;
+               StringArray::iterator pos2 = rowContent.begin() + (paramNames.size() - 1);
                rowContent.insert(pos2, sfList.size()-maxNumSolveFors, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
             }
 
@@ -3854,10 +3838,10 @@ void BatchEstimator::WriteReportFileHeaderPart4()
 
    // 2. Write information about tracking file sets
    WriteReportFileHeaderPart4_1();
-
+   
    // 3. Write information about ground stations
    WriteReportFileHeaderPart4_2();
-
+   
    // 4. Write information about error models
    WriteReportFileHeaderPart4_3();
 }
@@ -4136,14 +4120,16 @@ void BatchEstimator::WritePageHeader()
    /// 4.1. Write page header
    textFile << "\n";
    if (textFileMode == "Normal")
-      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type           Edit          Observed(O)         Computed (C)       Residual (O-C)  Elev.  Participants\n";
+   {
+      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit            Observed(O)            Computed (C)       Residual (O-C)  Elev.\n";
+   }
    else
    {
-      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type          Units   " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)             Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
+      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type          Units   " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)             Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle      Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size() - 1; ++i)
          textFile << "                         ";
-      textFile << "   Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
+      textFile << "  Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
    }
    textFile << "\n";
 
