@@ -5972,6 +5972,156 @@ std::string GmatStringUtil::WideStringToString(const wchar_t *wchar)
 }
 
 
+
+//------------------------------------------------------------------------------
+// bool IsValidIdentity(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+* Checks for valid identity. An identity is a name of a GMAT object. It is 
+* started by a alphabet and follow by a series of alphabet, number, and 
+* underscore. It has not to be GMAT keyword such as "GMAT", "Create", 
+* or "function".
+*
+* @param  str  The input string to check for valid name
+*
+* Returns      true if string is satisfied that condition, false otherwise
+*
+*/
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsValidIdentity(const std::string &str)
+{
+   // identity has to be not empty name
+   if (str == "")
+      return false;
+
+   // It has to be not GMAT key words
+   if (str == "GMAT" || str == "Create" || str == "function")
+      return false;
+
+   // First letter must start with alphabet
+   if (!isalpha(str[0]))
+      return false;
+
+   // follow by a series of alphabet, number, or underscore
+   for (UnsignedInt i = 1; i < str.size(); i++)
+   {
+      if (!isalnum(str[i]) && (str[i] != '_'))
+         return false;
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsValidFileName(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+* Checks for valid file name. A file name is a string containing all characters
+* with ASCII from 32 to 126 except /\|*":<>? characters.
+*
+* @param  str  The input string to check for valid name
+*
+* Returns      true if string is satisfied that condition, false otherwise
+*
+*/
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsValidFileName(const std::string &str)
+{
+   // file name has to be not empty name
+   if (str == "")
+      return false;
+
+   // It contains any character with ASCII fro 32 to 127 except /\|*":<>?
+   for (UnsignedInt i = 0; i < str.size(); i++)
+   {
+      if ((str[i] < 32) || (str[i] > 126) || 
+         (str[i] == '\\') || (str[i] == '/') || (str[i] == '|') || (str[i] == '*') ||
+         (str[i] == '"') || (str[i] == ':') || (str[i] == '<') || (str[i] == '>') || 
+         (str[i] == '?'))
+         return false;
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsValidFileName(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+* Checks for valid full file name. A full file name is a string containing path 
+* name and following by file name. 
+* We cannot verify based on regular expression of full file name but we only 
+* verify for characters which do not allow to be used in full file name. 
+*           [<driver>:][<path>]<filename>
+*
+* @param  str  The input string to check for valid name
+*
+* Returns      true if string is satisfied that condition, false otherwise
+*
+*/
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsValidFullFileName(const std::string &str)
+{
+   // full file name has to be not empty name
+   if (str == "")
+      return false;
+
+   // Get driver and verify driver
+   std::string str1 = str;
+   std::string::size_type pos = str1.find_first_of(':');
+   std::string driver = str1.substr(0, pos);
+   if (driver.size() > 1)
+      return false;
+   if ((driver.size() == 1) && (!isalpha(driver[0])))
+      return false;
+
+   // Get path and filename
+   std::string path, filename;
+   str1 = str1.substr(pos + 1);
+   std::string::size_type pos1 = str1.find_last_of('/');
+   pos = str1.find_last_of('\\');
+   if (pos != str1.npos)
+   {
+      if (pos1 != str1.npos)
+         pos = min(pos, pos1);
+   }
+   else
+   {
+      if (pos1 != str1.npos)
+         pos = pos1;
+   }
+
+   if (pos != str1.npos)
+   {
+      path = str1.substr(0, pos);
+      filename = str1.substr(pos + 1);
+   }
+   else
+   {
+      path = "";
+      filename = str1;
+   }
+
+   // Verify filename
+   if (!IsValidFileName(filename))
+      return false;
+
+   // Verify path. It contains any character with ASCII fro 32 to 127 except |*":<>?
+   for (UnsignedInt i = 0; i < path.size(); i++)
+   {
+      if ((path[i] < 32) || (path[i] > 126) ||
+         (path[i] == '|') || (path[i] == '*') ||
+         (path[i] == '"') || (path[i] == ':') || (path[i] == '<') || (path[i] == '>') ||
+         (path[i] == '?'))
+         return false;
+   }
+
+   return true;
+}
+
+
 ////------------------------------------------------------------------------------
 //// std::wstring StringToWideString(const std::string &str)
 ////------------------------------------------------------------------------------

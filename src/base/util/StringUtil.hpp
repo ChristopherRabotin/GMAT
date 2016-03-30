@@ -220,6 +220,9 @@ namespace GmatStringUtil
                                   const std::string &desc = "",
                                   const std::string &prefix = "");
 
+   GMAT_API bool IsValidIdentity(const std::string &str);
+   GMAT_API bool IsValidFileName(const std::string &str);
+   GMAT_API bool IsValidFullFileName(const std::string &str);
 
    enum AlignmentType
    {
