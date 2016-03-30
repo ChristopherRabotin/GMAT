@@ -6102,7 +6102,7 @@ bool GmatStringUtil::IsValidFullFileName(const std::string &str, Integer &error)
    if (pos != str1.npos)
    {
       if (pos1 != str1.npos)
-         pos = min(pos, pos1);
+         pos = GmatMathUtil::Min(pos, pos1);
    }
    else
    {
