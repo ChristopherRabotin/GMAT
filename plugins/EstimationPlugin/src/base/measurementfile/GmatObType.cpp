@@ -486,7 +486,7 @@ ObservationData* GmatObType::ReadObservation()
    // Verify measurement type
    StringArray typeList = GetAvailableMeasurementTypes();
    if (find(typeList.begin(), typeList.end(), currentObs.typeName) == typeList.end())
-      throw MeasurementException("Error: GMAT can't handle measurement type '" + currentObs.typeName + "'.\n");
+      throw MeasurementException("Error: GMAT cannot handle observation data with type '" + currentObs.typeName + "'.\n");
 
 
    // Signal based measurements have types that start at 9000; smaller IDs are
