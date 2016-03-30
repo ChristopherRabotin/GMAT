@@ -52661,7 +52661,7 @@ doublereal bspl2f_(integer *i__, real *t1)
     extern /* Subroutine */ int iri_tec__(real *, real *, integer *, real *, 
 	    real *, real *), iri_sub__(logical *, integer *, real *, real *, 
 	    integer *, integer *, real *, real *, real *, real *, real *, 
-	    real *);
+	    real *, integer *);
 
 /* ----------------------------------------------------------------------- */
 /* Program for numerical integration of IRI-94 profiles from h=100km */
@@ -52689,12 +52689,12 @@ doublereal bspl2f_(integer *i__, real *t1)
     *tecb = (float)-111.;
 
 /* initialize IRI parameter in COMMON blocks */
-
+integer ier;
     abeg = *hbeg;
     aend = *hend;
     astp = *hend - *hbeg;
     iri_sub__(&jf[1], jmag, alati, along, iy, md, hour, &abeg, &aend, &astp, 
-	    outf, oarr);
+	    outf, oarr, &ier);
 
 /*  calculate total electron content (TEC) in m-2 using the */
 /*  stepsize selection 2 (highest accuracy) */

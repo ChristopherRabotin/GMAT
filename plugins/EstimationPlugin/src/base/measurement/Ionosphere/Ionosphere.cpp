@@ -265,7 +265,7 @@ void Ionosphere::GetTimeRange()
    std::string filename = dataPath + "/IonosphereData/ap.dat";
    try
    {
-      fs.open(filename, std::fstream::in);
+      fs.open(filename.c_str(), std::fstream::in);
    }
    catch(...)
    {
