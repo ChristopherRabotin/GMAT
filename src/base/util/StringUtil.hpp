@@ -222,7 +222,7 @@ namespace GmatStringUtil
 
    GMAT_API bool IsValidIdentity(const std::string &str);
    GMAT_API bool IsValidFileName(const std::string &str);
-   GMAT_API bool IsValidFullFileName(const std::string &str);
+   GMAT_API bool IsValidFullFileName(const std::string &str, Integer &error);
 
    enum AlignmentType
    {

@@ -6056,26 +6056,43 @@ bool GmatStringUtil::IsValidFileName(const std::string &str)
 * verify for characters which do not allow to be used in full file name. 
 *           [<driver>:][<path>]<filename>
 *
-* @param  str  The input string to check for valid name
+* @param  str     The input string to check for valid name
+* @param  error   Error number
 *
-* Returns      true if string is satisfied that condition, false otherwise
+* Returns         true if string is satisfied that condition, false otherwise
 *
 */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsValidFullFileName(const std::string &str)
+bool GmatStringUtil::IsValidFullFileName(const std::string &str, Integer &error)
 {
+   error = 0;
+
    // full file name has to be not empty name
    if (str == "")
+   {
+      error = 1;
       return false;
+   }
 
    // Get driver and verify driver
    std::string str1 = str;
+   std::string driver = "";
    std::string::size_type pos = str1.find_first_of(':');
-   std::string driver = str1.substr(0, pos);
-   if (driver.size() > 1)
-      return false;
-   if ((driver.size() == 1) && (!isalpha(driver[0])))
-      return false;
+   if (pos != str1.npos)
+   {
+      driver = str1.substr(0, pos);
+      if (driver.size() > 1)
+      {
+         error = 2;
+         return false;
+      }
+
+      if ((driver.size() == 1) && (!isalpha(driver[0])))
+      {
+         error = 3;
+         return false;
+      }
+   }
 
    // Get path and filename
    std::string path, filename;
@@ -6103,10 +6120,13 @@ bool GmatStringUtil::IsValidFullFileName(const std::string &str)
       path = "";
       filename = str1;
    }
-
+   
    // Verify filename
    if (!IsValidFileName(filename))
+   {
+      error = 4;
       return false;
+   }
 
    // Verify path. It contains any character with ASCII fro 32 to 127 except |*":<>?
    for (UnsignedInt i = 0; i < path.size(); i++)
@@ -6115,9 +6135,12 @@ bool GmatStringUtil::IsValidFullFileName(const std::string &str)
          (path[i] == '|') || (path[i] == '*') ||
          (path[i] == '"') || (path[i] == ':') || (path[i] == '<') || (path[i] == '>') ||
          (path[i] == '?'))
+      {
+         error = 5;
          return false;
+      }
    }
-
+   MessageInterface::ShowMessage("driver = <%s>   path = <%s>  filename = <%s>\n", driver.c_str(), path.c_str(), filename.c_str());
    return true;
 }
 
