@@ -52690,7 +52690,6 @@ doublereal bspl2f_(integer *i__, real *t1)
     *tecb = (float)-111.;
 
 /* initialize IRI parameter in COMMON blocks */
-
     abeg = *hbeg;
     aend = *hend;
     astp = *hend - *hbeg;
