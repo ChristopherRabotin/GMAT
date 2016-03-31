@@ -52655,13 +52655,13 @@ doublereal bspl2f_(integer *i__, real *t1)
 
 /* Subroutine */ int irit13_(real *alati, real *along, integer *jmag, logical 
 	*jf, integer *iy, integer *md, real *hour, real *hbeg, real *hend, 
-	real *tec, real *tecb, real *tect)
+	real *tec, real *tecb, real *tect, integer *ier)
 {
     real abeg, aend, oarr[50], astp, outf[10000]	/* was [20][500] */;
     extern /* Subroutine */ int iri_tec__(real *, real *, integer *, real *, 
 	    real *, real *), iri_sub__(logical *, integer *, real *, real *, 
 	    integer *, integer *, real *, real *, real *, real *, real *, 
-	    real *);
+	    real *, integer *);
 
 /* ----------------------------------------------------------------------- */
 /* Program for numerical integration of IRI-94 profiles from h=100km */
@@ -52676,6 +52676,7 @@ doublereal bspl2f_(integer *i__, real *t1)
 
 /*  OUTPUT: TEC          Total Electron Content in M-2 */
 /*          tecb,tect    percentage of bottomside and topside content */
+/*          IER          error number */
 /* ----------------------------------------------------------------------- */
 
 /*  select various options and choices for IRI-94 */
@@ -52694,7 +52695,10 @@ doublereal bspl2f_(integer *i__, real *t1)
     aend = *hend;
     astp = *hend - *hbeg;
     iri_sub__(&jf[1], jmag, alati, along, iy, md, hour, &abeg, &aend, &astp, 
-	    outf, oarr);
+	    outf, oarr, ier);
+    if (*ier != 0) {
+	return 0;
+    }
 
 /*  calculate total electron content (TEC) in m-2 using the */
 /*  stepsize selection 2 (highest accuracy) */
