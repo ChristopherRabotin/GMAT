@@ -29,6 +29,7 @@
  */
 //------------------------------------------------------------------------------
 #include "RFHardware.hpp"
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
@@ -278,7 +279,7 @@ bool RFHardware::SetStringParameter(const Integer id, const std::string &value)
    {
    case PRIMARY_ANTENNA:
       if (value == "")
-         throw GmatBaseException("Error: Name of primary antenna set to " + GetName() + "is an empty string.\n");
+         throw HardwareException("Error: Name of primary antenna set to " + GetName() + "is an empty string.\n");
 
       primaryAntennaName = value;
       return true;
@@ -368,7 +369,7 @@ std::string RFHardware::GetRefObjectName(const Gmat::ObjectType type) const
    if ((type == Gmat::HARDWARE)||(type == Gmat::UNKNOWN_OBJECT))
    {
       if (primaryAntennaName == "")
-         throw GmatBaseException("Error: value of " + GetName() + ".PrimaryAntenna parameter was not set in GMAT script.\n");
+         throw HardwareException("Error: value of " + GetName() + ".PrimaryAntenna parameter was not set in GMAT script.\n");
 
       return primaryAntennaName;
    }
@@ -394,7 +395,7 @@ const StringArray& RFHardware::GetRefObjectNameArray(const Gmat::ObjectType type
    case Gmat::HARDWARE:
       refObjectNames.clear();
       if (primaryAntennaName == "")
-         throw GmatBaseException("Error: value of " + GetName() + ".PrimaryAntenna was not set in GMAT script.\n");
+         throw HardwareException("Error: value of " + GetName() + ".PrimaryAntenna was not set in GMAT script.\n");
 
       refObjectNames.push_back(primaryAntennaName);
       return refObjectNames;
