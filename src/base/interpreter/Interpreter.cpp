@@ -87,7 +87,6 @@
 //#define DEBUG_SPECIAL_CASE
 //#define DEBUG_PARSE_REPORT
 //#define DEBUG_OBJECT_MAP
-//#define DEBUG_OBJECT_LIST
 //#define DEBUG_FIND_OBJECT
 //#define DEBUG_FIND_PROP_ID
 //#define DEBUG_VAR_EXPRESSION
@@ -1094,8 +1093,10 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          {
             // Parse array name in case it is array declaration
             std::string arrName = GmatStringUtil::GetArrayName(name, "[]");
+            #ifdef DEBUG_CREATE_OBJECT
             MessageInterface::ShowMessage
-               ("==> name='%s', arrName='%s'\n", name.c_str(), arrName.c_str());
+               ("   name='%s', arrName='%s'\n", name.c_str(), arrName.c_str());
+            #endif
             InterpreterException ex("");
             ex.SetDetails("%s object named \"%s\" already exists, so ignored",
                           type.c_str(), arrName.c_str());

@@ -42,6 +42,7 @@ namespace Gmat
       COMMAND_BLOCK,
       ASSIGNMENT_BLOCK,
       FUNCTION_BLOCK,
+      INCLUDE_BLOCK,
    };
 };
 

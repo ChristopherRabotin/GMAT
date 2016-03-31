@@ -34,6 +34,7 @@
 #include "Interpreter.hpp"
 #include "InterpreterException.hpp"
 #include "Function.hpp"
+#include <stack>            // for Inlcude script and file postion stack
 
 /**
  * The ScriptInterpreter class manages the script reading and writing process.
@@ -58,10 +59,10 @@ public:
    bool Build(const std::string &scriptfile,
               Gmat::WriteMode mode = Gmat::SCRIPTING);
    
-   bool SetInStream(std::istream *str);
-   bool SetOutStream(std::ostream *str);
+   bool SetInStream(std::istream *istrm);
+   bool SetOutStream(std::ostream *ostrm);
 
-   std::string GetScriptFileName();       // made changes by TUAN NGUYEN
+   std::string GetMainScriptFileName();       // made changes by TUAN NGUYEN
    
 protected:
    
@@ -70,6 +71,8 @@ protected:
    
    std::istream *inStream;
    std::ostream *outStream;
+   
+   bool InterpretIncludeFile();
    
    bool ReadScript(GmatCommand *cmd = NULL, bool skipHeader = false);
    bool Parse(GmatCommand *inCmd = NULL);
@@ -94,14 +97,23 @@ private:
    std::string functionDef;
    /// Function file name
    std::string functionFilename;
-   /// Name of the current script file
-   std::string scriptFilename;
+   /// Name of the main script file
+   std::string mainScriptFilename;
+   /// Fullpath of the last include file detected
+   std::string lastIncludeFile;
+   /// Name of the current script file being read (main or include file)
+   std::string currentScriptBeingRead;
    /// Section delimiter comment
    StringArray sectionDelimiterString;
    /// Script lines with Variable, Array, and String
    StringArray userParameterLines;
    /// List of written objects, used to avoid duplicates
    StringArray objectsWritten;
+   
+   /// Stack holding main script or include file names and istream pointer
+   // Use std::vector as stack so we can use additional methods such as begin() and end()
+   std::vector<std::string>  includeStack;
+   std::stack<std::istream*> inStreamStack;
    
    bool CheckEncoding();
    bool ParseDefinitionBlock(const StringArray &chunks, GmatCommand *inCmd,
@@ -110,6 +122,7 @@ private:
                           GmatBase *obj);
    bool ParseAssignmentBlock(const StringArray &chunks, GmatCommand *inCmd,
                              GmatBase *obj);
+   bool ParseIncludeBlock(const StringArray &chunks);
    bool IsOneWordCommand(const std::string &str);
    
    void SetComments(GmatBase *obj, const std::string &preStr,

@@ -55,9 +55,9 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
-//#define DEBUG_COMMENTS
+#define DEBUG_COMMENT_LINE
 //#define DEBUG_COMMENTS_ATTRIBUTE
-//#define DEBUG_GENERATING_STRING
+#define DEBUG_GENERATING_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_WRITE_PARAM
 //#define DEBUG_CLOAKING
@@ -190,6 +190,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    typeName                   (typeStr),
    instanceName               (nomme),
    instanceFullName           (nomme),                   // made changes by TUAN NGUYEN
+   scriptCreatedFrom          (""),
+   isCreatedFromMainScript    (true),
    type                       (typeId),
    ownedObjectCount           (0),
    isInitialized              (false),
@@ -274,6 +276,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     //instanceName    ("CopyOf"+a.instanceName),
     instanceName              (a.instanceName),
     instanceFullName          (a.instanceFullName),          // made changes by TUAN NGUYEN
+    scriptCreatedFrom         (a.scriptCreatedFrom),
+    isCreatedFromMainScript   (a.isCreatedFromMainScript),
     type                      (a.type),
     ownedObjectCount          (a.ownedObjectCount),
     generatingString          (a.generatingString),
@@ -327,6 +331,8 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    typeName                  = a.typeName;
    // We don't want to copy instanceName (loj: 2008.02.15)
    //instanceName              = a.instanceName;
+   scriptCreatedFrom         = a.scriptCreatedFrom;
+   isCreatedFromMainScript   = a.isCreatedFromMainScript;
    type                      = a.type;
    ownedObjectCount          = a.ownedObjectCount;
    generatingString          = a.generatingString;
@@ -2515,6 +2521,10 @@ bool GmatBase::SetOnOffParameter(const Integer id, const std::string &value)
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetCommentLine() const
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::GetCommentLine() returning '%s'\n", commentLine.c_str());
+   #endif
    return commentLine;
 }
 
@@ -4173,6 +4183,55 @@ Integer GmatBase::GetEstimationParameterSize(Integer id)
 Real* GmatBase::GetEstimationParameterValue(Integer id)
 {
    return NULL;
+}
+
+
+//---------------------------------------------------------------------------
+// void SetScriptCreatedFrom(const std::string &script)
+//---------------------------------------------------------------------------
+/**
+ * Sets script name where this object is created from.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetScriptCreatedFrom(const std::string &script)
+{
+   scriptCreatedFrom = script;
+}
+
+//---------------------------------------------------------------------------
+// std::string GetScriptCreatedFrom()
+//---------------------------------------------------------------------------
+/**
+ * Retrieves script name where this object is created from.
+ */
+//---------------------------------------------------------------------------
+std::string GmatBase::GetScriptCreatedFrom()
+{
+   return scriptCreatedFrom;
+}
+
+//---------------------------------------------------------------------------
+// void SetIsCreatedFromMainScript(bool flag)
+//---------------------------------------------------------------------------
+/**
+ * Sets flag indicating this object is created from the main script.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetIsCreatedFromMainScript(bool flag)
+{
+   isCreatedFromMainScript = flag;
+}
+
+//---------------------------------------------------------------------------
+// bool IsCreatedFromMainScript()
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating this object is created from the main script.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsCreatedFromMainScript()
+{
+   return isCreatedFromMainScript;
 }
 
 

@@ -411,6 +411,7 @@ public:
    Gmat::RunState GetDetailedRunState(Integer sandboxNum = 1);
    
    // Script
+   std::string GetMainScriptFileName();
    bool InterpretScript(const std::string &filename, bool readBack = false,
                         const std::string &newPath = "");
    bool InterpretScript(std::istringstream *ss, bool clearObjs);
@@ -512,7 +513,7 @@ private:
    bool loadSandboxAndPause;
    Integer objectManageOption;
    Integer currentSandboxNumber;
-   std::string currentScriptFileName;
+   std::string mainScriptFileName;
    std::vector<Sandbox*> sandboxes;
    std::vector<TriggerManager*> triggerManagers;
    std::vector<GmatCommand*> commands;

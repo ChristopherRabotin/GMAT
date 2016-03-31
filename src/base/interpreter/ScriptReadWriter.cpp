@@ -133,13 +133,24 @@ Integer ScriptReadWriter::GetLineNumber()
 void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlock,
                                       bool skipHeader)
 {
+   #ifdef DEBUG_FIRST_BLOCK
+   MessageInterface::ShowMessage
+      ("ScriptReadWriter::ReadFirstBlock() entered, skipHeader=%d\n", skipHeader);
+   #endif
+   
    std::string newLine = "";
    header = "";
    firstBlock = "";
    bool doneWithHeader = false;
    
    if (reachedEndOfFile)
+   {
+      #ifdef DEBUG_FIRST_BLOCK
+      MessageInterface::ShowMessage
+         ("ScriptReadWriter::ReadFirstBlock() leaving, end-of-file reached\n");
+      #endif
       return;
+   }
    
    // get 1 line of text
    newLine = CrossPlatformGetLine();
@@ -150,7 +161,13 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
    #endif
    
    if (reachedEndOfFile && IsBlank(newLine))
+   {
+      #ifdef DEBUG_FIRST_BLOCK
+      MessageInterface::ShowMessage
+         ("ScriptReadWriter::ReadFirstBlock() leaving, end-of-file reached\n");
+      #endif
       return;
+   }
    
    //if line is not blank and is not comment line, return this line
    if (!IsBlank(newLine) && (!IsComment(newLine)))
@@ -165,6 +182,14 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
          #endif
       }
       firstBlock = newLine;
+      #ifdef DEBUG_FIRST_BLOCK
+      MessageInterface::ShowMessage
+         ("ReadFirstBlock() header=<<<%s>>>\nfirstBlock=<<<%s>>>\n", header.c_str(),
+          firstBlock.c_str());
+      MessageInterface::ShowMessage
+         ("ReadFirstBlock() newLine=<<<%s>>>\n", newLine.c_str());
+      MessageInterface::ShowMessage("ScriptReadWriter::ReadFirstBlock() leaving\n");
+      #endif
       return;
    }
    
@@ -214,6 +239,8 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
                ("ReadFirstBlock() non-blank and non-comment found\n"
                 "header=<<<%s>>>\nfirstBlock=<<<%s>>>\n", header.c_str(),
                 firstBlock.c_str());
+            MessageInterface::ShowMessage
+               ("ScriptReadWriter::ReadFirstBlock() leaving\n");
             #endif
             
             return;
@@ -277,6 +304,7 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
        firstBlock.c_str());
    MessageInterface::ShowMessage
       ("ReadFirstBlock() newLine=<<<%s>>>\n", newLine.c_str());
+   MessageInterface::ShowMessage("ScriptReadWriter::ReadFirstBlock() leaving\n");
    #endif
 }
 
@@ -290,6 +318,10 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
 //------------------------------------------------------------------------------
 std::string ScriptReadWriter::ReadLogicalBlock()
 {
+   #ifdef DEBUG_SCRIPT_READ
+   MessageInterface::ShowMessage("ScriptReadWriter::ReadLogicalBlock() entered\n");
+   #endif
+   
    std::string result = "";
    std::string oneLine = ""; 
    std::string block = "";
@@ -337,6 +369,10 @@ std::string ScriptReadWriter::ReadLogicalBlock()
    
    readFirstBlock = true;
    
+   #ifdef DEBUG_SCRIPT_READ
+   MessageInterface::ShowMessage
+      ("ScriptReadWriter::ReadLogicalBlock() returning:\n   %s\n", result.c_str());
+   #endif
    return result;
 }
 
