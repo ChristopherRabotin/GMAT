@@ -57,6 +57,7 @@ ObservationData::ObservationData() :
    unit              ("km"),
    uplinkBand        (0),
    uplinkFreq        (0.0),
+   uplinkFreqAtRecei (0.0),                                // made changes by TUAN NGUYEN
    rangeModulo       (1.0),
    dopplerCountInterval   (1.0e-10),
    tdrsServiceID     ("SA1"),                              // made changes by TUAN NGUYEN
@@ -114,6 +115,7 @@ ObservationData::ObservationData(const ObservationData& od):
 //   dataFormat              (od.dataFormat),
    uplinkBand              (od.uplinkBand),
    uplinkFreq              (od.uplinkFreq),
+   uplinkFreqAtRecei       (od.uplinkFreqAtRecei),                // made changes by TUAN NGUYEN
    rangeModulo             (od.rangeModulo),
    dopplerCountInterval	   (od.dopplerCountInterval),
    tdrsServiceID           (od.tdrsServiceID),                    // made changes by TUAN NGUYEN
@@ -163,6 +165,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       dataFormat              = od.dataFormat;
       uplinkBand              = od.uplinkBand;
       uplinkFreq              = od.uplinkFreq;
+      uplinkFreqAtRecei       = od.uplinkFreqAtRecei;                // made changes by TUAN NGUYEN
       rangeModulo             = od.rangeModulo;
       dopplerCountInterval    = od.dopplerCountInterval;
       tdrsServiceID           = od.tdrsServiceID;                    // made changes by TUAN NGUYEN
@@ -202,6 +205,7 @@ void ObservationData::Clear()
 ///// TBD: Determine if there is a more generic way to add these
    uplinkBand              = 0;
    uplinkFreq              = 0.0;
+   uplinkFreqAtRecei       = 0.0;                      // made changes by TUAN NGUYEN
    rangeModulo             = 1.0;
    dopplerCountInterval    = 1.0e-10;
    tdrsServiceID           = "SA1";                    // made changes by TUAN NGUYEN
