@@ -535,9 +535,9 @@ Real Ionosphere::TEC()
    for(int i = 0; i < NUM_OF_INTERVALS; ++i)
    {
       p2 = p1 + dR;
-      electdensity = ElectronDensity(p2, p1);               // unit: electron per m-3
+      electdensity = ElectronDensity(p2, p1);                   // unit: electron / m^3
       ds = (p2-p1).GetMagnitude()*GmatMathConstants::KM_TO_M;   // unit: m
-      tec += electdensity*ds;
+      tec += electdensity*ds;                                   // unit: electron / m^2
       p1 = p2;
    }
    
@@ -628,7 +628,7 @@ RealArray Ionosphere::Correction()
    }
 
    Real freq = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / waveLength;
-   Real tec = TEC();                  // Equation 6.70 of MONTENBRUCK and GILL
+   Real tec = TEC();                  // Equation 6.70 of MONTENBRUCK and GILL      // unit: number of electrons/ m^2
    Real drho = 40.3*tec/(freq*freq);  // Equation 6.69 of MONTENBRUCK and GILL      // unit: meter
    Real dphi = 0;                     //BendingAngle()*180/GmatConstants::PI;
                                       // It has not been defined yet
