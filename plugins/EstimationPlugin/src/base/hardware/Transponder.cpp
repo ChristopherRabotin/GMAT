@@ -27,6 +27,7 @@
 //------------------------------------------------------------------------------
 
 #include "Transponder.hpp"
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 #include <stdlib.h>                // for atof
 
@@ -199,7 +200,7 @@ Integer Transponder::GetParameterID(const std::string & str) const
       if (str == PARAMETER_TEXT[i - RFHardwareParamCount])
       {
          if (IsParameterReadOnly(i))
-            throw GmatBaseException("Error: '" + str + "' parameter was not defined in GMAT Transponder's syntax.\n");
+            throw HardwareException("Error: '" + str + "' parameter was not defined in GMAT Transponder's syntax.\n");
 
          return i;
       }
@@ -700,7 +701,7 @@ bool Transponder::IsTransmitted(Integer whichOne)
    case 2:
       return isTransmitted2;
    default:
-      throw GmatBaseException("Index is out of bound\n");
+      throw HardwareException("Index is out of bound\n");
    }
 }
 
