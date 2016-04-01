@@ -621,7 +621,7 @@ std::string Simulator::GetStringParameter(const Integer id,
  * @param id ID for the requested parameter.
  * @param value string value for the requested parameter.
  *
- * @exception <EstimatorException> thrown if value is out of range
+ * @exception <SolverException> thrown if value is out of range
  *
  * @return  success flag.
  */
@@ -639,7 +639,7 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
    {
       std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
       if (measName == "")                                                                                           // made changes by TUAN NGUYEN
-         throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");   // made changes by TUAN NGUYEN
+         throw SolverException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");      // made changes by TUAN NGUYEN
       return SetStringParameter(id, measName, measList.size());
    }
 
@@ -714,7 +714,7 @@ Real Simulator::ConvertToRealEpoch(const std::string &theEpoch,
  * @param value string value for the requested parameter.
  * @param index index into the StringArray.
  *
- * @exception <EstimatorException> thrown if value is out of range
+ * @exception <SolverException> thrown if value is out of range
  *
  * @return  success flag.
  */
@@ -729,6 +729,9 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value,
    #endif
    if (id == MEASUREMENTS)
    {
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw SolverException("Error: '%s' set to " + GetName() + ".Measurements parameter is an invalid object name.\n");
+
       Integer sz = (Integer) measList.size();
       if (index == sz) // needs to be added to the end of the list
       {
@@ -1192,7 +1195,7 @@ bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             {
                MessageInterface::ShowMessage("Simulator cannot initialize "
                         "because an expected MeasurementModel is NULL\n");
-               throw EstimatorException("In Simulator::SetRefObject, a "
+               throw SolverException("In Simulator::SetRefObject, a "
                         "measurement in the tracking system " + obj->GetName() +
                         " is NULL\n");
             }
@@ -1498,7 +1501,7 @@ Solver::SolverState Simulator::AdvanceState()
             MessageInterface::ShowMessage("Entered Simulator state machine: "
                "Bad state for a simulator.\n");
          #endif
-         /* throw EstimatorException("Solver state not supported for the simulator")*/;
+         /* throw SolverException("Solver state not supported for the simulator")*/;
    }
 
    #ifdef DEBUG_STATE_MACHINE
@@ -1771,7 +1774,7 @@ void Simulator::SimulateData()
    {
       // Write measurements to data file
       if (measManager.WriteMeasurements() == false)
-         throw EstimatorException("Measurement writing failed");
+         throw SolverException("Measurement writing failed");
    }
    
    // Prep for the next measurement simulation

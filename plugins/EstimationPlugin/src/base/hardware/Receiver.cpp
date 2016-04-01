@@ -27,6 +27,7 @@
 //------------------------------------------------------------------------------
 
 #include "Receiver.hpp"
+#include "HardwareException.hpp"""
 #include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
@@ -183,7 +184,7 @@ Integer Receiver::GetParameterID(const std::string & str) const
       if (str == PARAMETER_TEXT[i - RFHardwareParamCount])
       {
          if (IsParameterReadOnly(i))
-            throw GmatBaseException("Error: '" + str + "' parameter was not defined in GMAT Receiver's syntax.\n");
+            throw HardwareException("Error: '" + str + "' parameter was not defined in GMAT Receiver's syntax.\n");
 
          return i;
       }
@@ -547,7 +548,7 @@ Real Receiver::GetDelay(Integer whichOne)
    if (whichOne == 0)
       return RFHardware::GetDelay();
    else
-      throw GmatBaseException("Delay index is out of bound\n");
+      throw HardwareException("Delay index is out of bound\n");
 }
 
 
@@ -568,7 +569,7 @@ bool Receiver::SetDelay(Real delay, Integer whichOne)
       hardwareDelay1 = delay;
       return true;
    default:
-      throw GmatBaseException("Delay index is out of bound\n");
+      throw HardwareException("Delay index is out of bound\n");
    }
 }
 

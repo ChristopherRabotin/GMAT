@@ -1600,7 +1600,24 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
 }
 
 
-bool MeasureModel::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, Real uplinkFrequency, std::vector<RampTableData>* rampTB)
+//------------------------------------------------------------------------------
+// bool ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
+//        Real uplinkFrequency, std::vector<RampTableData>* rampTB)
+//------------------------------------------------------------------------------
+/**
+* This function is used to recalculate frequency and media correction for TDRS
+* Doppler measurement.
+*
+* @param pathIndex           Calculation for the given signal path specified by
+*                            pathIndex
+* @param uplinkFrequency     Transmit frequency
+* @param rampTB              Ramp table for a ramped measurement
+*
+* @return                    true if no error ocurrs, false otherwise
+*/
+//------------------------------------------------------------------------------
+bool MeasureModel::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
+                        Real uplinkFrequency, std::vector<RampTableData>* rampTB)
 {
    bool retval = false;
    
@@ -1615,7 +1632,7 @@ bool MeasureModel::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex,
    leg = leg->GetNext();
    while(leg != NULL)
    {
-      leg->SignalFrequencyCalculation(rampTB);          // calculate signal frequency on each signal leg
+      leg->SignalFrequencyCalculation(rampTB);                       // calculate signal frequency on each signal leg
       leg = leg->GetNext();
    }
 
@@ -1626,7 +1643,7 @@ bool MeasureModel::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex,
    leg = signalPaths[pathIndex];
    while(leg != NULL)
    {
-      leg->MediaCorrectionCalculation(rampTB);          // calculate media corrections for signal leg
+      leg->MediaCorrectionCalculation(rampTB);                       // calculate media corrections for signal leg
       leg = leg->GetNext();
    }
 
