@@ -6140,7 +6140,7 @@ bool GmatStringUtil::IsValidFullFileName(const std::string &str, Integer &error)
          return false;
       }
    }
-   MessageInterface::ShowMessage("driver = <%s>   path = <%s>  filename = <%s>\n", driver.c_str(), path.c_str(), filename.c_str());
+   //MessageInterface::ShowMessage("driver = <%s>   path = <%s>  filename = <%s>\n", driver.c_str(), path.c_str(), filename.c_str());
    return true;
 }
 
