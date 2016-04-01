@@ -505,24 +505,32 @@ bool BatchEstimator::SetStringParameter(const Integer id,
          return true;
       }
       else
-         throw SolverException("The requested inversion routine is not an "
+         throw EstimatorException("The requested inversion routine is not an "
                "allowed value for the field \"InversionAlgorithm\"; allowed "
                "values are \"Internal\", \"Schur\" and \"Cholesky\"");
    }
 
    if (id == ESTIMATION_EPOCH)
    {
-      if ((estEpochFormat == "FromParticipants") && (value != ""))
+      if (value == "")
+         throw EstimatorException("Error: No value was set to " + GetName() + ".EstimationEpoch parameter.\n");
+
+      if (estEpochFormat == "FromParticipants")
       {
          MessageInterface::ShowMessage("Setting value for %s.EstimationEpoch has no "
                "effect due to %s.EstimationEpochFormat to be \"%s\"\n", 
                GetName().c_str(), GetName().c_str(), estEpochFormat.c_str());
       }
-      if (estEpochFormat != "FromParticipants")
+      else
       {
          estEpoch = value;
-         // Convert to a.1 time for internal processing
-         estimationEpoch = ConvertToRealEpoch(estEpoch, estEpochFormat);
+         if (TimeConverterUtil::IsValidTimeSystem(estEpochFormat))
+         {
+            // Convert to a.1 time for internal processing
+            estimationEpoch = ConvertToRealEpoch(estEpoch, estEpochFormat);
+         }
+         else
+            throw EstimatorException("Error: Cannot set value '" + value + " to " + GetName() + ".EstimationEpoch parameter due to its invalid time format.\n");
       }
 
       return true;
@@ -758,7 +766,6 @@ const StringArray& BatchEstimator::GetPropertyEnumStrings(const Integer id) cons
    {
       enumStrings.push_back("FromParticipants");
 
-      // StringArray nameList = TimeConverterUtil::GetListOfTimeSystemTypes();     // made changes by TUAN NGUYEN
       StringArray nameList = TimeConverterUtil::GetValidTimeRepresentations();     // made changes by TUAN NGUYEN
       for (UnsignedInt i = 0; i < nameList.size(); ++i)
          enumStrings.push_back(nameList[i]);
@@ -1012,7 +1019,7 @@ void BatchEstimator::CompleteInitialization()
       //bool measOK = measManager.SetPropagator(propagator);                           // made changes by TUAN NGUYEN
       //measOK = measOK && measManager.Initialize();                                   // made changes by TUAN NGUYEN
       //if (!measOK)                                                                   // made changes by TUAN NGUYEN
-      //   throw SolverException(                                                      // made changes by TUAN NGUYEN
+      //   throw EstimatorException(                                                   // made changes by TUAN NGUYEN
       //         "BatchEstimator::CompleteInitialization - error initializing "        // made changes by TUAN NGUYEN
       //         "MeasurementManager.\n");                                             // made changes by TUAN NGUYEN
       
@@ -1803,7 +1810,7 @@ std::string BatchEstimator::GetProgressString()
             break;
 
          default:
-            throw SolverException(
+            throw EstimatorException(
                "Solver state not supported for the simulator");
       }
    }
@@ -2701,14 +2708,14 @@ std::string BatchEstimator::GetOperatingSystemName()
 #ifdef __linux__
    struct utsname uts;
    if (uname(&uts) == -1)
-      throw GmatBaseException("Error: cannot get OS information\n");
+      throw EstimatorException("Error: cannot get OS information\n");
    
    osName.assign(uts.sysname);
 #else
    #ifdef __APPLE__
    struct utsname uts;
    if (uname(&uts) == -1)
-      throw GmatBaseException("Error: cannot get OS information\n");
+      throw EstimatorException("Error: cannot get OS information\n");
 
    osName.assign(uts.sysname);
 
@@ -2738,14 +2745,14 @@ std::string BatchEstimator::GetOperatingSystemVersion()
 #ifdef __linux__
    struct utsname uts;
    if (uname(&uts) == -1)
-      throw GmatBaseException("Error: cannot get OS information\n");
+      throw EstimatorException("Error: cannot get OS information\n");
 
    osVersion.assign(uts.version);
 #else
 #ifdef __APPLE__
    struct utsname uts;
    if (uname(&uts) == -1)
-      throw GmatBaseException("Error: cannot get OS information\n");
+      throw EstimatorException("Error: cannot get OS information\n");
 
    osVersion.assign(uts.version);
 
@@ -6781,11 +6788,11 @@ Integer BatchEstimator::SchurInvert(Real *sum1, Integer array_size)
    else
    {
       if (array_size == 0)
-         throw SolverException("Schur inversion cannot proceed; the size of "
+         throw EstimatorException("Schur inversion cannot proceed; the size of "
                "the array being inverted is zero");
 
       if (sum1[0] == 0.0)
-         throw SolverException("Schur inversion cannot proceed; the upper "
+         throw EstimatorException("Schur inversion cannot proceed; the upper "
                "left element of the array being inverted is zero");
    }
 
