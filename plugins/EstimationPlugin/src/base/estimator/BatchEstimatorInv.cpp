@@ -1018,7 +1018,7 @@ void BatchEstimatorInv::Estimate()
 
       Integer iSize = information.GetNumColumns();
       if (iSize != information.GetNumRows())
-         throw SolverException("Schur inversion requires a square information "
+         throw EstimatorException("Schur inversion requires a square information "
                         "matrix");
 
       arraysize = iSize * (iSize + 1) / 2;
@@ -1059,7 +1059,7 @@ void BatchEstimatorInv::Estimate()
       #endif
 
       if (schurRet != 0)
-         throw SolverException("Schur inversion failed");
+         throw EstimatorException("Schur inversion failed");
 
       // Now fill in cov
       // Fill sum1 with the upper triangle
@@ -1081,7 +1081,7 @@ void BatchEstimatorInv::Estimate()
 
       Integer iSize = information.GetNumColumns();
       if (iSize != information.GetNumRows())
-         throw SolverException("Cholesky inversion requires a symmetric positive definite "
+         throw EstimatorException("Cholesky inversion requires a symmetric positive definite "
                   "information matrix");
 
       arraysize = iSize * (iSize + 1) / 2;
@@ -1096,7 +1096,7 @@ void BatchEstimatorInv::Estimate()
          }
 
       if (CholeskyInvert(sum1, arraysize) != 0)
-         throw SolverException("Cholesky inversion failed");
+         throw EstimatorException("Cholesky inversion failed");
 
       // Now fill in cov
       // Fill sum1 with the upper triangle
