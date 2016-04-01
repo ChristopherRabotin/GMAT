@@ -21,14 +21,18 @@ ADD_DEFINITIONS("-DPOLYHEDRONGRAVITYMODEL_EXPORTS")
 
 # ====================================================================
 # list of directories containing source/header files
-SET(PLUGIN_DIRS factory gravitymodel include plugin)
+SET(PLUGIN_DIRS factory gravitymodel include parameter plugin)
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
   factory/PolyhedronGravityModelFactory.cpp
+  factory/GravityParameterFactory.cpp
   gravitymodel/PolyhedronBody.cpp
   gravitymodel/PolyhedronGravityModel.cpp
+  parameter/GravData.cpp
+  parameter/GravReal.cpp
+  parameter/SurfaceContact.cpp
   plugin/GmatPluginFunctions.cpp
 )
 
