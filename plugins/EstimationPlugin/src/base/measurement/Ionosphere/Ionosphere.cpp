@@ -47,7 +47,7 @@
 //------------------------------------------------------------------------------
 IonosphereCorrectionModel* IonosphereCorrectionModel::instance = NULL;
 
-const Real Ionosphere::NUM_OF_INTERVALS = 100; // 20;
+const Real Ionosphere::NUM_OF_INTERVALS = 20;
 const Real Ionosphere::IONOSPHERE_MAX_ATTITUDE = 2000.0;
 
 
