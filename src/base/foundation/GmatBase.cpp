@@ -55,9 +55,9 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
-#define DEBUG_COMMENT_LINE
+//#define DEBUG_COMMENT_LINE
 //#define DEBUG_COMMENTS_ATTRIBUTE
-#define DEBUG_GENERATING_STRING
+//#define DEBUG_GENERATING_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_WRITE_PARAM
 //#define DEBUG_CLOAKING
@@ -3642,12 +3642,25 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       ("   showPrefaceComment=%d, commentLine=<%s>\n   showInlineComment=%d "
        "inlineComment=<%s>\n",  showPrefaceComment, commentLine.c_str(),
        showInlineComment, inlineComment.c_str());
+   MessageInterface::ShowMessage("   isCreatedFromMainScript=%d\n", isCreatedFromMainScript);
    #endif
 
    // don't write anything for cloaked objects, unless we're in SHOW_SCRIPT mode
    if ((mode != Gmat::SHOW_SCRIPT) && IsObjectCloaked())
    {
       generatingString = "";
+      return generatingString;
+   }
+   
+   // Don't write unless object is created from the main script
+   if (!isCreatedFromMainScript)
+   {
+      generatingString = "";
+      #ifdef DEBUG_GENERATING_STRING
+      MessageInterface::ShowMessage
+         ("GmatBase::GetGeneratingString() just returning blank, it is not "
+          "created from the main script\n");
+      #endif
       return generatingString;
    }
    

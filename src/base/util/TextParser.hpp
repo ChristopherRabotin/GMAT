@@ -65,6 +65,9 @@ public:
    
    void Reset();
    
+   // For treating Include line as comment
+   void PrependIncludeComment(const std::string &incLine);
+   
    // for parsing
    Gmat::BlockType EvaluateBlock(const std::string &logicalBlock);
    StringArray DecomposeBlock(const std::string &logicalBlock);

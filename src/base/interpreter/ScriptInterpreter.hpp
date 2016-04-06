@@ -89,8 +89,11 @@ private:
    bool functionDefined;
    /// Flag indicating function file has more than one function definition, so ignoring the rest
    bool ignoreRest;
+   /// Flag indicating first time command block found
+   bool firstTimeCommandBlock;
    /// Flag indicating first time command mode entered
    bool firstTimeCommandMode;
+   
    /// First command string
    std::string firstCommandStr;
    /// Function definition line
@@ -101,8 +104,10 @@ private:
    std::string mainScriptFilename;
    /// Fullpath of the last include file detected
    std::string lastIncludeFile;
-   /// Name of the current script file being read (main or include file)
-   std::string currentScriptBeingRead;
+   /// Saved include comment to add to next object comment to preserve
+   /// #include position when saving to script
+   std::string savedIncludeComment;
+   
    /// Section delimiter comment
    StringArray sectionDelimiterString;
    /// Script lines with Variable, Array, and String
@@ -112,7 +117,7 @@ private:
    
    /// Stack holding main script or include file names and istream pointer
    // Use std::vector as stack so we can use additional methods such as begin() and end()
-   std::vector<std::string>  includeStack;
+   std::vector<std::string>  scriptStack;
    std::stack<std::istream*> inStreamStack;
    
    bool CheckEncoding();

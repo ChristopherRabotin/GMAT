@@ -200,6 +200,11 @@ protected:
    ScriptReadWriter  *theReadWriter;
    TextParser        theTextParser;
    
+   /// Name of the current script file being read (main or include file)
+   std::string  currentScriptBeingRead;
+   /// Flag indicating if resource or command created from include files
+   bool         isReadingIncludeFile;
+   
    bool         inCommandMode;
    bool         inRealCommandMode;
    bool         beginMissionSeqFound;

@@ -43,6 +43,7 @@ const std::string ScriptReadWriter::ellipsis = "...";
 //#define DEBUG_SCRIPT_READ
 //#define DEBUG_FIRST_BLOCK
 //#define DEBUG_ELLIPSIS
+//#define DEBUG_COMMENT
 
 //---------------------------------
 // public
@@ -342,7 +343,7 @@ std::string ScriptReadWriter::ReadLogicalBlock()
    
    // keep looping till we find non-blank or non-comment line
    while ((!reachedEndOfFile) && (IsBlank(oneLine) || IsComment(oneLine)))
-   {
+   {      
       block = block + oneLine + "\n";
       oneLine = CrossPlatformGetLine();
       
@@ -371,7 +372,7 @@ std::string ScriptReadWriter::ReadLogicalBlock()
    
    #ifdef DEBUG_SCRIPT_READ
    MessageInterface::ShowMessage
-      ("ScriptReadWriter::ReadLogicalBlock() returning:\n   %s\n", result.c_str());
+      ("ScriptReadWriter::ReadLogicalBlock() returning:\n<<<%s>>>\n", result.c_str());
    #endif
    return result;
 }
@@ -386,7 +387,6 @@ bool ScriptReadWriter::WriteText(const std::string &textToWrite)
    outStream->flush();
    return true;
 }
-
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -445,8 +445,22 @@ std::string ScriptReadWriter::CrossPlatformGetLine()
 //------------------------------------------------------------------------------
 bool ScriptReadWriter::IsComment(const std::string &text)
 {
+   #ifdef DEBUG_COMMENT
+   MessageInterface::ShowMessage
+      ("ScriptReadWriter::IsComment() entered, text=\n<%s>\n", text.c_str());
+   #endif
    std::string str = GmatStringUtil::Trim(text, GmatStringUtil::BOTH);
-   return GmatStringUtil::StartsWith(str, "%");
+   bool isComment = GmatStringUtil::StartsWith(str, "%");
+   // // Treat # sign as comment to preserve #Include position
+   // bool hasSharpSign = GmatStringUtil::StartsWith(str, "#");
+   // isComment = isComment || hasSharpSign;
+   
+   #ifdef DEBUG_COMMENT
+   MessageInterface::ShowMessage
+      ("ScriptReadWriter::IsComment() returnig %d\n", isComment);
+   #endif
+   return (isComment);
+   //return GmatStringUtil::StartsWith(str, "%");
 }
 
 
@@ -596,27 +610,34 @@ std::string ScriptReadWriter::HandleEllipsis(const std::string &text)
 }
 
 
-//------------------------------------------------------------------------------
-// std::string HandleComments(const std::string &text)
-//------------------------------------------------------------------------------
-std::string ScriptReadWriter::HandleComments(const std::string &text)
-{
-   std::string result = text + "\n";
+// This method is not used
+// //------------------------------------------------------------------------------
+// // std::string HandleComments(const std::string &text)
+// //------------------------------------------------------------------------------
+// std::string ScriptReadWriter::HandleComments(const std::string &text)
+// {
+//    MessageInterface::ShowMessage
+//       ("==> ScriptReadWriter::HandleComments() entered, text=<%s>\n", text.c_str());
    
-   std::string newLine = CrossPlatformGetLine();
+//    std::string result = text + "\n";
+   
+//    std::string newLine = CrossPlatformGetLine();
 
-   // keep adding to comment if line is blank or comment
-   while (((IsComment(newLine)) || (IsBlank(newLine))) && (!reachedEndOfFile))
-   {
-      result += (newLine + "\n");
-      newLine = CrossPlatformGetLine();
-   }
+//    // keep adding to comment if line is blank or comment
+//    while (((IsComment(newLine)) || (IsBlank(newLine))) && (!reachedEndOfFile))
+//    {
+//       result += (newLine + "\n");
+//       newLine = CrossPlatformGetLine();
+//    }
    
-   if (HasEllipse(newLine))
-      newLine = HandleEllipsis(newLine);
+//    if (HasEllipse(newLine))
+//       newLine = HandleEllipsis(newLine);
    
-   result += newLine;
+//    result += newLine;
    
-   return result;
-}
+//    MessageInterface::ShowMessage
+//       ("==> ScriptReadWriter::HandleComments() returning\n   <%s>\n", result.c_str());
+   
+//    return result;
+// }
 

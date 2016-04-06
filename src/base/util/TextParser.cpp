@@ -95,6 +95,22 @@ void TextParser::Reset()
    isFunctionCall = false;
 }
 
+//------------------------------------------------------------------------------
+// void PrependIncludeComment(const std::string &incLine)
+//------------------------------------------------------------------------------
+/**
+ * Prepends #Include statement to comment lines of the next object to preserve
+ * #Include position when saving script
+ */
+//------------------------------------------------------------------------------
+void TextParser::PrependIncludeComment(const std::string &incLine)
+{
+   #ifdef DEBUG_INCLUDE
+   MessageInterface::ShowMessage
+      ("TextParser::PrependIncludeComment() adding comment: <%s>\n", incLine.c_str());
+   #endif
+   prefaceComment = incLine + prefaceComment;
+}
 
 //-------------------------------------------------------------------------------
 // StringArray DecomposeBlock(const std::string &logicalBlock)
@@ -189,18 +205,18 @@ StringArray TextParser::DecomposeBlock(const std::string &logicalBlock)
 //-------------------------------------------------------------------------------
 Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
 {
-   Integer length = logicalBlock.size();
-
    #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage
-      ("TextParser::EvaluateBlock() length=%d, isFunctionCall=%d\n", length, isFunctionCall);
+      ("TextParser::EvaluateBlock() entered, logicalBlock=\n<<<%s>>>\n", logicalBlock.c_str());
    #endif
-
-   #if DEBUG_TP_EVAL_BLOCK > 1
+   
+   Integer length = logicalBlock.size();
+   
+   #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage
-      ("TextParser::EvaluateBlock() logicalBlock=\n<<<%s>>>\n", logicalBlock.c_str());
+      ("   logicalBlock.size()=%d, isFunctionCall=%d\n", length, isFunctionCall);
    #endif
-
+   
    // first break into string array
    StringArray lines = DecomposeBlock(logicalBlock);
 
@@ -244,6 +260,9 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
       index1 = str.find_first_not_of(whiteSpace);
       if (index1 != str.npos)
       {
+         #if DEBUG_TP_EVAL_BLOCK > 1
+         MessageInterface::ShowMessage("   First non-whitespace found at %u\n", index1);
+         #endif
          // Treat '#' as a comment and then handle it later as include file
          if (str[index1] == '%' || str[index1] == '\n' || str[index1] == '\r' ||
              str[index1] == '#')
@@ -251,6 +270,10 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             if (str[index1] != '#')
             {
                prefaceComment = prefaceComment + str;
+               #if DEBUG_TP_EVAL_BLOCK > 1
+               MessageInterface::ShowMessage
+                  ("   First char is not #, prefaceComment=<%s>\n", prefaceComment.c_str());
+               #endif
                commentCounter++;
                continue;
             }
@@ -261,6 +284,10 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
                if (str.find("#Include") != str.npos)
                {
                   prefaceComment = prefaceComment + str;
+                  #if DEBUG_TP_EVAL_BLOCK > 1
+                  MessageInterface::ShowMessage
+                     ("   Found #Include, prefaceComment=<%s>\n", prefaceComment.c_str());
+                  #endif
                   commentCounter++;
                }
             }
@@ -447,8 +474,14 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             }
          }
       }
+      else
+      {
+         #if DEBUG_TP_EVAL_BLOCK
+         MessageInterface::ShowMessage("   Non-whitespace not found\n");
+         #endif
+      }
    }
-
+   
    #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage("   theInstruction='%s'\n", theInstruction.c_str());
    #endif
@@ -490,16 +523,16 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
    theChunks.push_back(prefaceComment);
    theChunks.push_back(inlineComment);
    theChunks.push_back(theInstruction);
-
+   
    #if DEBUG_TP_EVAL_BLOCK
-   MessageInterface::ShowMessage
-      ("   keyword=<%s>, blockType=%d, isFunctionCall=%d\n", keyword.c_str(),
-       theBlockType, isFunctionCall);
    MessageInterface::ShowMessage
       ("   prefaceComment=<%s>\n   inlineComment=<%s>\n   theInstruction=<%s>\n",
        prefaceComment.c_str(), inlineComment.c_str(), theInstruction.c_str());
+   MessageInterface::ShowMessage
+      ("TextParser::EvaluateBlock() returning, keyword=<%s>, blockType=%d, isFunctionCall=%d\n",
+       keyword.c_str(), theBlockType, isFunctionCall);
    #endif
-
+   
    return theBlockType;
 }
 

@@ -129,6 +129,8 @@ const std::string Interpreter::defaultIndicator = "DFLT__";
 //------------------------------------------------------------------------------
 Interpreter::Interpreter(SolarSystem *ss, ObjectMap *objMap)
 {
+   currentScriptBeingRead = "";
+   isReadingIncludeFile = false;
    inCommandMode = false;
    inRealCommandMode = false;
    beginMissionSeqFound = false;
@@ -205,6 +207,7 @@ void Interpreter::Initialize()
    errorList.clear();
    delayedBlocks.clear();
    delayedBlockLineNumbers.clear();
+   
    inCommandMode = false;
    parsingDelayedBlock = false;
    ignoreError = false;
@@ -1029,7 +1032,9 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    #endif
    
    debugMsg = "In CreateObject()";
-   GmatBase *obj = NULL;
+   // Tried using C++ 11 feature nullptr;
+   //GmatBase *obj = NULL;
+   GmatBase *obj = nullptr;
    
    // if object to be managed and has non-blank name, and name is not valid, handle error
    //if (manage == 1 && name != "")
@@ -1300,6 +1305,18 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       }
    }
    
+   // Set script name where it is created from
+   if (obj != nullptr)
+   {
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("   obj=<%p><%s>'%s', isReadingIncludeFile=%d, \n   currentScringBeingRead='%s'\n",
+          obj, obj->GetTypeName().c_str(), obj->GetName().c_str(), isReadingIncludeFile,
+          currentScriptBeingRead.c_str());
+      #endif
+      obj->SetScriptCreatedFrom(currentScriptBeingRead);
+      obj->SetIsCreatedFromMainScript(!isReadingIncludeFile);
+   }
    
    //@note
    // Do not throw exception if obj == NULL, since caller uses return pointer
@@ -2302,6 +2319,19 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       ("     desc     = <%s>\n     desc1    = <%s>\n     realDesc = <%s>\n",
        desc.c_str(), desc1.c_str(), realDesc.c_str());
    #endif
+   
+   // Set script name where it is created from
+   if (cmd != nullptr)
+   {
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("   cmd=<%p><%s>, isReadingIncludeFile=%d,\n   currentScringBeingRead='%s'\n",
+          cmd, cmd->GetTypeName().c_str(), isReadingIncludeFile,
+          currentScriptBeingRead.c_str());
+      #endif
+      cmd->SetScriptCreatedFrom(currentScriptBeingRead);
+      cmd->SetIsCreatedFromMainScript(!isReadingIncludeFile);
+   }
    
    // Now assemble command
    try

@@ -103,17 +103,18 @@ ScriptInterpreter::ScriptInterpreter() :
    functionDefined = false;
    ignoreRest = false;
    
-   functionDef        = "";
-   functionFilename   = "";
-   mainScriptFilename = "";
-   lastIncludeFile    = "";
-   currentScriptBeingRead = "";
-   currentBlock       = "";
-   headerComment      = "";
-   footerComment      = "";
+   functionDef         = "";
+   functionFilename    = "";
+   mainScriptFilename  = "";
+   lastIncludeFile     = "";
+   savedIncludeComment = "";
+   currentBlock        = "";
+   headerComment       = "";
+   footerComment       = "";
    
    inCommandMode = false;
    inRealCommandMode = false;
+   firstTimeCommandBlock = true;
    firstTimeCommandMode = true;
    
    // Initialize the section delimiter comment
@@ -161,6 +162,7 @@ bool ScriptInterpreter::Interpret()
    
    inCommandMode = false;
    inRealCommandMode = false;
+   firstTimeCommandBlock = true;
    firstTimeCommandMode = true;
    beginMissionSeqFound = false;
    userParameterLines.clear();
@@ -890,7 +892,7 @@ bool ScriptInterpreter::ReadFirstPass()
 // bool InterpretIncludeFile()
 //------------------------------------------------------------------------------
 /**
- * Parses include file as part of the main script.
+ * Parses include file as part of the main or GMAT function script.
  */
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::InterpretIncludeFile()
@@ -902,12 +904,16 @@ bool ScriptInterpreter::InterpretIncludeFile()
    #endif
    
    bool retval = false;
+   #ifdef DEBUG_INCLUDE
+   MessageInterface::ShowMessage("   ==> Setting isReadingIncludeFile to true\n");
+   #endif
+   isReadingIncludeFile = true;
    
    // Check for self-include
    if (!inStreamStack.empty())
    {
-      //std::string prevFile = includeStack.top();
-      std::string prevFile = includeStack.back();
+      //std::string prevFile = scriptStack.top();
+      std::string prevFile = scriptStack.back();
       #ifdef DEBUG_INCLUDE
       MessageInterface::ShowMessage
          ("   ===> Include stack is not empty, so check for self-include\n   "
@@ -921,7 +927,7 @@ bool ScriptInterpreter::InterpretIncludeFile()
          #endif
          lastIncludeFile = prevFile;
          currentScriptBeingRead = lastIncludeFile;
-         includeStack.pop_back();
+         scriptStack.pop_back();
          inStream = inStreamStack.top();
          inStreamStack.pop();
          SetInStream(inStream);
@@ -950,7 +956,7 @@ bool ScriptInterpreter::InterpretIncludeFile()
       
       // Cannot use begin() and end() with std::stack, so changed to use std::vector
       bool incFound =
-         (find(includeStack.begin(), includeStack.end(), currentScriptBeingRead) != includeStack.end());
+         (find(scriptStack.begin(), scriptStack.end(), currentScriptBeingRead) != scriptStack.end());
       
       if (incFound)
       {
@@ -959,11 +965,11 @@ bool ScriptInterpreter::InterpretIncludeFile()
             ("   ===> Circular include found, so pop include stack and "
              "throw a fatal exception\n");
          #endif
-         std::string prevFile = includeStack.back();
+         std::string prevFile = scriptStack.back();
          std::string currFile = currentScriptBeingRead;
          lastIncludeFile = prevFile;
          currentScriptBeingRead = lastIncludeFile;
-         includeStack.pop_back();
+         scriptStack.pop_back();
          inStream = inStreamStack.top();
          inStreamStack.pop();
          SetInStream(inStream);
@@ -978,13 +984,13 @@ bool ScriptInterpreter::InterpretIncludeFile()
       else
       {
          #ifdef DEBUG_INCLUDE
-         MessageInterface::ShowMessage("   ===> It is not self-include\n");
+         MessageInterface::ShowMessage("   ===> It is not circular-include\n");
          #endif
       }
    }
    
    // Push current inStream to stack
-   includeStack.push_back(currentScriptBeingRead);
+   scriptStack.push_back(currentScriptBeingRead);
    inStreamStack.push(inStream);
    #ifdef DEBUG_INCLUDE
    MessageInterface::ShowMessage
@@ -1024,10 +1030,10 @@ bool ScriptInterpreter::InterpretIncludeFile()
    // If more include file in stack, get next one
    if (!inStreamStack.empty())
    {
-      //lastIncludeFile = includeStack.top();
-      lastIncludeFile = includeStack.back();
+      //lastIncludeFile = scriptStack.top();
+      lastIncludeFile = scriptStack.back();
       currentScriptBeingRead = lastIncludeFile;
-      includeStack.pop_back();
+      scriptStack.pop_back();
       inStream = inStreamStack.top();
       inStreamStack.pop();
       SetInStream(inStream);
@@ -1036,6 +1042,22 @@ bool ScriptInterpreter::InterpretIncludeFile()
          ("   Popped from stack:\n   currentScriptBeingRead='%s'\n   inStream<%p>\n",
           currentScriptBeingRead.c_str(), inStream);
       #endif
+      
+      // Set isReadingIncludeFile to false it stack is empty
+      if (inStreamStack.empty())
+      {
+         #ifdef DEBUG_INCLUDE
+         MessageInterface::ShowMessage("   ==> Setting isReadingIncludeFile to false\n");
+         #endif
+         isReadingIncludeFile = false;
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_INCLUDE
+      MessageInterface::ShowMessage("   ==> Setting isReadingIncludeFile to false\n");
+      #endif
+      isReadingIncludeFile = false;
    }
    
    #ifdef DEBUG_INCLUDE
@@ -1122,6 +1144,10 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
       ("===> headerComment:\n<<<%s>>>\n", headerComment.c_str());
    #endif
    
+   // Saved include comment to add to next object comment to preserve
+   // #include position when saving to script
+   std::string savedIncComment;
+   
    while (currentBlock != "")
    {
       try
@@ -1135,7 +1161,15 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
          #if DBGLVL_SCRIPT_READING > 1
          MessageInterface::ShowMessage
             ("===> after EvaluateBlock() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
+         MessageInterface::ShowMessage
+            ("   savedIncComment=<%s>\n", savedIncComment.c_str());
          #endif
+         
+         if (savedIncComment != "")
+         {
+            theTextParser.PrependIncludeComment(savedIncComment);
+            savedIncComment = "";
+         }
          
          if (currentBlockType == Gmat::INCLUDE_BLOCK)
          {
@@ -1150,6 +1184,16 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
             bool incRetval = ParseIncludeBlock(chunks);
             if (incRetval)
             {
+               savedIncComment = theTextParser.GetPrefaceComment();
+               if (savedIncComment != "")
+               {
+                  #ifdef DBGLVL_SCRIPT_READING
+                  MessageInterface::ShowMessage
+                     ("   Setting savedIncludeComment to <%s>\n", savedIncComment.c_str());
+                  #endif
+                  savedIncludeComment = savedIncComment;
+               }
+               
                #ifdef DBGLVL_SCRIPT_READING
                MessageInterface::ShowMessage("   Calling InterpretIncludeFile()\n");
                #endif
@@ -1395,6 +1439,9 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    try
    {
       chunks = theTextParser.ChunkLine();
+      #ifdef DEBUG_PARSE
+      WriteStringArray("Parse()", "", chunks);
+      #endif
    }
    catch (BaseException &e)
    {
@@ -1462,7 +1509,12 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
       {
          #ifdef DEBUG_PARSE
          MessageInterface::ShowMessage("   => currentBlockType is COMMAND_BLOCK\n");
+         MessageInterface::ShowMessage("   firstTimeCommandBlock=%d\n", firstTimeCommandBlock);
          #endif
+
+         if (firstTimeCommandBlock)
+            firstTimeCommandBlock = false;
+         
          // if TextParser detected as function call
          if (theTextParser.IsFunctionCall())
          {
@@ -1553,21 +1605,18 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
          logicalBlockCount++;
          break;
       }
-   // case Gmat::INCLUDE_BLOCK:
-   //    {
-   //       #ifdef DEBUG_PARSE
-   //       MessageInterface::ShowMessage
-   //          ("   => currentBlockType is INCLUDE_BLOCK, it should not be handled here\n");
-   //       MessageInterface::ShowMessage("ScriptInterpreter::Parse() returning true\n");
-   //       #endif
-   //       return true;
-   //    }
    default:
       break;
    }
    
    if (inCommandMode)
    {
+      #ifdef DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("===> firstTimeCommandMode=%d, Command mode entered at '%s'\n",
+          firstTimeCommandMode, firstCommandStr.c_str());
+      #endif
+      
       if (!beginMissionSeqFound && firstTimeCommandMode)
       {
          firstCommandStr = actualScript;
@@ -1985,9 +2034,14 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    // Footer Comment
    //-----------------------------------
    #ifdef DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage("   footerComment=\n<%s>\n", footerComment.c_str());
+   MessageInterface::ShowMessage
+      ("   savedIncludeComment=\n<%s>\n", savedIncludeComment.c_str());
+   MessageInterface::ShowMessage
+      ("   footerComment=\n<%s>\n", footerComment.c_str());
    #endif
    
+   if (savedIncludeComment != "")
+      theReadWriter->WriteText(savedIncludeComment);
    if (footerComment != "")
       theReadWriter->WriteText(footerComment);
    //else
@@ -2034,6 +2088,11 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
    // Get comments
    std::string preStr = theTextParser.GetPrefaceComment();
    std::string inStr = theTextParser.GetInlineComment();
+   
+   #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("   prefaceComment = '%s'\n   inlineComment='%s'\n", preStr.c_str(), inStr.c_str());
+   #endif
    
    Integer count = chunks.size();
    bool retval = true;
@@ -2219,12 +2278,18 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
                                           GmatCommand *inCmd, GmatBase *obj)
 {
    #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage("ScriptInterpreter::ParseCommandBlock() entered\n");
    WriteStringArray("ParseCommandBlock()", "", chunks);
    #endif
    
    // Get comments
    std::string preStr = theTextParser.GetPrefaceComment();
    std::string inStr = theTextParser.GetInlineComment();
+   
+   #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("   prefaceComment = '%s'\n   inlineComment='%s'\n", preStr.c_str(), inStr.c_str());
+   #endif
    
    #ifdef DEBUG_COMMAND_MODE_TOGGLE
       if (!inCommandMode)
@@ -2366,6 +2431,11 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    // Get comments
    std::string preStr = theTextParser.GetPrefaceComment();
    std::string inStr = theTextParser.GetInlineComment();
+   
+   #ifdef DEBUG_PARSE_ASSIGNMENT
+   MessageInterface::ShowMessage
+      ("   prefaceComment = '%s'\n   inlineComment='%s'\n", preStr.c_str(), inStr.c_str());
+   #endif
    
    // check for .. in the command block
    if (chunks[0].find("..") != chunks[0].npos ||
@@ -2854,8 +2924,8 @@ void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
 {
    #ifdef DEBUG_SET_COMMENTS
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::SetComments() <%s>'%s'\n   preStr=\n'%s'\n    inStr=\n'%s'\n",
-       obj->GetTypeName().c_str(), obj->GetName().c_str(), preStr.c_str(),
+      ("ScriptInterpreter::SetComments() <%p><%s>'%s' entered\n   preStr=\n'%s'\n    inStr=\n'%s'\n",
+       obj, obj->GetTypeName().c_str(), obj->GetName().c_str(), preStr.c_str(),
        inStr.c_str());
    #endif
    
@@ -2881,6 +2951,12 @@ void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
    
    if (inStr != "")
       obj->SetInlineComment(inStr);
+   
+   #ifdef DEBUG_SET_COMMENTS
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::SetComments() <%p><%s>'%s' leaving\n", obj,
+       obj->GetTypeName().c_str(), obj->GetName().c_str());
+   #endif
 }
 
 
