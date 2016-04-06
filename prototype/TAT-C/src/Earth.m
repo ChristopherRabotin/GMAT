@@ -37,7 +37,7 @@ classdef Earth
         end
         
         function R = FixedToTopoRMat(~,gdLat,gdLon)
-            % Computes rotation matrix from inertial to topocentric
+            % Computes rotation matrix from inertial to topocentric axes
             % Inputs: int gdLat, int gdLon (geodedic coordinates of topo
             % system).
             zHat = [cos(gdLat)*cos(gdLon);cos(gdLat)*sin(gdLon);sin(gdLat)];
@@ -47,17 +47,21 @@ classdef Earth
             R = [xHat yHat zHat];
         end
         
-%         function [gdLat] = GeocentricToGeodeticLat(gcLat)
-%             e2 = 2*obj.bodyFlattening - obj.bodyFlattening^2;
-%             delta = 1;
-%             phi = gcLat;
-%             while
-%                 phi = gdLat;
-%                 sinPhi = sin(phi);
-%                 C = obj.bodyRadius/sqrt(1 - e2*sinPhi*sinPhi);
-%                 %gdLat = atan(
-%             end
-%         end
+        function [gdLat] = GeocentricToGeodeticLat(obj,gcLat)
+           % Converts from geocentric latitude to geodetic latitude
+           eSquared = 2*obj.bodyFlattening - obj.bodyFlattening^2;
+           gdLat = gcLat;
+            xyPos = obj.bodyRadius*cos(gcLat);
+            zPos = obj.bodyRadius*sin(gcLat);
+            diff = 1;
+            while diff > 1e-10;
+                phi = gdLat;
+                sinPhi = sin(gdLat);
+                C = obj.bodyRadius/sqrt(1 - eSquared*sinPhi*sinPhi);
+                gdLat = atan2(zPos + C*eSquared*sinPhi,xyPos);
+                diff = abs(gdLat - phi);
+            end
+        end
         
         function [rsun,rtasc,decl] = GetEarthSunDistRaDec(~,jd)
             

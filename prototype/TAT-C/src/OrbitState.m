@@ -49,6 +49,8 @@ classdef OrbitState < handle
         
         function cartVec = ConvertKepToCart(obj,a,e,i,Om,om,nu)
             % Converts from Cartesian to Keplerian
+            
+            % C++ code should be borrowed from GMAT state converter
             p = a*(1-e*e);
             r = p/(1+e*cos(nu));
             rv = [r*cos(nu); r*sin(nu); 0];			% in PQW frame
@@ -67,6 +69,8 @@ classdef OrbitState < handle
         
         function oe =  ConvertCartToKep(obj,cart)
             % Converts from Keplerian to Cartesian
+            
+            % C++ code should be borrowed from GMAT state converter
             twopi = 2*pi;
             
             rv = cart(1:3);  % position vector
