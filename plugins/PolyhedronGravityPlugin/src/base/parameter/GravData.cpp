@@ -37,7 +37,7 @@
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 
-#include "DragForce.hpp"
+#include "PolyhedronGravityModel.hpp"
 
 //#define DEBUG_ODEDATA_INIT 1
 //#define DEBUG_ODEDATA_RUN  1
@@ -213,6 +213,9 @@ Real GravData::GetGravReal(const std::string &str)
                         forceType = POLYHEDRAL;
                         body = force->GetBody();
                         bodyRadius = body->GetEquatorialRadius();
+                        cbForce = force;
+                        cbForce->SetSolarSystem(mSolarSystem);
+                        cbForce->Initialize();
                      }
 
                      break;
@@ -221,48 +224,35 @@ Real GravData::GetGravReal(const std::string &str)
             }
          }
 
-         Real epoch  = mSpacecraft->GetEpoch();
+         GmatEpoch epoch  = mSpacecraft->GetEpoch();
          Real *scState = mSpacecraft->GetState().GetState();
          Rvector6 cbState = body->GetState(epoch);
-         Real state[3];
+         Rvector3 state;
+
          state[0] = scState[0] - cbState[0];
          state[1] = scState[1] - cbState[1];
          state[2] = scState[2] - cbState[2];
+
+         Real dist = state.Norm();
 
          if (cbForce != NULL)
          {
             switch (forceType)
             {
             case POINT_MASS:
-               {
-                  Real dist = GmatMathUtil::Sqrt(state[0]*state[0] +
-                        state[1]*state[1] + state[2]*state[2]);
-                  retval = dist - bodyRadius;
-
-                  MessageInterface::ShowMessage("Point mass %lf\n", retval);
-               }
+               retval = dist - bodyRadius;
                break;
 
             case HARMONIC:
-               {
-                  /// @todo Change to geodetic altitude here
-                  Real dist = GmatMathUtil::Sqrt(state[0]*state[0] +
-                        state[1]*state[1] + state[2]*state[2]);
-                  retval = dist - bodyRadius;
-
-                  MessageInterface::ShowMessage("Harmonic\n");
-               }
+               /// @todo Change to geodetic altitude here
+               retval = dist - bodyRadius;
                break;
 
             case POLYHEDRAL:
-               {
-                  /// @todo Change to use the polymodel here
-                  Real dist = GmatMathUtil::Sqrt(state[0]*state[0] +
-                        state[1]*state[1] + state[2]*state[2]);
+               if (dist < bodyRadius)
+                  retval = ((PolyhedronGravityModel*)cbForce)->GetAltitude(state, epoch);
+               else
                   retval = dist - bodyRadius;
-
-                  MessageInterface::ShowMessage("Harmonic\n");
-               }
                break;
 
             case UNDEFINED:
@@ -360,6 +350,11 @@ void GravData::InitializeRefObjects()
       throw ParameterException
          ("GravData::InitializeRefObjects() Cannot find ODE Model object\n");
 
+   if (cbForce != NULL)
+   {
+      cbForce->SetSolarSystem(mSolarSystem);
+      cbForce->Initialize();
+   }
 }
 
 

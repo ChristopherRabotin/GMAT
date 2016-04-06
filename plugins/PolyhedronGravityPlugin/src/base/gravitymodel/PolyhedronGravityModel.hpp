@@ -42,6 +42,8 @@ public:
 
    bool SetDensity(Real density);								// set density for the body
    Real GetDensity();											   // get density of the body
+   Real GetSolidAngle(Rvector3 &r, GmatEpoch time);
+   Real GetAltitude(Rvector3 &r, GmatEpoch time);
 
    bool SetBodyShapeFileName(const std::string &filename);		// set bodyShapeFilename of the body
    std::string GetBodyShapeFileName(); 						    	// get bodyShapeFilename of the body
@@ -79,7 +81,7 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index,
-                         Integer quantity);
+                         Integer quantity, Integer sizeOfType);
 
 public:
    // Parameter IDs
@@ -119,6 +121,8 @@ private:
 
    Real					   now;                    // current time
    Real                 initialtime;				// initial time
+   /// Calculation value used to detect when we are inside of the body
+   Real                 sumWf;
    bool                 isPHGMInitialized;       
 
 };
