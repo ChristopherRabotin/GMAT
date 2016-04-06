@@ -33,7 +33,7 @@
 #include "Estimator.hpp"
 #include "GmatState.hpp"
 #include "PropagationStateManager.hpp"
-#include "SolverException.hpp"
+//#include "SolverException.hpp"
 #include "SpaceObject.hpp"
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
@@ -323,7 +323,7 @@ bool Estimator::Initialize()
 
       // Check to make sure required objects have been set
       if (!propagator)
-         throw SolverException(
+         throw EstimatorException(
                "Estimator error - no propagators are set for estimation or propagators are not defined in your script.\n");
 
       if (measurementNames.empty())
@@ -379,7 +379,7 @@ bool Estimator::Initialize()
          }                                                                         // made changes by TUAN NGUYEN
 
          if (!found)                                                               // made changes by TUAN NGUYEN
-            throw SolverException("Cannot initialize estimator; '" + name +
+            throw EstimatorException("Cannot initialize estimator; '" + name +
                   "' object is not defined in script.\n");                         // made changes by TUAN NGUYEN
       }                                                                            // made changes by TUAN NGUYEN
 
@@ -407,7 +407,7 @@ bool Estimator::Reinitialize()
       bool measOK = measManager.SetPropagator(propagator);
       measOK = measOK && measManager.Initialize();
       if (!measOK)
-         throw SolverException(
+         throw EstimatorException(
            "BatchEstimator::CompleteInitialization - error initializing "
             "MeasurementManager.\n");
       
@@ -813,6 +813,9 @@ bool Estimator::SetStringParameter(const Integer id,
 {
    if (id == PROPAGATOR)
    {
+      if (!GmatStringUtil::IsValidIdentity(value))                                                                                   // made changes by TUAN NGUYEN
+         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Propagator is an invalid GMAT object name.\n");   // made changes by TUAN NGUYEN
+
       propagatorName = value;
       return true;
    }
@@ -823,6 +826,10 @@ bool Estimator::SetStringParameter(const Integer id,
       std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));              // made changes by TUAN NGUYEN
       if (measName == "")                                                                                           // made changes by TUAN NGUYEN
          throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");   // made changes by TUAN NGUYEN
+
+      if (!GmatStringUtil::IsValidIdentity(value))                                                                  // made changes by TUAN NGUYEN
+         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Measurements is an invalid GMAT object name.\n");   // made changes by TUAN NGUYEN
+
       return SetStringParameter(id, measName, measurementNames.size());                                             // made changes by TUAN NGUYEN
    }                                                                                                                // made changes by TUAN NGUYEN
 
@@ -842,7 +849,7 @@ bool Estimator::SetStringParameter(const Integer id,
  * @param value string value for the requested parameter.
  * @param index index into the StringArray.
  *
- * @exception <SolverException> thrown if value is out of range
+ * @exception <EstimatorException> thrown if value is out of range
  *
  * @return  success flag.
  *
@@ -853,6 +860,10 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 {
    if (id == MEASUREMENTS)
    {
+      // Verify measurement name
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Measurements is an invalid GMAT object name.\n");
+      
       Integer sz = (Integer) measurementNames.size();
       if (index == sz) // needs to be added to the end of the list
       {
@@ -863,7 +874,7 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
       {
          std::string errmsg = "Estimator::SetStringParameter error - index "
                "into measurement array is out of bounds.\n";
-         throw SolverException(errmsg);
+         throw EstimatorException(errmsg);
       }
       else // is in bounds
       {
@@ -882,7 +893,7 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
       {
          std::string errmsg = "Estimator::SetStringParameter error - index "
                "into measurement array is out of bounds.\n";
-         throw SolverException(errmsg);
+         throw EstimatorException(errmsg);
       }
       else // is in bounds
          solveForStrings.at(index) = value;
@@ -902,7 +913,7 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
       {
          std::string errmsg = "Estimator::SetStringParameter error - index "
                "into residual plot array is out of bounds.\n";
-         throw SolverException(errmsg);
+         throw EstimatorException(errmsg);
       }
       else // is in bounds
          addedPlots.at(index) = value;
@@ -1379,7 +1390,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             {
                MessageInterface::ShowMessage("Estimator cannot initialize "
                         "because an expected MeasurementModel is NULL\n");
-               throw SolverException("In Estimator::SetRefObject, a "
+               throw EstimatorException("In Estimator::SetRefObject, a "
                         "measurement in the tracking system " + obj->GetName() +
                         " is NULL\n");
             }
@@ -1611,7 +1622,7 @@ void Estimator::UpdateClonedObject(GmatBase *obj)
 {
    if (obj->IsOfType("Spacecraft"))
       return;
-   throw SolverException("To do: implement Estimator::UpdateClonedObject "
+   throw EstimatorException("To do: implement Estimator::UpdateClonedObject "
          "for " + obj->GetTypeName() + " objects");
 }
 
@@ -1684,7 +1695,7 @@ Real Estimator::ConvertToRealEpoch(const std::string &theEpoch,
          retval, outStr);
 
    if (retval == -999.999)
-      throw SolverException("Error converting the time string \"" + theEpoch +
+      throw EstimatorException("Error converting the time string \"" + theEpoch +
             "\"; please check the format for the input string.");
    return retval;
 }

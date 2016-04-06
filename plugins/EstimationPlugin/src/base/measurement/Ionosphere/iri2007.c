@@ -52655,7 +52655,7 @@ doublereal bspl2f_(integer *i__, real *t1)
 
 /* Subroutine */ int irit13_(real *alati, real *along, integer *jmag, logical 
 	*jf, integer *iy, integer *md, real *hour, real *hbeg, real *hend, 
-	real *tec, real *tecb, real *tect)
+	real *tec, real *tecb, real *tect, integer *ier)
 {
     real abeg, aend, oarr[50], astp, outf[10000]	/* was [20][500] */;
     extern /* Subroutine */ int iri_tec__(real *, real *, integer *, real *, 
@@ -52676,6 +52676,7 @@ doublereal bspl2f_(integer *i__, real *t1)
 
 /*  OUTPUT: TEC          Total Electron Content in M-2 */
 /*          tecb,tect    percentage of bottomside and topside content */
+/*          IER          error number */
 /* ----------------------------------------------------------------------- */
 
 /*  select various options and choices for IRI-94 */
@@ -52689,12 +52690,14 @@ doublereal bspl2f_(integer *i__, real *t1)
     *tecb = (float)-111.;
 
 /* initialize IRI parameter in COMMON blocks */
-integer ier;
     abeg = *hbeg;
     aend = *hend;
     astp = *hend - *hbeg;
     iri_sub__(&jf[1], jmag, alati, along, iy, md, hour, &abeg, &aend, &astp, 
-	    outf, oarr, &ier);
+	    outf, oarr, ier);
+    if (*ier != 0) {
+	return 0;
+    }
 
 /*  calculate total electron content (TEC) in m-2 using the */
 /*  stepsize selection 2 (highest accuracy) */

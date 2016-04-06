@@ -27,6 +27,7 @@
 //------------------------------------------------------------------------------
 
 #include "Antenna.hpp"
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 
 
@@ -178,7 +179,7 @@ Integer Antenna::GetParameterID(const std::string & str) const
       if (str == PARAMETER_TEXT[i - HardwareParamCount])
       {
          if (IsParameterReadOnly(i))
-            throw GmatBaseException("Error: Parameter '" + str + "' was not defined in GMAT Antenna's syntax.\n");
+            throw HardwareException("Error: Parameter '" + str + "' was not defined in GMAT Antenna's syntax.\n");
 
          return i;
       }

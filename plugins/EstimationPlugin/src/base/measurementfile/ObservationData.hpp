@@ -114,8 +114,10 @@ public:
 //   std::string dataFormat;			// Flag indicating which data format is used. Its value is either "GMATInternal" or "GMAT_OD"
    /// Uplink band
    Integer           uplinkBand;
-   /// Uplink frequency
+   /// Uplink frequency at transmit epoch
    Real              uplinkFreq;
+   /// Uplink frequency at receive epoch. For ramped frequency model, this frequency is different from uplinkFreq       // made changes by TUAN NGUYEN
+   Real              uplinkFreqAtRecei;                                                                                 // made changes by TUAN NGUYEN
    /// Range modulo
    Real              rangeModulo;
 

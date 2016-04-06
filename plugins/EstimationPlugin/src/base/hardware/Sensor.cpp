@@ -26,7 +26,7 @@
  */
 //------------------------------------------------------------------------------
 #include "Sensor.hpp"
-#include "GmatBaseException.hpp"
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_SET_REAL_PARA
@@ -207,7 +207,7 @@ Integer Sensor::GetParameterID(const std::string & str) const
       if (str == PARAMETER_TEXT[i - HardwareParamCount])
       {
          if (IsParameterReadOnly(i))
-            throw GmatBaseException("Error: '" + str + "' parameter was not defined in GMAT " + typeName + "'s syntax.\n");
+            throw HardwareException("Error: '" + str + "' parameter was not defined in GMAT " + typeName + "'s syntax.\n");
          
          return i;
       }
@@ -470,7 +470,7 @@ Real Sensor::GetRealParameter(const Integer id, const Integer index) const
             if(index == 1)
                return hardwareDelay2;
             else
-               throw GmatBaseException("Index is out of bound\n");
+               throw HardwareException("Index is out of bound\n");
          }
       default:
          break;
@@ -519,16 +519,22 @@ Real Sensor::SetRealParameter(const Integer id, const Real value, const Integer 
       case HARDWARE_DELAY:
          if (index == 0)
          {
+            if (value < 0.0)
+               throw HardwareException("Error: A negative number was set to " + GetName() + ".HardwareDelay parameter.\n");
+
             hardwareDelay1 = value;
             return hardwareDelay1;
          }
          else if(index == 1)
          {
+            if (value < 0.0)
+               throw HardwareException("Error: A negative number was set to " + GetName() + ".HardwareDelay parameter.\n");
+
             hardwareDelay2 = value;
             return hardwareDelay2;
          }
          else
-            throw GmatBaseException("Index is out of bound\n");
+            throw HardwareException("Index is out of bound\n");
 
       default:
          break;

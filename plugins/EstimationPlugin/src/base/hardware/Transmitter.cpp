@@ -30,6 +30,7 @@
 //------------------------------------------------------------------------------
 
 #include "Transmitter.hpp"
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_SET_REAL_PARA
@@ -70,7 +71,7 @@ Transmitter::PARAMETER_TYPE[TransmitterParamCount - RFHardwareParamCount] =
 Transmitter::Transmitter(const std::string &name) :
    RFHardware     ("Transmitter", name),
    frequencyModel ("constant"),
-   frequency      (0.0)
+   frequency      (0.0)                            // unit: MHz
 {
    objectTypeNames.push_back("Transmitter");
    parameterCount = TransmitterParamCount;
@@ -186,7 +187,7 @@ Integer Transmitter::GetParameterID(const std::string & str) const
       if (str == PARAMETER_TEXT[i - RFHardwareParamCount])
       {
          if (IsParameterReadOnly(i))
-            throw GmatBaseException("Error: Parameter '" + str + "' was not defined in GMAT Transmitter's syntax.\n");
+            throw HardwareException("Error: Parameter '" + str + "' was not defined in GMAT Transmitter's syntax.\n");
 
          return i;
       }
@@ -384,6 +385,9 @@ Real Transmitter::SetRealParameter(const Integer id, const Real value)
       case FREQUENCY:
          if (value >= 0.0)
             frequency = value;
+         else
+            throw HardwareException("Error: frequency set to " + GetName() + ".Frequency is a negative number.\n");
+
          return frequency;
 
       //case HARDWARE_DELAY:
@@ -569,7 +573,7 @@ Real Transmitter::GetDelay(Integer whichOne)
    if (whichOne == 0)
       return RFHardware::GetDelay();
    else
-      throw GmatBaseException("Delay index is out of bound\n");
+      throw HardwareException("Delay index is out of bound\n");
 }
 
 
@@ -590,7 +594,7 @@ bool Transmitter::SetDelay(Real delay, Integer whichOne)
           hardwareDelay1 = delay;
           return true;
      default:
-          throw GmatBaseException("Delay index is out of bound\n");
+          throw HardwareException("Delay index is out of bound\n");
    }
 }
 

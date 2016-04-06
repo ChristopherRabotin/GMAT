@@ -555,7 +555,24 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 }
 
 
-bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, Real uplinkFrequency, std::vector<RampTableData>* rampTB)
+//------------------------------------------------------------------------------
+// bool ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
+//        Real uplinkFrequency, std::vector<RampTableData>* rampTB)
+//------------------------------------------------------------------------------
+/**
+* This function is used to recalculate frequency and media correction for TDRS 
+* Doppler measurement.
+*
+* @param pathIndex           Calculation for the given signal path specified by
+*                            pathIndex
+* @param uplinkFrequency     Transmit frequency
+* @param rampTB              Ramp table for a ramped measurement
+*
+* @return                    true if no error ocurrs, false otherwise
+*/
+//------------------------------------------------------------------------------
+bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
+                         Real uplinkFrequency, std::vector<RampTableData>* rampTB)
 {
    bool retval = false;
 
@@ -575,17 +592,13 @@ bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathInde
          if (current->useCorrection[j])
          {
             if ((current->correctionIDs[j] == "Troposphere")||(current->correctionIDs[j] == "Ionosphere"))
-            {
                correction += current->corrections[j];
-               //MessageInterface::ShowMessage(" leg %s -> %s: correction name = %s   correction = %.12lf\n", current->tNode->GetName().c_str(), current->rNode->GetName().c_str(), current->correctionIDs[j].c_str(), current->corrections[j]);
-            }
          }
       }
       currentleg = currentleg->GetNext();
       current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
    }
 
-   //MessageInterface::ShowMessage("Hello there: C-value = %.12lf   correction = %.12lf\n", cMeasurement.value[pathIndex], correction);
    cMeasurement.value[pathIndex] += correction;
          
    retval = true;
