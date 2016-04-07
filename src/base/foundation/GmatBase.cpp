@@ -2531,8 +2531,19 @@ const std::string GmatBase::GetCommentLine() const
 //---------------------------------------------------------------------------
 //  void SetCommentLine(const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets comment line. Comment line starts with % sign.
+ * ex) %--- This is comment line
+ *     Create Spacecraft sat;
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetCommentLine(const std::string &comment)
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetCommentLine() <%p><%s>'%s' setting commentLine to <%s>\n",
+       this, typeName.c_str(), instanceName.c_str(), comment.c_str());
+   #endif
    commentLine = comment;
 }
 
@@ -2547,8 +2558,18 @@ const std::string GmatBase::GetInlineComment() const
 //---------------------------------------------------------------------------
 //  void SetInlineComment(const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets inline comment. Inline comment starts with % sign after GMAT statement.
+ * ex) Create Spacecraft sat; %--- This is inline comment
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetInlineComment(const std::string &comment)
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetInlineComment() <%p><%s>'%s' setting inlineComment to <%s>\n",
+       this, typeName.c_str(), instanceName.c_str(), comment.c_str());
+   #endif
    inlineComment = comment;
 }
 
@@ -2557,6 +2578,11 @@ void GmatBase::SetInlineComment(const std::string &comment)
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetAttributeCommentLine(Integer index)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::GetAttributeCommentLine() <%p><%s>'%s' entered, index=%d\n",
+       this, typeName.c_str(), instanceName.c_str(), index);
+   #endif
    if (index >= (Integer)attributeCommentLines.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
@@ -2578,9 +2604,22 @@ const std::string GmatBase::GetAttributeCommentLine(Integer index)
 //---------------------------------------------------------------------------
 //  void SetAttributeCommentLine(Integer index, const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets attribute comment line. Attribute comment line starts with % sign
+ % before object property setting.
+ * ex) %--- This is attribute comment line
+ *     sat.X = 7000;
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetAttributeCommentLine(Integer index,
                                        const std::string &comment)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetAttributeCommentLine() <%p><%s>'%s' entered, index=%d, "
+       "comment=<%s>\n", this, typeName.c_str(), instanceName.c_str(), index,
+       comment.c_str());
+   #endif
    if (index >= (Integer)attributeCommentLines.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
@@ -2601,6 +2640,12 @@ void GmatBase::SetAttributeCommentLine(Integer index,
 
 //---------------------------------------------------------------------------
 //  const std::string GetInlineAttributeComment(Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Sets inline attribute comment. Attribute inline comment starts with % sign
+ % after object property setting.
+ * ex) sat.X = 7000; %--- This is attribute inline comment
+ */
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetInlineAttributeComment(Integer index)
 {
@@ -2629,6 +2674,13 @@ const std::string GmatBase::GetInlineAttributeComment(Integer index)
 void GmatBase::SetInlineAttributeComment(Integer index,
                                          const std::string &comment)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetInlineAttributeComment() <%p><%s>'%s' entered, index=%d, "
+       "comment=<%s>\n", this, typeName.c_str(), instanceName.c_str(), index,
+       comment.c_str());
+   #endif
+   
    if (index >= (Integer)attributeInlineComments.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
