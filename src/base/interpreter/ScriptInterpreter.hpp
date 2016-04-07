@@ -72,7 +72,7 @@ protected:
    std::istream *inStream;
    std::ostream *outStream;
    
-   bool InterpretIncludeFile();
+   bool InterpretIncludeFile(GmatCommand *inCmd);
    
    bool ReadScript(GmatCommand *cmd = NULL, bool skipHeader = false);
    bool Parse(GmatCommand *inCmd = NULL);

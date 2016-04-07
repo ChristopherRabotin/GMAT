@@ -541,6 +541,8 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    // get updated function path (LOJ: 2015.04.15)
    //functionFilename = fileName;
    functionFilename = currentFunction->GetFunctionPathAndName();
+   // Set currentScriptBeingRead to function file for #Include script in funtion
+   currentScriptBeingRead = functionFilename;
    beginMissionSeqFound = false;
    continueOnError = true;
    bool retval = false;
@@ -634,7 +636,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(Function *funct)
 {
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::InterpretGmatFunction(*function) entered, "
+      ("\nScriptInterpreter::InterpretGmatFunction(*function) entered, "
        "function=<%p>\n", funct);
    #endif
    
@@ -884,23 +886,23 @@ bool ScriptInterpreter::ReadFirstPass()
    #endif
    
    return retval;
-   
 }
 
 
 //------------------------------------------------------------------------------
-// bool InterpretIncludeFile()
+// bool InterpretIncludeFile(GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 /**
  * Parses include file as part of the main or GMAT function script.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::InterpretIncludeFile()
+bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
 {
    #ifdef DEBUG_INCLUDE
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::InterpretIncludeFile() entered\n   lastIncludeFile='%s'\n   "
-       "currentScriptBeingRead='%s'\n", lastIncludeFile.c_str(), currentScriptBeingRead.c_str());
+      ("ScriptInterpreter::InterpretIncludeFile() entered, inCmd=<%p>\n"
+       "   lastIncludeFile='%s'\n   currentScriptBeingRead='%s'\n",
+       inCmd, lastIncludeFile.c_str(), currentScriptBeingRead.c_str());
    #endif
    
    bool retval = false;
@@ -1015,7 +1017,7 @@ bool ScriptInterpreter::InterpretIncludeFile()
       #ifdef DEBUG_INCLUDE
       MessageInterface::ShowMessage("   Calling ReadScript()\n");
       #endif
-      retval = ReadScript(NULL, true);
+      retval = ReadScript(inCmd, true);
    }
    else
    {
@@ -1197,7 +1199,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
                #ifdef DBGLVL_SCRIPT_READING
                MessageInterface::ShowMessage("   Calling InterpretIncludeFile()\n");
                #endif
-               incRetval = InterpretIncludeFile();
+               incRetval = InterpretIncludeFile(inCmd);
                #ifdef DBGLVL_SCRIPT_READING
                MessageInterface::ShowMessage("   => Returned from InterpretIncludeFile()\n");
                #endif
@@ -2041,7 +2043,10 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    #endif
    
    if (savedIncludeComment != "")
+   {
       theReadWriter->WriteText(savedIncludeComment);
+      savedIncludeComment = "";
+   }
    if (footerComment != "")
       theReadWriter->WriteText(footerComment);
    //else
@@ -2288,8 +2293,21 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
    
    #ifdef DEBUG_PARSE
    MessageInterface::ShowMessage
-      ("   prefaceComment = '%s'\n   inlineComment='%s'\n", preStr.c_str(), inStr.c_str());
+      ("   savedIncludeComment=<%s>\n", savedIncludeComment.c_str());
+   MessageInterface::ShowMessage
+      ("   prefaceComment=<%s>\n   inlineComment=<%s>\n", preStr.c_str(), inStr.c_str());
    #endif
+   
+   // If last saved include comment is the same as preface comment, reset it
+   if (savedIncludeComment == preStr)
+   {
+      #ifdef DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("   Last saved include comment is the same as preface comment, "
+          "so it was reset\n");
+      #endif
+      savedIncludeComment = "";
+   }
    
    #ifdef DEBUG_COMMAND_MODE_TOGGLE
       if (!inCommandMode)
@@ -2777,8 +2795,20 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       attrStr = preStr;
       attrInLineStr = inStr;
       
+      #ifdef DEBUG_PARSE_ASSIGNMENT
+      MessageInterface::ShowMessage
+         ("   attrStr=<%s>\n   attrInLineStr=<%s>\n", attrStr.c_str(), attrInLineStr.c_str());
+      #endif
+      
       if (attrStr != "")
+      {
+         #ifdef DEBUG_PARSE_ASSIGNMENT
+         MessageInterface::ShowMessage
+            ("   Calling SetAttributeCommentLine() paramID=%d, attrStr=<%s>\n",
+             paramID, attrStr.c_str());
+         #endif
          owner->SetAttributeCommentLine(paramID, attrStr);
+      }
       
       if (attrInLineStr != "")
       {
