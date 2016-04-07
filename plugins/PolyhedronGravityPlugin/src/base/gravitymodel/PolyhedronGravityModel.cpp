@@ -67,7 +67,8 @@ PolyhedronGravityModel::PolyhedronGravityModel(const std::string &name):
    bodyShapeFilename        (""),
    polybody                 (NULL),
    sumWf                    (0.0),
-   isPHGMInitialized        (false)
+   isPHGMInitialized        (false),
+   isShapeLoaded            (false)
 {
    #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("PolyhedronGravityModel default construction <%p>\n", this);
@@ -99,7 +100,8 @@ PolyhedronGravityModel::PolyhedronGravityModel(const PolyhedronGravityModel& pol
    bodyShapeFilename    (polgm.bodyShapeFilename),
    polybody					(NULL),
    sumWf                (0.0),
-   isPHGMInitialized    (false)
+   isPHGMInitialized    (false),
+   isShapeLoaded        (false)
 {
    #ifdef DEBUG_CONSTRUCTION
 	  MessageInterface::ShowMessage("PolyhedronGravityModel copy construction <%p>\n", this);
@@ -128,6 +130,7 @@ PolyhedronGravityModel& PolyhedronGravityModel::operator= (const PolyhedronGravi
    bodyDensity			   = polgm.bodyDensity;
    bodyShapeFilename	   = polgm.bodyShapeFilename;
    isPHGMInitialized    = false;
+   isShapeLoaded        = false;
    sumWf                = 0.0;
 
    if(polybody)
@@ -1156,8 +1159,12 @@ Real PolyhedronGravityModel::GetAltitude(Rvector3& r, GmatEpoch time)
    Real r1, r2, r3;
 
    Real alt, distance = 1.0e300;
-   polybody->LoadBodyShape();
-   polybody->FaceNormals();
+   if (!isShapeLoaded)
+   {
+      polybody->LoadBodyShape();
+      polybody->FaceNormals();
+      isShapeLoaded = true;
+   }
 
    #ifdef DEBUG_SOLID_ANGLE
       MessageInterface::ShowMessage("   Shape data loaded: %d faces found,"

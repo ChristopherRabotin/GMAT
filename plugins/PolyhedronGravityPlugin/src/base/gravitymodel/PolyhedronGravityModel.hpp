@@ -124,7 +124,7 @@ private:
    /// Calculation value used to detect when we are inside of the body
    Real                 sumWf;
    bool                 isPHGMInitialized;       
-
+   bool                 isShapeLoaded;
 };
 
 #endif /* PolyhedronGravityModel_hpp */
