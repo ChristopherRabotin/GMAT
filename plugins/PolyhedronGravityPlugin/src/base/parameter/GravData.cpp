@@ -165,9 +165,9 @@ Real GravData::GetGravReal(const std::string &str)
 
    Real retval = 0.0;
 
-   if (str == "SurfaceContact")
+   if (str == "SurfaceHeight")
    {
-      // SurfaceContact: a measure of the altitude of from body, based on model
+      // SurfaceHeight: a measure of the altitude of from body, based on model
       // Default the return to be outside of the body
       retval = 1000.0;
 

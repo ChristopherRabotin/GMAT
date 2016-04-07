@@ -26,13 +26,13 @@
 /**
  * Class used to stop on a Celestial Body's surface.
  */
-class POLYHEDRONGRAVITYMODEL_API SurfaceContact : public GravReal
+class POLYHEDRONGRAVITYMODEL_API SurfaceHeight : public GravReal
 {
 public:
-   SurfaceContact(const std::string &name = "", GmatBase *obj = NULL);
-   virtual ~SurfaceContact();
-   SurfaceContact(const SurfaceContact& sc);
-   SurfaceContact& operator=(const SurfaceContact& sc);
+   SurfaceHeight(const std::string &name = "", GmatBase *obj = NULL);
+   virtual ~SurfaceHeight();
+   SurfaceHeight(const SurfaceHeight& sc);
+   SurfaceHeight& operator=(const SurfaceHeight& sc);
 
    // methods inherited from Parameter
    virtual bool Evaluate();

@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include "GravityParameterFactory.hpp"
-#include "SurfaceContact.hpp"
+#include "SurfaceHeight.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ GravityParameterFactory::GravityParameterFactory() :
 {
    if (creatables.empty())
    {
-      creatables.push_back("SurfaceContact");
+      creatables.push_back("SurfaceHeight");
    }
 }
 
@@ -81,7 +81,7 @@ GravityParameterFactory::GravityParameterFactory(
 {
    if (creatables.empty())
    {
-      creatables.push_back("SurfaceContact");
+      creatables.push_back("SurfaceHeight");
    }
 }
 
@@ -138,8 +138,8 @@ StringArray GravityParameterFactory::GetListOfCreatableObjects(
    /// fixed
    if (!registrationComplete)
    {
-      Parameter *param = CreateParameter("SurfaceContact",
-            "DefaultSC.DefaultFM.SurfaceContact");
+      Parameter *param = CreateParameter("SurfaceHeight",
+            "DefaultSC.DefaultFM.SurfaceHeight");
       delete param;
 
 //      // Here's how I think we might do this -- but this doesn't work:
@@ -177,8 +177,8 @@ Parameter* GravityParameterFactory::CreateParameter(const std::string& ofType,
             "Parameter...", ofType.c_str());
    #endif
 
-   if (ofType == "SurfaceContact")
-      retval = new SurfaceContact(withName);
+   if (ofType == "SurfaceHeight")
+      retval = new SurfaceHeight(withName);
 
    #ifdef DEBUG_CREATION
       MessageInterface::ShowMessage("output pointer is <%p>\n", retval);
