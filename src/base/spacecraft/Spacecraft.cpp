@@ -94,6 +94,7 @@
 //#define DEBUG_SPACECRAFT_STM
 //#define DEBUG_SC_NAIF_ID
 //#define DEBUG_ESTIMATION
+//#define DEBUG_ATTRIB_COMMENT
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -1533,36 +1534,49 @@ const std::string Spacecraft::GetAttributeCommentLine(Integer index)
    
    std::string comment;
    std::string text = GetParameterText(index);
-
+   Integer paramId = GetParameterID(text);
    #ifdef DEBUG_ATTRIB_COMMENT
-   MessageInterface::ShowMessage("===> text='%s'\n", text.c_str());
+   MessageInterface::ShowMessage
+      ("   => parameter text='%s', id=%d\n", text.c_str(), paramId);
+   MessageInterface::ShowMessage
+      ("   CART_X=%d, EndMultipleReps=%d, ATTITUDE=%d, ATTITUDE_ID_OFFSET=%d\n",
+       CART_X, EndMultipleReps, ATTITUDE, ATTITUDE_ID_OFFSET);
    #endif
    
    // Return attribute comment for multiple state reps here
-   if (((index >= CART_X) && (index < EndMultipleReps)) || (index == ATTITUDE))
+   if (((paramId >= CART_X) && (paramId < EndMultipleReps)) || (paramId == ATTITUDE))
    {
       if (attribCommentLineMap.find(text) != attribCommentLineMap.end())
          comment = attribCommentLineMap[text];
 
       #ifdef DEBUG_ATTRIB_COMMENT
       MessageInterface::ShowMessage
-         ("===> Returning '%s' for '%s'\n", comment.c_str(), text.c_str());
+         ("Spacecraft::GetAttributeCommentLine() Returning '%s' for '%s'\n",
+          comment.c_str(), text.c_str());
       #endif
       return comment;
    }
-   else if (index >= ATTITUDE_ID_OFFSET)
+   else if (paramId >= ATTITUDE_ID_OFFSET)
    {
       if (attitude)
-         comment = attitude->GetAttributeCommentLine(index - ATTITUDE_ID_OFFSET);
+         comment = attitude->GetAttributeCommentLine(paramId - ATTITUDE_ID_OFFSET);
       
       #ifdef DEBUG_ATTRIB_COMMENT
       MessageInterface::ShowMessage
-         ("===> Returning '%s' for Attitude\n", comment.c_str());
+         ("Spacecraft::GetAttributeCommentLine() Returning '%s' for Attitude\n",
+          comment.c_str());
       #endif
       return comment;
    }
    else
-      return SpaceObject::GetAttributeCommentLine(index);
+   {
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("Spacecraft::GetAttributeCommentLine() Returning SpaceObject::"
+          "GetAttributeCommentLine()\n");
+      #endif
+      return SpaceObject::GetAttributeCommentLine(paramId);
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -1573,22 +1587,26 @@ void Spacecraft::SetAttributeCommentLine(Integer index,
 {
    #ifdef DEBUG_ATTRIB_COMMENT
    MessageInterface::ShowMessage
-      ("===> Spacecraft::SetAttributeCommentLine() entered, index=%d, comment='%s'\n",
+      ("Spacecraft::SetAttributeCommentLine() entered, index=%d, comment='%s'\n",
        index, comment.c_str());
    #endif
    std::string text = GetParameterText(index);
-
+   
    #ifdef DEBUG_ATTRIB_COMMENT
-   MessageInterface::ShowMessage("===> text='%s'\n", text.c_str());
+   MessageInterface::ShowMessage("   => parameter text='%s'\n", text.c_str());
+   MessageInterface::ShowMessage
+      ("   CART_X=%d, EndMultipleReps=%d, ATTITUDE=%d\n", CART_X, EndMultipleReps, ATTITUDE);
    #endif
    
    // Save attribute comment for multiple state reps here
    if (((index >= CART_X) && (index < EndMultipleReps)) || (index == ATTITUDE))
    {
-      attribCommentLineMap[text] = comment;
       #ifdef DEBUG_ATTRIB_COMMENT
-      MessageInterface::ShowMessage("===> '%s' set to attribCommentLineMap\n", text.c_str());
+      MessageInterface::ShowMessage
+         ("   => Setting attribCommentLineMap[%s] to '%s'\n", text.c_str(),
+          comment.c_str());
       #endif
+      attribCommentLineMap[text] = comment;
    }
    else if (index >= ATTITUDE_ID_OFFSET)
    {
@@ -1597,6 +1615,11 @@ void Spacecraft::SetAttributeCommentLine(Integer index,
    }
    else
       SpaceObject::SetAttributeCommentLine(index, comment);
+   
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage
+      ("Spacecraft::SetAttributeCommentLine() leaving, index=%d\n\n", index);
+   #endif
 }
 
 //---------------------------------------------------------------------------
@@ -1611,11 +1634,14 @@ const std::string Spacecraft::GetInlineAttributeComment(Integer index)
    
    std::string comment;
    std::string text = GetParameterText(index);
+   Integer paramId = GetParameterID(text);
    #ifdef DEBUG_ATTRIB_COMMENT
-   MessageInterface::ShowMessage("===> text='%s'\n", text.c_str());
+   MessageInterface::ShowMessage
+      ("   => parameter text='%s', id=%d\n", text.c_str(), paramId);
    #endif
+   
    // Return inline attribute comment for multiple state reps here
-   if (((index >= CART_X) && (index < EndMultipleReps)) || (index == ATTITUDE))
+   if (((paramId >= CART_X) && (paramId < EndMultipleReps)) || (paramId == ATTITUDE))
    {
       if (inlineAttribCommentMap.find(text) != inlineAttribCommentMap.end())
          comment = inlineAttribCommentMap[text];
@@ -1626,10 +1652,10 @@ const std::string Spacecraft::GetInlineAttributeComment(Integer index)
       #endif
       return comment;
    }
-   else if (index >= ATTITUDE_ID_OFFSET)
+   else if (paramId >= ATTITUDE_ID_OFFSET)
    {
       if (attitude)
-         comment = attitude->GetInlineAttributeComment(index - ATTITUDE_ID_OFFSET);
+         comment = attitude->GetInlineAttributeComment(paramId - ATTITUDE_ID_OFFSET);
       #ifdef DEBUG_ATTRIB_COMMENT
       MessageInterface::ShowMessage
          ("Spacecraft::GetInlineAttributeComment() returning '%s' for Attitude\n",
@@ -1638,7 +1664,14 @@ const std::string Spacecraft::GetInlineAttributeComment(Integer index)
       return comment;
    }
    else
-      return SpaceObject::GetInlineAttributeComment(index);
+   {
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("Spacecraft::GetInlineAttributeComment() Returning SpaceObject::"
+          "GetInlineAttributeComment()\n");
+      #endif
+      return SpaceObject::GetInlineAttributeComment(paramId);
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -1655,18 +1688,18 @@ void Spacecraft::SetInlineAttributeComment(Integer index,
    std::string text = GetParameterText(index);
    
    #ifdef DEBUG_ATTRIB_COMMENT
-   MessageInterface::ShowMessage("   parameter text='%s'\n", text.c_str());
+   MessageInterface::ShowMessage("   => parameter text='%s'\n", text.c_str());
    #endif
    
    // Save inline attribute comment for multiple state reps here
    if (((index >= CART_X) && (index < EndMultipleReps)) || (index == ATTITUDE))
    {
-      inlineAttribCommentMap[text] = comment;
-      
       #ifdef DEBUG_ATTRIB_COMMENT
       MessageInterface::ShowMessage
-         ("   '%s' set to inlineAttribCommentMap\n", text.c_str());
+         ("   => Setting inlineAttribCommentMap[%s] to '%s'\n", text.c_str(),
+          comment.c_str());
       #endif
+      inlineAttribCommentMap[text] = comment;
    }
    else if (index >= ATTITUDE_ID_OFFSET)
    {
@@ -1678,7 +1711,18 @@ void Spacecraft::SetInlineAttributeComment(Integer index,
          attitude->SetInlineAttributeComment(index - ATTITUDE_ID_OFFSET, comment);
    }
    else
+   {
+      #ifdef DEBUG_ATTRIB_COMMENT
+      MessageInterface::ShowMessage
+         ("   Calling SpaceObject::SetInlineAttributeComment()\n");
+      #endif
       SpaceObject::SetInlineAttributeComment(index, comment);
+   }
+   
+   #ifdef DEBUG_ATTRIB_COMMENT
+   MessageInterface::ShowMessage
+      ("Spacecraft::SetInlineAttributeComment() leaving, index=%d\n\n", index);
+   #endif
 }
 
 //------------------------------------------------------------------------------
