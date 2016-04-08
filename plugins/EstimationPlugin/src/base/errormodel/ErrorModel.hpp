@@ -133,6 +133,9 @@ protected:
    static const Gmat::ParameterType
                 PARAMETER_TYPE[ErrorModelParamCount - GmatBaseParamCount];
 
+private:
+   StringArray    GetAllAvailableTypes();
+
 };
 
 #endif /* ErrorModel_hpp */

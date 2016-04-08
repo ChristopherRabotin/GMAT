@@ -21,7 +21,9 @@
 
 
 #include "ErrorModel.hpp"
+#include "StringUtil.hpp"
 #include "GmatBase.hpp"
+#include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>
 
@@ -384,8 +386,41 @@ std::string ErrorModel::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
 {
+   if (id == SOLVEFORS)
+   {
+      std::string value1 = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
+      if (value1 == "")
+         return true;
+
+      std::string::size_type pos = value1.find_first_of(',');
+      Integer i = 0;
+      while (pos != value.npos)
+      {
+         std::string value2 = value1.substr(0, pos);
+         value1 = value1.substr(pos+1);
+         SetStringParameter(id, value2, i);
+         ++i;
+         pos = value1.find_first_of(',');
+      }
+      SetStringParameter(id, value1, i);
+   }
+
    if (id == TYPE)
    {
+      // Get a list of all available types
+      StringArray typesList = GetAllAvailableTypes();
+      bool found = false;
+      for (Integer i = 0; i < typesList.size(); ++i)
+      {
+         if (typesList[i] == value)
+         {
+            found = true;
+            break;
+         }
+      }
+      if (!found)
+         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Type parameter is an invalid measurement type.\n");
+
       measurementType = value;
       return true;
    }
@@ -531,6 +566,10 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
    {                                                                                // made changes by TUAN NGUYEN
+      if (!GmatStringUtil::IsValidIdentity(value))                                  // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: '" + value + "' is an invalid value. "  // made changes by TUAN NGUYEN
+         + GetName() + ".SolveFors parameter only accepts Bias as a solve-for.\n"); // made changes by TUAN NGUYEN
+
       if ((0 <= index)&&(index < (Integer)solveforNames.size()))                    // made changes by TUAN NGUYEN
       {                                                                             // made changes by TUAN NGUYEN
          solveforNames[index] = value;                                              // made changes by TUAN NGUYEN
@@ -806,4 +845,16 @@ Real* ErrorModel::GetEstimationParameterValue(const Integer item)
    return retval;
 }
 
+
+StringArray ErrorModel::GetAllAvailableTypes()
+{
+   StringArray sa;
+
+   sa.push_back("Range_KM");
+   sa.push_back("Range_RU");
+   sa.push_back("Doppler_HZ");
+   sa.push_back("Doppler_RangeRate");
+
+   return sa;
+}
 
