@@ -17,14 +17,19 @@
 # different file by setting debugfile (see below).
 #
 
-# First, we want to find out exactly where this script is
+# First, we want to find out exactly where this script is, relative
+# to where it was invoked (when running the app bundle from the Finder,
+# this should be the absolute path).
 here="${0%/*}"
+# if we need the absolute path every time
+hereTwo="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Set debug flag and file here ......................
 debugit='false'
 if [ $debugit = 'true' ]
 then
    debugfile="$here/debugrungmat.txt"
+   echo "The value of debugfile is "$debugfile"" > $debugfile
 fi
 # ...................................................
 
@@ -42,7 +47,9 @@ FILE="$here/../../../gmat_startup_file.txt"
 # begin debugging
 if [ $debugit = 'true' ]
 then
-   echo "The meaning of here is "$here"" > $debugfile
+   echo "DEBUG " >> $debugfile
+   echo "The meaning of hereTwo is "$hereTwo"" >> $debugfile
+   echo "The meaning of here is "$here"" >> $debugfile
    echo "The meaning of cmd is "$cmd"" >> $debugfile
    pwd >> $debugfile
    if [ -f $FILE ]

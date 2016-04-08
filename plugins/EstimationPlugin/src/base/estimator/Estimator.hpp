@@ -49,7 +49,10 @@ public:
    Estimator(const Estimator& est);
    Estimator& operator=(const Estimator& est);
 
+   virtual void         SetSolarSystem(SolarSystem *ss);       // made changes by TUAN NGUYEN
+
    virtual bool         Initialize();
+   bool                 Reinitialize();                        // made changes by TUAN NGUYEN
    virtual void         CompleteInitialization();
    virtual bool         Finalize();
 
@@ -61,9 +64,14 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                        const Real value);
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -82,6 +90,11 @@ public:
    virtual std::string  GetOnOffParameter(const std::string &label) const;
    virtual bool         SetOnOffParameter(const std::string &label,
                                           const std::string &value);
+
+   virtual bool         GetBooleanParameter(const Integer id) const;                 // made changes by TUAN NGUYEN
+   virtual bool         SetBooleanParameter(const Integer id,                        // made changes by TUAN NGUYEN
+                                            const bool value);                       // made changes by TUAN NGUYEN
+
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
 
@@ -126,10 +139,17 @@ public:
 
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
+   virtual void UpdateClonedObjectParameter(GmatBase *obj,
+         Integer updatedParameterId);
+
+   void                SetDelayInitialization(bool delay); 
 
 protected:
-   /// Names of the measurement objects used in the estimation
+///// TBD: Do we need to separate TS and MM like this going forward?
+   /// Names of measurements and tracking systems used in the estimation
    StringArray             measurementNames;
+   /// Names of the measurement models used in the estimation
+   StringArray             modelNames;
    /// The solve for parameters in the estimation problem
    StringArray             solveForStrings;
    /// The consider parameters in the estimation problem
@@ -178,6 +198,12 @@ protected:
    std::vector<RealArray>  hTilde;
    /// The accumulated measurement data (transformed to the estimation epoch)
    std::vector<RealArray>  hAccum;
+
+   /// Weight, Observation data, calculated data
+   RealArray Weight;
+   RealArray OData;        // correction value of observation data
+   RealArray CData;
+
    /// The indices for the MeasurementModels with observations at current epoch
    IntegerArray            modelsToAccess;
 
@@ -185,10 +211,27 @@ protected:
    Rmatrix                 *stm;
    /// The estimation state covariance matrix
    Covariance              *stateCovariance;
-   /// The estimated state
+   /// The estimated state in GMAT internal coordinate system
    GmatState               *estimationState;
+   /// The previous estimated state    in GMAT internal coordinate system
+   GmatState               oldEstimationState;
+   
+   /// Apriori state (solve-for) presenting in participants' cooridnate systems
+   GmatState aprioriSolveForState;
+   /// The previous state (solve-for) presenting in participants' coordinate systems
+   GmatState previousSolveForState;
+   /// The current state (solve-for) presenting in participants' coordinate systems
+   GmatState currentSolveForState;
+
+
    /// Size of the estimation state vector
    UnsignedInt             stateSize;
+   /// The estimated state
+   GmatState               initialEstimationState;
+
+   /// Estimation status
+   Integer                 estimationStatus;
+
 
    /// The information matrix, $\Lambda$
    Rmatrix                 information;
@@ -222,6 +265,24 @@ protected:
    /// Flag indicating is an Event is currently being located
    bool                    locatingEvent;
 
+
+   /// Parameters for data sigma editting
+   Real maxResidualMult;
+   Real constMult;
+   Real additiveConst;
+
+   /// Flag indicating to reset best RMS when estimation is diverged                      // made changes by TUAN NGUYEN 
+   bool resetBestRMSFlag;                                                                  // made changes by TUAN NGUYEN
+
+   /// Number of removed observation data records
+   std::map<std::string, UnsignedInt> numRemovedRecords;
+
+   /// A string as a line/lines buffer to store a line/lines for writing to report file
+   std::string linesBuff;
+
+   /// Solar system         // It needs to display information of central bodies in estimation report file      // made changes by TUAN NGUYEN
+   SolarSystem *solarSystem;                                                                                    // made changes by TUAN NGUYEN                  
+
    /// Parameters associated with the Estimators
    enum
    {
@@ -232,6 +293,11 @@ protected:
       PROPAGATOR,
       SHOW_RESIDUALS,
       ADD_RESIDUAL_PLOT,
+      MAX_RESIDUAL_MULTIPLIER,
+      CONSTANT_MULTIPLIER,
+      ADDITIVE_CONSTANT,
+      RESET_BEST_RMS,                         // made changes by TUAN NGUYEN
+      CONVERGENT_STATUS,
       EstimatorParamCount
    };
 
@@ -243,7 +309,7 @@ protected:
                                PARAMETER_TYPE[EstimatorParamCount -
                                               SolverParamCount];
 
-   virtual bool            TestForConvergence(std::string &reason);
+   virtual Integer         TestForConvergence(std::string &reason);
 
    Real                    ConvertToRealEpoch(const std::string &theEpoch,
                                               const std::string &theFormat);
@@ -257,6 +323,27 @@ protected:
    virtual Integer         SetSolverResults(Real*, const std::string&,
                                             const std::string&);
    virtual void            SetResultValue(Integer, Real, const std::string&);
+
+///// TBD: Do simulators need this too?  If so, move to base class
+   virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);
+   virtual void            GetEstimationState(GmatState& outputState);
+   virtual void            GetEstimationStateForReport(GmatState& outputState);
+
+   /// Estimation status contains all status of an estimation
+   enum EstimationStatus
+   {
+      UNKNOWN,
+      ABSOLUTETOL_CONVERGED,
+      RELATIVETOL_CONVERGED,
+      ABS_AND_REL_TOL_CONVERGED,
+      MAX_CONSECUTIVE_DIVERGED,
+      MAX_ITERATIONS_DIVERGED,
+      CONVERGING,
+      DIVERGING,
+   };
+
+private:
+   bool      delayInitialization;            // made changes by TUAN NGUYEN
 };
 
 #endif /* Estimator_hpp */

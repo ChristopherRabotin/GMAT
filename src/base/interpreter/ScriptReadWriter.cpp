@@ -42,6 +42,7 @@ const std::string ScriptReadWriter::ellipsis = "...";
 
 //#define DEBUG_SCRIPT_READ
 //#define DEBUG_FIRST_BLOCK
+//#define DEBUG_ELLIPSIS
 
 //---------------------------------
 // public
@@ -432,14 +433,37 @@ bool ScriptReadWriter::IsBlank(const std::string &text)
 //------------------------------------------------------------------------------
 bool ScriptReadWriter::HasEllipse(const std::string &text)
 {
+   #ifdef DEBUG_ELLIPSE
+   MessageInterface::ShowMessage
+      ("ScriptReadWriter::HasEllipse() entered,\n   text = <%s>\n", text.c_str());
+   #endif
+   
    std::string ellipsis = "...";
 
    int pos = text.find(ellipsis,0);
+   bool ellipsisFound = false;
    
    if (pos < 0)
-      return false;
+   {
+      ellipsisFound = false;
+   }
    else
-      return true;
+   {
+      std::string newStr = GmatStringUtil::Trim(text, GmatStringUtil::TRAILING, true);
+      #ifdef DEBUG_ELLIPSE
+      MessageInterface::ShowMessage("   newStr = <%s>\n", newStr.c_str());
+      #endif
+      if (GmatStringUtil::EndsWith(newStr, ellipsis))
+         ellipsisFound = true;
+      else
+         ellipsisFound = false;
+   }
+   
+   #ifdef DEBUG_ELLIPSE
+   MessageInterface::ShowMessage
+      ("ScriptReadWriter::HasEllipse() <%s> returning %d\n", text.c_str(), ellipsisFound);
+   #endif
+   return ellipsisFound;
 }
 
 //------------------------------------------------------------------------------
@@ -447,11 +471,23 @@ bool ScriptReadWriter::HasEllipse(const std::string &text)
 //------------------------------------------------------------------------------
 std::string ScriptReadWriter::HandleEllipsis(const std::string &text)
 {
+   #ifdef DEBUG_ELLIPSIS
+   MessageInterface::ShowMessage
+      ("ScriptReadWriter::HandleEllipsis() entered, text = <%s>\n", text.c_str());
+   #endif
+   
    std::string str = GmatStringUtil::Trim(text, GmatStringUtil::TRAILING);
    int pos = str.find(ellipsis,0);
    
    if (pos < 0)      // no ellipsis
+   {
+      #ifdef DEBUG_ELLIPSIS
+      MessageInterface::ShowMessage
+         ("ScriptReadWriter::HandleEllipsis() returning <%s>, no ellipsis found\n",
+          str.c_str());
+      #endif
       return str;
+   }
    
    // make sure ellipsis is at the end of the line
    if ((int)(str.size())-3 != pos)
@@ -514,6 +550,12 @@ std::string ScriptReadWriter::HandleEllipsis(const std::string &text)
    }
    
    result += str;
+   
+   #ifdef DEBUG_ELLIPSIS
+   MessageInterface::ShowMessage
+      ("ScriptReadWriter::HandleEllipsis() returning <%s>\n", result.c_str());
+   #endif
+   
    return result;
 }
 

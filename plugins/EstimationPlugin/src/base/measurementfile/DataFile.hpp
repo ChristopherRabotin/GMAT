@@ -37,6 +37,7 @@
 #include "estimation_defs.hpp"
 #include "GmatBase.hpp"
 #include "ObType.hpp"
+#include "DataFilter.hpp"                            // made changes by TUAN NGUYEN
 #include "MeasurementData.hpp"
 #include "ObservationData.hpp"
 
@@ -85,16 +86,38 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
+
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string& label) const;
+   virtual Real         SetRealParameter(const std::string& label,
+                                         const Real value);
+
+
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
+
+   virtual bool         SetDataFilter(DataFilter *filter);                                     // made changes by TUAN NGUYEN
+   virtual std::vector<DataFilter*>&  GetFilterList();                                         // made changes by TUAN NGUYEN
 
    virtual bool         SetStream(ObType *thisStream);
    virtual bool         OpenStream(bool simulate = false);
    virtual bool         IsOpen();
    virtual void         WriteMeasurement(MeasurementData* theMeas);
    virtual ObservationData*
-                        ReadObservation();
+                        ReadObservation();                                                    // made changes by TUAN NGUYEN
+///// TBD: Determine if there is a more generic way to add these
+   virtual RampTableData* 
+                        ReadRampTableData();
+
    virtual bool         CloseStream();
+
+   ObservationData*     FilteringData(ObservationData* dataObject, Integer& rejectedReason);   // made changes by TUAN NGUYEN
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
@@ -106,15 +129,40 @@ protected:
 
    /// Name of the data stream
    std::string    streamName;
-   /// Text description of the observation type
+   /// Text description of the observation data type
    std::string    obsType;
+
+   /// This section is set for new design data filter                                         // made changes by TUAN NGUYEN
+   /// List of data filters                                                                   // made changes by TUAN NGUYEN
+   std::vector<DataFilter*>  filterList;                                                      // made changes by TUAN NGUYEN
+
+   /// This section is set for old design data filter
+   /// Data thinning ratio
+   Real thinningRatio;                     // data thinning ratio specify the ratio between the selected data records and total all records
+   /// List of station IDs
+   StringArray selectedStationIDs;         // list of stationIDs included in data file
+
+   /// Range of epoch is specified by start epoch and end epoch and format used by epoch
+   std::string         epochFormat;
+   std::string         startEpoch;
+   std::string         endEpoch;
+   /// Start epoch for the estimation
+   GmatEpoch           estimationStart;
+   /// End epoch for the end of the estimation
+   GmatEpoch           estimationEnd;
+
 
    /// Class parameter ID enumeration
    enum
    {
-       StreamName = GmatBaseParamCount,
-       ObsType,
-       DataFileParamCount
+      StreamName = GmatBaseParamCount,
+      ObsType,
+      DataThinningRatio,
+      SelectedStationIDs,
+      EpochFormat,
+      StartEpoch,
+      EndEpoch,
+      DataFileParamCount
    };
 
    // Start with the parameter IDs and associates strings
@@ -124,6 +172,17 @@ protected:
    /// Types of the DataFile parameters
    static const Gmat::ParameterType
                 PARAMETER_TYPE[DataFileParamCount - GmatBaseParamCount];
+
+private:
+   Real             ConvertToRealEpoch(const std::string &theEpoch, const std::string &theFormat);
+
+   ObservationData* FilteringDataForNewSyntax(ObservationData* dataObject, Integer& filterIndex);     // made changes by TUAN NGUYEN
+   ObservationData* FilteringDataForOldSyntax(ObservationData* dataObject, Integer& rejectedReason);  // made changes by TUAN NGUYEN
+
+   ObservationData  od_old;                                                                           // made changes by TUAN NGUYEN
+   Real             acc;                                                                              // made changes by TUAN NGUYEN
+   Real             epoch1;                                                                           // made changes by TUAN NGUYEN
+   Real             epoch2;                                                                           // made changes by TUAN NGUYEN
 };
 
 #endif /* DataFile_hpp */

@@ -22,6 +22,7 @@
 //#define DEBUG_CALCULATION
 //#define DEBUG_DERIVATIVE
 //#define DEBUG_REGISTRATION
+//#define DEBUG_SOLID_ANGLE
 
 
 using namespace GmatMathUtil;
@@ -65,7 +66,9 @@ PolyhedronGravityModel::PolyhedronGravityModel(const std::string &name):
    bodyDensity				    (1000.0),
    bodyShapeFilename        (""),
    polybody                 (NULL),
-   isPHGMInitialized        (false)
+   sumWf                    (0.0),
+   isPHGMInitialized        (false),
+   isShapeLoaded            (false)
 {
    #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("PolyhedronGravityModel default construction <%p>\n", this);
@@ -96,7 +99,9 @@ PolyhedronGravityModel::PolyhedronGravityModel(const PolyhedronGravityModel& pol
    bodyDensity				(polgm.bodyDensity),
    bodyShapeFilename    (polgm.bodyShapeFilename),
    polybody					(NULL),
-   isPHGMInitialized    (false)
+   sumWf                (0.0),
+   isPHGMInitialized    (false),
+   isShapeLoaded        (false)
 {
    #ifdef DEBUG_CONSTRUCTION
 	  MessageInterface::ShowMessage("PolyhedronGravityModel copy construction <%p>\n", this);
@@ -125,6 +130,8 @@ PolyhedronGravityModel& PolyhedronGravityModel::operator= (const PolyhedronGravi
    bodyDensity			   = polgm.bodyDensity;
    bodyShapeFilename	   = polgm.bodyShapeFilename;
    isPHGMInitialized    = false;
+   isShapeLoaded        = false;
+   sumWf                = 0.0;
 
    if(polybody)
       delete polybody;
@@ -168,7 +175,7 @@ bool PolyhedronGravityModel::Initialize()
             #endif
             if (polybody == NULL)
             {
-			      // create a PolyhedronBody object for the asteroid in order to calcullate gravity at spacecrafts' locations:
+			      // create a PolyhedronBody object for the asteroid in order to calculate gravity at spacecrafts' locations:
                polybody = new PolyhedronBody(bodyShapeFilename);
                retval = polybody->Initialize();								// initialize() will load body shape information from data file
                firstcalculation = true;
@@ -413,7 +420,7 @@ bool PolyhedronGravityModel::Calculation(Rvector6 x, Rvector6& xdot, Rmatrix66& 
    Rvector3 sumFace(0.0, 0.0, 0.0);
    Rmatrix33 sumEdgeA(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    Rmatrix33 sumFaceA(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-   Real sumWf = 0.0;
+   sumWf = 0.0;
 
    // Calculate face normals, edges, and vertices
    polybody->LoadBodyShape();
@@ -574,18 +581,11 @@ bool PolyhedronGravityModel::Calculation(Rvector6 x, Rvector6& xdot, Rmatrix66& 
 			 n(1)*n(0), n(1)*n(1), n(1)*n(2),
 			 n(2)*n(0), n(2)*n(1), n(2)*n(2));
 
-	  //MessageInterface::ShowMessage(" Ff = [ %le,  %le,  %le, \n", Ff(0,0), Ff(0,1), Ff(0,2));
-	  //MessageInterface::ShowMessage("        %le,  %le,  %le, \n", Ff(1,0), Ff(1,1), Ff(1,2));
-	  //MessageInterface::ShowMessage("        %le,  %le,  %le ]\n", Ff(2,0), Ff(2,1), Ff(2,2));
-     
 	  // face vertices:
 	  PolygonFace face = polybody->facesList[i];
 	  A = polybody->verticesList[face[0]];
 	  B = polybody->verticesList[face[1]];
 	  C = polybody->verticesList[face[2]];
-//	  MessageInterface::ShowMessage("A index = %d: A = (%le, %le, %le)\n", face[0], A(0), A(1), A(2));
-//	  MessageInterface::ShowMessage("B index = %d: B = (%le, %le, %le)\n", face[1], B(0), B(1), B(2));
-//	  MessageInterface::ShowMessage("C index = %d: C = (%le, %le, %le)\n", face[2], C(0), C(1), C(2));
 
 	  // Calculate vectors from field point to face vertices:
 	  R1 = A-r;
@@ -595,28 +595,20 @@ bool PolyhedronGravityModel::Calculation(Rvector6 x, Rvector6& xdot, Rmatrix66& 
 	  r1 = R1.Norm();
 	  r2 = R2.Norm();
 	  r3 = R3.Norm();
-//	  MessageInterface::ShowMessage("R1 = (%le, %le, %le)\n", R1(0), R1(1), R1(2));
-//	  MessageInterface::ShowMessage("R2 = (%le, %le, %le)\n", R2(0), R2(1), R2(2));
-//	  MessageInterface::ShowMessage("R3 = (%le, %le, %le)\n", R3(0), R3(1), R3(2));
-
-     //MessageInterface::ShowMessage(" r1 = %le,   r2 = %le,   r3 = %le\n", r1, r2, r3);
 
 	  cR23.Set(-R2(2)*R3(1) + R2(1)*R3(2),
 			    R2(2)*R3(0) - R2(0)*R3(2),
 			   -R2(1)*R3(0) + R2(0)*R3(1));
-//	  MessageInterface::ShowMessage("cR23 = (%le, %le, %le)\n", cR23(0), cR23(1), cR23(2));
-	  // [0 -R2(3) R2(2); R2(3) 0 -R2(1); -R2(2) R2(1) 0]*R3;
 
 	  // Calculate the solid angle term, wf:
 	  wf = 2*atan2(R1*cR23,
 	        (r1*r2*r3+r1*R2*R3+r2*R3*R1+r3*R1*R2));
-//	  MessageInterface::ShowMessage("wf = %18.12le\n", wf);
 
 	  // Sum the face gravity contributions
 	  sumFace = sumFace + Ff*R1*wf;
 	  sumWf = sumWf + wf;
 
-	  // Calculate variational terms (if requested)"
+	  // Calculate variational terms (if requested)
 //	    if nargout > 1
 	  sumFaceA = sumFaceA + Ff*wf;
 //	    end
@@ -958,13 +950,13 @@ bool PolyhedronGravityModel::GetDerivatives(Real * state, Real dt, Integer order
 	  for (int i=0; i < 6; ++i)
 	     deriv[i] = xdot.GetElement(i);
 
-	  #ifdef DEBUG_DERIVATIVE
-		 MessageInterface::ShowMessage("\n xdot in the bodyMJ2000Eq =   %le km/s,   %le km/s,   %le km/s,   %le km/s^2,   %le km/s^2,   %le km/s^2\n\n", xdot[0], xdot[1], xdot[2], xdot[3], xdot[4], xdot[5]);
-	     MessageInterface::ShowMessage("End PolyhedronGravityModel::GetDerivatives()\n");
-		 MessageInterface::ShowMessage("----------------------------------------------------------------------------------\n");
-      #endif
+     #ifdef DEBUG_DERIVATIVE
+         MessageInterface::ShowMessage("\n xdot in the bodyMJ2000Eq =   %le km/s,   %le km/s,   %le km/s,   %le km/s^2,   %le km/s^2,   %le km/s^2\n\n", xdot[0], xdot[1], xdot[2], xdot[3], xdot[4], xdot[5]);
+         MessageInterface::ShowMessage("End PolyhedronGravityModel::GetDerivatives()\n");
+         MessageInterface::ShowMessage("----------------------------------------------------------------------------------\n");
+     #endif
    }
-   
+
    return true;
 }
 
@@ -982,12 +974,13 @@ bool PolyhedronGravityModel::GetDerivatives(Real * state, Real dt, Integer order
  * @param id State Element ID for the derivative type
  * @param index Starting index in the state vector for this type of derivative
  * @param quantity Number of objects that supply this type of data
+ * @param quantity Number of rows/columns added to the STM (not yet used here)
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool PolyhedronGravityModel::SetStart(Gmat::StateElementId id, Integer index,
-      Integer quantity)
+      Integer quantity, Integer sizeOfType)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("PolyhedronGravityModel setting start data for id = "
@@ -1038,4 +1031,193 @@ bool PolyhedronGravityModel::SupportsDerivative(Gmat::StateElementId id)
    return GravityBase::SupportsDerivative(id);
 }
 
+//------------------------------------------------------------------------------
+// Real GetSolidAngle()
+//------------------------------------------------------------------------------
+/**
+ * Returns the last computed value of the solid angle of the body.
+ *
+ * This value is usually the solid angle with respect to a state vector that was
+ * passed into the derivative calculations.  If the derivatives have not been
+ * calculated yet, the value is 0.0.  It is 4 pi when the state vector fell
+ * inside of the body at the calculation point, and 0.0 (to numerical precision)
+ * when outside of the body.
+ *
+ * @return The computed solid angle.
+ */
+//------------------------------------------------------------------------------
+Real PolyhedronGravityModel::GetSolidAngle(Rvector3 &r, GmatEpoch time)
+{
+   #ifdef DEBUG_SOLID_ANGLE
+      MessageInterface::ShowMessage("---------------------------- Solid Angle "
+            "Calculation -----------------------------\n");
+      MessageInterface::ShowMessage("Start PolyhedronGravityModel::"
+            "GetSolidAngle()\n\n");
 
+      MessageInterface::ShowMessage("Evaluating Polyhedron gravity solid angle; "
+         "epoch = %lf,  r = [%lf %lf %lf]\n", 0.0, r[0], r[1], r[2]);
+      MessageInterface::ShowMessage("body(%p) name = '%s', Poly file = %s\n", polybody,
+           (polybody != NULL ? body->GetName().c_str() : "Body is NULL"),
+           bodyShapeFilename.c_str());
+   #endif
+
+   // Specify coordinate transformation matrix:
+   now = time;
+   std::vector<Rmatrix33> transform = CalculateTransformationMatrix();
+   Rmatrix33 D = transform[0];
+   r = D*r;                            // position in BodyFixed coordinate system
+
+   if (polybody == NULL)
+      return 0.0;
+
+   Rvector3 A, B, C, cR23, n;
+   Rvector3 R1, R2, R3;
+   Real r1, r2, r3;
+
+   sumWf = 0.0;
+   polybody->LoadBodyShape();
+   polybody->FaceNormals();
+
+   #ifdef DEBUG_SOLID_ANGLE
+      MessageInterface::ShowMessage("   Shape data loaded: %d faces found,"
+            " fn size = %d\n", polybody->facesList.size(), polybody->fn.size());
+   #endif
+
+   for (Integer i = polybody->facesList.size()-1; i >= 0; --i)
+   {
+     n = polybody->fn[i];
+
+     // face vertices:
+     PolygonFace face = polybody->facesList[i];
+     A = polybody->verticesList[face[0]];
+     B = polybody->verticesList[face[1]];
+     C = polybody->verticesList[face[2]];
+
+     // Calculate vectors from field point to face vertices:
+     R1 = A-r;
+     R2 = B-r;
+     R3 = C-r;
+
+     r1 = R1.Norm();
+     r2 = R2.Norm();
+     r3 = R3.Norm();
+
+     cR23.Set(-R2(2)*R3(1) + R2(1)*R3(2),
+             R2(2)*R3(0) - R2(0)*R3(2),
+            -R2(1)*R3(0) + R2(0)*R3(1));
+
+     // Calculate the solid angle term, wf:
+     sumWf = sumWf + 2*atan2(R1*cR23,
+           (r1*r2*r3+r1*R2*R3+r2*R3*R1+r3*R1*R2));
+   }
+
+   #ifdef DEBUG_SOLID_ANGLE
+      MessageInterface::ShowMessage("SolidAngle = %le\n", sumWf);
+   #endif
+
+   return sumWf;
+}
+
+//------------------------------------------------------------------------------
+// Real GetAltitude(Rvector3& r, GmatEpoch time)
+//------------------------------------------------------------------------------
+/**
+ * Finds the distance to the closest polyhedron face
+ *
+ * @param r The spacecraft position
+ * @param time The current epoch
+ *
+ * @return The height above the plane of r for the face closest to r
+ */
+//------------------------------------------------------------------------------
+Real PolyhedronGravityModel::GetAltitude(Rvector3& r, GmatEpoch time)
+{
+   #ifdef DEBUG_SOLID_ANGLE
+      MessageInterface::ShowMessage("---------------------------- Solid Angle "
+            "Calculation -----------------------------\n");
+      MessageInterface::ShowMessage("Start PolyhedronGravityModel::"
+            "GetSolidAngle()\n\n");
+
+      MessageInterface::ShowMessage("Evaluating Polyhedron gravity solid angle; "
+         "epoch = %lf,  r = [%lf %lf %lf]\n", 0.0, r[0], r[1], r[2]);
+      MessageInterface::ShowMessage("body(%p) name = '%s', Poly file = %s\n", polybody,
+           (polybody != NULL ? body->GetName().c_str() : "Body is NULL"),
+           bodyShapeFilename.c_str());
+   #endif
+
+   // Specify coordinate transformation matrix:
+   now = time;
+   std::vector<Rmatrix33> transform = CalculateTransformationMatrix();
+   Rmatrix33 orient = transform[0];
+   r = orient * r;                   // position in BodyFixed coordinate system
+
+   if (polybody == NULL)
+      return 0.0;
+
+   Rvector3 A, B, C, D, cR23, n;
+   Rvector3 R1, R2, R3, R;
+   Real r1, r2, r3;
+
+   Real alt, distance = 1.0e300;
+   if (!isShapeLoaded)
+   {
+      polybody->LoadBodyShape();
+      polybody->FaceNormals();
+      isShapeLoaded = true;
+   }
+
+   #ifdef DEBUG_SOLID_ANGLE
+      MessageInterface::ShowMessage("   Shape data loaded: %d faces found,"
+            " fn size = %d\n", polybody->facesList.size(), polybody->fn.size());
+   #endif
+
+   Integer index = -1;
+   for (Integer i = polybody->facesList.size()-1; i >= 0; --i)
+   {
+     n = polybody->fn[i];
+
+     // face vertices:
+     PolygonFace face = polybody->facesList[i];
+     A = polybody->verticesList[face[0]];
+     B = polybody->verticesList[face[1]];
+     C = polybody->verticesList[face[2]];
+
+     // Calculate the center of the face
+     D = 1.0 / 3.0 * (A + B + C);
+     // Vector from the face center to the input position
+     R = r - D;
+
+     alt = R.Norm();
+     if (alt < distance)
+     {
+        distance = alt;
+        index = i;
+     }
+   }
+
+   if (index != -1)
+   {
+      // Compute the unit surface normal
+      PolygonFace face = polybody->facesList[index];
+      A = polybody->verticesList[face[0]];
+      B = polybody->verticesList[face[1]];
+      C = polybody->verticesList[face[2]];
+
+      D[0] = A[1]*B[2]-B[1]*A[2] + B[1]*C[2]-C[1]*B[2] + C[1]*A[2]-A[1]*C[2];
+      D[1] = A[2]*B[0]-B[2]*A[0] + B[2]*C[0]-C[2]*B[0] + C[2]*A[0]-A[2]*C[0];
+      D[2] = A[0]*B[1]-B[0]*A[1] + B[0]*C[1]-C[0]*B[1] + C[0]*A[1]-A[0]*C[1];
+
+      D /= D.Norm();
+
+      // Dot it with r to get altitude
+      alt = r * D;
+   }
+   else
+      alt = 1.0e300;
+
+   #ifdef DEBUG_SOLID_ANGLE
+      MessageInterface::ShowMessage("Altitude = %le\n", alt);
+   #endif
+
+   return alt;
+}

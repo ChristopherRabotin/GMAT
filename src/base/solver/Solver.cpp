@@ -36,6 +36,7 @@
 #include "ISolverListener.hpp"
 #include "FileManager.hpp"
 #include "OwnedPlot.hpp"            // Replace with a proxy
+#include "StringUtil.hpp"                                    // made changes by TUAN NGUYEN
 
 //#define DEBUG_SOLVER_INIT
 //#define DEBUG_SOLVER_CALC
@@ -1113,6 +1114,11 @@ bool Solver::SetStringParameter(const Integer id, const std::string &value)
    
    if (id == solverTextFileID) 
    {
+      // verify a valid file name                                                        // made changes by TUAN NGUYEN
+      Integer error;                                                                     // made changes by TUAN NGUYEN
+      if (!GmatStringUtil::IsValidFullFileName(value, error))                            // made changes by TUAN NGUYEN
+         throw SolverException("Error: '" + value + "' set to " + GetName() + ".ReportFile is an invalid file name.\n");     // made changes by TUAN NGUYEN
+
       solverTextFile = value;
       return true;
    }

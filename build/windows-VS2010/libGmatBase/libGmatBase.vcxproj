@@ -149,7 +149,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\errormodel;..\..\..\src\base\event</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -166,7 +166,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event;..\..\..\src\errormodel</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -250,7 +250,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\errormodel;..\..\..\src\base\event</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3-win64|Win32'">
@@ -414,10 +414,10 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\TopocentricAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\event\EventException.cpp" />
-    <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp" />
     <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp" />
     <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp" />
-    <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\ListenerManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\ListenerManagerInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\Moderator.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotReceiver.cpp" />
@@ -469,6 +469,7 @@
     <ClCompile Include="..\..\..\src\base\foundation\GmatBase.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\GmatBaseException.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\GmatState.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\IChangeListener.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\ObjectInitializer.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\SpacePoint.cpp" />
     <ClCompile Include="..\..\..\src\base\foundation\StateManager.cpp" />
@@ -562,7 +563,6 @@
     <ClCompile Include="..\..\..\src\base\parameter\CartesianParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\DelaunayParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EnvData.cpp" />
-    <ClCompile Include="..\..\..\src\base\parameter\EnvParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EnvReal.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EquinoctialParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ExpressionParser.cpp" />
@@ -632,6 +632,7 @@
     <ClCompile Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\LibrationPoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Moon.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Msise90Atmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\msise90_sub.c">
@@ -645,7 +646,6 @@
     <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp" />
-    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystemException.cpp" />
@@ -704,9 +704,9 @@
     <ClCompile Include="..\..\..\src\base\util\FileUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Frozen.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GravityFileUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Linear.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MemoryTracker.cpp" />
@@ -845,10 +845,10 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\TopocentricAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\event\EventException.hpp" />
-    <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp" />
     <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp" />
     <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp" />
-    <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\ListenerManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\ListenerManagerInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\Moderator.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotReceiver.hpp" />
@@ -900,6 +900,7 @@
     <ClInclude Include="..\..\..\src\base\foundation\GmatBase.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\GmatBaseException.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\GmatState.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\IChangeListener.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\ObjectInitializer.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\SpacePoint.hpp" />
     <ClInclude Include="..\..\..\src\base\foundation\StateManager.hpp" />
@@ -994,7 +995,6 @@
     <ClInclude Include="..\..\..\src\base\parameter\CartesianParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\DelaunayParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EnvData.hpp" />
-    <ClInclude Include="..\..\..\src\base\parameter\EnvParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EnvReal.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EquinoctialParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ExpressionParser.hpp" />
@@ -1070,6 +1070,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\LibrationPoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Moon.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Msise90Atmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp" />
@@ -1078,7 +1079,6 @@
     <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp" />
-    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystemException.hpp" />
@@ -1146,9 +1146,9 @@
     <ClInclude Include="..\..\..\src\base\util\Frozen.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GmatConstants.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GravityFileUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Linear.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MemoryTracker.hpp" />

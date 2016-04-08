@@ -38,6 +38,7 @@
 #include <sstream>
 
 //#define DEBUG_STK_FILE
+//#define DEBUG_INITIALIZE
 //#define DEBUG_WRITE_DATA_SEGMENT
 //#define DEBUG_FINALIZE
 
@@ -108,26 +109,29 @@ STKEphemerisFile::~STKEphemerisFile()
 //------------------------------------------------------------------------------
 void STKEphemerisFile::InitializeData()
 {
+   #ifdef DEBUG_STK_EPHEMFILE_INIT
+   MessageInterface::ShowMessage("STKEphemerisFile::InitializeData() entered\n");
+   #endif
+   
    firstTimeWriting = true;
+   openForTempOutput = true;
    
    scenarioEpochA1Mjd  = 0.0;
    coordinateSystemEpochA1Mjd = 0.0;
-   beginSegmentTimeA1Mjd = 0.0;
-   endSegmentTimeA1Mjd = 0.0;
+   beginSegmentTime = 0.0;
    lastEpochWrote = -999.999;
-   
+   beginSegmentArray.clear();
    numberOfEphemPoints = 0;
+   interpolationOrder = 0;
    
-   // Reserve space for maximum 10 digits
-   dummyNumberOfEphemPoints = "          ";
    scenarioEpochUtcGreg = "";
+   interpolationMethod = "";
    centralBody = "";
    coordinateSystem = "";
    coordinateSystemEpochStr = "";
-   beginSegmentTimeStr = "";
-   endSegmentTimeStr = "";
    ephemTypeForRead = "";
    ephemTypeForWrite = "";
+   stkTempFileName = "";
    numEphemPointsBegPos = 0;
 }
 
@@ -204,14 +208,15 @@ bool STKEphemerisFile::OpenForRead(const std::string &filename,
  * @filename File name to open
  * @ephemType Ephemeris type to write, at this time only "TimePos" or "TimePosVel"
  *               is allowed
- */
+  */
 //------------------------------------------------------------------------------
 bool STKEphemerisFile::OpenForWrite(const std::string &filename,
                                     const std::string &ephemType)
 {
    #ifdef DEBUG_STK_FILE
    MessageInterface::ShowMessage
-      ("STKEphemerisFile::OpenForWrite() entered, filename='%s'\n", filename.c_str());
+      ("STKEphemerisFile::OpenForWrite() entered, filename='%s', openForTempOutput=%d\n",
+       filename.c_str(), openForTempOutput);
    #endif
    
    bool retval = false;
@@ -250,6 +255,22 @@ bool STKEphemerisFile::OpenForWrite(const std::string &filename,
       MessageInterface::ShowMessage
          ("   Failed open '%s' for writing\n", stkFileNameForWrite.c_str());
       #endif
+   }
+   
+   // Open temporary file to write STK ephemeris since header data needs to be
+   // updated after final data
+   if (openForTempOutput)
+   {
+      stkOutStream.close();
+      std::string tempPath = GmatFileUtil::GetTemporaryDirectory();
+      std::string fileNameNoPath = GmatFileUtil::ParseFileName(filename);
+      stkTempFileName = tempPath + fileNameNoPath;
+      #ifdef DEBUG_STK_FILE
+      MessageInterface::ShowMessage
+         ("          tempPath='%s'\n   stkTempFileName='%s'\n", tempPath.c_str(),
+          stkTempFileName.c_str());
+      #endif
+      stkOutStream.open(stkTempFileName.c_str());
    }
    
    #ifdef DEBUG_STK_FILE
@@ -292,6 +313,14 @@ void STKEphemerisFile::SetVersion(const std::string &version)
 }
 
 //------------------------------------------------------------------------------
+// void SetInterpolationOrder(Integer order)
+//------------------------------------------------------------------------------
+void STKEphemerisFile::SetInterpolationOrder(Integer order)
+{
+   interpolationOrder = order;
+}
+
+//------------------------------------------------------------------------------
 // bool SetHeaderForWriting(const std::string &fieldName,
 //                          const std::string &value)
 //------------------------------------------------------------------------------
@@ -307,16 +336,14 @@ bool STKEphemerisFile::SetHeaderForWriting(const std::string &fieldName,
 {
    if (fieldName == "Version")
       stkVersion = value;
+   else if (fieldName == "InterpolationMethod")
+      interpolationMethod = value;
    else if (fieldName == "CentralBody")
       centralBody = value;
    else if (fieldName == "CoordinateSystem")
       coordinateSystem = value;
    else if (fieldName == "CoordinateSystemEpoch")
       coordinateSystemEpochStr = value;
-   else if (fieldName == "BeginSegmentTime")
-      beginSegmentTimeStr = value;
-   else if (fieldName == "EndSegmentTime")
-      endSegmentTimeStr = value;
    else
       throw UtilityException
          ("The field \"" + fieldName + "\" is not valid STK header field.\n"
@@ -365,11 +392,38 @@ bool STKEphemerisFile::WriteHeader()
    // Clear stream contents
    ss.str("");
    
-   // numberOfEphemerisPoints need to be updated later
-   ss << "NumberOfEphemerisPoints " << dummyNumberOfEphemPoints << std::endl;
+   ss << "NumberOfEphemerisPoints " << numberOfEphemPoints << std::endl;
    ss << "ScenarioEpoch           " << scenarioEpochUtcGreg << std::endl;
+   
+   // Write interpolation info if not blank
+   if (interpolationMethod != "")
+   {
+      // Figure out actual interpolation order
+      Integer actualInterpOrder = interpolationOrder;
+      if (numberOfEphemPoints <= interpolationOrder)
+         actualInterpOrder = numberOfEphemPoints - 1;
+      if (numberOfEphemPoints == 1)
+         actualInterpOrder = 1;
+      ss << "InterpolationMethod     " << interpolationMethod << std::endl;
+      ss << "InterpolationOrder      " << actualInterpOrder << std::endl;
+   }
+   
    ss << "CentralBody             " << centralBody << std::endl;
    ss << "CoordinateSystem        " << coordinateSystem << std::endl;
+   
+   // Write begin segment times if not empty
+   if (!beginSegmentArray.empty())
+   {
+      char strBuff[200];
+      ss << "BEGIN SegmentBoundaryTimes" << std::endl;
+      for (unsigned int i = 0; i < beginSegmentArray.size(); i++)
+      {
+         sprintf(strBuff, "   %1.15e\n", beginSegmentArray[i]);
+         ss << strBuff;
+      }
+      ss << "END SegmentBoundaryTimes" << std::endl;
+   }
+   
    ss << std::endl;
    ss << ephemFormat << std::endl;
    ss << std::endl;
@@ -467,8 +521,7 @@ bool STKEphemerisFile::WriteDataSegment(const EpochArray &epochArray,
    if (firstTimeWriting)
    {
       scenarioEpochA1Mjd = (epochArray[0])->GetReal();
-      WriteHeader();
-      firstTimeWriting = false;
+      openForTempOutput = true;
    }
    
    if (ephemTypeForWrite == "TimePosVel")
@@ -487,7 +540,26 @@ bool STKEphemerisFile::WriteDataSegment(const EpochArray &epochArray,
    
    // If final data segment received, write end ephemeris
    if (canFinalize)
+   {
       FinalizeEphemeris();
+   }
+   else
+   {
+      // Indicate new segment starting by writing blank line and the last data
+      WriteBlankLine();
+      #ifdef DEBUG_WRITE_DATA_SEGMENT
+      WriteString("# ============================== new segment");
+      #endif
+      Integer last = numPoints - 1;
+      Real lastEpoch = (epochArray[last])->GetReal();
+      WriteTimePosVel(lastEpoch, stateArray[last]);
+      if (firstTimeWriting)
+         beginSegmentArray.push_back(0.0);
+      beginSegmentTime = (lastEpoch - scenarioEpochA1Mjd) * 86400.0;
+      beginSegmentArray.push_back(beginSegmentTime);
+   }
+   
+   firstTimeWriting = false;
    
    #ifdef DEBUG_WRITE_DATA_SEGMENT
    MessageInterface::ShowMessage("STKEphemerisFile::WriteDataSegment() leavng\n");
@@ -498,46 +570,6 @@ bool STKEphemerisFile::WriteDataSegment(const EpochArray &epochArray,
 //----------------------------
 // protected methods
 //----------------------------
-
-//------------------------------------------------------------------------------
-// void WriteTimePos(const EpochArray &epochArray, const StateArray &stateArray)
-//------------------------------------------------------------------------------
-/**
- * Writes STK ephemeris in EphemerisTimePos format
- */
-//------------------------------------------------------------------------------
-void STKEphemerisFile::WriteTimePos(const EpochArray &epochArray,
-                                    const StateArray &stateArray)
-{
-   Integer numPoints = stateArray.size();
-   
-   // Write out to stream
-   for (int i = 0; i < numPoints; i++)
-   {
-      // For multiple segments, end epoch of previous segment may be the same as
-      // beginning epoch of new segmnet, so check for duplicate epoch and use the
-      // state of new epoch since any maneuver or some spacecraft property update
-      // may happened.
-      Real epoch = (epochArray[i])->GetReal();
-      if (epoch == lastEpochWrote)
-         continue;
-      
-      const Real *outState = (stateArray[i])->GetDataVector();
-      Real timeIntervalInSecs = (epoch - scenarioEpochA1Mjd) * 86400.0;
-      char strBuff[200];
-      sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e\n",
-              timeIntervalInSecs, outState[0], outState[1], outState[2]);
-      stkOutStream << strBuff;
-      
-      #ifdef DEBUG_WRITE_POS
-      std::string epochStr = A1ModJulianToUtcGregorian(epochArray[i], 2);
-      MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr, outState[0]);
-      #endif
-      
-      lastEpochWrote = epoch;
-      numberOfEphemPoints++;
-   }
-}
 
 //------------------------------------------------------------------------------
 // void WriteTimePosVel(const EpochArray &epochArray, const StateArray &stateArray)
@@ -562,24 +594,85 @@ void STKEphemerisFile::WriteTimePosVel(const EpochArray &epochArray,
       if (epoch == lastEpochWrote)
          continue;
       
-      // Format output using scientific notation
-      const Real *outState = (stateArray[i])->GetDataVector();
-      Real timeIntervalInSecs = (epoch - scenarioEpochA1Mjd) * 86400.0;
-      char strBuff[200];
-      sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
-              timeIntervalInSecs, outState[0], outState[1], outState[2], outState[3],
-              outState[4], outState[5]);
-      stkOutStream << strBuff;
+      WriteTimePosVel(epoch, stateArray[i]);
       
-      #ifdef DEBUG_WRITE_POSVEL
-      std::string epochStr = A1ModJulianToUtcGregorian(epochArray[i], 2);
-      MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr, outState[0]);
-      #endif
+      // lastEpochWrote = epoch;
+      // numberOfEphemPoints++;
+   }
+}
+
+//------------------------------------------------------------------------------
+// void WriteTimePosVel(Real epoch, const Rvector6 *state)
+//------------------------------------------------------------------------------
+void STKEphemerisFile::WriteTimePosVel(Real epoch, const Rvector6 *state)
+{
+   // Format output using scientific notation
+   const Real *outState = state->GetDataVector();
+   Real timeIntervalInSecs = (epoch - scenarioEpochA1Mjd) * 86400.0;
+   char strBuff[200];
+   sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e  % 1.15e\n",
+           timeIntervalInSecs, outState[0], outState[1], outState[2], outState[3],
+           outState[4], outState[5]);
+   stkOutStream << strBuff;
+   
+   lastEpochWrote = epoch;
+   numberOfEphemPoints++;
+   
+   #ifdef DEBUG_WRITE_POSVEL
+   std::string epochStr = A1ModJulianToUtcGregorian(epochArray[i], 2);
+   MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr, outState[0]);
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// void WriteTimePos(const EpochArray &epochArray, const StateArray &stateArray)
+//------------------------------------------------------------------------------
+/**
+ * Writes STK ephemeris in EphemerisTimePos format
+ */
+//------------------------------------------------------------------------------
+void STKEphemerisFile::WriteTimePos(const EpochArray &epochArray,
+                                    const StateArray &stateArray)
+{
+   Integer numPoints = stateArray.size();
+   
+   // Write out to stream
+   for (int i = 0; i < numPoints; i++)
+   {
+      // For multiple segments, end epoch of previous segment may be the same as
+      // beginning epoch of new segmnet, so check for duplicate epoch and use the
+      // state of new epoch since any maneuver or some spacecraft property update
+      // may happened.
+      Real epoch = (epochArray[i])->GetReal();
+      if (epoch == lastEpochWrote)
+         continue;
+      
+      WriteTimePos(epoch, stateArray[i]);
       
       lastEpochWrote = epoch;
       numberOfEphemPoints++;
    }
 }
+
+//------------------------------------------------------------------------------
+// void WriteTimePos(Real epoch, const Rvector6 *state)
+//------------------------------------------------------------------------------
+void STKEphemerisFile::WriteTimePos(Real epoch, const Rvector6 *state)
+{
+   // Format output using scientific notation
+   const Real *outState = state->GetDataVector();
+   Real timeIntervalInSecs = (epoch - scenarioEpochA1Mjd) * 86400.0;
+   char strBuff[200];
+   sprintf(strBuff, "%1.15e  % 1.15e  % 1.15e  % 1.15e\n",
+           timeIntervalInSecs, outState[0], outState[1], outState[2]);
+   stkOutStream << strBuff;
+   
+   #ifdef DEBUG_WRITE_POSVEL
+   std::string epochStr = A1ModJulianToUtcGregorian(epochArray[i], 2);
+   MessageInterface::ShowMessage("   %s  % 1.15e\n", epochStr, outState[0]);
+   #endif
+}
+
 
 //------------------------------------------------------------------------------
 // void FinalizeEphemeris()
@@ -594,21 +687,49 @@ void STKEphemerisFile::FinalizeEphemeris()
    #ifdef DEBUG_FINALIZE
    MessageInterface::ShowMessage
       ("STKEphemerisFile::FinalizeEphemeris() entered, numberOfEphemPoints=%d, "
-       "numEphemPointsBegPos=%ld\n", numberOfEphemPoints, (long)numEphemPointsBegPos);
+       "numEphemPointsBegPos=%ld\n   stkTempFileName='%s'", numberOfEphemPoints,
+       (long)numEphemPointsBegPos, stkTempFileName.c_str());
    #endif
    
    // Write end ephemeris keyword
    stkOutStream << "END Ephemeris" << std::endl << std::endl;
    stkOutStream.flush();
    
-   // Write actual number of ephemeris points
-   stkOutStream.seekp(numEphemPointsBegPos, std::ios_base::beg);
-   std::stringstream ss("");
-   ss << "NumberOfEphemerisPoints " << numberOfEphemPoints;
-   stkOutStream << ss.str();
-   stkOutStream.flush();
+   // Close temp file and copy content to actual STK ephemeris file
+   // after writing header data
+   stkOutStream.close();   
    
+   if (OpenForRead(stkTempFileName, "TimePosVel"))
+   {
+      openForTempOutput = false;
+      OpenForWrite(stkFileNameForWrite, "TimePosVel");
+      WriteHeader();   
+      
+      // Read lines
+      std::string line;
+      while (!stkInStream.eof())
+      {
+         // Use cross-platform GetLine
+         //GmatFileUtil::GetLine(&stkInStream, line);
+         getline(stkInStream, line);
+         stkOutStream << line << std::endl;
+      }
+      
+      stkInStream.close();
+      stkOutStream.close();
+      
+      // Delete temp file
+      remove(stkTempFileName.c_str());
+   }
+   else
+   {
+      MessageInterface::ShowMessage("Failed to open temp file\n");
+   }
+         
    #ifdef DEBUG_FINALIZE
+   MessageInterface::ShowMessage("There are %d segments\n", beginSegmentArray);
+   for (unsigned int i = 0; i < beginSegmentArray.size(); i++)
+      MessageInterface::ShowMessage("   %.12e\n", beginSegmentArray[i]);
    MessageInterface::ShowMessage("STKEphemerisFile::FinalizeEphemeris() leaving\n");
    #endif
 }

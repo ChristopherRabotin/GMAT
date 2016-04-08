@@ -928,7 +928,8 @@ bool TrackingSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& TrackingSystem::GetRefObjectArray(const std::string & typeString)
 {
-   return GmatBase::GetRefObjectArray(typeString);
+   return GetRefObjectArray(GetObjectType(typeString));              // made changes by TUAN NGUYEN
+   //return GmatBase::GetRefObjectArray(typeString);                 // made changes by TUAN NGUYEN
 }
 
 

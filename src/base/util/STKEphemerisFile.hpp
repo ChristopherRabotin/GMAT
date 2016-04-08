@@ -48,41 +48,43 @@ public:
    void CloseForWrite();
    
    void SetVersion(const std::string &version);
+   void SetInterpolationOrder(Integer order);
    bool SetHeaderForWriting(const std::string &fieldName,
                             const std::string &value);
    
    bool WriteHeader();
    bool WriteBlankLine();
    bool WriteString(const std::string &str);
-   bool WriteDataSegment(const EpochArray &epochArray, const StateArray &stateArray, 
+   bool WriteDataSegment(const EpochArray &epochArray, const StateArray &stateArray,
                          bool canFinalize = false);
    void FinalizeEphemeris();
    
 protected:
 
    bool        firstTimeWriting;
+   bool        openForTempOutput;
    
    Real        scenarioEpochA1Mjd;
    Real        coordinateSystemEpochA1Mjd;
-   Real        beginSegmentTimeA1Mjd;
-   Real        endSegmentTimeA1Mjd;
+   Real        beginSegmentTime;
    Real        lastEpochWrote;
    
+   RealArray   beginSegmentArray;
    Integer     numberOfEphemPoints;
+   Integer     interpolationOrder;
    
    // Header fields
    std::string stkVersion;           // Required
-   std::string dummyNumberOfEphemPoints;
    std::string scenarioEpochUtcGreg; // Required
+   std::string interpolationMethod;
    std::string centralBody;
    std::string coordinateSystem;
    std::string coordinateSystemEpochStr;
-   std::string beginSegmentTimeStr;
-   std::string endSegmentTimeStr;
    
    // The file name for read/write
    std::string stkFileNameForRead;
    std::string stkFileNameForWrite;
+   std::string stkTempFileName;
    
    // Ephemeris type for read/write
    std::string ephemTypeForRead;
@@ -95,13 +97,15 @@ protected:
    std::ifstream stkInStream;
    std::ofstream stkOutStream;
    
-  // Epoch and state buffer for read
+   // Epoch and state buffer for read
    RealArray     a1MjdArray;
    StateArray    stateArray;
    
    // For ephemeris writing
    void WriteTimePosVel(const EpochArray &epochArray, const StateArray &stateArray);
+   void WriteTimePosVel(Real time, const Rvector6 *state);
    void WriteTimePos(const EpochArray &epochArray, const StateArray &stateArray);
+   void WriteTimePos(Real time, const Rvector6 *state);
    
    // Time conversion
    std::string A1ModJulianToUtcGregorian(Real epochInDays, Integer format);

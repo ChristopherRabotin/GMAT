@@ -32,6 +32,8 @@
 
 #include "MeasurementModelFactory.hpp"
 #include "MeasurementModel.hpp"
+#include "TrackingFileSet.hpp"
+#include "MessageInterface.hpp"
 
 
 //---------------------------------
@@ -54,10 +56,15 @@
  * added later.
  */
 //------------------------------------------------------------------------------
-MeasurementModel* MeasurementModelFactory::CreateMeasurementModel(
+MeasurementModelBase* MeasurementModelFactory::CreateMeasurementModel(
       const std::string & ofType, const std::string & withName)
 {
-   return new MeasurementModel(withName);
+   if (ofType == "MeasurementModel")
+      return new MeasurementModel(withName);
+   if (ofType == "TrackingFileSet")
+      return new TrackingFileSet(withName);
+
+   return NULL;
 }
 
 
@@ -75,6 +82,7 @@ MeasurementModelFactory::MeasurementModelFactory() :
    if (creatables.empty())
    {
       creatables.push_back("MeasurementModel");
+      creatables.push_back("TrackingFileSet");
    }
 }
 
@@ -106,6 +114,7 @@ MeasurementModelFactory::MeasurementModelFactory(StringArray createList) :
    if (creatables.empty())
    {
       creatables.push_back("MeasurementModel");
+      creatables.push_back("TrackingFileSet");
    }
 }
 
@@ -126,6 +135,7 @@ MeasurementModelFactory::MeasurementModelFactory(const MeasurementModelFactory &
    if (creatables.empty())
    {
       creatables.push_back("MeasurementModel");
+      creatables.push_back("TrackingFileSet");
    }
 }
 
@@ -149,6 +159,7 @@ MeasurementModelFactory&
    if (creatables.empty())
    {
       creatables.push_back("MeasurementModel");
+      creatables.push_back("TrackingFileSet");
    }
    return *this;
 }

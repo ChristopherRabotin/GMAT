@@ -144,7 +144,7 @@ public:
    virtual std::string ToString(Integer precision, Integer width = 1,
                                 bool horizontal = false,
                                 const std::string &prefix = "",
-                                bool appendEol = true) const;
+                                bool appendEol = false) const;
    
    virtual std::string ToString(bool useCurrentFormat = true,
                                 bool scientific = false, bool showPoint = false,
@@ -152,7 +152,7 @@ public:
                                 Integer width = GmatGlobal::DATA_WIDTH,
                                 bool horizontal = true, Integer spacing = 1,
                                 const std::string &prefix = "",
-                                bool appendEol = true) const;
+                                bool appendEol = false) const;
    
    virtual std::string ToRowString(Integer row, Integer precision,
                                    Integer width = 1, bool zeroFill = false) const;

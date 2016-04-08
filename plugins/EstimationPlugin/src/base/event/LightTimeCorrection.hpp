@@ -53,6 +53,9 @@ public:
    virtual void FixState(GmatBase* obj, bool LockState = false);
    virtual void FixState();
 
+   Real GetRelativityCorrection();     // Get relativity coorection (in Km)
+   Real GetLightTripRange();				// Get light trip range	(in Km)
+
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
@@ -72,8 +75,21 @@ protected:
    /// Variable used for iteration
    Real                 oldRange;
 
+   /// Number of Iteration. It is used to count number of iteration in order to exit loop
+   UnsignedInt numIter;
+
    virtual void CalculateTimestepEstimate();
    virtual Real CalculateRange();
+
+   Real RelativityCorrection(Rvector3 r1, Rvector3 r2, Real t1, Real t2);
+
+public:
+   Real ETminusTAI(Real tA1MJD, GmatBase* participant);
+
+private:
+   Real relativityCorrection;				// relativity correction (unit: km)
+   Real precisionRange;						// precision light time range (unit: km)
+
 };
 
 #endif /* LightTimeCorrection_hpp */

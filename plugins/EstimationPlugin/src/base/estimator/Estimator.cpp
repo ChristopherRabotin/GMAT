@@ -33,14 +33,22 @@
 #include "Estimator.hpp"
 #include "GmatState.hpp"
 #include "PropagationStateManager.hpp"
-#include "SolverException.hpp"
-#include "TimeSystemConverter.hpp"
+//#include "SolverException.hpp"
+#include "SpaceObject.hpp"
 #include "MessageInterface.hpp"
+#include "EstimatorException.hpp"
+#include "Spacecraft.hpp"
+#include "GroundstationInterface.hpp"
+#include "StringUtil.hpp"
+
 #include <sstream>
 
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_ESTIMATOR_WRITE
 //#define DEBUG_ESTIMATOR_INITIALIZATION
+//#define DEBUG_INITIALIZE
+//#define DEBUG_CLONED_PARAMETER UPDATES
 
 //------------------------------------------------------------------------------
 // static data
@@ -56,6 +64,11 @@ Estimator::PARAMETER_TEXT[] =
    "Propagator",
    "ShowAllResiduals",
    "AddResidualsPlot ",
+   "OLSEInitialRMSSigma",
+   "OLSEMultiplicativeConstant",
+   "OLSEAdditiveConstant",
+   "ResetBestRMSIfDiverging",
+   "ConvergentStatus",
 };
 
 const Gmat::ParameterType
@@ -68,6 +81,11 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::OBJECT_TYPE,
    Gmat::ON_OFF_TYPE,
    Gmat::STRINGARRAY_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 
@@ -87,8 +105,9 @@ Estimator::PARAMETER_TYPE[] =
 //------------------------------------------------------------------------------
 Estimator::Estimator(const std::string &type, const std::string &name) :
    Solver               (type, name),
+   solarSystem          (NULL),                          // made changes by TUAN NGUYEN
    absoluteTolerance    (1.0e-3),
-   relativeTolerance    (1.0e-3),
+   relativeTolerance    (1.0e-4),
    propagatorName       (""),
    resetState           (false),
    timeStep             (60.0),
@@ -100,15 +119,26 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    stateCovariance      (NULL),
    estimationState      (NULL),
    stateSize            (0),
+   estimationStatus     (UNKNOWN),
    showAllResiduals     (true),
    showSpecificResiduals(false),
    showErrorBars        (false),
-   locatingEvent        (false)
+   locatingEvent        (false),
+   maxResidualMult      (3000.0),
+   constMult            (3.0),
+   additiveConst        (0.0),
+   resetBestRMSFlag     (false)                          // made changes by TUAN NGUYEN
 {
+
    objectTypeNames.push_back("Estimator");
    parameterCount = EstimatorParamCount;
 
+   // Default value for Estimation.MaximumIterations = 15
+   maxIterations = 15;
+
    esm.SetMeasurementManager(&measManager);
+
+   delayInitialization = true;                          // made changes by TUAN NGUYEN
 }
 
 
@@ -140,7 +170,9 @@ Estimator::~Estimator()
 //------------------------------------------------------------------------------
 Estimator::Estimator(const Estimator& est) :
    Solver               (est),
+   solarSystem          (est.solarSystem),                       // made changes by TUAN NGUYEN
    measurementNames     (est.measurementNames),
+   modelNames           (est.modelNames),
    solveForStrings      (est.solveForStrings),
    absoluteTolerance    (est.absoluteTolerance),
    relativeTolerance    (est.relativeTolerance),
@@ -155,11 +187,20 @@ Estimator::Estimator(const Estimator& est) :
    stateCovariance      (est.stateCovariance),
    estimationState      (NULL),
    stateSize            (0),
+   estimationStatus     (UNKNOWN),
    showAllResiduals     (est.showAllResiduals),
    showSpecificResiduals(est.showSpecificResiduals),
    showErrorBars        (est.showErrorBars),
-   locatingEvent        (false)
+   locatingEvent        (false),
+   maxResidualMult      (est.maxResidualMult),
+   constMult            (est.constMult),
+   additiveConst        (est.additiveConst),
+   resetBestRMSFlag     (est.resetBestRMSFlag)                // made changes by TUAN NGUYEN
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("Estimator::Estimator() enter: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
+#endif
+
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
    else
@@ -168,8 +209,13 @@ Estimator::Estimator(const Estimator& est) :
    measManager = est.measManager;
    esm         = est.esm;
    addedPlots  = est.addedPlots;
-
    esm.SetMeasurementManager(&measManager);
+
+   delayInitialization = true;                                // made changes by TUAN NGUYEN
+
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("Estimator::Estimator() exit: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
+#endif
 }
 
 
@@ -190,7 +236,10 @@ Estimator& Estimator::operator=(const Estimator& est)
    {
       Solver::operator=(est);
 
+      solarSystem = est.solarSystem;                        // made changes by TUAN NGUYEN
+
       measurementNames = est.measurementNames;
+      modelNames       = est.modelNames;
       solveForStrings  = est.solveForStrings;
 
       absoluteTolerance = est.absoluteTolerance;
@@ -211,15 +260,28 @@ Estimator& Estimator::operator=(const Estimator& est)
       covariance           = NULL;
       estimationState      = NULL;
       stateSize            = 0;
+      estimationStatus     = UNKNOWN;
       showAllResiduals     = est.showAllResiduals;
       showSpecificResiduals= est.showSpecificResiduals;
       showErrorBars        = est.showErrorBars;
       addedPlots           = est.addedPlots;
 
       locatingEvent        = false;
+
+      maxResidualMult      = est.maxResidualMult;
+      constMult            = est.constMult;
+      additiveConst        = est.additiveConst;
+      resetBestRMSFlag     = est.resetBestRMSFlag;             // made changes by TUAN NGUYEN
    }
 
    return *this;
+}
+
+
+// made changes by TUAN NGUYEN
+void Estimator::SetSolarSystem(SolarSystem *ss)
+{
+   solarSystem = ss;
 }
 
 
@@ -235,21 +297,139 @@ Estimator& Estimator::operator=(const Estimator& est)
 //------------------------------------------------------------------------------
 bool Estimator::Initialize()
 {
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Enter Estimator::Initialize()\n");
+#endif
+
+   // it the delay flag is on, skip initialization to the next time
+   if (delayInitialization)
+   {
+      #ifdef DEBUG_INITIALIZE
+         MessageInterface::ShowMessage("Exit Estimator::Initialize(): delay initialization.\n");
+      #endif
+      return true;
+   }
+
+   // If initialized, do not do it again
+   if (isInitialized)
+      return true;
+
    bool retval = Solver::Initialize();
 
    if (retval)
    {
+      // Set estimation status to UNKNOWN
+      estimationStatus = UNKNOWN;
+
       // Check to make sure required objects have been set
       if (!propagator)
-         throw SolverException(
-               "Estimator error - no propagator set for the estimator object"
-               /*" named %s.", GetName().c_str()*/);
+         throw EstimatorException(
+               "Estimator error - no propagators are set for estimation or propagators are not defined in your script.\n");
 
       if (measurementNames.empty())
-         throw SolverException("Estimator error - no measurements set.\n");
+         throw EstimatorException("Error: no measurements are set for estimation.\n");
+
+
+      // Check the names of measurement models shown in est.AddData have to be the names of created objects               // made changes by TUAN NGUYEN
+      std::vector<MeasurementModel*> measModels = measManager.GetAllMeasurementModels();   // made changes by TUAN NGUYEN
+      std::vector<TrackingSystem*> tkSystems = measManager.GetAllTrackingSystems();        // made changes by TUAN NGUYEN
+      std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();            // made changes by TUAN NGUYEN
+      StringArray measNames = measManager.GetMeasurementNames();                           // made changes by TUAN NGUYEN
+
+      for(UnsignedInt i = 0; i < measNames.size(); ++i)                            // made changes by TUAN NGUYEN
+      {                                                                            // made changes by TUAN NGUYEN
+         std::string name = measNames[i];                                          // made changes by TUAN NGUYEN
+         //MessageInterface::ShowMessage("name = <%s>\n", name.c_str());
+
+         bool found = false;                                                       // made changes by TUAN NGUYEN
+         for(UnsignedInt j = 0; j < measModels.size(); ++j)                        // made changes by TUAN NGUYEN
+         {
+            //MessageInterface::ShowMessage("measModels[%d] = <%s>\n", j, measModels[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+            if (measModels[j]->GetName() == name)                                  // made changes by TUAN NGUYEN
+            {                                                                      // made changes by TUAN NGUYEN
+               found = true;                                                       // made changes by TUAN NGUYEN
+               break;                                                              // made changes by TUAN NGUYEN
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+
+         if (!found)
+         {
+            for(UnsignedInt j = 0; j < tkSystems.size(); ++j)                      // made changes by TUAN NGUYEN
+            {
+               //MessageInterface::ShowMessage("tkSystems[%d] = <%s>\n", j, tkSystems[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+               if (tkSystems[j]->GetName() == name)                                // made changes by TUAN NGUYEN
+               {                                                                   // made changes by TUAN NGUYEN
+                  found = true;                                                    // made changes by TUAN NGUYEN
+                  break;                                                           // made changes by TUAN NGUYEN
+               }
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+      
+         if (!found)
+         {
+            for(UnsignedInt j = 0; j < tfs.size(); ++j)                            // made changes by TUAN NGUYEN
+            {
+               //MessageInterface::ShowMessage("tfs[%d] = <%s>\n", j, tfs[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+               if (tfs[j]->GetName() == name)                                      // made changes by TUAN NGUYEN
+               {                                                                   // made changes by TUAN NGUYEN
+                  found = true;                                                    // made changes by TUAN NGUYEN
+                  break;                                                           // made changes by TUAN NGUYEN
+               }
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+
+         if (!found)                                                               // made changes by TUAN NGUYEN
+            throw EstimatorException("Cannot initialize estimator; '" + name +
+                  "' object is not defined in script.\n");                         // made changes by TUAN NGUYEN
+      }                                                                            // made changes by TUAN NGUYEN
+
+      measModels.clear();                                                          // made changes by TUAN NGUYEN
+      tkSystems.clear();                                                           // made changes by TUAN NGUYEN
+      tfs.clear();                                                                 // made changes by TUAN NGUYEN
+      measNames.clear();                                                           // made changes by TUAN NGUYEN
+
    }
 
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Exit Estimator::Initialize()   retval = %s\n", (retval?"true":"false"));
+#endif
+
    return retval;
+}
+
+
+bool Estimator::Reinitialize()
+{
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Enter Estimator::Reinitialize()\n");
+#endif
+      // Tell the measManager to complete its initialization
+      bool measOK = measManager.SetPropagator(propagator);
+      measOK = measOK && measManager.Initialize();
+      if (!measOK)
+         throw EstimatorException(
+           "BatchEstimator::CompleteInitialization - error initializing "
+            "MeasurementManager.\n");
+      
+      //@todo: auto generate tracking data adapters from observation data
+      //1. Read observation data from files and create a list of all tracking configs
+      UnsignedInt numRec = measManager.LoadObservations();
+      if (numRec == 0)
+         throw EstimatorException("No observation data is used for estimation\n");
+
+      //2. Generate tracking data adapters based on the list of tracking configs
+      measManager.AutoGenerateTrackingDataAdapters();
+   
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Exit Estimator::Reinitialize()\n");
+#endif
+   return true;
+}
+
+
+void Estimator::SetDelayInitialization(bool delay)
+{
+   delayInitialization = delay;
 }
 
 
@@ -265,8 +445,11 @@ bool Estimator::Initialize()
 //------------------------------------------------------------------------------
 void Estimator::CompleteInitialization()
 {
-   stm = esm.GetSTM();
-   stateCovariance = esm.GetCovariance();
+   if (esm.IsPropertiesSetupCorrect())       // Verify solve-for parameters setting up correctly 
+   {
+      stm = esm.GetSTM();
+      stateCovariance = esm.GetCovariance();
+   }
 }
 
 
@@ -380,6 +563,28 @@ std::string Estimator::GetParameterTypeString(const Integer id) const
    return Solver::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Estimator::IsParameterReadOnly(const Integer id) const
+{
+   if (id == CONVERGENT_STATUS)
+      return true;
+
+   return Solver::IsParameterReadOnly(id);
+}
+
+
 //------------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -392,12 +597,18 @@ std::string Estimator::GetParameterTypeString(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-Real        Estimator::GetRealParameter(const Integer id) const
+Real Estimator::GetRealParameter(const Integer id) const
 {
    if (id == ABSOLUTETOLERANCE)
       return absoluteTolerance;
    if (id == RELATIVETOLERANCE)
       return relativeTolerance;
+   if (id == MAX_RESIDUAL_MULTIPLIER)
+      return maxResidualMult;
+   if (id == CONSTANT_MULTIPLIER)
+      return constMult;
+   if (id == ADDITIVE_CONSTANT)
+      return additiveConst;
 
    return Solver::GetRealParameter(id);
 }
@@ -420,6 +631,9 @@ Real Estimator::SetRealParameter(const Integer id, const Real value)
    {
       if (value > 0.0)
          absoluteTolerance = value;
+      else
+         throw EstimatorException("Error: "+ GetName() +"."+ GetParameterText(id) +" parameter is not a positive number\n");
+
       return absoluteTolerance;
    }
 
@@ -427,11 +641,54 @@ Real Estimator::SetRealParameter(const Integer id, const Real value)
    {
       if ((value > 0.0) && (value <= 1.0))
          relativeTolerance = value;
+      else
+         throw EstimatorException("Error: "+ GetName() +"."+ GetParameterText(id) +" parameter is not in range (0,1]\n");
+
       return relativeTolerance;
    }
 
+   if (id == MAX_RESIDUAL_MULTIPLIER)
+   {
+       if (value > 0.0)
+           maxResidualMult = value;
+      else
+         throw EstimatorException("Error: "+ GetName() +"."+ GetParameterText(id) +" parameter is not a positive number\n");
+
+       return maxResidualMult;
+   }
+
+   if (id == CONSTANT_MULTIPLIER)
+   {
+      if (value > 0.0)
+           constMult = value;
+      else
+         throw EstimatorException("Error: "+ GetName() +"."+ GetParameterText(id) +" parameter is not a positive number\n");
+
+      return constMult;
+   }
+
+   if (id == ADDITIVE_CONSTANT)
+   {
+      additiveConst = value;
+      return additiveConst;
+   }
+
+
    return Solver::SetRealParameter(id, value);
 }
+
+
+Real Estimator::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+
+Real Estimator::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
@@ -449,6 +706,37 @@ std::string Estimator::GetStringParameter(const Integer id) const
 {
    if (id == PROPAGATOR)
       return propagatorName;
+
+   if (id == CONVERGENT_STATUS)
+   {
+      switch (estimationStatus)
+      {
+      case UNKNOWN:  
+         return "Unknown";
+         break;
+      case ABSOLUTETOL_CONVERGED:
+         return "Meet Absolute Tolerance convergence criteria";
+         break;
+      case RELATIVETOL_CONVERGED:
+         return "Meet Relative Tolerance convergence criteria";
+         break;
+      case ABS_AND_REL_TOL_CONVERGED:
+         return "Meet Absolute and Relative Tolerance convergence criteria";
+         break;
+      case MAX_CONSECUTIVE_DIVERGED:
+         return "Exceed maximum number of consecutive diverged iterations"; 
+         break;
+      case MAX_ITERATIONS_DIVERGED:
+         return "Exceed maximum number of iterations";
+         break;
+      case CONVERGING:
+         return "Converging";
+         break;
+      case DIVERGING:
+         return "Diverging";
+         break;
+      }
+   }
 
    return Solver::GetStringParameter(id);
 }
@@ -470,11 +758,37 @@ std::string Estimator::GetStringParameter(const Integer id,
                                           const Integer index) const
 {
    if (id == MEASUREMENTS)
-      return measurementNames.at(index);
+   {
+      if (((Integer)measurementNames.size() > index) && (index >= 0))
+         return measurementNames[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a measurement");
+      
+      //return measurementNames.at(index);
+   }
+
    if (id == SOLVEFORS)
-      return solveForStrings.at(index);
+   {
+      if (((Integer)solveForStrings.size() > index) && (index >= 0))
+         return solveForStrings[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a solve-for");
+
+      //return solveForStrings.at(index);
+   }
+
    if (id == ADD_RESIDUAL_PLOT)
-         return addedPlots.at(index);
+   {
+      if (((Integer)addedPlots.size() > index) && (index >= 0))
+         return addedPlots[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a plot");
+
+      //return addedPlots.at(index);
+   }
 
    return Solver::GetStringParameter(id, index);
 }
@@ -499,9 +813,25 @@ bool Estimator::SetStringParameter(const Integer id,
 {
    if (id == PROPAGATOR)
    {
+      if (!GmatStringUtil::IsValidIdentity(value))                                                                                   // made changes by TUAN NGUYEN
+         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Propagator is an invalid GMAT object name.\n");   // made changes by TUAN NGUYEN
+
       propagatorName = value;
       return true;
    }
+
+   //@Todo: this code will be removed when the bug in Interperter is fixed                                          // made changes by TUAN NGUYEN
+   if (id == MEASUREMENTS)                                                                                          // made changes by TUAN NGUYEN
+   {                                                                                                                // made changes by TUAN NGUYEN
+      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));              // made changes by TUAN NGUYEN
+      if (measName == "")                                                                                           // made changes by TUAN NGUYEN
+         throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");   // made changes by TUAN NGUYEN
+
+      if (!GmatStringUtil::IsValidIdentity(value))                                                                  // made changes by TUAN NGUYEN
+         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Measurements is an invalid GMAT object name.\n");   // made changes by TUAN NGUYEN
+
+      return SetStringParameter(id, measName, measurementNames.size());                                             // made changes by TUAN NGUYEN
+   }                                                                                                                // made changes by TUAN NGUYEN
 
    return Solver::SetStringParameter(id, value);
 }
@@ -519,7 +849,7 @@ bool Estimator::SetStringParameter(const Integer id,
  * @param value string value for the requested parameter.
  * @param index index into the StringArray.
  *
- * @exception <SolverException> thrown if value is out of range
+ * @exception <EstimatorException> thrown if value is out of range
  *
  * @return  success flag.
  *
@@ -530,6 +860,10 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 {
    if (id == MEASUREMENTS)
    {
+      // Verify measurement name
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Measurements is an invalid GMAT object name.\n");
+      
       Integer sz = (Integer) measurementNames.size();
       if (index == sz) // needs to be added to the end of the list
       {
@@ -540,7 +874,7 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
       {
          std::string errmsg = "Estimator::SetStringParameter error - index "
                "into measurement array is out of bounds.\n";
-         throw SolverException(errmsg);
+         throw EstimatorException(errmsg);
       }
       else // is in bounds
       {
@@ -559,7 +893,7 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
       {
          std::string errmsg = "Estimator::SetStringParameter error - index "
                "into measurement array is out of bounds.\n";
-         throw SolverException(errmsg);
+         throw EstimatorException(errmsg);
       }
       else // is in bounds
          solveForStrings.at(index) = value;
@@ -579,7 +913,7 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
       {
          std::string errmsg = "Estimator::SetStringParameter error - index "
                "into residual plot array is out of bounds.\n";
-         throw SolverException(errmsg);
+         throw EstimatorException(errmsg);
       }
       else // is in bounds
          addedPlots.at(index) = value;
@@ -705,6 +1039,52 @@ bool Estimator::SetOnOffParameter(const std::string &label,
       const std::string &value)
 {
    return SetOnOffParameter(GetParameterID(label), value);
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* Gets value of a boolean parameter
+*
+* @param id       The id of parameter
+*
+* @return         value of boolean parameter
+*/
+//------------------------------------------------------------------------------
+bool Estimator::GetBooleanParameter(const Integer id) const
+{
+   if (id == RESET_BEST_RMS)
+      return resetBestRMSFlag;
+
+   return Solver::GetBooleanParameter(id);
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+* Sets value to a boolean parameter
+*
+* @param id       The id of parameter
+* @param value    The value used to set to a boolean parameter
+*
+* @return         true if the setting is successed, false otherwise
+*/
+//------------------------------------------------------------------------------
+bool Estimator::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == RESET_BEST_RMS)
+   {
+      resetBestRMSFlag = value;
+      return true;
+   }
+
+   return Solver::SetBooleanParameter(id, value);
 }
 
 
@@ -964,6 +1344,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          if (propagator != NULL)
             delete propagator;
          propagator = (PropSetup*)obj->Clone();
+         measManager.SetPropagator(propagator);
          return true;
       }
    }
@@ -972,9 +1353,52 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    if (find(measList.begin(), measList.end(), name) != measList.end())
    {
-      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL))
+      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&
+          !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
       {
-         measManager.AddMeasurement((MeasurementModel *)obj);
+         // Handle MeasurmentModel and TrackingFileSet
+         #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+            MessageInterface::ShowMessage("Handle MeasurementModel and TrackingFileSet: <%s>\n", name.c_str());
+         #endif
+
+         modelNames.push_back(obj->GetName());
+         measManager.AddMeasurement((MeasurementModel *)obj);         
+         return true;
+      }
+      if (obj->IsOfType(Gmat::TRACKING_SYSTEM))
+      {
+         // Handle for TrackingSystem
+         #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+            MessageInterface::ShowMessage("Handle TrackingSystem: <%s>\n", name.c_str());
+         #endif
+
+         // Add to tracking system list                           // made changes by TUAN NGUYEN
+         measManager.AddMeasurement((TrackingSystem*)obj);        // made changes by TUAN NGUYEN
+         
+         MeasurementModel *meas;
+         // Retrieve each measurement model from the tracking system ...
+         for (UnsignedInt i = 0;
+                  i < ((TrackingSystem*)obj)->GetMeasurementCount(); ++i)
+         {
+            #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+               MessageInterface::ShowMessage("   Measurement %d\n", i);
+            #endif
+
+            // ...and pass them to the measurement manager
+            meas = ((TrackingSystem*)obj)->GetMeasurement(i);
+            if (meas == NULL)
+            {
+               MessageInterface::ShowMessage("Estimator cannot initialize "
+                        "because an expected MeasurementModel is NULL\n");
+               throw EstimatorException("In Estimator::SetRefObject, a "
+                        "measurement in the tracking system " + obj->GetName() +
+                        " is NULL\n");
+            }
+
+            modelNames.push_back(meas->GetName());
+            measManager.AddMeasurement(meas);
+
+         }
          return true;
       }
    }
@@ -995,7 +1419,8 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& Estimator::GetRefObjectArray(const std::string & typeString)
 {
-   return Solver::GetRefObjectArray(typeString);
+   return GetRefObjectArray(GetObjectType(typeString));                  // made changes by TUAN NGUYEN
+   //return Solver::GetRefObjectArray(typeString);                       // made changes by TUAN NGUYEN
 }
 
 
@@ -1195,7 +1620,36 @@ bool Estimator::HasLocalClones()
 //------------------------------------------------------------------------------
 void Estimator::UpdateClonedObject(GmatBase *obj)
 {
-   throw SolverException("To do: implement Estimator::UpdateClonedObject");
+   if (obj->IsOfType("Spacecraft"))
+      return;
+   throw EstimatorException("To do: implement Estimator::UpdateClonedObject "
+         "for " + obj->GetTypeName() + " objects");
+}
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * Added method to remove message in the Message window.
+ *
+ * The current implementation needs to be updated to actually process parameters
+ * when they are updated in the system.  For now, it is just overriding the base
+ * class "do nothing" method so that the message traffic is not shown to the
+ * user.
+ *
+ * Turn on the debug to figure out the updates being requested.
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void Estimator::UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+{
+#ifdef DEBUG_CLONED_PARAMETER_UPDATES
+   MessageInterface::ShowMessage("Estimator updating parameter %d (%s) using "
+         "object %s\n", updatedParameterId, obj->GetParameterText(updatedParameterId).c_str(),
+         obj->GetName().c_str());
+#endif
 }
 
 
@@ -1209,12 +1663,12 @@ void Estimator::UpdateClonedObject(GmatBase *obj)
  *
  * @param reason String indicating the condition(s) that indicate convergence
  *
- * @return true on convergence, false if convergence was not achieved
+ * @return return an integer to tell status of estimation
  */
 //------------------------------------------------------------------------------
-bool Estimator::TestForConvergence(std::string &reason)
+Integer Estimator::TestForConvergence(std::string &reason)
 {
-   return false;
+    return UNKNOWN;
 }
 
 //------------------------------------------------------------------------------
@@ -1241,7 +1695,7 @@ Real Estimator::ConvertToRealEpoch(const std::string &theEpoch,
          retval, outStr);
 
    if (retval == -999.999)
-      throw SolverException("Error converting the time string \"" + theEpoch +
+      throw EstimatorException("Error converting the time string \"" + theEpoch +
             "\"; please check the format for the input string.");
    return retval;
 }
@@ -1254,7 +1708,7 @@ Real Estimator::ConvertToRealEpoch(const std::string &theEpoch,
 /**
  * Creates an OwnedPlot instance that is used for plotting residuals
  *
- * @param plotName The name of the plot.  This name needs to ne unique in the
+ * @param plotName The name of the plot.  This name needs to be unique in the
  *                 Sandbox
  * @param measurementNames The names of the measurement models that are sources
  *                         for the residuals being plotted
@@ -1263,27 +1717,64 @@ Real Estimator::ConvertToRealEpoch(const std::string &theEpoch,
 void Estimator::BuildResidualPlot(const std::string &plotName,
       const StringArray &measurementNames)
 {
-   OwnedPlot *rPlot = new OwnedPlot(plotName);
-
-   rPlot->SetStringParameter("PlotTitle", plotName);
-   rPlot->SetBooleanParameter("UseLines", false);
-   rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
-
+   OwnedPlot *rPlot;
    for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
    {
-      std::string curveName = measurementNames[i] + " Residuals";
-      rPlot->SetStringParameter("Add", curveName);
       // Register measurement ID for this curve
-      Integer id = measManager.GetMeasurementId(measurementNames[i]);
+      IntegerArray id = measManager.GetMeasurementId(measurementNames[i]);
+      //std::vector<TrackingFileSet*> tfs = measManager.GetTrackingSets();
+      std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();
 
-      rPlot->SetUsedDataID(id);
+      UnsignedInt k;
+      for (k = 0; k < tfs.size(); ++k)
+         if (tfs[k]->GetName() == measurementNames[i])
+            break;
 
-      // todo: Register participants for this curve
-      //rPlot->SetUsedObjectID(Integer id);
+      if (k == tfs.size())
+      {
+         // processing for old measurement model
+         IntegerArray id = measManager.GetMeasurementId(measurementNames[i]);
+
+         rPlot = new OwnedPlot(plotName);
+         rPlot->SetStringParameter("PlotTitle", plotName);
+         rPlot->SetBooleanParameter("UseLines", false);
+         rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
+         rPlot->SetStringParameter("Add", measurementNames[i] + " Residuals");
+         rPlot->SetUsedDataID(id[0]);
+         rPlot->Initialize();
+
+         residualPlots.push_back(rPlot);
+      }
+      else
+      {
+         // processing for tracking data adapter 
+         std::vector<TrackingDataAdapter*>* adapters = tfs[k]->GetAdapters(); 
+         for (UnsignedInt j = 0; j < adapters->size(); ++j)
+         {
+            Integer id = adapters->at(j)->GetModelID();
+
+            std::stringstream ss;
+            ss << adapters->at(j)->GetName();
+            std::string pName = ss.str();
+
+            std::stringstream ss1;
+            ss1 << pName << " Residuals";
+            std::string curveName = ss1.str();
+            
+
+            rPlot = new OwnedPlot(pName);
+            rPlot->SetStringParameter("PlotTitle", plotName);
+            rPlot->SetBooleanParameter("UseLines", false);
+            rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
+            rPlot->SetStringParameter("Add", curveName);
+            rPlot->SetUsedDataID(id);
+            rPlot->Initialize();
+
+            residualPlots.push_back(rPlot);
+         }
+      }
    }
 
-   rPlot->Initialize();
-   residualPlots.push_back(rPlot);
 }
 
 
@@ -1435,3 +1926,124 @@ Integer Estimator::SetSolverResults(Real*, const std::string&,
 void Estimator::SetResultValue(Integer, Real, const std::string&)
 {
 }
+
+
+//------------------------------------------------------------------------------
+// bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, 
+//                    Real inputStateElement, Real* outputStateElement)
+//------------------------------------------------------------------------------
+/**
+ * Method used to convert result of a state's element in A1mjd to participant's 
+ * coordinate system
+ *
+ * @param infor                 information about state's element
+ * @param epoch                 the epoch at which the state is converted it's 
+ *                              coordinate system
+ * @param inputStateElement     state's element in GMAT internal coordinate system
+ *                              (A1Mjd)
+ * @param outputStateElemnet    state's element in participant's coordinate system
+ *
+*/
+//------------------------------------------------------------------------------
+bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement)
+{
+
+   (*outputStateElement) = inputStateElement;
+
+   if (infor->object->IsOfType(Gmat::SPACEOBJECT))
+   {
+      if ((infor->elementName == "CartesianState")||(infor->elementName == "Position")||(infor->elementName == "Velocity"))
+      {
+         SpaceObject* obj = (SpaceObject*) (infor->object);
+         std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+         CoordinateSystem* cs = (CoordinateSystem*) obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
+         if (cs == NULL)
+            throw EstimatorException("Coordinate system for "+obj->GetName()+" is not set\n");
+
+         SpacePoint* sp = obj->GetJ2000Body();
+         CoordinateSystem* gmatcs = CoordinateSystem::CreateLocalCoordinateSystem("bodyInertial",
+            "MJ2000Eq", sp, NULL, NULL, sp, cs->GetSolarSystem());
+        
+         CoordinateConverter* cv = new CoordinateConverter();
+         Rvector6 inState(0.0,0.0,0.0,0.0,0.0,0.0);
+         Integer index;
+         if ((infor->elementName == "CartesianState")||(infor->elementName == "Position"))
+            index = infor->subelement-1;
+         else if (infor->elementName == "Velocity")
+            index = infor->subelement+2;
+         else
+            throw EstimatorException("Error in Estimator object: Parameter %s has not defined in GMAT\n");
+
+         inState.SetElement(index, inputStateElement);
+         Rvector6 outState;
+        
+         cv->Convert(A1Mjd(epoch), inState, gmatcs, outState, cs);
+
+         (*outputStateElement) = outState[index]; 
+         delete cv;
+         delete gmatcs;
+      }
+   }
+
+   return true;
+}
+
+
+//-------------------------------------------------------------------------
+// void Estimator::GetEstimationState(GmatState& outputState)
+//-------------------------------------------------------------------------
+/**
+ * This Method used to convert result of estimation state to participants'
+ * coordinate system
+ *
+ * @param outState        estimation state in participants' coordinate systems
+ *
+*/
+//-------------------------------------------------------------------------
+void Estimator::GetEstimationState(GmatState& outputState)
+{
+    const std::vector<ListItem*> *map = esm.GetStateMap();
+
+    Real outputStateElement;
+    outputState.SetSize(map->size());
+
+    for (UnsignedInt i = 0; i < map->size(); ++i)
+    {
+        ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
+        outputState[i] = outputStateElement;
+    }
+}
+
+
+//-------------------------------------------------------------------------
+// void Estimator::GetEstimationStateForReport(GmatState& outputState)
+//-------------------------------------------------------------------------
+/**
+ * This Method used to convert result of estimation state to participants'
+ * coordinate system. For report, it reports Cr and Cd instead of Cr_Epsilon 
+ * and Cd_Epsilon.
+ *
+ * @param outState        estimation state in participants' coordinate systems
+ *
+*/
+//-------------------------------------------------------------------------
+void Estimator::GetEstimationStateForReport(GmatState& outputState)
+{
+    const std::vector<ListItem*> *map = esm.GetStateMap();
+
+    Real outputStateElement;
+    outputState.SetSize(map->size());
+
+    for (UnsignedInt i = 0; i < map->size(); ++i)
+    {
+        ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
+        outputState[i] = outputStateElement;
+
+        // get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+        if ((*map)[i]->elementName == "Cr_Epsilon")
+           outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cr");
+        else if ((*map)[i]->elementName == "Cd_Epsilon")
+           outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cd");
+    }
+}
+

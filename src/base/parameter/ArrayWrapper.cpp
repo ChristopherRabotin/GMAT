@@ -102,9 +102,8 @@ const ArrayWrapper& ArrayWrapper::operator=(const ArrayWrapper &aw)
       return *this;
    
    ElementWrapper::operator=(aw);
-   array        = aw.array;  
-   arrayName    = aw.arrayName;
-
+   array      = aw.array;  
+   arrayName  = aw.arrayName;
    return *this;
 }
 
@@ -346,16 +345,54 @@ const Rmatrix& ArrayWrapper::EvaluateArray() const
 bool ArrayWrapper::SetArray(const Rmatrix &toValue)
 {
    #ifdef DEBUG_ARRAY_WRAPPER
-      MessageInterface::ShowMessage(
-         "ArrayWrapper::SetArray called on array %s\n", 
-         arrayName.c_str());
+   MessageInterface::ShowMessage
+      ("ArrayWrapper::SetArray() '%s' entered, arrayName='%s', toValue = %s\n",
+       description.c_str(), arrayName.c_str(), toValue.ToString(12, 1, true).c_str());
    #endif
+   
    if (array == NULL)
       throw ParameterException(
       "Cannot set value of Array - object pointer is NULL\n");
+   
    try
    {
-      array->SetRmatrix(toValue);
+      Integer row1 = array->GetRowCount();
+      Integer col1 = array->GetColCount();
+      Integer row2 = toValue.GetNumRows();
+      Integer col2 = toValue.GetNumColumns();
+      #ifdef DEBUG_ARRAY_WRAPPER
+      MessageInterface::ShowMessage("     array.row = %d,   array.col = %d\n", row1, col1);
+      MessageInterface::ShowMessage("   toValue.row = %d, toValue.col = %d\n", row2, col2);
+      MessageInterface::ShowMessage("   allowOneDimArraySetting = %d\n", allowOneDimArraySetting);
+      #endif
+      // Allow to set matrix with 1xN or Nx1 (LOJ: 2016.03.09)
+      // Make a new matrix the same size as array
+      Rmatrix newMat(row1, col1);
+      if (row1 == row2 && col1 == col2)
+      {
+         newMat = toValue;
+      }
+      else if ((row1 == col2 && col1 == row2) && (col1 == 1) &&
+               allowOneDimArraySetting)
+      {
+         // Allow 1xN or Nx1 assignment
+         Rvector newVal = toValue.GetRowOrColumn();
+         if (row1 > col1)
+            newMat.MakeOneColumnMatrix(newVal);
+         else
+            newMat.MakeOneRowMatrix(newVal);
+      }
+      else
+      {
+         // Just assign original matrix so that it will throw an exception
+         array->SetRmatrix(toValue);
+      }
+      
+      #ifdef DEBUG_ARRAY_WRAPPER
+      MessageInterface::ShowMessage
+         ("   newMat.row = %d, newMat.col = %d\n", newMat.GetNumRows(), newMat.GetNumColumns());
+      #endif
+      array->SetRmatrix(newMat);
    }
    catch (BaseException &be)
    {
@@ -363,9 +400,19 @@ bool ArrayWrapper::SetArray(const Rmatrix &toValue)
       errmsg += "\n";
       throw ParameterException(errmsg);
    }
+
+   #ifdef DEBUG_ARRAY_WRAPPER
+   MessageInterface::ShowMessage
+      ("ArrayWrapper::SetArray() '%s' returning true\n", description.c_str());
+   #endif
+   
    return true;
 }
 
+
+//============================
+// protected
+//============================
 //---------------------------------------------------------------------------
 //  void SetupWrapper()
 //---------------------------------------------------------------------------

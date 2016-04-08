@@ -999,6 +999,65 @@ const Rvector3 SpacePoint::GetMJ2000Acceleration(const A1Mjd &atTime)
    return Rvector3(0.0,0.0,0.0);
 }
 
+//------------------------------------------------------------------------------
+// const Rvector6 GetMJ2000PrecState(const GmatTime &atTime)
+//------------------------------------------------------------------------------
+const Rvector6 SpacePoint::GetMJ2000PrecState(const GmatTime &atTime)
+{
+   GmatTime t = atTime;						// GmatTime value of atTime
+   GmatEpoch te = t.GetMjd();				// GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
+   Real dt = (t-te).GetTimeInSec();			// difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
+
+   Rvector6 s = GetMJ2000State(A1Mjd(te));				// state at time te
+   Rvector3 a = GetMJ2000Acceleration(A1Mjd(te));		// acceleration at time te
+   Rvector6 sdot(s[3],s[4],s[5],a[0],a[1],a[2]); 		// velocity at time te
+   s = s + sdot*dt;							// state at time atTime 
+
+   return s;
+}
+
+//------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000PrecPosition(const GmatTime &atTime)
+//------------------------------------------------------------------------------
+const Rvector3 SpacePoint::GetMJ2000PrecPosition(const GmatTime &atTime)
+{
+   GmatTime t = atTime;						// GmatTime value of atTime
+   GmatEpoch te = t.GetMjd();				// GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
+   Real dt = (t-te).GetTimeInSec();			// difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
+
+   Rvector3 r = GetMJ2000Position(A1Mjd(te));		// position at time te
+   Rvector3 v = GetMJ2000Velocity(A1Mjd(te));		// velocity at time te
+   r = r + v*dt;							// pocition at time atTime 
+
+   return r;
+}
+
+//------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000PrecVelocity(const GmatTime &atTime)
+//------------------------------------------------------------------------------
+const Rvector3 SpacePoint::GetMJ2000PrecVelocity(const GmatTime &atTime)
+{
+   GmatTime t = atTime;						// GmatTime value of atTime
+   GmatEpoch te = t.GetMjd();				// GmatEpoch value of atTime		Note that: value of t and value of te are different due to their type's precision
+   Real dt = (t-te).GetTimeInSec();			// difference in time (second) between GmatTime value and Gmatepoch value of atTime)  
+
+   Rvector3 v = GetMJ2000Velocity(A1Mjd(te));		// velocity at time te
+   Rvector3 a = GetMJ2000Acceleration(A1Mjd(te));	// acceleration at time te
+   v = v + a*dt;							// velocity at time atTime 
+
+   return v;
+}
+
+//------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000PrecAcceleration(const GmatTime &atTime)
+//------------------------------------------------------------------------------
+const Rvector3 SpacePoint::GetMJ2000PrecAcceleration(const GmatTime &atTime)
+{
+   GmatTime t = atTime;
+   // Assume that acceleration is the same with a very tiny change of time
+   return GetMJ2000Acceleration(A1Mjd(t.GetMjd()));
+}
+
 void SpacePoint::RemoveSpiceKernelName(const std::string &kernelType,
                                        const std::string &fileName)
 {

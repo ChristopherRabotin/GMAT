@@ -168,7 +168,7 @@ void ArraySetupDialog::Create()
    mArrGrid =
       new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(300,157), wxWANTS_CHARS);
 
-   mArrGrid->SetRowLabelSize(20);
+   mArrGrid->SetRowLabelSize(40);
    mArrGrid->SetColLabelSize(20);
    mArrGrid->SetScrollbars(5, 8, 15, 15);
    mArrGrid->EnableEditing(true);

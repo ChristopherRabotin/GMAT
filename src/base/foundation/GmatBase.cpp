@@ -130,8 +130,8 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "SolarPowerSystem", "NuclearPowerSystem",
    "Hardware",      "CoordinateSystem", "AxisSystem",       "Attitude",         "MathNode",
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
-   "MeasurementModel","CoreMeasurement","TrackingData",     "TrackingSystem",   "DataStream",       
-   "DataFile",      "ObType",           "Interface",        "MediaCorrection",  "Sensor",     
+   "MeasurementModel","CoreMeasurement","ErrorModel",       "TrackingData",     "TrackingSystem",   "DataStream",       // made changes by TUAN NGUYEN.      // add ErrorModel type
+   "DataFile",      "ObType",           "DataFilter",        "Interface",        "MediaCorrection",  "Sensor",          // made changes by TUAN NGUYEN.      // add DataFilter type
    "RFHardware",    "Antenna",          "UnknownObject"
 };
 /**
@@ -157,10 +157,9 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     false,
    false,     true,      false,     false,     false,
    false,     false,     false,     false,     false,
-   false,     false,     false,     false,     false,
-   false,     false,     false,     false,     false,
-   false,     false,
-   false
+   false,     false,     false,     false,     false,     false,                                 // made changes by TUAN NGUYEN   // add ErrorModel type
+   false,     false,     false,     false,     false,     false,                                 // made changes by TUAN NGUYEN   // add DataFilter type
+   false,     false,     false
 };
 
 
@@ -190,6 +189,7 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    parameterCount             (GmatBaseParamCount),
    typeName                   (typeStr),
    instanceName               (nomme),
+   instanceFullName           (nomme),                   // made changes by TUAN NGUYEN
    type                       (typeId),
    ownedObjectCount           (0),
    isInitialized              (false),
@@ -273,6 +273,7 @@ GmatBase::GmatBase(const GmatBase &a) :
     typeName                  (a.typeName),
     //instanceName    ("CopyOf"+a.instanceName),
     instanceName              (a.instanceName),
+    instanceFullName          (a.instanceFullName),          // made changes by TUAN NGUYEN
     type                      (a.type),
     ownedObjectCount          (a.ownedObjectCount),
     generatingString          (a.generatingString),
@@ -4110,7 +4111,7 @@ Integer GmatBase::SetEstimationParameter(const std::string &param)
 // Integer GmatBase::GetEstimationParameterID(const std::string &param)
 //------------------------------------------------------------------------------
 /**
- * This method...
+ * This method builds the parameter ID used in the estimation subsystem
  *
  * @param param The text name of the estimation parameter
  *
@@ -4133,6 +4134,15 @@ Integer GmatBase::GetEstimationParameterID(const std::string &param)
    return id;
 }
 
+std::string GmatBase::GetParameterNameForEstimationParameter(const std::string &parmName)
+{
+   return parmName;
+}
+
+std::string GmatBase::GetParameterNameFromEstimationParameter(const std::string &parmName)
+{
+   return parmName;
+}
 
 //------------------------------------------------------------------------------
 // bool GmatBase::IsEstimationParameterValid(Integer id)
@@ -4763,6 +4773,26 @@ Rmatrix* GmatBase::GetParameterSTM(Integer parameterId)
    return NULL;
 }
 
+
+//------------------------------------------------------------------------------
+// Integer GmatBase::GetStmRowId(const Integer forRow)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID associated with a given row/column of the STM
+ *
+ * Note that since the STM is of the form d(r(t)) / d(r(t_o)), the numerator
+ * setting for each row matches the denominator setting for each column.
+ *
+ * @param forRow The associated row (for the numerator) or column (denominator)
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+Integer GmatBase::GetStmRowId(const Integer forRow)
+{
+   return -1;
+}
+
 //------------------------------------------------------------------------------
 // Integer HasParameterCovariances(Integer parameterId)
 //------------------------------------------------------------------------------
@@ -4851,3 +4881,64 @@ bool GmatBase::IsParameterCommandModeSettable(const Integer id) const
 {
    return false;
 }
+
+
+// made changes by TUAN NGUYEN
+const std::string GmatBase::GetFullName()
+{
+   return instanceFullName;
+}
+
+
+// made changes by TUAN NGUYEN
+bool GmatBase::SetFullName(const std::string name)
+{
+   instanceFullName = name;
+   return true;
+}
+
+
+// made changes by TUAN NGUYEN
+#include "Moderator.hpp"
+ObjectMap GmatBase::GetConfiguredObjectMap()
+{
+   return Moderator::Instance()->GetSandbox()->GetObjectMap();
+}
+
+// made changes by TUAN NGUYEN
+GmatBase* GmatBase::GetConfiguredObject(const std::string &name)
+{
+   return Moderator::Instance()->GetInternalObject(name);
+   //return Moderator::Instance()->GetConfiguredObject(name);
+}
+
+
+// made changes by TUAN NGUYEN
+const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type)
+{
+   ObjectMap objMap = GetConfiguredObjectMap();
+   StringArray nameList;
+   for (ObjectMap::iterator i = objMap.begin(); i != objMap.end(); ++i)
+   {
+      if ((*i).second->IsOfType(type))
+         nameList.push_back((*i).first);
+   }
+
+   return nameList;
+}
+
+
+// made changes by TUAN NGUYEN
+const StringArray& GmatBase::GetListOfObjects(const std::string &typeName)
+{
+   ObjectMap objMap = GetConfiguredObjectMap();
+   StringArray nameList;
+   for (ObjectMap::iterator i = objMap.begin(); i != objMap.end(); ++i)
+   {
+      if ((*i).second->IsOfType(typeName))
+         nameList.push_back((*i).first);
+   }
+
+   return nameList;
+}
+

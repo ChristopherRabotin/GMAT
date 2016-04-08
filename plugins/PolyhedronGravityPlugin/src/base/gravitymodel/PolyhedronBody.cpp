@@ -126,6 +126,11 @@ bool PolyhedronBody::LoadBodyShape()
    if (isLoad)
       return true;
    
+   #ifdef DEBUG_READ_DATAFILE
+      MessageInterface::ShowMessage("PolyhedronBody::LoadBodyShape() loading "
+            "data from %s\n", bodyShapeFilename.c_str());
+   #endif
+
    // 1. Open data file:
    std::ifstream bsFile(bodyShapeFilename.c_str());
    if (!bsFile)
@@ -133,6 +138,9 @@ bool PolyhedronBody::LoadBodyShape()
                              bodyShapeFilename);
    bsFile.setf(std::ios::skipws);
 
+   #ifdef DEBUG_READ_DATAFILE
+      MessageInterface::ShowMessage("Starting\n");
+   #endif
 
    std::string  line, subline;
    // 2. Read all vertices and store them to pointsList:
@@ -144,6 +152,10 @@ bool PolyhedronBody::LoadBodyShape()
    // 2.1. Read number of vertices:
    getline(bsFile,line);
    GmatStringUtil::ToInteger(line,&numvertices);
+
+   #ifdef DEBUG_READ_DATAFILE
+      MessageInterface::ShowMessage("   %d vertices\n", numvertices);
+   #endif
 
    // 2.2. Read all vertices:
    Integer first, last;
@@ -183,18 +195,21 @@ bool PolyhedronBody::LoadBodyShape()
       vertex.Set(x, y,z);				             // unit: km
 	   verticesList.push_back(vertex);
    }
+
+   #ifdef DEBUG_READ_DATAFILE
+      MessageInterface::ShowMessage("   %d loaded\n", verticesList.size());
+   #endif
+
    if (bsFile.eof())
       throw UtilityException("Error: missing data in file: " +
                              bodyShapeFilename);
 
-#ifdef DEBUG_READ_DATAFILE
-   MessageInterface::ShowMessage("number of vertices = %d\n", verticesList.size());
-   for (UnsignedInt i = 0; i < verticesList.size(); ++i)
-      MessageInterface::ShowMessage("%.15lf   %.15lf   %.15lf\n", verticesList[i].Get(0), verticesList[i].Get(1), verticesList[i].Get(2) );
-   MessageInterface::ShowMessage("\n");
-#endif
-
-
+   #ifdef DEBUG_READ_DATAFILE
+      MessageInterface::ShowMessage("number of vertices = %d\n", verticesList.size());
+      for (UnsignedInt i = 0; i < verticesList.size(); ++i)
+         MessageInterface::ShowMessage("%.15lf   %.15lf   %.15lf\n", verticesList[i].Get(0), verticesList[i].Get(1), verticesList[i].Get(2) );
+      MessageInterface::ShowMessage("\n");
+   #endif
 
    // 3. Read all faces and store them to facesList:
    Integer numfaces;
@@ -204,6 +219,10 @@ bool PolyhedronBody::LoadBodyShape()
    // 3.1. Read number of faces:
    getline(bsFile,line);
    GmatStringUtil::ToInteger(line,&numfaces);
+
+   #ifdef DEBUG_READ_DATAFILE
+      MessageInterface::ShowMessage("   %d faces\n", numfaces);
+   #endif
 
    // 3.2. Read all faces:
    for(Integer i=0; (i < numfaces)&&(!bsFile.eof()); ++i)
@@ -247,6 +266,11 @@ bool PolyhedronBody::LoadBodyShape()
 	  facesList.push_back(triangularface);
      triangularface.clear();
    }
+
+   #ifdef DEBUG_READ_DATAFILE
+      MessageInterface::ShowMessage("   %d loaded\n", facesList.size());
+   #endif
+
    if (bsFile.eof())
       throw UtilityException("Error: missing data in file: " +
                              bodyShapeFilename);
@@ -256,12 +280,13 @@ bool PolyhedronBody::LoadBodyShape()
 
    isLoad = true;
 
-#ifdef DEBUG_READ_DATAFILE
-   MessageInterface::ShowMessage("number of faces = %d\n", facesList.size());
-   for (UnsignedInt i = 0; i < facesList.size(); ++i)
-      MessageInterface::ShowMessage("%d:  %d   %d   %d\n", i, facesList[i].at(0), facesList[i].at(1), facesList[i].at(2));
-   MessageInterface::ShowMessage("\n");
-#endif
+   #ifdef DEBUG_READ_DATAFILE
+      MessageInterface::ShowMessage("number of faces = %d\n", facesList.size());
+      for (UnsignedInt i = 0; i < facesList.size(); ++i)
+         MessageInterface::ShowMessage("%d:  %d   %d   %d\n", i,
+               facesList[i].at(0), facesList[i].at(1), facesList[i].at(2));
+      MessageInterface::ShowMessage("\n");
+   #endif
 
    return true;
 }
@@ -350,13 +375,14 @@ bool PolyhedronBody::FaceNormals()
 		fn.push_back(n);				// add normal vector to the normal vectors list
 	}
 
-#ifdef DEBUG_FACENORMALS_CALCULATION
-	MessageInterface::ShowMessage("List of normal vectors:\n");
-	for (UnsignedInt i = 0; i < fn.size(); ++i)
-	{
-		MessageInterface::ShowMessage("%.15lf   %.15lf   %.15lf\n", fn[i][0], fn[i][1], fn[i][2]);
-	}
-#endif
+   #ifdef DEBUG_FACENORMALS_CALCULATION
+      MessageInterface::ShowMessage("List of normal vectors:\n");
+      for (UnsignedInt i = 0; i < fn.size(); ++i)
+      {
+         MessageInterface::ShowMessage("%.15lf   %.15lf   %.15lf\n", fn[i][0], fn[i][1], fn[i][2]);
+      }
+   #endif
+
 	return true;
 }
 

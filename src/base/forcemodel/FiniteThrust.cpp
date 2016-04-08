@@ -957,7 +957,7 @@ bool FiniteThrust::SupportsDerivative(Gmat::StateElementId id)
  */
 //------------------------------------------------------------------------------
 bool FiniteThrust::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity)
+                      Integer quantity, Integer sizeOfType)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("FiniteThrust setting start data for id = "
@@ -979,9 +979,18 @@ bool FiniteThrust::SetStart(Gmat::StateElementId id, Integer index,
 //         stmCount = quantity;
 //         stmIndex = index;
 //         fillSTM = true;
+//         stmRowCount = sqrt(sizeOfType);
 //         retval = true;
 //         break;
          
+//      case Gmat::ORBIT_A_MATRIX:
+//         stmCount = quantity;
+//         stmIndex = index;
+//         fillSTM = true;
+//         stmRowCount = sqrt(sizeOfType);
+//         retval = true;
+//         break;
+
       case Gmat::MASS_FLOW:
          // todo: add mass flow bits here
          satThrustCount = quantity;

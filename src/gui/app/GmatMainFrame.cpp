@@ -118,6 +118,7 @@
 #include "CompareFilesDialog.hpp"
 #include "TextEphemFileDialog.hpp"
 #include "AboutDialog.hpp"
+#include "FileUpdateDialog.hpp"
 #include "SetPathDialog.hpp"
 #include "WelcomePanel.hpp"
 // email
@@ -230,6 +231,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU (MENU_HELP_TUTORIAL, GmatMainFrame::OnHelpTutorial)
    EVT_MENU (MENU_HELP_FORUM, GmatMainFrame::OnHelpForum)
    EVT_MENU (MENU_HELP_ISSUE, GmatMainFrame::OnHelpIssue)
+   EVT_MENU (MENU_HELP_UPDATE, GmatMainFrame::OnHelpUpdate)
    EVT_MENU (MENU_HELP_FEEDBACK, GmatMainFrame::OnHelpFeedback)
 
    EVT_MENU (MENU_FILE_NEW_SCRIPT, GmatMainFrame::OnNewScript)
@@ -4002,6 +4004,23 @@ void GmatMainFrame::OnHelpIssue(wxCommandEvent& WXUNUSED(event))
       ("GmatMainFrame::OnHelpIssue() report issue url='%s'\n", url.c_str());
    #endif
    ::wxLaunchDefaultBrowser(url);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnHelpUpdate(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles check for file updates command from the help menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnHelpUpdate(wxCommandEvent& WXUNUSED(event))
+{
+   FileUpdateDialog dlg(this, -1, "Data File Update Utility");
+   if (!dlg.IsEmpty())
+      dlg.ShowModal();
 }
 
 

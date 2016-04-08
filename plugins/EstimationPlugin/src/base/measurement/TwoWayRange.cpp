@@ -34,9 +34,13 @@
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
 
+// Moved here from inline location; includes should always be at the top in GMAT
+#include "MeasurementException.hpp"
+
 
 //#define DEBUG_HARDWARE_DELAYS
-
+//#define DEBUG_EVENT
+//#define DEBUG_INITIALIZE
 
 //------------------------------------------------------------------------------
 // TwoWayRange(const std::string &type, const std::string &nomme)
@@ -50,10 +54,13 @@
 //------------------------------------------------------------------------------
 TwoWayRange::TwoWayRange(const std::string &type, const std::string &nomme) :
    PhysicalMeasurement        (type, nomme),
-   tR                         (GmatTimeConstants::MJD_OF_J2000),
-   tT						         (GmatTimeConstants::MJD_OF_J2000),
-   tV						         (GmatTimeConstants::MJD_OF_J2000),
-   transmitDelay			      (0.0),
+   t1E						  (GmatTimeConstants::MJD_OF_J2000),
+   t1T                        (GmatTimeConstants::MJD_OF_J2000),
+   t2R	 			          (GmatTimeConstants::MJD_OF_J2000),
+   t2T						  (GmatTimeConstants::MJD_OF_J2000),
+   t3R	 			          (GmatTimeConstants::MJD_OF_J2000),
+   t3E						  (GmatTimeConstants::MJD_OF_J2000),
+   transmitDelay		      (0.0),
    targetDelay                (0.0),
    receiveDelay               (0.0),
    uplinkTime                 (0.0),
@@ -93,10 +100,13 @@ TwoWayRange::~TwoWayRange()
 //------------------------------------------------------------------------------
 TwoWayRange::TwoWayRange(const TwoWayRange& twr) :
    PhysicalMeasurement        (twr),
-   tR                         (twr.tR),
-   tT						         (twr.tT),
-   tV						         (twr.tV),
-   transmitDelay			      (twr.transmitDelay),
+   t1E                        (twr.t1E),
+   t1T 				          (twr.t1T),
+   t2R						  (twr.t2R),
+   t2T						  (twr.t2T),
+   t3R						  (twr.t3R),
+   t3E						  (twr.t3E),
+   transmitDelay		      (twr.transmitDelay),
    targetDelay                (twr.targetDelay),
    receiveDelay               (twr.receiveDelay),
    uplinkTime                 (twr.uplinkTime),
@@ -126,9 +136,12 @@ TwoWayRange& TwoWayRange::operator=(const TwoWayRange& twr)
    {
       PhysicalMeasurement::operator=(twr);
 
-      tR            = twr.tR;
-      tT			= twr.tT;
-      tV			= twr.tV;
+      t1E           = twr.t1E;
+      t1T			= twr.t1T;
+      t2R			= twr.t2R;
+      t2T           = twr.t2T;
+      t3R			= twr.t3R;
+      t3E			= twr.t3E;
       transmitDelay = twr.transmitDelay;
       targetDelay   = twr.targetDelay;
       receiveDelay  = twr.receiveDelay;
@@ -213,6 +226,10 @@ bool TwoWayRange::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool TwoWayRange::Initialize()
 {
+#ifdef DEBUG_INITIALIZE
+	MessageInterface::ShowMessage("Start TwoWayRange::Initialize()\n");
+#endif
+
    bool retval = false;
 
    if (PhysicalMeasurement::Initialize())
@@ -237,7 +254,8 @@ bool TwoWayRange::Initialize()
                      participants[i]->GetStringParameter("Id");
             }
 
-            SetHardwareDelays(false);
+            // SetHardwareDelays(false);		// made change to fix receiver delay setting: 4/2/2013
+			   SetHardwareDelays(true);			// made change to fix receiver delay setting: 4/2/2013
             retval = true;
          }
          else
@@ -247,7 +265,16 @@ bool TwoWayRange::Initialize()
                   "other SpacePoint participant; cannot initialize\n");
          }
       }
+
+	  // Set options to run relativity: // and ET-TAI corrections: 
+///// TBD: Determine if there is a more generic way to add these
+      uplinkLeg.SetRelativityCorrection(useRelativityCorrection);
+	   downlinkLeg.SetRelativityCorrection(useRelativityCorrection);
    }
+
+#ifdef DEBUG_INITIALIZE
+	MessageInterface::ShowMessage("Exit TwoWayRange::Initialize()\n");
+#endif
 
    return retval;
 }
@@ -316,6 +343,9 @@ bool TwoWayRange::SetEventData(Event *locatedEvent)
       Real start = - receiveDelay + downlinkLeg.GetVarTimestep() - targetDelay;
       uplinkLeg.SetFixedTimestep(start);
 
+	  #ifdef DEBUG_EVENT
+	     MessageInterface::ShowMessage(" receiveDelay = %.12lf,   targetDelay = %.12lf,   downlinkLeg.GetVarTimestep() = %.15lf\n", receiveDelay, targetDelay, downlinkLeg.GetVarTimestep());
+      #endif
       // declare success!
       retval = true;
    }
@@ -359,6 +389,13 @@ void TwoWayRange::InitializeMeasurement()
    uplinkLeg.AddCoordinateSystem(F2, index);   // Participant 1 CS for the event
    index = downlinkLeg.GetParticipantIndex(participants[1]);
    downlinkLeg.AddCoordinateSystem(F2, index); // Participant 2 CS for the event
+
+   // Set solar system for uplinkLeg and downlinkLeg in order to calculate states of paticipants in SSB coordinate system
+   if (solarSystem == NULL)
+	   throw MeasurementException("Error in TwoWayRange::InitializeMeasurement() due to solar system object is NULL.\n");
+
+   uplinkLeg.SetSolarSystem(solarSystem);
+   downlinkLeg.SetSolarSystem(solarSystem);
 }
 
 
@@ -377,6 +414,9 @@ void TwoWayRange::InitializeMeasurement()
 //------------------------------------------------------------------------------
 void TwoWayRange::SetHardwareDelays(bool loadEvents)
 {
+
+   UpdateHardware();                                                         // made changes by TUAN NGUYEN
+
    #ifdef DEBUG_HARDWARE_DELAYS
       MessageInterface::ShowMessage("TwoWayRange::SetHardwareDelays(%s)\n",
             (loadEvents ? "true" : "false"));

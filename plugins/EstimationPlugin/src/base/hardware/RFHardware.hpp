@@ -62,10 +62,10 @@ public:
    // needed if derived classes implement them in order to prevent compiler
    // confusion.
 
-   virtual std::string 	GetStringParameter(const Integer id) const;
-   virtual std::string 	GetStringParameter(const std::string &label) const;
-   virtual bool 			SetStringParameter(const Integer id, const std::string &value);
-   virtual bool 			SetStringParameter(const std::string &label,
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id, const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
                                       const std::string &value);
 
 
@@ -78,14 +78,14 @@ public:
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
 
-   virtual const 		ObjectTypeArray& GetRefObjectTypeArray();					// made changes by Tuan Nguyen
-   virtual bool 		HasRefObjectTypeArray();									// made changes by Tuan Nguyen
-   virtual bool         HasLocalClone() { return true;};							// made changes by Tuan Nguyen
+   virtual const        ObjectTypeArray& GetRefObjectTypeArray();
+   virtual bool         HasRefObjectTypeArray();
+   virtual bool         HasLocalClone() { return true;};
 
    virtual bool         Initialize();
 
 protected:
-   Antenna* 	primaryAntenna;
+   Antenna*    primaryAntenna;
    std::string primaryAntennaName;
 
    /// Published parameters for the RF hardware

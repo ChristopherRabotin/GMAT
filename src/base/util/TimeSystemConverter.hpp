@@ -168,6 +168,7 @@ namespace TimeConverterUtil
    StringArray GMAT_API GetValidTimeRepresentations();
    
    bool GMAT_API IsValidTimeSystem(const std::string& system);
+
 }
 
 #endif // TimeSystemConverter_hpp

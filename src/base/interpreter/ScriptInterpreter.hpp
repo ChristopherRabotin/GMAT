@@ -60,6 +60,8 @@ public:
    
    bool SetInStream(std::istream *str);
    bool SetOutStream(std::ostream *str);
+
+   std::string GetScriptFileName();       // made changes by TUAN NGUYEN
    
 protected:
    

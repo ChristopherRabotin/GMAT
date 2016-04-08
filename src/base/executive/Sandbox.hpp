@@ -78,6 +78,9 @@ public:
    GmatBase* GetInternalObject(std::string name,
                                Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
    
+   std::map<std::string, GmatBase *>                                // made changes by TUAN NGUYEN
+             GetObjectMap();                                        // made changes by TUAN NGUYEN
+
    // Execution methods
    bool Initialize();
    bool Execute();

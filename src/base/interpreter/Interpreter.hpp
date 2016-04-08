@@ -380,6 +380,7 @@ private:
    StringArray   functionList;
    StringArray   hardwareList;
    StringArray   measurementList;
+   StringArray   measurementModelList;
    StringArray   trackingSystemList;
    StringArray   obtypeList;
    StringArray   odeModelList;
@@ -393,7 +394,9 @@ private:
    StringArray   celestialBodyList;
    StringArray   eventLocatorList;
    StringArray   interfaceList;
-   
+   StringArray   errorModelList;                   // made changes by TUAN NGUYEN
+   StringArray   dataFilterList;                   // made changes by TUAN NGUYEN
+
    StringArray   matlabFunctionNames;
    
    static StringArray   allObjectTypeList;

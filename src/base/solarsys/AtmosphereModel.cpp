@@ -113,8 +113,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
-//   useGeodetic          (false),							// made changes by TUAN NGUYEN
-   useGeodetic          (true),							// made changes by TUAN NGUYEN
+//   useGeodetic          (false),
+   useGeodetic          (true),
    gha                  (0.0),
    ghaEpoch             (0.0),
    historicStart        (-1.0),
@@ -201,7 +201,7 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
-   useGeodetic          (am.useGeodetic),						// made changes by TUAN NGUYEN
+   useGeodetic          (am.useGeodetic),
    gha                  (0.0),
    ghaEpoch             (0.0),
    historicStart        (am.historicStart),
@@ -268,7 +268,7 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    geoHeight            = 0.0;
    geoLat               = 0.0;
    geoLong              = 0.0;
-   useGeodetic          = am.useGeodetic;							// made changes by TUAN NGUYEN
+   useGeodetic          = am.useGeodetic;
    gha                  = 0.0;
    ghaEpoch             = 0.0;
    historicStart        = am.historicStart;
@@ -385,6 +385,21 @@ void AtmosphereModel::SetCbJ2000CoordinateSystem(CoordinateSystem *cs)
 {
    cbJ2000 = cs;
 }
+
+
+// made changes  for bug GMT-5282
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetCbJ2000CoordinateSystem()
+//------------------------------------------------------------------------------
+/**
+ * Gets the body centered J2000 coordinate system.
+ */
+//------------------------------------------------------------------------------
+CoordinateSystem* AtmosphereModel::GetCbJ2000CoordinateSystem()
+{
+   return cbJ2000;
+}
+
 
 //------------------------------------------------------------------------------
 // void SetFixedCoordinateSystem(CoordinateSystem *cs)
@@ -1407,6 +1422,7 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
    CoordinateSystem *j2000ToUse = (cbJ2000 == NULL ? mInternalCoordSystem : cbJ2000);
 
 #ifdef DEBUG_CALCULATE_GEODETICS
+   MessageInterface::ShowMessage("AtmosphereModel::CalculateGeodetics():   cbJ2000 = <%p>    mInternalCoordSystem = <%p>\n", cbJ2000, mInternalCoordSystem);
    if (cbJ2000 == NULL)
 	   MessageInterface::ShowMessage("cbJ2000 == NULL, mInternalCoordSystem <%p,%s>\n", mInternalCoordSystem, mInternalCoordSystem->GetName().c_str());
    else
@@ -1420,7 +1436,8 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
    #ifdef DEBUG_COORDINATE_TRANSFORMS
       MessageInterface::ShowMessage("Geodetic calculations at epoch %.12lf\n",
             when);
-      MessageInterface::ShowMessage("Internal CS:\n%s\nFixed:\n%s\n",
+      if ((mInternalCoordSystem != NULL)&&(cbFixed != NULL))
+         MessageInterface::ShowMessage("Internal CS:\n%s\nFixed:\n%s\n",
             mInternalCoordSystem->GetGeneratingString(
                   Gmat::NO_COMMENTS).c_str(),
             cbFixed->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
@@ -1542,12 +1559,12 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
    //
    Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
    geoLat = atan2(state[2], rxy);
-//   geoHeight = rxy / cos(geoLat) - cbRadius;		// This equation is not correct for ellipsoid		// made changes by TUAN NGUYEN
+//   geoHeight = rxy / cos(geoLat) - cbRadius;		// This equation is not correct for ellipsoid
 //
-//   Real cs = cos(geoLat);												// made changes by TUAN NGUYEN
-//   Real sn = sin(geoLat);												// made changes by TUAN NGUYEN
-//   Real f = cbFlattening;												// made changes by TUAN NGUYEN
-//   geoHeight = rxy / cs - cbRadius*sqrt(cs*cs + (1-f)*(1-f)*sn*sn);		// made changes by TUAN NGUYEN    Fixed bug GMT-4184
+//   Real cs = cos(geoLat);
+//   Real sn = sin(geoLat);
+//   Real f = cbFlattening;
+//   geoHeight = rxy / cs - cbRadius*sqrt(cs*cs + (1-f)*(1-f)*sn*sn);		// Fixed bug GMT-4184
 
    Real delta = 1.0;
    Real tolerance = 1.0e-7;    // Better than 0.0001 degrees
@@ -1648,7 +1665,7 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
             // Handle constants for historic data
             if (historicalDataSource == 0)
                historicEnd = predictStart;
-         }
+   }
          if (predictedDataSource != 0)
          {
             #ifdef DEBUG_SCHATTEN_SETTINGS
@@ -1691,7 +1708,7 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
             fluxReader->PrepareApData(fDbuffer, epoch);
             f107 = fDbuffer.obsF107;
             f107a = fDbuffer.obsCtrF107a;
-            for (Integer i = 0; i < 7; i++)
+      for (Integer i = 0; i < 7; i++)
                 ap[i] = fDbuffer.ap[i];
             #ifdef DEBUG_FLUX_FILE
                MessageInterface::ShowMessage("%lf Historic flux: CSSI\n", epoch);
@@ -1708,10 +1725,10 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
                MessageInterface::ShowMessage("%lf Historic flux: Constants\n", epoch);
             #endif
             break;
-         }
+   }
       }
       else // Later than historic data end
-      {
+   {
          switch(predictedDataSource)
          {
          case 1:
@@ -1729,15 +1746,15 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
 
          case 0:
          default:
-            f107 = nominalF107;
-            f107a = nominalF107a;
-            for (Integer i = 0; i < 7; i++)
-               ap[i] = nominalAp;
+      f107 = nominalF107;
+      f107a = nominalF107a;
+      for (Integer i = 0; i < 7; i++)
+         ap[i] = nominalAp;
             #ifdef DEBUG_FLUX_FILE
                MessageInterface::ShowMessage("%lf Predict flux: Constants\n", epoch);
             #endif
             break;
-         }
+   }
       }
    }
    else  // All constants all the time

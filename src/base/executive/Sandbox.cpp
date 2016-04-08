@@ -515,6 +515,21 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
 }
 
 
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// std::map<std::string, GmatBase *> GetObjectMap()
+//------------------------------------------------------------------------------
+/**
+* This function is used to get object map 
+*
+*/
+//------------------------------------------------------------------------------
+std::map<std::string, GmatBase *> Sandbox::GetObjectMap()
+{
+   return objectMap;
+}
+
+
 //------------------------------------------------------------------------------
 // Execution methods
 //------------------------------------------------------------------------------

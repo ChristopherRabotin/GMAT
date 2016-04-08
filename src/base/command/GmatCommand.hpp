@@ -128,6 +128,7 @@ public:
    virtual std::string  GetSummaryName();
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetTriggerManagers(std::vector<TriggerManager*> *trigs);
+   virtual void         SetConfiguredObjectMap(ObjectMap *objMap);
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
    virtual ObjectMap*   GetObjectMap();
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
@@ -269,6 +270,9 @@ protected:
    GmatCommand          *previous;
    /// Indicator of the current nesting level
    Integer              level;
+   /// Object store for resource configuration. This is used for checking
+   /// resource name is the same as built-in function name
+   ObjectMap            *configObjectMap;
    /// Object store obtained from the Sandbox
    ObjectMap            *objectMap;
    /// Object store obtained from the Sandbox

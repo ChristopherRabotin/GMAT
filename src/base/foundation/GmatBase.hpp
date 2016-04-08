@@ -95,6 +95,10 @@ public:
                                 const std::string &oldName = "");
    virtual bool         SetName(const char *who,
                                 const std::string &oldName = "");
+
+   virtual const std::string  GetFullName();                                       // made changes by TUAN NGUYEN
+   virtual bool         SetFullName(const std::string name);                       // made changes by TUAN NGUYEN
+
    virtual Integer      GetParameterCount() const;
 
    bool                 IsOfType(Gmat::ObjectType ofType) const;
@@ -483,6 +487,8 @@ public:
    virtual std::string     GetAssociateName(UnsignedInt val = 0);
 
    virtual Integer         GetEstimationParameterID(const std::string &param);
+   virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
    virtual Integer         SetEstimationParameter(const std::string &param);
    virtual bool            IsEstimationParameterValid(const Integer id);
    virtual Integer         GetEstimationParameterSize(const Integer id);
@@ -490,6 +496,7 @@ public:
 
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
+   virtual Integer         GetStmRowId(const Integer forRow);
 
    // Covariance handling code
    virtual Integer         HasParameterCovariances(Integer parameterId);
@@ -504,6 +511,13 @@ public:
    bool IsCommandModeAssignable() const;
    virtual bool IsParameterCommandModeSettable(const Integer id) const;
    void CopyParameter(const GmatBase& fromObject, const Integer forParameter);
+
+   
+   /// Functions use information from Moderator                               // made changes by TUAN NGUYEN
+   ObjectMap               GetConfiguredObjectMap();                          // made changes by TUAN NGUYEN
+   GmatBase*               GetConfiguredObject(const std::string &name);      // made changes by TUAN NGUYEN
+   const StringArray&      GetListOfObjects(Gmat::ObjectType type);           // made changes by TUAN NGUYEN
+   const StringArray&      GetListOfObjects(const std::string &typeName);     // made changes by TUAN NGUYEN
 
 protected:
    /// Parameter IDs
@@ -528,6 +542,10 @@ protected:
    std::string         typeName;
    /// Name of the object -- empty if it is nameless
    std::string         instanceName;
+   
+   /// Full name of this object                               // made changes by TUAN NGUYEN
+   std::string         instanceFullName;                      // made changes by TUAN NGUYEN
+
    /// Enumerated base type of the object
    Gmat::ObjectType    type;
    /// Number of owned objects that belong to this instance

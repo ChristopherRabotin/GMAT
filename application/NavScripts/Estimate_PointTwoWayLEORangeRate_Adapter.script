@@ -1,0 +1,58 @@
+% Script Test Case for Build 0.1
+%
+%----- Create the spacecraft
+Create Spacecraft ODSat;
+GMAT ODSat.DateFormat = UTCGregorian;
+GMAT ODSat.Epoch = '09 Jun 2004 00:00:00.000';
+GMAT ODSat.Id = ODSatID;
+GMAT ODSat.X = 6648.837;
+GMAT ODSat.Y = -335.169;
+GMAT ODSat.Z = 2789.137;
+GMAT ODSat.VX = -0.34697109;
+GMAT ODSat.VY = 7.092177415;
+GMAT ODSat.VZ = 2.14549075;
+
+%----- Create the ground station
+Create GroundStation ST2K_48;
+GMAT ST2K_48.CentralBody = Earth;
+GMAT ST2K_48.StateType = Spherical;
+GMAT ST2K_48.HorizonReference = Ellipsoid;
+GMAT ST2K_48.Latitude = 32.54297736111111;
+GMAT ST2K_48.Longitude = 253.3879110555556;
+GMAT ST2K_48.Altitude = 1.45231;
+GMAT ST2K_48.Id = 'ST2K_48';
+
+%----- The data file
+Create TrackingFileSet estData
+estData.AddTrackingConfig = {{ST2K_48, ODSat, ST2K_48}, 'PointRangeRate'}
+estData.Filename = ODSatPointTwoWayRangeRate.gmd
+estData.UseLighttime = true;
+estData.DopplerInterval = 1.0;
+
+%----- The propagator
+Create ForceModel ODProp_ForceModel;
+GMAT ODProp_ForceModel.CentralBody = Earth;
+GMAT ODProp_ForceModel.PointMasses = {Earth};
+Create Propagator ODProp;
+GMAT ODProp.FM = ODProp_ForceModel;
+GMAT ODProp.Type = PrinceDormand78;
+GMAT ODProp.MinStep = 0;
+
+%------ Create the measurement estimator
+Create BatchEstimatorInv BatchEst;
+GMAT BatchEst.ShowProgress = true;
+GMAT BatchEst.ReportStyle = 'Normal';
+GMAT BatchEst.ReportFile = 'RREstimator.data';
+GMAT BatchEst.MaximumIterations = 15;
+GMAT BatchEst.Measurements = {estData};
+GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState'}; %, 'RangeMeasurement.Bias'};
+GMAT BatchEst.AbsoluteTol = 1e-05;
+GMAT BatchEst.RelativeTol = 1e-06;
+GMAT BatchEst.Propagator = ODProp;
+GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
+GMAT BatchEst.OLSEInitialRMSSigma = 3e212;
+BatchEst.OLSEMultiplicativeConstant = 40
+
+%------ Run the measurement simulator
+BeginMissionSequence
+RunEstimator BatchEst

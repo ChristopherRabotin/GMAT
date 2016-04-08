@@ -80,6 +80,7 @@
 #include <sstream>                  // for stringstream
 #include <algorithm>                // for sort(), set_difference()
 #include <ctime>                    // for clock()
+#include <errno.h>                 
 
 
 #ifdef CREATE_OUTPUT_FOLDER
@@ -210,8 +211,10 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       // We don't want to write before startup file is read so commented out
       //MessageInterface::ShowMessage("Moderator is reading startup file...\n");
       
-      // Read startup file, Set Log file
+      // Set theFileManager
       theFileManager = FileManager::Instance();
+
+      // Read startup file, Set Log file
       theFileManager->ReadStartupFile(startupFile);
       if ((suffix != "") && (forEntries != NULL))
       {
@@ -228,6 +231,10 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
          MessageInterface::SetLogFile(theFileManager->GetAbsPathname("LOG_FILE"));
          MessageInterface::ShowMessage("Logging to %s\n", theFileManager->GetAbsPathname("LOG_FILE").c_str());
       }
+
+      MessageInterface::ShowMessage("Moderator is updating data files...\n");
+      // update data files from repository
+      UpdateDataFiles();
       
       MessageInterface::ShowMessage("Moderator is creating core engine...\n");
       
@@ -4123,7 +4130,7 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
 
 // MeasurementModel
 //------------------------------------------------------------------------------
-// MeasurementModel* CreateMeasurementModel(const std::string &name)
+// MeasurementModelBase* CreateMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Creates a new named MeasurementModel and adds it to the configuration
@@ -4133,7 +4140,8 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
  * @return The new MeasurementModel
  */
 //------------------------------------------------------------------------------
-MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
+MeasurementModelBase* Moderator::CreateMeasurementModel(const std::string &type,
+      const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
@@ -4143,7 +4151,8 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
 
    if (GetMeasurementModel(name) == NULL)
    {
-      MeasurementModel *obj = theFactoryManager->CreateMeasurementModel(name);
+      MeasurementModelBase *obj =
+            theFactoryManager->CreateMeasurementModel(type, name);
 
       if (obj == NULL)
       {
@@ -4192,7 +4201,7 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// MeasurementModel* GetMeasurementModel(const std::string &name)
+// MeasurementModelBase* GetMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a measurement model from the configuration
@@ -4202,12 +4211,12 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
  * @return The named MeasurementModel
  */
 //------------------------------------------------------------------------------
-MeasurementModel* Moderator::GetMeasurementModel(const std::string &name)
+MeasurementModelBase* Moderator::GetMeasurementModel(const std::string &name)
 {
    if (name == "")
       return NULL;
    else
-      return (MeasurementModel*)FindObject(name);
+      return (MeasurementModelBase*)FindObject(name);
 }
 
 // TrackingSystem
@@ -6349,6 +6358,49 @@ void Moderator::SetCommandsUnchanged(Integer whichList)
 
 
 //------------------------------------------------------------------------------
+// bool UpdateDataFiles()
+//------------------------------------------------------------------------------
+/**
+ * Validates the command.
+ */
+//------------------------------------------------------------------------------
+bool Moderator::UpdateDataFiles()
+{
+   std::string file = theFileManager->GetStartupFileDir()+IFileUpdater::ShellFile;
+
+   // no update file, continue with running GMAT
+   if (!GmatFileUtil::DoesFileExist(file)) return false;
+
+   bool retValue;
+   try
+   {
+      errno = 0;
+      int ret_value = system(file.c_str());
+      retValue = (ret_value == 0 && errno == 0);
+      if (retValue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::INFO_, "Data Files have been successfully updated");
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "Data Files were not successfully updated");
+      }
+   }
+   catch (...)
+   {
+   }
+   Integer retCode;
+
+   if (GmatFileUtil::DoesFileExist(file + ".bak"))
+      remove((file + ".bak").c_str());
+   theFileManager->RenameFile(file, file + ".bak", retCode, true);
+   return retValue;
+}
+
+
+//------------------------------------------------------------------------------
 // void ValidateCommand(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
@@ -6712,6 +6764,16 @@ void Moderator::ClearAllSandboxes()
    MessageInterface::ShowMessage
       ("===> There are %d memory tracks after Sandbox clear\n", tracks.size());
    #endif
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// Sandbox* GetSandbox(Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+Sandbox* Moderator::GetSandbox(Integer sandboxNum)
+{
+   return sandboxes[sandboxNum-1];
 }
 
 

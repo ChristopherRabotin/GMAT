@@ -690,6 +690,8 @@ bool PropagationEnabledCommand::PrepareToPropagate()
       fm.clear();
       psm.clear();
       baseEpoch.clear();
+	   currEpoch.clear();				// fix bug #1 of ticket GMT-4314
+	   elapsedTime.clear();          // fix bug #1 of ticket GMT-4314
 
       for (UnsignedInt n = 0; n < propagators.size(); ++n)
       {
@@ -846,6 +848,9 @@ bool PropagationEnabledCommand::Step(Real dt)
             " failed to take a good final step (size = " + size + ")\n");
       }
 
+      #ifdef DEBUG_PROP_STEPS
+         MessageInterface::ShowMessage("%.12lf ", dt);
+      #endif
       ++current;
    }
 
@@ -859,7 +864,16 @@ bool PropagationEnabledCommand::Step(Real dt)
       // Update spacecraft epoch, without argument the spacecraft epoch
       // won't get updated for consecutive Propagate command
       fm[i]->UpdateSpaceObject(currEpoch[i]);
+
+      #ifdef DEBUG_PROP_STEPS
+         MessageInterface::ShowMessage("  ---> elapsed time = %.12lf, epoch "
+               "%.12lf", elapsedTime[i], currEpoch[i]);
+      #endif
    }
+
+   #ifdef DEBUG_PROP_STEPS
+      MessageInterface::ShowMessage("\n");
+   #endif
 
    if (publishOnStep)
    {

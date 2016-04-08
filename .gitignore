@@ -19,9 +19,12 @@ Release
 *.user
 /.settings/
 /KARI/
+/GmatAtGoddard.StarPath.djc.pui
+/GmatAtGoddard.prj
+*.md
 CheckRepo.TestEntry
 *~
 *.swp
-*.md
 /temp/
 /WinBuild/
+/RemoteSystemsTempFiles/

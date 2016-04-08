@@ -46,6 +46,7 @@
 #include "CoordinateConverter.hpp"
 #include "Hardware.hpp"
 
+//#include "MediaCorrectionInterface.hpp"
 
 class STATION_API GroundStation : public GroundstationInterface
 {
@@ -87,7 +88,6 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
-   // made changes by Tuan Nguyen
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
@@ -118,7 +118,7 @@ public:
 
    virtual bool         Initialize();
 
-//   virtual Integer         GetEstimationParameterID(const std::string &param);
+//   virtual Integer      GetEstimationParameterID(const std::string &param);
 //   virtual Integer         SetEstimationParameter(const std::string &param);
    virtual bool         IsEstimationParameterValid(const Integer id);
    virtual Integer      GetEstimationParameterSize(const Integer id);
@@ -127,8 +127,11 @@ public:
    virtual bool         IsValidID(const std::string &id);
 
 
-   Real*                IsValidElevationAngle(const Rvector6 &state_sez,
-                                              const Real minElevationEngle);
+   virtual Real*        IsValidElevationAngle(const Rvector6 &state_sez);
+
+   virtual bool         CreateErrorModelForSignalPath(std::string spacecraftName);          // made changes by TUAN NGUYEN
+   virtual std::map<std::string,ObjectArray>& 
+                        GetErrorModelMap();                                                 // made changes by TUAN NGUYEN
 
    DEFAULT_TO_NO_CLONES
 
@@ -136,22 +139,48 @@ protected:
    /// Ground station ID
    std::string          stationId;
 
-   // Added hardware of the ground station
-   StringArray	         hardwareNames;       // made changes by Tuan Nguyen
-   ObjectArray          hardwareList;        // made changes by Tuan Nguyen
+   /// Added hardware of the ground station
+   StringArray          hardwareNames;
+   ObjectArray          hardwareList;
 
-   /// Minimum elevation angle, in degrees
-   Real minElevationAngle;             
+   /// Add ionosphere and troposphere correction modes
+   std::string ionosphereModel;
+   std::string troposphereModel;
+
+   /// Parameters needed for Troposphere correction
+   Real                 temperature;                     // unit: Kelvin
+   Real                 pressure;                        // unit: hPa
+   Real                 humidity;                        // unit: percentage
+   std::string          dataSource;                      // specify data source for parameters needed for Troposphere correction: "Constant" or "FromFile"
+
+   /// Parameters needed for verifying measurement feasibility
+   Real minElevationAngle;               // unit: degree
    /// Visibility vector
    Real az_el_visible[3];
+
+   /// Error models used for measurements in this gound station               // made changes by TUAN NGUYEN
+   StringArray     errorModelNames;                                           // made changes by TUAN NGUYEN
+   ObjectArray     errorModels;                                               // made changes by TUAN NGUYEN
+
+   /// Containing all clones of ErrorModels associated with a signal path.
+   // The first element containing name of spacecraft in uplink signal. 
+   // The second element is an object array containing error model clones.
+   std::map<std::string,ObjectArray>     errorModelMap;                       // made changes by TUAN NGUYEN
 
 public:
    /// Published parameters for ground stations
    enum
    {
       STATION_ID = BodyFixedPointParamCount,
-      ADD_HARDWARE,								// made changes by Tuan Nguyen
-      MINIMUM_ELEVATION_ANGLE,		// It is needed for verifying measurement feasibility
+      ADD_HARDWARE,
+      IONOSPHERE_MODEL,
+      TROPOSPHERE_MODEL,
+      DATA_SOURCE,                  // When DataSource is 'Constant', that means temperature, pressure, and humidity are read from script, otherwise they are read from a data base 
+      TEMPERATURE,                  // temperature (in K) at ground station. It is used for Troposphere correction
+      PRESSURE,                     // pressure (in hPa) at ground station. It is used for Troposphere correction
+      HUMIDITY,                     // humidity (in %) at ground station. It is used for Troposphere correction
+      MINIMUM_ELEVATION_ANGLE,      // It is needed for verifying measurement feasibility
+      ERROR_MODELS,                 // ErrorModel contains all information about noise sigma, bias for given measurement types. Therefore, the following parameters have to be removed        // made change by TUAN NGUYEN
       GroundStationParamCount,
    };
 
@@ -161,7 +190,7 @@ public:
       PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount];
 
 private:
-   bool 		        VerifyAddHardware();			// made changes by Tuan Nguyen
+   bool               VerifyAddHardware();
 };
 
 #endif /*GroundStation_hpp*/
