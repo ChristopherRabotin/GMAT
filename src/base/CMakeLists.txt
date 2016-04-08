@@ -530,6 +530,7 @@ SET(BASE_SRCS
     util/MemoryTracker.cpp
     util/MessageInterface.cpp
     util/MessageReceiver.cpp
+    util/RandomNumber.cpp
     util/RealUtilities.cpp
     util/RgbColor.cpp
     util/Rmatrix33.cpp
