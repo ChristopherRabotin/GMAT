@@ -129,7 +129,9 @@ RandomNumber::RandomNumber()
 #endif
 
     unsigned int clockSeed = time(NULL);
-    srand(clockSeed);
+    //srand(clockSeed);
+    srand(5);
+    currentIndex = 0;
 }
 
 
@@ -347,59 +349,55 @@ Real RandomNumber::UniformOpenClosed(const Real a, const Real b)
 //------------------------------------------------------------------------------
 Real RandomNumber::Gaussian()
 {
-    const Real ur = 0.4359971734;
-    const Real vr = 0.9296123611;
-    const Real a = 0.062794;
-    const Real b = 2.530885;
-    const Real alpha = 0.8904302215;
-    const Real alpha_sq2pi_inv = alpha/GmatMathUtil::Sqrt(GmatMathConstants::TWO_PI);
+   const Real ur = 0.4359971734;
+   const Real vr = 0.9296123611;
+   const Real a = 0.062794;
+   const Real b = 2.530885;
+   const Real alpha = 0.8904302215;
+   const Real alpha_sq2pi_inv = alpha/GmatMathUtil::Sqrt(GmatMathConstants::TWO_PI);
 
-    bool flag;
+   bool flag;
 
-    do
-    {
-	
-	flag = false;
-	
-	Real V = UniformOpenOpen();
+   do
+   {
+	   flag = false;
+	   Real V = UniformOpenOpen();
     
-	if( V <= 2*ur*vr )
-	{
-	    return G(V/vr-ur,a,b);
-	}
-	else
-	{
-	    Real U;  
+	   if( V <= 2*ur*vr )
+	   {
+	      return G(V/vr-ur,a,b);
+	   }
+	   else
+	   {
+	      Real U;  
 	 
-	    if ( V >= vr )
-	    {	
-		U = UniformOpenOpen(-0.5,0.5);
+	      if ( V >= vr )
+	      {	
+		      U = UniformOpenOpen(-0.5,0.5);
+	      }
+	      else
+	      {
+		      U = V/vr - (ur + 0.5);
+		      U = 0.5*GmatMathUtil::SignOf(U)-U;
+		      V = UniformOpenOpen(0.0,vr);
+	      }
+	      
+	      Real gu = G(U,a,b);
+	      
+	      if (((V*GmatMathUtil::Exp(0.5*gu*gu)) - b*alpha_sq2pi_inv)*
+		       (0.25-GmatMathUtil::Abs(U)+U*U) <= a*alpha_sq2pi_inv)
+	      {
+		      return gu;
+	      }
+	      else
+	      {	
+	         flag = true;
+	      }
 	    }
-	    else
-	    {
-		U = V/vr - (ur + 0.5);
-		U = 0.5*GmatMathUtil::SignOf(U)-U;
-		V = UniformOpenOpen(0.0,vr);
-	    }
-	
-	    Real gu = G(U,a,b);
-	
-	    if (((V*GmatMathUtil::Exp(0.5*gu*gu)) - b*alpha_sq2pi_inv)*
-		(0.25-GmatMathUtil::Abs(U)+U*U) <= a*alpha_sq2pi_inv)
-	    {
-		return gu;
-	    }
-	    else
-	    {	
-	       flag = true;
-	    }
-	}
-	
     } 
     while (flag);
     
     return 0;
-    
 }
 
 //------------------------------------------------------------------------------
@@ -661,11 +659,11 @@ union RealNumberType128
 	unsigned char ch[16];
 };
 
-
+#include <random>
 Real RandomNumber::rrand()
 {
 #ifdef DEBUG_CALCULATION
-	MessageInterface::ShowMessage("Run rrand() fucntion\n");
+//	MessageInterface::ShowMessage("Run rrand() fucntion\n");
 #endif
 
    // Check machine is using Big indian or Little indian:
@@ -681,75 +679,110 @@ Real RandomNumber::rrand()
       isBigIndian = false;
 
    // Create a real random number
+   bool found;
    Real ret_Val;
-   if (sizeof(Real) == 8)
+   do
    {
-	   RealNumberType64 val;
+      if (sizeof(Real) == 8)
+      {
+         RealNumberType64 val;
 
-	   for (int i = 0; i < 8; ++i)
-		   val.ch[i] = rand();
-	   if (isBigIndian)
-	   {
-		   // Set first 12 bits to 0 
-		   val.ch[0] = '\0';
-		   val.ch[1] = val.ch[1] & 15; 
-	   }
-	   else
-	   {
-		   //Set first 12 bits to 0
-		   val.ch[0] = 0x3F;
-		   val.ch[1] = val.ch[1] | 0xF0;
+         for (int i = 0; i < 8; ++i)
+         {
+            Integer k = rand();
+            //         this->Seed(k);
+            //         k = rand();
+//            MessageInterface::ShowMessage("k = %d   ", k);
+            val.ch[i] = k; //  rand();
+         }
 
-		   // Swap to the order of Little indian
-		   unsigned char temp;
-		   for (int i = 0; i < 4; ++i)
-		   {
-			   temp = val.ch[i];
-			   val.ch[i] = val.ch[7-i];
-			   val.ch[7-i] = temp;
-		   }
-	   }
-//	   MessageInterface::ShowMessage("val.intNum[0] = %8x val.intNum[1] = %8x\n", val.intNum[0], val.intNum[1]);
-//	   MessageInterface::ShowMessage("%2x  %2x  %2x  %2x  %2x  %2x  %2x  %2x\n", val.ch[0], val.ch[1], val.ch[2], val.ch[3], val.ch[4], val.ch[5], val.ch[6], val.ch[7]);
-//	   MessageInterface::ShowMessage("val.realNum = %le\n", val.realNum);
-	   ret_Val = val.realNum;
+         if (isBigIndian)
+         {
+            // Set first 12 bits to 0 
+            val.ch[0] = '\0';
+            val.ch[1] = val.ch[1] & 15;
+         }
+         else
+         {
+            //Set first 12 bits to 0
+            val.ch[0] = 0x3F;
+            val.ch[1] = val.ch[1] | 0xF0;
 
-   }
-   else if (sizeof(Real) == 16)
-   {
-	   RealNumberType128 val;
+            // Swap to the order of Little indian
+            unsigned char temp;
+            for (int i = 0; i < 4; ++i)
+            {
+               temp = val.ch[i];
+               val.ch[i] = val.ch[7 - i];
+               val.ch[7 - i] = temp;
+            }
+         }
+         //	   MessageInterface::ShowMessage("val.intNum[0] = %8x val.intNum[1] = %8x\n", val.intNum[0], val.intNum[1]);
+         //	   MessageInterface::ShowMessage("%2x  %2x  %2x  %2x  %2x  %2x  %2x  %2x\n", val.ch[0], val.ch[1], val.ch[2], val.ch[3], val.ch[4], val.ch[5], val.ch[6], val.ch[7]);
+         //	   MessageInterface::ShowMessage("val.realNum = %le\n", val.realNum);
+         ret_Val = val.realNum;
 
-	   for (int i = 0; i < 16; ++i)
-		   val.ch[i] = rand();
-	   if (isBigIndian)
-	   {
-		   // Set first 16 bits to 0 
-		   val.ch[0] = 0x3F;
-		   val.ch[1] = 0xFF;
-	   }
-	   else
-	   {
-		   // Set first 16 bits to 0
-		   val.ch[0] = val.ch[1] = '\0';
+      }
+      else if (sizeof(Real) == 16)
+      {
+         RealNumberType128 val;
 
-		   // Swap to the order of Little indian
-		   unsigned char temp;
-		   for (int i = 0; i < 8; ++i)
-		   {
-			   temp = val.ch[i];
-			   val.ch[i] = val.ch[15-i];
-			   val.ch[15-i] = temp;
-		   }
+         for (int i = 0; i < 16; ++i)
+            val.ch[i] = rand();
+         if (isBigIndian)
+         {
+            // Set first 16 bits to 0 
+            val.ch[0] = 0x3F;
+            val.ch[1] = 0xFF;
+         }
+         else
+         {
+            // Set first 16 bits to 0
+            val.ch[0] = val.ch[1] = '\0';
 
-	   }
-	   ret_Val = val.realNum;
-   }
+            // Swap to the order of Little indian
+            unsigned char temp;
+            for (int i = 0; i < 8; ++i)
+            {
+               temp = val.ch[i];
+               val.ch[i] = val.ch[15 - i];
+               val.ch[15 - i] = temp;
+            }
 
-   ret_Val = ret_Val - 1.0;
+         }
+         ret_Val = val.realNum;
+      }
+
+      ret_Val = ret_Val - 1.0;
+
+      found = false;
+      for (Integer i = 0; i < preValue.size(); ++i)
+      {
+         if (ret_Val == preValue[i])
+         {
+            found = true;
+            break;
+         }
+      }
+   } while (found);
+
 
 #ifdef DEBUG_CALCULATION
-   MessageInterface::ShowMessage(" Real random number = %lf\n", ret_Val);
+      MessageInterface::ShowMessage(" Real random number = %lf\n", ret_Val);
 #endif
+   if (currentIndex < preValue.size())
+      preValue[currentIndex] = ret_Val;
+   else
+   {
+      if (preValue.size() < 40)
+         preValue.push_back(ret_Val);
+      else
+      {
+         currentIndex = 0;
+         preValue[currentIndex] = ret_Val;
+      }
+   }
+   ++currentIndex;
 
    return ret_Val;
 }

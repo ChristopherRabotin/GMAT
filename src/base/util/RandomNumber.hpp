@@ -103,14 +103,14 @@
 // extern C will be used
 //#define __cplusplus
 
-#include "estimation_defs.hpp"
-//#include "gmatdefs.hpp"
+//#include "estimation_defs.hpp"
+#include "gmatdefs.hpp"
 #include "RealUtilities.hpp"
 #include "UtilityException.hpp"
 
 
-//class GMAT_API RandomNumber
-class ESTIMATION_API RandomNumber
+class GMAT_API RandomNumber
+//class ESTIMATION_API RandomNumber
 {
 public:
 	static RandomNumber* Instance();
@@ -157,7 +157,8 @@ private:
 
 	Real G(Real x, Real a, Real b);
 	Real rrand();
-
+   RealArray    preValue;     // previous value of rrand()
+   Integer      currentIndex;
 };
 
 #endif	/* _RandomNumber_hpp */
