@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                           SurfaceContact
+//                           SurfaceHeight
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -17,10 +17,10 @@
  */
 //------------------------------------------------------------------------------
 
-#include "SurfaceContact.hpp"
+#include "SurfaceHeight.hpp"
 
 //------------------------------------------------------------------------------
-// SurfaceContact(const std::string &name, GmatBase *obj)
+// SurfaceHeight(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor
@@ -29,26 +29,26 @@
  * @param obj Object used with the new one
  */
 //------------------------------------------------------------------------------
-SurfaceContact::SurfaceContact(const std::string &name, GmatBase *obj) :
-   GravReal(name, "SurfaceContact", obj, "Surface Contact", "",
+SurfaceHeight::SurfaceHeight(const std::string &name, GmatBase *obj) :
+   GravReal(name, "SurfaceHeight", obj, "Surface Contact", "",
           Gmat::SPACECRAFT, GmatParam::ODE_MODEL)
 {
    mDepObjectName = "";
 }
 
 //------------------------------------------------------------------------------
-// ~SurfaceContact()
+// ~SurfaceHeight()
 //------------------------------------------------------------------------------
 /**
  * Destructor
  */
 //------------------------------------------------------------------------------
-SurfaceContact::~SurfaceContact()
+SurfaceHeight::~SurfaceHeight()
 {
 }
 
 //------------------------------------------------------------------------------
-// SurfaceContact(const SurfaceContact& sc)
+// SurfaceHeight(const SurfaceHeight& sc)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
@@ -56,13 +56,13 @@ SurfaceContact::~SurfaceContact()
  * @param sc The object copied
  */
 //------------------------------------------------------------------------------
-SurfaceContact::SurfaceContact(const SurfaceContact& sc) :
+SurfaceHeight::SurfaceHeight(const SurfaceHeight& sc) :
    GravReal       (sc)
 {
 }
 
 //------------------------------------------------------------------------------
-// SurfaceContact& operator=(const SurfaceContact& sc)
+// SurfaceHeight& operator=(const SurfaceHeight& sc)
 //------------------------------------------------------------------------------
 /**
  * Asignment operator
@@ -72,7 +72,7 @@ SurfaceContact::SurfaceContact(const SurfaceContact& sc) :
  * @return This object, set to match sc
  */
 //------------------------------------------------------------------------------
-SurfaceContact& SurfaceContact::operator =(const SurfaceContact& sc)
+SurfaceHeight& SurfaceHeight::operator =(const SurfaceHeight& sc)
 {
    if (this != &sc)
    {
@@ -91,9 +91,9 @@ SurfaceContact& SurfaceContact::operator =(const SurfaceContact& sc)
  * @return true if the parameter was evaluated successfully
  */
 //------------------------------------------------------------------------------
-bool SurfaceContact::Evaluate()
+bool SurfaceHeight::Evaluate()
 {
-   mRealValue = GravData::GetGravReal("SurfaceContact");
+   mRealValue = GravData::GetGravReal("SurfaceHeight");
 
    if (mRealValue == GravData::GRAV_REAL_UNDEFINED)
       return false;
@@ -110,7 +110,7 @@ bool SurfaceContact::Evaluate()
  * @return The copy
  */
 //------------------------------------------------------------------------------
-GmatBase* SurfaceContact::Clone() const
+GmatBase* SurfaceHeight::Clone() const
 {
-   return new SurfaceContact(*this);
+   return new SurfaceHeight(*this);
 }

@@ -32,7 +32,7 @@ SET(PLUGIN_SRCS
   gravitymodel/PolyhedronGravityModel.cpp
   parameter/GravData.cpp
   parameter/GravReal.cpp
-  parameter/SurfaceContact.cpp
+  parameter/SurfaceHeight.cpp
   plugin/GmatPluginFunctions.cpp
 )
 
