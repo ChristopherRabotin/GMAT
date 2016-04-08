@@ -875,23 +875,23 @@ bool DragForce::Initialize()
          if (!sun)
             throw ODEModelException("The Sun is not in solar system");
            
-         std::string bodyName;
+         //std::string bodyName;
 
-         // Drag currently requires that the drag body be the Earth.  When other
-         // drag models are implemented, remove this block and test.
-         for (StringArray::iterator i = dragBody.begin(); i != dragBody.end(); 
-              ++i)
-         {
-            if ((*i) != "Earth" && (*i) != "Mars")
-               throw ODEModelException(
-                  "Drag modeling only works at the Earth or Mars in current "
-                  "GMAT builds.");
-         }
-         
-         if (dragBody.size() > 0)
-            bodyName = dragBody[0];
-         else
-            bodyName = "Earth";
+         //// Drag currently requires that the drag body be the Earth or Mars.  When other
+         //// drag models are implemented, remove this block and test.
+         //for (StringArray::iterator i = dragBody.begin(); i != dragBody.end(); 
+         //     ++i)
+         //{
+         //   if ((*i) != "Earth" && (*i) != "Mars")
+         //      throw ODEModelException(
+         //         "Drag modeling only works at the Earth or Mars in current "
+         //         "GMAT builds.");
+         //}
+         //
+         //if (dragBody.size() > 0)
+         //   bodyName = dragBody[0];
+         //else
+         //   bodyName = "Earth";
          centralBody = solarSystem->GetBody(bodyName);
          body = solarSystem->GetBody(bodyName);                      // made changes for bug GMT-5282
    
@@ -951,9 +951,9 @@ bool DragForce::Initialize()
                throw ODEModelException("No central body is defined for DragForce\n");
 
             if (body->GetName() != atmos->GetCentralBodyName())
-				   throw ODEModelException("Force model's central body ('" +
-				         body->GetName() + "') and Atmosphere model's central body ('" +
-				         atmos->GetCentralBodyName() + "')are different\n");
+               throw ODEModelException("Force model's central body ('" +
+                  body->GetName() + "') and Atmosphere model's central body ('" +
+                  atmos->GetCentralBodyName() + "')are different\n");
 
             atmos->SetSunVector(sunLoc);
             atmos->SetCentralBodyVector(cbLoc);
