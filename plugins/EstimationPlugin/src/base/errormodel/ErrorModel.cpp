@@ -854,6 +854,7 @@ StringArray ErrorModel::GetAllAvailableTypes()
    sa.push_back("Range_RU");
    sa.push_back("Doppler_HZ");
    sa.push_back("Doppler_RangeRate");
+   sa.push_back("TDRSDoppler_HZ");
 
    return sa;
 }
