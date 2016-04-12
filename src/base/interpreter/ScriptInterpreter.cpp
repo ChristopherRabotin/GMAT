@@ -106,7 +106,6 @@ ScriptInterpreter::ScriptInterpreter() :
    functionDef         = "";
    functionFilename    = "";
    mainScriptFilename  = "";
-   lastIncludeFile     = "";
    savedIncludeComment = "";
    currentBlock        = "";
    headerComment       = "";
@@ -914,21 +913,20 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
    // Check for self-include
    if (!inStreamStack.empty())
    {
-      //std::string prevFile = scriptStack.top();
-      std::string prevFile = scriptStack.back();
+      std::string lastInFile = scriptStack.back();
       #ifdef DEBUG_INCLUDE
       MessageInterface::ShowMessage
          ("   ===> Include stack is not empty, so check for self-include\n   "
-          "prevFile='%s'\n", prevFile.c_str());
+          "lastInFile='%s'\n", lastInFile.c_str());
       #endif
-      if (prevFile == currentScriptBeingRead)
+      if (lastInFile == currentScriptBeingRead)
       {
          #ifdef DEBUG_INCLUDE
          MessageInterface::ShowMessage
             ("   ===> Self-include found, so pop include stack and throw a fatal exception\n");
          #endif
-         lastIncludeFile = prevFile;
-         currentScriptBeingRead = lastIncludeFile;
+         lastIncludeFile = lastInFile;
+         currentScriptBeingRead = lastInFile;
          scriptStack.pop_back();
          inStream = inStreamStack.top();
          inStreamStack.pop();
@@ -937,7 +935,8 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
          // Throw a fatal exception include file includes itself
          InterpreterException ie;
          ie.SetFatal(true);
-         ie.SetDetails("Self include found; The include file \"%s\" includes itself", prevFile.c_str());
+         ie.SetDetails("Self include found; The include file \"%s\" includes itself",
+                       lastInFile.c_str());
          throw ie;
       }
       else
@@ -967,10 +966,10 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
             ("   ===> Circular include found, so pop include stack and "
              "throw a fatal exception\n");
          #endif
-         std::string prevFile = scriptStack.back();
+         std::string lastInFile = scriptStack.back();
          std::string currFile = currentScriptBeingRead;
-         lastIncludeFile = prevFile;
-         currentScriptBeingRead = lastIncludeFile;
+         lastIncludeFile = lastInFile;
+         currentScriptBeingRead = lastInFile;
          scriptStack.pop_back();
          inStream = inStreamStack.top();
          inStreamStack.pop();
@@ -980,7 +979,7 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
          InterpreterException ie;
          ie.SetFatal(true);
          ie.SetDetails("Circular includes found; The include file \"%s\" included in \"%s\"",
-                       currFile.c_str(), prevFile.c_str());
+                       currFile.c_str(), lastInFile.c_str());
          throw ie;
       }
       else
@@ -1017,7 +1016,7 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
       #ifdef DEBUG_INCLUDE
       MessageInterface::ShowMessage("   Calling ReadScript()\n");
       #endif
-      retval = ReadScript(inCmd, true);
+      retval = ReadScript(inCmd, true, false);
    }
    else
    {
@@ -1032,9 +1031,10 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
    // If more include file in stack, get next one
    if (!inStreamStack.empty())
    {
-      //lastIncludeFile = scriptStack.top();
-      lastIncludeFile = scriptStack.back();
-      currentScriptBeingRead = lastIncludeFile;
+      std::string lastInFile = scriptStack.back();
+      if (inStreamStack.size() > 1)
+         lastIncludeFile = lastInFile;
+      currentScriptBeingRead = lastInFile;
       scriptStack.pop_back();
       inStream = inStreamStack.top();
       inStreamStack.pop();
@@ -1073,17 +1073,19 @@ bool ScriptInterpreter::InterpretIncludeFile(GmatCommand *inCmd)
 
 
 //------------------------------------------------------------------------------
-// bool ReadScript(GmatCommand *inCmd, bool skipHeader = false)
+// bool ReadScript(GmatCommand *inCmd, bool skipHeader = false,
+//                 bool reinitialize = true)
 //------------------------------------------------------------------------------
 /**
  * Reads a script from the input stream line by line and parses it.
  *
- * @param *inCmd The input command to append new commands to
+ * @param *inCmd The input command to append new commands to (NULL)
  * @param  skipHeader Flag indicating first comment block is not a header(false)
+ * @param  reinitialize Flag indicating whether Interpreter should be renintialized (true)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
+bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader,bool reinitialize)
 {
    #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
@@ -1112,9 +1114,15 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    logicalBlockCount = 0;
    theTextParser.Reset();
    
-   initialized = false;
-   Initialize();
-   
+   if (reinitialize)
+   {
+      #if DBGLVL_SCRIPT_READING
+      MessageInterface::ShowMessage
+         ("ScriptInterpreter::ReadScript() setting initialized to false\n");
+      #endif
+      initialized = false;
+      Initialize();
+   }
    
    #ifdef __OLD_FUNCTION__
    if (inFunctionMode)
@@ -2900,7 +2908,7 @@ bool ScriptInterpreter::ParseIncludeBlock(const StringArray &chunks)
    }
    
    lastIncludeFile = incPath + incFile;
-   
+   lastIncludeFile = GmatStringUtil::Replace(lastIncludeFile, "\\", "/");
    #ifdef DEBUG_PARSE_INCLUDE
    MessageInterface::ShowMessage("   ==> lastIncludeFile='%s'\n", lastIncludeFile.c_str());
    MessageInterface::ShowMessage
@@ -2998,6 +3006,14 @@ void ScriptInterpreter::WriteSectionDelimiter(const GmatBase *firstObj,
                                               const std::string &objDesc,
                                               bool forceWriting)
 {
+   #ifdef DEBUG_SECTION_DELIMITER
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::WriteSectionDelimiter() entered\n   firstObj=<%p><%s>'%p', "
+       "objDesc='%s', forceWriting=%d\n", firstObj,
+       firstObj ? firstObj->GetTypeName().c_str() : "NULL",
+       firstObj ? firstObj->GetName().c_str() : "NULL", objDesc.c_str(), forceWriting);
+   #endif
+   
    if (firstObj == NULL)
       return;
    
@@ -3016,6 +3032,11 @@ void ScriptInterpreter::WriteSectionDelimiter(const GmatBase *firstObj,
       theReadWriter->WriteText(sectionDelimiterString[1] + objDesc);
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
+   
+   #ifdef DEBUG_SECTION_DELIMITER
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::WriteSectionDelimiter() leaving\n");
+   #endif
 }
 
 
@@ -3255,6 +3276,10 @@ void ScriptInterpreter::WritePropagators(StringArray &objs,
 //------------------------------------------------------------------------------
 void ScriptInterpreter::WriteSpacecrafts(StringArray &objs, Gmat::WriteMode mode)
 {
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("ScriptInterpreter::WriteSpacecrafts() entered\n");
+   #endif
+   
    StringArray::iterator current;
    GmatBase *object =  NULL;
    
@@ -3287,14 +3312,29 @@ void ScriptInterpreter::WriteSpacecrafts(StringArray &objs, Gmat::WriteMode mode
       //==============================================================
       
       object = FindObject(*current);
+      #ifdef DEBUG_SCRIPT_WRITING
+      MessageInterface::ShowMessage
+         ("   Spacecraft obj = <%p>'%s', isCreatedFromMainScript=%d\n",
+          object, object ? object->GetName().c_str() : "NULL",
+          object->IsCreatedFromMainScript());
+      #endif
       if (object != NULL)
       {
-         if (object->GetCommentLine() == "")
+         std::string commentLine = object->GetCommentLine();
+         #ifdef DEBUG_SCRIPT_WRITING
+         MessageInterface::ShowMessage("   commentLine = <%s>\n", commentLine.c_str());
+         #endif
+         // If object is created from the main script and comment line blank
+         if (object->IsCreatedFromMainScript() && object->GetCommentLine() == "")
             theReadWriter->WriteText("\n");
          
-         theReadWriter->WriteText(object->GetGeneratingString(mode));               
+         theReadWriter->WriteText(object->GetGeneratingString(mode));
       }
    }
+   
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("ScriptInterpreter::WriteSpacecrafts() leaving\n");
+   #endif
 }
 
 
@@ -3839,14 +3879,16 @@ void ScriptInterpreter::WriteCommandSequence(Gmat::WriteMode mode)
       #ifdef DEBUG_SCRIPT_WRITING_COMMANDS
       MessageInterface::ShowMessage
          ("ScriptInterpreter::WriteCommandSequence() before write cmd=%s, mode=%d, "
-          "inTextMode=%d\n", cmd->GetTypeName().c_str(), mode, inTextMode);
+          "inTextMode=%d, isCreatedFromMainScript=%d\n", cmd->GetTypeName().c_str(), mode,
+          inTextMode, cmd->IsCreatedFromMainScript());
       #endif
       
       // EndScript is written from BeginScript
       if (!inTextMode && cmd->GetTypeName() != "EndScript")
       {
          theReadWriter->WriteText(cmd->GetGeneratingString());
-         theReadWriter->WriteText("\n");
+         if (cmd->IsCreatedFromMainScript())
+            theReadWriter->WriteText("\n");
       }
       
       if (cmd->GetTypeName() == "BeginScript")

@@ -74,7 +74,7 @@ protected:
    
    bool InterpretIncludeFile(GmatCommand *inCmd);
    
-   bool ReadScript(GmatCommand *cmd = NULL, bool skipHeader = false);
+   bool ReadScript(GmatCommand *cmd = NULL, bool skipHeader = false, bool reinitialize = true);
    bool Parse(GmatCommand *inCmd = NULL);
    bool WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    
@@ -102,8 +102,6 @@ private:
    std::string functionFilename;
    /// Name of the main script file
    std::string mainScriptFilename;
-   /// Fullpath of the last include file detected
-   std::string lastIncludeFile;
    /// Saved include comment to add to next object comment to preserve
    /// #include position when saving to script
    std::string savedIncludeComment;
