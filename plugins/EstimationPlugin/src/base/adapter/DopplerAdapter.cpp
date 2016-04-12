@@ -68,7 +68,7 @@ DopplerAdapter::DopplerAdapter(const std::string& name) :
    RangeAdapterKm         (name),
    adapterS               (NULL),
    turnaround             (1.0),
-   uplinkFreqE            (1.0e9),
+   uplinkFreqE            (1.0e3),     // 1000 MHz
    freqBandE              (1),
    dopplerCountInterval   (1.0)        // 1 second
 {
@@ -721,8 +721,9 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
    
    // 2.3. Specify uplink frequency
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
-   uplinkFreqE = calcData->GetUplinkFrequency(0, rampTB);
-   freqBandE = calcData->GetUplinkFrequencyBand(0, rampTB);
+   uplinkFreqE       = calcData->GetUplinkFrequency(0, rampTB);                           // unit: MHz
+   uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0, rampTB);            // unit: MHz   // its frequency is at measurement epoch
+   freqBandE         = calcData->GetUplinkFrequencyBand(0, rampTB);
    
 
    // 3. Compute for Start path
@@ -756,8 +757,8 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
 
    // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
-   uplinkFreq = adapterS->GetMeasurementModel()->GetUplinkFrequency(0, rampTB);
-   freqBand   = adapterS->GetMeasurementModel()->GetUplinkFrequencyBand(0, rampTB);
+   uplinkFreq        = adapterS->GetMeasurementModel()->GetUplinkFrequency(0, rampTB);
+   freqBand          = adapterS->GetMeasurementModel()->GetUplinkFrequencyBand(0, rampTB);
 
    // 4. Convert range from km to Hz and store in cMeasurement:
    Real dtS, dtE, dtdt;
@@ -811,7 +812,8 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       t3RE = measDataE.epoch;
       t1TE = t3RE - dtE/GmatTimeConstants::SECS_PER_DAY;
 
-      cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
+      cMeasurement.uplinkFreq = uplinkFreq*1.0e6;                       // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
+      cMeasurement.uplinkFreqAtRecei = uplinkFreqAtRecei*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreqAtRecei's unit is Hz
       cMeasurement.uplinkBand = freqBand;
       cMeasurement.dopplerCountInterval = interval;
 
@@ -828,7 +830,7 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
             cMeasurement.value[i] = 0.0;                     // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
 //            cMeasurement.uplinkFreq = uplinkFreqE;           // unit: Hz
 //            cMeasurement.uplinkBand = freqBandE;
-            cMeasurement.dopplerCountInterval = interval;    // unit: second
+//            cMeasurement.dopplerCountInterval = interval;    // unit: second
             cMeasurement.isFeasible = false;
             cMeasurement.unfeasibleReason = "R";
 //          currentMeasurement.feasibilityValue is set to elevation angle as shown in section 15
