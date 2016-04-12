@@ -107,7 +107,7 @@
 #include "gmatdefs.hpp"
 #include "RealUtilities.hpp"
 #include "UtilityException.hpp"
-
+#include <random>
 
 class GMAT_API RandomNumber
 //class ESTIMATION_API RandomNumber
@@ -123,7 +123,7 @@ public:
     void GaussianArray(Real *myArray, const Integer size,  
 	               const Real mean, const Real stdev);
     
-    unsigned int UniformInt();
+//    unsigned int UniformInt();
     Real Uniform();
     Real UniformPrimitive();
     Real UniformOpenOpen();
@@ -132,7 +132,7 @@ public:
     Real UniformOpenOpen(const Real a, const Real b);
     Real UniformOpenClosed(const Real a, const Real b);
 
-    void UniformArray(unsigned int *myArray, const Integer size);
+//    void UniformArray(unsigned int *myArray, const Integer size);
     void UniformArray(Real *myArray, const Integer size);
     void UniformPrimitiveArray(Real *myArray, const Integer size);
     void UniformOpenOpenArray(Real *myArray, const Integer size);
@@ -147,18 +147,27 @@ public:
     
     // Set and/or Re-set the seed for the random number generator
     void Seed(unsigned int s);
-    void SeedByArray(unsigned int *mySeed, Integer arraySize);
+//    void SeedByArray(unsigned int *mySeed, Integer arraySize);
     void ClockSeed();
 
 private:
 	static RandomNumber *theInstance;
 
-    RandomNumber();
+   RandomNumber();
 
 	Real G(Real x, Real a, Real b);
 	Real rrand();
-   RealArray    preValue;     // previous value of rrand()
-   Integer      currentIndex;
+//   RealArray    preValue;     // previous value of rrand()
+//   Integer      currentIndex;
+
+
+   // Providers used for local RNs
+   /// The random number generator
+   std::mt19937 generator;
+   //std::default_random_engine generator;
+   /// The white noise provider
+   std::uniform_real_distribution<> white;
+
 };
 
 #endif	/* _RandomNumber_hpp */

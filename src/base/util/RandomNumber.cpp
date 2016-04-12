@@ -128,10 +128,15 @@ RandomNumber::RandomNumber()
 	MessageInterface::ShowMessage("RandomNumber  default constructor\n");
 #endif
 
-    unsigned int clockSeed = time(NULL);
+    //unsigned int clockSeed = time(NULL);
     //srand(clockSeed);
-    srand(5);
-    currentIndex = 0;
+    //currentIndex = 0;
+
+    std::random_device rd;
+    generator.seed(rd());
+
+    std::uniform_real_distribution<>::param_type whiteParams(0.0, 1.0);
+    white.param(whiteParams);
 }
 
 
@@ -159,7 +164,8 @@ RandomNumber::~RandomNumber()
 //------------------------------------------------------------------------------
 void RandomNumber::Seed(unsigned int s)
 {
-    srand(s);
+    //srand(s);
+   generator.seed(s);
 }
 
 
@@ -173,23 +179,24 @@ void RandomNumber::Seed(unsigned int s)
 void RandomNumber::ClockSeed()
 {
     unsigned int clockSeed = time(NULL);
-    srand(clockSeed);
+    //srand(clockSeed);
+    generator.seed(clockSeed);
 }
 
-//------------------------------------------------------------------------------
-//  unsigned int UniformInt()
-//------------------------------------------------------------------------------
-/**
- *  Returns an unsigned 32-bit integer. This should only be used to seed.
- *
- *  @return The random deviate.
- *
- */
-//------------------------------------------------------------------------------
-unsigned int RandomNumber::UniformInt()
-{
-     return rand();
-}
+////------------------------------------------------------------------------------
+////  unsigned int UniformInt()
+////------------------------------------------------------------------------------
+///**
+// *  Returns an unsigned 32-bit integer. This should only be used to seed.
+// *
+// *  @return The random deviate.
+// *
+// */
+////------------------------------------------------------------------------------
+//unsigned int RandomNumber::UniformInt()
+//{
+//     return rand();
+//}
 
 //------------------------------------------------------------------------------
 //  Real Uniform()
@@ -437,24 +444,24 @@ Real RandomNumber::Gaussian(const Real mean, const Real stdev)
     return Gaussian() * stdev + mean;
 }
 
-//------------------------------------------------------------------------------
-//  void UniformArray(unsigned int *myArray, const Integer size)
-//------------------------------------------------------------------------------
-/**
- *  Returns an array of uniformly distributed unsigned 32bit integers.
- *  This method is significantly slower than the double precision methods
- *  and should only be used in conjunction with the SeedByArray method.
- *
- *  @param <myArray> Pointer to array where random deviates will be stored
- *  @param <size> size of the array of deviates
- *
- */
-//------------------------------------------------------------------------------
-void RandomNumber::UniformArray(unsigned int *myArray, const Integer size)
-{
-    for (Integer i = 0; i < size; i++)
-	   myArray[i] = UniformInt();
-}
+////------------------------------------------------------------------------------
+////  void UniformArray(unsigned int *myArray, const Integer size)
+////------------------------------------------------------------------------------
+///**
+// *  Returns an array of uniformly distributed unsigned 32bit integers.
+// *  This method is significantly slower than the double precision methods
+// *  and should only be used in conjunction with the SeedByArray method.
+// *
+// *  @param <myArray> Pointer to array where random deviates will be stored
+// *  @param <size> size of the array of deviates
+// *
+// */
+////------------------------------------------------------------------------------
+//void RandomNumber::UniformArray(unsigned int *myArray, const Integer size)
+//{
+//    for (Integer i = 0; i < size; i++)
+//	   myArray[i] = UniformInt();
+//}
 
 //------------------------------------------------------------------------------
 //  void UniformArray(Real *myArray, const Integer size)
@@ -659,130 +666,135 @@ union RealNumberType128
 	unsigned char ch[16];
 };
 
-#include <random>
 Real RandomNumber::rrand()
 {
-#ifdef DEBUG_CALCULATION
-//	MessageInterface::ShowMessage("Run rrand() fucntion\n");
-#endif
-
-   // Check machine is using Big indian or Little indian:
-   bool isBigIndian = true;
-   union 
-   {
-	   int intNum;
-	   char  ch[4];
-   } num;
-
-   num.intNum = 1;
-   if (num.ch[0] == '\1')
-      isBigIndian = false;
-
-   // Create a real random number
-   bool found;
-   Real ret_Val;
-   do
-   {
-      if (sizeof(Real) == 8)
-      {
-         RealNumberType64 val;
-
-         for (int i = 0; i < 8; ++i)
-         {
-            Integer k = rand();
-            //         this->Seed(k);
-            //         k = rand();
-//            MessageInterface::ShowMessage("k = %d   ", k);
-            val.ch[i] = k; //  rand();
-         }
-
-         if (isBigIndian)
-         {
-            // Set first 12 bits to 0 
-            val.ch[0] = '\0';
-            val.ch[1] = val.ch[1] & 15;
-         }
-         else
-         {
-            //Set first 12 bits to 0
-            val.ch[0] = 0x3F;
-            val.ch[1] = val.ch[1] | 0xF0;
-
-            // Swap to the order of Little indian
-            unsigned char temp;
-            for (int i = 0; i < 4; ++i)
-            {
-               temp = val.ch[i];
-               val.ch[i] = val.ch[7 - i];
-               val.ch[7 - i] = temp;
-            }
-         }
-         //	   MessageInterface::ShowMessage("val.intNum[0] = %8x val.intNum[1] = %8x\n", val.intNum[0], val.intNum[1]);
-         //	   MessageInterface::ShowMessage("%2x  %2x  %2x  %2x  %2x  %2x  %2x  %2x\n", val.ch[0], val.ch[1], val.ch[2], val.ch[3], val.ch[4], val.ch[5], val.ch[6], val.ch[7]);
-         //	   MessageInterface::ShowMessage("val.realNum = %le\n", val.realNum);
-         ret_Val = val.realNum;
-
-      }
-      else if (sizeof(Real) == 16)
-      {
-         RealNumberType128 val;
-
-         for (int i = 0; i < 16; ++i)
-            val.ch[i] = rand();
-         if (isBigIndian)
-         {
-            // Set first 16 bits to 0 
-            val.ch[0] = 0x3F;
-            val.ch[1] = 0xFF;
-         }
-         else
-         {
-            // Set first 16 bits to 0
-            val.ch[0] = val.ch[1] = '\0';
-
-            // Swap to the order of Little indian
-            unsigned char temp;
-            for (int i = 0; i < 8; ++i)
-            {
-               temp = val.ch[i];
-               val.ch[i] = val.ch[15 - i];
-               val.ch[15 - i] = temp;
-            }
-
-         }
-         ret_Val = val.realNum;
-      }
-
-      ret_Val = ret_Val - 1.0;
-
-      found = false;
-      for (Integer i = 0; i < preValue.size(); ++i)
-      {
-         if (ret_Val == preValue[i])
-         {
-            found = true;
-            break;
-         }
-      }
-   } while (found);
-
-
-#ifdef DEBUG_CALCULATION
-      MessageInterface::ShowMessage(" Real random number = %lf\n", ret_Val);
-#endif
-   if (currentIndex < preValue.size())
-      preValue[currentIndex] = ret_Val;
-   else
-   {
-      if (preValue.size() < 40)
-         preValue.push_back(ret_Val);
-      else
-      {
-         currentIndex = 0;
-         preValue[currentIndex] = ret_Val;
-      }
-   }
-   ++currentIndex;
-
-   return ret_Val;
+   return white(generator);
 }
+
+
+//Real RandomNumber::rrand1()
+//{
+//#ifdef DEBUG_CALCULATION
+////	MessageInterface::ShowMessage("Run rrand() fucntion\n");
+//#endif
+//
+//   // Check machine is using Big indian or Little indian:
+//   bool isBigIndian = true;
+//   union 
+//   {
+//	   int intNum;
+//	   char  ch[4];
+//   } num;
+//
+//   num.intNum = 1;
+//   if (num.ch[0] == '\1')
+//      isBigIndian = false;
+//
+//   // Create a real random number
+//   bool found;
+//   Real ret_Val;
+//   do
+//   {
+//      if (sizeof(Real) == 8)
+//      {
+//         RealNumberType64 val;
+//
+//         for (int i = 0; i < 8; ++i)
+//         {
+//            Integer k = rand();
+//            //         this->Seed(k);
+//            //         k = rand();
+////            MessageInterface::ShowMessage("k = %d   ", k);
+//            val.ch[i] = k; //  rand();
+//         }
+//
+//         if (isBigIndian)
+//         {
+//            // Set first 12 bits to 0 
+//            val.ch[0] = '\0';
+//            val.ch[1] = val.ch[1] & 15;
+//         }
+//         else
+//         {
+//            //Set first 12 bits to 0
+//            val.ch[0] = 0x3F;
+//            val.ch[1] = val.ch[1] | 0xF0;
+//
+//            // Swap to the order of Little indian
+//            unsigned char temp;
+//            for (int i = 0; i < 4; ++i)
+//            {
+//               temp = val.ch[i];
+//               val.ch[i] = val.ch[7 - i];
+//               val.ch[7 - i] = temp;
+//            }
+//         }
+//         //	   MessageInterface::ShowMessage("val.intNum[0] = %8x val.intNum[1] = %8x\n", val.intNum[0], val.intNum[1]);
+//         //	   MessageInterface::ShowMessage("%2x  %2x  %2x  %2x  %2x  %2x  %2x  %2x\n", val.ch[0], val.ch[1], val.ch[2], val.ch[3], val.ch[4], val.ch[5], val.ch[6], val.ch[7]);
+//         //	   MessageInterface::ShowMessage("val.realNum = %le\n", val.realNum);
+//         ret_Val = val.realNum;
+//
+//      }
+//      else if (sizeof(Real) == 16)
+//      {
+//         RealNumberType128 val;
+//
+//         for (int i = 0; i < 16; ++i)
+//            val.ch[i] = rand();
+//         if (isBigIndian)
+//         {
+//            // Set first 16 bits to 0 
+//            val.ch[0] = 0x3F;
+//            val.ch[1] = 0xFF;
+//         }
+//         else
+//         {
+//            // Set first 16 bits to 0
+//            val.ch[0] = val.ch[1] = '\0';
+//
+//            // Swap to the order of Little indian
+//            unsigned char temp;
+//            for (int i = 0; i < 8; ++i)
+//            {
+//               temp = val.ch[i];
+//               val.ch[i] = val.ch[15 - i];
+//               val.ch[15 - i] = temp;
+//            }
+//
+//         }
+//         ret_Val = val.realNum;
+//      }
+//
+//      ret_Val = ret_Val - 1.0;
+//
+//      found = false;
+//      for (Integer i = 0; i < preValue.size(); ++i)
+//      {
+//         if (ret_Val == preValue[i])
+//         {
+//            found = true;
+//            break;
+//         }
+//      }
+//   } while (found);
+//
+//
+//#ifdef DEBUG_CALCULATION
+//      MessageInterface::ShowMessage(" Real random number = %lf\n", ret_Val);
+//#endif
+//   if (currentIndex < preValue.size())
+//      preValue[currentIndex] = ret_Val;
+//   else
+//   {
+//      if (preValue.size() < 1)    // 40)
+//         preValue.push_back(ret_Val);
+//      else
+//      {
+//         currentIndex = 0;
+//         preValue[currentIndex] = ret_Val;
+//      }
+//   }
+//   ++currentIndex;
+//
+//   return ret_Val;
+//}
