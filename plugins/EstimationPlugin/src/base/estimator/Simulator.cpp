@@ -1692,7 +1692,8 @@ void Simulator::FindTimeStep()
 void Simulator::CalculateData()
 {
    // Tell the measurement manager to calculate the simulation data
-   if (measManager.CalculateMeasurements(true, false) == false)               // fixed Bug 8 in ticket GMT-4314
+   //if (measManager.CalculateMeasurements(true, false) == false)               // fixed Bug 8 in ticket GMT-4314
+   if (measManager.CalculateMeasurements(true, true, addNoise) == false)        // fixed Bug 8 in ticket GMT-4314
    {
       // No measurements were possible
       FindNextSimulationEpoch();
@@ -1770,12 +1771,12 @@ void Simulator::CalculateData()
 void Simulator::SimulateData()
 {
    // Tell the measurement manager to add noise and write the measurements
-   if (measManager.CalculateMeasurements(true, true, addNoise) == true)
-   {
+//   if (measManager.CalculateMeasurements(true, true, addNoise) == true)
+//   {
       // Write measurements to data file
       if (measManager.WriteMeasurements() == false)
          throw SolverException("Measurement writing failed");
-   }
+//   }
    
    // Prep for the next measurement simulation
    isTheFirstMeasurement = false;                                    // fix bug GMT-4909
