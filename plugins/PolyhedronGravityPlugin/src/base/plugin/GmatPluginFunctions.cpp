@@ -35,6 +35,7 @@
 #include "MessageInterface.hpp"
 
 #include "PolyhedronGravityModelFactory.hpp"
+#include "GravityParameterFactory.hpp"
 
 extern "C"
 {
@@ -49,7 +50,7 @@ extern "C"
    //------------------------------------------------------------------------------
    Integer GetFactoryCount()
    {
-      return 1;
+      return 2;
    }
    
    //------------------------------------------------------------------------------
@@ -73,6 +74,10 @@ extern "C"
             factory = new PolyhedronGravityModelFactory;
             break;
             
+         case 1:
+            factory = new GravityParameterFactory;
+            break;
+
          default:
             break;
       }
