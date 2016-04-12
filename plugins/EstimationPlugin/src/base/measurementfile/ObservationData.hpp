@@ -117,9 +117,9 @@ public:
    /// Uplink band
    Integer           uplinkBand;
    /// Uplink frequency at transmit epoch
-   Real              uplinkFreq;
+   Real              uplinkFreq;                        // unit: Hz
    /// Uplink frequency at receive epoch. For ramped frequency model, this frequency is different from uplinkFreq       // made changes by TUAN NGUYEN
-   Real              uplinkFreqAtRecei;                                                                                 // made changes by TUAN NGUYEN
+   Real              uplinkFreqAtRecei;                 // unit: Hz                                                     // made changes by TUAN NGUYEN
    /// Range modulo
    Real              rangeModulo;
 
