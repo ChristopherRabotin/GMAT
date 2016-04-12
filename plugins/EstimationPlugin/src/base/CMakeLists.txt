@@ -131,7 +131,6 @@ SET(PLUGIN_SRCS
     measurement/OpticalAngles.cpp
     measurement/OpticalAzEl.cpp
     measurement/PhysicalMeasurement.cpp
-    measurement/RandomNumber.cpp
     measurement/SnTwoWayRange.cpp
     measurement/TDRSSTwoWayRange.cpp
     measurement/TrackingData.cpp

@@ -373,7 +373,8 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    if (md->typeName == "DSNRange")
    {
       sprintf(databuffer, "    %d    %.15le    %.15le",
-         md->uplinkBand, md->uplinkFreq, md->rangeModulo);
+//         md->uplinkBand, md->uplinkFreq, md->rangeModulo);
+         md->uplinkBand, md->uplinkFreqAtRecei, md->rangeModulo);
       dataLine << databuffer;
    }
 
@@ -391,28 +392,28 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 }
 
 
-StringArray GmatObType::GetAvailableMeasurementTypes()
-{
-   StringArray typeList;
-
-   // New syntax's measurement types
-   typeList.push_back("Range_KM");
-   typeList.push_back("DSNRange");
-   typeList.push_back("Doppler");
-   typeList.push_back("Doppler_RangeRate");
-   typeList.push_back("TDRSDoppler_HZ");              // made changes by TUAN NGUYEN
-
-   // Old syntax's measurement types
-   typeList.push_back("DSNTwoWayRange");
-   typeList.push_back("DSNTwoWayDoppler");
-   typeList.push_back("USNTwoWayRange");
-   typeList.push_back("GeometricRange");
-   typeList.push_back("GeometricRangeRate");
-   typeList.push_back("GeometricRADec");
-   typeList.push_back("GeometricAzEl");
-
-   return typeList;
-}
+//StringArray GmatObType::GetAvailableMeasurementTypes()
+//{
+//   StringArray typeList;
+//
+//   // New syntax's measurement types
+//   typeList.push_back("Range_KM");
+//   typeList.push_back("DSNRange");
+//   typeList.push_back("Doppler");
+//   typeList.push_back("Doppler_RangeRate");
+//   typeList.push_back("TDRSDoppler_HZ");              // made changes by TUAN NGUYEN
+//
+//   // Old syntax's measurement types
+//   typeList.push_back("DSNTwoWayRange");
+//   typeList.push_back("DSNTwoWayDoppler");
+//   typeList.push_back("USNTwoWayRange");
+//   typeList.push_back("GeometricRange");
+//   typeList.push_back("GeometricRangeRate");
+//   typeList.push_back("GeometricRADec");
+//   typeList.push_back("GeometricAzEl");
+//
+//   return typeList;
+//}
 
 
 //-----------------------------------------------------------------------------
@@ -484,7 +485,8 @@ ObservationData* GmatObType::ReadObservation()
    currentObs.type = (Gmat::MeasurementType)type;
 
    // Verify measurement type
-   StringArray typeList = GetAvailableMeasurementTypes();
+   //StringArray typeList = GetAvailableMeasurementTypes();                          // made changes by TUAN NGUYEN
+   StringArray typeList = currentObs.GetAvailableMeasurementTypes();                 // made changes by TUAN NGUYEN
    if (find(typeList.begin(), typeList.end(), currentObs.typeName) == typeList.end())
       throw MeasurementException("Error: GMAT cannot handle observation data with type '" + currentObs.typeName + "'.\n");
 
@@ -636,7 +638,8 @@ ObservationData* GmatObType::ReadObservation()
    if (currentObs.typeName == "DSNRange")
    {
       theLine >> currentObs.uplinkBand;
-      theLine >> currentObs.uplinkFreq;
+//      theLine >> currentObs.uplinkFreq;                          // made changes by TUAN NGUYEN
+      theLine >> currentObs.uplinkFreqAtRecei;                     // made changes by TUAN NGUYEN
       theLine >> currentObs.rangeModulo;
       currentObs.unit = "RU";
    }
@@ -661,7 +664,8 @@ ObservationData* GmatObType::ReadObservation()
 
       if (currentObs.typeName == "DSNRange")
       {
-         MessageInterface::ShowMessage("   %d   %.12le   %.12le", currentObs.uplinkBand, currentObs.uplinkFreq, currentObs.rangeModulo);
+         //MessageInterface::ShowMessage("   %d   %.12le   %.12le", currentObs.uplinkBand, currentObs.uplinkFreq, currentObs.rangeModulo);
+         MessageInterface::ShowMessage("   %d   %.12le   %.12le", currentObs.uplinkBand, currentObs.uplinkFreqAtRecei, currentObs.rangeModulo);
       }
       else if ((currentObs.typeName == "Doppler")||(currentObs.typeName == "Doppler_RangeRate"))
       {

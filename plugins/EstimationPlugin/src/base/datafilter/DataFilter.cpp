@@ -653,6 +653,7 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == FILENAMES)
    {
+
       if (index == -1)
       {
          fileNames.clear();
@@ -662,6 +663,10 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       {
          if (value == "")
             throw MeasurementException("Error: cannot assign an empty string to file name.\n");
+
+         Integer error = 0;
+         if (!GmatStringUtil::IsValidFullFileName(value, error))
+            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames parameter is an invalid file name.\n");
 
          if (index == fileNames.size())
             fileNames.push_back(value);
@@ -691,6 +696,9 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
          else if (value == "All")
             allObserver = true;          // set flag to indicate choosing all observers
 
+         if (!GmatStringUtil::IsValidIdentity(value))                                                                                                   // made changes by TUAN NGUYEN
+            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".ObservedObjects parameter is an invalid GMAT object name.\n");  // made changes by TUAN NGUYEN
+
          if (index == observers.size())
             observers.push_back(value);
          else
@@ -718,6 +726,9 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
             throw MeasurementException("Error: cannot accept an empty string to a tracker ID.\n");
          else
             allTracker = true;         // set flag to indicate choosing all trackers
+
+         if (!GmatStringUtil::IsValidIdentity(value))                                                                                             // made changes by TUAN NGUYEN
+            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Trackers parameter is an invalid GMAT object name.\n");   // made changes by TUAN NGUYEN
 
          if (index == trackers.size())
             trackers.push_back(value);

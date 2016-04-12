@@ -80,7 +80,7 @@ private:
    bool ProcessSignals(const std::string str, Integer& participantSize,
          Integer& dataSize);
 
-   StringArray       GetAvailableMeasurementTypes();          // made changes by TUAN NGUYEN
+//   StringArray       GetAvailableMeasurementTypes();          // made changes by TUAN NGUYEN
 };
 
 #endif /* GMATOBTYPE_HPP_ */

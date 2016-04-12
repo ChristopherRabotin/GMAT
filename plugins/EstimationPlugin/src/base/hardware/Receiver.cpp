@@ -27,7 +27,7 @@
 //------------------------------------------------------------------------------
 
 #include "Receiver.hpp"
-#include "HardwareException.hpp"""
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
