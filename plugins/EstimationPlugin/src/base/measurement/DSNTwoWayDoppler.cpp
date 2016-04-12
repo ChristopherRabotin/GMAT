@@ -1069,11 +1069,13 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 
       // 11. Get frequency, frequency band, turn around ratio, and time interval:
       Real uplinkFreqS, uplinkFreqE;
+      Real uplinkFreqAtRecei;             // uplink frequency at receive epoch   // unit: MHz
       if (rampTB == NULL)
       {
          // Get uplink frequency from transmitter of ground station (participants[0])
          Signal* uplinkSignal = gsTransmitter->GetSignal();
          uplinkFreqS = uplinkFreqE = uplinkSignal->GetValue();      // unit: MHz
+         uplinkFreqAtRecei = uplinkFreqS;                           // unit: MHz       // for constant frequency
          frequency  = frequencyE = uplinkFreqS*1.0e6;               // unit: Hz
 
          // Get frequency band:
@@ -1094,10 +1096,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       else
       {
          // Get uplink frequency from ramped frequency table
-         frequency = GetFrequencyFromRampTable(t1TS);             // unit: Hz
-         frequencyE = GetFrequencyFromRampTable(t1TE);            // unit: Hz
-         uplinkFreqS = frequency/1.0e6;                           // unit MHz
-         uplinkFreqE = frequencyE/1.0e6;                          // unit MHz
+         frequency = GetFrequencyFromRampTable(t1TS);                          // unit: Hz
+         frequencyE = GetFrequencyFromRampTable(t1TE);                         // unit: Hz
+         uplinkFreqS = frequency/1.0e6;                                        // unit: MHz
+         uplinkFreqE = frequencyE/1.0e6;                                       // unit: MHz
+         uplinkFreqAtRecei = GetFrequencyFromRampTable(t3RE) / 1.0e6;          // unit: MHz      // for ramped frequency
 
          // Get frequency band from ramp table:
          freqBand = GetUplinkBandFromRampTable(t1TS);
@@ -1413,7 +1416,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("         dtdt = dtE - dtS : %.15lf s\n", dtdt);
       #endif
 
-      currentMeasurement.uplinkFreq = frequencyE;            // uplink frequency for E path
+      currentMeasurement.uplinkFreq = frequencyE;                          // unit: Hz        // uplink frequency for E path
+      currentMeasurement.uplinkFreqAtRecei = uplinkFreqAtRecei * 1.0e6;    // unit: Hz
       currentMeasurement.uplinkBand = freqBand;
       currentMeasurement.dopplerCountInterval = interval;
 
@@ -1427,9 +1431,10 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          } catch (MeasurementException exp)
          {
             currentMeasurement.value[0] = 0.0;                  // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
-            currentMeasurement.uplinkFreq = frequencyE;
-            currentMeasurement.uplinkBand = freqBand;
-            currentMeasurement.dopplerCountInterval = interval;
+//            currentMeasurement.uplinkFreq        = frequencyE;                   // unit: Hz
+//            currentMeasurement.uplinkFreqAtRecei = uplinkFreqAtRecei * 1.0e6;    // unit: Hz
+//            currentMeasurement.uplinkBand = freqBand;
+//            currentMeasurement.dopplerCountInterval = interval;
             currentMeasurement.isFeasible = false;
             currentMeasurement.unfeasibleReason = "R";
 //          currentMeasurement.feasibilityValue is set to elevation angle as shown in section 15

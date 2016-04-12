@@ -97,7 +97,9 @@ public:
    /// Uplink band
    Integer uplinkBand;
    /// Uplink frequency
-   Real uplinkFreq;
+   Real uplinkFreq;                            // unit: Hz
+   /// Uplink frequency at received epoch                             // made changes by TUAN NGUYEN
+   Real uplinkFreqAtRecei;                     // unit: Hz            // made changes by TUAN NGUYEN
    /// Range modulo
    Real rangeModulo;
 

@@ -1199,15 +1199,17 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
      
 
       // 7. Get frequency from transmitter of ground station (participants[0])
-      Real uplinkFreq;
+      Real uplinkFreq;                                  // uplink frequency at transmit epoch
+      Real uplinkFreqAtRecei;                           // uplink frequency at receive epoch
       if (obsData == NULL)
       {
          if (rampTB == NULL)
          {
             // Get uplink frequency from GMAT script when ramp table is not used
             Signal* uplinkSignal = gsTransmitter->GetSignal();
-            uplinkFreq = uplinkSignal->GetValue();                  // unit: MHz
-            frequency = uplinkFreq*1.0e6;                           // unit: Hz
+            uplinkFreq        = uplinkSignal->GetValue();                  // unit: MHz
+            uplinkFreqAtRecei = uplinkFreq;                                // unit: MHz      // for constant frequency
+            frequency         = uplinkFreq*1.0e6;                          // unit: Hz
 
             // Get uplink band based on definition of frequency range
             freqBand = FrequencyBand(frequency);
@@ -1220,8 +1222,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          else
          {
             // Get uplink frequency at a given time from ramped frequency table
-            frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
-            uplinkFreq = frequency/1.0e6;                          // unit MHz
+            frequency         = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
+            uplinkFreq        = frequency/1.0e6;                           // unit MHz
+            uplinkFreqAtRecei = GetFrequencyFromRampTable(t3R) / 1.0e6;    // unit MHz      // for ramped frequency
 
             // Get frequency band from ramp table at given time
             freqBand = GetUplinkBandFromRampTable(t1T);
@@ -1236,25 +1239,44 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       {
          if (rampTB == NULL)
          {
-            // Get uplink frequency at a given time from observation data
-            frequency = obsData->uplinkFreq;                       // unit: Hz   
+            //// Get uplink frequency at a given time from observation data
+            //frequency = obsData->uplinkFreq;                       // unit: Hz   
 
+            //#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            //MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...: frequency = %.12le\n", frequency); 
+            //#endif
+
+            // Get uplink frequency from GMAT script when ramp table is not used
+            Signal* uplinkSignal = gsTransmitter->GetSignal();
+            uplinkFreq        = uplinkSignal->GetValue();                  // unit: MHz
+            uplinkFreqAtRecei = uplinkFreq;                                // unit: MHz        // for constant frequency
+            frequency         = uplinkFreq*1.0e6;                          // unit: Hz
+
+            // Get uplink band based on definition of frequency range
+            freqBand = FrequencyBand(frequency);
+
+            // Range modulo constant is specified by GMAT script
             #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-            MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...: frequency = %.12le\n", frequency); 
+            MessageInterface::ShowMessage("   Uplink frequency is gotten from GMAT script...\n");
             #endif
          }
          else
          {
             // Get uplink frequency at a given time from ramped frequency table
-            frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
+            frequency = GetFrequencyFromRampTable(t1T);                      // unit: Hz      // Get frequency at transmit time t1T
+            uplinkFreq = frequency / 1.0e6;                                  // unit: MHz
+            uplinkFreqAtRecei = GetFrequencyFromRampTable(t3R) / 1.0e6;      // unit: MHz     // for ramped frequency
+
+            // Get frequency band from ramp table at given time
+            freqBand = GetUplinkBandFromRampTable(t1T);
 
             #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
                MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
             #endif
          }
 
-         uplinkFreq = frequency/1.0e6;                            // unit: MHz
-         freqBand = obsData->uplinkBand;
+         //uplinkFreq = frequency/1.0e6;                            // unit: MHz
+         //freqBand = obsData->uplinkBand;
          rangeModulo = obsData->rangeModulo;                      // unit: range unit
          obsValue = obsData->value;                               // unit: range unit
 
@@ -1449,7 +1471,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          } catch (MeasurementException exp)
          {
             currentMeasurement.value[0] = 0.0;               // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
-            currentMeasurement.uplinkFreq = frequency;
+            currentMeasurement.uplinkFreq = frequency;                              // unit: Hz
+            currentMeasurement.uplinkFreqAtRecei = uplinkFreqAtRecei * 1.0e6;       // unit: Hz
             currentMeasurement.uplinkBand = freqBand;
             currentMeasurement.rangeModulo = rangeModulo;
             currentMeasurement.isFeasible = false;
@@ -1504,7 +1527,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       // 20. Set value for currentMeasurement
       // currentMeasurement.value[0] = realRange;
       currentMeasurement.value[0] = realRangeFull;
-      currentMeasurement.uplinkFreq = frequency;
+      currentMeasurement.uplinkFreq = frequency;                                // unit: Hz
+      currentMeasurement.uplinkFreqAtRecei = uplinkFreqAtRecei * 1.0e6;         // unit: Hz
       currentMeasurement.uplinkBand = freqBand;
       currentMeasurement.rangeModulo = rangeModulo;
 
