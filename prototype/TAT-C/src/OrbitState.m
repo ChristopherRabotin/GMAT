@@ -13,6 +13,7 @@ classdef OrbitState < handle
         
         function obj = SetKeplerianState(obj,SMA,ECC,INC,RAAN,AOP,TA)
             % Sets the Keplerian state
+            % obj = SetKeplerianState(obj,SMA,ECC,INC,RAAN,AOP,TA)
             obj.currentState = obj.ConvertKepToCart(SMA,ECC,INC,RAAN,AOP,TA);
         end
         
