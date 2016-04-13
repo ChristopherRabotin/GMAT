@@ -19,6 +19,7 @@
 
 #include "gmatdefs.hpp"
 #include "EphemPropFactory.hpp"
+#include "Code500Propagator.hpp"
 #include "SPKPropagator.hpp"
 
 #include "MessageInterface.hpp"
@@ -47,6 +48,9 @@ Propagator* EphemPropFactory::CreatePropagator(const std::string &ofType,
    if (ofType == "SPK")
       return new SPKPropagator(withName);
 
+   if (ofType == "Code500")
+      return new Code500Propagator(withName);
+
    return NULL;
 }
 
@@ -65,6 +69,7 @@ EphemPropFactory::EphemPropFactory() :
    if (creatables.empty())
    {
       creatables.push_back("SPK");
+      creatables.push_back("Code500");
    }
 }
 
@@ -99,6 +104,7 @@ EphemPropFactory::EphemPropFactory(const EphemPropFactory& fact) :
    if (creatables.empty())
    {
       creatables.push_back("SPK");
+      creatables.push_back("Code500");
    }
 }
 
