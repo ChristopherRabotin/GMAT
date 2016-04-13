@@ -470,7 +470,7 @@ void Code500EphemerisFile::CloseForWrite()
 // bool ReadHeader1(int logOption = 0)
 //------------------------------------------------------------------------------
 /**
- * Unpacks heder 1 record and log values to log file on option.
+ * Unpacks header 1 record and log values to log file on option.
  *
  * @param  logOption  0 = no log, 1 = log all header data
  */
@@ -510,7 +510,7 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
 // bool ReadHeader2(int logOption = 0)
 //------------------------------------------------------------------------------
 /**
- * Unpacks heder 2 record and log values to log file on option.
+ * Unpacks header 2 record and log values to log file on option.
  *
  * @param  logOption  0 = no log, 1 = log all header data
  */
