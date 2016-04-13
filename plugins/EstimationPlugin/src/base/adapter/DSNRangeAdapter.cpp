@@ -398,8 +398,9 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
    {
       // 3.1. Specify uplink frequency
       // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
-      uplinkFreq = calcData->GetUplinkFrequency(0, rampTB);
-      freqBand = calcData->GetUplinkFrequencyBand(0, rampTB);
+      uplinkFreq        = calcData->GetUplinkFrequency(0, rampTB);                                                // unit: MHz
+      uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0, rampTB);                                 // unit: MHz
+      freqBand          = calcData->GetUplinkFrequencyBand(0, rampTB);
       
       // 3.2. Specify multiplier (at time t1)
       // multiplier only changes its value only after range in km is computed
@@ -475,7 +476,8 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
          }
       }
 
-      cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
+      cMeasurement.uplinkFreq = uplinkFreq*1.0e6;                       // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
+      cMeasurement.uplinkFreqAtRecei = uplinkFreqAtRecei*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreqAtRecei's unit is Hz
       cMeasurement.uplinkBand = freqBand;
       cMeasurement.rangeModulo = rangeModulo;
 

@@ -313,7 +313,8 @@ bool GmatODType::AddMeasurement(MeasurementData *md)
          dataLine << "    ";
    }
    
-   sprintf(databuffer, "    %d    %.15le    %.15le", md->uplinkBand, md->uplinkFreq, md->rangeModulo);
+   //sprintf(databuffer, "    %d    %.15le    %.15le", md->uplinkBand, md->uplinkFreq, md->rangeModulo);              // made changes by TUAN NGUYEN
+   sprintf(databuffer, "    %d    %.15le    %.15le", md->uplinkBand, md->uplinkFreqAtRecei, md->rangeModulo);         // made changes by TUAN NGUYEN
    dataLine << databuffer;
    theStream << dataLine.str() << "\n";
 
@@ -456,14 +457,17 @@ ObservationData* GmatODType::ReadObservation()
    {
       // Read uplink band, uplink frequency, and range modulo:
       Integer uplinkBand;
-      Real uplinkFreq;
+//      Real uplinkFreq;                                   // made changes by TUAN NGUYEN
+      Real uplinkFreqAtRecei;                              // made changes by TUAN NGUYEN
       Real rangeModulo;
 
       theLine >> uplinkBand;
-      theLine >> uplinkFreq;
+//      theLine >> uplinkFreq;                             // made changes by TUAN NGUYEN
+      theLine >> uplinkFreqAtRecei;                        // made changes by TUAN NGUYEN
       theLine >> rangeModulo;
       currentObs.uplinkBand  = uplinkBand;
-      currentObs.uplinkFreq  = uplinkFreq;
+//      currentObs.uplinkFreq  = uplinkFreq;               // made changes by TUAN NGUYEN
+      currentObs.uplinkFreqAtRecei = uplinkFreqAtRecei;    // made changes by TUAN NGUYEN
       currentObs.rangeModulo = rangeModulo;
    }
 

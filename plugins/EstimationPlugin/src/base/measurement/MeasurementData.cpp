@@ -55,6 +55,7 @@ MeasurementData::MeasurementData() :
    eventCount       (0),
    uplinkBand       (0),
    uplinkFreq       (0.0),
+   uplinkFreqAtRecei(0.0),                             // made changes by TUAN NGUYEN
    rangeModulo      (1.0),
    dopplerCountInterval	(1.0e-10),
    tdrsNode4Freq    (0.0),                             // made changes by TUAN NGUYEN
@@ -112,6 +113,7 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
 ///// TBD: Do these go here?
    uplinkBand       (md.uplinkBand),
    uplinkFreq       (md.uplinkFreq),
+   uplinkFreqAtRecei(md.uplinkFreqAtRecei),                    // made changes by TUAN NGUYEN
    rangeModulo      (md.rangeModulo),
    dopplerCountInterval	(md.dopplerCountInterval),
    tdrsNode4Freq    (md.tdrsNode4Freq),                        // made changes by TUAN NGUYEN
@@ -147,14 +149,15 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
       participantIDs   = md.participantIDs;
       value            = md.value;
       isFeasible       = md.isFeasible;
-	   unfeasibleReason = md.unfeasibleReason;
-	   feasibilityValue = md.feasibilityValue;
+	  unfeasibleReason = md.unfeasibleReason;
+	  feasibilityValue = md.feasibilityValue;
       covariance       = md.covariance;
       eventCount       = md.eventCount;
-	   uplinkBand       = md.uplinkBand;
-	   uplinkFreq       = md.uplinkFreq;
-	   rangeModulo      = md.rangeModulo;
-	   dopplerCountInterval = md.dopplerCountInterval;
+	  uplinkBand       = md.uplinkBand;
+	  uplinkFreq       = md.uplinkFreq;
+      uplinkFreqAtRecei = md.uplinkFreqAtRecei;                // made changes by TUAN NGUYEN 
+	  rangeModulo      = md.rangeModulo;
+	  dopplerCountInterval = md.dopplerCountInterval;
       tdrsNode4Freq    = md.tdrsNode4Freq;                     // made changes by TUAN NGUYEN
       tdrsNode4Band    = md.tdrsNode4Band;                     // made changes by TUAN NGUYEN
       tdrsServiceID    = md.tdrsServiceID;                     // made changes by TUAN NGUYEN
