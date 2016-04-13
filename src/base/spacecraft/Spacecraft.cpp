@@ -148,6 +148,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::RMATRIX_TYPE,     // FullSTM,
       Gmat::RMATRIX_TYPE,     // FullAMatrix,
       Gmat::INTEGER_TYPE,     // FullSTMRowCount,
+      Gmat::STRING_TYPE,      // EphemerisName
       Gmat::FILENAME_TYPE,    // SPADSRPFile
       Gmat::FILENAME_TYPE,    // SPADSRPFileFullPath
       Gmat::REAL_TYPE,        // SPADSRPScaleFactor
@@ -211,6 +212,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "FullSTM",
       "FullAMatrix",
       "FullSTMRowCount",
+      "EphemerisName",
       "SPADSRPFile",
       "SPADSRPFileFullPath",
       "SPADSRPScaleFactor",
@@ -380,6 +382,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    spacecraftId         ("SatId"),
    attitudeModel        ("CoordinateSystemFixed"),
    attitude             (NULL),
+   ephemerisName        (""),
    powerSystemName      (""),
    powerSystem          (NULL),
    totalMass            (850.0),
@@ -643,6 +646,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    coordSysMap          (a.coordSysMap),
    spacecraftId         (a.spacecraftId),
    attitudeModel        (a.attitudeModel),
+   ephemerisName        (a.ephemerisName),
    coordConverter       (a.coordConverter),
    powerSystemName      (a.powerSystemName),
    powerSystem          (NULL),
@@ -777,6 +781,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    coordSysMap          = a.coordSysMap;
    spacecraftId         = a.spacecraftId;
    attitudeModel        = a.attitudeModel;
+   ephemerisName        = a.ephemerisName;
    solarSystem          = a.solarSystem;         // need to copy
    internalCoordSystem  = a.internalCoordSystem; // need to copy
    coordinateSystem     = a.coordinateSystem;    // need to copy
@@ -2672,6 +2677,9 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
    // NAIF ID for the spacecraft reference frame is not read-only for spacecraft
    if (id == NAIF_ID_REFERENCE_FRAME)  return false;
 
+   if (id == EPHEMERIS_NAME)
+      return (ephemerisName == "");
+
    // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
 
    return SpaceObject::IsParameterReadOnly(id);
@@ -3677,6 +3685,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     if (id == POWER_SYSTEM_ID)
        return powerSystemName;
 
+    if (id == EPHEMERIS_NAME)
+       return ephemerisName;
+
     return SpaceObject::GetStringParameter(id);
 }
 
@@ -4133,6 +4144,10 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
                   value.c_str());
       #endif
       powerSystemName = value;
+   }
+   else if (id == EPHEMERIS_NAME)
+   {
+      ephemerisName = value;
    }
    else if (id == SPAD_SRP_FILE)
    {
