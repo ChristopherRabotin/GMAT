@@ -1698,9 +1698,11 @@ void Simulator::CalculateData()
       // No measurements were possible
       FindNextSimulationEpoch();
 
-      if ((currentEpoch < simulationEnd) &&
-          (nextSimulationEpoch < simulationEnd))
-         currentState = PROPAGATING;
+      //if ((currentEpoch < simulationEnd) &&                                               // fix bug GMT-5606
+      //    (nextSimulationEpoch < simulationEnd))                                          // fix bug GMT-5606
+      if ((nextSimulationEpoch < simulationEnd) ||                                          // fix bug GMT-5606
+          GmatMathUtil::IsEqual(nextSimulationEpoch, simulationEnd, SIMTIME_ROUNDOFF))      // fix bug GMT-5606
+             currentState = PROPAGATING;
       else
          currentState = FINISHED;
    }
@@ -1782,7 +1784,9 @@ void Simulator::SimulateData()
    isTheFirstMeasurement = false;                                    // fix bug GMT-4909
    FindNextSimulationEpoch();
    
-   if ((currentEpoch < simulationEnd) && (nextSimulationEpoch < simulationEnd))
+//   if ((currentEpoch < simulationEnd) && (nextSimulationEpoch < simulationEnd))        // fix bug GMT-5606
+   if ((nextSimulationEpoch < simulationEnd) ||                                          // fix bug GMT-5606
+      GmatMathUtil::IsEqual(nextSimulationEpoch, simulationEnd, SIMTIME_ROUNDOFF))       // fix bug GMT-5606
       currentState = PROPAGATING;
    else
       currentState = FINISHED;
