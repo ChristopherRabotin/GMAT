@@ -57,6 +57,10 @@
 ModelObject::ModelObject()
    : isLoaded (false)
    {
+   StructureScale = 1;
+   StructureOffset[0] = 0;
+   StructureOffset[1] = 0;
+   StructureOffset[2] = 0;
    Reset();
    }
 //--------------------------------------------------------------------
@@ -379,15 +383,25 @@ void ModelObject::Reset()
    Scale = 1;
    }
 //--------------------------------------------------------------------
+void ModelObject::DrawAsSpacecraft (bool isLit)
+   {
+   Draw (isLit,true);
+   }
+//--------------------------------------------------------------------
+void ModelObject::DrawAsCelestialBody (bool isLit)
+   {
+   Draw (isLit,false);
+   }
+//--------------------------------------------------------------------
 // void ModelObject::Draw(bool isLit)
 //--------------------------------------------------------------------
 /**
  * Draw the object on the screen
  */
 //--------------------------------------------------------------------
-void ModelObject::Draw(bool isLit)
+void ModelObject::Draw (bool isLit, bool ispacecraft)
    {
-   SetMatrix();
+   SetMatrix(ispacecraft);
    // Save the current matrix
    glPushMatrix();
    // Multiply the object matrix by the object's matrix
@@ -405,7 +419,7 @@ void ModelObject::Draw(bool isLit)
 //--------------------------------------------------------------------
 // Sets the matrix to use the base and currents for translation, rotation, etc.
 //--------------------------------------------------------------------
-void ModelObject::SetMatrix()
+void ModelObject::SetMatrix (bool isspacecraft)
    {
    matrix_type mat;
    MatrixIdentity(&matrix);
@@ -418,9 +432,18 @@ void ModelObject::SetMatrix()
    MatrixMult(&mat, &matrix, &matrix);
 
    MatrixIdentity(&mat);
-   MatrixSetElement(&mat, 0, 0, Scale*1000);
-   MatrixSetElement(&mat, 1, 1, Scale*1000);
-   MatrixSetElement(&mat, 2, 2, Scale*1000);
+   if (isspacecraft)
+      {
+      MatrixSetElement(&mat, 0, 0, Scale*1000);
+      MatrixSetElement(&mat, 1, 1, Scale*1000);
+      MatrixSetElement(&mat, 2, 2, Scale*1000);
+      }
+   else
+      {
+      MatrixSetElement(&mat, 0, 0, Scale);
+      MatrixSetElement(&mat, 1, 1, Scale);
+      MatrixSetElement(&mat, 2, 2, Scale);
+      }
    MatrixMult(&mat, &matrix, &matrix);
    
    MatrixIdentity(&mat);
@@ -429,17 +452,20 @@ void ModelObject::SetMatrix()
    MatrixSetElement(&mat, 3, 2, BodyPosition[2]);
    MatrixMult(&mat, &matrix, &matrix);
    
-   MatrixIdentity(&mat);
-   MatrixSetElement(&mat, 0, 0, StructureScale);
-   MatrixSetElement(&mat, 1, 1, StructureScale);
-   MatrixSetElement(&mat, 2, 2, StructureScale);
-   MatrixMult(&mat, &matrix, &matrix);
-   
-   MatrixIdentity(&mat);
-   MatrixSetElement(&mat, 3, 0, StructureOffset[0]);
-   MatrixSetElement(&mat, 3, 1, StructureOffset[1]);
-   MatrixSetElement(&mat, 3, 2, StructureOffset[2]);
-   MatrixMult(&mat, &matrix, &matrix);
+   if (isspacecraft)
+      {
+      MatrixIdentity(&mat);
+      MatrixSetElement(&mat, 0, 0, StructureScale);
+      MatrixSetElement(&mat, 1, 1, StructureScale);
+      MatrixSetElement(&mat, 2, 2, StructureScale);
+      MatrixMult(&mat, &matrix, &matrix);
+
+      MatrixIdentity(&mat);
+      MatrixSetElement(&mat, 3, 0, StructureOffset[0]);
+      MatrixSetElement(&mat, 3, 1, StructureOffset[1]);
+      MatrixSetElement(&mat, 3, 2, StructureOffset[2]);
+      MatrixMult(&mat, &matrix, &matrix);
+      }
    }
 //--------------------------------------------------------------------
 // void MatrixSetElement(matrix_type_ptr matrix, int r, int c, float value)
