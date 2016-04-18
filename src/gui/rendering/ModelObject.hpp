@@ -85,11 +85,13 @@ public:
    void SetScale (float x);
    void Reset ();
    
-   void Draw (bool isLit);
+   void DrawAsSpacecraft (bool isLit);
+   void DrawAsCelestialBody (bool isLit);
    void RenderShadowVolume (float *light_pos, int frame);
    
 private:
-   void SetMatrix();
+   void Draw (bool isLit, bool ispacecraft);
+   void SetMatrix (bool ispacecraft);
    
    int  LoadTexture(const std::string &file_name);
 
