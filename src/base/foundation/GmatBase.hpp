@@ -512,6 +512,11 @@ public:
    virtual bool IsParameterCommandModeSettable(const Integer id) const;
    void CopyParameter(const GmatBase& fromObject, const Integer forParameter);
 
+   /// Methods for script name and flag where object is created from
+   void SetScriptCreatedFrom(const std::string &script);
+   std::string GetScriptCreatedFrom();
+   void SetIsCreatedFromMainScript(bool flag);
+   bool IsCreatedFromMainScript();
    
    /// Functions use information from Moderator                               // made changes by TUAN NGUYEN
    ObjectMap               GetConfiguredObjectMap();                          // made changes by TUAN NGUYEN
@@ -546,6 +551,11 @@ protected:
    /// Full name of this object                               // made changes by TUAN NGUYEN
    std::string         instanceFullName;                      // made changes by TUAN NGUYEN
 
+   /// Script file name where object is created from
+   std::string         scriptCreatedFrom;
+   /// Flag indicating object is created from the main script
+   bool                isCreatedFromMainScript;
+   
    /// Enumerated base type of the object
    Gmat::ObjectType    type;
    /// Number of owned objects that belong to this instance

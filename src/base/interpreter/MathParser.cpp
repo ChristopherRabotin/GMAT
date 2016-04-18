@@ -47,7 +47,7 @@
 //#define DEBUG_PARSE 1
 //#define DEBUG_PARSE_NODE 1
 //#define DEBUG_PARSE_EQUATION 1
-//#define DEBUG_MATH_EQ 1
+//#define DEBUG_REMOVE_SPACES_IN_MATH_EQ 1
 //#define DEBUG_MATH_PARSER 2
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
@@ -2379,7 +2379,7 @@ std::string MathParser::GetOperator(const IntegerMap::iterator &pos1,
 //------------------------------------------------------------------------------
 std::string MathParser::RemoveSpaceInMathEquation(const std::string &str)
 {
-   #if DEBUG_MATH_EQ
+   #if DEBUG_REMOVE_SPACES_IN_MATH_EQ
    MessageInterface::ShowMessage
       ("\nMathParser::RemoveSpaceInMathEquation() entered, str=<%s>\n", str.c_str());
    #endif
@@ -2395,18 +2395,18 @@ std::string MathParser::RemoveSpaceInMathEquation(const std::string &str)
       {
          char currCh = *pos;
          char prevCh = str1[dist-1];
-         #if DEBUG_MATH_EQ > 1
+         #if DEBUG_REMOVE_SPACES_IN_MATH_EQ > 1
          MessageInterface::ShowMessage("   currCh=<%c>, prev char=<%c>\n", currCh, prevCh);
          #endif
          
          if (currCh == ' ')
          {
-            #if DEBUG_MATH_EQ > 1
+            #if DEBUG_REMOVE_SPACES_IN_MATH_EQ > 1
             MessageInterface::ShowMessage("   ===> current ch is blank, dist=%d\n", currCh, dist);
             #endif
             if (isalnum(prevCh))
             {
-               #if DEBUG_MATH_EQ > 1
+               #if DEBUG_REMOVE_SPACES_IN_MATH_EQ > 1
                MessageInterface::ShowMessage
                   ("   previous ch <%c> is alphanumeric, lastNonBlank=%d\n", prevCh, lastNonBlank);
                #endif
@@ -2414,7 +2414,7 @@ std::string MathParser::RemoveSpaceInMathEquation(const std::string &str)
                std::string substr = str1.substr(lastNonBlank, dist-lastNonBlank);
                if (GmatStringUtil::IsLastNumberPartOfName(substr))
                {
-                  #if DEBUG_MATH_EQ > 1
+                  #if DEBUG_REMOVE_SPACES_IN_MATH_EQ > 1
                   MessageInterface::ShowMessage
                      ("   => <%c> is part of name <%s>, so deleting <%c>\n", prevCh, substr.c_str(), *pos);
                   #endif
@@ -2428,7 +2428,7 @@ std::string MathParser::RemoveSpaceInMathEquation(const std::string &str)
                ++pos;
             else
             {
-               #if DEBUG_MATH_EQ > 1
+               #if DEBUG_REMOVE_SPACES_IN_MATH_EQ > 1
                MessageInterface::ShowMessage
                   ("   => previous ch <%c> is not alphanumeric or dot, so deleting <%c>\n",
                    prevCh, *pos);
@@ -2440,12 +2440,12 @@ std::string MathParser::RemoveSpaceInMathEquation(const std::string &str)
          else if (currCh == '(' || currCh == ')' || currCh == ',' ||
                   GmatStringUtil::IsMathOperator(currCh))
          {
-            #if DEBUG_MATH_EQ > 1
+            #if DEBUG_REMOVE_SPACES_IN_MATH_EQ > 1
             MessageInterface::ShowMessage("   ===> current ch is (), or operators\n", currCh);
             #endif
             if (prevCh == ' ')
             {
-               #if DEBUG_MATH_EQ > 1
+               #if DEBUG_REMOVE_SPACES_IN_MATH_EQ > 1
                MessageInterface::ShowMessage
                   ("   => previous ch is blank, so deleting <%c>\n", prevCh, *(pos-1));
                #endif
@@ -2462,7 +2462,7 @@ std::string MathParser::RemoveSpaceInMathEquation(const std::string &str)
          ++pos;
    }
    
-   #if DEBUG_MATH_EQ
+   #if DEBUG_REMOVE_SPACES_IN_MATH_EQ
    MessageInterface::ShowMessage
       ("MathParser::RemoveSpaceInMathEquation() returning, str=<%s>\n\n", str1.c_str());
    #endif

@@ -3527,7 +3527,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
 {
    bool debugParameter = true;
    #ifdef DEBUG_ONLY_FOR_SCRIPT
-   if (currentScriptFileName == "")
+   if (mainScriptFileName == "")
       debugParameter = false;
    #endif
    
@@ -7158,6 +7158,22 @@ Gmat::RunState Moderator::GetDetailedRunState(Integer sandboxNum)
 
 
 // Script
+
+//------------------------------------------------------------------------------
+// std::string GetMainScriptFileName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the main script file name if it is open.
+ *
+ * @return  The main script file name opened, "" if no script file opened
+ */
+//------------------------------------------------------------------------------
+std::string Moderator::GetMainScriptFileName()
+{
+   return mainScriptFileName;
+}
+
+
 //------------------------------------------------------------------------------
 // bool InterpretScript(const std::string &filename, bool readBack = false,
 //                      const std::string &newPath = "")
@@ -7177,6 +7193,11 @@ Gmat::RunState Moderator::GetDetailedRunState(Integer sandboxNum)
 bool Moderator::InterpretScript(const std::string &filename, bool readBack,
                                 const std::string &newPath)
 {
+   #if DEBUG_INTERPRET
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretScript() entered\n   filename='%s', readBack=%d, "
+       "newPath='%s'\n", filename.c_str(), readBack, newPath.c_str());
+   #endif
    bool isGoodScript = false;
    bool foundBeginMissionSeq = false;
    isRunReady = false;
@@ -7190,7 +7211,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    try
    {
       PrepareNextScriptReading();
-      currentScriptFileName = filename;
+      mainScriptFileName = filename;
       
       // Set GMAT working directory (for GMT-4408 LOJ: 2014.06.11)
       // GMAT working directory has script file
@@ -7380,6 +7401,11 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
 //------------------------------------------------------------------------------
 bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
 {
+   #if DEBUG_INTERPRET
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretScript() entered, istringstream=<%p>, clearObjs=%d\n",
+       ss, clearObjs);
+   #endif
    bool isGoodScript = false;
    isRunReady = false;
    endOfInterpreter = false;
@@ -7424,6 +7450,8 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
    MessageInterface::ShowMessage(GetScript());
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretScript() returning isGoodScript=%d\n", isGoodScript);
    #endif
    
    return isGoodScript;
@@ -7640,7 +7668,7 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
    objectManageOption = 1;
 
    // Reset current script file
-   currentScriptFileName = "";
+   mainScriptFileName = "";
    
    // Clear SpacePoint instance count so that Spacecraft color starts from the
    // same color for each run
@@ -8850,7 +8878,7 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
 {
    bool debugParameter = true;
    #ifdef DEBUG_ONLY_FOR_SCRIPT
-   if (currentScriptFileName == "")
+   if (mainScriptFileName == "")
       debugParameter = false;
    #endif
    
@@ -9026,7 +9054,7 @@ GmatBase* Moderator::FindObject(const std::string &name)
 {
    bool debugFindObject = true;
    #ifdef DEBUG_ONLY_FOR_SCRIPT
-   if (currentScriptFileName == "")
+   if (mainScriptFileName == "")
       debugFindObject = false;
    #endif
    
@@ -10178,7 +10206,7 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
 {
    bool showObjectMap = true;
    #ifdef DEBUG_ONLY_FOR_SCRIPT
-   if (currentScriptFileName == "")
+   if (mainScriptFileName == "")
       showObjectMap = false;
    #endif
    // #ifdef DEBUG_ONLY_FOR_FUNCTION
@@ -10330,7 +10358,7 @@ Moderator::Moderator()
    detailedRunState = Gmat::IDLE;
    objectManageOption = 1;
    currentSandboxNumber = 1;
-   currentScriptFileName = "";
+   mainScriptFileName = "";
    theMatlabInterface = NULL;
    
    // The motivation of adding this data member was due to Parameter creation
