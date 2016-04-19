@@ -947,15 +947,17 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
      
 
          // 8. Get frequency from transmitter of ground station (participants[0])
-         Real uplinkFreq;
+         Real uplinkFreq;                      // unit: MHz
+         Real uplinkFreqAtRecei;               // unit: MHz         // uplink frequency at receive epoch
          if (obsData == NULL)
          {
             if (rampTB == NULL)
             {
                // Get uplink frequency from GMAT script when ramp table is not used
                Signal* uplinkSignal = gsTransmitter->GetSignal();
-               uplinkFreq = uplinkSignal->GetValue();                  // unit: MHz
-               frequency = uplinkFreq*1.0e6;                           // unit: Hz
+               uplinkFreq        = uplinkSignal->GetValue();                  // unit: MHz
+               uplinkFreqAtRecei = uplinkFreq;                                // unit: MHz       // for constant frequency
+               frequency         = uplinkFreq*1.0e6;                          // unit: Hz
 
                // Get uplink band based on definition of frequency range
                freqBand = FrequencyBand(frequency);
@@ -968,8 +970,9 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
             else
             {
                // Get uplink frequency at a given time from ramped frequency table
-               frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
-               uplinkFreq = frequency/1.0e6;                          // unit MHz
+               frequency         = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
+               uplinkFreq        = frequency/1.0e6;                           // unit MHz
+               uplinkFreqAtRecei = GetFrequencyFromRampTable(t3R) / 1.0e6;    // unit MHz      // for ramped frequency
 
                // Get frequency band from ramp table at given time
                freqBand = GetUplinkBandFromRampTable(t1T);
@@ -984,25 +987,44 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
          {
             if (rampTB == NULL)
             {
-               // Get uplink frequency at a given time from observation data
-               frequency = obsData->uplinkFreq;                       // unit: Hz   
+               //// Get uplink frequency at a given time from observation data
+               //frequency = obsData->uplinkFreq;                       // unit: Hz   
 
+               // Get uplink frequency from GMAT script when ramp table is not used
+               Signal* uplinkSignal = gsTransmitter->GetSignal();
+               uplinkFreq = uplinkSignal->GetValue();                  // unit: MHz
+               uplinkFreqAtRecei = uplinkFreq;                                // unit: MHz       // for constant frequency
+               frequency = uplinkFreq*1.0e6;                          // unit: Hz
+
+               // Get uplink band based on definition of frequency range
+               freqBand = FrequencyBand(frequency);
+
+               // Range modulo constant is specified by GMAT script
                #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
                   MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...: frequency = %.12le\n", frequency); 
                #endif
             }
             else
             {
-               // Get uplink frequency at a given time from ramped frequency table
-               frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
+               //// Get uplink frequency at a given time from ramped frequency table
+               //frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
 
+               // Get uplink frequency at a given time from ramped frequency table
+               frequency         = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
+               uplinkFreq = frequency / 1.0e6;                           // unit MHz
+               uplinkFreqAtRecei = GetFrequencyFromRampTable(t3R) / 1.0e6;    // unit MHz      // for ramped frequency
+
+               // Get frequency band from ramp table at given time
+               freqBand = GetUplinkBandFromRampTable(t1T);
+
+               // Range modulo constant is specified by GMAT script
                #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
                   MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
                #endif
             }
 
-            uplinkFreq = frequency/1.0e6;                            // unit: MHz
-            freqBand = obsData->uplinkBand;
+            //uplinkFreq = frequency/1.0e6;                            // unit: MHz
+            //freqBand = obsData->uplinkBand;
             obsValue = obsData->value;                               // unit: range unit
 
             #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
@@ -1099,6 +1121,10 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
          realRange = uplinkRealRange + downlinkRealRange +
             (targetDelay + ettaiCorrection)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M;
 
+
+         currentMeasurement.uplinkFreq = uplinkFreq * 1.0e6;                  // made changes by TUAN NGUYEN
+         currentMeasurement.uplinkFreq = uplinkFreqAtRecei * 1.0e6;           // made changes by TUAN NGUYEN
+
       }
       else
       {
@@ -1186,6 +1212,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
             val = rn->Gaussian(currentMeasurement.value[0], noiseSigma->GetElement(0));
          currentMeasurement.value[0] = val;
       }
+
       retval = true;
    }
 

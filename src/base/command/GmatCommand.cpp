@@ -462,6 +462,19 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &useName)
 {
    static std::string empty;
+
+   // Don't write unless object is created from the main script
+   if (!isCreatedFromMainScript)
+   {
+      generatingString = "";
+      #ifdef DEBUG_GENERATING_STRING
+      MessageInterface::ShowMessage
+         ("GmatCommand::GetGeneratingString() just returning blank, it is not "
+          "created from the main script\n");
+      #endif
+      return generatingString;
+   }
+   
    if (generatingString == "") {
       if (typeName == "NoOp")
          return generatingString;
@@ -472,7 +485,7 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    if (mode == Gmat::NO_COMMENTS)
    {
       InsertCommandName(generatingString);      
-	  return generatingString;
+      return generatingString;
    }
    
    

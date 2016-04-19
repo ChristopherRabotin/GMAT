@@ -231,3 +231,29 @@ std::string ObservationData::GetTrackingConfig()
 
    return ss.str();
 }
+
+
+StringArray ObservationData::GetAvailableMeasurementTypes()
+{
+   StringArray typeList;
+
+   // New syntax's measurement types
+   typeList.push_back("Range_KM");
+   typeList.push_back("DSNRange");
+   typeList.push_back("Doppler");
+   typeList.push_back("Doppler_RangeRate");
+   typeList.push_back("TDRSDoppler_HZ");              // made changes by TUAN NGUYEN
+
+   // Old syntax's measurement types
+   typeList.push_back("DSNTwoWayRange");
+   typeList.push_back("DSNTwoWayDoppler");
+   typeList.push_back("USNTwoWayRange");
+   typeList.push_back("GeometricRange");
+   typeList.push_back("GeometricRangeRate");
+   typeList.push_back("GeometricRADec");
+   typeList.push_back("GeometricAzEl");
+
+   return typeList;
+}
+
+

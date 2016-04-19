@@ -46,7 +46,9 @@
 #endif
 
 #ifdef __WIN32__
+#ifndef IONOSPHERE
 #define IONOSPHERE
+#endif
 #endif
 
 #ifdef IONOSPHERE

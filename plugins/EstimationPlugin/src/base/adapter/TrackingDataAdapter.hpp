@@ -233,6 +233,8 @@ protected:
    Real                      uplinkFreq;                           // unit is MHz
    /// Frequency band   (In DSNDoppler, it is used for S path)
    Integer                   freqBand;
+   /// uplink frequency at recieved epoch (It is defferent from uplink frequency at transmit epoch uplinkFreq)
+   Real                      uplinkFreqAtRecei;                    // unit is MHz
    /// Observation data object containing an observation data record
    ObservationData*          obsData;
 

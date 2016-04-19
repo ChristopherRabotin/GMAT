@@ -200,6 +200,15 @@ public:
    void SetAbsPathname(const std::string &type, const char *newpath);
    void SetAbsPathname(const std::string &type, const std::string &newpath);
    
+   // GMAT include script methods
+   void ClearGmatIncludePath();
+   void AddGmatIncludePath(const char *path, bool addFront = true);
+   void AddGmatIncludePath(const std::string &path, bool addFront = true);
+   std::string GetGmatIncludePath(const char *incName);
+   std::string GetGmatIncludePath(const std::string &incName);
+   const StringArray& GetAllGmatIncludePaths();
+   
+   // GMAT function methods
    void ClearGmatFunctionPath();
    void AddGmatFunctionPath(const char *path, bool addFront = true);
    void AddGmatFunctionPath(const std::string &path, bool addFront = true);
@@ -207,11 +216,12 @@ public:
    std::string GetGmatFunctionPath(const std::string &funcName);
    const StringArray& GetAllGmatFunctionPaths();
    
+   // MATLAB function methods
    void ClearMatlabFunctionPath();
    void AddMatlabFunctionPath(const char* path, bool addFront = true);
    void AddMatlabFunctionPath(const std::string &path, bool addFront = true);
-   std::string GetMatlabFunctionPath(const char* name);
-   std::string GetMatlabFunctionPath(const std::string &name);
+   std::string GetMatlabFunctionPath(const char* funcName);
+   std::string GetMatlabFunctionPath(const std::string &funcName);
    const StringArray& GetAllMatlabFunctionPaths();
    
    // Python methods
@@ -228,10 +238,11 @@ public:
 
 private:
    
-   enum FunctionType
+   enum GmatPathType
    {
       GMAT_FUNCTION = 101,
       MATLAB_FUNCTION,
+      GMAT_INCLUDE,
    };
    
    struct FileInfo
@@ -262,11 +273,15 @@ private:
    std::ifstream mInStream;
    std::map<std::string, std::string> mPathMap;
    std::map<std::string, FileInfo*> mFileMap;
+   
+   std::list<std::string> mGmatIncludePaths;
    std::list<std::string> mGmatFunctionPaths;
    std::list<std::string> mMatlabFunctionPaths;
-  
+   
+   StringArray mGmatIncludeFullPaths;
    StringArray mGmatFunctionFullPaths;
    StringArray mMatlabFunctionFullPaths;
+   
    StringArray mSavedComments;
    StringArray mPathWrittenOuts;
    StringArray mFileWrittenOuts;
@@ -277,8 +292,8 @@ private:
 
    StringArray mPluginList;
    
-   std::string GetFunctionPath(FunctionType type, std::list<std::string> &pathList,
-                               const std::string &funcName);
+   std::string GetGmatPath(GmatPathType type, std::list<std::string> &pathList,
+                           const std::string &name);
    void AddFileType(const std::string &type, const std::string &name);
    void AddAvailablePotentialFiles();
    void WriteHeader(std::ofstream &outStream);

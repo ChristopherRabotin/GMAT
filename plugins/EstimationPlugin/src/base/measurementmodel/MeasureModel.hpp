@@ -145,6 +145,7 @@ public:
 
    /// Get uplink frequency and uplink band for a given signal path
    Real                 GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);
+   Real                 GetUplinkFrequencyAtReceivedEpoch(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);
    Integer              GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);
 
    /// Measurement Model Settings

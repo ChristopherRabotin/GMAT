@@ -995,12 +995,12 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    
    // 2.2.2. Specify uplink frequency
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
-   uplinkFreq = calcData->GetUplinkFrequency(0, NULL);    // No ramped table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
-   freqBand = calcData->GetUplinkFrequencyBand(0, NULL);  // No ramped table is used for TDRS measurement   // calcData->GetUplinkFrequencyBand(0, rampTB);
+   uplinkFreq        = calcData->GetUplinkFrequency(0, NULL);    // No ramped table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
+   uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0, NULL);    // No ramped table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
+   freqBand          = calcData->GetUplinkFrequencyBand(0, NULL);  // No ramped table is used for TDRS measurement   // calcData->GetUplinkFrequencyBand(0, rampTB);
    
    // 2.3.1. Measurement time is the same as the one for End-path
    GmatTime tm = cMeasurement.epoch;                                // Get measurement time
-//   MessageInterface::ShowMessage("Hi there 2: measurement epoch = %.15lf\n", cMeasurement.epoch);
    ObservationData* obData = NULL;
    if (forObservation)
       obData = new ObservationData(*forObservation);
@@ -1222,6 +1222,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
       // 4.9. Set uplink frequency, uplink frequency band, node4 frequency, node4 fequency band
 //     cMeasurement.epoch = measDataEL.epoch;
       cMeasurement.uplinkFreq           = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
+      cMeasurement.uplinkFreqAtRecei    = uplinkFreqAtRecei*1.0e6;  // convert Mhz to Hz due cMeasurement.uplinkFreqAtRecei's unit is Hz
       cMeasurement.uplinkBand           = freqBand;
       cMeasurement.tdrsNode4Freq        = node4Freq*1.0e6;          // convert Mhz to Hz due cMeasurement.tdrsNode4Freq's unit is Hz
       cMeasurement.tdrsNode4Band        = node4FreqBand;

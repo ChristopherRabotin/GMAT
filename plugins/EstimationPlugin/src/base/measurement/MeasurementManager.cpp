@@ -2491,8 +2491,8 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             #ifdef DEBUG_CALCULATE_MEASUREMENTS
                MessageInterface::ShowMessage(" Simulation: measurement with events\n");
             #endif
-            if (measurements[j].isFeasible)
-            {
+            //if (measurements[j].isFeasible)                                                        // made changes by TUAN NGUYEN
+            //{                                                                                      // made changes by TUAN NGUYEN
                measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);
                if (measurements[j].unfeasibleReason == "R")
                {
@@ -2504,7 +2504,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                   sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", models[j]->GetName().c_str(), taiTime);
                   throw MeasurementException(s); 
                }
-            }
+            //}                                                                                       // made changes by TUAN NGUYEN
          }
          else
          {
@@ -2564,7 +2564,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          // Set AddNoise to measuement apdater
          adapters[i]->SetBooleanParameter("AddNoise", addNoise);
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage("******** Finsh setting noise\n");
+            MessageInterface::ShowMessage("******** Finish setting noise\n");
          #endif
 
          // Run CalculateMeasurement() function 
@@ -2573,8 +2573,8 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             #ifdef DEBUG_CALCULATE_MEASUREMENTS
                MessageInterface::ShowMessage(" Simulation: measurement adapter %s with events\n", adapters[i]->GetName().c_str());
             #endif
-            if (measurements[i].isFeasible)
-            {
+            //if (measurements[i].isFeasible)                                                         // made changes by TUAN NGUYEN
+            //{                                                                                       // made changes by TUAN NGUYEN
                measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
                if (measurements[i].unfeasibleReason == "R")
                {
@@ -2587,7 +2587,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                //   throw MeasurementException(s); 
                   throw MeasurementException(adapters[i]->GetErrorMessage());
                }
-            }
+            //}                                                                                       // made changes by TUAN NGUYEN
          }
          else
          {

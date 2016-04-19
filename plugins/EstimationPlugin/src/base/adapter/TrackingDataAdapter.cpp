@@ -87,6 +87,7 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    withLighttime        (false),
    thePropagator        (NULL),
    uplinkFreq           (1.0e3),         // unit: Mhz
+   uplinkFreqAtRecei    (1.0e3),         // unit: Mhz     // made changes by TUAN NGUYEN
    freqBand             (1),
    obsData              (NULL),
    addNoise             (false),
@@ -171,6 +172,7 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    withLighttime        (ma.withLighttime),
    thePropagator        (NULL),
    uplinkFreq           (ma.uplinkFreq),
+   uplinkFreqAtRecei    (ma.uplinkFreqAtRecei),                 // made changes by TUAN NGUYEN
    freqBand             (ma.freqBand),
    obsData              (ma.obsData),
    addNoise             (ma.addNoise),
@@ -225,6 +227,7 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       withLighttime      = ma.withLighttime;
 
       uplinkFreq         = ma.uplinkFreq;
+      uplinkFreqAtRecei  = ma.uplinkFreqAtRecei;        // made changes by TUAN NGUYEN
       freqBand           = ma.freqBand;
       obsData            = ma.obsData;
       addNoise           = ma.addNoise;

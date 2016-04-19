@@ -1955,7 +1955,18 @@ const std::vector<ObjectArray*>& MeasureModel::GetParticipantObjectLists()
 }
 
 
-
+//-------------------------------------------------------------------------------------------------------------
+// Real GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
+//-------------------------------------------------------------------------------------------------------------
+/**
+* This fucntion is used to get uplink frequency at transmit epoch.
+*
+* @param pathIndex        index of a signal path
+* @param ramTB            a pointer to a ramp table
+*
+* @return                 uplink frequency (in MHz) at transmit epoch
+*/
+//-------------------------------------------------------------------------------------------------------------
 Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
 {
    // 1. Specify the first signal leg
@@ -1968,7 +1979,7 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
    if (sd.tNode == NULL)
    {
       std::stringstream ss;
-      ss << "Error: Transmit participant of leg " << GetName() << " is NULL";
+      ss << "Error: Transmit participant of signal path is NULL.\n";
       throw MeasurementException(ss.str());
    }
 
@@ -1999,7 +2010,7 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
          if (i == hardwareList.size())
          {
             std::stringstream ss;
-            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
             throw MeasurementException(ss.str());
          }
       }
@@ -2021,7 +2032,7 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
       if (i == hardwareList.size())
       {
          std::stringstream ss;
-         ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+         ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
          throw MeasurementException(ss.str());
       }
    }
@@ -2030,7 +2041,106 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
 }
 
 
+//-------------------------------------------------------------------------------------------------------------
+// Real GetUplinkFrequencyAtReceivedEpoch(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
+//-------------------------------------------------------------------------------------------------------------
+/**
+* This fucntion is used to get uplink frequency at received epoch.
+*
+* @param pathIndex        index of a signal path
+* @param ramTB            a pointer to a ramp table
+*
+* @return                 uplink frequency (in MHz) at recieved epoch
+*/
+//-------------------------------------------------------------------------------------------------------------
+Real MeasureModel::GetUplinkFrequencyAtReceivedEpoch(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
+{
+   // 1. Specify the first signal leg and last signal leg
+   PhysicalSignal* fleg = (PhysicalSignal*)signalPaths[pathIndex];
+   PhysicalSignal* lastLeg = fleg;
+   while (lastLeg->GetNext() != NULL)
+      lastLeg = (PhysicalSignal*)(lastLeg->GetNext());
 
+   // 2. Get uplink frequency at receive epoch
+   Real frequency;                                                                              // unit: Mhz
+   if (rampTB)
+   {
+      // 2.1.1. Get received epoch
+      SignalData sd;
+      sd = lastLeg->GetSignalData();
+      GmatTime t1 = sd.rPrecTime + sd.rDelay / GmatTimeConstants::SECS_PER_DAY;
+
+      // 2.1.2. Get frequency from ramp table at received epoch
+      frequency = lastLeg->GetFrequencyFromRampTable(t1.GetMjd(), rampTB) / 1.0e6;             // unit: MHz
+   }
+   else
+   {
+      // 2.2.1. Get frequency from transmitter
+      SignalData sd;
+      sd = fleg->GetSignalData();
+      if (sd.tNode == NULL)
+         throw MeasurementException("Error: transmit participant of signal path is NULL.\n");
+
+      if (sd.tNode->IsOfType(Gmat::GROUND_STATION))
+      {
+         // Get frequency from ground station' transmitter
+         ObjectArray hardwareList = ((GroundstationInterface*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         UnsignedInt i;
+         for (i = 0; i < hardwareList.size(); ++i)
+         {
+            if (hardwareList[i]->IsOfType("Transmitter"))
+            {
+               frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();   // unit: MHz 
+               break;
+            }
+         }
+
+         if (i == hardwareList.size())
+         {
+            std::stringstream ss;
+            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
+            throw MeasurementException(ss.str());
+         }
+      }
+      else
+      {
+         // Get frequency from spacecraft's transmitter or transponder
+         ObjectArray hardwareList = ((Spacecraft*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         UnsignedInt i;
+         for (i = 0; i < hardwareList.size(); ++i)
+         {
+            if (hardwareList[i]->IsOfType("Transmitter"))
+            {
+               frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();    // unit: MHz 
+               break;
+            }
+         }
+
+         if (i == hardwareList.size())
+         {
+            std::stringstream ss;
+            ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
+            throw MeasurementException(ss.str());
+         }
+      }
+   }
+
+   return frequency;
+}
+
+
+//-------------------------------------------------------------------------------------------------------------
+// Real GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
+//-------------------------------------------------------------------------------------------------------------
+/**
+* This fucntion is used to get uplink frequency band.
+*
+* @param pathIndex        index of a signal path
+* @param ramTB            a pointer to a ramp table
+*
+* @return                 uplink's frequency band
+*/
+//-------------------------------------------------------------------------------------------------------------
 Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
 {
    // 1. Specify the first signal leg
@@ -2041,7 +2151,7 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
    if (sd.tNode == NULL)
    {
       std::stringstream ss;
-      ss << "Error: Transmit participant of leg " << GetName() << " is NULL";
+      ss << "Error: Transmit participant of signal path is NULL.\n";
       throw MeasurementException(ss.str());
    }
 
@@ -2074,7 +2184,7 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
          if (i == hardwareList.size())
          {
             std::stringstream ss;
-            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
             throw MeasurementException(ss.str());
          }
       }
@@ -2097,14 +2207,10 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
       if (i == hardwareList.size())
       {
          std::stringstream ss;
-         ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+         ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal.\n";
          throw MeasurementException(ss.str());
       }
    }
 
    return freqBand;
 }
-
-
-
-

@@ -55,7 +55,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
-//#define DEBUG_COMMENTS
+//#define DEBUG_COMMENT_LINE
 //#define DEBUG_COMMENTS_ATTRIBUTE
 //#define DEBUG_GENERATING_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
@@ -190,6 +190,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    typeName                   (typeStr),
    instanceName               (nomme),
    instanceFullName           (nomme),                   // made changes by TUAN NGUYEN
+   scriptCreatedFrom          (""),
+   isCreatedFromMainScript    (true),
    type                       (typeId),
    ownedObjectCount           (0),
    isInitialized              (false),
@@ -274,6 +276,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     //instanceName    ("CopyOf"+a.instanceName),
     instanceName              (a.instanceName),
     instanceFullName          (a.instanceFullName),          // made changes by TUAN NGUYEN
+    scriptCreatedFrom         (a.scriptCreatedFrom),
+    isCreatedFromMainScript   (a.isCreatedFromMainScript),
     type                      (a.type),
     ownedObjectCount          (a.ownedObjectCount),
     generatingString          (a.generatingString),
@@ -327,6 +331,8 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    typeName                  = a.typeName;
    // We don't want to copy instanceName (loj: 2008.02.15)
    //instanceName              = a.instanceName;
+   scriptCreatedFrom         = a.scriptCreatedFrom;
+   isCreatedFromMainScript   = a.isCreatedFromMainScript;
    type                      = a.type;
    ownedObjectCount          = a.ownedObjectCount;
    generatingString          = a.generatingString;
@@ -2515,14 +2521,29 @@ bool GmatBase::SetOnOffParameter(const Integer id, const std::string &value)
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetCommentLine() const
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::GetCommentLine() returning '%s'\n", commentLine.c_str());
+   #endif
    return commentLine;
 }
 
 //---------------------------------------------------------------------------
 //  void SetCommentLine(const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets comment line. Comment line starts with % sign.
+ * ex) %--- This is comment line
+ *     Create Spacecraft sat;
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetCommentLine(const std::string &comment)
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetCommentLine() <%p><%s>'%s' setting commentLine to <%s>\n",
+       this, typeName.c_str(), instanceName.c_str(), comment.c_str());
+   #endif
    commentLine = comment;
 }
 
@@ -2537,8 +2558,18 @@ const std::string GmatBase::GetInlineComment() const
 //---------------------------------------------------------------------------
 //  void SetInlineComment(const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets inline comment. Inline comment starts with % sign after GMAT statement.
+ * ex) Create Spacecraft sat; %--- This is inline comment
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetInlineComment(const std::string &comment)
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetInlineComment() <%p><%s>'%s' setting inlineComment to <%s>\n",
+       this, typeName.c_str(), instanceName.c_str(), comment.c_str());
+   #endif
    inlineComment = comment;
 }
 
@@ -2547,6 +2578,11 @@ void GmatBase::SetInlineComment(const std::string &comment)
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetAttributeCommentLine(Integer index)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::GetAttributeCommentLine() <%p><%s>'%s' entered, index=%d\n",
+       this, typeName.c_str(), instanceName.c_str(), index);
+   #endif
    if (index >= (Integer)attributeCommentLines.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
@@ -2568,9 +2604,22 @@ const std::string GmatBase::GetAttributeCommentLine(Integer index)
 //---------------------------------------------------------------------------
 //  void SetAttributeCommentLine(Integer index, const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets attribute comment line. Attribute comment line starts with % sign
+ % before object property setting.
+ * ex) %--- This is attribute comment line
+ *     sat.X = 7000;
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetAttributeCommentLine(Integer index,
                                        const std::string &comment)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetAttributeCommentLine() <%p><%s>'%s' entered, index=%d, "
+       "comment=<%s>\n", this, typeName.c_str(), instanceName.c_str(), index,
+       comment.c_str());
+   #endif
    if (index >= (Integer)attributeCommentLines.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
@@ -2591,6 +2640,12 @@ void GmatBase::SetAttributeCommentLine(Integer index,
 
 //---------------------------------------------------------------------------
 //  const std::string GetInlineAttributeComment(Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Sets inline attribute comment. Attribute inline comment starts with % sign
+ % after object property setting.
+ * ex) sat.X = 7000; %--- This is attribute inline comment
+ */
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetInlineAttributeComment(Integer index)
 {
@@ -2619,6 +2674,13 @@ const std::string GmatBase::GetInlineAttributeComment(Integer index)
 void GmatBase::SetInlineAttributeComment(Integer index,
                                          const std::string &comment)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetInlineAttributeComment() <%p><%s>'%s' entered, index=%d, "
+       "comment=<%s>\n", this, typeName.c_str(), instanceName.c_str(), index,
+       comment.c_str());
+   #endif
+   
    if (index >= (Integer)attributeInlineComments.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
@@ -3632,12 +3694,25 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       ("   showPrefaceComment=%d, commentLine=<%s>\n   showInlineComment=%d "
        "inlineComment=<%s>\n",  showPrefaceComment, commentLine.c_str(),
        showInlineComment, inlineComment.c_str());
+   MessageInterface::ShowMessage("   isCreatedFromMainScript=%d\n", isCreatedFromMainScript);
    #endif
 
    // don't write anything for cloaked objects, unless we're in SHOW_SCRIPT mode
    if ((mode != Gmat::SHOW_SCRIPT) && IsObjectCloaked())
    {
       generatingString = "";
+      return generatingString;
+   }
+   
+   // Don't write unless object is created from the main script
+   if (!isCreatedFromMainScript)
+   {
+      generatingString = "";
+      #ifdef DEBUG_GENERATING_STRING
+      MessageInterface::ShowMessage
+         ("GmatBase::GetGeneratingString() just returning blank, it is not "
+          "created from the main script\n");
+      #endif
       return generatingString;
    }
    
@@ -4173,6 +4248,55 @@ Integer GmatBase::GetEstimationParameterSize(Integer id)
 Real* GmatBase::GetEstimationParameterValue(Integer id)
 {
    return NULL;
+}
+
+
+//---------------------------------------------------------------------------
+// void SetScriptCreatedFrom(const std::string &script)
+//---------------------------------------------------------------------------
+/**
+ * Sets script name where this object is created from.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetScriptCreatedFrom(const std::string &script)
+{
+   scriptCreatedFrom = script;
+}
+
+//---------------------------------------------------------------------------
+// std::string GetScriptCreatedFrom()
+//---------------------------------------------------------------------------
+/**
+ * Retrieves script name where this object is created from.
+ */
+//---------------------------------------------------------------------------
+std::string GmatBase::GetScriptCreatedFrom()
+{
+   return scriptCreatedFrom;
+}
+
+//---------------------------------------------------------------------------
+// void SetIsCreatedFromMainScript(bool flag)
+//---------------------------------------------------------------------------
+/**
+ * Sets flag indicating this object is created from the main script.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetIsCreatedFromMainScript(bool flag)
+{
+   isCreatedFromMainScript = flag;
+}
+
+//---------------------------------------------------------------------------
+// bool IsCreatedFromMainScript()
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating this object is created from the main script.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsCreatedFromMainScript()
+{
+   return isCreatedFromMainScript;
 }
 
 
