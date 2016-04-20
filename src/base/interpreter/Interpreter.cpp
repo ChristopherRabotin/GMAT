@@ -6665,7 +6665,7 @@ bool Interpreter::SetPropertyStringValue(GmatBase *obj, const Integer id,
             
             retval = obj->SetStringParameter(id, valueToUse);
          }
-         catch (BaseException &)
+         catch (BaseException &be)
          {
             #ifdef DEBUG_SET
             MessageInterface::ShowMessage
@@ -6674,8 +6674,41 @@ bool Interpreter::SetPropertyStringValue(GmatBase *obj, const Integer id,
                      valueToUse.c_str(), index);
             #endif
             
+            //========================================================
+            // Old code
+            #if 0
+            //========================================================
+            
             // try with index
             retval = obj->SetStringParameter(id, valueToUse, index);
+            
+            //========================================================
+            #else
+            //========================================================
+            
+            if (index == -1)
+            {
+               HandleError(be);
+               ignoreError = true;
+               retval = false;
+            }
+            else
+            {
+               try
+               {
+                  // try with index
+                  retval = obj->SetStringParameter(id, valueToUse, index);
+               }
+               catch (BaseException &ex)
+               {
+                  HandleError(ex);
+                  ignoreError = true;
+                  retval = false;
+               }
+            }
+            //========================================================
+            #endif
+            //========================================================
          }
          break;
       }
