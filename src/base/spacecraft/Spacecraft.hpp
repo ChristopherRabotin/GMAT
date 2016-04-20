@@ -322,6 +322,8 @@ protected:
       FULL_STM_ROWCOUNT,
 //      ORBIT_COVARIANCE,
 
+      EPHEMERIS_NAME,
+
       // SPAD SRP parameters
       SPAD_SRP_FILE,
       SPAD_SRP_FILE_FULL_PATH, // read-only
@@ -571,6 +573,9 @@ protected:
    std::string       attitudeModel;
    /// Pointer to the object that manages the attitude of the spacecraft
    Attitude          *attitude;
+
+   /// Name of the ephem file used for ephem propagatoirs that use a single file
+   std::string       ephemerisName;
 
    // for non-internal spacecraft information
    CoordinateConverter coordConverter;

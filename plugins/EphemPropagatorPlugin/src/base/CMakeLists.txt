@@ -33,6 +33,7 @@ SET(PLUGIN_SRCS
     factory/EphemPropFactory.cpp
     plugin/GmatPluginFunctions.cpp
     propagator/EphemerisPropagator.cpp
+    propagator/Code500Propagator.cpp
     propagator/SPKPropagator.cpp
 )
 
