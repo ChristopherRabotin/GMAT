@@ -10,19 +10,44 @@ classdef PointGroup < handle
         lonVec
         % std:vec of 3x1 arrays. The cartesian coordinates of grid points
         testPointsArray
-        % Integer.  The number of points in the point group
-        numPoints
+        % Integer. The number of points in the point group (i.e. passed
+        % constraint tests)
+        numPoints = 0;
+        % Integer. Number of points requested in point algorithm
+        numRequestedPoints
+        % Double. Upper bound on allowable latitude. -pi/2 <= latUpper <= pi/2
+        latUpper = pi/2
+        % Double. Lower bound on allowable latitude. -pi/2 <= latLower <= pi/2
+        latLower = -pi/2
+        % Double. Upper bound on allowable longitude
+        lonUpper = 2*pi
+        % Double. Lower bound on allowable longitude
+        lonLower = 0
     end
     
     methods (Access = public)
         
-        function obj = PointGroup(modelName,numPoints)
+        function obj = PointGroup(modelName,numRequestedPoints,latUpper,latLower,lonUpper,lonLower)
             % Class constructor
-            % Inputs:  string modelName, int numPoints
-            obj.numPoints = numPoints;
+            % Inputs:  string modelName, int numRequestedPoints, double
+            % latUpper, double latLower, double, lonUpper, double lonLower
+            obj.numRequestedPoints = numRequestedPoints;
             obj.modelName = modelName;
-            obj.DimensionArrays();
-            obj.ComputeTestPoints('Helical')
+            if nargin > 2
+                obj.SetLatLonBounds(latUpper,latLower,lonUpper,lonLower);
+            end
+            obj.ComputeTestPoints('Helical');
+        end
+        
+        function obj = AddUserDefinedPoints(obj,latVec,lonVec)
+            %  Add user defined latitude and longitude points
+            %  Inputs are real arrays of longitude and latitude in radians
+            if length(latVec) ~= length(lonVec)
+                error('latVec and lonVec must have the same length)')
+            end
+            for pointIdx = 1:length(latVec)
+                obj.AccumulatePoints(latVec(pointIdx),lonVec(pointIdx))
+            end
         end
         
         function posVec = GetPointPositionVector(obj,poiIndex)
@@ -46,15 +71,52 @@ classdef PointGroup < handle
             numPoints = obj.numPoints;
         end
         
+        function [latVec,lonVec] = GetLatLonVectors(obj)
+            % Returns the latitude and longitude vectors
+            latVec = obj.latVec;
+            lonVec = obj.lonVec;
+        end
+        
     end
     
     methods (Access = private)
         
-        function DimensionArrays(obj)
-            % Pre-dimensions arrays based on user's number of points
-            obj.testPointsArray = cell(1,obj.numPoints);
-            obj.latVec = zeros(1,obj.numPoints);
-            obj.lonVec = zeros(1,obj.numPoints);
+        function SetLatLonBounds(obj,latUpper,latLower,lonUpper,lonLower)
+            % Sets bounds on latitude and longitude for grid points
+            % angle inputs are in radians
+            if latLower > latUpper || latLower == latUpper
+                error('latLower > latUpper or they are equal')
+            end
+            if lonLower > lonUpper || lonLower == lonUpper
+                error('lonLower > lonUpper or they are equal')
+            end
+            if latUpper < -pi/2 || latUpper > pi/2
+                error('latUpper value is invalid')
+            else
+                obj.latUpper = latUpper;
+            end
+            if latLower < -pi/2 || latLower > pi/2
+                error('latUpper value is invalid')
+            else
+                obj.latLower = latLower;
+            end
+            obj.lonUpper = mod(lonUpper,2*pi);
+            obj.lonLower = mod(lonLower,2*pi);
+        end
+        
+        function AccumulatePoints(obj,lat,lon)
+            %  Accumlates points, only adding them if they pass constraint
+            %  checks
+            if (lat >= obj.latLower && lat <= obj.latUpper) && ...
+                    (lon >= obj.lonLower && lon <= obj.lonUpper)
+                obj.numPoints = obj.numPoints + 1;
+                obj.lonVec(obj.numPoints) = lon;
+                obj.latVec(obj.numPoints) = lat;
+                %  TODO:  Use geodetic to Cartesian conversion.
+                obj.testPointsArray{obj.numPoints} = [ cos(lon) * cos(lat);
+                    sin(lon) * cos(lat);
+                    sin(lat)];
+            end
         end
         
         function ComputeTestPoints(obj,modelName)
@@ -62,35 +124,29 @@ classdef PointGroup < handle
             %  Inputs: string modelName
             
             % Place first point at north pole
-            if (obj.numPoints >= 1)
+            if (obj.numRequestedPoints >= 1)
                 % One Point at North Pole
-                pointIdx    = 1;
-                obj.testPointsArray{pointIdx} = [0 0 1]';
-                obj.latVec(1,1) = pi/2;
-                obj.lonVec(1,1) = 0;
+                AccumulatePoints(obj,pi/2,0)
             end
             % Place second point at south pole
-            if (obj.numPoints >= 2)
+            if (obj.numRequestedPoints >= 2)
                 % One Point at South Pole
-                pointIdx    = 2;
-                obj.testPointsArray{pointIdx} = [0 0 -1]';
-                obj.latVec(1,1) = -pi/2;
-                obj.lonVec(1,1) = 0;
+                AccumulatePoints(obj,-pi/2,0)
             end
             % Place remaining points according to requested algorithm
-            if (obj.numPoints >= 3)
+            if (obj.numRequestedPoints >= 3)
                 if strcmp(modelName,'Helical')
-                    ComputeHelicalPoints(obj,obj.numPoints-2);
+                    ComputeHelicalPoints(obj,obj.numRequestedPoints-2);
                 end
             end
         end
         
-        function ComputeHelicalPoints(obj,numPoints)
+        function ComputeHelicalPoints(obj,numRequestedPoints)
             % Build a set of evenly spaced points using Helical algorithm
             % Inputs: int, numPoints
             
             % Determine how many longitude "bands" and fill them in
-            numDiscreteLatitudes = floor(sqrt((numPoints+1)*pi/4));
+            numDiscreteLatitudes = floor(sqrt((numRequestedPoints+1)*pi/4));
             discreteLatitudes = zeros(1,numDiscreteLatitudes); % array of ints  in C++
             for latIdx = 1:2:numDiscreteLatitudes
                 % Odd Numbers
@@ -108,7 +164,7 @@ classdef PointGroup < handle
             numPointsByLatBand = zeros(1,numDiscreteLatitudes); % Array of ints  in C++
             pointIdx = 2; % this is two because we already added in points at the poles
             numRemainingPoints = zeros(1,numDiscreteLatitudes+1); % Array of ints in C++
-            numRemainingPoints(1) = numPoints;
+            numRemainingPoints(1) = numRequestedPoints;
             for latIdx=1:1:numDiscreteLatitudes
                 numPointsByLatBand(latIdx) = round( numRemainingPoints(latIdx)*...
                     cos(discreteLatitudes(latIdx))/alpha(latIdx));
@@ -122,12 +178,13 @@ classdef PointGroup < handle
                     % arrays.
                     pointIdx = pointIdx + 1;
                     %  TODO:  Use geodetic to Cartesian conversion.
-                    obj.testPointsArray{pointIdx} = [ cos(currentLongitude) *...
-                        cos(discreteLatitudes(latIdx));
-                        sin(currentLongitude) * cos(discreteLatitudes(latIdx));
-                        sin(discreteLatitudes(latIdx))];
-                    obj.latVec(1,pointIdx) = discreteLatitudes(latIdx);
-                    obj.lonVec(1,pointIdx) = currentLongitude;
+                    obj.AccumulatePoints(discreteLatitudes(latIdx),currentLongitude);
+                    %                     obj.testPointsArray{pointIdx} = [ cos(currentLongitude) *...
+                    %                         cos(discreteLatitudes(latIdx));
+                    %                         sin(currentLongitude) * cos(discreteLatitudes(latIdx));
+                    %                         sin(discreteLatitudes(latIdx))];
+                    %                     obj.latVec(1,pointIdx) = discreteLatitudes(latIdx);
+                    %                     obj.lonVec(1,pointIdx) = currentLongitude;
                 end
             end
         end

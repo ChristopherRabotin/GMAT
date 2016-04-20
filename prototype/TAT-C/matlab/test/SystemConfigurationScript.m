@@ -3,7 +3,7 @@
 
 % installDir is the directory of the Git repo (i.e. the folder that
 % contains "src" and "test" folders etc.
-installDir = 'C:/Users/sphughe1/Documents/Repos/mesa-jade/public/gmat/prototype/TAT-C/';
+installDir = 'C:/Users/sphughe1/Documents/Repos/jade-clean/gmat/prototype/TAT-C/';
 tatCFilePaths = genpath(installDir);
 addpath(tatCFilePaths);
 

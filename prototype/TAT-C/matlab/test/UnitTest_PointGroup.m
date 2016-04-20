@@ -74,4 +74,32 @@ if maxDiff >= 1e-13
     error('error in returned value for num points')
 end
 
+% Test lat/lon contraint setting
+latUpper = pi/3;
+latLower = -pi/3;
+lonUpper = 2*pi - pi/6;
+lonLower = pi/6;
+pg = PointGroup('Helical',300,latUpper,latLower,lonUpper,lonLower);
+[latVec,lonVec] = pg.GetLatLonVectors();
+for pointIdx = 1:pg.GetNumPoints()
+    if (latVec(pointIdx) < latLower || latVec(pointIdx) > latUpper) || ...
+            (lonVec(pointIdx) < lonLower || lonVec(pointIdx) > lonUpper)
+        error('latitude and or longitude violates constraint')
+    end
+end
 
+%  Test setting your own lat lon using those from the previous test
+pgCustom = PointGroup('Helical',0);
+pgCustom.AddUserDefinedPoints(latVec,lonVec);
+if pg.GetNumPoints() ~= pgCustom.GetNumPoints()
+    error('error setting user defined points)')
+end
+[latVec2,lonVec2] = pgCustom.GetLatLonVectors();
+for pointIdx = 1:pgCustom.GetNumPoints()
+    if latVec2(pointIdx) ~= latVec(pointIdx)
+        error('error setting user defined points)')
+    end
+    if lonVec2(pointIdx) ~= lonVec(pointIdx)
+        error('error setting user defined points)')
+    end
+end
