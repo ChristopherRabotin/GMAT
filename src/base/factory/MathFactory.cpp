@@ -62,6 +62,8 @@
 #include "Norm.hpp"
 #include "Power.hpp"
 #include "RadToDeg.hpp"
+#include "Rand.hpp"
+#include "Randn.hpp"
 #include "Sin.hpp"
 #include "Sprintf.hpp"
 #include "Sqrt.hpp"
@@ -160,6 +162,10 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
       mathNode = new Inverse(withName);
    else if (newType == "Norm")        // norm(m)
       mathNode = new Norm(withName);
+   else if (newType == "Rand")        // rand(m)
+      mathNode = new Rand(withName);
+   else if (newType == "Randn")       // randn(m)
+      mathNode = new Randn(withName);
    else if (newType == "Transpose")   // transpose(m) or m'
       mathNode = new Transpose(withName);
    
@@ -331,6 +337,8 @@ void MathFactory::BuildCreatables()
    creatables.push_back("Diag");
    creatables.push_back("Inv");
    creatables.push_back("Norm");
+   creatables.push_back("Rand");
+   creatables.push_back("Randn");
    creatables.push_back("Transpose");
    
    // Trigonometric functions

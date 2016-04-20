@@ -57,7 +57,8 @@ public:
                                    Integer start = 0);
    MathNode*    Parse(const std::string &str);
    StringArray  GetGmatFunctionNames();
-   
+   bool         IsInputRequiredForFunction(const std::string &fn);
+   bool         IsFunctionWithOptionalInput(const std::string &fn);
 protected:
    
    MathNode*    ParseNode(const std::string &str);

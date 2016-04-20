@@ -344,6 +344,8 @@ SET(BASE_SRCS
     math/NumericFunction.cpp
     math/Power.cpp
     math/RadToDeg.cpp
+    math/Rand.cpp
+    math/Randn.cpp
     math/Sin.cpp
     math/Sinh.cpp
     math/Sprintf.cpp

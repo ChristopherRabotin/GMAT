@@ -202,6 +202,7 @@
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\DataInterfaceFactory.cpp" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\ReaderFactory.cpp" />
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\factory\EphemPropFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\Code500Propagator.cpp" />
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\EphemerisPropagator.cpp" />
     <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\SPKPropagator.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DopplerAdapter.cpp" />
@@ -274,7 +275,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAngles.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAzEl.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\PhysicalMeasurement.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\RandomNumber.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\SnTwoWayRange.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TDRSSTwoWayRange.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TrackingData.cpp" />
@@ -560,6 +560,8 @@
     <ClCompile Include="..\..\..\src\base\math\NumericFunction.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Power.cpp" />
     <ClCompile Include="..\..\..\src\base\math\RadToDeg.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Rand.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Randn.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Sin.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Sinh.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Sprintf.cpp" />
@@ -752,6 +754,7 @@
     <ClCompile Include="..\..\..\src\base\util\MessageInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MessageReceiver.cpp" />
     <ClCompile Include="..\..\..\src\base\util\OrbitDesignerTime.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\RandomNumber.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RealUtilities.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RepeatGroundTrack.cpp" />
     <ClCompile Include="..\..\..\src\base\util\RepeatSunSync.cpp" />
@@ -958,6 +961,7 @@
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\DataInterfaceFactory.hpp" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\factory\ReaderFactory.hpp" />
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\factory\EphemPropFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\Code500Propagator.hpp" />
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\EphemerisPropagator.hpp" />
     <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\SPKPropagator.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DopplerAdapter.hpp" />
@@ -1032,7 +1036,6 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAngles.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\OpticalAzEl.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\PhysicalMeasurement.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\RandomNumber.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\SnTwoWayRange.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TDRSSTwoWayRange.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\TrackingData.hpp" />
@@ -1319,6 +1322,8 @@
     <ClInclude Include="..\..\..\src\base\math\NumericFunction.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Power.hpp" />
     <ClInclude Include="..\..\..\src\base\math\RadToDeg.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Rand.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Randn.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Sin.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Sinh.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Sprintf.hpp" />
@@ -1525,6 +1530,7 @@
     <ClInclude Include="..\..\..\src\base\util\OrbitDesignerTime.hpp" />
     <ClInclude Include="..\..\..\src\base\util\OrbitTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\PhysicalConstants.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\RandomNumber.hpp" />
     <ClInclude Include="..\..\..\src\base\util\RealTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\RealUtilities.hpp" />
     <ClInclude Include="..\..\..\src\base\util\RepeatGroundTrack.hpp" />
