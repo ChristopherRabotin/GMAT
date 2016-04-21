@@ -179,7 +179,8 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
    MessageInterface::ShowMessage
       ("=================================================================\n");
    MessageInterface::ShowMessage
-      ("MathParser::IsEquation() str=<%s>\n", str.c_str());
+      ("MathParser::IsEquation() entered, str=<%s>, checkMinusSign=%d\n",
+       str.c_str(), checkMinusSign);
    MessageInterface::ShowMessage
       ("=================================================================\n");
    #endif
@@ -230,11 +231,24 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       // Check for any math symbols or blank and comma, etc
       if (str1.find_first_of(" (),*/+-^'") == str1.npos)
       {
-         #if DEBUG_PARSE_EQUATION
-         MessageInterface::ShowMessage
-            ("MathParser::IsEquation(%s) returning false, no math symbols found\n", str.c_str());
-         #endif
-         return false;
+         // Check for math function without input
+         if (IsFunctionWithOptionalInput(str1))
+         {
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("MathParser::IsEquation(%s) returning true, '%s' is a function with optional input\n",
+                str.c_str(), str.c_str());
+            #endif
+            return true;
+         }
+         else
+         {
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("MathParser::IsEquation(%s) returning false, no () or math symbols found\n", str.c_str());
+            #endif
+            return false;
+         }
       }
       
       // If [] found as in sat.Quaternion = [1.0 0.0 0.0 0.0], return false
@@ -753,7 +767,7 @@ MathNode* MathParser::Parse(const std::string &str)
    MessageInterface::ShowMessage
       ("\n=================================================================\n");
    MessageInterface::ShowMessage
-      ("MathParser::Parse() theEquation=%s\n", theEquation.c_str());
+      ("MathParser::Parse() entered, theEquation=%s\n", theEquation.c_str());
    MessageInterface::ShowMessage
       ("=================================================================\n");
    #endif
@@ -884,6 +898,11 @@ MathNode* MathParser::Parse(const std::string &str)
       ("MathParser::Parse() After removing unary + at 0\n   newEq=%s\n", newEq.c_str());
    #endif
    
+   // Add () if newEq is function with no input so that ParseNode will recognize
+   // as a function
+   if (IsFunctionWithOptionalInput(newEq))
+       newEq = newEq + "()";
+   
    // Parse top node
    MathNode *topNode = ParseNode(newEq);
    
@@ -917,6 +936,57 @@ StringArray MathParser::GetGmatFunctionNames()
 
 
 //------------------------------------------------------------------------------
+// bool IsInputRequiredForFunction(const std::string &fn)
+//------------------------------------------------------------------------------
+bool MathParser::IsInputRequiredForFunction(const std::string &fn)
+{
+   if (fn == "rand" || fn == "randn")
+      return false;
+   else
+      return true;
+}
+
+//------------------------------------------------------------------------------
+// bool IsFunctionWithOptionalInput(const std::string &fn)
+//------------------------------------------------------------------------------
+/**
+ * Checks if input is not an object name and it is a function name with
+ * no input required.
+ */
+//------------------------------------------------------------------------------
+bool MathParser::IsFunctionWithOptionalInput(const std::string &fn)
+{
+   #ifdef DEBUG_PARSE_EQUATION
+   MessageInterface::ShowMessage
+      ("MathParser::IsFunctionWithOptionalInput() entered, fn='%s'\n", fn.c_str());
+   #endif
+   
+   bool isFunction = false;
+   if (theObjectMap != NULL && theObjectMap->find(fn) != theObjectMap->end())
+   {
+      #ifdef DEBUG_PARSE_EQUATION
+      MessageInterface::ShowMessage("   '%s' is a created object name\n", fn.c_str());
+      #endif
+   }
+   else
+   {
+      if (!IsInputRequiredForFunction(fn) && IsMathFunction(fn))
+      {
+         #ifdef DEBUG_PARSE_EQUATION
+         MessageInterface::ShowMessage("   '%s' is a math function\n", fn.c_str());
+         #endif
+         isFunction = true;
+      }
+   }
+   
+   #ifdef DEBUG_PARSE_EQUATION
+   MessageInterface::ShowMessage
+      ("MathParser::IsFunctionWithOptionalInput() returning %d\n", isFunction);
+   #endif
+   return isFunction;
+}
+
+//------------------------------------------------------------------------------
 // MathNode* ParseNode(const std::string &str)
 //------------------------------------------------------------------------------
 MathNode* MathParser::ParseNode(const std::string &str)
@@ -935,6 +1005,11 @@ MathNode* MathParser::ParseNode(const std::string &str)
       MessageInterface::ShowMessage
          ("   After removing extra parenthesis, str=<%s>\n", str1.c_str());
       #endif
+
+      // Add () for math function whose input is optional, so that it can create
+      // proper function node
+      if (!IsInputRequiredForFunction(str1))
+         str1 = str1 + "()";
       
       // Check for GmatFunction with no parenthesis
       if (IsGmatFunction(str1))
@@ -1018,7 +1093,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
          {
             #if DEBUG_PARSE_NODE
             MessageInterface::ShowMessage
-               ("MathParser::ParseNode(<%s>) *** Throwing Exception: Missing input arguments\n", str.c_str());
+               ("MathParser::ParseNode(<%s>) *** Throwing Exception: 1 Missing input arguments\n", str.c_str());
             #endif
             throw MathException("Missing input arguments");
          }
@@ -1063,11 +1138,23 @@ MathNode* MathParser::ParseNode(const std::string &str)
          {
             if (IsMathFunction(op))
             {
-               #if DEBUG_PARSE_NODE
-               MessageInterface::ShowMessage
-                  ("MathParser::ParseNode(<%s>) *** Throwing Exception: Missing input arguments\n", str.c_str());
-               #endif
-               throw MathException(op + "() - Missing input arguments");
+               // Check if function's input is optional. There is no input so 1 is assumed
+               if (!IsInputRequiredForFunction(op))
+               {
+                  #if DEBUG_PARSE_NODE
+                  MessageInterface::ShowMessage
+                     ("'%s' function's input is optional so 1 is assumed\n", op.c_str());
+                  #endif
+               }
+               else
+               {
+                  #if DEBUG_PARSE_NODE
+                  MessageInterface::ShowMessage
+                     ("MathParser::ParseNode(<%s>) *** Throwing Exception: "
+                      "2 Missing input arguments\n", str.c_str());
+                  #endif
+                  throw MathException(op + "() - Missing input arguments");
+               }
             }
          }
          else
@@ -1434,7 +1521,7 @@ StringArray MathParser::Decompose(const std::string &str)
             ("MathParser::Decompose() *** Throwing Exception: %s - Missing arguments\n",
              items[0].c_str());
          #endif
-         throw MathException(items[0] + " - Missing input arguments");
+         throw MathException(items[0] + " - 3 Missing input arguments");
       }
    }
    
@@ -3104,6 +3191,10 @@ bool MathParser::IsMathElement(const std::string &str)
          return false;
       }
    }
+   else if (IsFunctionWithOptionalInput(str))
+   {
+      return false;
+   }
    else
    {
       #ifdef DEBUG_MATH_ELEMENT
@@ -3733,6 +3824,8 @@ void MathParser::BuildAllFunctionList()
    matrixFuncList.push_back("det");
    matrixFuncList.push_back("inv");
    matrixFuncList.push_back("norm");
+   matrixFuncList.push_back("rand");
+   matrixFuncList.push_back("randn");
    matrixFuncList.push_back("transpose");
    
    // Unit Conversion functions

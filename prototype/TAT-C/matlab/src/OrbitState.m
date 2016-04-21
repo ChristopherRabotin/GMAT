@@ -14,11 +14,13 @@ classdef OrbitState < handle
         function obj = SetKeplerianState(obj,SMA,ECC,INC,RAAN,AOP,TA)
             % Sets the Keplerian state
             % obj = SetKeplerianState(obj,SMA,ECC,INC,RAAN,AOP,TA)
+            % Angles are in radians, SMA unit should be consistent with gravParam
             obj.currentState = obj.ConvertKepToCart(SMA,ECC,INC,RAAN,AOP,TA);
         end
         
         function obj = SetKeplerianVectorState(obj,kepVector)
             % Sets Keplerian state given states in an array
+            % Angles are in radians, SMA unit should be consistent with gravParam
             obj.currentState = obj.ConvertKepToCart(...
                 kepVector(1),kepVector(2),kepVector(3),...
                 kepVector(4),kepVector(5),kepVector(6));
@@ -26,6 +28,7 @@ classdef OrbitState < handle
         
         function obj = SetCartesianState(obj,cartVec)
             % Sets the cartesian state
+            % Units should be consistent with gravParam
             obj.currentState = cartVec;
         end
         
@@ -36,11 +39,13 @@ classdef OrbitState < handle
         
         function kepState = GetKeplerianState(obj)
             % Returns the Keplerian state
+            % Angles are in radians, SMA unit is consistent with gravParam
             kepState = obj.ConvertCartToKep(obj.currentState);
         end
         
         function cartState = GetCartesianState(obj)
             % Returns the Cartesian state
+            % Units are consistent with gravParam
             cartState = obj.currentState;
         end
         
