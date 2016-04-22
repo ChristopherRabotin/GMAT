@@ -232,7 +232,8 @@ protected:
    virtual std::string    GetProgressString();
 
 private:
-   bool               isTheFirstMeasurement;                                    // fix bug GMT-4909
+   bool                   isTheFirstMeasurement;                                    // fix bug GMT-4909
+   bool                   isEpochFormatSet;
 };
 
 #endif /* Simulator_hpp */
