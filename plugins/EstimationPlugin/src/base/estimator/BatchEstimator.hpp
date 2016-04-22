@@ -96,12 +96,12 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
-   virtual std::string  GetOnOffParameter(const Integer id) const;
-   virtual bool         SetOnOffParameter(const Integer id,
-                                         const std::string &value);
-   virtual std::string  GetOnOffParameter(const std::string &label) const;
-   virtual bool         SetOnOffParameter(const std::string &label,
-                                          const std::string &value);
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
 
    virtual const StringArray& GetPropertyEnumStrings(const Integer id) const;
 
@@ -184,7 +184,8 @@ protected:
    {
       ESTIMATION_EPOCH_FORMAT = EstimatorParamCount,
       ESTIMATION_EPOCH,
-//     USE_PRIORI_ESTIMATE,
+//      USE_PRIORI_ESTIMATE,
+      USE_INITIAL_COVARIANCE,
       INVERSION_ALGORITHM,
       MAX_CONSECUTIVE_DIVERGENCES,
       BatchEstimatorParamCount,

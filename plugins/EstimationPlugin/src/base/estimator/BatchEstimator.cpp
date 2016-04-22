@@ -109,6 +109,7 @@ BatchEstimator::PARAMETER_TEXT[] =
    "EstimationEpochFormat",         // The epoch of the solution
    "EstimationEpoch",               // The epoch of the solution
 //   "UsePrioriEstimate",
+   "UseInitialCovariance",
    "InversionAlgorithm",
    "MaxConsecutiveDivergences",
    // todo Add useApriori here
@@ -120,6 +121,7 @@ BatchEstimator::PARAMETER_TYPE[] =
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
 //   Gmat::ON_OFF_TYPE,        // "UsePrioriEstimate"
+   Gmat::BOOLEAN_TYPE,         // "UseInitialCovariance"
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
 };
@@ -658,91 +660,81 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+// bool BatchEstimator::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
- * This method gets "On" or "Off" value
+ * This method gets value from a boolean parameter 
  *
  * @param id   The id number of a parameter
  *
- * @return "On" or "Off" value
+ * @return     a boolean value
  */
 //------------------------------------------------------------------------------
-std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+bool BatchEstimator::GetBooleanParameter(const Integer id) const
 {
-//   if (id == USE_PRIORI_ESTIMATE)
-//      return (useApriori ? "On" : "Off");
+   if (id == USE_INITIAL_COVARIANCE)
+      return useApriori;
 
-   return Estimator::GetOnOffParameter(id);
+   return Estimator::GetBooleanParameter(id);
 }
 
 
 //------------------------------------------------------------------------------
-// bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
+// bool BatchEstimator::SetBooleanParameter(const Integer id, const bool value)
 //------------------------------------------------------------------------------
 /**
- * This method gets "On" or "Off" value
+ * This method sets value to a boolean parameter
  *
- * @param id      The id number of a parameter
- * @param value      value "On" or "Off"
+ * @param id         The id number of a parameter
+ * @param value      value set to the parameter
  *
  * @return true value when it successfully sets the value, false otherwise. 
  */
 //------------------------------------------------------------------------------
-bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
+bool BatchEstimator::SetBooleanParameter(const Integer id, const bool value)
 {
-//   if (id == USE_PRIORI_ESTIMATE)
-//   {
-//      if (value == "On")
-//      {
-//         useApriori = true;
-//         return true;
-//      }
-//      if (value == "Off")
-//      {
-//         useApriori = false;
-//        return true;
-//      }
-//
-//      return false;
-//   }
+   if (id == USE_INITIAL_COVARIANCE)
+   {
+      useApriori = value;
+      return true;
+   }
 
-   return Estimator::SetOnOffParameter(id, value);
+   return Estimator::SetBooleanParameter(id, value);
 }
 
 
 //------------------------------------------------------------------------------
-// std::string BatchEstimator::GetOnOffParameter(const std::string &label) const
+// bool BatchEstimator::GetBooleanParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
-* This method gets "On" or "Off" value
+* This method gets value from a boolean parameter
 *
 * @param label   The name of a parameter
 *
-* @return "On" or "Off" value
+* @return        value of the parameter
 */
 //------------------------------------------------------------------------------
-std::string BatchEstimator::GetOnOffParameter(const std::string &label) const
+bool BatchEstimator::GetBooleanParameter(const std::string &label) const
 {
-   return GetOnOffParameter(GetParameterID(label));
+   return GetBooleanParameter(GetParameterID(label));
 }
 
 
 //------------------------------------------------------------------------------
-// bool BatchEstimator::SetOnOffParameter(const std::string &label, const std::string &value)
+// bool BatchEstimator::SetBooleanParameter(const std::string &label, const bool value)
 //------------------------------------------------------------------------------
 /**
-* This method gets "On" or "Off" value
+* This method sets value to a boolean parameter
 *
 * @param label      The name of a parameter
-* @param value      value "On" or "Off"
+* @param value      value used to set to parameter
 *
 * @return true value when it successfully sets the value, false otherwise.
 */
 //------------------------------------------------------------------------------
-bool BatchEstimator::SetOnOffParameter(const std::string &label, const std::string &value)
+bool BatchEstimator::SetBooleanParameter(const std::string &label, const bool value)
 {
-   return SetOnOffParameter(GetParameterID(label), value);
+   return SetBooleanParameter(GetParameterID(label), value);
 }
 
 
@@ -1096,10 +1088,10 @@ void BatchEstimator::CompleteInitialization()
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
       residuals[i] = 0.0;
-//      if (useApriori)
-//         x0bar[i] = (*estimationState)[i];
-//      else                                               // Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
-           x0bar[i] = 0.0;
+      if (useApriori)
+         x0bar[i] = (*estimationState)[i];
+      else                                               // Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
+         x0bar[i] = 0.0;
    }
 
    if (useApriori)
@@ -3894,7 +3886,15 @@ void BatchEstimator::WriteReportFileHeaderPart5()
          // Get central body objects used in spacecrafts' coordinate system
          Spacecraft *sc = (Spacecraft*)obj;
          std::string csName = sc->GetStringParameter("CoordinateSystem");
-         CoordinateSystem *cs = (CoordinateSystem *)GetConfiguredObject(csName);
+         CoordinateSystem *cs = NULL;
+         try
+         {
+            cs = (CoordinateSystem *)GetConfiguredObject(csName);
+         }
+         catch (...)
+         {
+            throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not define in GMAT script.\n");
+         }
          name = cs->GetStringParameter("Origin");
       }
       else if (obj->IsOfType(Gmat::GROUND_STATION))
