@@ -257,3 +257,17 @@ StringArray ObservationData::GetAvailableMeasurementTypes()
 }
 
 
+bool ObservationData::IsValidMeasurementType(const std::string typeName)
+{
+   StringArray typeList = GetAvailableMeasurementTypes();
+   bool isValid = false;
+   for (Integer i = 0; i < typeList.size(); ++i)
+   {
+      if (typeList[i] == typeName)
+      {
+         isValid = true;
+         break;
+      }
+   }
+   return isValid;
+}
