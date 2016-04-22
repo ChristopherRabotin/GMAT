@@ -247,6 +247,11 @@ public:
 
    virtual void        SetPropStateManager(PropagationStateManager *sm);
 
+   // Methods used for PM based Parameters
+   virtual bool        BuildModelState(GmatEpoch now, Real *state,
+                                       Real *j2kState, Integer dimension = 6);
+
+
 protected:
       
    /// pointer to the body for which this force is computed
@@ -310,9 +315,9 @@ protected:
    /// Number of A-matrices that need to be filled
    Integer                   aMatrixCount;
 
-   // Methods used for PM based Parameters
-   virtual bool              BuildModelState(GmatEpoch now, Real *state,
-                                   Real *j2kState, Integer dimension = 6);
+   //// Methods used for PM based Parameters
+   //virtual bool              BuildModelState(GmatEpoch now, Real *state,
+   //                                Real *j2kState, Integer dimension = 6);
 
    /// Parameter IDs
    enum
