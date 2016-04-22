@@ -63,7 +63,7 @@ Estimator::PARAMETER_TEXT[] =
    "RelativeTol",
    "Propagator",
    "ShowAllResiduals",
-   "AddResidualsPlot ",
+   "AddResidualsPlot",
    "OLSEInitialRMSSigma",
    "OLSEMultiplicativeConstant",
    "OLSEAdditiveConstant",
