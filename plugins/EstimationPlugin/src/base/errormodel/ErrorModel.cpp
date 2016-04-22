@@ -43,6 +43,7 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
    "NoiseSigma",
 //   "NoiseModel",
    "Bias",
+   "BiasSigma",                                                                                                         // made changes by TUAN NGUYEN
    "SolveFors",
 };
 
@@ -54,6 +55,7 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
 //   Gmat::STRING_TYPE,         // NOISE_MODEL           // Specify model of error. It is "RandomConstant" for Gausian distribution 
    Gmat::REAL_TYPE,			   // BIAS                  // Measurement bias
+   Gmat::REAL_TYPE,			   // BIAS_SIGMA            // Measurement bias sigma                                       // made changes by TUAN NGUYEN
    Gmat::STRINGARRAY_TYPE,    // SOLVEFORS             // Contains a list of all solve-for parameters in ErrorModel 
 };
 
@@ -73,9 +75,10 @@ ErrorModel::ErrorModel(const std::string name) :
    measurementType   ("Range_KM"),
 //   measurementTrip   (2),
 //   strand            (""),
-   noiseSigma        (0.01),                   // 0.01 Km
+   noiseSigma        (0.01),                  // 0.01 measurement unit (km, RU, Km/s, or Hz)
 //   noiseModel        ("NoiseConstant"), 
-   bias              (0.0)                    // 0.0 Km
+   bias              (0.0),                   // 0.0 measurement unit (km, RU, Km/s, or Hz)
+   biasSigma         (0.0)                    // 0.0 measurement unit (km, RU, Km/s, or Hz)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -117,6 +120,7 @@ ErrorModel::ErrorModel(const ErrorModel& em) :
    noiseSigma            (em.noiseSigma),
 //   noiseModel            (em.noiseModel),
    bias                  (em.bias),
+   biasSigma             (em.biasSigma),                               // made changes by TUAN NGUYEN
    solveforNames         (em.solveforNames)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -153,6 +157,7 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
       noiseSigma          = em.noiseSigma;
 //      noiseModel          = em.noiseModel;
       bias                = em.bias;
+      biasSigma           = em.biasSigma;             // made changes by TUAN NGUYEN
       solveforNames       = em.solveforNames;
    }
 
@@ -388,21 +393,55 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == SOLVEFORS)
    {
-      std::string value1 = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
-      if (value1 == "")
-         return true;
-
-      std::string::size_type pos = value1.find_first_of(',');
-      Integer i = 0;
-      while (pos != value.npos)
+      // if it is an empty list, then clear the solve-for list
+      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
       {
-         std::string value2 = value1.substr(0, pos);
-         value1 = value1.substr(pos+1);
-         SetStringParameter(id, value2, i);
-         ++i;
-         pos = value1.find_first_of(',');
+         solveforNames.clear();
+         return true;
       }
-      SetStringParameter(id, value1, i);
+
+      // If is not "{}", it is a string containing solve-for variable  
+      // Check for valid identity
+      if (value != "Bias")
+         throw GmatBaseException("Error: '" + value + "' is an invalid value. "
+         + GetName() + ".SolveFors parameter only accepts Bias as a solve-for.\n");
+
+      if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())
+         solveforNames.push_back(value);
+      else
+         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".SolveFors parameter is replicated.\n");
+
+      return true;
+
+      //if (value1.at(0) != '{')
+      //{
+      //   if (value1 != "Bias")
+      //      throw GmatBaseException("Error: '" + value + "' is an invalid value. "
+      //      + GetName() + ".SolveFors parameter only accepts Bias as a solve-for.\n");
+
+      //   solveforNames.push_back(value1);
+      //   return true;
+      //}
+      //else
+      //{
+      //   std::string value1 = GmatStringUtil::RemoveOuterString(value1, "{", "}");
+      //   if (value1 == "")
+      //      return true;
+
+      //   std::string::size_type pos = value1.find_first_of(',');
+      //   Integer i = 0;
+      //   while (pos != value.npos)
+      //   {
+      //      std::string value2 = value1.substr(0, pos);
+      //      value1 = value1.substr(pos + 1);
+      //      SetStringParameter(id, value2, i);
+      //      ++i;
+      //      pos = value1.find_first_of(',');
+      //   }
+
+      //   SetStringParameter(id, value1, i);
+      //   return true;
+      //}
    }
 
    if (id == TYPE)
@@ -566,8 +605,15 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
    {                                                                                // made changes by TUAN NGUYEN
-      if (!GmatStringUtil::IsValidIdentity(value))                                  // made changes by TUAN NGUYEN
-         throw MeasurementException("Error: '" + value + "' is an invalid value. "  // made changes by TUAN NGUYEN
+      // an empty list is set to SolveFors parameter when index == -1
+      if (index == -1)
+      {
+         solveforNames.clear();
+         return true;
+      }
+
+      if (value != "Bias")                                                          // made changes by TUAN NGUYEN
+         throw GmatBaseException("Error: '" + value + "' is an invalid value. "     // made changes by TUAN NGUYEN
          + GetName() + ".SolveFors parameter only accepts Bias as a solve-for.\n"); // made changes by TUAN NGUYEN
 
       if ((0 <= index)&&(index < (Integer)solveforNames.size()))                    // made changes by TUAN NGUYEN
@@ -582,7 +628,7 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
             solveforNames.clear();
             return true;
          }
-         else if (index == solveforNames.size())                                         // made changes by TUAN NGUYEN
+         else if (index == solveforNames.size())                                    // made changes by TUAN NGUYEN
          {                                                                          // made changes by TUAN NGUYEN
             solveforNames.push_back(value);                                         // made changes by TUAN NGUYEN
             return true;                                                            // made changes by TUAN NGUYEN
@@ -594,6 +640,7 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
             throw GmatBaseException(ss.str());                                      // made changes by TUAN NGUYEN
          }                                                                          // made changes by TUAN NGUYEN
       }                                                                             // made changes by TUAN NGUYEN
+      return true;
    }                                                                                // made changes by TUAN NGUYEN
 
    return GmatBase::SetStringParameter(id, value, index);
@@ -686,6 +733,9 @@ Real ErrorModel::GetRealParameter(const Integer id) const
    if (id == BIAS)
       return bias;
 
+   if (id == BIAS_SIGMA)                  // made changes by TUAN NGUYEN
+      return biasSigma;                   // made changes by TUAN NGUYEN
+
    return GmatBase::GetRealParameter(id);
 }
 
@@ -695,7 +745,7 @@ Real ErrorModel::SetRealParameter(const Integer id, const Real value)
    if (id == NOISE_SIGMA)
    {
       if (value <= 0.0)
-         throw GmatBaseException("Error: value of "+ GetName() +".NoiseSigma has to be a positive number.\n");
+         throw GmatBaseException("Error: value set to "+ GetName() +".NoiseSigma is a non positive number. It has to be a positive number.\n");
 
 	  noiseSigma = value;
 	  return noiseSigma;
@@ -706,6 +756,16 @@ Real ErrorModel::SetRealParameter(const Integer id, const Real value)
 	  bias = value;
 	  return bias;
    }
+
+   if (id == BIAS_SIGMA)
+   {
+      if (value <= 0.0)
+         throw GmatBaseException("Error: value set to " + GetName() + ".BiasSigma is a nonpositive number. It has to be a positive number.\n");
+
+      biasSigma = value;
+      return biasSigma;
+   }
+
    return GmatBase::SetRealParameter(id, value);
 }
 
