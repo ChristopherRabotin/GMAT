@@ -49,7 +49,7 @@ classdef PointGroup < handle
                 obj.AccumulatePoints(latVec(pointIdx),lonVec(pointIdx))
             end
         end
-        
+                
         function posVec = GetPointPositionVector(obj,poiIndex)
             % Returns body fixed location of point given point index
             % Inputs. int poiIndex
@@ -80,7 +80,7 @@ classdef PointGroup < handle
     end
     
     methods (Access = private)
-        
+               
         function SetLatLonBounds(obj,latUpper,latLower,lonUpper,lonLower)
             % Sets bounds on latitude and longitude for grid points
             % angle inputs are in radians
@@ -112,10 +112,11 @@ classdef PointGroup < handle
                 obj.numPoints = obj.numPoints + 1;
                 obj.lonVec(obj.numPoints) = lon;
                 obj.latVec(obj.numPoints) = lat;
-                %  TODO:  Use geodetic to Cartesian conversion.
+                %  TODO:  Use geodetic to Cartesian conversion and don't
+                %  hard code the Earth radius.
                 obj.testPointsArray{obj.numPoints} = [ cos(lon) * cos(lat);
                     sin(lon) * cos(lat);
-                    sin(lat)];
+                    sin(lat)]*6378.1363;
             end
         end
         
@@ -188,6 +189,7 @@ classdef PointGroup < handle
                 end
             end
         end
+        
     end
     
     methods (Access = public)
@@ -197,6 +199,9 @@ classdef PointGroup < handle
             %  Used to visualize points. not needed in GMAT.
             %  DO NOT CONVERT TO C++
             [xSphere,ySphere,zSphere] = sphere(25);
+            xSphere = xSphere*6378.1363;
+            ySphere = ySphere*6378.1363;
+            zSphere = zSphere*6378.1363;
             figHandle = figure(100);
             surf(xSphere,ySphere,zSphere,'EdgeColor',[0.784 0.816 0.831])
             colormap('white')
