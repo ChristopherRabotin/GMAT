@@ -860,6 +860,13 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 {
    if (id == MEASUREMENTS)
    {
+      // an empty list is set to Measurements parameter when index == -1
+      if (index == -1)
+      {
+         measurementNames.clear();
+         return true;
+      }
+
       // Verify measurement name
       if (!GmatStringUtil::IsValidIdentity(value))
          throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Measurements is an invalid GMAT object name.\n");
@@ -886,6 +893,13 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == SOLVEFORS)
    {
+      // an empty list is set to SolveFors parameter when index == -1
+      if (index == -1)
+      {
+         measurementNames.clear();
+         return true;
+      }
+
       Integer sz = (Integer) solveForStrings.size();
       if (index == sz) // needs to be added to the end of the list
          solveForStrings.push_back(value);
@@ -906,6 +920,10 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == ADD_RESIDUAL_PLOT)
    {
+      // Nothing to do when an empty list is added to AddResualPlot parameter
+      if (index == -1)
+         return true;
+
       Integer sz = (Integer)addedPlots.size();
       if (index == sz) // needs to be added to the end of the list
          addedPlots.push_back(value);
