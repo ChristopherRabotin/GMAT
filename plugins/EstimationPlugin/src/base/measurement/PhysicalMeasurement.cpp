@@ -629,6 +629,13 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       // MessageInterface::ShowMessage("Calculate Troposphere correction\n");
       mediaCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
 
+      // GMT-5576 QA Check for Atmosphere Correction
+      if (mediaCorrection[0] < 0.0)
+      {
+         MessageInterface::ShowMessage("Warning: Troposphere correction has a negative value. \n");
+         MessageInterface::ShowMessage("The correction is calculated based on signal sent or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", participants[0]->GetName().c_str(), epoch1, participants[1]->GetName().c_str());
+      }
+
       #ifdef DEBUG_MEASUREMENT_CORRECTION
          MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2B-r1B = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, rangeVector[0], rangeVector[1], rangeVector[2]);
          MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", mediaCorrection[0], mediaCorrection[1], mediaCorrection[2]);
@@ -638,6 +645,13 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       // 3. Run Ionosphere correction:
       // MessageInterface::ShowMessage("Calculate Ionosphere correction\n");
       RealArray ionoCorrection = this->IonosphereCorrection(freq, r1B, r2B, epoch1, epoch2);
+
+      // GMT-5576 QA Check for Atmosphere Correction
+      if (ionoCorrection[0] < 0.0)
+      {
+         MessageInterface::ShowMessage("Warning: Ionosphere correction has a negative value. \n");
+         MessageInterface::ShowMessage("The correction is calculated based on signal sent from or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", participants[0]->GetName().c_str(), epoch1, participants[1]->GetName().c_str());
+      }
 
       // 4. Combine effects:
       mediaCorrection[0] += ionoCorrection[0];
