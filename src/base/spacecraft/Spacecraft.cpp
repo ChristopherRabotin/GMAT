@@ -135,6 +135,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::ENUMERATION_TYPE, // DateFormat
       Gmat::REAL_TYPE,        // Cd
       Gmat::REAL_TYPE,        // Cr
+      Gmat::REAL_TYPE,        // CdSigma               // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,        // CrSigma               // made changes by TUAN NGUYEN
       Gmat::REAL_TYPE,        // DragArea
       Gmat::REAL_TYPE,        // SRPArea
       Gmat::OBJECTARRAY_TYPE, // Tanks
@@ -198,6 +200,8 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "DateFormat",
       "Cd",
       "Cr",
+      "CdSigma",                      // made changes by TUAN NGUYEN
+      "CrSigma",                      // made changes by TUAN NGUYEN
       "DragArea",
       "SRPArea",
       "Tanks",
@@ -353,6 +357,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    modelFileFullPath    (""),
    dryMass              (850.0),
    coeffDrag            (2.2),
+   coeffDragSigma       (0.1),                        // made changes by TUAN NGUYEN
    dragArea             (15.0),
    srpArea              (1.0),
    reflectCoeff         (1.8),
@@ -614,6 +619,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    scEpochStr           (a.scEpochStr),
    dryMass              (a.dryMass),
    coeffDrag            (a.coeffDrag),
+   coeffDragSigma       (a.coeffDragSigma),                  // made changes by TUAN NGUYEN
    dragArea             (a.dragArea),
    srpArea              (a.srpArea),
    reflectCoeff         (a.reflectCoeff),
@@ -758,6 +764,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    scEpochStr           = a.scEpochStr;
    dryMass              = a.dryMass;
    coeffDrag            = a.coeffDrag;
+   coeffDragSigma       = a.coeffDragSigma;                 // made changes by TUAN NGUYEN
    dragArea             = a.dragArea;
    srpArea              = a.srpArea;
    reflectCoeff         = a.reflectCoeff;
@@ -2953,6 +2960,9 @@ Real Spacecraft::GetRealParameter(const Integer id) const
 
    if (id == CR_ID)
       return reflectCoeff * (1.0 + crEpsilon);
+   
+   if (id == CD_SIGMA_ID)   return coeffDragSigma;              // made changes by TUAN NGUYEN
+   if (id == CR_SIGMA_ID)   return reflectCoeffSigma;           // made changes by TUAN NGUYEN
 
    if (id == DRAG_AREA_ID)  return dragArea;
    if (id == SRP_AREA_ID)   return srpArea;
@@ -3071,6 +3081,21 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
       parmsChanged = true;
       return SetRealParameter("Cr",value);
    }
+   if (id == CD_SIGMA_ID)                                                                                                             // made changes by TUAN NGUYEN
+   {                                                                                                                                  // made changes by TUAN NGUYEN
+      if (value <= 0.0)                                                                                                               // made changes by TUAN NGUYEN
+         throw SpaceObjectException("Error: a nonpositive number was set to CrSigma. A valid value has to be a positive number.\n");  // made changes by TUAN NGUYEN
+      coeffDragSigma = value;                                                                                                         // made changes by TUAN NGUYEN
+      return coeffDragSigma;                                                                                                          // made changes by TUAN NGUYEN
+   }                                                                                                                                  // made changes by TUAN NGUYEN
+   if (id == CR_SIGMA_ID)                                                                                                             // made changes by TUAN NGUYEN
+   {                                                                                                                                  // made changes by TUAN NGUYEN
+      if (value <= 0.0)                                                                                                               // made changes by TUAN NGUYEN
+         throw SpaceObjectException("Error: a nonpositive number was set to CdSigma. A valid value has to be a positive number.\n");  // made changes by TUAN NGUYEN
+      reflectCoeffSigma = value;                                                                                                      // made changes by TUAN NGUYEN
+      return reflectCoeffSigma;                                                                                                       // made changes by TUAN NGUYEN
+   }                                                                                                                                  // made changes by TUAN NGUYEN
+
    if (id == DRAG_AREA_ID)
    {
       parmsChanged = true;

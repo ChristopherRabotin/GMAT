@@ -307,6 +307,8 @@ protected:
       DATE_FORMAT_ID,
       CD_ID,
       CR_ID,
+      CD_SIGMA_ID,           // made changes by TUAN NGUYEN
+      CR_SIGMA_ID,           // made changes by TUAN NGUYEN
       DRAG_AREA_ID,
       SRP_AREA_ID,
       FUEL_TANK_ID,
@@ -511,9 +513,11 @@ protected:
    std::string       scEpochStr;
    Real              dryMass;
    Real              coeffDrag;
+   Real              coeffDragSigma;                                        // made changes by TUAN NGUYEN
    Real              dragArea;
    Real              srpArea;
    Real              reflectCoeff;
+   Real              reflectCoeffSigma;                                     // made changes by TUAN NGUYEN
    /// String specifying the epoch time system (A1, TAI, UTC, or TT)
    std::string       epochSystem;
    /// String specifying the epoch time format (Gregorian or ModJulian)
