@@ -41,6 +41,7 @@
 #include "UtilityException.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
+#include "TimeSystemConverter.hpp"
 
 //#define DEBUG_OFFSET
 //#define DEBUG_EOP_READ
@@ -129,6 +130,7 @@ const EopFile& EopFile::operator=(const EopFile &eopF)
    lastOffset    = eopF.lastOffset;
    lastIndex     = eopF.lastIndex;
    isInitialized = eopF.isInitialized;
+
    return *this;
 }
 
@@ -516,3 +518,17 @@ bool EopFile::IsBlank(const char* aLine)
    return true;
 }
 
+
+void EopFile::GetTimeRage(Real& timeMin, Real& timeMax)
+{
+   static RealArray ra;
+   const Real *data = polarMotion->GetDataVector();
+   Integer col = polarMotion->GetNumColumns();
+   Integer row = polarMotion->GetNumRows();
+   Real timeUtcMjdMin = data[0] - GmatTimeConstants::JD_JAN_5_1941;                       // unit: UTCMjd w.r.t ref GmatTimeConstants::JD_JAN_5_1941
+   Real timeUtcMjdMax = data[(tableSz - 1)*col] - GmatTimeConstants::JD_JAN_5_1941;       // unit: UTCMjd w.r.t ref GmatTimeConstants::JD_JAN_5_1941
+   timeMin = TimeConverterUtil::Convert(timeUtcMjdMin, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);    // unit: A1Mjd
+   timeMax = TimeConverterUtil::Convert(timeUtcMjdMax, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);    // unit: A1Mjd
+
+   //MessageInterface::ShowMessage("timeMin = %lf A1Mjd    timeMax = %lf A1Mjd\n", timeMin, timeMax);
+}
