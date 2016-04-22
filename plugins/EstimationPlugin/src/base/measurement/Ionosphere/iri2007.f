@@ -183,9 +183,6 @@ C  Sigma      [Eq. A5]
 
 
 
-
-
-
 c igrf.for, version number can be found at the end of this comment.
 c-----------------------------------------------------------------------        
 C
@@ -983,7 +980,8 @@ C ===============================================================
 2233        CONTINUE                                                    
 2211    CONTINUE
         GOTO 998                                                        
-999     print *, 'Error in GETSHC function: file read error !!!'
+c999     print *, 'Error in GETSHC function: file read error !!!'
+999
 998     RETURN                                                   
         END                                                          
 C
@@ -1484,7 +1482,6 @@ C   5  IF (IHOUR.GT.24) RETURN
       END
 C 
 C  
-
 
 
 
@@ -27603,8 +27600,6 @@ C
 
 
 
-
-
 c irifun.for, version number can be found at the end of this comment.
 c-----------------------------------------------------------------------
 C
@@ -33506,9 +33501,9 @@ c Read all the ionoindx and indrz values
 
         iytmp=yr*100+mm
         if (iytmp .lt. iymst .or. iytmp .gt. iymend) then
-               if(konsol.gt.1) write(konsol,8000) iytmp,iymst,
-     &                                            iymend
- 8000          format(1x,I10,'** OUT OF RANGE **'/,5x,
+c               if(konsol.gt.1) write(konsol,8000) iytmp,iymst,
+c     &                                            iymend
+8000          format(1x,I10,'** OUT OF RANGE **'/,5x,
      &  'The file IG_RZ.DAT which contains the indices Rz12',
      &  ' and IG12'/5x,'currently only covers the time period',
      &  ' (yymm) : ',I6,'-',I6)
@@ -33690,12 +33685,12 @@ C*****************************************************************
         A1(I,J,M)=Y5(N1)
  002    B1(I,J,M)=Y6(N1)
         IF(FI.GT.65..OR.AE.LT.500.)THEN
-        WRITE(*,*)'LSTID are for AE>500. and ABS(FI)<65.'
+c        WRITE(*,*)'LSTID are for AE>500. and ABS(FI)<65.'
         GOTO 004
         ENDIF
         TS=TS70+(-1.5571*FI+109.)/60.
         IF(TS.LT.SUX.AND.TS.GT.SAX)THEN
-        WRITE(*,*)' LSTID are only at night'
+c        WRITE(*,*)' LSTID are only at night'
         GOTO 004
         ENDIF
         IF(INN.EQ.1)TM=TM+24.
@@ -33841,10 +33836,10 @@ c--------------------------------------------------------------------
         endif         
         goto 20
         
-21      if(konsol.gt.1) write(konsol,100)
+c21      if(konsol.gt.1) write(konsol,100)
 100     format(1X,'Date is outside range of Ap indices file.',
      &     ' STORM model is turned off.')
-        IAP(1)=-5
+21      IAP(1)=-5
       
 20    RETURN
       END
@@ -33906,10 +33901,10 @@ c--------------------------------------------------------------------
         
         goto 20
 
-21      if(konsol.gt.1) write(konsol,100)
+c21      if(konsol.gt.1) write(konsol,100)
 100     format(1X,'Date is outside range of F10.7D indices file',
      &    ' (F10.7D = F10.7M = F10.7RM12).')
-        F107D = -111.0
+21      F107D = -111.0
      
 20    RETURN
       END
@@ -34315,10 +34310,10 @@ C      CALLING THE PROGRAM TO CONVERT TO GEOMAGNETIC COORDINATES
 
        ELSE
 
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)'   Wrong Coordinates Selection -------- >>', coor
-          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)'   Wrong Coordinates Selection -------- >>', coor
+c          WRITE (6,*)' '
           GOTO 100
        ENDIF
 
@@ -34371,10 +34366,10 @@ C     INTEGRAL OF ap
 
       ELSE
 
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)'  Wrong Universal Time value -------- >>', ut
-          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)'  Wrong Universal Time value -------- >>', ut
+c          WRITE (6,*)' '
           GOTO 100
 
       END IF
@@ -34391,20 +34386,20 @@ C     INTEGRAL OF ap
       end if
 
       if(doy.gt.366.or.doy.lt.1)then
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)'      Wrong Day of Year value --- >>', doy
-          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)'      Wrong Day of Year value --- >>', doy
+c          WRITE (6,*)' '
           GOTO 100
       end if
 
       if(rgma.gt.90.0.or.rgma.lt.-90.0)then
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)'   Wrong GEOMAGNETIC LATITUDE value --- >>', rgma
-          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)'   Wrong GEOMAGNETIC LATITUDE value --- >>', rgma
+c          WRITE (6,*)' '
           GOTO 100
       end if
 
@@ -35033,7 +35028,7 @@ CC
      #                      +Coff15(3,J)*dAEt_75)*bspl4_ptime(J,SLT)
           END DO
           DynamoVd=0.0D0
-	  print*,AEd1_6,AEd7_12,AEd22_28P,Alfa,Beta
+c	  print*,AEd1_6,AEd7_12,AEd22_28P,Alfa,Beta
           DO J=1,9
              DynamoVd=DynamoVd +(Coff15(4,J)*AEd1_6+
      #                           Coff15(5,J)*Alfa*AEd7_12+
@@ -36218,7 +36213,7 @@ c
       HMF1IN=(.not.jf(14))
        IF(HMF1IN) then
                 AHMF1=OARR(4)
-                if(.not.layver.and.(konsol.gt.1)) write(konsol,1939)
+c                if(.not.layver.and.(konsol.gt.1)) write(konsol,1939)
 1939  format(' *Ne* User input of hmF1 is only possible for the LAY-',
      &          'version')
         else
@@ -36264,61 +36259,61 @@ c lists the selected options before starting the table
 c
 
       if(icalls.gt.1.or.konsol.eq.1) goto 8201
-          write(konsol,2911) 
+c          write(konsol,2911) 
         if(NODEN) goto 2889
-          if(LAYVER) write(konsol,9012) 
-          if(GULB0) write(konsol,9013) 
-          if(OLD79) write(konsol,9014) 
-          if(TOPO.and.(.not.TOPC)) write(konsol,9206)
-          if(.not.TOPO) then
-                if(TOPC) then
-                      write(konsol,9204) 
-                else
-                      write(konsol,9205) 
-                endif
-                endif
+c          if(LAYVER) write(konsol,9012) 
+c          if(GULB0) write(konsol,9013) 
+c          if(OLD79) write(konsol,9014) 
+c          if(TOPO.and.(.not.TOPC)) write(konsol,9206)
+c          if(.not.TOPO) then
+c                if(TOPC) then
+c                      write(konsol,9204) 
+c                else
+c                      write(konsol,9205) 
+c                endif
+c                endif
           if(FOF2IN) then
-                write(konsol,9015) 
+c                write(konsol,9015) 
                 goto 2889
                 endif
-        if(URSIF2) then
-                write(konsol,9016) 
-        else
-                write(konsol,9017) 
-        endif
-        if(HMF2IN) write(konsol,9018) 
-        if(fof1in) write(konsol,9019) 
-        if(HMF1IN.and.LAYVER) write(konsol,9021) 
-        if(foein) write(konsol,9022) 
-        if(HMEIN) write(konsol,9023) 
-        if(F1_OCPRO) write(konsol,9024) 
-        if(F1_L_COND) write(konsol,9025) 
-        if(DREG) then 
-            write(konsol,9026) 
-        else
-            write(konsol,9027) 
-        endif
+c        if(URSIF2) then
+c                write(konsol,9016) 
+c        else
+c                write(konsol,9017) 
+c        endif
+c        if(HMF2IN) write(konsol,9018) 
+c        if(fof1in) write(konsol,9019) 
+c        if(HMF1IN.and.LAYVER) write(konsol,9021) 
+c        if(foein) write(konsol,9022) 
+c        if(HMEIN) write(konsol,9023) 
+c        if(F1_OCPRO) write(konsol,9024) 
+c        if(F1_L_COND) write(konsol,9025) 
+c        if(DREG) then 
+c            write(konsol,9026) 
+c        else
+c            write(konsol,9027) 
+c        endif
         if(jf(26)) then
             if(fof2in) then 
-                  write(konsol,9028) 
+c                  write(konsol,9028) 
                   jf(26)=.false.
-            else
-                  write(konsol,9029) 
+c            else
+c                  write(konsol,9029) 
             endif
             endif
 
 2889    continue
 
-        if((.not.NOION).and.(DY)) write(konsol,9031) 
-        if((.not.NOION).and.(.not.DY)) write(konsol,9039) 
+c        if((.not.NOION).and.(DY)) write(konsol,9031) 
+c        if((.not.NOION).and.(.not.DY)) write(konsol,9039) 
 
         if(NOTEM) goto 8201
-          if(TENEOP) write(konsol,9032) 
-          if(jf(23)) then 
-            write(konsol,9033) 
-          else
-            write(konsol,9034) 
-          endif
+c          if(TENEOP) write(konsol,9032) 
+c          if(jf(23)) then 
+c            write(konsol,9033) 
+c          else
+c            write(konsol,9034) 
+c          endif
 2911    format('*** IRI parameters are being calculated ***')
 9012    format('Ne, E-F: The LAY-Version is prelimenary.',
      &          ' Erroneous profile features can occur.')
@@ -36671,9 +36666,9 @@ C
 
         GOTO 4291
         
-8448    WRITE(konsol,8449)
+c8448    WRITE(konsol,8449)
 8449    FORMAT(1X////, ' Invalid month.')
-        GOTO 3330
+8448    GOTO 3330
 C
 C LINEAR INTERPOLATION IN SOLAR ACTIVITY. IG12 used for foF2
 C
@@ -36882,7 +36877,7 @@ c
         IF(ENIGHT) DEPTH=-DEPTH
         CALL TAL(HDEEP,DEPTH,WIDTH,DLNDH,EXT,E)
         IF(.NOT.EXT) GOTO 667
-        if(konsol.gt.1) WRITE(KONSOL,650)
+c        if(konsol.gt.1) WRITE(KONSOL,650)
 650     FORMAT(1X,'*NE* E-REGION VALLEY CAN NOT BE MODELLED')
 600   WIDTH=.0
 667   HEF=HME+WIDTH
@@ -36992,10 +36987,10 @@ c
 c omit F1 feature ....................................................
 c
 
-9427    if(konsol.gt.1) WRITE(KONSOL,11) 
+c9427    if(konsol.gt.1) WRITE(KONSOL,11) 
 11      FORMAT(1X,'*NE* HMF1 IS NOT EVALUATED BY THE FUNCTION XE2'/
      &        1X,'CORR.: NO F1 REGION, B1=3, C1=0.0')
-        HMF1=0.
+9427    HMF1=0.
         F1REG=.FALSE.
 c        NMF1=0.
 c        C1=0.0
@@ -37009,7 +37004,7 @@ c
             IF(ENIGHT) DEPTH=-DEPTH
             CALL TAL(HDEEP,DEPTH,WIDTH,DLNDH,EXT,E)
             IF(.NOT.EXT) GOTO 380
-            if(konsol.gt.1) WRITE(KONSOL,650)
+c            if(konsol.gt.1) WRITE(KONSOL,650)
             WIDTH=.0
             hef=hme
             hefold=hef
@@ -37046,11 +37041,11 @@ c
 c assume linear interpolation between HZ and HEF ..................
 c
 
-3885    if(konsol.gt.1) WRITE(KONSOL,100)
+c3885    if(konsol.gt.1) WRITE(KONSOL,100)
 100     FORMAT(1X,'*NE* HST IS NOT EVALUATED BY THE FUNCTION XE3')
-        HZ=(HEF+HF1)/2.
+3885    HZ=(HEF+HF1)/2.
         xnehz=xe3_1(hz)
-        if(konsol.gt.1) WRITE(KONSOL,901) HZ,HEF
+c        if(konsol.gt.1) WRITE(KONSOL,901) HZ,HEF
 901     FORMAT(6X,'CORR.: LIN. APP. BETWEEN HZ=',F5.1,
      &          ' AND HEF=',F5.1)
         T=(XNEHZ-NME)/(HZ-HEF)
@@ -37072,9 +37067,9 @@ C
         HHMF2 = HMF2
         CALL INILAY(FNIGHT,F1REG,NMF2,NMF1,NME,VNER,HHMF2,HMF1M,HME,
      &                  HV1R,HV2R,HHALF,HXL,SCL,AMP,IIQU)
-        IF((IIQU.EQ.1).and.(konsol.gt.1)) WRITE(KONSOL,7733)
+c        IF((IIQU.EQ.1).and.(konsol.gt.1)) WRITE(KONSOL,7733)
 7733   FORMAT('*NE* LAY amplitudes found with 2nd choice of HXL(1).')
-        IF((IIQU.EQ.2).and.(konsol.gt.1)) WRITE(KONSOL,7722)
+c        IF((IIQU.EQ.2).and.(konsol.gt.1)) WRITE(KONSOL,7722)
 7722   FORMAT('*NE* LAY amplitudes could not be found.')
 
 C
@@ -37750,6 +37745,7 @@ c-----------------------------------------------------------------------
 
 
 
+
 c     Loads all files into memory so they don't have to be reread on
 c     every routine call.
 c
@@ -37802,8 +37798,8 @@ c         Open coefficient file. Read past first header record.
 c         Read degree and order of model and Earth's radius.           
           read(iunit, *)
           read(iunit, *) nmax_shc(ifile), erad_shc(ifile), yy
-          print * ,'Read ', fullpath
-          print * , nmax_shc(ifile), '  ', erad_shc(ifile), '  ', yy
+c          print * ,'Read ', fullpath
+c          print * , nmax_shc(ifile), '  ', erad_shc(ifile), '  ', yy
 
 c         --------------------------------------------------------------
 c         Read the coefficient file, arranged as follows:              
@@ -37839,10 +37835,10 @@ c                      stop 1
                   end if
 
                   read(iunit, *) (shcfiles(i, irec, ifile), i=1,4)
-                  print *, shcfiles(1, irec, ifile), '  ', 
-     & shcfiles(2, irec, ifile), '  ',
-     & shcfiles(3, irec, ifile), '  ',
-     & shcfiles(4, irec, ifile)
+c                  print *, shcfiles(1, irec, ifile), '  ', 
+c     & shcfiles(2, irec, ifile), '  ',
+c     & shcfiles(3, irec, ifile), '  ',
+c     & shcfiles(4, irec, ifile)
               end do
           end do
       

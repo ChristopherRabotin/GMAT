@@ -68,7 +68,7 @@ public:
    Ionosphere& operator=(const Ionosphere& ions);
    virtual GmatBase*    Clone() const;
 
-   virtual bool Initialize();                         // made changes by TUAN NGUYEN
+   virtual bool Initialize();
 
    bool SetWaveLength(Real lambda);
    bool SetTime(GmatEpoch ep);
@@ -82,15 +82,14 @@ public:
 
 protected:
    /// epoch range specified by ap.dat file
-   Integer yyyymmddMin;                              // made changes by TUAN NGUYEN
-   Integer yyyymmddMax;                              // made changes by TUAN NGUYEN
+   Integer yyyymmddMin;
+   Integer yyyymmddMax;
 
 
 private:
-   void GetTimeRange();                         // made changes by TUAN NGUYEN
+   void GetTimeRange();
 
-   float ElectronDensity(Rvector3 pos2, Rvector3 pos1);
-//   float ElectronDensity1(Rvector3 pos2, Rvector3 pos1);
+   float ElectronDensity(Rvector3 pos1);
 
    Real waveLength;          // wave length of the signal
    GmatEpoch epoch;          // time
@@ -104,7 +103,7 @@ private:
    Real earthRadius;
 
    static const Real NUM_OF_INTERVALS;
-   static const Real IONOSPHERE_MAX_ATTITUDE;             // made changes by TUAN NGUYEN
+   static const Real IONOSPHERE_MAX_ATTITUDE;
 };
 
 

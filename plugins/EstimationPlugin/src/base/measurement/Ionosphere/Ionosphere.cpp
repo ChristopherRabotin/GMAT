@@ -416,8 +416,7 @@ extern "C" int iri_web__(integer *jmag, logical *jf, real *alati, real *
 	*height, real *h_tec_max__, integer *ivar, real *vbeg, real *vend, 
 	real *vstp, real *a, real *b, integer *ier);
 
-
-float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
+float Ionosphere::ElectronDensity(Rvector3 pos1)
 {
    CelestialBody* earth = solarSystem->GetBody("Earth");
    Real radius = earth->GetRealParameter(earth->GetParameterID("EquatorialRadius"));
@@ -431,10 +430,6 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    real longitude = (real)(GmatCalcUtil::CalculatePlanetData("Longitude", state, radius, flattening, 0.0));
    real hbeg      = (real)(GmatCalcUtil::CalculatePlanetData("Altitude", state, radius, flattening, 0.0));
 
-   // the fisrt position's latitude and longitude (unit: degree):
-//   real latitude = (real)(asin(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);   // unit: degree
-//   real longitude = (real)(atan2(pos1.Get(1),pos1.Get(0))*GmatMathConstants::DEG_PER_RAD);         // unit: degree
-   
    // mmag  = 0 geographic   =1 geomagnetic coordinates
    integer jmag = 0;   // 1;
    
@@ -483,9 +478,7 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    MessageInterface::ShowMessage("(latitude = %lf degree,  longitude = %lf degree,  attitude = %lf km,  ", latitude, longitude, hbeg);
    MessageInterface::ShowMessage("coordinate system type = %s)\n",(jmag?"Geomagetic":"Geographic"));
 #endif
-   //iri_web(&jmag, &jf[1], &latitude, &longitude, &iy, &md, &iut, &hour, &hbeg, &hbeg, 
-   //   &ivar, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
-   
+
    iri_web__(&jmag, &jf[1], &latitude, &longitude, &iy, &md, &iut, &hour, &hbeg, &hbeg, 
       &ivar, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
 
@@ -499,7 +492,7 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
 #ifdef DEBUG_IONOSPHERE_ELECT_DENSITY
    MessageInterface::ShowMessage("              Electron density at that time and location = %le electrons per m3.\n", density);
 #endif
-
+   
    return density;         //*(pos2-pos1).GetMagnitude();
 }
 
@@ -510,7 +503,7 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
 // square cross sectioncylinder with its bases on spacecraft and on ground 
 // station.
 //
-//  return value: tec  (unit: number of electorns per 1 meter square)
+//  return value: tec  (unit: number of electrons per 1 meter square)
 //---------------------------------------------------------------------------
 Real Ionosphere::TEC()
 {
@@ -535,7 +528,7 @@ Real Ionosphere::TEC()
    for(int i = 0; i < NUM_OF_INTERVALS; ++i)
    {
       p2 = p1 + dR;
-      electdensity = ElectronDensity(p2, p1);                   // unit: electron / m^3
+      electdensity = ElectronDensity(p1);                   // unit: electron / m^3
       ds = (p2-p1).GetMagnitude()*GmatMathConstants::KM_TO_M;   // unit: m
       tec += electdensity*ds;                                   // unit: electron / m^2
       p1 = p2;
@@ -566,8 +559,8 @@ Real Ionosphere::BendingAngle()
       p2 = p1 + dR;
       
       delta = dR/100;
-      de1 = ElectronDensity(p1+delta, p1);
-      de2 = ElectronDensity(p1+2*delta,p1+delta);
+      de1 = ElectronDensity(p1);
+      de2 = ElectronDensity(p1+delta);
       n1 = 1 - 40.3*de1/(freq*freq);
       n2 = 1 - 40.3*de2/(freq*freq);
       dn_drho = -40.3*(de2 - de1)/ (freq*freq) / (((p1+delta).GetMagnitude() - p1.GetMagnitude())*GmatMathConstants::KM_TO_M);

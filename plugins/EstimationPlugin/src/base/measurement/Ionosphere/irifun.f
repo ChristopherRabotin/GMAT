@@ -5899,9 +5899,9 @@ c Read all the ionoindx and indrz values
 
         iytmp=yr*100+mm
         if (iytmp .lt. iymst .or. iytmp .gt. iymend) then
-               if(konsol.gt.1) write(konsol,8000) iytmp,iymst,
-     &                                            iymend
- 8000          format(1x,I10,'** OUT OF RANGE **'/,5x,
+c               if(konsol.gt.1) write(konsol,8000) iytmp,iymst,
+c     &                                            iymend
+8000          format(1x,I10,'** OUT OF RANGE **'/,5x,
      &  'The file IG_RZ.DAT which contains the indices Rz12',
      &  ' and IG12'/5x,'currently only covers the time period',
      &  ' (yymm) : ',I6,'-',I6)
@@ -6083,12 +6083,12 @@ C*****************************************************************
         A1(I,J,M)=Y5(N1)
  002    B1(I,J,M)=Y6(N1)
         IF(FI.GT.65..OR.AE.LT.500.)THEN
-        WRITE(*,*)'LSTID are for AE>500. and ABS(FI)<65.'
+c        WRITE(*,*)'LSTID are for AE>500. and ABS(FI)<65.'
         GOTO 004
         ENDIF
         TS=TS70+(-1.5571*FI+109.)/60.
         IF(TS.LT.SUX.AND.TS.GT.SAX)THEN
-        WRITE(*,*)' LSTID are only at night'
+c        WRITE(*,*)' LSTID are only at night'
         GOTO 004
         ENDIF
         IF(INN.EQ.1)TM=TM+24.
@@ -6234,10 +6234,10 @@ c--------------------------------------------------------------------
         endif         
         goto 20
         
-21      if(konsol.gt.1) write(konsol,100)
+c21      if(konsol.gt.1) write(konsol,100)
 100     format(1X,'Date is outside range of Ap indices file.',
      &     ' STORM model is turned off.')
-        IAP(1)=-5
+21      IAP(1)=-5
       
 20    RETURN
       END
@@ -6299,10 +6299,10 @@ c--------------------------------------------------------------------
         
         goto 20
 
-21      if(konsol.gt.1) write(konsol,100)
+c21      if(konsol.gt.1) write(konsol,100)
 100     format(1X,'Date is outside range of F10.7D indices file',
      &    ' (F10.7D = F10.7M = F10.7RM12).')
-        F107D = -111.0
+21      F107D = -111.0
      
 20    RETURN
       END
@@ -6708,10 +6708,10 @@ C      CALLING THE PROGRAM TO CONVERT TO GEOMAGNETIC COORDINATES
 
        ELSE
 
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)'   Wrong Coordinates Selection -------- >>', coor
-          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)'   Wrong Coordinates Selection -------- >>', coor
+c          WRITE (6,*)' '
           GOTO 100
        ENDIF
 
@@ -6764,10 +6764,10 @@ C     INTEGRAL OF ap
 
       ELSE
 
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)'  Wrong Universal Time value -------- >>', ut
-          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)'  Wrong Universal Time value -------- >>', ut
+c          WRITE (6,*)' '
           GOTO 100
 
       END IF
@@ -6784,20 +6784,20 @@ C     INTEGRAL OF ap
       end if
 
       if(doy.gt.366.or.doy.lt.1)then
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)'      Wrong Day of Year value --- >>', doy
-          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)'      Wrong Day of Year value --- >>', doy
+c          WRITE (6,*)' '
           GOTO 100
       end if
 
       if(rgma.gt.90.0.or.rgma.lt.-90.0)then
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)' '
-          WRITE (6,*)'   Wrong GEOMAGNETIC LATITUDE value --- >>', rgma
-          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)' '
+c          WRITE (6,*)'   Wrong GEOMAGNETIC LATITUDE value --- >>', rgma
+c          WRITE (6,*)' '
           GOTO 100
       end if
 
@@ -7426,7 +7426,7 @@ CC
      #                      +Coff15(3,J)*dAEt_75)*bspl4_ptime(J,SLT)
           END DO
           DynamoVd=0.0D0
-	  print*,AEd1_6,AEd7_12,AEd22_28P,Alfa,Beta
+c	  print*,AEd1_6,AEd7_12,AEd22_28P,Alfa,Beta
           DO J=1,9
              DynamoVd=DynamoVd +(Coff15(4,J)*AEd1_6+
      #                           Coff15(5,J)*Alfa*AEd7_12+
