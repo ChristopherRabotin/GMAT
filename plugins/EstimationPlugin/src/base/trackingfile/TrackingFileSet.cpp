@@ -647,36 +647,70 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
             "value = '%s') called\n", GetName().c_str(), this, id, value.c_str());
    #endif
 
-   //if (id == FILENAME)
-   //{
-   //   if (find(filenames.begin(), filenames.end(), value) == filenames.end())
-   //   {
-   //      filenames.push_back(value);
-   //      return true;
-   //   }
-   //   else
-   //      throw MeasurementException("Error: File name is replicated ('" + value + "')\n");
-   //}
+   if (id == TRACKINGCONFIG)
+   {
+      throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".AddTrackingConfig parameter has a syntax error.\n");
+   }
 
-   //if (id == RAMPED_TABLENAME)
-   //{
-   //   if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())
-   //   {
-   //      rampedTablenames.push_back(value);
-   //      return true;
-   //   }
-   //   else
-   //      throw MeasurementException("Error: ramped table name is replicated ('" + value + "')\n");
+   if (id == FILENAME)
+   {
+      // if it is an empty list, then clear file name list
+      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
+      {
+         filenames.clear();
+         return true;
+      }
 
-   //}
+      // check for a valid file name
+      Integer err = 0;
+      if (!GmatStringUtil::IsValidFullFileName(value, err))
+         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileName parameter is an invalid file name.\n");
+
+      // add name to the list
+      if (find(filenames.begin(), filenames.end(), value) == filenames.end())
+      {
+         filenames.push_back(value);
+         return true;
+      }
+      else
+         throw MeasurementException("Error: File name is replicated ('" + value + "')\n");
+   }
+
+   if (id == RAMPED_TABLENAME)
+   {
+      // if it is an empty list, then clear ramped table name list
+      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
+      {
+         rampedTablenames.clear();
+         return true;
+      }
+
+      // check for a valid file name
+      Integer err = 0;
+      if (!GmatStringUtil::IsValidFullFileName(value, err))
+         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".RampTable parameter is an invalid file name.\n");
+
+      // add name to the list
+      if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())
+      {
+         rampedTablenames.push_back(value);
+         return true;
+      }
+      else
+         throw MeasurementException("Error: ramped table name is replicated ('" + value + "')\n");
+
+   }
 
    if (id == DATA_FILTERS)
    {
-      if (value.substr(0,1) == "{")
+      // if it is an empty list, then set clear the list
+      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
       {
-         if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")
-            return true;
+         dataFilterNames.clear();
+         return true;
       }
+      else if (!GmatStringUtil::IsValidIdentity(value))
+         throw MeasurementException("Error: '" + value + " set to " + GetName() + ".DataFilters parameter is an invalid object name.\n");
 
       if (find(dataFilterNames.begin(), dataFilterNames.end(), value) == dataFilterNames.end())
       {
@@ -780,7 +814,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == TRACKINGCONFIG)
    {
-      // return true when it is an empty list
+      // Nothing was set to tracking configuration when an empty list was set to AddTrackingConfig parameter
       if (index == -1)
          return true;
 
@@ -892,9 +926,12 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == RAMPED_TABLENAME)
    {
-      // return true when it is an empty list
+      // an empty list is set to RampTables parameter when index == -1
       if (index == -1)
+      {
+         rampedTablenames.clear();
          return true;
+      }
 
       if ((!rampedTablenames.empty())&&
           (find(rampedTablenames.begin(), rampedTablenames.end(), value) != rampedTablenames.end()))
@@ -921,7 +958,10 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
    {
       // return true when it is an empty list
       if (index == -1)
+      {
+         dataFilterNames.clear();
          return true;
+      }
 
       if ((!dataFilterNames.empty())&&
           (find(dataFilterNames.begin(), dataFilterNames.end(), value) != dataFilterNames.end()))
@@ -946,9 +986,12 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == TDRS_SERVICE_ACCESS)                                                                         // made changes by TUAN NGUYEN
    {                                                                                                      // made changes by TUAN NGUYEN
-      // return true when it is an empty list                                                             // made changes by TUAN NGUYEN
+      // an empty list is set to TDARSServiceAccess parameter when index == -1                            // made changes by TUAN NGUYEN
       if (index == -1)                                                                                    // made changes by TUAN NGUYEN
+      {
+         tdrsServiceAccessList.clear();
          return true;                                                                                     // made changes by TUAN NGUYEN
+      }
 
       if ((!tdrsServiceAccessList.empty())&&                                                              // made changes by TUAN NGUYEN
           (find(tdrsServiceAccessList.begin(), tdrsServiceAccessList.end(), value) != tdrsServiceAccessList.end()))   // made changes by TUAN NGUYEN
