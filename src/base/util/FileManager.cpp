@@ -51,7 +51,7 @@
 //#define __FM_ADD_DEFAULT_INPUT__
 
 //#define DEBUG_FILE_MANAGER
-//#define DEBUG_FUNCTION_PATH
+//#define DEBUG_GMAT_PATH
 //#define DEBUG_ADD_FILETYPE
 //#define DEBUG_ABS_PATH
 //#define DEBUG_FILE_PATH
@@ -310,6 +310,7 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
       if (DoesDirectoryExist(newDir))
       {
          mGmatWorkingDir = newDir;
+         AddGmatIncludePath(newDir);
          // Add GMAT working directory to MATLAB search path so that this directory
          // will have higher priority in search path for the new file path implementation.
          // (LOJ: 2014.07.09)
@@ -1482,12 +1483,42 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    }
    
    //---------------------------------------------
+   // write GMAT_INCLUDE_PATH next
+   //---------------------------------------------
+   #ifdef DEBUG_WRITE_STARTUP_FILE
+   MessageInterface::ShowMessage("   .....Writing GMAT_INCLUDE_PATH paths\n");
+   #endif
+   bool isEmptyPath = true;
+   for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
+        pos != mPathMap.end(); ++pos)
+   {
+      if (pos->first == "GMAT_INCLUDE_PATH")
+      {
+         // Write all GmatInclude paths
+         std::list<std::string>::iterator listpos = mGmatIncludePaths.begin();
+         while (listpos != mGmatIncludePaths.end())
+         {
+            outStream << std::setw(22) << pos->first << " = "
+                      << *listpos << "\n";
+            ++listpos;
+         }
+         isEmptyPath = false;
+         break;
+      }
+   }
+   if (isEmptyPath)
+      outStream << std::setw(22) << "#GMAT_INCLUDE_PATH " << " = " << "\n";
+   
+   outStream << "#-----------------------------------------------------------\n";
+   mPathWrittenOuts.push_back("GMAT_INCLUDE_PATH");
+   
+   //---------------------------------------------
    // write GMAT_FUNCTION_PATH next
    //---------------------------------------------
    #ifdef DEBUG_WRITE_STARTUP_FILE
    MessageInterface::ShowMessage("   .....Writing GMAT_FUNCTION_PATH paths\n");
    #endif
-   bool isEmptyPath = true;
+   isEmptyPath = true;
    for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
         pos != mPathMap.end(); ++pos)
    {
@@ -2549,6 +2580,141 @@ void FileManager::SetAbsPathname(const std::string &type, const std::string &new
 
 
 //------------------------------------------------------------------------------
+// void ClearGmatIncludePath()
+//------------------------------------------------------------------------------
+void FileManager::ClearGmatIncludePath()
+{
+   mGmatIncludePaths.clear();
+}
+
+
+//------------------------------------------------------------------------------
+// void AddGmatIncludePath(const char *path, bool addFront)
+//------------------------------------------------------------------------------
+void FileManager::AddGmatIncludePath(const char *path, bool addFront)
+{
+   return AddGmatIncludePath(std::string(path), addFront);
+}
+
+
+//------------------------------------------------------------------------------
+// void  AddGmatIncludePath(const std::string &path, bool addFront, bool addFront)
+//------------------------------------------------------------------------------
+/*
+ * If new path it adds to the GmatInclude path list.
+ * If path already exist, it moves to the front or back of the list, depends on
+ * addFront flag.
+ *
+ * @param  path  path name to be added
+ * @param  addFront  if set to true, it adds to the front, else adds to the back (true)
+ */
+//------------------------------------------------------------------------------
+void FileManager::AddGmatIncludePath(const std::string &path, bool addFront)
+{
+   #ifdef DEBUG_GMAT_PATH
+   MessageInterface::ShowMessage
+      ("FileManager::AddGmatIncludePath() Adding %s to GmatIncludePath\n   "
+       "addFront=%d\n", path.c_str(), addFront);
+   #endif
+
+   std::string pathname = path;
+
+   // if path has full pathname (directory and filename), remove filename first
+   if (path.find(".") != path.npos)
+      pathname = GmatFileUtil::ParsePathName(path);
+
+   std::list<std::string>::iterator pos =
+      find(mGmatIncludePaths.begin(), mGmatIncludePaths.end(), pathname);
+
+   if (pos == mGmatIncludePaths.end())
+   {
+      #ifdef DEBUG_GMAT_PATH
+      MessageInterface::ShowMessage
+         ("   the pathname <%s> is new, so adding to %s\n", pathname.c_str(),
+          addFront ? "front" : "back");
+      #endif
+
+      // if new pathname, add to front or back of the list
+      if (addFront)
+         mGmatIncludePaths.push_front(pathname);
+      else
+         mGmatIncludePaths.push_back(pathname);
+   }
+   else
+   {
+      // if existing pathname remove and add front or back of the list
+      #ifdef DEBUG_GMAT_PATH
+      MessageInterface::ShowMessage
+         ("   the pathname <%s> already exists, so moving to %s\n", pathname.c_str(),
+          addFront ? "front" : "back");
+      #endif
+
+      std::string oldPath = *pos;
+      mGmatIncludePaths.erase(pos);
+      if (addFront)
+         mGmatIncludePaths.push_front(oldPath);
+      else
+         mGmatIncludePaths.push_back(oldPath);
+   }
+
+   #ifdef DEBUG_GMAT_PATH
+   pos = mGmatIncludePaths.begin();
+   while (pos != mGmatIncludePaths.end())
+   {
+      MessageInterface::ShowMessage
+         ("------   mGmatIncludePaths = %s\n", (*pos).c_str());
+      ++pos;
+   }
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetGmatIncludePath(const char *incName)
+//------------------------------------------------------------------------------
+std::string FileManager::GetGmatIncludePath(const char *incName)
+{
+   return GetGmatPath(GMAT_INCLUDE, mGmatIncludePaths, std::string(incName));
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetGmatIncludePath(const std::string &incName)
+//------------------------------------------------------------------------------
+/*
+ * Returns the absolute path that has Include filename.
+ * It searches in the most recently added path first which is at the top of
+ * the list.
+ *
+ * @param   incName  Include filename to be located
+ * @return  Path  Path that has Include filename
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetGmatIncludePath(const std::string &incName)
+{
+   return GetGmatPath(GMAT_INCLUDE, mGmatIncludePaths, incName);
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetAllGmatIncludePaths()
+//------------------------------------------------------------------------------
+const StringArray& FileManager::GetAllGmatIncludePaths()
+{
+   mGmatIncludeFullPaths.clear();
+
+   std::list<std::string>::iterator listpos = mGmatIncludePaths.begin();
+   while (listpos != mGmatIncludePaths.end())
+   {
+      mGmatIncludeFullPaths.push_back(ConvertToAbsPath(*listpos));
+      ++listpos;
+   }
+
+   return mGmatIncludeFullPaths;
+}
+
+
+//------------------------------------------------------------------------------
 // void ClearGmatFunctionPath()
 //------------------------------------------------------------------------------
 void FileManager::ClearGmatFunctionPath()
@@ -2580,7 +2746,7 @@ void FileManager::AddGmatFunctionPath(const char *path, bool addFront)
 //------------------------------------------------------------------------------
 void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
 {
-   #ifdef DEBUG_FUNCTION_PATH
+   #ifdef DEBUG_GMAT_PATH
    MessageInterface::ShowMessage
       ("FileManager::AddGmatFunctionPath() Adding %s to GmatFunctionPath\n   "
        "addFront=%d\n", path.c_str(), addFront);
@@ -2597,7 +2763,7 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
 
    if (pos == mGmatFunctionPaths.end())
    {
-      #ifdef DEBUG_FUNCTION_PATH
+      #ifdef DEBUG_GMAT_PATH
       MessageInterface::ShowMessage
          ("   the pathname <%s> is new, so adding to %s\n", pathname.c_str(),
           addFront ? "front" : "back");
@@ -2612,7 +2778,7 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
    else
    {
       // if existing pathname remove and add front or back of the list
-      #ifdef DEBUG_FUNCTION_PATH
+      #ifdef DEBUG_GMAT_PATH
       MessageInterface::ShowMessage
          ("   the pathname <%s> already exists, so moving to %s\n", pathname.c_str(),
           addFront ? "front" : "back");
@@ -2626,7 +2792,7 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
          mGmatFunctionPaths.push_back(oldPath);
    }
 
-   #ifdef DEBUG_FUNCTION_PATH
+   #ifdef DEBUG_GMAT_PATH
    pos = mGmatFunctionPaths.begin();
    while (pos != mGmatFunctionPaths.end())
    {
@@ -2643,7 +2809,7 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
 //------------------------------------------------------------------------------
 std::string FileManager::GetGmatFunctionPath(const char *funcName)
 {
-   return GetFunctionPath(GMAT_FUNCTION, mGmatFunctionPaths, std::string(funcName));
+   return GetGmatPath(GMAT_FUNCTION, mGmatFunctionPaths, std::string(funcName));
 }
 
 
@@ -2661,7 +2827,7 @@ std::string FileManager::GetGmatFunctionPath(const char *funcName)
 //------------------------------------------------------------------------------
 std::string FileManager::GetGmatFunctionPath(const std::string &funcName)
 {
-   return GetFunctionPath(GMAT_FUNCTION, mGmatFunctionPaths, funcName);
+   return GetGmatPath(GMAT_FUNCTION, mGmatFunctionPaths, funcName);
 }
 
 
@@ -2712,7 +2878,7 @@ void FileManager::AddMatlabFunctionPath(const char *path, bool addFront)
 //------------------------------------------------------------------------------
 void FileManager::AddMatlabFunctionPath(const std::string &path, bool addFront)
 {
-   #ifdef DEBUG_FUNCTION_PATH
+   #ifdef DEBUG_GMAT_PATH
    MessageInterface::ShowMessage
       ("FileManager::AddMatlabFunctionPath() Adding %s to MatlabFunctionPath\n",
        path.c_str());
@@ -2740,7 +2906,7 @@ void FileManager::AddMatlabFunctionPath(const std::string &path, bool addFront)
          mMatlabFunctionPaths.push_back(oldPath);
    }
 
-   #ifdef DEBUG_FUNCTION_PATH
+   #ifdef DEBUG_GMAT_PATH
    pos = mMatlabFunctionPaths.begin();
    while (pos != mMatlabFunctionPaths.end())
    {
@@ -2752,14 +2918,14 @@ void FileManager::AddMatlabFunctionPath(const std::string &path, bool addFront)
 }
 
 
-std::string FileManager::GetMatlabFunctionPath(const char *name)
+std::string FileManager::GetMatlabFunctionPath(const char *funcName)
 {
-   return GetMatlabFunctionPath(std::string(name));
+   return GetMatlabFunctionPath(std::string(funcName));
 }
 
 
 //------------------------------------------------------------------------------
-// std::string GetMatlabFunctionPath(const std::string &name)
+// std::string GetMatlabFunctionPath(const std::string &funcName)
 //------------------------------------------------------------------------------
 /*
  * Returns the absolute path that has MatlabFunction name.
@@ -2770,19 +2936,19 @@ std::string FileManager::GetMatlabFunctionPath(const char *name)
  * @return  Path that has MatlabFunction name
  */
 //------------------------------------------------------------------------------
-std::string FileManager::GetMatlabFunctionPath(const std::string &name)
+std::string FileManager::GetMatlabFunctionPath(const std::string &funcName)
 {
-   std::string path = GetFunctionPath(MATLAB_FUNCTION, mMatlabFunctionPaths, name);
+   std::string path = GetGmatPath(MATLAB_FUNCTION, mMatlabFunctionPaths, funcName);
    
    // Write informational message if debug is turned on from the startup file
    if (mWriteFilePathInfo == "ON")
    {
       if (path == "")
          MessageInterface::ShowMessage
-            ("*** Using MATLAB built-in function '%s'\n", name.c_str());
+            ("*** Using MATLAB built-in function '%s'\n", funcName.c_str());
       else
          MessageInterface::ShowMessage
-            ("*** Using MATLAB function '%s' from '%s'\n", name.c_str(), path.c_str());
+            ("*** Using MATLAB function '%s' from '%s'\n", funcName.c_str(), path.c_str());
    }
    
    return path;
@@ -2818,7 +2984,7 @@ const StringArray& FileManager::GetAllMatlabFunctionPaths()
 //------------------------------------------------------------------------------
 void FileManager::AddPythonModulePath(const std::string& path)
 {
-#ifdef DEBUG_FUNCTION_PATH
+#ifdef DEBUG_GMAT_PATH
 	MessageInterface::ShowMessage
 		("FileManager::AddPythonModulePath() Adding %s to PythonModulePath\n",
 		path.c_str());
@@ -2833,7 +2999,7 @@ void FileManager::AddPythonModulePath(const std::string& path)
 	}
 	
 
-#ifdef DEBUG_FUNCTION_PATH
+#ifdef DEBUG_GMAT_PATH
 	pos = mPythonModulePaths.begin();
 	while (pos != mPythonModulePaths.end())
 	{
@@ -2946,39 +3112,51 @@ void FileManager::AdjustSettings(const std::string &suffix,
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// std::string GetFunctionPath(FunctionType type, const std::list<std::string> &pathList
-//                             const std::string &funcName)
+// std::string GetGmatPath(GmatPathType type, const std::list<std::string> &pathList
+//                         const std::string &name)
 //------------------------------------------------------------------------------
 /*
- * Searches proper function path list from the top and return first path found.
+ * Searches proper GMAT path list from the top and return first path found.
  *
  * @param  type  type of function (MATLAB_FUNCTION, GMAT_FUNCTION)
  * @param  pathList  function path list to use in search
- * @param  funcName  name of the function to search
+ * @param  name  name of the function to search
  */
 //------------------------------------------------------------------------------
-std::string FileManager::GetFunctionPath(FunctionType type,
-                                         std::list<std::string> &pathList,
-                                         const std::string &funcName)
+std::string FileManager::GetGmatPath(GmatPathType type,
+                                     std::list<std::string> &pathList,
+                                     const std::string &name)
 {
-   #ifdef DEBUG_FUNCTION_PATH
+   #ifdef DEBUG_GMAT_PATH
    MessageInterface::ShowMessage
-      ("FileManager::GetFunctionPath(%s) with type %d entered\n",
-       funcName.c_str(), type);
+      ("FileManager::GetGmatPath(%s) with type %d entered\n",
+       name.c_str(), type);
    #endif
-
-   std::string funcName1 = funcName;
+   
+   std::string name1 = name;
    if (type == GMAT_FUNCTION)
    {
-      if (funcName.find(".gmf") == funcName.npos)
-         funcName1 = funcName1 + ".gmf";
+      if (name.find(".gmf") == name.npos)
+         name1 = name1 + ".gmf";
+   }
+   else if (type == MATLAB_FUNCTION)
+   {
+      if (name.find(".m") == name.npos)
+         name1 = name1 + ".m";
+   }
+   else if (type == GMAT_INCLUDE)
+   {
+      if (name.find(".script") == name.npos)
+         name1 = name1 + ".script";
    }
    else
    {
-      if (funcName.find(".m") == funcName.npos)
-         funcName1 = funcName1 + ".m";
+      UtilityException ue;
+      ue.SetDetails("*** INTERNAL ERROR *** FileManager::GetGmatPath() The path "
+                    "type %d is undefined\n", type);
+      throw ue;
    }
-
+   
    // Search through pathList
    // The most recent path added to the last, so search backwards
    std::string pathName, fullPath;
@@ -2990,9 +3168,9 @@ std::string FileManager::GetFunctionPath(FunctionType type,
    while (pos != pathList.end())
    {
       pathName = *pos;
-      fullPath = ConvertToAbsPath(pathName) + funcName1;
+      fullPath = ConvertToAbsPath(pathName) + name1;
 
-      #ifdef DEBUG_FUNCTION_PATH
+      #ifdef DEBUG_GMAT_PATH
       MessageInterface::ShowMessage("   pathName='%s'\n", pathName.c_str());
       MessageInterface::ShowMessage("   fullPath='%s'\n", fullPath.c_str());
       #endif
@@ -3011,14 +3189,13 @@ std::string FileManager::GetFunctionPath(FunctionType type,
    else
       fullPath = "";
 
-   #ifdef DEBUG_FUNCTION_PATH
+   #ifdef DEBUG_GMAT_PATH
    MessageInterface::ShowMessage
-      ("FileManager::GetFunctionPath(%s) returning '%s'\n", funcName.c_str(),
+      ("FileManager::GetGmatPath(%s) returning '%s'\n", name.c_str(),
        fullPath.c_str());
    #endif
 
    return fullPath;
-
 }
 
 

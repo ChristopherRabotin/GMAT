@@ -2538,9 +2538,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticRejectFilter.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\datafilter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\RandomNumber.cpp">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\FileUpdaterSVN.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
@@ -2602,6 +2599,18 @@
       <Filter>Source Files\base\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\math\Strrep.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\RandomNumber.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Rand.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\Code500Propagator.cpp">
+      <Filter>Source Files\plugins\EphemPropagatorPlugin\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Randn.cpp">
       <Filter>Source Files\base\math</Filter>
     </ClCompile>
   </ItemGroup>
@@ -4889,9 +4898,6 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticRejectFilter.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\datafilter</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\RandomNumber.hpp">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\FileUpdaterSVN.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
@@ -4953,6 +4959,18 @@
       <Filter>Source Files\base\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\math\Strrep.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\RandomNumber.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Rand.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\Code500Propagator.hpp">
+      <Filter>Source Files\plugins\EphemPropagatorPlugin\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Randn.hpp">
       <Filter>Source Files\base\math</Filter>
     </ClInclude>
   </ItemGroup>

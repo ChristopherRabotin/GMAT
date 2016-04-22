@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                              Load3ds
+//                                 Randn
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -17,24 +17,41 @@
 // express or implied.   See the License for the specific language
 // governing permissions and limitations under the License.
 //
-// ** Legal **
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
-// Author: Phillip Silvia, Jr.
-// Created: 2009/06/24
+// Author: Linda Jun
+// Created: 2016.04.20
+//
 /**
- * Loads a .3ds file and stores the information in a ModelObject
+ * Declares Randn class.
  */
 //------------------------------------------------------------------------------
+#ifndef _Randn_hpp
+#define _Randn_hpp
 
-#ifndef _LOAD_3DS_H
-#define _LOAD_3DS_H
+#include "MathFunction.hpp"
 
-#include "ModelObject.hpp"
+class GMAT_API Randn : public MathFunction
+{
+public:
+   Randn(const std::string &nomme);
+   virtual ~Randn();
+   Randn(const Randn &copy);
+   
+   // inherited from GmatBase
+   virtual GmatBase* Clone() const;
+   
+   virtual void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount);
+   virtual bool ValidateInputs(); 
+   virtual Real Evaluate();
+   virtual Rmatrix MatrixEvaluate();
 
-// Constants
-#define LOAD3DS_DEBUG 0
+protected:
+   Integer GetOutputDimension();
+   
+private:
+   
+};
 
-// Functions
-extern char Load3DS(ModelObject *p_object, const std::string &p_filename);
-
-#endif
+#endif // _Randn_hpp

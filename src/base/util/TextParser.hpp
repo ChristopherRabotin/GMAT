@@ -42,6 +42,7 @@ namespace Gmat
       COMMAND_BLOCK,
       ASSIGNMENT_BLOCK,
       FUNCTION_BLOCK,
+      INCLUDE_BLOCK,
    };
 };
 
@@ -63,6 +64,9 @@ public:
    bool IsFunctionCall() { return isFunctionCall; }
    
    void Reset();
+   
+   // For treating Include line as comment
+   void PrependIncludeComment(const std::string &incLine);
    
    // for parsing
    Gmat::BlockType EvaluateBlock(const std::string &logicalBlock);

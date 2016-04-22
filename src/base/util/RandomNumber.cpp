@@ -178,9 +178,9 @@ void RandomNumber::Seed(unsigned int s)
 //------------------------------------------------------------------------------
 void RandomNumber::ClockSeed()
 {
-    unsigned int clockSeed = time(NULL);
-    //srand(clockSeed);
-    generator.seed(clockSeed);
+   unsigned int clockSeed = time(NULL);
+   //srand(clockSeed);
+   generator.seed(clockSeed);
 }
 
 ////------------------------------------------------------------------------------
@@ -215,9 +215,9 @@ Real RandomNumber::Uniform()
 	do 
 	{
 	   rn = rrand();
-	} while (rn != 1.0);
-
-    return rn;
+   } while (rn == 1.0);
+   
+   return rn;
 }
 
 //------------------------------------------------------------------------------

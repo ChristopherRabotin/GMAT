@@ -55,7 +55,7 @@ public:
                        bool skipHeader = false);
    std::string ReadLogicalBlock();
    bool WriteText(const std::string &textToWrite);
-   
+      
 protected:
 
 private:
@@ -78,7 +78,7 @@ private:
    bool IsBlank(const std::string &text);
    bool HasEllipse(const std::string &text);
    std::string HandleEllipsis(const std::string &text);
-   std::string HandleComments(const std::string &text);
+   //std::string HandleComments(const std::string &text);
    
    static ScriptReadWriter *instance;   
    static const std::string sectionDelimiter;

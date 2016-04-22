@@ -225,7 +225,7 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
       loadedModel->SetRotation (true, rotation[0], rotation[1], rotation[2]);
       loadedModel->SetAttitude (true, 0, 0, 0);
       loadedModel->SetScale (scale);
-      loadedModel->Draw(true);
+      loadedModel->DrawAsSpacecraft(true);
    }
    
    glDisable(GL_LIGHTING);

@@ -2815,12 +2815,14 @@ std::string BatchEstimator::GetUserID()
 #ifdef __linux__
    char *name;
    name = getlogin();
-   userName.assign(name);
+   if (name != NULL)
+      userName.assign(name);
 #else
 #ifdef __APPLE__
    char *name;
    name = getlogin();
-   userName.assign(name);
+   if (name != NULL)
+      userName.assign(name);
 #endif
 #endif
 
@@ -2873,10 +2875,13 @@ void BatchEstimator::WriteReportFileHeader()
 //------------------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart1()
 {
+MessageInterface::ShowMessage("WriteReportFileHeaderPart1() called\n");
    /// 1. Write header 1:
    time_t now = time(NULL);
    std::string runDate = CTime(&now);
+MessageInterface::ShowMessage("   Run time:   %s\n", runDate.c_str());
    std::string buildTime = GetFileCreateTime("GMAT.exe");
+MessageInterface::ShowMessage("   Build time: %s\n", buildTime.c_str());
 
    textFile
       << "                                              *****  G E N E R A L  M I S S I O N  A N A L Y S I S  T O O L  *****\n"
@@ -2885,7 +2890,9 @@ void BatchEstimator::WriteReportFileHeaderPart1()
       << GmatStringUtil::GetAlignmentString("", 59) + "Build Date : " << buildTime << "\n"
       << "\n"
       << GmatStringUtil::GetAlignmentString("", 36) + "Hostname : " << GmatStringUtil::GetAlignmentString(GetHostName(), 36, GmatStringUtil::LEFT) << " OS / Arch : " << GetOperatingSystemName() << " " << GetOperatingSystemVersion() << "\n"
-      << GmatStringUtil::GetAlignmentString("", 36) + "User ID  : " << GmatStringUtil::GetAlignmentString(GetUserID(), 36, GmatStringUtil::LEFT)   << " Run Date  : " << runDate << "\n"
+      << GmatStringUtil::GetAlignmentString("", 36) + "User ID  : "
+      << GmatStringUtil::GetAlignmentString(GetUserID(), 36, GmatStringUtil::LEFT)
+      << " Run Date  : " << runDate << "\n"
       << "\n"
       << "\n";
 

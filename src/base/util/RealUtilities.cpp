@@ -34,6 +34,8 @@
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
 #include "Linear.hpp"         // for GmatRealUtil::
+#include "RandomNumber.hpp"   // for Uniform() and Gaussian()
+
 
 //#define DEBUG_MATH_UTIL
 
@@ -631,31 +633,62 @@ Real GmatMathUtil::Log (Real x, Integer base)
    return GmatMathUtil::Log(x, Real(base));
 }
 
-
-static Integer Seed[2]= {30001,15001};
-
 //------------------------------------------------------------------------------
-//  void SetSeed(Integer initialSeed1,
+// Real Rand(Real lowerBound=0.0, Real upperBound=1.0)
 //------------------------------------------------------------------------------
 /**
- * @note 30_031 = 2*3*5*7*11*13+1
- *       67_831 = 2*3*5*7*17*19+1;
+ * Returns uniformly distributed pseudorandom number
  */
 //------------------------------------------------------------------------------
-void GmatMathUtil::SetSeed(Integer initialSeed1, Integer initialSeed2) 
+Real GmatMathUtil::Rand(Real lowerBound, Real upperBound)
 {
-   Seed[0] = initialSeed1 % 67831;
-   Seed[1] = initialSeed2 % 30031;
+   RandomNumber* rn = RandomNumber::Instance();
+   return rn->Uniform(lowerBound, upperBound);
 }
 
 //------------------------------------------------------------------------------
-//  void GetSeed(Integer& initialSeed1, Integer& initialSeed2)
+// Real Randn(Real mean, Real stdev)
 //------------------------------------------------------------------------------
-void GmatMathUtil::GetSeed(Integer& initialSeed1, Integer& initialSeed2)
+/**
+ * Returns normally distributed pseudorandom numbers.
+ * Actually the normal distribution is the sub form of Gaussian distribution.
+ * Gaussian distribution have 2 parameters, mean and variance. When there is
+ * zero mean and unit variance the Gaussian distribution becomes normal
+ * other wise it is pronounced as Gaussian.
+ */
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Randn(Real mean, Real stdev)
 {
-   initialSeed1 = Seed[0];
-   initialSeed2 = Seed[1];
+   RandomNumber* rn = RandomNumber::Instance();
+   return rn->Gaussian(mean, stdev);
 }
+
+
+// Commented out. These are not used in anywhere. (LOJ: 2016.04.20)
+// static Integer Seed[2]= {30001,15001};
+
+// //------------------------------------------------------------------------------
+// //  void SetSeed(Integer initialSeed1,
+// //------------------------------------------------------------------------------
+// /**
+//  * @note 30_031 = 2*3*5*7*11*13+1
+//  *       67_831 = 2*3*5*7*17*19+1;
+//  */
+// //------------------------------------------------------------------------------
+// void GmatMathUtil::SetSeed(Integer initialSeed1, Integer initialSeed2) 
+// {
+//    Seed[0] = initialSeed1 % 67831;
+//    Seed[1] = initialSeed2 % 30031;
+// }
+
+// //------------------------------------------------------------------------------
+// //  void GetSeed(Integer& initialSeed1, Integer& initialSeed2)
+// //------------------------------------------------------------------------------
+// void GmatMathUtil::GetSeed(Integer& initialSeed1, Integer& initialSeed2)
+// {
+//    initialSeed1 = Seed[0];
+//    initialSeed2 = Seed[1];
+// }
 
 //------------------------------------------------------------------------------
 //  void SetSeedByClock() 
@@ -678,109 +711,109 @@ void GmatMathUtil::GetSeed(Integer& initialSeed1, Integer& initialSeed2)
 //
 //};
 
-//------------------------------------------------------------------------------
-//  Real Number (Real lowerBound, Real upperBound)
-//------------------------------------------------------------------------------
-/**
- * @note 211 = 2*3*5*7+1
- *       2311 = 2*3*5*7*11 + 1
- *       30031 = 2*3*5*7*11*13+1
- *       67831 = 2*3*5*7*17*19+1
- *       2037032760 = (30031 * 67831) -1
- */
-//------------------------------------------------------------------------------
-Real GmatMathUtil::Number (Real lowerBound, Real upperBound)
-{
-   Real X,Y;
+// //------------------------------------------------------------------------------
+// //  Real Number (Real lowerBound, Real upperBound)
+// //------------------------------------------------------------------------------
+// /**
+//  * @note 211 = 2*3*5*7+1
+//  *       2311 = 2*3*5*7*11 + 1
+//  *       30031 = 2*3*5*7*11*13+1
+//  *       67831 = 2*3*5*7*17*19+1
+//  *       2037032760 = (30031 * 67831) -1
+//  */
+// //------------------------------------------------------------------------------
+// Real GmatMathUtil::Number (Real lowerBound, Real upperBound)
+// {
+//    Real X,Y;
 
-   Seed[1] = (211 * Seed[1]+2311) % 30031;
+//    Seed[1] = (211 * Seed[1]+2311) % 30031;
 
-   Seed[0] = 30031* Seed[0] +Seed[1];
-   X = Real(Seed[0] % 2037032760) / Real(2037032760);
+//    Seed[0] = 30031* Seed[0] +Seed[1];
+//    X = Real(Seed[0] % 2037032760) / Real(2037032760);
    
-   Seed[0] = Seed[0] % 67831;
+//    Seed[0] = Seed[0] % 67831;
 
-   Y = (upperBound-lowerBound)*X + lowerBound;
+//    Y = (upperBound-lowerBound)*X + lowerBound;
     
-   return Y;
-}
+//    return Y;
+// }
 
-//------------------------------------------------------------------------------
-//  Real GaussianNumber(Real mu, Real sigma)
-//------------------------------------------------------------------------------
-Real GmatMathUtil::GaussianNumber(Real mu, Real sigma)
-{
-   Integer i=0;
-   Real Z = -6.0;
+// //------------------------------------------------------------------------------
+// //  Real GaussianNumber(Real mu, Real sigma)
+// //------------------------------------------------------------------------------
+// Real GmatMathUtil::GaussianNumber(Real mu, Real sigma)
+// {
+//    Integer i=0;
+//    Real Z = -6.0;
    
-   for (i=0;i<12;i++) 
-      Z = Z+Number();
+//    for (i=0;i<12;i++) 
+//       Z = Z+Number();
    
-   return mu+Z*sigma;
-}
+//    return mu+Z*sigma;
+// }
 
-struct key
-{
-static Integer x;
-static Integer y;
-static Integer z;
-};
+// struct key
+// {
+// static Integer x;
+// static Integer y;
+// static Integer z;
+// };
 
-Integer key::x = 10001;
-Integer key::y = 20001;
-Integer key::z = 30001;
+// Integer key::x = 10001;
+// Integer key::y = 20001;
+// Integer key::z = 30001;
 
-//------------------------------------------------------------------------------
-//  Real Ran () 
-//------------------------------------------------------------------------------
-Real GmatMathUtil::Ran () 
-{
-   Real w;
-   key::x = 171 * (key::x%177-177) - 2 * (key::x/177);
-   if (key::x<0) 
-   {
-      key::x = key::x + 30269;
-   };
+// //------------------------------------------------------------------------------
+// //  Real Ran () 
+// //------------------------------------------------------------------------------
+// Real GmatMathUtil::Ran () 
+// {
+//    Real w;
+//    key::x = 171 * (key::x%177-177) - 2 * (key::x/177);
+//    if (key::x<0) 
+//    {
+//       key::x = key::x + 30269;
+//    };
    
-   key::y = 172 * (key::y%176-176)-35 * (key::y/176);
-   if (key::y<0) 
-   {
-      key::y = key::y + 30307;
-   };
+//    key::y = 172 * (key::y%176-176)-35 * (key::y/176);
+//    if (key::y<0) 
+//    {
+//       key::y = key::y + 30307;
+//    };
    
-   key::z = 170 * (key::z%178-178) -63* (key::z/178);
-   if (key::z<0) 
-   {
-      key::z = key::z +30323;
-   };
+//    key::z = 170 * (key::z%178-178) -63* (key::z/178);
+//    if (key::z<0) 
+//    {
+//       key::z = key::z +30323;
+//    };
 
-   w = Real(key::x)/30269.0 + Real(key::y)/30307.0 + Real(key::z)/30323.0;
+//    w = Real(key::x)/30269.0 + Real(key::y)/30307.0 + Real(key::z)/30323.0;
    
-   return (w - Real(Integer(w-0.5)));  
-}
+//    return (w - Real(Integer(w-0.5)));  
+// }
 
-//------------------------------------------------------------------------------
-//  void SetRanKey(Real k) 
-//------------------------------------------------------------------------------
-void GmatMathUtil::SetRanKey(Real k) 
-{
-   //Real dummy = 0.0;
-   if (k==0) 
-   {
-      key::x = 10001;
-      key::y = 20001;
-      key::z = 30001;
-   } 
-   else 
-   {
-      Integer i;
-      Integer loop = Integer(k-Real(Integer(fabs(k)/31270.0)*31270.0))%31270;
+// //------------------------------------------------------------------------------
+// //  void SetRanKey(Real k) 
+// //------------------------------------------------------------------------------
+// void GmatMathUtil::SetRanKey(Real k) 
+// {
+//    //Real dummy = 0.0;
+//    if (k==0) 
+//    {
+//       key::x = 10001;
+//       key::y = 20001;
+//       key::z = 30001;
+//    } 
+//    else 
+//    {
+//       Integer i;
+//       Integer loop = Integer(k-Real(Integer(fabs(k)/31270.0)*31270.0))%31270;
       
-      for (i=1; i<=loop;i++) 
-         //dummy =
-         GmatMathUtil::Ran();
-   }
-}
+//       for (i=1; i<=loop;i++) 
+//          //dummy =
+//          GmatMathUtil::Ran();
+//    }
+// }
 
 //------------------------------------------------------------------------------
 //  R(Real g, Real f)
