@@ -41,19 +41,39 @@ classdef CoverageChecker < handle
             vec = [];
             for pointIdx = 1:obj.pointGroup.GetNumPoints()
                 % Compute range vector
-                pointVec = obj.pointGroup.GetPointPositionVector(pointIdx);
-                rangeVec = bodyFixedState - pointVec;
-                % Check in view
-                dotProd = rangeVec'*pointVec;
+               pointVec = obj.pointGroup.GetPointPositionVector(pointIdx);
+               [rangeVec,isFeasible] = obj.CheckFeasibility(bodyFixedState,pointVec);
                 % Simple line of site test
-                if dotProd > 0
-                    covCount = covCount + 1;
-                    vec(covCount) = pointIdx; %#ok<AGROW>
-                    obj.numEventsPerPoint(pointIdx) = obj.numEventsPerPoint(pointIdx) + 1;
-                    obj.timeSeriesData{pointIdx,obj.numEventsPerPoint(pointIdx)} = obj.timeIdx;
+                if isFeasible
+                    % Simple nadir conical sensor test
+                    sensorNum = 1;
+                    if obj.spaceCraft.GetHasSensors()
+                        sensorFOV = obj.spaceCraft.GetSensorFOV(sensorNum);
+                    else
+                        sensorFOV = pi;
+                    end
+                    cosineOffNadirAngle = (rangeVec')*bodyFixedState/...
+                        norm(rangeVec)/norm(bodyFixedState);
+                    offNadirAngle = acos(cosineOffNadirAngle);
+                    if offNadirAngle < sensorFOV
+                        covCount = covCount + 1;
+                        vec(covCount) = pointIdx; %#ok<AGROW>
+                        obj.numEventsPerPoint(pointIdx) = obj.numEventsPerPoint(pointIdx) + 1;
+                        obj.timeSeriesData{pointIdx,obj.numEventsPerPoint(pointIdx)} = obj.timeIdx;
+                    end
                 end
             end
-            
+        end
+        
+        function [rangeVec,isFeasible] = CheckFeasibility(~,bodyFixedState,pointVec)
+            rangeVec = bodyFixedState - pointVec;
+            dotProd = rangeVec(1)*pointVec(1)+ rangeVec(2)*pointVec(2)+ ...
+                rangeVec(3)*pointVec(3);%'*pointVec;
+            if dotProd > 0
+                isFeasible = true;
+            else
+                isFeasible = false;
+            end
         end
         
         function vec = AccumulateCoverageData(obj)
@@ -68,7 +88,7 @@ classdef CoverageChecker < handle
             inertialState = obj.spaceCraft.GetCartesianState();
             %  TODO.  Handle differences in units of points and states.
             bodyFixedState = obj.centralBody.GetBodyFixedState(...
-                inertialState(1:3,1),jDate)/6378.1373;
+                inertialState(1:3,1),jDate);
         end
         
         function coverageEvents = ProcessCoverageDate(obj)
@@ -87,7 +107,7 @@ classdef CoverageChecker < handle
                                 obj.timeSeriesData{pointIdx,dateIdx - 1} ~= 1)
                             endTime = obj.dateData{obj.timeSeriesData{pointIdx,dateIdx-1}};
                             isEnd = true;
-                        % Test for the last event for this point
+                            % Test for the last event for this point
                         elseif dateIdx == numEvents
                             endTime = obj.dateData{obj.timeSeriesData{pointIdx,dateIdx}};
                             isEnd = true;

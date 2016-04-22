@@ -12,8 +12,12 @@ date.SetGregorianDate(2017,1,15,22,30,20.111);
 state = OrbitState();
 state.SetKeplerianState(6700,0.002,90*pi/180,pi/4 + pi/6,.2345,pi/6);
 
+% Create a conical sensor
+sensor = ConicalSensor(pi);
+
 % Create a spacecraft giving it a state and epoch
 sat1 = Spacecraft(date,state);
+%sat1.AddSensor(sensor)
 
 % Create the propagator
 prop = Propagator(sat1);

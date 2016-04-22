@@ -62,7 +62,7 @@ truthData = [
     -0.788733249245582        -0.573048248828767        -0.222520933956314
     -0.30126929315467        -0.927211543798553        -0.222520933956314
     0.30126929315467        -0.927211543798553        -0.222520933956314
-    0.788733249245582        -0.573048248828767        -0.222520933956314];
+    0.788733249245582        -0.573048248828767        -0.222520933956314]*6378.1363;
 maxDiff = -inf;
 for pointIdx = 1:testPointNum
     diff = norm( truthData(pointIdx,:)' -  pg.GetPointPositionVector(pointIdx));
@@ -70,7 +70,7 @@ for pointIdx = 1:testPointNum
         maxDiff = diff;
     end
 end
-if maxDiff >= 1e-13
+if maxDiff >= 1e-11
     error('error in returned value for num points')
 end
 
