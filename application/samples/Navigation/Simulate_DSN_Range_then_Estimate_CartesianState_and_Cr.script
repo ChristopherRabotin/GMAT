@@ -1,0 +1,402 @@
+%TrkFile_SimEst_DSN_DS
+
+%----------------------------------------
+%---------- Solar System User-Modified Values
+%----------------------------------------
+
+GMAT SolarSystem.EphemerisSource = 'DE421';
+GMAT SolarSystem.SPKFilename = 'D:/Data/Documents/GMAT/Builds/LatestCompleteVersion/bin/../data/planetary_ephem/spk/DE421AllPlanets.bsp';
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+%-------------------------------------------- 
+%---------- Spacecraft
+%--------------------------------------------
+Create Spacecraft SimSat;
+GMAT SimSat.DateFormat = UTCGregorian;
+GMAT SimSat.Epoch = '16 Jul 2012 00:00:00.000';  %26124.50040509259 TAIMJD = 26124.50040549053 A1MJD
+GMAT SimSat.CoordinateSystem = SunMJ2000Eq;
+GMAT SimSat.DisplayStateType = Cartesian;
+GMAT SimSat.X = 84687817.03982838;
+GMAT SimSat.Y = 107018399.5024377;
+GMAT SimSat.Z = 46279991.4002645;
+GMAT SimSat.VX = -24.43619252417577;
+GMAT SimSat.VY = 16.49856732228815;
+GMAT SimSat.VZ = 7.084755971994685;
+GMAT SimSat.DryMass = 603.309;     %Kg
+GMAT SimSat.Cd = 2.2;
+GMAT SimSat.Cr = 0.54;
+GMAT SimSat.DragArea = 15;
+GMAT SimSat.SRPArea = 7.9796;      %m^2
+GMAT SimSat.NAIFId = -10004001;
+GMAT SimSat.NAIFIdReferenceFrame = -9004001;
+GMAT SimSat.OrbitColor = Red;
+GMAT SimSat.TargetColor = Teal;
+GMAT SimSat.Id = 'EstSat01';
+GMAT SimSat.Attitude = CoordinateSystemFixed;
+GMAT SimSat.SPADSRPScaleFactor = 1;
+GMAT SimSat.AddHardware = {Transponder1, Antenna2};
+GMAT SimSat.ModelFile = 'aura.3ds';
+GMAT SimSat.ModelOffsetX = 0;
+GMAT SimSat.ModelOffsetY = 0;
+GMAT SimSat.ModelOffsetZ = 0;
+GMAT SimSat.ModelRotationX = 0;
+GMAT SimSat.ModelRotationY = 0;
+GMAT SimSat.ModelRotationZ = 0;
+GMAT SimSat.ModelScale = 1;
+GMAT SimSat.AttitudeDisplayStateType = 'Quaternion';
+GMAT SimSat.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT SimSat.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT SimSat.EulerAngleSequence = '321';
+
+Create Spacecraft SimSatCopy;
+GMAT SimSatCopy.DateFormat = UTCGregorian;
+GMAT SimSatCopy.Epoch = '16 Jul 2012 00:00:00.000';
+GMAT SimSatCopy.CoordinateSystem = SunMJ2000Eq;
+GMAT SimSatCopy.DisplayStateType = Cartesian;
+GMAT SimSatCopy.X = 84687817.03982838;
+GMAT SimSatCopy.Y = 107018399.5024377;
+GMAT SimSatCopy.Z = 46279991.4002645;
+GMAT SimSatCopy.VX = -24.43619252417577;
+GMAT SimSatCopy.VY = 16.49856732228815;
+GMAT SimSatCopy.VZ = 7.084755971994685;
+GMAT SimSatCopy.DryMass = 603.309;
+GMAT SimSatCopy.Cd = 2.2;
+GMAT SimSatCopy.Cr = 0.54;
+GMAT SimSatCopy.DragArea = 15;
+GMAT SimSatCopy.SRPArea = 7.9796;
+GMAT SimSatCopy.NAIFId = -10004001;
+GMAT SimSatCopy.NAIFIdReferenceFrame = -9004001;
+GMAT SimSatCopy.OrbitColor = Red;
+GMAT SimSatCopy.TargetColor = Teal;
+GMAT SimSatCopy.Id = 'EstSat01';
+GMAT SimSatCopy.Attitude = CoordinateSystemFixed;
+GMAT SimSatCopy.SPADSRPScaleFactor = 1;
+GMAT SimSatCopy.AddHardware = {Transponder1, Antenna2};
+GMAT SimSatCopy.ModelFile = 'aura.3ds';
+GMAT SimSatCopy.ModelOffsetX = 0;
+GMAT SimSatCopy.ModelOffsetY = 0;
+GMAT SimSatCopy.ModelOffsetZ = 0;
+GMAT SimSatCopy.ModelRotationX = 0;
+GMAT SimSatCopy.ModelRotationY = 0;
+GMAT SimSatCopy.ModelRotationZ = 0;
+GMAT SimSatCopy.ModelScale = 1;
+GMAT SimSatCopy.AttitudeDisplayStateType = 'Quaternion';
+GMAT SimSatCopy.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT SimSatCopy.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT SimSatCopy.EulerAngleSequence = '321';
+
+Create Spacecraft EstSat;
+GMAT EstSat.DateFormat = UTCGregorian;
+GMAT EstSat.Epoch = '16 Jul 2012 00:00:00.000';  %26124.50040509259 TAIMJD = 26124.50040549053 A1MJD
+GMAT EstSat.CoordinateSystem = SunMJ2000Eq;
+GMAT EstSat.DisplayStateType = Cartesian;
+GMAT EstSat.X = 84687817.03982838;
+GMAT EstSat.Y = 107018399.5024377;
+GMAT EstSat.Z = 46279991.4002645;
+GMAT EstSat.VX = -24.43619252417577;
+GMAT EstSat.VY = 16.49856732228815;
+GMAT EstSat.VZ = 7.084755971994685;
+
+GMAT EstSat.DryMass = 603.309;     %Kg
+GMAT EstSat.Cd = 2.2;
+GMAT EstSat.Cr = 1.54;
+GMAT EstSat.DragArea = 15;
+GMAT EstSat.SRPArea = 7.9796;      %m^2
+GMAT EstSat.NAIFId = -10006001;
+GMAT EstSat.NAIFIdReferenceFrame = -9006001;
+GMAT EstSat.OrbitColor = Yellow;
+GMAT EstSat.TargetColor = DarkGray;
+GMAT EstSat.Id = 'EstSat01';
+GMAT EstSat.Attitude = CoordinateSystemFixed;
+GMAT EstSat.SPADSRPScaleFactor = 1;
+GMAT EstSat.AddHardware = {Transponder1, Antenna2};
+GMAT EstSat.SolveFors = {'CartesianState', 'Cr'};
+GMAT EstSat.ModelFile = 'aura.3ds';
+GMAT EstSat.ModelOffsetX = 0;
+GMAT EstSat.ModelOffsetY = 0;
+GMAT EstSat.ModelOffsetZ = 0;
+GMAT EstSat.ModelRotationX = 0;
+GMAT EstSat.ModelRotationY = 0;
+GMAT EstSat.ModelRotationZ = 0;
+GMAT EstSat.ModelScale = 1;
+GMAT EstSat.AttitudeDisplayStateType = 'Quaternion';
+GMAT EstSat.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT EstSat.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT EstSat.EulerAngleSequence = '321';
+%GMAT estData.DataFilters = {saf};
+
+
+%----------------------------------------
+%---------- Communications Hardware
+%----------------------------------------
+
+Create Antenna Antenna1;
+
+Create Transmitter Transmitter1;
+GMAT Transmitter1.PrimaryAntenna = Antenna1;
+GMAT Transmitter1.Frequency = 2067.5; %% MHz
+
+Create Receiver Receiver1;
+GMAT Receiver1.PrimaryAntenna = Antenna1;
+
+Create Transponder Transponder1;
+GMAT Transponder1.HardwareDelay = 0;
+GMAT Transponder1.PrimaryAntenna = Antenna2;
+GMAT Transponder1.TurnAroundRatio = '240/221';
+
+Create Antenna Antenna2;
+
+%----------------------------------------
+%---------- GroundStations
+%----------------------------------------
+Create GroundStation CAN; %DSN Canberra
+GMAT CAN.OrbitColor = Thistle;
+GMAT CAN.TargetColor = DarkGray;
+GMAT CAN.CentralBody = Earth;
+GMAT CAN.StateType = Cartesian;
+GMAT CAN.HorizonReference = Ellipsoid;
+GMAT CAN.Location1 = -4461.083514;
+GMAT CAN.Location2 = 2682.281745;
+GMAT CAN.Location3 = -3674.570392;
+GMAT CAN.Id = 'CAN';
+GMAT CAN.AddHardware = {Transmitter1, Receiver1, Antenna1};
+GMAT CAN.IonosphereModel = 'None';
+GMAT CAN.TroposphereModel = 'None';
+GMAT CAN.DataSource = 'Constant';
+GMAT CAN.Temperature = 295.1;
+GMAT CAN.Pressure = 1013.5;
+GMAT CAN.Humidity = 55;
+GMAT CAN.MinimumElevationAngle = 0;
+GMAT CAN.ErrorModels = {DSNRange_ErrorModel, DSNDoppler_ErrorModel};
+
+Create GroundStation GDS;  %DSN Goldstone
+GMAT GDS.OrbitColor = Thistle;
+GMAT GDS.TargetColor = DarkGray;
+GMAT GDS.CentralBody = Earth;
+GMAT GDS.StateType = Cartesian;
+GMAT GDS.HorizonReference = Ellipsoid;
+GMAT GDS.Location1 = -2353.621251;
+GMAT GDS.Location2 = -4641.341542;
+GMAT GDS.Location3 = 3677.05237;
+GMAT GDS.Id = 'GDS';
+GMAT GDS.AddHardware = {Transmitter1, Receiver1, Antenna1};
+GMAT GDS.IonosphereModel = 'None';
+GMAT GDS.TroposphereModel = 'None';
+GMAT GDS.DataSource = 'Constant';
+GMAT GDS.Temperature = 295.1;
+GMAT GDS.Pressure = 1013.5;
+GMAT GDS.Humidity = 55;
+GMAT GDS.MinimumElevationAngle = 0;
+GMAT GDS.ErrorModels = {DSNRange_ErrorModel, DSNDoppler_ErrorModel};
+
+Create GroundStation MAD;  %DSN Madrid
+GMAT MAD.OrbitColor = Thistle;
+GMAT MAD.TargetColor = DarkGray;
+GMAT MAD.CentralBody = Earth;
+GMAT MAD.StateType = Cartesian;
+GMAT MAD.HorizonReference = Ellipsoid;
+GMAT MAD.Location1 = 4849.519988;
+GMAT MAD.Location2 = -360.641653;
+GMAT MAD.Location3 = 4114.50459;
+GMAT MAD.Id = 'MAD';
+GMAT MAD.AddHardware = {Transmitter1, Receiver1, Antenna1};
+GMAT MAD.IonosphereModel = 'None';
+GMAT MAD.TroposphereModel = 'None';
+GMAT MAD.DataSource = 'Constant';
+GMAT MAD.Temperature = 295.1;
+GMAT MAD.Pressure = 1013.5;
+GMAT MAD.Humidity = 55;
+GMAT MAD.MinimumElevationAngle = 0;
+GMAT MAD.ErrorModels = {DSNRange_ErrorModel, DSNDoppler_ErrorModel};
+
+%DSNDoppler_ErrorModel.SolveFors = {Bias};
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+Create ForceModel ODProp_ForceModel;
+GMAT ODProp_ForceModel.CentralBody = Sun;
+GMAT ODProp_ForceModel.PointMasses = {Earth, Luna, Sun};
+GMAT ODProp_ForceModel.Drag = None;
+GMAT ODProp_ForceModel.SRP = On;
+GMAT ODProp_ForceModel.RelativisticCorrection = Off;
+GMAT ODProp_ForceModel.ErrorControl = RSSStep;
+GMAT ODProp_ForceModel.SRP.Flux = 1370.052;
+GMAT ODProp_ForceModel.SRP.SRPModel = Spherical;
+GMAT ODProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator ODProp;
+GMAT ODProp.FM = ODProp_ForceModel;
+GMAT ODProp.Type = RungeKutta89;
+GMAT ODProp.InitialStepSize = 60;
+GMAT ODProp.Accuracy = 1e-013;
+GMAT ODProp.MinStep = 0;
+GMAT ODProp.MaxStep = 86400;
+GMAT ODProp.MaxStepAttempts = 50;
+GMAT ODProp.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem SunMJ2000Eq;
+GMAT SunMJ2000Eq.Origin = Sun;
+GMAT SunMJ2000Eq.Axes = MJ2000Eq;
+
+%----------------------------------------
+%---------- ErrorModels
+%----------------------------------------
+
+Create ErrorModel DSNRange_ErrorModel;
+GMAT DSNRange_ErrorModel.Type = 'Range_RU';
+GMAT DSNRange_ErrorModel.NoiseSigma = 35.375;           % unit: RU
+GMAT DSNRange_ErrorModel.Bias = 0;                    % unit: RU
+%DSNRange_ErrorModel.SolveFors = {Bias};
+
+Create ErrorModel DSNDoppler_ErrorModel;
+GMAT DSNDoppler_ErrorModel.Type = 'Doppler_HZ';
+GMAT DSNDoppler_ErrorModel.NoiseSigma = 0.02816;        % unit: Hz
+GMAT DSNDoppler_ErrorModel.Bias = 0;                    % unit: Hz   % All parameters are the same but Bias
+
+
+
+%----------------------------------------
+%---------- TrackingFileSet
+%----------------------------------------
+Create TrackingFileSet simData;
+GMAT simData.AddTrackingConfig = {'{{CAN,SimSat,CAN},Doppler}', '{{MAD,SimSat,MAD},Doppler}', '{{GDS,SimSat,GDS},Doppler}', '{{GDS,SimSat,GDS},DSNRange}', '{{MAD,SimSat,MAD},DSNRange}', '{{CAN,SimSat,CAN},DSNRange}'};
+GMAT simData.FileName = {'TrkFile_SimEst_DSN_DS.gmd'};
+GMAT simData.RampTable = {'../data/navdata/ramptables/TrkFile_SimEst_DSN_DS.rmp'};
+GMAT simData.UseLightTime = true;
+GMAT simData.UseRelativityCorrection = true;
+GMAT simData.UseETminusTAI = true;
+GMAT simData.SimRangeModuloConstant = 33554432;
+GMAT simData.SimDopplerCountInterval = 10;
+GMAT simData.SimTDRSNode4Frequency = 2000;
+GMAT simData.SimTDRSNode4FrequencyBand = 1;
+GMAT simData.SimTDRSSmarId = 0;
+GMAT simData.SimTDRSDataFlag = 0;
+
+Create TrackingFileSet estData;
+GMAT estData.AddTrackingConfig = {'{{GDS,EstSat,GDS},DSNRange}', '{{CAN,EstSat,CAN},DSNRange}', '{{MAD,EstSat,MAD},DSNRange}'};
+%GMAT estData.AddTrackingConfig = {{CAN, EstSat, CAN}, 'Doppler'}; 
+%GMAT estData.AddTrackingConfig = {{MAD, EstSat, MAD}, 'Doppler'}; 
+%GMAT estData.AddTrackingConfig = {{GDS, EstSat, GDS}, 'Doppler'}; 
+GMAT estData.FileName = {'TrkFile_SimEst_DSN_DS.gmd'};
+GMAT estData.RampTable = {'../data/navdata/ramptables/TrkFile_SimEst_DSN_DS.rmp'};
+GMAT estData.UseLightTime = true;
+GMAT estData.UseRelativityCorrection = true;
+GMAT estData.UseETminusTAI = true;
+GMAT estData.SimRangeModuloConstant = 33554432;     % unit: RU
+GMAT estData.SimDopplerCountInterval = 10;             % unit: seconds, 
+GMAT estData.SimTDRSNode4Frequency = 2000;
+GMAT estData.SimTDRSNode4FrequencyBand = 1;
+GMAT estData.SimTDRSSmarId = 0;
+GMAT estData.SimTDRSDataFlag = 0;
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+Create Simulator simmer;
+GMAT simmer.AddData = {simData};
+GMAT simmer.Propagator = ODProp;
+GMAT simmer.EpochFormat = UTCGregorian;
+GMAT simmer.InitialEpoch = '16 Jul 2012 00:00:00.000';
+GMAT simmer.FinalEpoch = '23 Jul 2012 00:00:00.000';
+GMAT simmer.MeasurementTimeStep = 600;
+GMAT simmer.AddNoise = On;
+
+Create BatchEstimatorInv bat;
+GMAT bat.ShowProgress = true;
+GMAT bat.ReportStyle = Verbose;
+GMAT bat.ReportFile = 'TrkFile_SimEst_DSN_DS_WorkingFile.report';
+GMAT bat.MaximumIterations = 4;
+GMAT bat.Measurements = {estData};
+GMAT bat.AbsoluteTol = 0.001;
+GMAT bat.RelativeTol = 0.0001;
+GMAT bat.Propagator = ODProp;
+GMAT bat.ShowAllResiduals = On;
+GMAT bat.OLSEInitialRMSSigma = 1e+070;
+GMAT bat.OLSEMultiplicativeConstant = 1e+070;
+GMAT bat.OLSEAdditiveConstant = 1e+070;
+GMAT bat.ResetBestRMSIfDiverging = false;
+GMAT bat.EstimationEpochFormat = 'FromParticipants';  %'TAIModJulian
+GMAT bat.InversionAlgorithm = 'Internal';             %Cholesky, Schur
+GMAT bat.MaxConsecutiveDivergences = 3;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile rf;
+GMAT rf.SolverIterations = Current;
+GMAT rf.UpperLeft = [ 0.08695652173913043 0.187207488299532 ];
+GMAT rf.Size = [ 0.5992753623188406 0.7987519500780032 ];
+GMAT rf.RelativeZOrder = 20;
+GMAT rf.Maximized = false;
+GMAT rf.Filename = 'TrkFile_SimEst_DSN_DS_2.report';
+GMAT rf.Precision = 16;
+GMAT rf.WriteHeaders = false;
+GMAT rf.LeftJustify = On;
+GMAT rf.ZeroFill = Off;
+GMAT rf.FixedWidth = true;
+GMAT rf.Delimiter = ' ';
+GMAT rf.ColumnWidth = 23;
+GMAT rf.WriteReport = true;
+
+Create ReportFile rftemp;
+GMAT rftemp.SolverIterations = Current;
+GMAT rftemp.UpperLeft = [ 0 0 ];
+GMAT rftemp.Size = [ 0 0 ];
+GMAT rftemp.RelativeZOrder = 0;
+GMAT rftemp.Maximized = false;
+GMAT rftemp.Filename = 'TrkFile_SimEst_DSN_DS_2_temp.report';
+GMAT rftemp.Precision = 16;
+GMAT rftemp.WriteHeaders = false;
+GMAT rftemp.LeftJustify = On;
+GMAT rftemp.ZeroFill = Off;
+GMAT rftemp.FixedWidth = true;
+GMAT rftemp.Delimiter = ' ';
+GMAT rftemp.ColumnWidth = 23;
+GMAT rftemp.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+Create Variable PosError VelError CrError;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+
+%----- Run the Simulator followed by the Estimator
+BeginMissionSequence;
+RunSimulator simmer;
+
+RunEstimator bat;
+%Report rf SimSatCopy.TAIModJulian SimSatCopy.EarthMJ2000Eq.X SimSatCopy.EarthMJ2000Eq.Y SimSatCopy.EarthMJ2000Eq.Z SimSatCopy.EarthMJ2000Eq.VX SimSatCopy.EarthMJ2000Eq.VY SimSatCopy.EarthMJ2000Eq.VZ;
+%Report rf EstSat.TAIModJulian EstSat.EarthMJ2000Eq.X EstSat.EarthMJ2000Eq.Y EstSat.EarthMJ2000Eq.Z EstSat.EarthMJ2000Eq.VX EstSat.EarthMJ2000Eq.VY EstSat.EarthMJ2000Eq.VZ;
+
+GMAT PosError = sqrt (  (EstSat.X - SimSatCopy.X)^2 + (EstSat.Y - SimSatCopy.Y)^2 + (EstSat.Z - SimSatCopy.Z)^2 );
+GMAT VelError = sqrt (  (EstSat.VX - SimSatCopy.VX)^2  + (EstSat.VY - SimSatCopy.VY)^2  + (EstSat.VZ - SimSatCopy.VZ)^2 );
+
+Report rftemp SimSatCopy.TAIModJulian SimSatCopy.SunMJ2000Eq.X SimSatCopy.SunMJ2000Eq.Y SimSatCopy.SunMJ2000Eq.Z SimSatCopy.SunMJ2000Eq.VX SimSatCopy.SunMJ2000Eq.VY SimSatCopy.SunMJ2000Eq.VZ;
+Report rftemp EstSat.TAIModJulian EstSat.SunMJ2000Eq.X EstSat.SunMJ2000Eq.Y EstSat.SunMJ2000Eq.Z EstSat.SunMJ2000Eq.VX EstSat.SunMJ2000Eq.VY EstSat.SunMJ2000Eq.VZ;
+
+GMAT CrError = EstSat.Cr - SimSatCopy.Cr;
+
+Report rf PosError VelError CrError;
