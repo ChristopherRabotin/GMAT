@@ -3900,7 +3900,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
          }
          catch (...)
          {
-            throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not define in GMAT script.\n");
+            throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
          }
          name = cs->GetStringParameter("Origin");
       }
