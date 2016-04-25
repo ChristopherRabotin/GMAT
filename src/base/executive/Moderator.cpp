@@ -8494,6 +8494,9 @@ void Moderator::CreateDefaultParameters()
       CreateParameter("RefTemperature", "DefaultSC.DefaultFuelTank.RefTemperature");
       // Thruster Parameters
       CreateParameter("DutyCycle", "DefaultSC.DefaultThruster.DutyCycle");
+      CreateParameter("Isp", "DefaultSC.DefaultThruster.Isp");
+      CreateParameter("MassFlowRate", "DefaultSC.DefaultThruster.MassFlowRate");
+      CreateParameter("Thrust", "DefaultSC.DefaultThruster.Thrust");
       CreateParameter("ThrustScaleFactor", "DefaultSC.DefaultThruster.ThrustScaleFactor");
       CreateParameter("GravitationalAccel", "DefaultSC.DefaultThruster.GravitationalAccel");
       CreateParameter("C1", "DefaultSC.DefaultThruster.C1");

@@ -493,6 +493,12 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ThrustScaleFactor(withName);
    if (ofType == "GravitationalAccel")
       return new GravitationalAccel(withName);
+   if (ofType == "Thrust")
+      return new Thrust(withName);
+   if (ofType == "Isp")
+      return new Isp(withName);
+   if (ofType == "MassFlowRate")
+      return new MassFlowRate(withName);
    
    if (ofType == "C1"  || ofType == "C2"  || ofType == "C3"  || ofType == "C4"  ||
        ofType == "C5"  || ofType == "C6"  || ofType == "C7"  || ofType == "C8"  ||
@@ -780,6 +786,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("DutyCycle");
       creatables.push_back("ThrustScaleFactor");
       creatables.push_back("GravitationalAccel");
+      creatables.push_back("Thrust");
+      creatables.push_back("Isp");
+      creatables.push_back("MassFlowRate");
       
       creatables.push_back("C1");
       creatables.push_back("C2");
