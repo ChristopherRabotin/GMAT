@@ -1153,6 +1153,8 @@ void BatchEstimator::CompleteInitialization()
       currentState = PROPAGATING;
    }
 
+   // Clear warning message's count
+   warningCount = 0;
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("BatchEstimator::CompleteInitialization "

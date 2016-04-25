@@ -257,6 +257,14 @@ void BatchEstimatorInv::Accumulate()
    std::string times;
    Real temp;
 
+   // Verify measurement epoch is inside of EOP time range
+   if ((currentObs->epoch < eopTimeMin) || (currentObs->epoch > eopTimeMax))
+   {
+      if (warningCount == 0)
+         MessageInterface::ShowMessage("Warning: measurement epoch %.12lf A1Mjd is outside EOP time range [%.12lf A1Mjd, %.12lf A1Mjd]\n", currentObs->epoch, eopTimeMin, eopTimeMax);
+      ++warningCount;
+   }
+
    // Write to report file iteration number, record number, and time:
    TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch, "", "UTCGregorian", temp, times, 1);
    if (textFileMode == "Normal")

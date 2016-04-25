@@ -32,6 +32,7 @@
 
 #include "Estimator.hpp"
 #include "GmatState.hpp"
+#include "GmatGlobal.hpp"
 #include "PropagationStateManager.hpp"
 //#include "SolverException.hpp"
 #include "SpaceObject.hpp"
@@ -388,6 +389,8 @@ bool Estimator::Initialize()
       tfs.clear();                                                                 // made changes by TUAN NGUYEN
       measNames.clear();                                                           // made changes by TUAN NGUYEN
 
+      // Get EOP time range
+      GmatGlobal::Instance()->GetEopFile()->GetTimeRage(eopTimeMin, eopTimeMax);
    }
 
 #ifdef DEBUG_INITIALIZE
