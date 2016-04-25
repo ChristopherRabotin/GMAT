@@ -495,8 +495,6 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
          if (find(observers.begin(), observers.end(), value) == observers.end())
             observers.push_back(value);
-         else
-            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".ObservedObjects parameter is replicated.\n");
       }
       return true;
    }
@@ -522,8 +520,6 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
          if (find(trackers.begin(), trackers.end(), value) == trackers.end())
             trackers.push_back(value);
-         else
-            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Trackers parameter is replicated.\n");
       }
       return true;
    }
@@ -553,8 +549,6 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
          if (find(dataTypes.begin(), dataTypes.end(), value) == dataTypes.end())
             dataTypes.push_back(value);
-         else
-            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".DatTypes parameter is replicated.\n");
       }
       return true;
    }
@@ -802,7 +796,7 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       else if ((0 <= index)&&(index <= (Integer)dataTypes.size()))
       {
          StringArray nameList = GetListOfMeasurementTypes();
-         if (find(nameList.begin(), nameList.end(), value) == nameList.end())
+         if ((value != "All")&&(find(nameList.begin(), nameList.end(), value) == nameList.end()))
             throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".DataTypes parameter is invalid.\n");
 
          if (index == dataTypes.size())
