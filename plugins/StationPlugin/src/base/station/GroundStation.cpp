@@ -67,7 +67,7 @@ GroundStation::PARAMETER_TEXT[GroundStationParamCount - BodyFixedPointParamCount
       "Pressure",               // hPa
       "Humidity",               // percentage
       "MinimumElevationAngle",  // degree
-      "ErrorModels",                   // ERROR_MODELS                    // made changes by TUAN NGUYEN
+      "ErrorModels",                   // ERROR_MODELS
    };
 
 const Gmat::ParameterType
@@ -82,7 +82,7 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
       Gmat::REAL_TYPE,      // Pressure
       Gmat::REAL_TYPE,      // Humidity
       Gmat::REAL_TYPE,      // MinimumElevationAngle
-      Gmat::OBJECTARRAY_TYPE,      // ERROR_MODEL                          // made changes by TUAN NGUYEN
+      Gmat::OBJECTARRAY_TYPE,      // ERROR_MODEL
    };
 
 //---------------------------------
@@ -135,13 +135,13 @@ GroundStation::~GroundStation()
 {
    // delete all hardware
    for (UnsignedInt i = 0; i < hardwareList.size(); ++i)
-      if (hardwareList[i] != NULL)                          // made changes by TUAN NGUYEN
+      if (hardwareList[i] != NULL)
          delete hardwareList[i];
 
-   // delete all error models                               // made changes by TUAN NGUYEN
-   for (UnsignedInt i = 0; i < errorModels.size(); ++i)     // made changes by TUAN NGUYEN
-      if (errorModels[i] != NULL)                           // made changes by TUAN NGUYEN
-         delete errorModels[i];                             // made changes by TUAN NGUYEN
+   // delete all error models
+   for (UnsignedInt i = 0; i < errorModels.size(); ++i)
+      if (errorModels[i] != NULL)
+         delete errorModels[i];
 
    // delete all clones of ErrorModels
    for (std::map<std::string, ObjectArray>::iterator i = errorModelMap.begin(); i != errorModelMap.end(); ++i)
@@ -175,7 +175,7 @@ GroundStation::GroundStation(const GroundStation& gs) :
    humidity              (gs.humidity),
    dataSource            (gs.dataSource),
    minElevationAngle     (gs.minElevationAngle),
-   errorModelNames       (gs.errorModelNames),             // made changes by TUAN NGUYEN
+   errorModelNames       (gs.errorModelNames),
    ionosphereModel       (gs.ionosphereModel),
    troposphereModel      (gs.troposphereModel)
 {
@@ -223,7 +223,7 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
       dataSource      = gs.dataSource;
 
       minElevationAngle  = gs.minElevationAngle;
-      errorModelNames    = gs.errorModelNames;                // made changes by TUAN NGUYEN
+      errorModelNames    = gs.errorModelNames;
       troposphereModel  = gs.troposphereModel;
       ionosphereModel   = gs.ionosphereModel;
    }
@@ -489,16 +489,16 @@ bool GroundStation::SetStringParameter(const Integer id,
       return true;
    }
 
-   if (id == ERROR_MODELS)                                                      // made changes by TUAN NGUYEN
-   {                                                                            // made changes by TUAN NGUYEN
-      // Only add error model if it is not in the list already                  // made changes by TUAN NGUYEN
-      if (find(errorModelNames.begin(), errorModelNames.end(), value) ==        // made changes by TUAN NGUYEN
-                  errorModelNames.end())                                        // made changes by TUAN NGUYEN
-      {                                                                         // made changes by TUAN NGUYEN
-         errorModelNames.push_back(value);                                      // made changes by TUAN NGUYEN
-      }                                                                         // made changes by TUAN NGUYEN
-      return true;                                                              // made changes by TUAN NGUYEN
-   }                                                                            // made changes by TUAN NGUYEN
+   if (id == ERROR_MODELS)
+   {
+      // Only add error model if it is not in the list already
+      if (find(errorModelNames.begin(), errorModelNames.end(), value) == 
+                  errorModelNames.end())
+      {
+         errorModelNames.push_back(value);
+      }
+      return true;
+   }
 
    return GroundstationInterface::SetStringParameter(id, value);
 }
@@ -658,14 +658,14 @@ bool GroundStation::SetStringParameter(const Integer id,
       }
       return true;
 
-   case ERROR_MODELS:                                                           // made changes by TUAN NGUYEN
-      // Only add the error model if it is not in the list already              // made changes by TUAN NGUYEN
-      if (find(errorModelNames.begin(), errorModelNames.end(), value) ==        // made changes by TUAN NGUYEN
-                  errorModelNames.end())                                        // made changes by TUAN NGUYEN
-      {                                                                         // made changes by TUAN NGUYEN
-         errorModelNames.push_back(value);                                      // made changes by TUAN NGUYEN
-      }                                                                         // made changes by TUAN NGUYEN
-      return true;                                                              // made changes by TUAN NGUYEN
+   case ERROR_MODELS:
+      // Only add the error model if it is not in the list already
+      if (find(errorModelNames.begin(), errorModelNames.end(), value) == 
+                  errorModelNames.end())
+      {
+         errorModelNames.push_back(value);
+      }
+      return true;
 
    default:
       break;      // intentional drop through
@@ -691,8 +691,8 @@ const StringArray& GroundStation::GetStringArrayParameter(const Integer id) cons
    if (id == ADD_HARDWARE)
       return hardwareNames;
 
-   if (id == ERROR_MODELS)                                                // made changes by TUAN NGUYEN
-      return errorModelNames;                                             // made changes by TUAN NGUYEN
+   if (id == ERROR_MODELS)
+      return errorModelNames;
 
    return GroundstationInterface::GetStringArrayParameter(id);
 }
@@ -816,9 +816,9 @@ bool GroundStation::RenameRefObject(const Gmat::ObjectType type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
-   switch (type)                                            // made changes by TUAN NGUYEN
-   {                                                        // made changes by TUAN NGUYEN
-   case Gmat::HARDWARE:                                     // made changes by TUAN NGUYEN
+   switch (type)
+   {
+   case Gmat::HARDWARE:
       for (UnsignedInt i=0; i<hardwareNames.size(); i++)
       {
          if (hardwareNames[i] == oldName)
@@ -830,17 +830,17 @@ bool GroundStation::RenameRefObject(const Gmat::ObjectType type,
       return true;
       break;
 
-   case Gmat::ERROR_MODEL:                                  // made changes by TUAN NGUYEN
-      for (UnsignedInt i=0; i<errorModelNames.size(); i++)  // made changes by TUAN NGUYEN
-      {                                                     // made changes by TUAN NGUYEN
-         if (errorModelNames[i] == oldName)                 // made changes by TUAN NGUYEN
-         {                                                  // made changes by TUAN NGUYEN
-            errorModelNames[i] = newName;                   // made changes by TUAN NGUYEN
-            break;                                          // made changes by TUAN NGUYEN
-         }                                                  // made changes by TUAN NGUYEN
-      }                                                     // made changes by TUAN NGUYEN
-      return true;                                          // made changes by TUAN NGUYEN
-      break;                                                // made changes by TUAN NGUYEN
+   case Gmat::ERROR_MODEL:
+      for (UnsignedInt i=0; i<errorModelNames.size(); i++)
+      {
+         if (errorModelNames[i] == oldName)
+         {
+            errorModelNames[i] = newName;
+            break;
+         }
+      }
+      return true;
+      break;
    }
 
    return GroundstationInterface::RenameRefObject(type, oldName, newName);
@@ -876,28 +876,28 @@ GroundStation::GetRefObjectNameArray(const Gmat::ObjectType type)
       // Add all hardware names to retval array
       for (UnsignedInt i = 0; i < hardwareNames.size(); ++i)
       {
-         if (find(retval.begin(), retval.end(), hardwareNames[i]) == retval.end())        // made changes by TUAN NGUYEN
+         if (find(retval.begin(), retval.end(), hardwareNames[i]) == retval.end())
             retval.push_back(hardwareNames[i]);
       }
    }
    
    // for error model
-   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::ERROR_MODEL))                       // made changes by TUAN NGUYEN
-   {                                                                                      // made changes by TUAN NGUYEN
-      // Add all error model names to retval array                                        // made changes by TUAN NGUYEN
-      for (UnsignedInt i = 0; i < errorModelNames.size(); ++i)                            // made changes by TUAN NGUYEN
-      {                                                                                   // made changes by TUAN NGUYEN
-         if (find(retval.begin(), retval.end(), errorModelNames[i]) == retval.end())      // made changes by TUAN NGUYEN
-            retval.push_back(errorModelNames[i]);                                         // made changes by TUAN NGUYEN
-      }                                                                                   // made changes by TUAN NGUYEN
-   }                                                                                      // made changes by TUAN NGUYEN
+   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::ERROR_MODEL))
+   {
+      // Add all error model names to retval array
+      for (UnsignedInt i = 0; i < errorModelNames.size(); ++i)
+      {
+         if (find(retval.begin(), retval.end(), errorModelNames[i]) == retval.end())
+            retval.push_back(errorModelNames[i]);
+      }
+   }
 
 
    // Now pick up the objects that the base classes need
    StringArray baseNames = GroundstationInterface::GetRefObjectNameArray(type);
    for (UnsignedInt i = 0; i < baseNames.size(); ++i)
    {
-      if (find(retval.begin(), retval.end(), baseNames[i]) == retval.end())              // made changes by TUAN NGUYEN
+      if (find(retval.begin(), retval.end(), baseNames[i]) == retval.end())
          retval.push_back(baseNames[i]);
    }
 
@@ -937,26 +937,26 @@ GmatBase* GroundStation::GetRefObject(const Gmat::ObjectType type,
       }
    }
 
-   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::ERROR_MODEL))                 // made changes by TUAN NGUYEN
-   {                                                                                // made changes by TUAN NGUYEN
-      for(std::map<std::string,ObjectArray>::iterator i = errorModelMap.begin();    // made changes by TUAN NGUYEN
-            i != errorModelMap.end(); ++i)                                          // made changes by TUAN NGUYEN
-      {                                                                             // made changes by TUAN NGUYEN
-         for(UnsignedInt j = 0; j < i->second.size(); ++j)                          // made changes by TUAN NGUYEN
-         {                                                                          // made changes by TUAN NGUYEN
-            GmatBase* errorModelObj = i->second.at(j);                              // made changes by TUAN NGUYEN
-            if (errorModelObj->GetFullName() == name)                               // made changes by TUAN NGUYEN
-               return errorModelObj;                                                // made changes by TUAN NGUYEN
-         }                                                                          // made changes by TUAN NGUYEN
-      }                                                                             // made changes by TUAN NGUYEN
+   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::ERROR_MODEL))
+   {
+      for(std::map<std::string,ObjectArray>::iterator i = errorModelMap.begin();
+            i != errorModelMap.end(); ++i)
+      {
+         for(UnsignedInt j = 0; j < i->second.size(); ++j)
+         {
+            GmatBase* errorModelObj = i->second.at(j);
+            if (errorModelObj->GetFullName() == name)
+               return errorModelObj;
+         }
+      }
 
-      //for(ObjectArray::iterator i = errorModels.begin();                            // made changes by TUAN NGUYEN
-      //         i < errorModels.end(); ++i)                                          // made changes by TUAN NGUYEN
-      //{                                                                             // made changes by TUAN NGUYEN
-      //   if ((*i)->GetName() == name)                                               // made changes by TUAN NGUYEN
-      //      return (*i);                                                            // made changes by TUAN NGUYEN
-      //}                                                                             // made changes by TUAN NGUYEN
-   }                                                                                // made changes by TUAN NGUYEN
+      //for(ObjectArray::iterator i = errorModels.begin();
+      //         i < errorModels.end(); ++i)
+      //{
+      //   if ((*i)->GetName() == name)
+      //      return (*i);
+      //}
+   }
 
    return GroundstationInterface::GetRefObject(type, name);
 }
@@ -987,9 +987,9 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    if (obj == NULL)
       return false;
 
-   switch (type)                                                                           // made changes by TUAN NGUYEN
-   {                                                                                       // made changes by TUAN NGUYEN
-   case Gmat::HARDWARE:   // work for hardware                                             // made changes by TUAN NGUYEN
+   switch (type)
+   {
+   case Gmat::HARDWARE:   // work for hardware
       if (obj->GetType() == Gmat::HARDWARE)
       {
          // Don't add if it's already there
@@ -1011,29 +1011,29 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       return false;      // <-- throw here; It was supposed to be hardware, but isn't.
       break;
 
-   case Gmat::ERROR_MODEL:   // work for error model                                        // made changes by TUAN NGUYEN
-      if (obj->GetType() == Gmat::ERROR_MODEL)                                              // made changes by TUAN NGUYEN
-      {                                                                                     // made changes by TUAN NGUYEN
-         // Don't add if it's already there                                                 // made changes by TUAN NGUYEN
-         bool errormodelRegistered = false;                                                 // made changes by TUAN NGUYEN
-         for (UnsignedInt i=0; i < errorModels.size(); ++i)                                 // made changes by TUAN NGUYEN
-         {                                                                                  // made changes by TUAN NGUYEN
-            if (errorModels[i]->GetName() == obj->GetName())                                // made changes by TUAN NGUYEN
-            {                                                                               // made changes by TUAN NGUYEN
-               errormodelRegistered = true;                                                 // made changes by TUAN NGUYEN
-               break;                                                                       // made changes by TUAN NGUYEN
-            }                                                                               // made changes by TUAN NGUYEN
-         }                                                                                  // made changes by TUAN NGUYEN
-         if (!errormodelRegistered)                                                         // made changes by TUAN NGUYEN
-         {                                                                                  // made changes by TUAN NGUYEN
-            GmatBase* refObj = obj->Clone();       // a error model needs to be cloned      // made changes by TUAN NGUYEN
+   case Gmat::ERROR_MODEL:   // work for error model
+      if (obj->GetType() == Gmat::ERROR_MODEL)
+      {
+         // Don't add if it's already there
+         bool errormodelRegistered = false;
+         for (UnsignedInt i=0; i < errorModels.size(); ++i)
+         {
+            if (errorModels[i]->GetName() == obj->GetName())
+            {
+               errormodelRegistered = true;
+               break;
+            }
+         }
+         if (!errormodelRegistered)
+         {
+            GmatBase* refObj = obj->Clone();       // a error model needs to be cloned
             refObj->SetFullName(GetName() + "." + refObj->GetName()); // It needs to have full name. ex: "CAN.ErrorModel1"  
             errorModels.push_back(refObj);   
-         }                                                                                  // made changes by TUAN NGUYEN
-         return true;                                                                       // made changes by TUAN NGUYEN
-      }                                                                                     // made changes by TUAN NGUYEN
-      return false;      // <-- throw here; It was supposed to be error model, but isn't.   // made changes by TUAN NGUYEN
-      break;                                                                                // made changes by TUAN NGUYEN
+         }
+         return true;
+      }
+      return false;      // <-- throw here; It was supposed to be error model, but isn't.
+      break;
    }
 
    return GroundstationInterface::SetRefObject(obj, type, name);
@@ -1046,8 +1046,8 @@ ObjectArray& GroundStation::GetRefObjectArray(const Gmat::ObjectType type)
    case Gmat::HARDWARE:
       return hardwareList;
    
-   case Gmat::ERROR_MODEL:                   // made changes by TUAN NGUYEN
-      return errorModels;                    // made changes by TUAN NGUYEN
+   case Gmat::ERROR_MODEL:
+      return errorModels;
    
    default:
       break;
@@ -1064,10 +1064,10 @@ ObjectArray& GroundStation::GetRefObjectArray(const std::string& typeString)
       return hardwareList;
    }
 
-   if (typeString == "ErrorModel")                // made changes by TUAN NGUYEN
-   {                                              // made changes by TUAN NGUYEN
-      return errorModels;                         // made changes by TUAN NGUYEN
-   }                                              // made changes by TUAN NGUYEN
+   if (typeString == "ErrorModel")
+   {
+      return errorModels;
+   }
 
    return GroundstationInterface::GetRefObjectArray(typeString);
 }
@@ -1103,7 +1103,7 @@ const ObjectTypeArray& GroundStation::GetRefObjectTypeArray()
    GroundstationInterface::GetRefObjectTypeArray();
 
    refObjectTypes.push_back(Gmat::HARDWARE);
-   refObjectTypes.push_back(Gmat::ERROR_MODEL);                            // made changes by TUAN NGUYEN
+   refObjectTypes.push_back(Gmat::ERROR_MODEL);
    
    return refObjectTypes;
 }
@@ -1276,7 +1276,6 @@ bool GroundStation::Initialize()
 }
 
 
-// made changes by TUAN NGUYEN
 bool GroundStation::CreateErrorModelForSignalPath(std::string spacecraftName)
 {
    std::map<std::string, ObjectArray>::iterator i = errorModelMap.find(spacecraftName);
@@ -1297,7 +1296,6 @@ bool GroundStation::CreateErrorModelForSignalPath(std::string spacecraftName)
 }
 
 
-// made changes by TUAN NGUYEN
 std::map<std::string,ObjectArray>& GroundStation::GetErrorModelMap()
 {
    return errorModelMap;

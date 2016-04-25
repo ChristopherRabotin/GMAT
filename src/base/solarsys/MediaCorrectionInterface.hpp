@@ -35,7 +35,7 @@ public:
    MediaCorrectionInterface& operator=(const MediaCorrectionInterface& mc);
    virtual GmatBase*    Clone() const;
 
-   virtual bool Initialize();                         // made changes by TUAN NGUYEN
+   virtual bool Initialize();
 
    virtual bool SetModel(Integer mod);
    virtual bool SetModelName(std::string modName);
@@ -68,8 +68,8 @@ protected:
    Real elevationAngle;            // unit: radian
    Real range;                     // unit: m
 
-   /// Contain path name of data folder. It needs for Ionosphere code to read ap.dat file and specify the epoch range   // made changes by TUAN NGUYEN
-   std::string     dataPath;                                                                                            // made changes by TUAN NGUYEN
+   /// Contain path name of data folder. It needs for Ionosphere code to read ap.dat file and specify the epoch range
+   std::string     dataPath;
 
 };
 

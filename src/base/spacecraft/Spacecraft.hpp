@@ -642,9 +642,9 @@ protected:
    /// List of hardware objects used in the spacecraft
    ObjectArray       hardwareList;
 
-   // Solve-for parameters                                               // made changes by TUAN NGUYEN
-   /// List of solve-for parameters in Spacecraft object                 // made changes by TUAN NGUYEN
-   StringArray       solveforNames;                                      // made changes by TUAN NGUYEN
+   // Solve-for parameters
+   /// List of solve-for parameters in Spacecraft object
+   StringArray       solveforNames;
    /// List of STM parameters in Spacecraft object
    StringArray       stmElementNames;
 

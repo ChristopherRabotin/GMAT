@@ -48,6 +48,7 @@
 
 #include "GmatBase.hpp"
 #include "GmatGlobal.hpp"  // for GetDataPrecision(), IsWritingGmatKeyword()
+#include "Moderator.hpp"
 #include <sstream>         // for StringStream
 #include "StringUtil.hpp"
 #include "FileManager.hpp" // for FindPath()
@@ -130,8 +131,8 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "SolarPowerSystem", "NuclearPowerSystem",
    "Hardware",      "CoordinateSystem", "AxisSystem",       "Attitude",         "MathNode",
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
-   "MeasurementModel","CoreMeasurement","ErrorModel",       "TrackingData",     "TrackingSystem",   "DataStream",       // made changes by TUAN NGUYEN.      // add ErrorModel type
-   "DataFile",      "ObType",           "DataFilter",        "Interface",        "MediaCorrection",  "Sensor",          // made changes by TUAN NGUYEN.      // add DataFilter type
+   "MeasurementModel","CoreMeasurement","ErrorModel",       "TrackingData",     "TrackingSystem",   "DataStream",
+   "DataFile",      "ObType",           "DataFilter",        "Interface",        "MediaCorrection",  "Sensor",
    "RFHardware",    "Antenna",          "UnknownObject"
 };
 /**
@@ -157,8 +158,8 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     false,
    false,     true,      false,     false,     false,
    false,     false,     false,     false,     false,
-   false,     false,     false,     false,     false,     false,                                 // made changes by TUAN NGUYEN   // add ErrorModel type
-   false,     false,     false,     false,     false,     false,                                 // made changes by TUAN NGUYEN   // add DataFilter type
+   false,     false,     false,     false,     false,     false,
+   false,     false,     false,     false,     false,     false,
    false,     false,     false
 };
 
@@ -189,7 +190,7 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    parameterCount             (GmatBaseParamCount),
    typeName                   (typeStr),
    instanceName               (nomme),
-   instanceFullName           (nomme),                   // made changes by TUAN NGUYEN
+   instanceFullName           (nomme),
    scriptCreatedFrom          (""),
    isCreatedFromMainScript    (true),
    type                       (typeId),
@@ -275,7 +276,7 @@ GmatBase::GmatBase(const GmatBase &a) :
     typeName                  (a.typeName),
     //instanceName    ("CopyOf"+a.instanceName),
     instanceName              (a.instanceName),
-    instanceFullName          (a.instanceFullName),          // made changes by TUAN NGUYEN
+    instanceFullName          (a.instanceFullName),
     scriptCreatedFrom         (a.scriptCreatedFrom),
     isCreatedFromMainScript   (a.isCreatedFromMainScript),
     type                      (a.type),
@@ -5007,14 +5008,12 @@ bool GmatBase::IsParameterCommandModeSettable(const Integer id) const
 }
 
 
-// made changes by TUAN NGUYEN
 const std::string GmatBase::GetFullName()
 {
    return instanceFullName;
 }
 
 
-// made changes by TUAN NGUYEN
 bool GmatBase::SetFullName(const std::string name)
 {
    instanceFullName = name;
@@ -5022,22 +5021,18 @@ bool GmatBase::SetFullName(const std::string name)
 }
 
 
-// made changes by TUAN NGUYEN
-#include "Moderator.hpp"
 ObjectMap GmatBase::GetConfiguredObjectMap()
 {
    return Moderator::Instance()->GetSandbox()->GetObjectMap();
 }
 
-// made changes by TUAN NGUYEN
+
 GmatBase* GmatBase::GetConfiguredObject(const std::string &name)
 {
    return Moderator::Instance()->GetInternalObject(name);
-   //return Moderator::Instance()->GetConfiguredObject(name);
 }
 
 
-// made changes by TUAN NGUYEN
 const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type)
 {
    ObjectMap objMap = GetConfiguredObjectMap();
@@ -5052,7 +5047,6 @@ const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type)
 }
 
 
-// made changes by TUAN NGUYEN
 const StringArray& GmatBase::GetListOfObjects(const std::string &typeName)
 {
    ObjectMap objMap = GetConfiguredObjectMap();

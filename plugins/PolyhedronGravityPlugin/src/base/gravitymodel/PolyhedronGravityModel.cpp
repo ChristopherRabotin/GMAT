@@ -787,7 +787,7 @@ bool PolyhedronGravityModel::SetStringParameter(const Integer id, const std::str
    {
       case CREATE_FORCE_BODY:
          createForceBodyName = value;
-		 this->SetBodyName(value);						// set theBody is the createForceBody	// made change by TUAN NGUYEN 
+		 this->SetBodyName(value);						// set theBody is the createForceBody
 		 return true;
       case SHAPE_FILENAME:
          bodyShapeFilename = value;

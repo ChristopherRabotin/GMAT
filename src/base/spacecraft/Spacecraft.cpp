@@ -163,7 +163,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // CartesianVZ
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
-      Gmat::STRINGARRAY_TYPE, // SolveFors                  // made changes by TUAN NGUYEN
+      Gmat::STRINGARRAY_TYPE, // SolveFors
       Gmat::STRINGARRAY_TYPE, // StmElementNames
       Gmat::REAL_TYPE,        // CD_EPSILON
       Gmat::REAL_TYPE,        // CR_EPSILON
@@ -229,7 +229,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "CartesianVZ",
       "MassFlow",
       "AddHardware",
-      "SolveFors",                             // made changes by TUAN NGUYEN      // move solve-for parameter from batch estimator to solve-for object 
+      "SolveFors",                             // move solve-for parameter from batch estimator to solve-for object 
       "StmElementNames",
       "Cd_Epsilon",
       "Cr_Epsilon",
@@ -669,7 +669,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spadBFCS             (NULL),
    ephemMgr             (NULL),
    includeCartesianState(a.includeCartesianState),
-   solveforNames        (a.solveforNames),                        // made changes by TUAN NGUYEN
+   solveforNames        (a.solveforNames),
    stmElementNames      (a.stmElementNames),
    cdEpsilon            (a.cdEpsilon),
    crEpsilon            (a.crEpsilon),
@@ -900,7 +900,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    includeCartesianState = a.includeCartesianState;
 
-   solveforNames      = a.solveforNames;                                 // made changes by TUAN NGUYEN
+   solveforNames      = a.solveforNames;
    stmElementNames    = a.stmElementNames;
 
    cdEpsilon          = a.cdEpsilon;
@@ -3801,13 +3801,13 @@ std::string Spacecraft::GetStringParameter(const Integer id,
                return "";
          }
 
-      case SOLVEFORS:                                                          // made changes by TUAN NGUYEN
-         {                                                                     // made changes by TUAN NGUYEN
-            if ((0 <= index)&(index < (Integer)(solveforNames.size())))        // made changes by TUAN NGUYEN
-               return solveforNames[index];                                    // made changes by TUAN NGUYEN
-            else                                                               // made changes by TUAN NGUYEN
-               return "";                                                      // made changes by TUAN NGUYEN
-         }                                                                     // made changes by TUAN NGUYEN
+      case SOLVEFORS:
+         {
+            if ((0 <= index)&(index < (Integer)(solveforNames.size())))
+               return solveforNames[index];
+            else
+               return "";
+         }
 
       case STMELEMENTS:
          if ((index >= 0) && (index < (Integer)stmElementNames.size()))
@@ -3858,8 +3858,8 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
 {
    if (id == ADD_HARDWARE)
       return hardwareNames;
-   if (id == SOLVEFORS)                                         // made changes by TUAN NGUYEN
-      return solveforNames;                                     // made changes by TUAN NGUYEN
+   if (id == SOLVEFORS)
+      return solveforNames;
    if (id == STMELEMENTS)
       return stmElementNames;
    if (id == FUEL_TANK_ID)
@@ -4356,17 +4356,17 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
-   case SOLVEFORS:                                                                                 // made changes by TUAN NGUYEN
-      {                                                                                            // made changes by TUAN NGUYEN
-         if (index < (Integer)solveforNames.size())                                                // made changes by TUAN NGUYEN
-            solveforNames[index] = value;                                                          // made changes by TUAN NGUYEN
-         else                                                                                      // made changes by TUAN NGUYEN
-            // Only add the solvefor parameter if it is not in the list already                    // made changes by TUAN NGUYEN
-            if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())    // made changes by TUAN NGUYEN
-               solveforNames.push_back(value);                                                     // made changes by TUAN NGUYEN
+   case SOLVEFORS:
+      {
+         if (index < (Integer)solveforNames.size())
+            solveforNames[index] = value;
+         else
+            // Only add the solvefor parameter if it is not in the list already
+            if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())
+               solveforNames.push_back(value);
 
-         return true;                                                                              // made changes by TUAN NGUYEN
-      }                                                                                            // made changes by TUAN NGUYEN
+         return true;
+      }
    case STMELEMENTS:
       if (index < stmElementNames.size())
          stmElementNames[index] = value;
@@ -5718,7 +5718,6 @@ bool Spacecraft::IsEstimationParameterValid(const Integer item)
    
    switch (id)
    {
-      //case Gmat::CARTESIAN_STATE:          // made changes by TUAN NGUYEN
       case CARTESIAN_X:                      // It is compared to Spacecraft CARTESIAN_X parameter's ID
          retval = true;
          break;

@@ -56,8 +56,8 @@
 
 class MeasurementModelBase;
 class CoreMeasurement;
-class ErrorModel;                             // made changes by TUAN NGUYEN
-class DataFilter;                             // made changes by TUAN NGUYEN
+class ErrorModel;
+class DataFilter;
 class DataFile;
 class ObType;
 class TrackingSystem;
@@ -100,8 +100,8 @@ public:
 
    void                AddMeasurementModel(MeasurementModelBase *mModel);
    void                AddMeasurement(CoreMeasurement *meas);
-   void                AddErrorModel(ErrorModel *meas);                                // made changes by TUAN NGUYEN
-   void                AddDataFilter(DataFilter *filter);                              // made changes by TUAN NGUYEN
+   void                AddErrorModel(ErrorModel *meas);
+   void                AddDataFilter(DataFilter *filter);
    void                AddDataFile(DataFile *meas);
    void                AddObType(ObType *meas);
    void                AddEventLocator(EventLocator *el);
@@ -152,8 +152,8 @@ public:
    CoordinateSystem*   GetCoordinateSystem(const std::string &name);
    CalculatedPoint*    GetCalculatedPoint(const std::string &name);
    MeasurementModelBase* GetMeasurementModel(const std::string &name);
-   ErrorModel*         GetErrorModel(const std::string &name);                                // made changes by TUAN NGUYEN
-   DataFilter*         GetDataFilter(const std::string &name);                                // made changes by TUAN NGUYEN
+   ErrorModel*         GetErrorModel(const std::string &name);
+   DataFilter*         GetDataFilter(const std::string &name);
 
    TrackingSystem*     GetTrackingSystem(const std::string &name);
    TrackingData*       GetTrackingData(const std::string &name);

@@ -900,8 +900,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          distancefactor = nominalSun / sunDistance;        // it has no unit (Km/Km)
 
          // Convert m/s^2 to km/s^2
-         //distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;         // made changes by TUAN NGUYEN
-         distancefactor *= distancefactor;                                        // made changes by TUAN NGUYEN
+         //distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
+         distancefactor *= distancefactor;
 
          #ifdef DEBUG_SRP_ORIGIN
             if (shadowModel == 0) 
@@ -912,8 +912,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            if (sunRadius < sunDistance)                                             // made changes by TUAN NGUYEN       // This change avoids ASIN() error
-            {                                                                        // made changes by TUAN NGUYEN
+            if (sunRadius < sunDistance)                                             // This change avoids ASIN() error
+            {
                std::string shModel = "DualCone";
                if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
 #ifdef DEBUG_SHADOW_STATE
@@ -931,13 +931,13 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                percentSun = shadowState->FindShadowState(inSunlight, inShadow,
                      shModel, &state[i6], cbSunVector, sunSat, forceVector,
                      sunRadius, bodyRadius, psunrad);
-            }                                                                        // made changes by TUAN NGUYEN
-            else                                                                     // made changes by TUAN NGUYEN
-            {                                                                        // made changes by TUAN NGUYEN
-               inSunlight = true;                                                    // made changes by TUAN NGUYEN
-               inShadow = false;                                                     // made changes by TUAN NGUYEN
-               percentSun = 1.0;                                                     // made changes by TUAN NGUYEN
-            }                                                                        // made changes by TUAN NGUYEN
+            }
+            else
+            {
+               inSunlight = true;
+               inShadow = false;
+               percentSun = 1.0;
+            }
          }
          else
          {
@@ -1086,8 +1086,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
          distancefactor = nominalSun / sunDistance;     // It has no unit (Km/Km)
          // Convert m/s^2 to km/s^2
-         //distancefactor *= distancefactor * GmatMathConstants::M_TO_KM * GmatMathConstants::M_TO_KM;             //made changes by TUAN NGUYEN
-         distancefactor *= distancefactor;                                                                         //made changes by TUAN NGUYEN
+         //distancefactor *= distancefactor * GmatMathConstants::M_TO_KM * GmatMathConstants::M_TO_KM;
+         distancefactor *= distancefactor;
 
          #ifdef DEBUG_SRP_ORIGIN
             if (shadowModel == 0)
@@ -1098,22 +1098,22 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            if (sunRadius < sunDistance)                                               // made changes by TUAN NGUYEN      // This change avoids ASIN() error
-            {                                                                          // made changes by TUAN NGUYEN
+            if (sunRadius < sunDistance)                                               // This change avoids ASIN() error
+            {
                std::string shModel = "DualCone";
                if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
                percentSun = shadowState->FindShadowState(inSunlight, inShadow,
-                  // shModel, &state[i6], cbSunVector, sunSat, forceVector,            // made changes by TUAN NGUYEN
-                  shModel, &state[associate], cbSunVector, sunSat, forceVector,        // made changes by TUAN NGUYEN
+                  // shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  shModel, &state[associate], cbSunVector, sunSat, forceVector,
                   sunRadius, bodyRadius, psunrad);
                //FindShadowState(inSunlight, inShadow, &state[i6]);
-            }                                                                          // made changes by TUAN NGUYEN
-            else                                                                       // made changes by TUAN NGUYEN
-            {                                                                          // made changes by TUAN NGUYEN
-               inSunlight = true;                                                      // made changes by TUAN NGUYEN
-               inShadow = false;                                                       // made changes by TUAN NGUYEN
-               percentSun = 1.0;                                                       // made changes by TUAN NGUYEN
-            }                                                                          // made changes by TUAN NGUYEN
+            }
+            else
+            {
+               inSunlight = true;
+               inShadow = false;
+               percentSun = 1.0;
+            }
          }
          else
          {
@@ -1135,7 +1135,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                if ((old_cr != cr[i]))
                {
                   old_cr = cr[i];
-                  //MessageInterface::ShowMessage("Cr = %.12lf   Cr0 = %.12lf\n", cr[i], crInitial[i]);         // made changes by TUAN NGUYEN
+                  //MessageInterface::ShowMessage("Cr = %.12lf   Cr0 = %.12lf\n", cr[i], crInitial[i]);
                }
 
                // All of the common terms for C_s
@@ -1302,8 +1302,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
          distancefactor = nominalSun / sunDistance;                              // It has no unit due to Km/Km
          // Convert m/s^2 to km/s^2
-         // distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;                   // made changes by TUAN NGUYEN
-         distancefactor *= distancefactor;                                                   // made changes by TUAN NGUYEN
+         // distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
+         distancefactor *= distancefactor;
 
          #ifdef DEBUG_SRP_ORIGIN
             if (shadowModel == 0)
@@ -1314,22 +1314,22 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            if (sunRadius < sunDistance)                                                     // made changes by TUAN NGUYEN      // this change avoids ASIN() error
+            if (sunRadius < sunDistance)                                                     // this change avoids ASIN() error
             {
                std::string shModel = "DualCone";
                if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
                percentSun = shadowState->FindShadowState(inSunlight, inShadow,
-                  //shModel, &state[i6], cbSunVector, sunSat, forceVector,                   // made changes by TUAN NGUYEN
-                  shModel, &state[associate], cbSunVector, sunSat, forceVector,              // made changes by TUAN NGUYEN
+                  //shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  shModel, &state[associate], cbSunVector, sunSat, forceVector,
                   sunRadius, bodyRadius, psunrad);
                //            FindShadowState(inSunlight, inShadow, &state[i6]);
-            }                                                                                // made changes by TUAN NGUYEN
-            else                                                                             // made changes by TUAN NGUYEN
-            {                                                                                // made changes by TUAN NGUYEN
-               inSunlight = true;                                                            // made changes by TUAN NGUYEN
-               inShadow = false;                                                             // made changes by TUAN NGUYEN
-               percentSun = 1.0;                                                             // made changes by TUAN NGUYEN
-            }                                                                                // made changes by TUAN NGUYEN
+            }
+            else
+            {
+               inSunlight = true;
+               inShadow = false;
+               percentSun = 1.0;
+            }
          }
          else
          {
