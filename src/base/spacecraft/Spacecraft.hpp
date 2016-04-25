@@ -307,6 +307,8 @@ protected:
       DATE_FORMAT_ID,
       CD_ID,
       CR_ID,
+      CD_SIGMA_ID,           // made changes by TUAN NGUYEN
+      CR_SIGMA_ID,           // made changes by TUAN NGUYEN
       DRAG_AREA_ID,
       SRP_AREA_ID,
       FUEL_TANK_ID,
@@ -513,9 +515,11 @@ protected:
    std::string       scEpochStr;
    Real              dryMass;
    Real              coeffDrag;
+   Real              coeffDragSigma;                                        // made changes by TUAN NGUYEN
    Real              dragArea;
    Real              srpArea;
    Real              reflectCoeff;
+   Real              reflectCoeffSigma;                                     // made changes by TUAN NGUYEN
    /// String specifying the epoch time system (A1, TAI, UTC, or TT)
    std::string       epochSystem;
    /// String specifying the epoch time format (Gregorian or ModJulian)
@@ -638,9 +642,9 @@ protected:
    /// List of hardware objects used in the spacecraft
    ObjectArray       hardwareList;
 
-   // Solve-for parameters                                               // made changes by TUAN NGUYEN
-   /// List of solve-for parameters in Spacecraft object                 // made changes by TUAN NGUYEN
-   StringArray       solveforNames;                                      // made changes by TUAN NGUYEN
+   // Solve-for parameters
+   /// List of solve-for parameters in Spacecraft object
+   StringArray       solveforNames;
    /// List of STM parameters in Spacecraft object
    StringArray       stmElementNames;
 

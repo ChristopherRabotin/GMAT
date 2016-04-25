@@ -136,6 +136,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::ENUMERATION_TYPE, // DateFormat
       Gmat::REAL_TYPE,        // Cd
       Gmat::REAL_TYPE,        // Cr
+      Gmat::REAL_TYPE,        // CdSigma               // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,        // CrSigma               // made changes by TUAN NGUYEN
       Gmat::REAL_TYPE,        // DragArea
       Gmat::REAL_TYPE,        // SRPArea
       Gmat::OBJECTARRAY_TYPE, // Tanks
@@ -161,7 +163,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // CartesianVZ
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
-      Gmat::STRINGARRAY_TYPE, // SolveFors                  // made changes by TUAN NGUYEN
+      Gmat::STRINGARRAY_TYPE, // SolveFors
       Gmat::STRINGARRAY_TYPE, // StmElementNames
       Gmat::REAL_TYPE,        // CD_EPSILON
       Gmat::REAL_TYPE,        // CR_EPSILON
@@ -200,6 +202,8 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "DateFormat",
       "Cd",
       "Cr",
+      "CdSigma",                      // made changes by TUAN NGUYEN
+      "CrSigma",                      // made changes by TUAN NGUYEN
       "DragArea",
       "SRPArea",
       "Tanks",
@@ -225,7 +229,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "CartesianVZ",
       "MassFlow",
       "AddHardware",
-      "SolveFors",                             // made changes by TUAN NGUYEN      // move solve-for parameter from batch estimator to solve-for object 
+      "SolveFors",                             // move solve-for parameter from batch estimator to solve-for object 
       "StmElementNames",
       "Cd_Epsilon",
       "Cr_Epsilon",
@@ -356,6 +360,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    modelFileFullPath    (""),
    dryMass              (850.0),
    coeffDrag            (2.2),
+   coeffDragSigma       (0.1),                        // made changes by TUAN NGUYEN
    dragArea             (15.0),
    srpArea              (1.0),
    reflectCoeff         (1.8),
@@ -618,6 +623,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    scEpochStr           (a.scEpochStr),
    dryMass              (a.dryMass),
    coeffDrag            (a.coeffDrag),
+   coeffDragSigma       (a.coeffDragSigma),                  // made changes by TUAN NGUYEN
    dragArea             (a.dragArea),
    srpArea              (a.srpArea),
    reflectCoeff         (a.reflectCoeff),
@@ -663,7 +669,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spadBFCS             (NULL),
    ephemMgr             (NULL),
    includeCartesianState(a.includeCartesianState),
-   solveforNames        (a.solveforNames),                        // made changes by TUAN NGUYEN
+   solveforNames        (a.solveforNames),
    stmElementNames      (a.stmElementNames),
    cdEpsilon            (a.cdEpsilon),
    crEpsilon            (a.crEpsilon),
@@ -763,6 +769,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    scEpochStr           = a.scEpochStr;
    dryMass              = a.dryMass;
    coeffDrag            = a.coeffDrag;
+   coeffDragSigma       = a.coeffDragSigma;                 // made changes by TUAN NGUYEN
    dragArea             = a.dragArea;
    srpArea              = a.srpArea;
    reflectCoeff         = a.reflectCoeff;
@@ -893,7 +900,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    includeCartesianState = a.includeCartesianState;
 
-   solveforNames      = a.solveforNames;                                 // made changes by TUAN NGUYEN
+   solveforNames      = a.solveforNames;
    stmElementNames    = a.stmElementNames;
 
    cdEpsilon          = a.cdEpsilon;
@@ -3005,6 +3012,9 @@ Real Spacecraft::GetRealParameter(const Integer id) const
 
    if (id == CR_ID)
       return reflectCoeff * (1.0 + crEpsilon);
+   
+   if (id == CD_SIGMA_ID)   return coeffDragSigma;              // made changes by TUAN NGUYEN
+   if (id == CR_SIGMA_ID)   return reflectCoeffSigma;           // made changes by TUAN NGUYEN
 
    if (id == DRAG_AREA_ID)  return dragArea;
    if (id == SRP_AREA_ID)   return srpArea;
@@ -3123,6 +3133,21 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
       parmsChanged = true;
       return SetRealParameter("Cr",value);
    }
+   if (id == CD_SIGMA_ID)                                                                                                             // made changes by TUAN NGUYEN
+   {                                                                                                                                  // made changes by TUAN NGUYEN
+      if (value <= 0.0)                                                                                                               // made changes by TUAN NGUYEN
+         throw SpaceObjectException("Error: a nonpositive number was set to CrSigma. A valid value has to be a positive number.\n");  // made changes by TUAN NGUYEN
+      coeffDragSigma = value;                                                                                                         // made changes by TUAN NGUYEN
+      return coeffDragSigma;                                                                                                          // made changes by TUAN NGUYEN
+   }                                                                                                                                  // made changes by TUAN NGUYEN
+   if (id == CR_SIGMA_ID)                                                                                                             // made changes by TUAN NGUYEN
+   {                                                                                                                                  // made changes by TUAN NGUYEN
+      if (value <= 0.0)                                                                                                               // made changes by TUAN NGUYEN
+         throw SpaceObjectException("Error: a nonpositive number was set to CdSigma. A valid value has to be a positive number.\n");  // made changes by TUAN NGUYEN
+      reflectCoeffSigma = value;                                                                                                      // made changes by TUAN NGUYEN
+      return reflectCoeffSigma;                                                                                                       // made changes by TUAN NGUYEN
+   }                                                                                                                                  // made changes by TUAN NGUYEN
+
    if (id == DRAG_AREA_ID)
    {
       parmsChanged = true;
@@ -3776,13 +3801,13 @@ std::string Spacecraft::GetStringParameter(const Integer id,
                return "";
          }
 
-      case SOLVEFORS:                                                          // made changes by TUAN NGUYEN
-         {                                                                     // made changes by TUAN NGUYEN
-            if ((0 <= index)&(index < (Integer)(solveforNames.size())))        // made changes by TUAN NGUYEN
-               return solveforNames[index];                                    // made changes by TUAN NGUYEN
-            else                                                               // made changes by TUAN NGUYEN
-               return "";                                                      // made changes by TUAN NGUYEN
-         }                                                                     // made changes by TUAN NGUYEN
+      case SOLVEFORS:
+         {
+            if ((0 <= index)&(index < (Integer)(solveforNames.size())))
+               return solveforNames[index];
+            else
+               return "";
+         }
 
       case STMELEMENTS:
          if ((index >= 0) && (index < (Integer)stmElementNames.size()))
@@ -3833,8 +3858,8 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
 {
    if (id == ADD_HARDWARE)
       return hardwareNames;
-   if (id == SOLVEFORS)                                         // made changes by TUAN NGUYEN
-      return solveforNames;                                     // made changes by TUAN NGUYEN
+   if (id == SOLVEFORS)
+      return solveforNames;
    if (id == STMELEMENTS)
       return stmElementNames;
    if (id == FUEL_TANK_ID)
@@ -4331,17 +4356,17 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
-   case SOLVEFORS:                                                                                 // made changes by TUAN NGUYEN
-      {                                                                                            // made changes by TUAN NGUYEN
-         if (index < (Integer)solveforNames.size())                                                // made changes by TUAN NGUYEN
-            solveforNames[index] = value;                                                          // made changes by TUAN NGUYEN
-         else                                                                                      // made changes by TUAN NGUYEN
-            // Only add the solvefor parameter if it is not in the list already                    // made changes by TUAN NGUYEN
-            if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())    // made changes by TUAN NGUYEN
-               solveforNames.push_back(value);                                                     // made changes by TUAN NGUYEN
+   case SOLVEFORS:
+      {
+         if (index < (Integer)solveforNames.size())
+            solveforNames[index] = value;
+         else
+            // Only add the solvefor parameter if it is not in the list already
+            if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())
+               solveforNames.push_back(value);
 
-         return true;                                                                              // made changes by TUAN NGUYEN
-      }                                                                                            // made changes by TUAN NGUYEN
+         return true;
+      }
    case STMELEMENTS:
       if (index < stmElementNames.size())
          stmElementNames[index] = value;
@@ -5693,7 +5718,6 @@ bool Spacecraft::IsEstimationParameterValid(const Integer item)
    
    switch (id)
    {
-      //case Gmat::CARTESIAN_STATE:          // made changes by TUAN NGUYEN
       case CARTESIAN_X:                      // It is compared to Spacecraft CARTESIAN_X parameter's ID
          retval = true;
          break;

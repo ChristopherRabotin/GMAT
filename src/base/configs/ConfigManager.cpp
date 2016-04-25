@@ -717,21 +717,21 @@ void ConfigManager::AddMeasurement(CoreMeasurement *meas)
  * @param errorModel Pointer to the ErrorModel instance.
  */
 //------------------------------------------------------------------------------
-void ConfigManager::AddErrorModel(ErrorModel *errorModel)                              // made changes by TUAN NGUYEN
-{                                                                                      // made changes by TUAN NGUYEN
-   if (errorModel == NULL)                                                             // made changes by TUAN NGUYEN
-      throw ConfigManagerException("Cannot add NULL ErrorModel object");               // made changes by TUAN NGUYEN
+void ConfigManager::AddErrorModel(ErrorModel *errorModel)
+{
+   if (errorModel == NULL)
+      throw ConfigManagerException("Cannot add NULL ErrorModel object");
 
-   GmatBase *obj = (GmatBase*)errorModel;                                              // made changes by TUAN NGUYEN
-   std::string name = obj->GetName();                                                  // made changes by TUAN NGUYEN
-   if (name == "")                                                                     // made changes by TUAN NGUYEN
-      throw ConfigManagerException("Unnamed objects cannot be managed");               // made changes by TUAN NGUYEN
+   GmatBase *obj = (GmatBase*)errorModel;
+   std::string name = obj->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
 
-   if (!obj->IsOfType(Gmat::ERROR_MODEL))                                              // made changes by TUAN NGUYEN
-      throw ConfigManagerException(name + " is not an ErrorModel");                    // made changes by TUAN NGUYEN
+   if (!obj->IsOfType(Gmat::ERROR_MODEL))
+      throw ConfigManagerException(name + " is not an ErrorModel");
 
-   AddObject(obj);                                                                     // made changes by TUAN NGUYEN
-}                                                                                      // made changes by TUAN NGUYEN
+   AddObject(obj);
+}
 
 
 //------------------------------------------------------------------------------
@@ -743,21 +743,21 @@ void ConfigManager::AddErrorModel(ErrorModel *errorModel)                       
  * @param filter Pointer to the DataFilter instance.
  */
 //------------------------------------------------------------------------------
-void ConfigManager::AddDataFilter(DataFilter *filter)                                  // made changes by TUAN NGUYEN
-{                                                                                      // made changes by TUAN NGUYEN
-   if (filter == NULL)                                                                 // made changes by TUAN NGUYEN
-      throw ConfigManagerException("Cannot add NULL DataFilter object");               // made changes by TUAN NGUYEN
+void ConfigManager::AddDataFilter(DataFilter *filter)
+{
+   if (filter == NULL)
+      throw ConfigManagerException("Cannot add NULL DataFilter object");
 
-   GmatBase *obj = (GmatBase*)filter;                                                  // made changes by TUAN NGUYEN
-   std::string name = obj->GetName();                                                  // made changes by TUAN NGUYEN
-   if (name == "")                                                                     // made changes by TUAN NGUYEN
-      throw ConfigManagerException("Unnamed objects cannot be managed");               // made changes by TUAN NGUYEN
+   GmatBase *obj = (GmatBase*)filter;
+   std::string name = obj->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
 
-   if (!obj->IsOfType(Gmat::DATA_FILTER))                                              // made changes by TUAN NGUYEN
-      throw ConfigManagerException(name + " is not a DataFilter");                     // made changes by TUAN NGUYEN
+   if (!obj->IsOfType(Gmat::DATA_FILTER))
+      throw ConfigManagerException(name + " is not a DataFilter");
 
-   AddObject(obj);                                                                     // made changes by TUAN NGUYEN
-}                                                                                      // made changes by TUAN NGUYEN
+   AddObject(obj);
+}
 
 
 //------------------------------------------------------------------------------
@@ -2487,18 +2487,18 @@ MeasurementModelBase* ConfigManager::GetMeasurementModel(const std::string &name
  * @return A pointer to the ErrorModel, or NULL if it was not found
  */
 //------------------------------------------------------------------------------
-ErrorModel* ConfigManager::GetErrorModel(const std::string &name)                 // made changes by TUAN NGUYEN
-{                                                                                 // made changes by TUAN NGUYEN
-   ErrorModel *erm = NULL;                                                        // made changes by TUAN NGUYEN
-   if (mapping.find(name) != mapping.end())                                       // made changes by TUAN NGUYEN
-   {                                                                              // made changes by TUAN NGUYEN
-      if (mapping[name]->IsOfType(Gmat::ERROR_MODEL))                             // made changes by TUAN NGUYEN
-      {                                                                           // made changes by TUAN NGUYEN
-         erm = (ErrorModel *)mapping[name];                                       // made changes by TUAN NGUYEN
-      }                                                                           // made changes by TUAN NGUYEN
-   }                                                                              // made changes by TUAN NGUYEN
-   return erm;                                                                    // made changes by TUAN NGUYEN
-}                                                                                 // made changes by TUAN NGUYEN
+ErrorModel* ConfigManager::GetErrorModel(const std::string &name)
+{
+   ErrorModel *erm = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->IsOfType(Gmat::ERROR_MODEL))
+      {
+         erm = (ErrorModel *)mapping[name];
+      }
+   }
+   return erm;
+}
 
 
 //------------------------------------------------------------------------------
@@ -2512,18 +2512,18 @@ ErrorModel* ConfigManager::GetErrorModel(const std::string &name)               
  * @return A pointer to the DataFilter, or NULL if it was not found
  */
 //------------------------------------------------------------------------------
-DataFilter* ConfigManager::GetDataFilter(const std::string &name)                 // made changes by TUAN NGUYEN
-{                                                                                 // made changes by TUAN NGUYEN
-   DataFilter *df = NULL;                                                         // made changes by TUAN NGUYEN
-   if (mapping.find(name) != mapping.end())                                       // made changes by TUAN NGUYEN
-   {                                                                              // made changes by TUAN NGUYEN
-      if (mapping[name]->IsOfType(Gmat::DATA_FILTER))                             // made changes by TUAN NGUYEN
-      {                                                                           // made changes by TUAN NGUYEN
-         df = (DataFilter *)mapping[name];                                        // made changes by TUAN NGUYEN
-      }                                                                           // made changes by TUAN NGUYEN
-   }                                                                              // made changes by TUAN NGUYEN
-   return df;                                                                     // made changes by TUAN NGUYEN
-}                                                                                 // made changes by TUAN NGUYEN
+DataFilter* ConfigManager::GetDataFilter(const std::string &name)
+{
+   DataFilter *df = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->IsOfType(Gmat::DATA_FILTER))
+      {
+         df = (DataFilter *)mapping[name];
+      }
+   }
+   return df;
+}
 
 
 //------------------------------------------------------------------------------

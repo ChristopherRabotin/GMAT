@@ -106,7 +106,8 @@ Simulator::Simulator(const std::string& name) :
    simulationStep      (60.0),
    locatingEvent       (false),
    timeStep            (60.0),
-   addNoise            (false)
+   addNoise            (false),
+   isEpochFormatSet    (false)
 {
    objectTypeNames.push_back("Simulator");
    parameterCount = SimulatorParamCount;
@@ -144,7 +145,8 @@ Simulator::Simulator(const Simulator& sim) :
    timeStep            (sim.timeStep),
    measManager         (sim.measManager),
    measList            (sim.measList),
-   addNoise            (sim.addNoise)
+   addNoise            (sim.addNoise),
+   isEpochFormatSet    (sim.isEpochFormatSet)
 {
    propagator = NULL;
    if (sim.propagator) propagator = ((PropSetup*) (sim.propagator)->Clone());
@@ -193,6 +195,7 @@ Simulator& Simulator::operator =(const Simulator& sim)
       measManager         = sim.measManager;
       measList            = sim.measList;
       addNoise            = sim.addNoise;
+      isEpochFormatSet    = sim.isEpochFormatSet;
    }
 
    return *this;
@@ -536,8 +539,8 @@ Real Simulator::GetRealParameter(const Integer id) const
 /**
  * This method sets the Real parameter value, given the input parameter ID.
  *
- * @param id ID for the parameter whose value to change.
- * @param value Value for the parameter.
+ * @param id         ID for the parameter whose value to change.
+ * @param value      Value for the parameter (unit: second).
  *
  * @return  Real value of the requested parameter.
  */
@@ -549,6 +552,13 @@ Real Simulator::SetRealParameter(const Integer id, const Real value)
       #ifdef DEBUG_TIMESTEP
         MessageInterface::ShowMessage("simulationStep = %.15lf\n", value);
       #endif
+      if (value <= 0.0)
+      {
+         std::stringstream ss;
+         ss << "Error: a nonpositive number (" << value << ") was set to " << GetName() << ".MeasurementTimeStep parameter. It should be a positive number.\n";
+         throw SolverException(ss.str());
+      }
+
       simulationStep = value;
       return true;
    }
@@ -637,35 +647,53 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
    //@Todo: this code will be removed when the bug in Interperter is fixed                                          // made changes by TUAN NGUYEN
    if (id == MEASUREMENTS)
    {
-      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
-      if (measName == "")                                                                                           // made changes by TUAN NGUYEN
-         throw SolverException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");      // made changes by TUAN NGUYEN
-      return SetStringParameter(id, measName, measList.size());
+      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
+         throw SolverException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");
+
+      if (find(measList.begin(), measList.end(), value) == measList.end())
+         measList.push_back(value);
+
+      return true;
+      //std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
+      //if (measName == "")                                                                                           // made changes by TUAN NGUYEN
+      //   throw SolverException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");      // made changes by TUAN NGUYEN
+      //return SetStringParameter(id, measName, measList.size());
    }
 
    if (id == PROPAGATOR)
    {
-      propagatorName = value;  // get propSetup here???
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw SolverException("Error: '" + value + "' set to " + GetName() + ".Propagator parameter is an invalid object name.\n");
+
+      propagatorName = value;  // get propSetup here???   Answer: GMAT cannot get propSetup object here due to at this point, the script to define propSetup object may be not read yet. Getting propSetup should be in SetRefObject()
       return true;
    }
    if (id == EPOCH_FORMAT)
    {
+      if (!TimeConverterUtil::IsValidTimeSystem(value))
+         throw SolverException("Error: Time system '" + value + "' set to " + GetName() + ".EpochFormat parameter is invalid.\n");
+
       epochFormat = value;
+      isEpochFormatSet = true;
       return true;
    }
    if (id == INITIAL_EPOCH)
    {
+      if (!isEpochFormatSet)
+         MessageInterface::ShowMessage("Warning: In your script, %s.EpochFormat parameter has to be set before setting %s.InitialEpoch.\n", GetName().c_str(), GetName().c_str());
+
       initialEpoch = value;
       // Convert to a.1 time for internal processing
-      //simulationStart = ConvertToRealEpoch(initialEpoch, initialEpochFormat);
       simulationStart = ConvertToRealEpoch(initialEpoch, epochFormat);
       return true;
    }
    if (id == FINAL_EPOCH)
    {
+      if (!isEpochFormatSet)
+         MessageInterface::ShowMessage("Warning: In your script, %s.EpochFormat parameter has to be set before setting %s.FinalEpoch.\n", GetName().c_str(), GetName().c_str());
+
       finalEpoch = value;
       // Convert to a.1 time for internal processing
-      //simulationEnd = ConvertToRealEpoch(finalEpoch, finalEpochFormat);
       simulationEnd = ConvertToRealEpoch(finalEpoch, epochFormat);
       return true;
    }
@@ -729,8 +757,12 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value,
    #endif
    if (id == MEASUREMENTS)
    {
+      // No measurement is added when an empty list is set to Add Measurement parameter 
+      if (index == -1)
+         return true;
+
       if (!GmatStringUtil::IsValidIdentity(value))
-         throw SolverException("Error: '%s' set to " + GetName() + ".Measurements parameter is an invalid object name.\n");
+         throw SolverException("Error: '" + value + "' set to " + GetName() + ".Measurements parameter is an invalid object name.\n");
 
       Integer sz = (Integer) measList.size();
       if (index == sz) // needs to be added to the end of the list
@@ -820,17 +852,17 @@ bool Simulator::SetOnOffParameter(const Integer id, const std::string &value)
    if (id == ADD_NOISE)
    {
       if (value == "On")
-     {
+      {
          addNoise = true;
-       return true;
-     }
-      if (value == "Off")
-     {
+         return true;
+      } 
+      else if (value == "Off")
+      {
          addNoise = false;
-       return true;
-     }
+         return true;
+      }
 
-     return false;
+      return false;
    }
 
    return Solver::SetOnOffParameter(id, value);
@@ -1333,6 +1365,7 @@ bool Simulator::Initialize()
    if (simulationEnd < simulationStart)
       throw SolverException(
             "Simulator error - simulation end time is before simulation start time.\n");
+
    // Check to make sure required objects have been set
    if (propagatorName == "")
       throw SolverException(
@@ -1605,6 +1638,23 @@ void Simulator::CompleteInitialization()
 {
    // tell the measManager to complete its initialization
    bool measOK = measManager.Initialize();
+
+   // Get time range of EOP file
+   EopFile* eop = GmatGlobal::Instance()->GetEopFile();
+   if (eop != NULL)
+   {
+      Real timeMin, timeMax;
+      eop->GetTimeRage(timeMin, timeMax);
+      if (simulationStart < timeMin)
+      {
+         MessageInterface::ShowMessage("Warning: %s.InitialEpoch has value (%.12lf A1Mjd) outside EOP time range [%.12lf A1Mjd , %.12lf A1Mjd].\n", GetName().c_str(), simulationStart, timeMin, timeMax);
+      }
+      else if (simulationEnd > timeMax)
+         MessageInterface::ShowMessage("Warning: %s.FinalEpoch has value (%.12lf A1Mjd) outside EOP time range [%.12lf A1Mjd , %.12lf A1Mjd].\n", GetName().c_str(), simulationEnd, timeMin, timeMax);
+   }
+   else
+      MessageInterface::ShowMessage("Warning: No EOP file was used for running this GMAT script.\n");
+
    if (!measOK)
       throw SolverException(
             "Simulator::CompleteInitialization - error initializing "

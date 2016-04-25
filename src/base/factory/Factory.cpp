@@ -796,12 +796,12 @@ CoreMeasurement* Factory::CreateMeasurement(const std::string & ofType,
  *                               objects of type ErrorModel.
  */
 //------------------------------------------------------------------------------
-ErrorModel* Factory::CreateErrorModel(const std::string & ofType,                         // made changes by TUAN NGUYEN
-                                        const std::string & withName)                     // made changes by TUAN NGUYEN
-{                                                                                         // made changes by TUAN NGUYEN
-   throw FactoryException                                                                 // made changes by TUAN NGUYEN
-   ("Factory::CreateErrorModel() must be implemented by a ErrorModelFactory\n");          // made changes by TUAN NGUYEN
-}                                                                                         // made changes by TUAN NGUYEN
+ErrorModel* Factory::CreateErrorModel(const std::string & ofType,
+                                        const std::string & withName)
+{
+   throw FactoryException
+   ("Factory::CreateErrorModel() must be implemented by a ErrorModelFactory\n");
+}
 
 
 //------------------------------------------------------------------------------
@@ -825,12 +825,12 @@ ErrorModel* Factory::CreateErrorModel(const std::string & ofType,               
  *                               objects of type DataFilter.
  */
 //------------------------------------------------------------------------------
-DataFilter* Factory::CreateDataFilter(const std::string & ofType,                         // made changes by TUAN NGUYEN
-                                        const std::string & withName)                     // made changes by TUAN NGUYEN
-{                                                                                         // made changes by TUAN NGUYEN
-   throw FactoryException                                                                 // made changes by TUAN NGUYEN
-   ("Factory::CreateDataFilter() must be implemented by a DataFilterFactory\n");          // made changes by TUAN NGUYEN
-}                                                                                         // made changes by TUAN NGUYEN
+DataFilter* Factory::CreateDataFilter(const std::string & ofType,
+                                        const std::string & withName)
+{
+   throw FactoryException
+   ("Factory::CreateDataFilter() must be implemented by a DataFilterFactory\n");
+}
 
 
 //------------------------------------------------------------------------------

@@ -96,8 +96,8 @@ public:
    virtual bool         SetName(const char *who,
                                 const std::string &oldName = "");
 
-   virtual const std::string  GetFullName();                                       // made changes by TUAN NGUYEN
-   virtual bool         SetFullName(const std::string name);                       // made changes by TUAN NGUYEN
+   virtual const std::string  GetFullName();
+   virtual bool         SetFullName(const std::string name);
 
    virtual Integer      GetParameterCount() const;
 
@@ -518,11 +518,11 @@ public:
    void SetIsCreatedFromMainScript(bool flag);
    bool IsCreatedFromMainScript();
    
-   /// Functions use information from Moderator                               // made changes by TUAN NGUYEN
-   ObjectMap               GetConfiguredObjectMap();                          // made changes by TUAN NGUYEN
-   GmatBase*               GetConfiguredObject(const std::string &name);      // made changes by TUAN NGUYEN
-   const StringArray&      GetListOfObjects(Gmat::ObjectType type);           // made changes by TUAN NGUYEN
-   const StringArray&      GetListOfObjects(const std::string &typeName);     // made changes by TUAN NGUYEN
+   /// Functions use information from Moderator
+   ObjectMap               GetConfiguredObjectMap();
+   GmatBase*               GetConfiguredObject(const std::string &name);
+   const StringArray&      GetListOfObjects(Gmat::ObjectType type);
+   const StringArray&      GetListOfObjects(const std::string &typeName);
 
 protected:
    /// Parameter IDs
@@ -548,8 +548,8 @@ protected:
    /// Name of the object -- empty if it is nameless
    std::string         instanceName;
    
-   /// Full name of this object                               // made changes by TUAN NGUYEN
-   std::string         instanceFullName;                      // made changes by TUAN NGUYEN
+   /// Full name of this object
+   std::string         instanceFullName;
 
    /// Script file name where object is created from
    std::string         scriptCreatedFrom;

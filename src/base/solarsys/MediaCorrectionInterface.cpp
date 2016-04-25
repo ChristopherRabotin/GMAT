@@ -31,7 +31,7 @@
 MediaCorrectionInterface::MediaCorrectionInterface(const std::string &typeStr,
                                  const std::string &nomme) :
    GmatBase         (Gmat::MEDIA_CORRECTION, typeStr, nomme),
-   dataPath         (""),                                             // made changes by TUAN NGUYEN
+   dataPath         (""),
    solarSystem      (NULL),
    temperature      (295.1),      // 295.1K
    pressure         (1013.5),     // 1013.5 kPa
@@ -66,7 +66,7 @@ MediaCorrectionInterface::~MediaCorrectionInterface()
 //------------------------------------------------------------------------------
 MediaCorrectionInterface::MediaCorrectionInterface(const MediaCorrectionInterface& mdc):
    GmatBase           (mdc),
-   dataPath           (mdc.dataPath),                  // made changes by TUAN NGUYEN
+   dataPath           (mdc.dataPath),
    pressure           (mdc.pressure),
    temperature        (mdc.temperature),
    humidityFraction   (mdc.humidityFraction),
@@ -100,7 +100,7 @@ MediaCorrectionInterface& MediaCorrectionInterface::operator=(const MediaCorrect
       modelName         = mc.modelName;
       solarSystem       = mc.solarSystem;
 
-      dataPath          = mc.dataPath;            // made changes by TUAN NGUYEN
+      dataPath          = mc.dataPath;
 
       temperature       = mc.temperature;
       pressure          = mc.pressure;

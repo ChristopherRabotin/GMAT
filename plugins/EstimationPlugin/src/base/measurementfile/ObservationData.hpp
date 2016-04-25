@@ -57,9 +57,10 @@ public:
 
    virtual void      Clear();
    
-   std::string       GetTrackingConfig();                       //made changes by TUAN NGUYEN
+   std::string       GetTrackingConfig();                                     //made changes by TUAN NGUYEN
 
-   StringArray       GetAvailableMeasurementTypes();            // made changes by TUAN NGUYEN
+   StringArray       GetAvailableMeasurementTypes();                          // made changes by TUAN NGUYEN
+   bool              IsValidMeasurementType(const std::string typeName);      // made changes by TUAN NGUYEN
 
 // Explicitly public so that this class acts like a struct
 public:

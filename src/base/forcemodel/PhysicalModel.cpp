@@ -313,18 +313,18 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       else
          isInitialized = false;
    }
-   //else                                                                        // made changes by TUAN NGUYEN
-   //{                                                                           // made changes by TUAN NGUYEN
-   //   if (modelState != NULL)                                                  // made changes by TUAN NGUYEN
-   //   {                                                                        // made changes by TUAN NGUYEN
-   //      #ifdef DEBUG_STATE_ALLOCATION                                         // made changes by TUAN NGUYEN
-   //         MessageInterface::ShowMessage("Deleting modelState at %p\n",       // made changes by TUAN NGUYEN
-   //               modelState);                                                 // made changes by TUAN NGUYEN
-   //      #endif                                                                // made changes by TUAN NGUYEN
-   //      delete [] modelState;                                                 // made changes by TUAN NGUYEN
-   //      modelState = NULL;                                                    // made changes by TUAN NGUYEN
-   //   }                                                                        // made changes by TUAN NGUYEN
-   //}                                                                           // made changes by TUAN NGUYEN
+   //else
+   //{
+   //   if (modelState != NULL)
+   //   {
+   //      #ifdef DEBUG_STATE_ALLOCATION
+   //         MessageInterface::ShowMessage("Deleting modelState at %p\n",
+   //               modelState);
+   //      #endif
+   //      delete [] modelState;
+   //      modelState = NULL;
+   //   }
+   //}
    rawState = modelState;
    
    if (pm.deriv != NULL) 
@@ -465,14 +465,14 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
       else
          isInitialized = false;
    }
-   else                                    // made changes by TUAN NGUYEN
-   {                                       // made changes by TUAN NGUYEN
-      if (deriv)                           // made changes by TUAN NGUYEN
-      {                                    // made changes by TUAN NGUYEN
-         delete [] deriv;                  // made changes by TUAN NGUYEN
-         deriv = NULL;                     // made changes by TUAN NGUYEN
-      }                                    // made changes by TUAN NGUYEN
-   }                                       // made changes by TUAN NGUYEN
+   else
+   {
+      if (deriv)
+      {
+         delete [] deriv;
+         deriv = NULL;
+      }
+   }
    
    return *this;
 }
@@ -538,7 +538,6 @@ void PhysicalModel::SetForceOrigin(CelestialBody* toBody)
 }
 
 
-// made changes by TUAN NGUYEN
 CelestialBody* PhysicalModel::GetForceOrigin()
 {
    return forceOrigin;
@@ -646,8 +645,8 @@ bool PhysicalModel::Initialize()
       else
          isInitialized = false;
    }
-   else                                       // made changes by TUAN NGUYEN
-      isInitialized = false;                  // made changes by TUAN NGUYEN
+   else
+      isInitialized = false;
 
    rawState = modelState;
    

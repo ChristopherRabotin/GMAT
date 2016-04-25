@@ -182,7 +182,7 @@ protected:
 private:
    Real    ConvertToRealEpoch(const std::string &theEpoch,
                                    const std::string &theFormat);
-
+   bool    isEpochFormatSet;
 };
 
 #endif /* DataFilter_hpp */

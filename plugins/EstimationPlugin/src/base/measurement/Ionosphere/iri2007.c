@@ -38835,61 +38835,61 @@ struct {
 /* Table of constant values */
 
 static real c_b6 = (float)1.;
-static integer c__9 = 9;
 static integer c__1 = 1;
 static integer c_n1 = -1;
 static integer c__0 = 0;
 static integer c__25 = 25;
-static doublereal c_b86 = .5;
-static doublereal c_b90 = 10.;
-static real c_b93 = (float)394.5;
-static real c_b95 = (float)100.;
-static real c_b96 = (float)300.;
+static doublereal c_b83 = .5;
+static doublereal c_b87 = 10.;
+static real c_b90 = (float)394.5;
+static real c_b92 = (float)100.;
+static real c_b93 = (float)300.;
 static integer c__6 = 6;
-static doublereal c_b145 = .33333333333333331;
+static doublereal c_b142 = .33333333333333331;
 static integer c__8 = 8;
 static integer c__4 = 4;
 static integer c__2 = 2;
 static integer c__3 = 3;
+static integer c__9 = 9;
 static integer c__76 = 76;
 static integer c__13 = 13;
 static integer c__988 = 988;
 static integer c__7 = 7;
 static integer c__49 = 49;
 static integer c__441 = 441;
-static doublereal c_b297 = 2.36;
-static doublereal c_b299 = .25;
-static doublereal c_b302 = 2.7;
-static real c_b396 = (float)2.;
-static real c_b400 = (float).1;
-static real c_b401 = (float).15;
-static real c_b605 = (float)80.;
-static real c_b606 = (float)110.;
-static real c_b607 = (float)200.;
-static real c_b609 = (float)12.;
-static real c_b634 = (float)1.9;
-static real c_b635 = (float)2.6;
-static real c_b638 = (float)28.;
-static real c_b643 = (float)81.;
-static real c_b646 = (float).06;
-static real c_b654 = (float)4e8;
-static real c_b656 = (float)88.;
-static real c_b659 = (float).05;
-static real c_b662 = (float)4.6;
-static real c_b663 = (float)4.5;
-static real c_b666 = (float)-11.5;
-static real c_b667 = (float)-4.;
-static real c_b679 = (float).001;
-static real c_b697 = (float)0.;
-static doublereal c_b704 = 2.;
-static real c_b705 = (float)1.5;
-static real c_b715 = (float)3.;
-static real c_b722 = (float)130.;
-static real c_b723 = (float)500.;
-static real c_b726 = (float).01;
+static doublereal c_b294 = 2.36;
+static doublereal c_b296 = .25;
+static doublereal c_b299 = 2.7;
+static real c_b393 = (float)2.;
+static real c_b397 = (float).1;
+static real c_b398 = (float).15;
+static real c_b521 = (float)80.;
+static real c_b522 = (float)110.;
+static real c_b523 = (float)200.;
+static real c_b525 = (float)12.;
+static real c_b550 = (float)1.9;
+static real c_b551 = (float)2.6;
+static real c_b554 = (float)28.;
+static real c_b559 = (float)81.;
+static real c_b562 = (float).06;
+static real c_b570 = (float)4e8;
+static real c_b572 = (float)88.;
+static real c_b575 = (float).05;
+static real c_b578 = (float)4.6;
+static real c_b579 = (float)4.5;
+static real c_b582 = (float)-11.5;
+static real c_b583 = (float)-4.;
+static real c_b595 = (float).001;
+static real c_b611 = (float)0.;
+static doublereal c_b618 = 2.;
+static real c_b619 = (float)1.5;
+static real c_b629 = (float)3.;
+static real c_b636 = (float)130.;
+static real c_b637 = (float)500.;
+static real c_b640 = (float).01;
 static integer c__12 = 12;
-static real c_b748 = (float)10.;
-static real c_b755 = (float)50.;
+static real c_b662 = (float)10.;
+static real c_b669 = (float)50.;
 
 /* cira.for, version number can be found at the end of this comment. */
 /* ----------------------------------------------------------------------- */
@@ -40148,16 +40148,11 @@ L7:
     integer i__1, i__2;
 
     /* Builtin functions */
-    integer i_nint(real *), s_wsle(cilist *), do_lio(integer *, integer *, 
-	    char *, ftnlen), e_wsle();
+    integer i_nint(real *);
 
     /* Local variables */
     real g, h__;
     integer i__, m, n, mm, nn, irec;
-
-    /* Fortran I/O blocks */
-    static cilist io___209 = { 0, 6, 0, 0, 0 };
-
 
 /* =============================================================== */
 
@@ -40230,11 +40225,8 @@ L7:
 /* L2211: */
     }
     goto L998;
+/* 999     print *, 'Error in GETSHC function: file read error !!!' */
 L999:
-    s_wsle(&io___209);
-    do_lio(&c__9, &c__1, "Error in GETSHC function: file read error !!!", (
-	    ftnlen)45);
-    e_wsle();
 L998:
     return 0;
 } /* getshc_ */
@@ -40914,7 +40906,7 @@ L2:
     } else {
 	if (*z__ < (float)90.) {
 	    d__1 = (doublereal) cos(*z__ * pi / 180);
-	    f1z = pow_dd(&d__1, &c_b86) * (float)1.1892;
+	    f1z = pow_dd(&d__1, &c_b83) * (float)1.1892;
 	} else {
 	    f1z = (float)0.;
 	}
@@ -41238,7 +41230,7 @@ L1:
     el = edenijkl[0] + flx1 * (edenijkl[1] - edenijkl[0]);
 
     d__1 = (doublereal) el;
-    *edens = pow_dd(&c_b90, &d__1);
+    *edens = pow_dd(&c_b87, &d__1);
 
     return 0;
 } /* f00_ */
@@ -41475,9 +41467,9 @@ doublereal xe1_(real *h__)
     x0 = (float)300. - blo10_1.delta;
     xmx0 = (*h__ - block1_1.hmf2) / dxdh;
     x = xmx0 + x0;
-    eptr1 = eptr_(&x, &blo10_1.beta, &c_b93) - eptr_(&x0, &blo10_1.beta, &
-	    c_b93);
-    eptr2 = eptr_(&x, &c_b95, &c_b96) - eptr_(&x0, &c_b95, &c_b96);
+    eptr1 = eptr_(&x, &blo10_1.beta, &c_b90) - eptr_(&x0, &blo10_1.beta, &
+	    c_b90);
+    eptr2 = eptr_(&x, &c_b92, &c_b93) - eptr_(&x0, &c_b92, &c_b93);
     y = blo10_1.beta * blo10_1.eta * eptr1 + blo10_1.zeta * (eptr2 * (float)
 	    100. - xmx0);
     y *= dxdh;
@@ -41580,8 +41572,8 @@ doublereal dxe1n_(real *h__)
     x0 = (float)300. - blo10_1.delta;
     x = (*h__ - block1_1.hmf2) / ((float)1e3 - block1_1.hmf2) * (float)700. + 
 	    x0;
-    epst2 = epst_(&x, &c_b95, &c_b96);
-    epst1 = epst_(&x, &blo10_1.beta, &c_b93);
+    epst2 = epst_(&x, &c_b92, &c_b93);
+    epst1 = epst_(&x, &blo10_1.beta, &c_b90);
     ret_val = -blo10_1.eta * epst1 + blo10_1.zeta * ((float)1. - epst2);
     return ret_val;
 } /* dxe1n_ */
@@ -41898,7 +41890,7 @@ L600:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_325 = { (float)11.654, (float)10.964, (float)10.369, (float)
+	} equiv_324 = { (float)11.654, (float)10.964, (float)10.369, (float)
 		10.044, (float)11.447, (float)10.747, (float)10.23, (float)
 		9.8437, {0}, (float)-2.2826e-8, (float)-1.5354e-9, (float)
 		1.9844e-8, (float)-4.8215e-10, (float).33033, (float).2354, (
@@ -42020,7 +42012,7 @@ L600:
 		.0050097, (float)-.0030059, (float)-.012886, (float)-.0026567,
 		 (float)-.0013791, (float)-5.2399e-4 };
 
-#define dneh ((real *)&equiv_325)
+#define dneh ((real *)&equiv_324)
 
     static real dnel[441]	/* was [3][3][49] */ = { (float)11.062,(float)
 	    10.41,(float)10.158,(float)10.967,(float)10.407,(float)10.166,0.0,
@@ -42182,7 +42174,7 @@ L600:
     *nne = (r_lg10(&nneh) - r_lg10(&nnel)) / (float)115. * (*f107 - (float)
 	    85.) + r_lg10(&nnel);
     d__1 = (doublereal) (*nne);
-    *nne = pow_dd(&c_b90, &d__1);
+    *nne = pow_dd(&c_b87, &d__1);
     return 0;
 } /* calne_ */
 
@@ -42377,7 +42369,7 @@ L600:
     bb = eptr_(ah, &dno[i__ - 1], &ah[i__]);
     sum += (st[i__] - st[i__ - 1]) * (aa - bb) * dno[i__ - 1];
     d__1 = (doublereal) sum;
-    *nne = pow_dd(&c_b90, &d__1);
+    *nne = pow_dd(&c_b87, &d__1);
     return 0;
 } /* nelow_ */
 
@@ -42587,7 +42579,7 @@ L600:
 	sum += (st[i__] - st[i__ - 1]) * (aa - bb) * dno[i__ - 1];
     }
     d__1 = (doublereal) sum;
-    *nne = pow_dd(&c_b90, &d__1);
+    *nne = pow_dd(&c_b87, &d__1);
     return 0;
 } /* nehigh_ */
 
@@ -42772,7 +42764,7 @@ L600:
 	integer fill_160[4];
 	real e_161[8];
 	integer fill_162[4];
-	} equiv_480 = { (float)2118.5, (float)2625.3, (float)2922.8, (float)
+	} equiv_479 = { (float)2118.5, (float)2625.3, (float)2922.8, (float)
 		3373.8, (float)2073.2, (float)2596.4, (float)2962.1, (float)
 		3289., {0}, (float)-.9096, (float)-1.4102, (float)-1.0193, (
 		float)-.14579, (float)118.58, (float)273.69, (float)396.88, (
@@ -42950,7 +42942,7 @@ L600:
 		float)49.158, (float)24.878, (float)34.333, (float)-15.174, (
 		float)-44.075 };
 
-#define d__ ((real *)&equiv_480)
+#define d__ ((real *)&equiv_479)
 
     static integer mf107[49] = { 1,-1,1,-1,1,-1,1,1,-1,1,-1,1,-1,1,-1,1,-1,1,
 	    -1,1,-1,1,-1,1,1,-1,1,-1,1,1,-1,1,-1,1,-1,1,-1,1,-1,1,1,-1,1,1,-1,
@@ -43054,7 +43046,7 @@ L600:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_481 = { (float)2.1792, (float)3.3758, (float)1.478, (float)
+	} equiv_480 = { (float)2.1792, (float)3.3758, (float)1.478, (float)
 		1.4513, (float)3.2236, (float)1.7678, (float)1.3888, (float)
 		.86854, {0}, (float)-2.1275e-7, (float)-4.8705e-7, (float)
 		-5.4689e-9, (float)-2.7903e-8, (float).7858, (float)-.12523, (
@@ -43170,7 +43162,7 @@ L600:
 		-.017679, (float)-.014532, (float)-.0035795, (float)-.027587, 
 		(float)-.1031, (float)-.035943 };
 
-#define fa ((real *)&equiv_481)
+#define fa ((real *)&equiv_480)
 
     static struct {
 	real e_1[8];
@@ -43271,7 +43263,7 @@ L600:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_482 = { (float)-419.34, (float)-672.22, (float)-252.47, (
+	} equiv_481 = { (float)-419.34, (float)-672.22, (float)-252.47, (
 		float)-421.57, (float)-626.95, (float)-399.11, (float)-280.05,
 		 (float)-198.99, {0}, (float)7.5753e-5, (float)1.1078e-4, (
 		float)-1.0611e-5, (float)-1.2843e-5, (float)-17.178, (float)
@@ -43382,7 +43374,7 @@ L600:
 		float).75525, (float)-4.8309, (float)3.1723, (float)6.3166, (
 		float)-2.6929, (float)1.5189, (float)21.825, (float)10.312 };
 
-#define fb ((real *)&equiv_482)
+#define fb ((real *)&equiv_481)
 
     static real sz[400]	/* was [4][4][25] */ = { (float)-22.484,(float)11.725,
 	    (float)48.197,(float)162.89,(float)81.616,(float)66.929,(float)
@@ -43636,7 +43628,7 @@ L600:
 /* latitude calculated by highly accurate polynomial expansion */
 
 	d__1 = (doublereal) (*dimo / *b0);
-	a = pow_dd(&d__1, &c_b145) / *fl;
+	a = pow_dd(&d__1, &c_b142) / *fl;
 /* Computing 2nd power */
 	d__1 = a;
 /* Computing 3rd power */
@@ -44158,7 +44150,7 @@ L16:
 	}
 /* L2: */
 	d__1 = (doublereal) ste;
-	te[k] = pow_dd(&c_b90, &d__1);
+	te[k] = pow_dd(&c_b87, &d__1);
     }
     if (is == 2) {
 	*dipl = -(*dipl);
@@ -44170,7 +44162,7 @@ L16:
 	    ste += a[i__ - 1] * c__[((i__ << 1) + 2 << 2) - 9];
 	}
 	d__1 = (doublereal) ste;
-	te[4] = pow_dd(&c_b90, &d__1);
+	te[4] = pow_dd(&c_b87, &d__1);
     }
 /* ---------- TEMPERATURE AT 400KM AT MIDNIGHT AND NOON */
     for (j = 1; j <= 2; ++j) {
@@ -44183,7 +44175,7 @@ L16:
 	}
 /* L4: */
 	d__1 = (doublereal) ste;
-	te[j + 4] = pow_dd(&c_b90, &d__1);
+	te[j + 4] = pow_dd(&c_b87, &d__1);
     }
     return 0;
 } /* teba_ */
@@ -45836,7 +45828,7 @@ L4:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_679 = { (float)-.012838, (float)-.11873, (float)-.50096, (
+	} equiv_678 = { (float)-.012838, (float)-.11873, (float)-.50096, (
 		float)-.75121, (float)-.013612, (float)-.114, (float)-.38369, 
 		(float)-.8219, {0}, (float)3.3892e-9, (float)-7.9543e-8, (
 		float)3.9699e-7, (float)4.7106e-6, (float)-.005555, (float)
@@ -45960,7 +45952,7 @@ L4:
 		.0078412, (float).0014431, (float)1.3591e-4, (float)-.0032403,
 		 (float).0010792, (float)-.014069 };
 
-#define doh ((real *)&equiv_679)
+#define doh ((real *)&equiv_678)
 
     static struct {
 	real e_1[8];
@@ -46061,7 +46053,7 @@ L4:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_680 = { (float)-3.1678, (float)-1.5293, (float)-.81841, (
+	} equiv_679 = { (float)-3.1678, (float)-1.5293, (float)-.81841, (
 		float)-.66978, (float)-2.8141, (float)-1.3652, (float)-.815, (
 		float)-.56899, {0}, (float)3.6289e-7, (float)1.9563e-7, (
 		float)1.3246e-7, (float)4.5698e-7, (float)-.44836, (float)
@@ -46181,7 +46173,7 @@ L4:
 		(float).0061813, (float).0068488, (float)-3.7978e-4, (float)
 		-8.071e-4 };
 
-#define dhh ((real *)&equiv_680)
+#define dhh ((real *)&equiv_679)
 
     static struct {
 	real e_1[8];
@@ -46282,7 +46274,7 @@ L4:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_681 = { (float)-3.0827, (float)-1.71, (float)-1.2078, (float)
+	} equiv_680 = { (float)-3.0827, (float)-1.71, (float)-1.2078, (float)
 		-1.123, (float)-2.976, (float)-2.0393, (float)-1.5728, (float)
 		-1.3029, {0}, (float)4.4643e-7, (float)5.254e-7, (float)
 		-8.3889e-8, (float)-2.9419e-7, (float)-.86799, (float)-.81007,
@@ -46401,7 +46393,7 @@ L4:
 		-.0051509, (float)-7.739e-4, (float)-.0021051, (float).01086, 
 		(float).0049376, (float).001845 };
 
-#define dheh ((real *)&equiv_681)
+#define dheh ((real *)&equiv_680)
 
     static struct {
 	real e_1[8];
@@ -46502,7 +46494,7 @@ L4:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_682 = { (float)-1.6313, (float)-1.4724, (float)-1.6315, (
+	} equiv_681 = { (float)-1.6313, (float)-1.4724, (float)-1.6315, (
 		float)-1.7525, (float)-1.595, (float)-1.4816, (float)-1.5647, 
 		(float)-1.752, {0}, (float)3.3826e-9, (float)6.2234e-7, (
 		float)1.1175e-7, (float)-1.0714e-6, (float).12602, (float)
@@ -46623,7 +46615,7 @@ L4:
 		-6.3752e-4, (float)-.0051806, (float)-.010009, (float)
 		-.0058925, (float)-.016702 };
 
-#define dnh ((real *)&equiv_682)
+#define dnh ((real *)&equiv_681)
 
     static real dol[441]	/* was [3][3][49] */ = { (float)-.0034295,(
 	    float)-.26245,(float)-.89352,(float)-.0075061,(float)-.31262,(
@@ -47134,13 +47126,13 @@ L4:
 	    + r_lg10(&nnl);
 /*     percentages */
     d__1 = (doublereal) (*no);
-    *no = pow_dd(&c_b90, &d__1);
+    *no = pow_dd(&c_b87, &d__1);
     d__1 = (doublereal) (*nh);
-    *nh = pow_dd(&c_b90, &d__1);
+    *nh = pow_dd(&c_b87, &d__1);
     d__1 = (doublereal) (*nhe);
-    *nhe = pow_dd(&c_b90, &d__1);
+    *nhe = pow_dd(&c_b87, &d__1);
     d__1 = (doublereal) (*nn);
-    *nn = pow_dd(&c_b90, &d__1);
+    *nn = pow_dd(&c_b87, &d__1);
 /*     last normalization */
     ntot = *no + *nh + *nhe + *nn;
     *no /= ntot;
@@ -47348,7 +47340,7 @@ L4:
     bb = eptr_(ah, &dno[i__ - 1], &ah[i__]);
     sum += (st[i__] - st[i__ - 1]) * (aa - bb) * dno[i__ - 1];
     d__1 = (doublereal) sum;
-    *nion = pow_dd(&c_b90, &d__1);
+    *nion = pow_dd(&c_b87, &d__1);
     return 0;
 } /* ionlow_ */
 
@@ -47567,7 +47559,7 @@ L4:
 	sum += (st[i__] - st[i__ - 1]) * (aa - bb) * dno[i__ - 1];
     }
     d__1 = (doublereal) sum;
-    *nion = pow_dd(&c_b90, &d__1);
+    *nion = pow_dd(&c_b87, &d__1);
     return 0;
 } /* ionhigh_ */
 
@@ -47597,7 +47589,7 @@ doublereal invdpc_(real *fl, real *dimo, real *b0, real *dipl, real *dtor)
 /*      invariant latitude calculated by highly */
 /*      accurate polynomial expansion */
     d__1 = (doublereal) (*dimo / *b0);
-    a = pow_dd(&d__1, &c_b145) / *fl;
+    a = pow_dd(&d__1, &c_b142) / *fl;
 /* Computing 2nd power */
     d__1 = a;
 /* Computing 3rd power */
@@ -47865,7 +47857,7 @@ doublereal f1_c1__(real *xmodip, real *hour, real *suxnon, real *saxnon)
     }
     *f1prob = f1pr;
     d__1 = (doublereal) xarg;
-    f1prl = pow_dd(&d__1, &c_b297);
+    f1prl = pow_dd(&d__1, &c_b294);
     if (f1prl < (float).001) {
 	f1prl = (float)0.;
     }
@@ -47936,7 +47928,7 @@ doublereal foeedi_(real *cov, real *xhi, real *xhim, real *xlati)
 	r4foe = smin;
     }
     d__1 = (doublereal) r4foe;
-    ret_val = pow_dd(&d__1, &c_b299);
+    ret_val = pow_dd(&d__1, &c_b296);
     return ret_val;
 } /* foeedi_ */
 
@@ -47968,7 +47960,7 @@ doublereal xmded_(real *xhi, real *r__, real *yw)
     y = *r__ * (float)8.8e6 + (float)6.05e8;
     yy = cos(*xhi * const_1.umr);
     d__1 = (doublereal) yy;
-    yyy = (float)-.1 / pow_dd(&d__1, &c_b302);
+    yyy = (float)-.1 / pow_dd(&d__1, &c_b299);
     if (yyy < (float)-40.) {
 	ymd = (float)0.;
     } else {
@@ -49193,7 +49185,7 @@ doublereal xe2to5_(real *h__, real *hmf2, integer *nl, real *hx, real *sc,
     for (i__ = 1; i__ <= i__1; ++i__) {
 	ylay = amp[i__] * rlay_(h__, hmf2, &sc[i__], &hx[i__]);
 	d__1 = (doublereal) ylay;
-	zlay = pow_dd(&c_b90, &d__1);
+	zlay = pow_dd(&c_b87, &d__1);
 /* L1: */
 	sum *= zlay;
     }
@@ -49541,7 +49533,7 @@ L1:
     /* Function Body */
     numlay = 4;
     nc1 = 2;
-    alg102 = r_lg10(&c_b396);
+    alg102 = r_lg10(&c_b393);
 
 /* constraints: xx == height     yy == log(Ne/NmF2)    ww == weights */
 /* ----------------------------------------------------------------- */
@@ -49610,7 +49602,7 @@ L100:
 	ww[0] = (float).5;
     } else {
 	zet = yy[0] - yy[5];
-	ww[0] = epst_(&zet, &c_b400, &c_b401);
+	ww[0] = epst_(&zet, &c_b397, &c_b398);
     }
     if (*hhalf > *hmf1) {
 	hfff = *hmf1;
@@ -49686,18 +49678,11 @@ L1937:
 
     static integer iflag = 0;
 
-    /* Format strings */
-    static char fmt_8000[] = "(1x,i10,\002** OUT OF RANGE **\002/,5x,\002The\
- file IG_RZ.DAT which contains the indices Rz12\002,\002 and IG12\002/5x,\
-\002currently only covers the time period\002,\002 (yymm) : \002,i6,\002-\
-\002,i6)";
-
     /* System generated locals */
     integer i__1;
 
     /* Builtin functions */
     double sqrt(doublereal);
-    integer s_wsfe(cilist *), do_fio(integer *, char *, ftnlen), e_wsfe();
 
     /* Local variables */
     static real ionoindx[2000];
@@ -49719,10 +49704,6 @@ L1937:
     integer iytmp;
     static integer iymst, iymend;
     integer nrdaym;
-
-    /* Fortran I/O blocks */
-    static cilist io___1026 = { 0, 0, 0, fmt_8000, 0 };
-
 
 /* ---------------------------------------------------------------- */
 /* input:        yr,mm,day       year(yyyy),month(mm),day(dd) */
@@ -49836,14 +49817,9 @@ L1:
     }
     iytmp = *yr * 100 + *mm;
     if (iytmp < iymst || iytmp > iymend) {
-	if (iounit_1.konsol > 1) {
-	    io___1026.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___1026);
-	    do_fio(&c__1, (char *)&iytmp, (ftnlen)sizeof(integer));
-	    do_fio(&c__1, (char *)&iymst, (ftnlen)sizeof(integer));
-	    do_fio(&c__1, (char *)&iymend, (ftnlen)sizeof(integer));
-	    e_wsfe();
-	}
+/*               if(konsol.gt.1) write(konsol,8000) iytmp,iymst, */
+/*     &                                            iymend */
+/* L8000: */
 	*nmonth = -1;
 	return 0;
     }
@@ -49997,8 +49973,6 @@ L1927:
     doublereal d__1, d__2;
 
     /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
-	    e_wsle();
     double exp(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
@@ -50009,11 +49983,6 @@ L1927:
     integer n1;
     real ts, df1, df2, dh1, dh2;
     integer inn;
-
-    /* Fortran I/O blocks */
-    static cilist io___1053 = { 0, 6, 0, 0, 0 };
-    static cilist io___1055 = { 0, 6, 0, 0, 0 };
-
 
 /* ***************************************************************** */
 /*   COMPUTER PROGRAM FOR UPDATING FOF2 AND HMF2 FOR EFFECTS OF */
@@ -50079,17 +50048,12 @@ L1927:
 	}
     }
     if (*fi > (float)65. || *ae < (float)500.) {
-	s_wsle(&io___1053);
-	do_lio(&c__9, &c__1, "LSTID are for AE>500. and ABS(FI)<65.", (ftnlen)
-		37);
-	e_wsle();
+/*        WRITE(*,*)'LSTID are for AE>500. and ABS(FI)<65.' */
 	goto L4;
     }
     ts = *ts70 + (*fi * (float)-1.5571 + (float)109.) / (float)60.;
     if (ts < *sux && ts > *sax) {
-	s_wsle(&io___1055);
-	do_lio(&c__9, &c__1, " LSTID are only at night", (ftnlen)24);
-	e_wsle();
+/*        WRITE(*,*)' LSTID are only at night' */
 	goto L4;
     }
     if (inn == 1) {
@@ -50175,23 +50139,12 @@ L5:
 
     static integer lm[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
 
-    /* Format strings */
-    static char fmt_100[] = "(1x,\002Date is outside range of Ap indices fil\
-e.\002,\002 STORM model is turned off.\002)";
-
     /* System generated locals */
     integer i__1;
-
-    /* Builtin functions */
-    integer s_wsfe(cilist *), e_wsfe();
 
     /* Local variables */
     real f;
     integer i__, j1, j2, i9, jd, is, jy, jmn, nyd, iss, iiap[8], iybeg, ihour;
-
-    /* Fortran I/O blocks */
-    static cilist io___1076 = { 0, 0, 0, fmt_100, 0 };
-
 
 /* -------------------------------------------------------------------- */
 /* Finds 3-hourly Ap indices for IRI-storm for given year IYYYY (yyyy), */
@@ -50316,12 +50269,9 @@ e.\002,\002 STORM model is turned off.\002)";
 	}
     }
     goto L20;
+/* 21      if(konsol.gt.1) write(konsol,100) */
+/* L100: */
 L21:
-    if (iounit_1.konsol > 1) {
-	io___1076.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1076);
-	e_wsfe();
-    }
     iap[1] = -5;
 L20:
     return 0;
@@ -50336,25 +50286,14 @@ L20:
 
     static integer lm[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
 
-    /* Format strings */
-    static char fmt_100[] = "(1x,\002Date is outside range of F10.7D indices\
- file\002,\002 (F10.7D = F10.7M = F10.7RM12).\002)";
-
     /* System generated locals */
     integer i__1;
-
-    /* Builtin functions */
-    integer s_wsfe(cilist *), e_wsfe();
 
     /* Local variables */
     real f;
     integer i__, j, jd, is, jy, jmn, nyd;
     real sum;
     integer iiap[8], mend, iybeg;
-
-    /* Fortran I/O blocks */
-    static cilist io___1090 = { 0, 0, 0, fmt_100, 0 };
-
 
 /* -------------------------------------------------------------------- */
 /* Finds daily and monthly F10.7 index, F107D and F107M, for given year */
@@ -50418,12 +50357,9 @@ L20:
     }
     *f107m = sum / mend;
     goto L20;
+/* 21      if(konsol.gt.1) write(konsol,100) */
+/* L100: */
 L21:
-    if (iounit_1.konsol > 1) {
-	io___1090.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1090);
-	e_wsfe();
-    }
     *f107d = (float)-111.;
 L20:
     return 0;
@@ -50926,10 +50862,6 @@ L20:
     /* System generated locals */
     real r__1, r__2, r__3;
 
-    /* Builtin functions */
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
-	    e_wsle();
-
     /* Local variables */
     integer i__, j, k, l1, l2, n1, n2, n3, n4, s1, s2;
     real rl, rs, cf1, cf2, cf3, cf4;
@@ -50937,27 +50869,6 @@ L20:
     real rap, cf300, facl, facs, rapf;
     integer dayno;
     extern /* Subroutine */ int conver_(real *, real *, real *);
-
-    /* Fortran I/O blocks */
-    static cilist io___1113 = { 0, 6, 0, 0, 0 };
-    static cilist io___1114 = { 0, 6, 0, 0, 0 };
-    static cilist io___1115 = { 0, 6, 0, 0, 0 };
-    static cilist io___1116 = { 0, 6, 0, 0, 0 };
-    static cilist io___1120 = { 0, 6, 0, 0, 0 };
-    static cilist io___1121 = { 0, 6, 0, 0, 0 };
-    static cilist io___1122 = { 0, 6, 0, 0, 0 };
-    static cilist io___1123 = { 0, 6, 0, 0, 0 };
-    static cilist io___1126 = { 0, 6, 0, 0, 0 };
-    static cilist io___1127 = { 0, 6, 0, 0, 0 };
-    static cilist io___1128 = { 0, 6, 0, 0, 0 };
-    static cilist io___1129 = { 0, 6, 0, 0, 0 };
-    static cilist io___1130 = { 0, 6, 0, 0, 0 };
-    static cilist io___1131 = { 0, 6, 0, 0, 0 };
-    static cilist io___1132 = { 0, 6, 0, 0, 0 };
-    static cilist io___1133 = { 0, 6, 0, 0, 0 };
-    static cilist io___1134 = { 0, 6, 0, 0, 0 };
-    static cilist io___1135 = { 0, 6, 0, 0, 0 };
-
 
 /* ---------------------------------------------------------------------- */
 /*      Fortran code to obtain the foF2 storm-time correction factor at */
@@ -51000,20 +50911,10 @@ L20:
     } else if (*coor == 2) {
 	*rgma = *rga;
     } else {
-	s_wsle(&io___1113);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1114);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1115);
-	do_lio(&c__9, &c__1, "   Wrong Coordinates Selection -------- >>", (
-		ftnlen)42);
-	do_lio(&c__3, &c__1, (char *)&(*coor), (ftnlen)sizeof(integer));
-	e_wsle();
-	s_wsle(&io___1116);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)'   Wrong Coordinates Selection -------- >>', coor */
+/*          WRITE (6,*)' ' */
 	goto L100;
     }
 /* FROM 3-HOURLY TO HOURLY ap (New, interpolates between the three hourly ap values) */
@@ -51056,20 +50957,10 @@ L20:
 	    ut == 17 || *ut == 20 || *ut == 23) {
 	k = 3;
     } else {
-	s_wsle(&io___1120);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1121);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1122);
-	do_lio(&c__9, &c__1, "  Wrong Universal Time value -------- >>", (
-		ftnlen)40);
-	do_lio(&c__3, &c__1, (char *)&(*ut), (ftnlen)sizeof(integer));
-	e_wsle();
-	s_wsle(&io___1123);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)'  Wrong Universal Time value -------- >>', ut */
+/*          WRITE (6,*)' ' */
 	goto L100;
     }
     rap = (float)0.;
@@ -51081,43 +50972,19 @@ L20:
 	goto L100;
     }
     if (*doy > 366 || *doy < 1) {
-	s_wsle(&io___1126);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1127);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1128);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1129);
-	do_lio(&c__9, &c__1, "      Wrong Day of Year value --- >>", (ftnlen)
-		36);
-	do_lio(&c__3, &c__1, (char *)&(*doy), (ftnlen)sizeof(integer));
-	e_wsle();
-	s_wsle(&io___1130);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)'      Wrong Day of Year value --- >>', doy */
+/*          WRITE (6,*)' ' */
 	goto L100;
     }
     if (*rgma > (float)90. || *rgma < (float)-90.) {
-	s_wsle(&io___1131);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1132);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1133);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
-	s_wsle(&io___1134);
-	do_lio(&c__9, &c__1, "   Wrong GEOMAGNETIC LATITUDE value --- >>", (
-		ftnlen)42);
-	do_lio(&c__4, &c__1, (char *)&(*rgma), (ftnlen)sizeof(real));
-	e_wsle();
-	s_wsle(&io___1135);
-	do_lio(&c__9, &c__1, " ", (ftnlen)1);
-	e_wsle();
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)' ' */
+/*          WRITE (6,*)'   Wrong GEOMAGNETIC LATITUDE value --- >>', rgma */
+/*          WRITE (6,*)' ' */
 	goto L100;
     }
 /*      write(6,*)rgma */
@@ -51717,8 +51584,6 @@ doublereal bspl4_long__(integer *i__, real *x1)
 
     /* Builtin functions */
     double exp(doublereal);
-    integer s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
-	    e_wsle();
 
     /* Local variables */
     integer i__, j;
@@ -51726,10 +51591,6 @@ doublereal bspl4_long__(integer *i__, real *x1)
     real ae1_6__, alfa, beta, ae1_12__, aed1_6__, aed7_12__, ae7_12s__, 
 	    aed22_28__, daet_30__, aed1_6s__, daet_90__, daet_75__, 
 	    aed7_12s__, aed22_28p__, aed22_28s__, daet_7p5__;
-
-    /* Fortran I/O blocks */
-    static cilist io___1210 = { 0, 6, 0, 0, 0 };
-
 
 /* ******************************************************************* */
 /*  Empirical vertical disturbance drifts model */
@@ -51931,13 +51792,7 @@ doublereal bspl4_long__(integer *i__, real *x1)
 		    bspl4_ptime__(&j, slt);
 	}
 	*dynamovd = (float)0.;
-	s_wsle(&io___1210);
-	do_lio(&c__4, &c__1, (char *)&aed1_6__, (ftnlen)sizeof(real));
-	do_lio(&c__4, &c__1, (char *)&aed7_12__, (ftnlen)sizeof(real));
-	do_lio(&c__4, &c__1, (char *)&aed22_28p__, (ftnlen)sizeof(real));
-	do_lio(&c__4, &c__1, (char *)&alfa, (ftnlen)sizeof(real));
-	do_lio(&c__4, &c__1, (char *)&beta, (ftnlen)sizeof(real));
-	e_wsle();
+/* 	  print*,AEd1_6,AEd7_12,AEd22_28P,Alfa,Beta */
 	for (j = 1; j <= 9; ++j) {
 	    *dynamovd += (coff15[j * 6 - 3] * aed1_6__ + coff15[j * 6 - 2] * 
 		    alfa * aed7_12__ + coff15[j * 6 - 1] * beta * aed22_28p__)
@@ -52690,6 +52545,7 @@ doublereal bspl2f_(integer *i__, real *t1)
     *tecb = (float)-111.;
 
 /* initialize IRI parameter in COMMON blocks */
+
     abeg = *hbeg;
     aend = *hend;
     astp = *hend - *hbeg;
@@ -53048,67 +52904,14 @@ L2345:
 	along, integer *iyyyy, integer *mmdd, real *dhour, real *heibeg, real 
 	*heiend, real *heistp, real *outf, real *oarr, integer *ier)
 {
-    /* Format strings */
-    static char fmt_1939[] = "(\002 *Ne* User input of hmF1 is only possible\
- for the LAY-\002,\002version\002)";
-    static char fmt_2911[] = "(\002*** IRI parameters are being calculated *\
-**\002)";
-    static char fmt_9012[] = "(\002Ne, E-F: The LAY-Version is prelimenary\
-.\002,\002 Erroneous profile features can occur.\002)";
-    static char fmt_9013[] = "(\002Ne, B0: Bottomside thickness is \002,\002\
-obtained with Gulyaeva-1987 model.\002)";
-    static char fmt_9014[] = "(\002Ne: No upper limit for F10.7 in\002,\002 \
-topside formula.\002)";
-    static char fmt_9206[] = "(\002Ne: TTS for Topside\002)";
-    static char fmt_9204[] = "(\002Ne: Corrected Topside Formula\002)";
-    static char fmt_9205[] = "(\002Ne: NeQuick for Topside\002)";
-    static char fmt_9015[] = "(\002Ne, foF2/NmF2: provided by user.\002)";
-    static char fmt_9016[] = "(\002Ne, foF2: URSI model is used.\002)";
-    static char fmt_9017[] = "(\002Ne, foF2: CCIR model is used.\002)";
-    static char fmt_9018[] = "(\002Ne, hmF2/M3000F2: provided by user.\002)";
-    static char fmt_9019[] = "(\002Ne, foF1/NmF1: provided by user.\002)";
-    static char fmt_9021[] = "(\002Ne, hmF1: provided by user.\002)";
-    static char fmt_9022[] = "(\002Ne, foE/NmE: provided by user.\002)";
-    static char fmt_9023[] = "(\002Ne, hmE: provided by user.\002)";
-    static char fmt_9024[] = "(\002Ne, foF1: probability function used.\002)";
-    static char fmt_9025[] = "(\002Ne, foF1: L condition cases included.\002)"
-	    ;
-    static char fmt_9026[] = "(\002Ne, D: IRI-90\002)";
-    static char fmt_9027[] = "(\002Ne, D: IRI-90, DRS-95,and FIRI-01)\002)";
-    static char fmt_9028[] = "(\002Ne, foF2: Storm model turned off if foF2 \
-or\002,\002 NmF2 user input\002)";
-    static char fmt_9029[] = "(\002Ne, foF2: storm model included\002)";
-    static char fmt_9031[] = "(\002Ion Com.: DS-95 & TTS-03\002)";
-    static char fmt_9039[] = "(\002Ion Com.: DS-78 & DY-85\002)";
-    static char fmt_9032[] = "(\002Te: Temperature-density correlation is us\
-ed.\002)";
-    static char fmt_9033[] = "(\002Te: Aeros/ISIS model\002)";
-    static char fmt_9034[] = "(\002Te: Interkosmos model\002)";
-    static char fmt_8449[] = "(1x////,\002 Invalid month.\002)";
-    static char fmt_650[] = "(1x,\002*NE* E-REGION VALLEY CAN NOT BE MODEL\
-LED\002)";
-    static char fmt_11[] = "(1x,\002*NE* HMF1 IS NOT EVALUATED BY THE FUNCTI\
-ON XE2\002/1x,\002CORR.: NO F1 REGION, B1=3, C1=0.0\002)";
-    static char fmt_100[] = "(1x,\002*NE* HST IS NOT EVALUATED BY THE FUNCTI\
-ON XE3\002)";
-    static char fmt_901[] = "(6x,\002CORR.: LIN. APP. BETWEEN HZ=\002,f5.1\
-,\002 AND HEF=\002,f5.1)";
-    static char fmt_7733[] = "(\002*NE* LAY amplitudes found with 2nd choice\
- of HXL(1).\002)";
-    static char fmt_7722[] = "(\002*NE* LAY amplitudes could not be found\
-.\002)";
-
     /* System generated locals */
     real r__1, r__2;
     doublereal d__1, d__2;
 
     /* Builtin functions */
-    double atan(doublereal), log(doublereal), sqrt(doublereal);
-    integer s_wsfe(cilist *), e_wsfe();
-    double tan(doublereal), exp(doublereal), cos(doublereal), pow_dd(
-	    doublereal *, doublereal *);
-    integer do_fio(integer *, char *, ftnlen);
-    double r_sign(real *, real *);
+    double atan(doublereal), log(doublereal), sqrt(doublereal), tan(
+	    doublereal), exp(doublereal), cos(doublereal), pow_dd(doublereal *
+	    , doublereal *), r_sign(real *, real *);
 
     /* Local variables */
     static logical sam_date__;
@@ -53313,44 +53116,6 @@ ON XE3\002)";
 	     real *, real *, real *, real *, real *, real *);
     static real spfhour;
     static logical f1_ocpro__;
-
-    /* Fortran I/O blocks */
-    static cilist io___1348 = { 0, 0, 0, fmt_1939, 0 };
-    static cilist io___1358 = { 0, 0, 0, fmt_2911, 0 };
-    static cilist io___1359 = { 0, 0, 0, fmt_9012, 0 };
-    static cilist io___1360 = { 0, 0, 0, fmt_9013, 0 };
-    static cilist io___1361 = { 0, 0, 0, fmt_9014, 0 };
-    static cilist io___1362 = { 0, 0, 0, fmt_9206, 0 };
-    static cilist io___1363 = { 0, 0, 0, fmt_9204, 0 };
-    static cilist io___1364 = { 0, 0, 0, fmt_9205, 0 };
-    static cilist io___1365 = { 0, 0, 0, fmt_9015, 0 };
-    static cilist io___1366 = { 0, 0, 0, fmt_9016, 0 };
-    static cilist io___1367 = { 0, 0, 0, fmt_9017, 0 };
-    static cilist io___1368 = { 0, 0, 0, fmt_9018, 0 };
-    static cilist io___1369 = { 0, 0, 0, fmt_9019, 0 };
-    static cilist io___1370 = { 0, 0, 0, fmt_9021, 0 };
-    static cilist io___1371 = { 0, 0, 0, fmt_9022, 0 };
-    static cilist io___1372 = { 0, 0, 0, fmt_9023, 0 };
-    static cilist io___1373 = { 0, 0, 0, fmt_9024, 0 };
-    static cilist io___1374 = { 0, 0, 0, fmt_9025, 0 };
-    static cilist io___1375 = { 0, 0, 0, fmt_9026, 0 };
-    static cilist io___1376 = { 0, 0, 0, fmt_9027, 0 };
-    static cilist io___1377 = { 0, 0, 0, fmt_9028, 0 };
-    static cilist io___1378 = { 0, 0, 0, fmt_9029, 0 };
-    static cilist io___1379 = { 0, 0, 0, fmt_9031, 0 };
-    static cilist io___1380 = { 0, 0, 0, fmt_9039, 0 };
-    static cilist io___1381 = { 0, 0, 0, fmt_9032, 0 };
-    static cilist io___1382 = { 0, 0, 0, fmt_9033, 0 };
-    static cilist io___1383 = { 0, 0, 0, fmt_9034, 0 };
-    static cilist io___1465 = { 0, 0, 0, fmt_8449, 0 };
-    static cilist io___1530 = { 0, 0, 0, fmt_650, 0 };
-    static cilist io___1548 = { 0, 0, 0, fmt_11, 0 };
-    static cilist io___1549 = { 0, 0, 0, fmt_650, 0 };
-    static cilist io___1555 = { 0, 0, 0, fmt_100, 0 };
-    static cilist io___1557 = { 0, 0, 0, fmt_901, 0 };
-    static cilist io___1567 = { 0, 0, 0, fmt_7733, 0 };
-    static cilist io___1568 = { 0, 0, 0, fmt_7722, 0 };
-
 
 /* ----------------------------------------------------------------- */
 
@@ -53708,11 +53473,8 @@ ON XE3\002)";
     hmf1in = ! jf[14];
     if (hmf1in) {
 	ahmf1 = oarr[4];
-	if (! layver && iounit_1.konsol > 1) {
-	    io___1348.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___1348);
-	    e_wsfe();
-	}
+/*                if(.not.layver.and.(konsol.gt.1)) write(konsol,1939) */
+/* L1939: */
     } else {
 	oarr[4] = (float)-1.;
     }
@@ -53765,142 +53527,88 @@ ON XE3\002)";
     if (const2_1.icalls > 1 || iounit_1.konsol == 1) {
 	goto L8201;
     }
-    io___1358.ciunit = iounit_1.konsol;
-    s_wsfe(&io___1358);
-    e_wsfe();
+/*          write(konsol,2911) */
     if (noden) {
 	goto L2889;
     }
-    if (layver) {
-	io___1359.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1359);
-	e_wsfe();
-    }
-    if (gulb0) {
-	io___1360.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1360);
-	e_wsfe();
-    }
-    if (old79) {
-	io___1361.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1361);
-	e_wsfe();
-    }
-    if (topo && ! topc) {
-	io___1362.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1362);
-	e_wsfe();
-    }
-    if (! topo) {
-	if (topc) {
-	    io___1363.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___1363);
-	    e_wsfe();
-	} else {
-	    io___1364.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___1364);
-	    e_wsfe();
-	}
-    }
+/*          if(LAYVER) write(konsol,9012) */
+/*          if(GULB0) write(konsol,9013) */
+/*          if(OLD79) write(konsol,9014) */
+/*          if(TOPO.and.(.not.TOPC)) write(konsol,9206) */
+/*          if(.not.TOPO) then */
+/*                if(TOPC) then */
+/*                      write(konsol,9204) */
+/*                else */
+/*                      write(konsol,9205) */
+/*                endif */
+/*                endif */
     if (fof2in) {
-	io___1365.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1365);
-	e_wsfe();
+/*                write(konsol,9015) */
 	goto L2889;
     }
-    if (ursif2) {
-	io___1366.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1366);
-	e_wsfe();
-    } else {
-	io___1367.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1367);
-	e_wsfe();
-    }
-    if (hmf2in) {
-	io___1368.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1368);
-	e_wsfe();
-    }
-    if (fof1in) {
-	io___1369.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1369);
-	e_wsfe();
-    }
-    if (hmf1in && layver) {
-	io___1370.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1370);
-	e_wsfe();
-    }
-    if (foein) {
-	io___1371.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1371);
-	e_wsfe();
-    }
-    if (hmein) {
-	io___1372.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1372);
-	e_wsfe();
-    }
-    if (f1_ocpro__) {
-	io___1373.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1373);
-	e_wsfe();
-    }
-    if (f1_l_cond__) {
-	io___1374.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1374);
-	e_wsfe();
-    }
-    if (dreg) {
-	io___1375.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1375);
-	e_wsfe();
-    } else {
-	io___1376.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1376);
-	e_wsfe();
-    }
+/*        if(URSIF2) then */
+/*                write(konsol,9016) */
+/*        else */
+/*                write(konsol,9017) */
+/*        endif */
+/*        if(HMF2IN) write(konsol,9018) */
+/*        if(fof1in) write(konsol,9019) */
+/*        if(HMF1IN.and.LAYVER) write(konsol,9021) */
+/*        if(foein) write(konsol,9022) */
+/*        if(HMEIN) write(konsol,9023) */
+/*        if(F1_OCPRO) write(konsol,9024) */
+/*        if(F1_L_COND) write(konsol,9025) */
+/*        if(DREG) then */
+/*            write(konsol,9026) */
+/*        else */
+/*            write(konsol,9027) */
+/*        endif */
     if (jf[26]) {
 	if (fof2in) {
-	    io___1377.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___1377);
-	    e_wsfe();
+/*                  write(konsol,9028) */
 	    jf[26] = FALSE_;
-	} else {
-	    io___1378.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___1378);
-	    e_wsfe();
+/*            else */
+/*                  write(konsol,9029) */
 	}
     }
 L2889:
-    if (! noion && dy) {
-	io___1379.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1379);
-	e_wsfe();
-    }
-    if (! noion && ! dy) {
-	io___1380.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1380);
-	e_wsfe();
-    }
+/*        if((.not.NOION).and.(DY)) write(konsol,9031) */
+/*        if((.not.NOION).and.(.not.DY)) write(konsol,9039) */
     if (notem) {
 	goto L8201;
     }
-    if (teneop) {
-	io___1381.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1381);
-	e_wsfe();
-    }
-    if (jf[23]) {
-	io___1382.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1382);
-	e_wsfe();
-    } else {
-	io___1383.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1383);
-	e_wsfe();
-    }
+/*          if(TENEOP) write(konsol,9032) */
+/*          if(jf(23)) then */
+/*            write(konsol,9033) */
+/*          else */
+/*            write(konsol,9034) */
+/*          endif */
+/* L2911: */
+/* L9012: */
+/* L9013: */
+/* L9014: */
+/* L9204: */
+/* L9205: */
+/* L9206: */
+/* L9015: */
+/* L9016: */
+/* L9017: */
+/* L9018: */
+/* L9019: */
+/* L9021: */
+/* L9022: */
+/* L9023: */
+/* L9024: */
+/* L9025: */
+/* L9026: */
+/* L9027: */
+/* L9028: */
+/* L9029: */
+/* L9039: */
+/* L9031: */
+/* L9032: */
+/* L9033: */
+/* L9034: */
 L8201:
 
 /* CALCULATION OF DAY OF YEAR OR MONTH/DAY AND DECIMAL YEAR */
@@ -53947,12 +53655,12 @@ L8201:
     }
     geodip_(&iyear, &lati, &longi, &mlat, &mlong, jmag);
 /*        CALL GGM(JMAG,XLONGI1,XLATI1,XMLONG1,XMLAT1) */
-    igrf_dip__(&lati, &longi, &ryear, &c_b96, &dip, &magbr, &modip, ier);
+    igrf_dip__(&lati, &longi, &ryear, &c_b93, &dip, &magbr, &modip, ier);
     if (*ier != 0) {
 	return 0;
     }
     if (! jf[18]) {
-	fieldg_(&lati, &longi, &c_b96, &xma, &yma, &zma, &bet, &dip, &dec, &
+	fieldg_(&lati, &longi, &c_b93, &xma, &yma, &zma, &bet, &dip, &dec, &
 		modip);
 	magbr = atan(tan(dip * const_1.umr) * (float).5) / const_1.umr;
     }
@@ -54073,15 +53781,15 @@ L5592:
 /* (E-REGION), 200 KM (F1-REGION), AND 500 KM (TE, TI). */
 
 L2910:
-    soco_(&daynr, &hour, &lati, &longi, &c_b605, &sundec, &xhi1, &sax80, &
+    soco_(&daynr, &hour, &lati, &longi, &c_b521, &sundec, &xhi1, &sax80, &
 	    sux80);
-    soco_(&daynr, &hour, &lati, &longi, &c_b606, &sud1, &xhi2, &sax110, &
+    soco_(&daynr, &hour, &lati, &longi, &c_b522, &sud1, &xhi2, &sax110, &
 	    sux110);
-    soco_(&daynr, &hour, &lati, &longi, &c_b607, &sud1, &xhi, &sax200, &
+    soco_(&daynr, &hour, &lati, &longi, &c_b523, &sud1, &xhi, &sax200, &
 	    sux200);
-    soco_(&daynr, &hour, &lati, &longi, &c_b96, &sud1, &xhi3, &sax300, &
+    soco_(&daynr, &hour, &lati, &longi, &c_b93, &sud1, &xhi3, &sax300, &
 	    sux300);
-    soco_(&daynr, &c_b609, &lati, &longi, &c_b606, &sunde1, &xhinon, &sax1, &
+    soco_(&daynr, &c_b525, &lati, &longi, &c_b522, &sunde1, &xhinon, &sax1, &
 	    sux1);
     dnight = FALSE_;
     if (dabs(sax80) > (float)25.) {
@@ -54297,10 +54005,9 @@ L4293:
 	}
     }
     goto L4291;
+/* 8448    WRITE(konsol,8449) */
+/* L8449: */
 L8448:
-    io___1465.ciunit = iounit_1.konsol;
-    s_wsfe(&io___1465);
-    e_wsfe();
     goto L3330;
 
 /* LINEAR INTERPOLATION IN SOLAR ACTIVITY. IG12 used for foF2 */
@@ -54465,7 +54172,7 @@ L501:
 
 /* F layer - bottomside thickness parameter B0 and shape parameters B1 */
 
-    block2_1.b1 = hpol_(&hour, &c_b634, &c_b635, &sax200, &sux200, &c_b6, &
+    block2_1.b1 = hpol_(&hour, &c_b550, &c_b551, &sax200, &sux200, &c_b6, &
 	    c_b6);
     if (gulb0) {
 	rogul_(&seaday, &xhi, &seax, &grat);
@@ -54522,12 +54229,12 @@ L501:
     xdel = xdels[season - 1] / dela;
     dndhbr = dnds[season - 1] / dela;
     r__1 = (float)10.5 / dela;
-    hdeep = hpol_(&hour, &r__1, &c_b638, &sax110, &sux110, &c_b6, &c_b6);
+    hdeep = hpol_(&hour, &r__1, &c_b554, &sax110, &sux110, &c_b6, &c_b6);
     r__1 = (float)17.8 / dela;
     r__2 = (float)22. / dela + (float)45.;
     width = hpol_(&hour, &r__1, &r__2, &sax110, &sux110, &c_b6, &c_b6);
-    depth = hpol_(&hour, &xdel, &c_b643, &sax110, &sux110, &c_b6, &c_b6);
-    dlndh = hpol_(&hour, &dndhbr, &c_b646, &sax110, &sux110, &c_b6, &c_b6);
+    depth = hpol_(&hour, &xdel, &c_b559, &sax110, &sux110, &c_b6, &c_b6);
+    dlndh = hpol_(&hour, &dndhbr, &c_b562, &sax110, &sux110, &c_b6, &c_b6);
     if (depth < (float)1.) {
 	goto L600;
     }
@@ -54538,11 +54245,8 @@ L501:
     if (! ext) {
 	goto L667;
     }
-    if (iounit_1.konsol > 1) {
-	io___1530.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1530);
-	e_wsfe();
-    }
+/*        if(konsol.gt.1) WRITE(KONSOL,650) */
+/* L650: */
 L600:
     width = (float)0.;
 L667:
@@ -54554,13 +54258,13 @@ L667:
 
 /* L2727: */
     hmex = block4_2.hme - (float)9.;
-    block6_2.nmd = xmded_(&xhi, &rssn, &c_b654);
-    block6_2.hmd = hpol_(&hour, &c_b643, &c_b656, &sax80, &sux80, &c_b6, &
+    block6_2.nmd = xmded_(&xhi, &rssn, &c_b570);
+    block6_2.hmd = hpol_(&hour, &c_b559, &c_b572, &sax80, &sux80, &c_b6, &
 	    c_b6);
     r__1 = (float).03 / dela + (float).02;
-    f[0] = hpol_(&hour, &r__1, &c_b659, &sax80, &sux80, &c_b6, &c_b6);
-    f[1] = hpol_(&hour, &c_b662, &c_b663, &sax80, &sux80, &c_b6, &c_b6);
-    f[2] = hpol_(&hour, &c_b666, &c_b667, &sax80, &sux80, &c_b6, &c_b6);
+    f[0] = hpol_(&hour, &r__1, &c_b575, &sax80, &sux80, &c_b6, &c_b6);
+    f[1] = hpol_(&hour, &c_b578, &c_b579, &sax80, &sux80, &c_b6, &c_b6);
+    f[2] = hpol_(&hour, &c_b582, &c_b583, &sax80, &sux80, &c_b6, &c_b6);
     block7_1.fp1 = f[0];
     block7_1.fp2 = -block7_1.fp1 * block7_1.fp1 / (float)2.;
     block7_1.fp30 = (-f[1] * block7_1.fp2 - block7_1.fp1 + (float)1. / f[1]) /
@@ -54607,7 +54311,7 @@ L667:
 	    ddens[ii * 5 - 5] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 5] = pow_dd(&c_b90, &d__1);
+		ddens[ii * 5 - 5] = pow_dd(&c_b87, &d__1);
 	    }
 	}
 	f5sw = (float).5;
@@ -54617,7 +54321,7 @@ L667:
 	    ddens[ii * 5 - 4] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 4] = pow_dd(&c_b90, &d__1);
+		ddens[ii * 5 - 4] = pow_dd(&c_b87, &d__1);
 	    }
 	}
 	f5sw = (float)1.;
@@ -54627,7 +54331,7 @@ L667:
 	    ddens[ii * 5 - 3] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 3] = pow_dd(&c_b90, &d__1);
+		ddens[ii * 5 - 3] = pow_dd(&c_b87, &d__1);
 	    }
 	}
 	f5sw = (float)0.;
@@ -54637,7 +54341,7 @@ L667:
 	    ddens[ii * 5 - 2] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 2] = pow_dd(&c_b90, &d__1);
+		ddens[ii * 5 - 2] = pow_dd(&c_b87, &d__1);
 	    }
 	}
 	f5sw = (float)0.;
@@ -54647,7 +54351,7 @@ L667:
 	    ddens[ii * 5 - 1] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 1] = pow_dd(&c_b90, &d__1);
+		ddens[ii * 5 - 1] = pow_dd(&c_b87, &d__1);
 	    }
 	}
     }
@@ -54675,7 +54379,7 @@ L9245:
 	}
 	goto L9245;
     }
-    regfa1_(&block4_2.hef, &block1_3.hmf2, &xe2h, &block1_3.nmf2, &c_b679, &
+    regfa1_(&block4_2.hef, &block1_3.hmf2, &xe2h, &block1_3.nmf2, &c_b595, &
 	    nmf1, (E_fp)xe2_, &schalt, &block1_3.hmf1);
     if (! schalt) {
 	goto L3801;
@@ -54683,12 +54387,9 @@ L9245:
 
 /* omit F1 feature .................................................... */
 
+/* 9427    if(konsol.gt.1) WRITE(KONSOL,11) */
+/* L11: */
 L9427:
-    if (iounit_1.konsol > 1) {
-	io___1548.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1548);
-	e_wsfe();
-    }
     block1_3.hmf1 = (float)0.;
     block1_3.f1reg = FALSE_;
 /*        NMF1=0. */
@@ -54706,11 +54407,7 @@ L3801:
 	if (! ext) {
 	    goto L380;
 	}
-	if (iounit_1.konsol > 1) {
-	    io___1549.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___1549);
-	    e_wsfe();
-	}
+/*            if(konsol.gt.1) WRITE(KONSOL,650) */
 	width = (float)0.;
 	block4_2.hef = block4_2.hme;
 	hefold = block4_2.hef;
@@ -54732,7 +54429,7 @@ L380:
     if (xf2 > block4_2.nme) {
 	goto L3885;
     }
-    regfa1_(&hf1, &hf2, &xf1, &xf2, &c_b679, &block4_2.nme, (E_fp)xe3_1__, &
+    regfa1_(&hf1, &hf2, &xf1, &xf2, &c_b595, &block4_2.nme, (E_fp)xe3_1__, &
 	    schalt, &block3_1.hst);
     if (schalt) {
 	goto L3885;
@@ -54744,21 +54441,13 @@ L380:
 
 /* assume linear interpolation between HZ and HEF .................. */
 
+/* 3885    if(konsol.gt.1) WRITE(KONSOL,100) */
+/* L100: */
 L3885:
-    if (iounit_1.konsol > 1) {
-	io___1555.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1555);
-	e_wsfe();
-    }
     block3_1.hz = (block4_2.hef + hf1) / (float)2.;
     xnehz = xe3_1__(&block3_1.hz);
-    if (iounit_1.konsol > 1) {
-	io___1557.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1557);
-	do_fio(&c__1, (char *)&block3_1.hz, (ftnlen)sizeof(real));
-	do_fio(&c__1, (char *)&block4_2.hef, (ftnlen)sizeof(real));
-	e_wsfe();
-    }
+/*        if(konsol.gt.1) WRITE(KONSOL,901) HZ,HEF */
+/* L901: */
     block3_1.t = (xnehz - block4_2.nme) / (block3_1.hz - block4_2.hef);
     block3_1.hst = (float)-333.;
     goto L4933;
@@ -54778,16 +54467,10 @@ L6153:
     inilay_(&fnight, &block1_3.f1reg, &block1_3.nmf2, &nmf1, &block4_2.nme, &
 	    vner, &hhmf2, &hmf1m, &block4_2.hme, &hv1r, &hv2r, &hhalf, hxl, 
 	    scl, amp, &iiqu);
-    if (iiqu == 1 && iounit_1.konsol > 1) {
-	io___1567.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1567);
-	e_wsfe();
-    }
-    if (iiqu == 2 && iounit_1.konsol > 1) {
-	io___1568.ciunit = iounit_1.konsol;
-	s_wsfe(&io___1568);
-	e_wsfe();
-    }
+/*        IF((IIQU.EQ.1).and.(konsol.gt.1)) WRITE(KONSOL,7733) */
+/* L7733: */
+/*        IF((IIQU.EQ.2).and.(konsol.gt.1)) WRITE(KONSOL,7722) */
+/* L7722: */
 
 /* ---------- CALCULATION OF NEUTRAL TEMPERATURE PARAMETER------- */
 
@@ -54805,10 +54488,10 @@ L4933:
 	if (jf[18]) {
 	    secni = ((float)24. - longi / 15) * (float)3600.;
 	} else {
-	    ut_lt__(&c__1, &utni, &c_b697, &longi, &iyz, &idz);
+	    ut_lt__(&c__1, &utni, &c_b611, &longi, &iyz, &idz);
 	    secni = utni * (float)3600.;
 	}
-	cira86_(&daynr, &secni, &lati, &longi, &c_b697, &cov, &texni, &tn1ni, 
+	cira86_(&daynr, &secni, &lati, &longi, &c_b611, &cov, &texni, &tn1ni, 
 		&signi);
     } else {
 	texni = blotn_2.texos;
@@ -54856,10 +54539,10 @@ L4933:
 /* Te(600km) from AEROS, Spenner and Plugge (1979) */
 	ett = exp(-mlat / (float)11.35);
 	d__1 = (doublereal) (ett + 1);
-	tet = (float)2900. - ett * (float)5600. / pow_dd(&d__1, &c_b704);
+	tet = (float)2900. - ett * (float)5600. / pow_dd(&d__1, &c_b618);
 	ten = (float)1161. / (exp(-(absmlt - (float)45.) / (float)5.) + (
 		float)1.) + (float)839.;
-	ate[4] = hpol_(&hour, &tet, &ten, &sax300, &sux300, &c_b705, &c_b705);
+	ate[4] = hpol_(&hour, &tet, &ten, &sax300, &sux300, &c_b619, &c_b619);
     } else {
 /* Te at fixed heights from IK, Truhlik, Triskova, Smilauer */
 	blote_2.ahh[2] = (float)300.;
@@ -54936,7 +54619,7 @@ L4933:
     z1 = exp(mlat * (float)-.09);
     z2 = z1 + (float)1.;
     tid1 = (float)1240. - z1 * (float)1400. / (z2 * z2);
-    block8_2.mm[1] = hpol_(&hour, &c_b715, &c_b697, &sax300, &sux300, &c_b6, &
+    block8_2.mm[1] = hpol_(&hour, &c_b629, &c_b611, &sax300, &sux300, &c_b6, &
 	    c_b6);
 /* Ti(430km) duirng nighttime from AEROS data */
     z1 = absmlt;
@@ -54961,9 +54644,9 @@ L4933:
 	ti1 = tnn1;
     }
 /* Tangent on Tn profile determines HS */
-    ti13 = teder_(&c_b722);
-    ti50 = teder_(&c_b723);
-    regfa1_(&c_b722, &c_b723, &ti13, &ti50, &c_b726, &ti1, (E_fp)teder_, &
+    ti13 = teder_(&c_b636);
+    ti50 = teder_(&c_b637);
+    regfa1_(&c_b636, &c_b637, &ti13, &ti50, &c_b640, &ti1, (E_fp)teder_, &
 	    schalt, &block8_2.hs);
     if (schalt) {
 	block8_2.hs = (float)200.;
@@ -55256,7 +54939,7 @@ L7108:
     } else {
 	rox = rpid_(&height, &hfixo, &rdomax, &msumo, mo, ddo, ho);
 	ro2x = rpid_(&height, &hfixo2, &rdo2mx, &c__2, mo2, do2, ho2);
-	rdhhe_(&height, &h0o, &rox, &ro2x, &nobo2, &c_b748, &rhx, &rhex);
+	rdhhe_(&height, &h0o, &rox, &ro2x, &nobo2, &c_b662, &rhx, &rhex);
 	rnox = rdno_(&height, &h0o, &ro2x, &rox, &nobo2);
 	rnx = (float)-1.;
 	rclust = (float)-1.;
@@ -55492,7 +55175,7 @@ L3330:
 	    return 0;
 	}
 	if (*h_tec_max__ > (float)50.) {
-	    iri_tec__(&c_b755, h_tec_max__, &c__2, &tec, &tect, &tecb);
+	    iri_tec__(&c_b669, h_tec_max__, &c__2, &tec, &tect, &tecb);
 	    oarr[36] = tec;
 	    oarr[37] = tect;
 	}
@@ -55534,7 +55217,7 @@ L3330:
 	    return 0;
 	}
 	if (*h_tec_max__ > (float)50.) {
-	    iri_tec__(&c_b755, h_tec_max__, &c__2, &tec, &tect, &tecb);
+	    iri_tec__(&c_b669, h_tec_max__, &c__2, &tec, &tect, &tecb);
 	    oarr[36] = tec;
 	    oarr[37] = tect;
 	}
@@ -55596,8 +55279,7 @@ L3330:
     integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi();
     /* Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
     integer f_open(olist *), s_rsle(cilist *), e_rsle(), do_lio(integer *, 
-	    integer *, char *, ftnlen), s_wsle(cilist *), e_wsle(), f_clos(
-	    cllist *);
+	    integer *, char *, ftnlen), f_clos(cllist *);
     /* Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
@@ -55607,12 +55289,9 @@ L3330:
     integer irec;
 
     /* Fortran I/O blocks */
-    static cilist io___1688 = { 0, 84, 0, 0, 0 };
-    static cilist io___1689 = { 0, 84, 0, 0, 0 };
-    static cilist io___1691 = { 0, 6, 0, 0, 0 };
-    static cilist io___1692 = { 0, 6, 0, 0, 0 };
-    static cilist io___1696 = { 0, 84, 0, 0, 0 };
-    static cilist io___1698 = { 0, 6, 0, 0, 0 };
+    static cilist io___1628 = { 0, 84, 0, 0, 0 };
+    static cilist io___1629 = { 0, 84, 0, 0, 0 };
+    static cilist io___1634 = { 0, 84, 0, 0, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -55658,28 +55337,17 @@ L3330:
 	goto L2001;
     }
 /*         Read degree and order of model and Earth's radius. */
-    s_rsle(&io___1688);
+    s_rsle(&io___1628);
     e_rsle();
-    s_rsle(&io___1689);
+    s_rsle(&io___1629);
     do_lio(&c__3, &c__1, (char *)&shc1_1.nmax_shc__[*ifile - 1], (ftnlen)
 	    sizeof(integer));
     do_lio(&c__4, &c__1, (char *)&shc1_1.erad_shc__[*ifile - 1], (ftnlen)
 	    sizeof(real));
     do_lio(&c__4, &c__1, (char *)&yy, (ftnlen)sizeof(real));
     e_rsle();
-    s_wsle(&io___1691);
-    do_lio(&c__9, &c__1, "Read ", (ftnlen)5);
-    do_lio(&c__9, &c__1, fullpath, (ftnlen)256);
-    e_wsle();
-    s_wsle(&io___1692);
-    do_lio(&c__3, &c__1, (char *)&shc1_1.nmax_shc__[*ifile - 1], (ftnlen)
-	    sizeof(integer));
-    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
-    do_lio(&c__4, &c__1, (char *)&shc1_1.erad_shc__[*ifile - 1], (ftnlen)
-	    sizeof(real));
-    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
-    do_lio(&c__4, &c__1, (char *)&yy, (ftnlen)sizeof(real));
-    e_wsle();
+/*          print * ,'Read ', fullpath */
+/*          print * , nmax_shc(ifile), '  ', erad_shc(ifile), '  ', yy */
 /*         -------------------------------------------------------------- */
 /*         Read the coefficient file, arranged as follows: */
 
@@ -55714,25 +55382,16 @@ L3330:
 			 (ftnlen)256, (ftnlen)44);
 		return 0;
 	    }
-	    s_rsle(&io___1696);
+	    s_rsle(&io___1634);
 	    for (i__ = 1; i__ <= 4; ++i__) {
 		do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[i__ + (irec + *
 			ifile * 200 << 2) - 805], (ftnlen)sizeof(real));
 	    }
 	    e_rsle();
-	    s_wsle(&io___1698);
-	    do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[(irec + *ifile * 
-		    200 << 2) - 804], (ftnlen)sizeof(real));
-	    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
-	    do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[(irec + *ifile * 
-		    200 << 2) - 803], (ftnlen)sizeof(real));
-	    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
-	    do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[(irec + *ifile * 
-		    200 << 2) - 802], (ftnlen)sizeof(real));
-	    do_lio(&c__9, &c__1, "  ", (ftnlen)2);
-	    do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[(irec + *ifile * 
-		    200 << 2) - 801], (ftnlen)sizeof(real));
-	    e_wsle();
+/*                  print *, shcfiles(1, irec, ifile), '  ', */
+/*     & shcfiles(2, irec, ifile), '  ', */
+/*     & shcfiles(3, irec, ifile), '  ', */
+/*     & shcfiles(4, irec, ifile) */
 	}
     }
     cl__1.cerr = 0;
@@ -55779,10 +55438,10 @@ L2001:
     integer i__, inum_vals__;
 
     /* Fortran I/O blocks */
-    static cilist io___1700 = { 0, 84, 0, 0, 0 };
-    static cilist io___1701 = { 0, 84, 0, 0, 0 };
-    static cilist io___1703 = { 0, 84, 0, 0, 0 };
-    static cilist io___1705 = { 0, 84, 0, 0, 0 };
+    static cilist io___1637 = { 0, 84, 0, 0, 0 };
+    static cilist io___1638 = { 0, 84, 0, 0, 0 };
+    static cilist io___1640 = { 0, 84, 0, 0, 0 };
+    static cilist io___1642 = { 0, 84, 0, 0, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -55821,7 +55480,7 @@ L2001:
     }
 /*         Read the update date, the start date and the end date */
 /*         (mm,yyyy), and get number of data points to read. */
-    s_rsle(&io___1700);
+    s_rsle(&io___1637);
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupd_igrz__, (ftnlen)sizeof(integer)
 	    );
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupm_igrz__, (ftnlen)sizeof(integer)
@@ -55829,7 +55488,7 @@ L2001:
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupy_igrz__, (ftnlen)sizeof(integer)
 	    );
     e_rsle();
-    s_rsle(&io___1701);
+    s_rsle(&io___1638);
     do_lio(&c__3, &c__1, (char *)&igrz1_1.imst_igrz__, (ftnlen)sizeof(integer)
 	    );
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iyst_igrz__, (ftnlen)sizeof(integer)
@@ -55851,14 +55510,14 @@ L2001:
 	return 0;
     }
 /*         Read data records */
-    s_rsle(&io___1703);
+    s_rsle(&io___1640);
     i__1 = inum_vals__;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	do_lio(&c__4, &c__1, (char *)&igrz1_1.ionoindx_igrz__[i__ - 1], (
 		ftnlen)sizeof(real));
     }
     e_rsle();
-    s_rsle(&io___1705);
+    s_rsle(&io___1642);
     i__1 = inum_vals__;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	do_lio(&c__4, &c__1, (char *)&igrz1_1.indrz_igrz__[i__ - 1], (ftnlen)
@@ -55908,7 +55567,7 @@ L3001:
     integer k, irec;
 
     /* Fortran I/O blocks */
-    static cilist io___1708 = { 0, 84, 1, fmt_1002, 0 };
+    static cilist io___1645 = { 0, 84, 1, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -55953,7 +55612,7 @@ L3001:
 	    s_copy(errmsg, "ERROR: load_ap: irec exceeds MAXRECORDS_AP", (
 		    ftnlen)256, (ftnlen)42);
 	}
-	i__1 = s_rsfe(&io___1708);
+	i__1 = s_rsfe(&io___1645);
 	if (i__1 != 0) {
 	    goto L2001;
 	}
@@ -56020,7 +55679,7 @@ L4001:
     integer i__, j, k;
 
     /* Fortran I/O blocks */
-    static cilist io___1711 = { 0, 84, 0, fmt_1002, 0 };
+    static cilist io___1648 = { 0, 84, 0, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -56066,7 +55725,7 @@ L4001:
     if (i__1 != 0) {
 	goto L5001;
     }
-    s_rsfe(&io___1711);
+    s_rsfe(&io___1648);
     for (k = 1; k <= 2; ++k) {
 	for (j = 1; j <= 76; ++j) {
 	    for (i__ = 1; i__ <= 13; ++i__) {
@@ -56130,7 +55789,7 @@ L5001:
     integer i__, j, k;
 
     /* Fortran I/O blocks */
-    static cilist io___1716 = { 0, 84, 0, fmt_1002, 0 };
+    static cilist io___1653 = { 0, 84, 0, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -56176,7 +55835,7 @@ L5001:
     if (i__1 != 0) {
 	goto L6001;
     }
-    s_rsfe(&io___1716);
+    s_rsfe(&io___1653);
     for (k = 1; k <= 2; ++k) {
 	for (j = 1; j <= 76; ++j) {
 	    for (i__ = 1; i__ <= 13; ++i__) {

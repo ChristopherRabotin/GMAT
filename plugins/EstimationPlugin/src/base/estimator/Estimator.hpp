@@ -283,6 +283,11 @@ protected:
    /// Solar system         // It needs to display information of central bodies in estimation report file      // made changes by TUAN NGUYEN
    SolarSystem *solarSystem;                                                                                    // made changes by TUAN NGUYEN                  
 
+   // EOP time range. It needs to check measurement epoch to be inside that range.
+   Real      eopTimeMin;        // EOP time min
+   Real      eopTimeMax;        // EOP time max
+   Integer   warningCount;      // count number of warning message when check measurement epoch to be inside or outside  EOP time range 
+
    /// Parameters associated with the Estimators
    enum
    {

@@ -87,7 +87,8 @@ DataFilter::DataFilter(const std::string name) :
    isChecked         (false),
    allObserver       (false),
    allTracker        (false),
-   allDataType       (false)
+   allDataType       (false),
+   isEpochFormatSet  (false)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFilter default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -154,7 +155,8 @@ DataFilter::DataFilter(const DataFilter& saf) :
    epochEnd              (saf.epochEnd),
    strands               (saf.strands),
    dataTypesMap          (saf.dataTypesMap),
-   isChecked             (false)
+   isChecked             (false),
+   isEpochFormatSet      (saf.isEpochFormatSet)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFilter copy constructor from <%s,%p>  to  <%s,%p>\n", saf.GetName().c_str(), &saf, GetName().c_str(), this);
@@ -201,6 +203,7 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
       strands      = saf.strands;
       dataTypesMap = saf.dataTypesMap;
       isChecked    = false;
+      isEpochFormatSet = saf.isEpochFormatSet;
    }
 
    return *this;
@@ -412,25 +415,48 @@ std::string DataFilter::GetStringParameter(const Integer id) const
 bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 {
 #ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::SetStringParameter(id = %d, value = <%s>) enter\n", GetName().c_str(), this, id, value.c_str());
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::SetStringParameter(id = %d, value = <%s>) enter1\n", GetName().c_str(), this, id, value.c_str());
 #endif
+   if (id == FILENAMES)
+   {
+      // Check for empty list
+      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
+         throw MeasurementException("Error: an empty list of file name was set to " + GetName() + ".FileNames parameter.\n");
+
+      // If is not empty list, it is a name containing file name
+      // Check for valid file name
+      Integer err = 0;
+      if (!GmatStringUtil::IsValidFullFileName(value, err))
+         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames parameter is an invalid file name.\n");
+
+      if (find(fileNames.begin(), fileNames.end(), value) == fileNames.end())
+         fileNames.push_back(value);
+      else
+         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames is replicated.\n");
+
+      return true;
+   }
 
    if (id == EPOCH_FORMAT)
    {
-      //StringArray nameList = GetListOfValidEpochFormats();
-      //if (find(nameList.begin(), nameList.end(), value) == nameList.end())
       if (TimeConverterUtil::IsValidTimeSystem(value) == false)
-         throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".EpochFormat parameter is invalid.\n");
+         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".EpochFormat parameter is invalid.\n");
 
-      Real t1;
-      TimeConverterUtil::Convert("A1ModJulian", epochStart, "", value, t1, initialEpoch);
-      TimeConverterUtil::Convert("A1ModJulian", epochEnd, "", value, t1, finalEpoch);
       epochFormat = value;
+      isEpochFormatSet = true;
+
+      //Real t1;
+      //TimeConverterUtil::Convert("A1ModJulian", epochStart, "", value, t1, initialEpoch);
+      //TimeConverterUtil::Convert("A1ModJulian", epochEnd, "", value, t1, finalEpoch);
+      
       return true;
    }
 
    if (id == INITIAL_EPOCH)
    {
+      if (!isEpochFormatSet)
+         MessageInterface::ShowMessage("Warning: In your script, %s.EpochFormat parameter has to be set before setting %s.InitialEpoch.\n", GetName().c_str(), GetName().c_str());
+
       initialEpoch = value;
       // Convert to a.1 time for internal processing
       epochStart = ConvertToRealEpoch(initialEpoch, epochFormat);
@@ -439,6 +465,9 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == FINAL_EPOCH)
    {
+      if (!isEpochFormatSet)
+         MessageInterface::ShowMessage("Warning: In your script, %s.EpochFormat parameter has to be set before setting %s.FinalEpoch.\n", GetName().c_str(), GetName().c_str());
+
       finalEpoch = value;
       // Convert to a.1 time for internal processing
       epochEnd = ConvertToRealEpoch(finalEpoch, epochFormat);
@@ -458,6 +487,8 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
       {
          if (value == "All")
             allObserver = true;
+         else if (!GmatStringUtil::IsValidIdentity(value))
+            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".ObservedObjects parameter is an invalid observed object's name.\n");
 
          if ((allObserver == false) && (observers[0] == "All"))
             observers.erase(observers.begin());
@@ -481,6 +512,8 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
       {
          if (value == "All")
             allTracker = true;
+         else if (!GmatStringUtil::IsValidIdentity(value))
+            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Trackers parameter is invalid tracker's name.\n");
 
          if ((allTracker == false) && (trackers[0] == "All"))
             trackers.erase(trackers.begin());
@@ -504,6 +537,12 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
       {
          if (value == "All")
             allDataType = true;
+         else
+         {
+            ObservationData obData;
+            if (!obData.IsValidMeasurementType(value))
+               throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".DataTypes parameter is an invalid measurement type.\n");
+         }
 
          if ((allDataType == false) && (dataTypes[0] == "All"))
             dataTypes.erase(dataTypes.begin());
@@ -648,12 +687,12 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
                                            const Integer index)
 {
 #ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::SetStringParameter(id = %d, value = <%s>, index = %d) enter\n", GetName().c_str(), this, id, value.c_str(), index);
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::SetStringParameter(id = %d, value = <%s>, index = %d) enter2\n", GetName().c_str(), this, id, value.c_str(), index);
 #endif
 
    if (id == FILENAMES)
    {
-
+      // an empty list is set to FileNames parameter when index == -1
       if (index == -1)
       {
          fileNames.clear();
@@ -662,11 +701,11 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       else if ((0 <= index)&&(index <= (Integer)fileNames.size()))
       {
          if (value == "")
-            throw MeasurementException("Error: cannot assign an empty string to file name.\n");
+            throw GmatBaseException("Error: cannot assign an empty string to " + GetName() + ".FileNames parameter.\n");
 
          Integer error = 0;
          if (!GmatStringUtil::IsValidFullFileName(value, error))
-            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames parameter is an invalid file name.\n");
+            throw GmatBaseException("Error: '" + value + "' set to " + GetName() + ".FileNames parameter is an invalid file name.\n");
 
          if (index == fileNames.size())
             fileNames.push_back(value);
@@ -684,6 +723,7 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == OBSERVED_OBJECTS)
    {
+      // an empty list is set to ObservedObjects parameter when index == -1 
       if (index == -1)
       {
          observers.clear();
@@ -715,6 +755,7 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == TRACKERS)
    {
+      // an empty list is set to Trackers parameter when index == -1
       if (index == -1)
       {
          trackers.clear();
@@ -746,6 +787,7 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == DATA_TYPES)
    {
+      // an empty list is set to DataTypes parameter when index == -1
       if (index == -1)
       {
          dataTypes.clear();
@@ -754,7 +796,7 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       else if ((0 <= index)&&(index <= (Integer)dataTypes.size()))
       {
          StringArray nameList = GetListOfMeasurementTypes();
-         if (find(nameList.begin(), nameList.end(), value) == nameList.end())
+         if ((value != "All")&&(find(nameList.begin(), nameList.end(), value) == nameList.end()))
             throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".DataTypes parameter is invalid.\n");
 
          if (index == dataTypes.size())
@@ -774,6 +816,7 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == STRANDS)
    {
+      // an empty list is set to Strands parameter when index == -1
       if (index == -1)
       {
          strands.clear();

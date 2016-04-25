@@ -171,7 +171,14 @@ Real OdeData::GetOdeReal(const std::string &str)
          if (df != NULL)
          {
             Real epoch  = mSpacecraft->GetEpoch();
-            Real *state = mSpacecraft->GetState().GetState();
+
+            // It converts spacecraft j2kbodyMJ2000Eq to bodyMJ2000Eq where body is the planet containing the amtmosphere
+            // (for example: body of MarsGRAM atmosphere model is Mars)   
+            //Real *state = mSpacecraft->GetState().GetState();                           // made changes by TUAN NGUYEN
+            Real *j2kState = mSpacecraft->GetState().GetState();                          // made changes by TUAN NGUYEN
+            Real state[6];                                                                // made changes by TUAN NGUYEN
+
+            df->BuildModelState(epoch, state, j2kState);                                  // made changes by TUAN NGUYEN
 
             #ifdef DEBUG_ODEDATA_RUN
                MessageInterface::ShowMessage("Getting density for epoch %.12lf and state [%.8lf %.8lf %.8lf %.12lf %.12lf %.12lf]; ",

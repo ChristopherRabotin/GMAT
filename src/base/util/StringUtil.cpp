@@ -1217,7 +1217,6 @@ std::string GmatStringUtil::ReplaceChainedUnaryOperators(const std::string &str)
 }
 
 
-// made changes by TUAN NGUYEN
 std::string GmatStringUtil::RealToString(const Real &val, Integer precision,
    bool showPoint, Integer width)
 {
@@ -1225,7 +1224,6 @@ std::string GmatStringUtil::RealToString(const Real &val, Integer precision,
 }
 
 
-// made changes by TUAN NGUYEN
 std::string GmatStringUtil::RealToString(const Real &val, bool useCurrentFormat,
    bool scientific, bool showPoint,
    Integer precision, Integer width)
