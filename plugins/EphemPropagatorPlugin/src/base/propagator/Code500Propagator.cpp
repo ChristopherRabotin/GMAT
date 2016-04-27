@@ -58,6 +58,13 @@ const Gmat::ParameterType Code500Propagator::PARAMETER_TYPE[
 };
 
 
+const Real Code500Propagator::DUL_TO_KM         = 10000.0;
+const Real Code500Propagator::DUL_DUT_TO_KM_SEC = 10000.0 / 864.0;
+const Real Code500Propagator::DUT_TO_DAY        = 864.0 / 86400.0;
+const Real Code500Propagator::DUT_TO_SEC        = 864.0;
+
+
+
 //---------------------------------
 // public
 //---------------------------------
@@ -75,7 +82,10 @@ Code500Propagator::Code500Propagator(const std::string &name) :
    EphemerisPropagator        ("Code500", name),
    ephemName                  (""),
    satID                      (101.0),
-   fileIsOpen                 (false)
+   fileIsOpen                 (false),
+   ephemRecords               (NULL),
+   record                     (-1),
+   stateIndex                 (-1)
 {
    // GmatBase data
   objectTypeNames.push_back("Code500Propagator");
@@ -108,7 +118,10 @@ Code500Propagator::Code500Propagator(const Code500Propagator & prop) :
    EphemerisPropagator        (prop),
    ephemName                  (prop.ephemName),
    satID                      (prop.satID),
-   fileIsOpen                 (false)
+   fileIsOpen                 (false),
+   ephemRecords               (NULL),
+   record                     (-1),
+   stateIndex                 (-1)
 {
 }
 
@@ -135,6 +148,10 @@ Code500Propagator & Code500Propagator::operator =(const Code500Propagator & prop
       if (fileIsOpen)
          ephem.CloseForRead();
       fileIsOpen = false;
+      ephemRecords = NULL;
+      record = -1;
+      stateIndex = -1;
+      currentEpoch = prop.currentEpoch;
    }
 
    return *this;
@@ -577,8 +594,16 @@ bool Code500Propagator::Initialize()
 //            satID = id;
 
             if (propObjects[i]->IsOfType(Gmat::SPACECRAFT))
+            {
                ephemName = propObjects[i]->GetStringParameter(
                      "EphemerisName");
+               currentEpoch = ((Spacecraft*)propObjects[i])->GetEpoch();
+
+               #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage("Spacecraft epoch is %.12lf\n",
+                        currentEpoch);
+               #endif
+            }
             else
                throw PropagatorException("Code 500 ephemeris propagators only "
                      "work for Spacecraft.");
@@ -598,6 +623,86 @@ bool Code500Propagator::Initialize()
 
             ephem.ReadHeader1(logOption);
             ephem.ReadHeader2(logOption);
+            ephem.ReadDataRecords(-999, 0);
+            Real timeSystem = ephem.GetTimeSystem();
+
+            ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
+
+            #ifdef DEBUG_INITIALIZATION
+               if (ephemRecords != NULL)
+                  MessageInterface::ShowMessage("EphemRecords contains %d "
+                        "data blocks\n", ephemRecords->size());
+            #endif
+
+            MessageInterface::ShowMessage("Record contents:\n");
+
+            startEpochs.clear();
+            timeSteps.clear();
+            for (UnsignedInt i = 0; i < ephemRecords->size(); ++i)
+            {
+               // Save the data used by the Code500 propagator in GMAT compatible formats
+               Real startDate = ephemRecords->at(i).dateOfFirstEphemPoint_YYYMMDD;
+               Real startSecs = ephemRecords->at(i).secsOfDayForFirstEphemPoint;
+               Integer year   = (Integer)(startDate / 10000);
+               Integer month  = (Integer)((startDate - year * 10000) / 100);
+               Integer day    = (Integer)(startDate - year * 10000 - month * 100);
+               year += 1900;
+               Integer hour   = (Integer)(startSecs / 3600);
+               Integer minute = (Integer)((startSecs - hour * 3600) / 60);
+               Real second    = startSecs - hour * 3600 - minute * 60;
+
+               #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage("Start:  %04d/%02d/%02d %02d:"
+                        "%02d:%lf %s\n", year, month, day, hour, minute, second,
+                        (timeSystem == 1.0 ? "A.1" : "UTC"));
+               #endif
+
+               GmatEpoch epoch = ModifiedJulianDate(year, month, day, hour, minute, second);
+               GmatEpoch theEpoch = 0.0;
+
+               // If not A.1 time, convert it!
+               if (timeSystem == 1.0)
+                  theEpoch = epoch;
+               else //if (timeSystem == 2.0) // Should check to be sure it was set
+                  theEpoch = TimeConverterUtil::Convert(epoch, TimeConverterUtil::UTCMJD,
+                        TimeConverterUtil::A1MJD);
+
+               startEpochs.push_back(theEpoch);
+               timeSteps.push_back(ephemRecords->at(i).timeIntervalBetweenPoints_SEC);
+
+               #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage("   %3d: Date %.0lf : %lf secs "
+                        "=> %.12lf, stepping %lf s\n", i,
+                        ephemRecords->at(i).dateOfFirstEphemPoint_YYYMMDD,
+                        ephemRecords->at(i).secsOfDayForFirstEphemPoint, theEpoch,
+                        ephemRecords->at(i).timeIntervalBetweenPoints_SEC);
+
+                  MessageInterface::ShowMessage("      State: [%lf   %lf   "
+                        "%lf]   [%lf   %lf   %lf]\n",
+                        ephemRecords->at(i).firstStateVector_DULT[0] * DUL_TO_KM,
+                        ephemRecords->at(i).firstStateVector_DULT[1] * DUL_TO_KM,
+                        ephemRecords->at(i).firstStateVector_DULT[2] * DUL_TO_KM,
+                        ephemRecords->at(i).firstStateVector_DULT[3] * DUL_DUT_TO_KM_SEC,
+                        ephemRecords->at(i).firstStateVector_DULT[4] * DUL_DUT_TO_KM_SEC,
+                        ephemRecords->at(i).firstStateVector_DULT[5] * DUL_DUT_TO_KM_SEC);
+
+                  for (UnsignedInt j = 0; j < 4; ++j)
+                     MessageInterface::ShowMessage("          %d: [%lf   %lf   "
+                           "%lf]   [%lf   %lf   %lf]\n", j,
+                           ephemRecords->at(i).stateVector2Thru50_DULT[j][0] * DUL_TO_KM,
+                           ephemRecords->at(i).stateVector2Thru50_DULT[j][1] * DUL_TO_KM,
+                           ephemRecords->at(i).stateVector2Thru50_DULT[j][2] * DUL_TO_KM,
+                           ephemRecords->at(i).stateVector2Thru50_DULT[j][3] * DUL_DUT_TO_KM_SEC,
+                           ephemRecords->at(i).stateVector2Thru50_DULT[j][4] * DUL_DUT_TO_KM_SEC,
+                           ephemRecords->at(i).stateVector2Thru50_DULT[j][5] * DUL_DUT_TO_KM_SEC);
+               #endif
+            }
+
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("The ephem spans from %.12lf to "
+                     "%.12lf\nRecords pointer = %p\n", ephemStart, ephemEnd,
+                     ephemRecords);
+            #endif
             fileIsOpen = true;
          }
       }
@@ -625,6 +730,64 @@ bool Code500Propagator::Step()
    #endif
 
    bool retval = false;
+
+   // Might need to do this:
+   // currentEpoch = ((Spacecraft*)propObjects[i])->GetEpoch();
+   if (record == -1)
+   {
+      // Initialize the pointers into the ephem data
+      FindRecord(currentEpoch);
+   }
+
+   if (record < 0)
+      throw PropagatorException("Unable to propagate: is the epoch outside "
+            "of the span of the ephemeris file?");
+
+   Rvector6  outState;
+
+   timeFromEpoch += ephemStep;
+   stepTaken = ephemStep;
+   currentEpoch = initialEpoch + timeFromEpoch /
+         GmatTimeConstants::SECS_PER_DAY;
+
+   // Allow for slop in the last few bits
+   if ((currentEpoch < ephemStart - 1e-10) ||
+       (currentEpoch > ephemEnd + 1e-10))
+   {
+      std::stringstream errmsg;
+      errmsg.precision(16);
+      errmsg << "The Code 500 Propagator "
+             << instanceName
+             << " is attempting to step outside of the span of the "
+                "ephemeris data; halting.  ";
+      errmsg << "The current Code 500 ephemeris covers the A.1 modified "
+                "Julian span ";
+      errmsg << ephemStart << " to " << ephemEnd << " and the "
+            "requested epoch is " << currentEpoch << ".";
+      throw PropagatorException(errmsg.str());
+   }
+
+   GetState(currentEpoch, outState);
+
+   std::memcpy(state, outState.GetDataVector(),
+         dimension*sizeof(Real));
+   //MoveToOrigin(currentEpoch);
+   UpdateSpaceObject(currentEpoch);
+
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("(Step for %p) State at epoch "
+            "%.12lf is [", this, currentEpoch);
+      for (Integer i = 0; i < dimension; ++i)
+      {
+         MessageInterface::ShowMessage("%.12lf", state[i]);
+         if (i < 5)
+            MessageInterface::ShowMessage("   ");
+         else
+            MessageInterface::ShowMessage("]\n");
+      }
+   #endif
+
+   retval = true;
 
    return retval;
 }
@@ -747,4 +910,62 @@ void Code500Propagator::UpdateState()
 //------------------------------------------------------------------------------
 void Code500Propagator::SetEphemSpan(Integer whichOne)
 {
+}
+
+//------------------------------------------------------------------------------
+// void Code500Propagator::FindRecord(GmatEpoch forEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Sets up the indices into the ephem data for a input epoch
+ *
+ * @param forEpoch The epoch that is being set up
+ */
+//------------------------------------------------------------------------------
+void Code500Propagator::FindRecord(GmatEpoch forEpoch)
+{
+   record = -1;
+   stateIndex = -1;
+
+   if ((forEpoch >= ephemStart) && (forEpoch <= ephemEnd))
+   {
+      record = -2;
+      for (UnsignedInt i = 0; i < ephemRecords->size(); ++i)
+         if (forEpoch < startEpochs[i])
+         {
+            record = i - 1;
+            break;
+         }
+
+      // Handle epoch in the final block
+      if (record == -2)
+      {
+         record = ephemRecords->size() - 1;
+      }
+
+      // Now figure out the record number in the block
+      Real secsPastStart = (forEpoch - startEpochs[record]) *
+            GmatTimeConstants::SECS_PER_DAY;
+      stateIndex = (Integer)(secsPastStart / timeSteps[record]);
+   }
+
+      MessageInterface::ShowMessage("Epoch %.12lf has index %d in block %d\n",
+            forEpoch, stateIndex, record);
+}
+
+void Code500Propagator::GetState(GmatEpoch forEpoch, Rvector6 &outstate)
+{
+   FindRecord(forEpoch);
+   for (Integer i = 0; i < 3; ++i)
+   {
+      if (stateIndex == 0)
+      {
+         outstate[i] = ephemRecords->at(record).firstStateVector_DULT[i] * DUL_TO_KM;
+         outstate[i+3] = ephemRecords->at(record).firstStateVector_DULT[i+3] * DUL_DUT_TO_KM_SEC;
+      }
+      else
+      {
+         outstate[i] = ephemRecords->at(record).stateVector2Thru50_DULT[stateIndex-1][i] * DUL_TO_KM;
+         outstate[i+3] = ephemRecords->at(record).stateVector2Thru50_DULT[stateIndex-1][i+3] * DUL_DUT_TO_KM_SEC;
+      }
+   }
 }
