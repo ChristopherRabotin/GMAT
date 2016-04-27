@@ -124,13 +124,7 @@ PhysicalMeasurement::PhysicalMeasurement(const PhysicalMeasurement& pm) :
       troposphere = NULL;
 
    #ifdef IONOSPHERE
-      //if (pm.ionosphere != NULL)                                                   // made changes by TUAN NGUYEN
-      //   ionosphere = new Ionosphere(*(pm.ionosphere));                            // made changes by TUAN NGUYEN
-      //else                                                                         // made changes by TUAN NGUYEN
-      //   ionosphere = NULL;                                                        // made changes by TUAN NGUYEN
       ionosphere = pm.ionosphere;
-      //if (ionosphere == NULL)                                                           // made changes by TUAN NGUYEN
-      //   ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();   // made changes by TUAN NGUYEN
    #endif
 }
 
@@ -171,16 +165,7 @@ PhysicalMeasurement& PhysicalMeasurement::operator=(
          troposphere = NULL;
 
       #ifdef IONOSPHERE
-         //if (ionosphere != NULL)                                      // made changes by TUAN NGUYEN
-         //   delete ionosphere;                                        // made changes by TUAN NGUYEN
-
-         //if (pm.ionosphere != NULL)                                   // made changes by TUAN NGUYEN
-         //   ionosphere = new Ionosphere(*(pm.ionosphere));            // made changes by TUAN NGUYEN
-         //else                                                         // made changes by TUAN NGUYEN
-         //   ionosphere = NULL;                                        // made changes by TUAN NGUYEN
          ionosphere = pm.ionosphere;
-         //if (ionosphere == NULL)                                                           // made changes by TUAN NGUYEN
-         //   ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();   // made changes by TUAN NGUYEN
       #endif
    }
 
@@ -358,9 +343,8 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
 ///// TBD: Determine if there is a more generic way to add these
          // Create IRI2007 ionosphere correction model
          #ifdef IONOSPHERE
-            // ionosphere = new Ionosphere(modelName);                                       // made changes by TUAN NGUYEN
-            if (ionosphere == NULL)                                                          // made changes by TUAN NGUYEN
-               ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();  // made changes by TUAN NGUYEN
+            if (ionosphere == NULL)
+               ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();
          #else
             MessageInterface::ShowMessage("Ionosphere IRI2007 model currently is not "
                      "available.\nIt will be be added to GMAT in a future release.\n");

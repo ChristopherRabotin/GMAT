@@ -48,18 +48,18 @@ public:
 
    // methods overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
-   virtual std::string  GetParameterUnit(const Integer id) const;            // made changes by TUAN NGUYEN
+   virtual std::string  GetParameterUnit(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
-   virtual Integer      GetIntegerParameter(const Integer id) const;         // made changes by TUAN NGUYEN
+   virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id,
-                                            const Integer value);            // made changes by TUAN NGUYEN
-   virtual Integer      GetIntegerParameter(const std::string &label) const; // made changes by TUAN NGUYEN
+                                            const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
    virtual Integer      SetIntegerParameter(const std::string &label,
-                                            const Integer value);            // made changes by TUAN NGUYEN
+                                            const Integer value);
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -146,10 +146,10 @@ public:
    virtual void         SetPropagator(PropSetup *ps);
    virtual bool         Initialize();
 
-   const StringArray&   GetParticipants() const;           // made changes by TUAN NGUYEN
+   const StringArray&   GetParticipants() const;
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
-   bool                 GenerateTrackingConfigs(std::vector<StringArray> strandsList, StringArray typesList);   // made changes by TUAN NGUYEN
+   bool                 GenerateTrackingConfigs(std::vector<StringArray> strandsList, StringArray typesList);
 
 protected:
    /**
@@ -165,11 +165,11 @@ protected:
       MeasurementDefinition& operator=(const MeasurementDefinition& md);
 
       std::string GetDefinitionString() const;
-      bool        SetDefinitionString(StringArray strand, std::string measType);      // made changes by TUAN NGUYEN
+      bool        SetDefinitionString(StringArray strand, std::string measType);
 
-      /// The strings describing signal paths                             // made changes by TUAN NGUYEN
+      /// The strings describing signal paths
       std::vector<StringArray> strands;
-      /// The measurement types associated with the signal paths          // made changes by TUAN NGUYEN
+      /// The measurement types associated with the signal paths
       StringArray types;
    };
 
@@ -232,11 +232,11 @@ protected:
       USE_ETMINUSTAI,
       RANGE_MODULO,
       DOPPLER_COUNT_INTERVAL,
-      TDRS_SERVICE_ACCESS,               // made changes by TUAN NGUYEN
-      TDRS_NODE4_FREQUENCY,              // made changes by TUAN NGUYEN
-      TDRS_NODE4_BAND,                   // made changes by TUAN NGUYEN
-      TDRS_SMAR_ID,                      // made changes by TUAN NGUYEN
-      TDRS_DATA_FLAG,                    // made changes by TUAN NGUYEN
+      TDRS_SERVICE_ACCESS,
+      TDRS_NODE4_FREQUENCY,
+      TDRS_NODE4_BAND,
+      TDRS_SMAR_ID,
+      TDRS_DATA_FLAG,
       DATA_FILTERS,
       TrackingFileSetParamCount,
    };

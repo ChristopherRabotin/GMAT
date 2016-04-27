@@ -314,13 +314,13 @@ std::string AveragedDoppler::GetParameterTypeString(const Integer id) const
  * @return   true if parameter read only, false otherwise.
  */
 //------------------------------------------------------------------------------
-bool AveragedDoppler::IsParameterReadOnly(const Integer id) const      // made changes by TUAN NGUYEN
-{                                                                      // made changes by TUAN NGUYEN
-   if (id == BuildInTurnAroundRatio)                                   // made changes by TUAN NGUYEN
-      return true;                                                     // made changes by TUAN NGUYEN
+bool AveragedDoppler::IsParameterReadOnly(const Integer id) const
+{
+   if (id == BuildInTurnAroundRatio)
+      return true;
 
-   return PhysicalMeasurement::IsParameterReadOnly(id);                // made changes by TUAN NGUYEN
-}                                                                      // made changes by TUAN NGUYEN
+   return PhysicalMeasurement::IsParameterReadOnly(id);
+}
 
 
 //------------------------------------------------------------------------------
@@ -897,7 +897,7 @@ void AveragedDoppler::SetHardwareDelays(bool loadEvents)
       MessageInterface::ShowMessage("   t3e timetag:   %.12lf\n", t3E[1]);
    #endif
 
-   UpdateHardware();                                                         // made changes by TUAN NGUYEN
+   UpdateHardware();
 
    // Transmitter sits on the 1st participant
    #ifdef DEBUG_HARDWARE_DELAYS

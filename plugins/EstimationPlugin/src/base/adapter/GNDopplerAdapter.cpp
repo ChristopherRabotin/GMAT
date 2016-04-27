@@ -303,7 +303,7 @@ bool GNDopplerAdapter::SetStringParameter(const Integer id, const std::string& v
 {
    // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
    bool retval = true;
-   if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))                    // made changes by TUAN NGUYEN
+   if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))
       retval = adapterS->SetStringParameter(id, value);
 
    retval = RangeAdapterKm::SetStringParameter(id, value) && retval;

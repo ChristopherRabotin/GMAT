@@ -428,12 +428,6 @@ template <class T>
 void
 TableTemplate<T>::GetSize(int &r, int &c) const 
 {
-   // It will get 0 when the table is unsized                     // made changes by TUAN NGUYEN
-   //if (isSizedD == false)                                       // made changes by TUAN NGUYEN
-   //{                                                            // made changes by TUAN NGUYEN
-   //   throw TableTemplateExceptions::UnsizedTable();            // made changes by TUAN NGUYEN
-   //}                                                            // made changes by TUAN NGUYEN
-
    r = rowsD;
    c = colsD;
 }
@@ -445,12 +439,6 @@ template <class T>
 int
 TableTemplate<T>::GetNumColumns() const 
 {
-   // It will get 0 when the table is unsized                     // made changes by TUAN NGUYEN
-   //if (isSizedD == false)                                       // made changes by TUAN NGUYEN
-   //{                                                            // made changes by TUAN NGUYEN
-   //   throw TableTemplateExceptions::UnsizedTable();            // made changes by TUAN NGUYEN
-   //}                                                            // made changes by TUAN NGUYEN
-
    return colsD;
 }
 
@@ -461,12 +449,6 @@ template <class T>
 int
 TableTemplate<T>::GetNumRows() const 
 {
-   // It will get 0 when the table is unsized                     // made changes by TUAN NGUYEN
-   //if (isSizedD == false)                                       // made changes by TUAN NGUYEN
-   //{                                                            // made changes by TUAN NGUYEN
-   //   throw TableTemplateExceptions::UnsizedTable();            // made changes by TUAN NGUYEN
-   //}                                                            // made changes by TUAN NGUYEN
-
    return rowsD;
 }
 

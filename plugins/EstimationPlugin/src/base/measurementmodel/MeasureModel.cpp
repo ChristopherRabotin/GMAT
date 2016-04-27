@@ -78,11 +78,6 @@ MeasureModel::PARAMETER_TYPE[MeasurementParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const std::string &name) :
    GmatBase          (Gmat::MEASUREMENT_MODEL, "SignalBasedMeasurement", name),
-
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
-   stmRowCount       (6),                                                     // made changes by TUAN NGUYEN
-#endif
-
    feasible          (false),
    withLighttime     (true),
    propsNeedInit     (false),          // Only need init if one is set
@@ -175,11 +170,6 @@ MeasureModel::~MeasureModel()
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const MeasureModel& mm) :
    GmatBase          (mm),
-
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
-   stmRowCount       (mm.stmRowCount),                          // made changes by TUAN NGUYEN
-#endif
-
    feasible          (false),
    withLighttime     (mm.withLighttime),
    propsNeedInit     (false),
@@ -221,10 +211,6 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       GmatBase::operator=(mm);
 
       theData.clear();
-
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
-      stmRowCount         = mm.stmRowCount;             // made changes by TUAN NGUYEN
-#endif
 
       feasible            = false;
       withLighttime       = mm.withLighttime;
@@ -813,15 +799,6 @@ void MeasureModel::SetPropagator(PropSetup* ps)
    {
       SpacePoint *obj = i->first;
 
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX      
-      bool updateSTMRowCount = false;                                     // made changes by TUAN NGUYEN
-      if (obj->IsOfType(Gmat::SPACECRAFT))                                // made changes by TUAN NGUYEN
-      {                                                                   // made changes by TUAN NGUYEN
-         stmRowCount = obj->GetIntegerParameter("FullSTMRowCount");       // made changes by TUAN NGUYEN
-         updateSTMRowCount = true;                                        // made changes by TUAN NGUYEN
-      }                                                                   // made changes by TUAN NGUYEN
-#endif
-
       if (obj->IsOfType(Gmat::SPACEOBJECT))
       {
          // Clone the propagator for each SpaceObject
@@ -834,16 +811,10 @@ void MeasureModel::SetPropagator(PropSetup* ps)
             {
                signalPaths[i]->SetPropagator(propagator, obj);
 
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
-               if (updateSTMRowCount)                                     // made changes by TUAN NGUYEN
-               {                                                          // made changes by TUAN NGUYEN
-                  signalPaths[i]->SetStmRowCount(stmRowCount);            // made changes by TUAN NGUYEN
-               }                                                          // made changes by TUAN NGUYEN
-#endif
-               }
             }
          }
       }
+   }
 }
 
 
@@ -1007,42 +978,40 @@ bool MeasureModel::Initialize()
             for(UnsignedInt i = 0; i < correctionTypeList.size(); ++i)
                AddCorrection(correctionModelList[i], correctionTypeList[i]);
 
-            // For each ground station, clone all ErrorModel objects for each signal path                // made changes by TUAN NGUYEN
-            for (UnsignedInt i = 0; i < participants.size(); ++i)                                        // made changes by TUAN NGUYEN
-            {                                                                                            // made changes by TUAN NGUYEN
-               GmatBase* firstPart = participants[i]->at(0);                                             // made changes by TUAN NGUYEN
-               GmatBase* lastPart = participants[i]->at(participants[i]->size()-1);                      // made changes by TUAN NGUYEN
+            // For each ground station, clone all ErrorModel objects for each signal path
+            for (UnsignedInt i = 0; i < participants.size(); ++i)
+            {
+               GmatBase* firstPart = participants[i]->at(0);
+               GmatBase* lastPart = participants[i]->at(participants[i]->size()-1);
                
                if ((firstPart->IsOfType(Gmat::GROUND_STATION))&&
-                   (lastPart->IsOfType(Gmat::GROUND_STATION) == false))                                   // made changes by TUAN NGUYEN
-               {                                                                                         // made changes by TUAN NGUYEN
-                  // clone all ErrorModel objects belonging to groundstation firstPart                   // made changes by TUAN NGUYEN
-                  std::string spacecraftName = "";                                                       // made changes by TUAN NGUYEN
-                  if (participants[i]->at(1)->IsOfType(Gmat::SPACECRAFT))                                // made changes by TUAN NGUYEN
-                     spacecraftName = participants[i]->at(1)->GetName();                                 // made changes by TUAN NGUYEN
-                  else                                                                                   // made changes by TUAN NGUYEN
+                   (lastPart->IsOfType(Gmat::GROUND_STATION) == false))
+               {
+                  // clone all ErrorModel objects belonging to groundstation firstPart
+                  std::string spacecraftName = "";
+                  if (participants[i]->at(1)->IsOfType(Gmat::SPACECRAFT))
+                     spacecraftName = participants[i]->at(1)->GetName();
+                  else
                      throw MeasurementException("Error: It has 2 ground stations (" + 
                           firstPart->GetName() + ", " + participants[i]->at(1)->GetName() + 
-                          ") next to each other in signal path.\n");                                     // made changes by TUAN NGUYEN
+                          ") next to each other in signal path.\n");
 
-                  ((GroundstationInterface*) firstPart)->CreateErrorModelForSignalPath(spacecraftName);  // made changes by TUAN NGUYEN
+                  ((GroundstationInterface*) firstPart)->CreateErrorModelForSignalPath(spacecraftName);
                }
-
                else
-               //if ((lastPart != firstPart)&&(lastPart->IsOfType(Gmat::GROUND_STATION)))                  // made changes by TUAN NGUYEN
-               {                                                                                         // made changes by TUAN NGUYEN
-                  // clone all ErrorModel objects belonging to groundstation firstPart                   // made changes by TUAN NGUYEN
-                  std::string spacecraftName = "";                                                       // made changes by TUAN NGUYEN
-                  if (participants[i]->at(participants[i]->size()-2)->IsOfType(Gmat::SPACECRAFT))        // made changes by TUAN NGUYEN
-                     spacecraftName = participants[i]->at(participants[i]->size()-2)->GetName();         // made changes by TUAN NGUYEN
-                  else                                                                                   // made changes by TUAN NGUYEN
+               {
+                  // clone all ErrorModel objects belonging to groundstation firstPart
+                  std::string spacecraftName = "";
+                  if (participants[i]->at(participants[i]->size()-2)->IsOfType(Gmat::SPACECRAFT))
+                     spacecraftName = participants[i]->at(participants[i]->size()-2)->GetName();
+                  else
                      throw MeasurementException("Error: It has 2 ground stations (" + 
                             participants[i]->at(participants[i]->size()-2)->GetName() + ", " + 
-                            lastPart->GetName() + ") next to each other in signal path.\n");             // made changes by TUAN NGUYEN
+                            lastPart->GetName() + ") next to each other in signal path.\n");
 
-                  ((GroundstationInterface*) lastPart)->CreateErrorModelForSignalPath(spacecraftName);   // made changes by TUAN NGUYEN
-               }                                                                                         // made changes by TUAN NGUYEN
-            }                                                                                            // made changes by TUAN NGUYEN
+                  ((GroundstationInterface*) lastPart)->CreateErrorModelForSignalPath(spacecraftName);
+               }
+            }
 
             retval = true;
          }
@@ -1178,7 +1147,7 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
  * @return true if the the calculation succeeded, false if not
  */
 //------------------------------------------------------------------------------
-bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrection,                    // made changes by TUAN NGUYEN
+bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrection,
       ObservationData* forObservation, std::vector<RampTableData>* rampTB,
       Real atTimeOffset, Integer forStrand)
 {
@@ -1351,47 +1320,39 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
                propMap[sdObj->tNode]->GetPropagator()->AccessOutState();
             Rvector6 state(propState);        // state of spacecrat presenting in MJ2000Eq coordinate system with origin at ForceModel.CentralBody
 
-            // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // made changes by TUAN NGUYEN  fix bug GMT-5364
-            SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // made changes by TUAN NGUYEN  fix bug GMT-5364
-            SpacePoint* forcemodelOrigin = propMap[sdObj->tNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
-            state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->tPrecTime));                         // made changes by TUAN NGUYEN  fix bug GMT-5364
+            // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // fix bug GMT-5364
+            SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->tNode))->GetOrigin();                 // the origin of the transmit spacecraft's cooridinate system   // fix bug GMT-5364
+            SpacePoint* forcemodelOrigin = propMap[sdObj->tNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+            state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->tPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->tPrecTime));                         // fix bug GMT-5364
             sdObj->tLoc = state.GetR();
             sdObj->tVel = state.GetV();
 
             // Specify transmit participant's STM at measurement time tm
-            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
 	   		// Set size for tSTMtm
-            Integer stmRowCount = sdObj->tNode->GetIntegerParameter("FullSTMRowCount");                       // made changes by TUAN NGUYEN
-            if ((sdObj->tSTMtm.GetNumRows() != stmRowCount)||(sdObj->tSTMtm.GetNumColumns() != stmRowCount))  // made changes by TUAN NGUYEN
-               sdObj->tSTMtm.ChangeSize(stmRowCount, stmRowCount, true);                                      // made changes by TUAN NGUYEN
+            Integer stmRowCount = sdObj->tNode->GetIntegerParameter("FullSTMRowCount");
+            if ((sdObj->tSTMtm.GetNumRows() != stmRowCount)||(sdObj->tSTMtm.GetNumColumns() != stmRowCount))
+               sdObj->tSTMtm.ChangeSize(stmRowCount, stmRowCount, true);
 
 			   // Get start index of STM
-			   const std::vector<ListItem*>* stateMap = propMap[sdObj->tNode]->GetPropStateManager()->GetStateMap();      // made changes by TUAN NGUYEN
-			   UnsignedInt stmStartIndex = -1;                                                                            // made changes by TUAN NGUYEN
-   			for (UnsignedInt index = 0; index < stateMap->size(); ++index)                                             // made changes by TUAN NGUYEN
-	   		{                                                                                                          // made changes by TUAN NGUYEN
-		   	   if (((*stateMap)[index]->object == sdObj->tNode) && ((*stateMap)[index]->elementName == "STM"))         // made changes by TUAN NGUYEN
+			   const std::vector<ListItem*>* stateMap = propMap[sdObj->tNode]->GetPropStateManager()->GetStateMap();
+			   UnsignedInt stmStartIndex = -1;
+   			for (UnsignedInt index = 0; index < stateMap->size(); ++index)
+	   		{
+		   	   if (((*stateMap)[index]->object == sdObj->tNode) && ((*stateMap)[index]->elementName == "STM"))
 			      {
 				   	stmStartIndex = index;
-					   break;                                                                                               // made changes by TUAN NGUYEN
+					   break;
 			      }
-			   }                                                                                                          // made changes by TUAN NGUYEN
+			   }
 
    			// Set value for tSTMtm
-            for (UnsignedInt ii = 0; ii < stmRowCount; ++ii)                                          // made changes by TUAN NGUYEN
-               for (UnsignedInt jj = 0; jj < stmRowCount; ++jj)                                       // made changes by TUAN NGUYEN
-                  sdObj->tSTMtm(ii,jj) = propState[stmStartIndex + ii*stmRowCount + jj];              // made changes by TUAN NGUYEN
-            #else                                                                                     // made changes by TUAN NGUYEN
-            for (UnsignedInt ii = 0; ii < 6; ++ii)
-               for (UnsignedInt jj = 0; jj < 6; ++jj)
-                  sdObj->tSTMtm(ii,jj) = propState[6 + ii*stmRowCount + jj];
-            #endif                                                                                    // made changes by TUAN NGUYEN
+            for (UnsignedInt ii = 0; ii < stmRowCount; ++ii)
+               for (UnsignedInt jj = 0; jj < stmRowCount; ++jj)
+                  sdObj->tSTMtm(ii,jj) = propState[stmStartIndex + ii*stmRowCount + jj];
 
             // transmit participant STM at transmit time t1
-            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
-            if ((sdObj->tSTM.GetNumRows() != sdObj->tSTMtm.GetNumRows())||(sdObj->tSTM.GetNumColumns() != sdObj->tSTMtm.GetNumColumns()))  // made changes by TUAN NGUYEN
-               sdObj->tSTM.ChangeSize(sdObj->tSTMtm.GetNumRows(), sdObj->tSTMtm.GetNumColumns(), true);                                    // made changes by TUAN NGUYEN
-            #endif
+            if ((sdObj->tSTM.GetNumRows() != sdObj->tSTMtm.GetNumRows())||(sdObj->tSTM.GetNumColumns() != sdObj->tSTMtm.GetNumColumns()))
+               sdObj->tSTM.ChangeSize(sdObj->tSTMtm.GetNumRows(), sdObj->tSTMtm.GetNumColumns(), true);
             sdObj->tSTM = sdObj->tSTMtm;
          }
 
@@ -1402,47 +1363,39 @@ bool MeasureModel::CalculateMeasurement(bool withEvents, bool withMediaCorrectio
                propMap[sdObj->rNode]->GetPropagator()->AccessOutState();
             Rvector6 state(propState);
 
-            // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // made changes by TUAN NGUYEN  fix bug GMT-5364
-            SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->rNode))->GetOrigin();                 // the origin of the receive spacecraft's cooridinate system    // made changes by TUAN NGUYEN  fix bug GMT-5364
-            SpacePoint* forcemodelOrigin = propMap[sdObj->rNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // made changes by TUAN NGUYEN  fix bug GMT-5364
-            state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->rPrecTime));                         // made changes by TUAN NGUYEN  fix bug GMT-5364
+            // This step is used to convert spacecraft's state to Spacecraft.CoordinateSystem                                                                          // fix bug GMT-5364
+            SpacePoint* spacecraftOrigin = ((Spacecraft*)(sdObj->rNode))->GetOrigin();                 // the origin of the receive spacecraft's cooridinate system    // fix bug GMT-5364
+            SpacePoint* forcemodelOrigin = propMap[sdObj->rNode]->GetODEModel()->GetForceOrigin();     // the origin of the coordinate system used in forcemodel       // fix bug GMT-5364
+            state = state + (forcemodelOrigin->GetMJ2000PrecState(sdObj->rPrecTime) - spacecraftOrigin->GetMJ2000PrecState(sdObj->rPrecTime));                         // fix bug GMT-5364
             sdObj->rLoc = state.GetR();
             sdObj->rVel = state.GetV();
 
             // receive participant STM at measurement type tm
-            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
-            Integer stmRowCount = sdObj->rNode->GetIntegerParameter("FullSTMRowCount");                       // made changes by TUAN NGUYEN
+            Integer stmRowCount = sdObj->rNode->GetIntegerParameter("FullSTMRowCount");
 			   // Set size for rSTMtm
-            if ((sdObj->rSTMtm.GetNumRows() != stmRowCount)||(sdObj->rSTMtm.GetNumColumns() != stmRowCount))  // made changes by TUAN NGUYEN
-               sdObj->rSTMtm.ChangeSize(stmRowCount, stmRowCount, true);                                      // made changes by TUAN NGUYEN
+            if ((sdObj->rSTMtm.GetNumRows() != stmRowCount)||(sdObj->rSTMtm.GetNumColumns() != stmRowCount))
+               sdObj->rSTMtm.ChangeSize(stmRowCount, stmRowCount, true);
 
 			   // Get start index of STM
-			   const std::vector<ListItem*>* stateMap = propMap[sdObj->rNode]->GetPropStateManager()->GetStateMap();      // made changes by TUAN NGUYEN
-            UnsignedInt stmStartIndex = -1;                                                                            // made changes by TUAN NGUYEN
-            for (UnsignedInt index = 0; index < stateMap->size(); ++index)                                             // made changes by TUAN NGUYEN
-            {                                                                                                          // made changes by TUAN NGUYEN
-               if (((*stateMap)[index]->object == sdObj->rNode) && ((*stateMap)[index]->elementName == "STM"))         // made changes by TUAN NGUYEN
-               {                                                                                                       // made changes by TUAN NGUYEN
-                  stmStartIndex = index;                                                                               // made changes by TUAN NGUYEN
-                  break;                                                                                               // made changes by TUAN NGUYEN
-               }                                                                                                       // made changes by TUAN NGUYEN
-            }                                                                                                          // made changes by TUAN NGUYEN
+			   const std::vector<ListItem*>* stateMap = propMap[sdObj->rNode]->GetPropStateManager()->GetStateMap();
+            UnsignedInt stmStartIndex = -1;
+            for (UnsignedInt index = 0; index < stateMap->size(); ++index)
+            {
+               if (((*stateMap)[index]->object == sdObj->rNode) && ((*stateMap)[index]->elementName == "STM"))
+               {
+                  stmStartIndex = index;
+                  break;
+               }
+            }
 
 			   // Set value for eSTMtm
-            for (UnsignedInt ii = 0; ii < stmRowCount; ++ii)                                          // made changes by TUAN NGUYEN
-               for (UnsignedInt jj = 0; jj < stmRowCount; ++jj)                                       // made changes by TUAN NGUYEN
-                  sdObj->rSTMtm(ii,jj) = propState[stmStartIndex + ii*stmRowCount + jj];              // made changes by TUAN NGUYEN
-            #else                                                                                     // made changes by TUAN NGUYEN
-            for (UnsignedInt ii = 0; ii < 6; ++ii)
-               for (UnsignedInt jj = 0; jj < 6; ++jj)
-                  sdObj->rSTMtm(ii,jj) = propState[6 + ii*stmRowCount + jj];
-            #endif                                                                                    // made changes by TUAN NGUYEN
+            for (UnsignedInt ii = 0; ii < stmRowCount; ++ii)
+               for (UnsignedInt jj = 0; jj < stmRowCount; ++jj)
+                  sdObj->rSTMtm(ii,jj) = propState[stmStartIndex + ii*stmRowCount + jj];
 
             // receive participant STM at receive time t2
-            #ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
-            if ((sdObj->rSTM.GetNumRows() != sdObj->rSTMtm.GetNumRows())||(sdObj->rSTM.GetNumColumns() != sdObj->rSTMtm.GetNumColumns()))  // made changes by TUAN NGUYEN
-               sdObj->rSTM.ChangeSize(sdObj->rSTMtm.GetNumRows(), sdObj->rSTMtm.GetNumColumns(), true);                                    // made changes by TUAN NGUYEN
-            #endif
+            if ((sdObj->rSTM.GetNumRows() != sdObj->rSTMtm.GetNumRows())||(sdObj->rSTM.GetNumColumns() != sdObj->rSTMtm.GetNumColumns()))
+               sdObj->rSTM.ChangeSize(sdObj->rSTMtm.GetNumRows(), sdObj->rSTMtm.GetNumColumns(), true);
             sdObj->rSTM = sdObj->rSTMtm;
          }
 

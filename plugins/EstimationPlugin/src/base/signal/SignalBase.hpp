@@ -74,9 +74,6 @@ public:
 
    virtual void         SetPropagator(PropSetup *propagator,
                                       GmatBase *forObj = NULL);
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                 // made changes by TUAN NGUYEN
-   virtual void         SetStmRowCount(UnsignedInt rc);
-#endif                                                                      // made changes by TUAN NGUYEN
 
    virtual bool         Initialize();
    virtual void         InitializeSignal(bool chainForwards = false);
@@ -88,8 +85,8 @@ public:
                         ModelSignalDerivative(GmatBase *obj,
                               Integer forId) = 0;
 
-   /// This fucntion is used to compute signal frequency on each signal leg                                              // made changes by TUAN NGUYEN
-   virtual bool         SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency = 0.0) = 0;  // made changes by TUAN NGUYEN
+   /// This fucntion is used to compute signal frequency on each signal leg
+   virtual bool         SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency = 0.0) = 0;
 
 
    /// This function is used to add media correction to measurement model
@@ -128,10 +125,6 @@ protected:
    SignalData                 theData;
    /// Participant data that can be passed to callers
    std::vector<RealArray>     theDataDerivatives;
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                 // made changes by TUAN NGUYEN
-   /// Number of rows/columns in teh state transition matrix
-   UnsignedInt                stmRowCount;
-#endif                                                                      // made changes by TUAN NGUYEN
 
    // Member data used
    // Coordinate Systems
@@ -206,9 +199,9 @@ protected:
    virtual void               UpdateRotationMatrix(Real atEpoch,
                                     const std::string &whichOne = "All");
 
-   virtual Real               GetCrDerivative(GmatBase *forObj);                                   // made changes by TUAN NGUYEN
-   virtual Real               GetCdDerivative(GmatBase *forObj);                                   // made changes by TUAN NGUYEN
-   virtual void               GetCDerivativeVector(GmatBase *forObj, Rvector &deriv);              // made changes by TUAN NGUYEN
+   virtual Real               GetCrDerivative(GmatBase *forObj);
+   virtual Real               GetCdDerivative(GmatBase *forObj);
+   virtual void               GetCDerivativeVector(GmatBase *forObj, Rvector &deriv);
    virtual void               GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
                                  Rvector &deriv);
    virtual void               GetRangeVectorDerivative(GmatBase *forObj, bool wrtR, bool wrtV,

@@ -50,8 +50,8 @@ public:
    virtual bool         SetStringParameter(const Integer id, const std::string &value);
    virtual bool         SetStringParameter(const std::string &label, const std::string &value);
 
-   /// This function is used to set tracking configs to data file object in order to use for data filter       // made changes by TUAN NGUYEN
-   virtual bool         SetTrackingConfigs(StringArray tkconfigs);                                             // made changes by TUAN NGUYEN
+   /// This function is used to set tracking configs to data file object in order to use for data filter
+   virtual bool         SetTrackingConfigs(StringArray tkconfigs);
 
    virtual ObservationData* 
                         FilteringData(ObservationData* dataObject, Integer& rejectedReason);
@@ -62,8 +62,8 @@ public:
 
 protected:
 
-   /// List of tracking configs used for data filter                                          // made changes by TUAN NGUYEN
-   StringArray tkConfigList;                                                                  // made changes by TUAN NGUYEN
+   /// List of tracking configs used for data filter
+   StringArray tkConfigList;
 
    /// Class parameter ID enumeration
    enum

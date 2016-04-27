@@ -143,9 +143,9 @@ ErrorModel* ErrorModelFactory::CreateErrorModel(const std::string &ofType,
 }
 
 
-GmatBase* ErrorModelFactory::CreateObject(const std::string &ofType,               // made changes by TUAN NGUYEN
-                                const std::string &withName)                       // made changes by TUAN NGUYEN
-{                                                                                  // made changes by TUAN NGUYEN
-   return (GmatBase*) CreateErrorModel(ofType, withName);                          // made changes by TUAN NGUYEN
-}                                                                                  // made changes by TUAN NGUYEN
+GmatBase* ErrorModelFactory::CreateObject(const std::string &ofType,
+                                const std::string &withName)
+{
+   return (GmatBase*) CreateErrorModel(ofType, withName);
+}
 

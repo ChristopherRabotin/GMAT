@@ -37,7 +37,7 @@
 #include "estimation_defs.hpp"
 #include "GmatBase.hpp"
 #include "ObType.hpp"
-#include "DataFilter.hpp"                            // made changes by TUAN NGUYEN
+#include "DataFilter.hpp"
 #include "MeasurementData.hpp"
 #include "ObservationData.hpp"
 
@@ -102,22 +102,22 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
 
-   virtual bool         SetDataFilter(DataFilter *filter);                                     // made changes by TUAN NGUYEN
-   virtual std::vector<DataFilter*>&  GetFilterList();                                         // made changes by TUAN NGUYEN
+   virtual bool         SetDataFilter(DataFilter *filter);
+   virtual std::vector<DataFilter*>&  GetFilterList();
 
    virtual bool         SetStream(ObType *thisStream);
    virtual bool         OpenStream(bool simulate = false);
    virtual bool         IsOpen();
    virtual void         WriteMeasurement(MeasurementData* theMeas);
    virtual ObservationData*
-                        ReadObservation();                                                    // made changes by TUAN NGUYEN
+                        ReadObservation();
 ///// TBD: Determine if there is a more generic way to add these
    virtual RampTableData* 
                         ReadRampTableData();
 
    virtual bool         CloseStream();
 
-   ObservationData*     FilteringData(ObservationData* dataObject, Integer& rejectedReason);   // made changes by TUAN NGUYEN
+   ObservationData*     FilteringData(ObservationData* dataObject, Integer& rejectedReason);
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
@@ -132,9 +132,9 @@ protected:
    /// Text description of the observation data type
    std::string    obsType;
 
-   /// This section is set for new design data filter                                         // made changes by TUAN NGUYEN
-   /// List of data filters                                                                   // made changes by TUAN NGUYEN
-   std::vector<DataFilter*>  filterList;                                                      // made changes by TUAN NGUYEN
+   /// This section is set for new design data filter
+   /// List of data filters
+   std::vector<DataFilter*>  filterList;
 
    /// This section is set for old design data filter
    /// Data thinning ratio
@@ -176,13 +176,13 @@ protected:
 private:
    Real             ConvertToRealEpoch(const std::string &theEpoch, const std::string &theFormat);
 
-   ObservationData* FilteringDataForNewSyntax(ObservationData* dataObject, Integer& filterIndex);     // made changes by TUAN NGUYEN
-   ObservationData* FilteringDataForOldSyntax(ObservationData* dataObject, Integer& rejectedReason);  // made changes by TUAN NGUYEN
+   ObservationData* FilteringDataForNewSyntax(ObservationData* dataObject, Integer& filterIndex);
+   ObservationData* FilteringDataForOldSyntax(ObservationData* dataObject, Integer& rejectedReason);
 
-   ObservationData  od_old;                                                                           // made changes by TUAN NGUYEN
-   Real             acc;                                                                              // made changes by TUAN NGUYEN
-   Real             epoch1;                                                                           // made changes by TUAN NGUYEN
-   Real             epoch2;                                                                           // made changes by TUAN NGUYEN
+   ObservationData  od_old;
+   Real             acc;
+   Real             epoch1;
+   Real             epoch2;
 };
 
 #endif /* DataFile_hpp */

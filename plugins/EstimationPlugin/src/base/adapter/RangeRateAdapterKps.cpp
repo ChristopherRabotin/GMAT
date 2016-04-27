@@ -829,8 +829,7 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurementAtOffset(
       throw MeasurementException("Strand index is out of bounds");
 
    // Fire the measurement model to build the collection of signal data
-   //if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt,                       // made changes by TUAN NGUYEN
-   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, dt,    // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, dt, 
          forStrand))
    {
       std::vector<SignalData*> data = calcData->GetSignalData();

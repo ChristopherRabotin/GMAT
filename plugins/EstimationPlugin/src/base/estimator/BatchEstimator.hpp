@@ -149,8 +149,8 @@ protected:
    /// Maximum consecutive divergences
    Integer               maxConsDivergences;
 
-   /// particicpants column lenght. It is used for writing report file               // made changes by TUAN NGUYEN
-   Integer                pcolumnLen;                                                // made changes by TUAN NGUYEN
+   /// particicpants column lenght. It is used for writing report file
+   Integer                pcolumnLen;
 
    /// Variables used for statistics calculation
    std::map<std::string, std::map<std::string, Real> > statisticsTable;       // this table is for groundstation and measurement type
@@ -226,46 +226,40 @@ protected:
    virtual bool            DataFilter();
 
 private:
-//   bool                    IsReuseableType(const std::string& value);
-   
-//   void                   WriteScript();                                                                            // made changes by TUAN NGUYEN
-   void                   WriteHeader();
-   void                   WriteSummary(Solver::SolverState sState);
-   void                   WriteConclusion();
 
-   void                   WriteReportFileHeaderPart1();                               // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeaderPart2();                               // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeaderPart3();                               // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeaderPart4_1();                             // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeaderPart4_2();                             // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeaderPart4_3();                             // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeaderPart4();                               // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeaderPart5();                               // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeaderPart6();                               // made changes by TUAN NGUYEN
-   void                   WriteReportFileHeader();                                    // made changes by TUAN NGUYEN
+   void                   WriteReportFileHeaderPart1();
+   void                   WriteReportFileHeaderPart2();
+   void                   WriteReportFileHeaderPart3();
+   void                   WriteReportFileHeaderPart4_1();
+   void                   WriteReportFileHeaderPart4_2();
+   void                   WriteReportFileHeaderPart4_3();
+   void                   WriteReportFileHeaderPart4();
+   void                   WriteReportFileHeaderPart5();
+   void                   WriteReportFileHeaderPart6();
+   void                   WriteReportFileHeader();
 
-   void                   WriteIterationHeader();                                     // made changes by TUAN NGUYEN
-   void                   WritePageHeader();                                          // made changes by TUAN NGUYEN
+   void                   WriteIterationHeader();
+   void                   WritePageHeader();
    
-   void                   WriteIterationSummaryPart1(Solver::SolverState sState);     // made changes by TUAN NGUYEN
-   void                   WriteIterationSummaryPart2(Solver::SolverState sState);     // made changes by TUAN NGUYEN
-   void                   WriteIterationSummaryPart3(Solver::SolverState sState);     // made changes by TUAN NGUYEN
-   void                   WriteIterationSummaryPart4(Solver::SolverState sState);     // made changes by TUAN NGUYEN
-   void                   WriteReportFileSummary(Solver::SolverState sState);         // made changes by TUAN NGUYEN
+   void                   WriteIterationSummaryPart1(Solver::SolverState sState);
+   void                   WriteIterationSummaryPart2(Solver::SolverState sState);
+   void                   WriteIterationSummaryPart3(Solver::SolverState sState);
+   void                   WriteIterationSummaryPart4(Solver::SolverState sState);
+   void                   WriteReportFileSummary(Solver::SolverState sState);
    
    std::string            GetElementFullName(ListItem* infor, bool isInternalCS) const;
-   std::string            GetElementUnit(ListItem* infor) const;                          // made changes by TUAN NGUYEN
-   std::string            GetUnit(std::string type);                                      // made changes by TUAN NGUYEN
-   Integer                GetElementPrecision(std::string unit) const;                    // made changes by TUAN NGUYEN
-   Rmatrix                CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap);                       // made changes by TUAN NGUYEN
+   std::string            GetElementUnit(ListItem* infor) const;
+   std::string            GetUnit(std::string type);
+   Integer                GetElementPrecision(std::string unit) const;
+   Rmatrix                CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap);
 
    std::map<GmatBase*, Rvector6> 
-                          CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
+                          CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state);
    std::map<GmatBase*, Rvector6> 
-                          CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
-   Rmatrix66              CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);      // made changes by TUAN NGUYEN
+                          CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);
+   Rmatrix66              CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);
    std::map<GmatBase*, RealArray>
-                          CalculateAncillaryElements(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
+                          CalculateAncillaryElements(const std::vector<ListItem*> *map, GmatState state);
 
 
    std::string            GetFileCreateTime(std::string fileName);
