@@ -19,7 +19,7 @@
 // governing permissions and limitations under the License.
 //
 // Author: Tuan Nguyen
-// Created: 2010/06/07 by Tuan Nguyen (GSFC-NASA
+// Created: 2010/06/07 by Tuan Nguyen (GSFC-NASA)
 //
 /**
  * Implementation for the Sensor class

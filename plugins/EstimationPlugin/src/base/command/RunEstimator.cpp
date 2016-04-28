@@ -64,8 +64,7 @@ RunEstimator::RunEstimator() :
    eventMan                (NULL)
 {
    overridePropInit = true;
-//   needReinitialize = false;                 // made changes by TUAN NGUYEN
-   delayInitialization = true;                 // made changes by TUAN NGUYEN
+   delayInitialization = true;
 }
 
 
@@ -105,8 +104,7 @@ RunEstimator::RunEstimator(const RunEstimator & rs) :
    eventMan                (NULL)
 {
    overridePropInit = true;
-//   needReinitialize = false;                  // made changes by TUAN NGUYEN
-   delayInitialization = true;                 // made changes by TUAN NGUYEN
+   delayInitialization = true;
 }
 
 //------------------------------------------------------------------------------
@@ -344,11 +342,11 @@ bool RunEstimator::Initialize()
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.1\n"); 
       #endif
-   theEstimator->SetDelayInitialization(false);                           // made changes by TUAN NGUYEN
+   theEstimator->SetDelayInitialization(false);
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.2\n"); 
       #endif
-   theEstimator->Initialize();                                            // made changes by TUAN NGUYEN
+   theEstimator->Initialize();
 
    theEstimator->TakeAction("ResetInstanceCount");
    simObj->TakeAction("ResetInstanceCount");
@@ -479,9 +477,9 @@ void RunEstimator::SetPropagationProperties(PropagationStateManager *psm)
 bool RunEstimator::PreExecution()
 {
    bool retval = false;
-   if (Initialize())                                                       // made changes by TUAN NGUYEN
+   if (Initialize())
    {
-      retval = theEstimator->Reinitialize();                               // made changes by TUAN NGUYEN
+      retval = theEstimator->Reinitialize();
 
       // Load participant names to estimation state manager 
       MeasurementManager *measman = theEstimator->GetMeasurementManager();
@@ -489,8 +487,8 @@ bool RunEstimator::PreExecution()
       StringArray participants = measman->GetParticipantList();
       esm->SetParticipantList(participants);
       
-      // Load solve for objects to esm                                   // made changes by TUAN NGUYEN
-      LoadSolveForsToESM();                                              // made changes by TUAN NGUYEN
+      // Load solve for objects to esm
+      LoadSolveForsToESM();
 
       // Pass in the objects
       StringArray objList = esm->GetObjectList("");
@@ -499,7 +497,7 @@ bool RunEstimator::PreExecution()
          std::string propName = objList[i];
          std::string objName = propName;
          std::string refObjectName = "";
-         size_t loc = propName.find('.');              // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+         size_t loc = propName.find('.');              // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
          if (loc != propName.npos)
          {
             objName = propName.substr(0, loc);
@@ -511,7 +509,7 @@ bool RunEstimator::PreExecution()
          // ex: propName = "CAN.ErrorModel1". Referent object is "ErrorModel1". It needs to set object ErrorModel1 to estimation state mananger   
          if (refObjectName != "")
          { 
-            GmatBase* refObj = obj->GetRefObject(Gmat::UNKNOWN_OBJECT, propName);         // made changes by TUAN NGUYEN
+            GmatBase* refObj = obj->GetRefObject(Gmat::UNKNOWN_OBJECT, propName);
             obj = refObj;
          }
 
@@ -639,13 +637,13 @@ bool RunEstimator::Execute()
    //--------------------------------------------------------------------
    // Steps to run before running Execute()
    //--------------------------------------------------------------------
-   // Initialization step is moved here:               // made changes by TUAN NGUYEN
-   if (delayInitialization)                            // made changes by TUAN NGUYEN
-   {                                                   // made changes by TUAN NGUYEN
-      // It needs to run initialization now            // made changes by TUAN NGUYEN
-      delayInitialization = false;                     // made changes by TUAN NGUYEN
-      PreExecution();                                  // made changes by TUAN NGUYEN
-   }                                                   // made changes by TUAN NGUYEN
+   // Initialization step is moved here:
+   if (delayInitialization)
+   {
+      // It needs to run initialization now
+      delayInitialization = false;
+      PreExecution();
+   }
 
 
    #ifdef DEBUG_EXECUTION

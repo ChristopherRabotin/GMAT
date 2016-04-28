@@ -60,11 +60,11 @@ ObservationData::ObservationData() :
    uplinkFreqAtRecei (0.0),                                // made changes by TUAN NGUYEN
    rangeModulo       (1.0),
    dopplerCountInterval   (1.0e-10),
-   tdrsServiceID     ("SA1"),                              // made changes by TUAN NGUYEN
-   tdrsNode4Freq     (0.0),                                // made changes by TUAN NGUYEN
-   tdrsNode4Band     (0),                                  // made changes by TUAN NGUYEN
-   tdrsSMARID        (0),                                  // made changes by TUAN NGUYEN
-   tdrsDataFlag      (0)                                   // made changes by TUAN NGUYEN
+   tdrsServiceID     ("SA1"),
+   tdrsNode4Freq     (0.0),
+   tdrsNode4Band     (0),
+   tdrsSMARID        (0),
+   tdrsDataFlag      (0)
 {
 ///// TBD: This does not go here -- we'll be adding a new data type, so need to have a way to handle this
    dataFormat = "GMATInternal";
@@ -118,11 +118,11 @@ ObservationData::ObservationData(const ObservationData& od):
    uplinkFreqAtRecei       (od.uplinkFreqAtRecei),                // made changes by TUAN NGUYEN
    rangeModulo             (od.rangeModulo),
    dopplerCountInterval	   (od.dopplerCountInterval),
-   tdrsServiceID           (od.tdrsServiceID),                    // made changes by TUAN NGUYEN
-   tdrsNode4Freq           (od.tdrsNode4Freq),                    // made changes by TUAN NGUYEN
-   tdrsNode4Band           (od.tdrsNode4Band),                    // made changes by TUAN NGUYEN
-   tdrsSMARID              (od.tdrsSMARID),                       // made changes by TUAN NGUYEN
-   tdrsDataFlag            (od.tdrsDataFlag)                      // made changes by TUAN NGUYEN
+   tdrsServiceID           (od.tdrsServiceID),
+   tdrsNode4Freq           (od.tdrsNode4Freq),
+   tdrsNode4Band           (od.tdrsNode4Band),
+   tdrsSMARID              (od.tdrsSMARID),
+   tdrsDataFlag            (od.tdrsDataFlag)
 {
    dataFormat = od.dataFormat;
 }
@@ -168,11 +168,11 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       uplinkFreqAtRecei       = od.uplinkFreqAtRecei;                // made changes by TUAN NGUYEN
       rangeModulo             = od.rangeModulo;
       dopplerCountInterval    = od.dopplerCountInterval;
-      tdrsServiceID           = od.tdrsServiceID;                    // made changes by TUAN NGUYEN
-      tdrsNode4Freq           = od.tdrsNode4Freq;                    // made changes by TUAN NGUYEN
-      tdrsNode4Band           = od.tdrsNode4Band;                    // made changes by TUAN NGUYEN
-      tdrsSMARID              = od.tdrsSMARID;                       // made changes by TUAN NGUYEN
-      tdrsDataFlag            = od.tdrsDataFlag;                     // made changes by TUAN NGUYEN
+      tdrsServiceID           = od.tdrsServiceID;
+      tdrsNode4Freq           = od.tdrsNode4Freq;
+      tdrsNode4Band           = od.tdrsNode4Band;
+      tdrsSMARID              = od.tdrsSMARID;
+      tdrsDataFlag            = od.tdrsDataFlag;
    }
 
    return *this;
@@ -208,11 +208,11 @@ void ObservationData::Clear()
    uplinkFreqAtRecei       = 0.0;                      // made changes by TUAN NGUYEN
    rangeModulo             = 1.0;
    dopplerCountInterval    = 1.0e-10;
-   tdrsServiceID           = "SA1";                    // made changes by TUAN NGUYEN
-   tdrsNode4Freq           = 0.0;                      // made changes by TUAN NGUYEN
-   tdrsNode4Band           = 0;                        // made changes by TUAN NGUYEN
-   tdrsSMARID              = 0;                        // made changes by TUAN NGUYEN
-   tdrsDataFlag            = 0;                        // made changes by TUAN NGUYEN
+   tdrsServiceID           = "SA1";
+   tdrsNode4Freq           = 0.0;
+   tdrsNode4Band           = 0;
+   tdrsSMARID              = 0;
+   tdrsDataFlag            = 0;
 }
 
 
@@ -242,7 +242,7 @@ StringArray ObservationData::GetAvailableMeasurementTypes()
    typeList.push_back("DSNRange");
    typeList.push_back("Doppler");
    typeList.push_back("Doppler_RangeRate");
-   typeList.push_back("TDRSDoppler_HZ");              // made changes by TUAN NGUYEN
+   typeList.push_back("TDRSDoppler_HZ");
 
    // Old syntax's measurement types
    typeList.push_back("DSNTwoWayRange");

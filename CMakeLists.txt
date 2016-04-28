@@ -21,9 +21,9 @@
 # Require CMake minimum version
 cmake_minimum_required(VERSION 2.8)
 
-# Support OSX 10.8+
+# Support OSX 10.8+ -> go to 10.10 as minimum
 IF(APPLE)
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8 CACHE STRING 
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.10 CACHE STRING
     "Minimum OSX version to target for deployment (at runtime). Set to empty string to target current MacOS version.")
 ENDIF()
 
@@ -240,7 +240,7 @@ MESSAGE(STATUS "Please set the Xerces locations")
 if(UNIX)
   if(APPLE)
     # Check this for Mac
-    SET(XERCES_LIBRARY "")
+    SET(XERCES_LIBRARY "xerces-c-3.1")
   else()
     SET(XERCES_LIBRARY "")
   endif()

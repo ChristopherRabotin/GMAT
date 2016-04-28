@@ -46,7 +46,6 @@
 //#define DEBUG_INVERSION
 //#define DEBUG_STM
 
-#define NEW_REPORTFILE_FORMAT
 
 //------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
@@ -269,26 +268,16 @@ void BatchEstimatorInv::Accumulate()
    TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch, "", "UTCGregorian", temp, times, 1);
    if (textFileMode == "Normal")
    {
-#ifdef NEW_REPORTFILE_FORMAT
       sprintf(&s[0], "%4d %6d  %s  ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str());
-#else
-      sprintf(&s[0], "%4d  %8d   %s   ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str());
-#endif
-
    }
    else
    {
       Real timeTAI = TimeConverterUtil::Convert(currentObs->epoch, currentObs->epochSystem, TimeConverterUtil::TAIMJD);
-#ifdef NEW_REPORTFILE_FORMAT
       sprintf(&s[0], "%4d   %6d  %s  %.12lf ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str(), timeTAI);
-#else
-      sprintf(&s[0],"%4d  %8d   %s  %.12lf        ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str(), timeTAI);
-#endif
    }
    sLine << s;
 
 
-#ifdef NEW_REPORTFILE_FORMAT
    std::string ss;
    if (textFileMode == "Normal")
    {
@@ -299,7 +288,7 @@ void BatchEstimatorInv::Accumulate()
       ss = "";
       for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
          ss = ss + currentObs->participantIDs[n] + (((n + 1) == currentObs->participantIDs.size()) ? "" : ",");
-      sLine << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(ss), pcolumnLen) + " ";                                          // made changes by TUAN NGUYEN
+      sLine << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(ss), pcolumnLen) + " ";
    }
    else
    {
@@ -314,23 +303,8 @@ void BatchEstimatorInv::Accumulate()
       ss = "";
       for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
          ss = ss + currentObs->participantIDs[n] + (((n + 1) == currentObs->participantIDs.size()) ? "" : ",");
-      sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen) + " ";                                          // made changes by TUAN NGUYEN
+      sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen) + " ";
    }
-#else
-   // Write to report file measurement type name and its unit:
-   std::string ss = currentObs->typeName + "                    ";
-   sLine << ss.substr(0,20) << " ";
-
-   ss = currentObs->unit + "    ";
-   sLine << ss.substr(0,4) << " ";
-
-
-   // Write to report file all participants in signal path:
-   ss = "";
-   for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
-      ss = ss + currentObs->participantIDs[n] + (((n + 1) == currentObs->participantIDs.size()) ? "" : ",");
-   sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen) + " ";                                          // made changes by TUAN NGUYEN
-#endif
 
 
    if (modelsToAccess.size() == 0)
@@ -340,7 +314,6 @@ void BatchEstimatorInv::Accumulate()
       measManager.GetObsDataObject()->inUsed = false;
       measManager.GetObsDataObject()->removedReason = "U";
 
-#ifdef NEW_REPORTFILE_FORMAT
       if (textFileMode == "Normal")
       {
          // Write to report file edit status:
@@ -366,38 +339,13 @@ void BatchEstimatorInv::Accumulate()
 
          if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
             sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-         else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))                        // made changes by TUAN NGUYEN
+         else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
             sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
          else
             sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
          sLine << s;
          sLine << "\n";
       }
-#else
-      // Write to report file edit status:
-      sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 10, GmatStringUtil::LEFT);
-
-	  // This line crashes on Linux, so comment out there
-      sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A                  N/A", currentObs->value_orig[0], currentObs->value[0]);
-      sLine << s;
-
-      if (textFileMode != "Normal")
-      {
-         // fill out N/A for partial derivative
-         for (int i = 0; i < stateMap->size(); ++i)
-            sLine << "                      N/A";
-
-         if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-            sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-         else if ((currentObs->typeName == "DSNTwoWayDoppler") || (currentObs->typeName == "Doppler") || (currentObs->typeName == "Doppler_RangeRate"))                        // made changes by TUAN NGUYEN
-            sprintf(&s[0], "            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
-         else
-            sprintf(&s[0], "          N/A                      N/A                      N/A                     N/A");
-         sLine << s;
-      }
-      sLine << "\n";
-#endif
-
    }
    else
    {
@@ -412,7 +360,6 @@ void BatchEstimatorInv::Accumulate()
          else
             numRemovedRecords[ss]++;
 
-#ifdef NEW_REPORTFILE_FORMAT
          if (textFileMode == "Normal")
          {
             // Write to report file edit status:
@@ -446,29 +393,6 @@ void BatchEstimatorInv::Accumulate()
             sLine << s;
             sLine << "\n";
          }
-#else
-         // Write to report file edit status:
-         sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
-
-         sprintf(&s[0], "%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->feasibilityValue);
-         sLine << s;
-
-         if (textFileMode != "Normal")
-         {
-            // fill out N/A for partial derivative
-            for (int i = 0; i < stateMap->size(); ++i)
-               sLine << "                      N/A";
-
-            if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-               sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-            else if ((currentObs->typeName == "DSNTwoWayDoppler") || (currentObs->typeName == "Doppler") || (currentObs->typeName == "Doppler_RangeRate"))
-               sprintf(&s[0], "            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
-            else
-               sprintf(&s[0], "          N/A                      N/A                      N/A                     N/A");
-            sLine << s;
-         }
-         sLine << "\n";
-#endif
       }
       else // (count >= 1)
       {
@@ -505,7 +429,6 @@ void BatchEstimatorInv::Accumulate()
             else
                weight = 1.0;
 
-#ifdef NEW_REPORTFILE_FORMAT
             if (textFileMode == "Normal")
             {
                // Write to report file edit status:
@@ -540,29 +463,6 @@ void BatchEstimatorInv::Accumulate()
                sLine << s;
                sLine << "\n";
             }
-#else
-            // Write to report file edit status:
-            sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
-
-            sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
-            sLine << s;
-
-            if (textFileMode != "Normal")
-            {
-               // fill out N/A for partial derivative
-               for (int i = 0; i < stateMap->size(); ++i)
-                  sLine << "                      N/A";
-
-               if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-                  sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-               else if ((currentObs->typeName == "DSNTwoWayDoppler") || (currentObs->typeName == "Doppler") || (currentObs->typeName == "Doppler_RangeRate"))
-                  sprintf(&s[0], "            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
-               else
-                  sprintf(&s[0], "          N/A                      N/A                      N/A                     N/A");
-               sLine << s;
-            }
-            sLine << "\n";
-#endif
 
 
             // Reset value for removed reason for all reuseable data records
@@ -750,8 +650,6 @@ void BatchEstimatorInv::Accumulate()
             
                // Write report for this observation data for case data record is removed
                std::string ss = currentObs->removedReason;
-
-#ifdef NEW_REPORTFILE_FORMAT
                if (textFileMode == "Normal")
                {
                   // Write to report file edit status:
@@ -772,13 +670,6 @@ void BatchEstimatorInv::Accumulate()
                   sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
                   sLine << s;
                }
-#else
-               // Write to report file edit status:
-               sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
-
-               sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
-               sLine << s;
-#endif
             
                if (textFileMode != "Normal")
                {
@@ -982,12 +873,12 @@ void BatchEstimatorInv::Estimate()
       bestResidualRMS = newResidualRMS;
    else
    {
-      // Reset best RMS as needed                                            // made changes by TUAN NGUYEN
-      if (resetBestRMSFlag)                                                  // made changes by TUAN NGUYEN
-      {                                                                      // made changes by TUAN NGUYEN
-         if (estimationStatus == DIVERGING)                                  // made changes by TUAN NGUYEN
-            bestResidualRMS = oldResidualRMS;                                // made changes by TUAN NGUYEN
-      }                                                                      // made changes by TUAN NGUYEN
+      // Reset best RMS as needed
+      if (resetBestRMSFlag)
+      {
+         if (estimationStatus == DIVERGING)
+            bestResidualRMS = oldResidualRMS;
+      }
 
       bestResidualRMS = GmatMathUtil::Min(bestResidualRMS, newResidualRMS);
    }
@@ -1172,8 +1063,8 @@ void BatchEstimatorInv::Estimate()
       dx.push_back(delta);
       (*estimationState)[i] += delta;
    }
-   esm.RestoreObjects(&outerLoopBuffer);                           // Restore solver-object initial state           // made changes by TUAN NGUYEN
-   esm.MapVectorToObjects();                                       // update objects state to current state         // made changes by TUAN NGUYEN
+   esm.RestoreObjects(&outerLoopBuffer);                           // Restore solver-object initial state
+   esm.MapVectorToObjects();                                       // update objects state to current state
 
    // Convert current estimation state from GMAT internal coordinate system to participants' coordinate system
    GetEstimationStateForReport(currentSolveForState);

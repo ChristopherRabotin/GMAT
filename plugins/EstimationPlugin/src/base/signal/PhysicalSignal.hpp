@@ -104,7 +104,7 @@ protected:
    Real           ETminusTAI(Real tA1MJD, SpacePoint* participant);
 
    /// This fucntion is used to compute signal frequency on each signal leg
-   virtual bool   SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency = 0.0);                           // made changes by TUAN NGUYEN
+   virtual bool   SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency = 0.0);
 
    /// These functions are used to compute midia correction
    virtual bool   MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL);
@@ -123,8 +123,8 @@ private:
    UnsignedInt endIndex;
 
    void           SpecifyBeginEndIndexesOfRampTable();
-   bool           TestSignalBlockedBetweenTwoSpacecrafts();                                                                       // made changes by TUAN NGUYEN
-   bool           TestSignalBlockedByBody(CelestialBody* body, Rvector3 tRSSB, Rvector3 rRSSB, GmatTime tTime, GmatTime rTime);   // made changes by TUAN NGUYEN
+   bool           TestSignalBlockedBetweenTwoSpacecrafts();
+   bool           TestSignalBlockedByBody(CelestialBody* body, Rvector3 tRSSB, Rvector3 rRSSB, GmatTime tTime, GmatTime rTime);
 };
 
 #endif /* PhysicalSignal_hpp */

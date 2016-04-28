@@ -109,8 +109,8 @@ protected:
    //std::string   noiseModel;                    // specify noise model. It will be "RandomConstant" for Gausian noise model.
    /// Measurement bias
    Real          bias;                          // specify bias of a measurement
-   /// Measurement bias sigma                                                                 // made changes by TUAN NGUYEN
-   Real          biasSigma;                     // specify bias sigma of a measurement        // made changes by TUAN NGUYEN
+   /// Measurement bias sigma
+   Real          biasSigma;                     // specify bias sigma of a measurement
    /// Solve-for parameters
    StringArray   solveforNames;                 // It contains a name list of solve-for parameters
 
@@ -123,8 +123,8 @@ protected:
       NOISE_SIGMA,
       //NOISE_MODEL,
       BIAS,
-      BIAS_SIGMA,                             // made changes by TUAN NGUYEN
-      SOLVEFORS,                              // made changes by TUAN NGUYEN
+      BIAS_SIGMA,
+      SOLVEFORS,
       ErrorModelParamCount
    };
 

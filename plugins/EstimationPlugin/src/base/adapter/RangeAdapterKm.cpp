@@ -344,8 +344,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             instanceName + " before the measurement was set");
    
    // Fire the measurement model to build the collection of signal data
-   //if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))                        // made changes by TUAN NGUYEN
-   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))     // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))
    {
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
@@ -461,7 +460,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf km \n", values[i]);
             MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
             MessageInterface::ShowMessage("      . Bias adding option        : %s\n", (addBias?"true":"false"));
-            if (measurementType == "Range_KM")            // made changes by TUAN NGUYEN
+            if (measurementType == "Range_KM")
             {
                MessageInterface::ShowMessage("      . Range noise sigma          : %.12lf km \n", noiseSigma[i]);
                MessageInterface::ShowMessage("      . Range bias                 : %.12lf km \n", measurementBias[i]);
@@ -620,8 +619,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
             instanceName + " before the measurement was set");
 
    // Fire the measurement model to build the collection of signal data
-   //if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt))                            // made changes by TUAN NGUYEN
-   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, dt))         // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB, dt))
    {
       std::vector<SignalData*> data = calcData->GetSignalData();
       std::string unfeasibilityReason;
@@ -777,21 +775,19 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
    // Clear derivative variable
    for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
       theDataDerivatives[i].clear();
-   theDataDerivatives.clear();                                                        // made changes by TUAN NGUYEN
+   theDataDerivatives.clear();
 
    if (paramName == "Bias")
    {
-      //RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
-      //theDataDerivatives.clear();                                                     // made changes by TUAN NGUYEN
-      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_KM")               // made changes by TUAN NGUYEN
-         theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);     // made changes by TUAN NGUYEN
-      else                                                                            // made changes by TUAN NGUYEN
-      {                                                                               // made changes by TUAN NGUYEN
-         Integer size = obj->GetEstimationParameterSize(id);                          // made changes by TUAN NGUYEN
-         RealArray oneRow;                                                            // made changes by TUAN NGUYEN
-         oneRow.assign(size, 0.0);                                                    // made changes by TUAN NGUYEN
-         theDataDerivatives.push_back(oneRow);                                        // made changes by TUAN NGUYEN
-      }                                                                               // made changes by TUAN NGUYEN
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_KM")
+         theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);
+      else
+      {
+         Integer size = obj->GetEstimationParameterSize(id);
+         RealArray oneRow;
+         oneRow.assign(size, 0.0);
+         theDataDerivatives.push_back(oneRow);
+      }
 
    }
    else

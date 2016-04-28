@@ -43,7 +43,7 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
    "NoiseSigma",
 //   "NoiseModel",
    "Bias",
-   "BiasSigma",                                                                                                         // made changes by TUAN NGUYEN
+   "BiasSigma",
    "SolveFors",
 };
 
@@ -55,7 +55,7 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
 //   Gmat::STRING_TYPE,         // NOISE_MODEL           // Specify model of error. It is "RandomConstant" for Gausian distribution 
    Gmat::REAL_TYPE,			   // BIAS                  // Measurement bias
-   Gmat::REAL_TYPE,			   // BIAS_SIGMA            // Measurement bias sigma                                       // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,			   // BIAS_SIGMA            // Measurement bias sigma
    Gmat::STRINGARRAY_TYPE,    // SOLVEFORS             // Contains a list of all solve-for parameters in ErrorModel 
 };
 
@@ -120,7 +120,7 @@ ErrorModel::ErrorModel(const ErrorModel& em) :
    noiseSigma            (em.noiseSigma),
 //   noiseModel            (em.noiseModel),
    bias                  (em.bias),
-   biasSigma             (em.biasSigma),                               // made changes by TUAN NGUYEN
+   biasSigma             (em.biasSigma),
    solveforNames         (em.solveforNames)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -157,7 +157,7 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
       noiseSigma          = em.noiseSigma;
 //      noiseModel          = em.noiseModel;
       bias                = em.bias;
-      biasSigma           = em.biasSigma;             // made changes by TUAN NGUYEN
+      biasSigma           = em.biasSigma;
       solveforNames       = em.solveforNames;
    }
 
@@ -544,17 +544,17 @@ std::string ErrorModel::GetStringParameter(const Integer id, const Integer index
    //   return participantNameList[index];
    //}
 
-   if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
-   {                                                                                // made changes by TUAN NGUYEN
-      if ((index < 0)||(index >= (Integer)solveforNames.size()))                    // made changes by TUAN NGUYEN
-      {                                                                             // made changes by TUAN NGUYEN
-         std::stringstream ss;                                                      // made changes by TUAN NGUYEN
-         ss << "Error: solve-for index (" << index << ") is out of bound.\n";       // made changes by TUAN NGUYEN
-         throw GmatBaseException(ss.str());                                         // made changes by TUAN NGUYEN
-      }                                                                             // made changes by TUAN NGUYEN
+   if (id == SOLVEFORS)
+   {
+      if ((index < 0)||(index >= (Integer)solveforNames.size()))
+      {
+         std::stringstream ss;
+         ss << "Error: solve-for index (" << index << ") is out of bound.\n";
+         throw GmatBaseException(ss.str());
+      }
 
-      return solveforNames[index];                                                  // made changes by TUAN NGUYEN
-   }                                                                                // made changes by TUAN NGUYEN
+      return solveforNames[index];
+   }
 
    return GmatBase::GetStringParameter(id, index);
 }
@@ -603,8 +603,8 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
    //   }
    //}
 
-   if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
-   {                                                                                // made changes by TUAN NGUYEN
+   if (id == SOLVEFORS)
+   {
       // an empty list is set to SolveFors parameter when index == -1
       if (index == -1)
       {
@@ -612,36 +612,36 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
          return true;
       }
 
-      if (value != "Bias")                                                          // made changes by TUAN NGUYEN
-         throw GmatBaseException("Error: '" + value + "' is an invalid value. "     // made changes by TUAN NGUYEN
-         + GetName() + ".SolveFors parameter only accepts Bias as a solve-for.\n"); // made changes by TUAN NGUYEN
+      if (value != "Bias")
+         throw GmatBaseException("Error: '" + value + "' is an invalid value. "
+         + GetName() + ".SolveFors parameter only accepts Bias as a solve-for.\n");
 
-      if ((0 <= index)&&(index < (Integer)solveforNames.size()))                    // made changes by TUAN NGUYEN
-      {                                                                             // made changes by TUAN NGUYEN
-         solveforNames[index] = value;                                              // made changes by TUAN NGUYEN
-         return true;                                                               // made changes by TUAN NGUYEN
-      }                                                                             // made changes by TUAN NGUYEN
-      else                                                                          // made changes by TUAN NGUYEN
-      {                                                                             // made changes by TUAN NGUYEN
+      if ((0 <= index)&&(index < (Integer)solveforNames.size()))
+      {
+         solveforNames[index] = value;
+         return true;
+      }
+      else
+      {
          if (index == -1)
          {
             solveforNames.clear();
             return true;
          }
-         else if (index == solveforNames.size())                                    // made changes by TUAN NGUYEN
-         {                                                                          // made changes by TUAN NGUYEN
-            solveforNames.push_back(value);                                         // made changes by TUAN NGUYEN
-            return true;                                                            // made changes by TUAN NGUYEN
-         }                                                                          // made changes by TUAN NGUYEN
-         else                                                                       // made changes by TUAN NGUYEN
-         {                                                                          // made changes by TUAN NGUYEN
-            std::stringstream ss;                                                   // made changes by TUAN NGUYEN
-            ss << "Error: solve-for's index (" << index << ") is out of bound.\n";  // made changes by TUAN NGUYEN
-            throw GmatBaseException(ss.str());                                      // made changes by TUAN NGUYEN
-         }                                                                          // made changes by TUAN NGUYEN
-      }                                                                             // made changes by TUAN NGUYEN
+         else if (index == solveforNames.size())
+         {
+            solveforNames.push_back(value);
+            return true;
+         }
+         else
+         {
+            std::stringstream ss;
+            ss << "Error: solve-for's index (" << index << ") is out of bound.\n";
+            throw GmatBaseException(ss.str());
+         }
+      }
       return true;
-   }                                                                                // made changes by TUAN NGUYEN
+   }
 
    return GmatBase::SetStringParameter(id, value, index);
 }
@@ -700,8 +700,8 @@ const StringArray& ErrorModel::GetStringArrayParameter(const Integer id) const
    //if (id == STRAND)
    //   return participantNameList;
 
-   if (id == SOLVEFORS)                           // made changes by TUAN NGUYEN
-      return solveforNames;                       // made changes by TUAN NGUYEN
+   if (id == SOLVEFORS)
+      return solveforNames;
 
    return GmatBase::GetStringArrayParameter(id);
 }
@@ -733,8 +733,8 @@ Real ErrorModel::GetRealParameter(const Integer id) const
    if (id == BIAS)
       return bias;
 
-   if (id == BIAS_SIGMA)                  // made changes by TUAN NGUYEN
-      return biasSigma;                   // made changes by TUAN NGUYEN
+   if (id == BIAS_SIGMA)
+      return biasSigma;
 
    return GmatBase::GetRealParameter(id);
 }

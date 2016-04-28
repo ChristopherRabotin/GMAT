@@ -889,23 +889,23 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                   // if ground station is only at first transmit node in signal path, take derivative w.r.t the bias associate to ground station's error mode, otherwise keep default value 0
 
                   // Get full name of the derivitive object
-                  std::string derivObjName = obj->GetFullName();                                     // made changes by TUAN NGUYEN
+                  std::string derivObjName = obj->GetFullName();
 
                   // Get names of all error models defined in the ground station
                   GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalData().tNode;
-                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();            // made changes by TUAN NGUYEN
+                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();
 
                   // Search for error model
                   bool found = false;
                   for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
                      mapIndex != errmodelMap.end(); ++mapIndex)
                   {
-                     for (UnsignedInt j = 0; j < mapIndex->second.size(); ++j)                       // made changes by TUAN NGUYEN
+                     for (UnsignedInt j = 0; j < mapIndex->second.size(); ++j)
                      {
-                        if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)                 // made changes by TUAN NGUYEN
+                        if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)
                         {
                            found = true;
-                           break;                                                                    // made changes by TUAN NGUYEN
+                           break;
                         }
                         if (found)
                            break;
@@ -913,10 +913,10 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                   }
 
                   if (found)
-                  {                                                                                  // made changes by TUAN NGUYEN
-                     for (Integer i = 0; i < size; ++i)                                              // made changes by TUAN NGUYEN
-                        theDataDerivatives[0][i] += 1.0;                                             // made changes by TUAN NGUYEN
-                  }                                                                                  // made changes by TUAN NGUYEN
+                  {
+                     for (Integer i = 0; i < size; ++i)
+                        theDataDerivatives[0][i] += 1.0;
+                  }
                }
             }
             else if (next == NULL)
@@ -926,23 +926,23 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                {
                   // if ground station is at the end of signal path, take derivative w.r.t the bias associate to ground station's error mode, otherwise keep default value 0
                   // Get full name of the derivitive object
-                  std::string derivObjName = obj->GetFullName();                                     // made changes by TUAN NGUYEN
+                  std::string derivObjName = obj->GetFullName();
 
                   // Get names of all error models defined in the ground station
                   GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalData().rNode;
-                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();            // made changes by TUAN NGUYEN
+                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();
 
                   // Search for error model
                   bool found = false;
                   for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
                      mapIndex != errmodelMap.end(); ++mapIndex)
                   {
-                     for (UnsignedInt j = 0; j < (mapIndex)->second.size(); ++j)                     // made changes by TUAN NGUYEN
+                     for (UnsignedInt j = 0; j < (mapIndex)->second.size(); ++j)
                      {
-                        if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)                 // made changes by TUAN NGUYEN
+                        if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)
                         {
                            found = true;
-                           break;                                                                    // made changes by TUAN NGUYEN
+                           break;
                         }
                         if (found)
                            break;
@@ -967,9 +967,8 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
             MessageInterface::ShowMessage("   Deriv is w.r.t. something "
                      "independent, so zero\n");
          #endif
-            // Set 0 to all elements (number of elements is specified by size)  // made changes by TUAN NGUYEN 
-            //for (UnsignedInt i = 0; i < 3; ++i)                               // made changes by TUAN NGUYEN
-            for (UnsignedInt i = 0; i < size; ++i)                              // made changes by TUAN NGUYEN
+            // Set 0 to all elements (number of elements is specified by size)
+            for (UnsignedInt i = 0; i < size; ++i)
                theDataDerivatives[0][i] += 0.0;
          }
    }
@@ -1248,7 +1247,7 @@ bool PhysicalSignal::HardwareDelayCalculation()
 }
 
 
-bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency)         // made changes by TUAN NGUYEN
+bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* rampTB, Real uplinkFrequency)
 {
    // 1. Verify the exsisting of transmit participant and receive participant 
    if (theData.tNode == NULL)
@@ -1282,7 +1281,7 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
             GmatTime t1 = theData.tPrecTime - theData.tDelay/GmatTimeConstants::SECS_PER_DAY;
             frequency = GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;                     // unit: Mhz
          }
-         else if (uplinkFrequency == 0.0)                                 // made changes by TUAN NGUYEN
+         else if (uplinkFrequency == 0.0)
          {
             // Get transmit frequency from ground station's transmitter
             ObjectArray hardwareList = ((GroundstationInterface*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
@@ -1303,8 +1302,8 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
                throw MeasurementException(ss.str());
             }
          }
-         else                                                            // made changes by TUAN NGUYEN
-            frequency = uplinkFrequency;                                 // made changes by TUAN NGUYEN
+         else
+            frequency = uplinkFrequency;
       }
       else
       {
@@ -1335,7 +1334,7 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
    {
       if (theData.arriveFreq == -1.0)               // theData.arriveFerq only equals -1.0 when Transmit Node is the first node in signal path 
       {
-         if (uplinkFrequency == 0.0)                           // made changes by TUAN NGUYEN
+         if (uplinkFrequency == 0.0)
          {
             // Case 3: Transmit Node is a spacecraft and is the first node in signal path 
             // Get transmit frequency from spacecraft's transmitter
@@ -1357,8 +1356,8 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
                throw MeasurementException(ss.str());
             }
          }
-         else                                               // made changes by TUAN NGUYEN
-            frequency = uplinkFrequency;                    // made changes by TUAN NGUYEN
+         else
+            frequency = uplinkFrequency;
       }
       else
       {
@@ -1571,7 +1570,7 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    {
       if (ionosphere == NULL)
       {
-         ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();  // made changes by TUAN NGUYEN
+         ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();
       }
       theData.useCorrection.push_back(true);
    }
@@ -1716,8 +1715,7 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
    {
       if (ionosphere == NULL)
       {
-         // ionosphere = new Ionosphere(gs->GetName()+"_Ionosphere");                  // made changes by TUAN NGUYEN
-         ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();  // made changes by TUAN NGUYEN
+         ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();
       }
       theData.useCorrection.push_back(true);
    }
@@ -1740,7 +1738,7 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
    // 4. Get transmit frequency from theData.tNode
    if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
    {
-      if (theData.arriveFreq == -1.0)                                                                          // made changes by TUAN NGUYEN
+      if (theData.arriveFreq == -1.0)
       {
          // Get frequency from ground station's transmiter or from ramped frequency table
          if (rampTB)
@@ -1771,29 +1769,29 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
             }
          }
       }
-      else                                                                                                         // made changes by TUAN NGUYEN
-      {                                                                                                            // made changes by TUAN NGUYEN
-         // In this case, ground station is used as an intermediate signal transponder.                            // made changes by TUAN NGUYEN
-         // Example: role of GS2 in signal path: {GS1, SC1, GS2, SC2, GS3}                                         // made changes by TUAN NGUYEN
-         // Get transmit frequency from ground station's transmitter                                               // made changes by TUAN NGUYEN
-         ObjectArray hardwareList = ((GroundstationInterface*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);   // made changes by TUAN NGUYEN
-         UnsignedInt i;                                                                                            // made changes by TUAN NGUYEN
-         for (i = 0; i < hardwareList.size(); ++i)                                                                 // made changes by TUAN NGUYEN
-         {                                                                                                         // made changes by TUAN NGUYEN
-            if (hardwareList[i]->IsOfType("Transponder"))                                                          // made changes by TUAN NGUYEN
-            {                                                                                                      // made changes by TUAN NGUYEN
-               frequency = ((Transponder*)hardwareList[i])->GetSignal(1)->GetValue();           // unit: MHz       // made changes by TUAN NGUYEN
-               break;                                                                                              // made changes by TUAN NGUYEN
-            }                                                                                                      // made changes by TUAN NGUYEN
-         }                                                                                                         // made changes by TUAN NGUYEN
+      else
+      {
+         // In this case, ground station is used as an intermediate signal transponder.
+         // Example: role of GS2 in signal path: {GS1, SC1, GS2, SC2, GS3}
+         // Get transmit frequency from ground station's transmitter
+         ObjectArray hardwareList = ((GroundstationInterface*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         UnsignedInt i;
+         for (i = 0; i < hardwareList.size(); ++i)
+         {
+            if (hardwareList[i]->IsOfType("Transponder"))
+            {
+               frequency = ((Transponder*)hardwareList[i])->GetSignal(1)->GetValue();           // unit: MHz
+               break;
+            }
+         }
          
-         if (i == hardwareList.size())                                                                             // made changes by TUAN NGUYEN
-         {                                                                                                         // made changes by TUAN NGUYEN
-            std::stringstream ss;                                                                                  // made changes by TUAN NGUYEN
-            ss << "Error: Ground station " << theData.tNode->GetName() << " does not have a transponder to receive and transmit signal\n";    // made changes by TUAN NGUYEN
-            throw MeasurementException(ss.str());                                                                  // made changes by TUAN NGUYEN
-         }                                                                                                         // made changes by TUAN NGUYEN
-      }                                                                                                            // made changes by TUAN NGUYEN
+         if (i == hardwareList.size())
+         {
+            std::stringstream ss;
+            ss << "Error: Ground station " << theData.tNode->GetName() << " does not have a transponder to receive and transmit signal\n";
+            throw MeasurementException(ss.str());
+         }
+      }
    }
    else
    {
@@ -1821,8 +1819,8 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
          throw MeasurementException(ss.str());
       }
    }
-   // Set value for transmit frequency in signal data object                                                        // made changes by TUAN NGUYEN
-   theData.transmitFreq = frequency;                                                                                // made changes by TUAN NGUYEN
+   // Set value for transmit frequency in signal data object
+   theData.transmitFreq = frequency;
 
 
    // 5. Compute range rate from transmit participant to receive participant 
@@ -1831,37 +1829,37 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
 
    // 6. Compute doppler shift frequency at receiver
    dsFrequency = frequency*(1 - rangeRate/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM));   // unt: Mhz
-   // Set value for receive frequency signal data object                                                            // made changes by TUAN NGUYEN
-   theData.receiveFreq = dsFrequency;                                                                               // made changes by TUAN NGUYEN
+   // Set value for receive frequency signal data object
+   theData.receiveFreq = dsFrequency;
 
    // 7. Set receive frequency to receiver
    if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
    {
-      if (next)                                                                                                     // made changes by TUAN NGUYEN
-      {                                                                                                             // made changes by TUAN NGUYEN
-         // In this case, ground station is used as an intermediate signal transponder                              // made changes by TUAN NGUYEN
-         // Set doppler shift frequency to ground station's transponder                                             // made changes by TUAN NGUYEN
-         ObjectArray hardwareList = ((GroundstationInterface*)theData.rNode)->GetRefObjectArray(Gmat::HARDWARE);    // made changes by TUAN NGUYEN
-         UnsignedInt i;                                                                                             // made changes by TUAN NGUYEN
-         for (i = 0; i < hardwareList.size(); ++i)                                                                  // made changes by TUAN NGUYEN
-         {                                                                                                          // made changes by TUAN NGUYEN
-            if (hardwareList[i]->IsOfType("Transponder"))                                                           // made changes by TUAN NGUYEN
-            {                                                                                                       // made changes by TUAN NGUYEN
-               Signal* inputSignal = ((Transponder*)hardwareList[i])->GetSignal(0);                                 // made changes by TUAN NGUYEN
-               inputSignal->SetValue(dsFrequency);                               // unit: Mhz                       // made changes by TUAN NGUYEN
-               ((Transponder*)hardwareList[i])->SetSignal(inputSignal, 0);       // This function force to calculate transmit frequency of the transponder     // made changes by TUAN NGUYEN
-               break;                                                                                               // made changes by TUAN NGUYEN
-            }                                                                                                       // made changes by TUAN NGUYEN
-         }                                                                                                          // made changes by TUAN NGUYEN
+      if (next)
+      {
+         // In this case, ground station is used as an intermediate signal transponder
+         // Set doppler shift frequency to ground station's transponder
+         ObjectArray hardwareList = ((GroundstationInterface*)theData.rNode)->GetRefObjectArray(Gmat::HARDWARE);
+         UnsignedInt i;
+         for (i = 0; i < hardwareList.size(); ++i)
+         {
+            if (hardwareList[i]->IsOfType("Transponder"))
+            {
+               Signal* inputSignal = ((Transponder*)hardwareList[i])->GetSignal(0);
+               inputSignal->SetValue(dsFrequency);                               // unit: Mhz
+               ((Transponder*)hardwareList[i])->SetSignal(inputSignal, 0);       // This function force to calculate transmit frequency of the transponder
+               break;
+            }
+         }
 
-         if (i == hardwareList.size())                                                                              // made changes by TUAN NGUYEN
-         {                                                                                                          // made changes by TUAN NGUYEN
-            std::stringstream ss;                                                                                   // made changes by TUAN NGUYEN
-            ss << "Error: Ground station " << theData.rNode->GetName() << " does not have a transponder to pass signal\n";    // made changes by TUAN NGUYEN
-            throw MeasurementException(ss.str());                                                                   // made changes by TUAN NGUYEN
-         }                                                                                                          // made changes by TUAN NGUYEN
-      }                                                                                                             // made changes by TUAN NGUYEN
-      else                                                                                                          // made changes by TUAN NGUYEN
+         if (i == hardwareList.size())
+         {
+            std::stringstream ss;
+            ss << "Error: Ground station " << theData.rNode->GetName() << " does not have a transponder to pass signal\n";
+            throw MeasurementException(ss.str());
+         }
+      }
+      else
       {
          // In this case, ground station is used as signal receiver
          // Set doppler shift frequency to ground station' receiver
@@ -1885,9 +1883,9 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
             throw MeasurementException(ss.str());
          }
       }
-      //// Note that: there is no next leg when the receive participant is a ground station                       // made changes by TUAN NGUYEN
-      //if (next)                                                                                                 // made changes by TUAN NGUYEN
-      //   throw MeasurementException("Error: ground station is in middle of signal path\n");                     // made changes by TUAN NGUYEN
+      //// Note that: there is no next leg when the receive participant is a ground station
+      //if (next)
+      //   throw MeasurementException("Error: ground station is in middle of signal path\n");
    }
    else
    {
@@ -1913,9 +1911,9 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
       }
    }
 
-   // Set value for arriveFreq in signal data object of the next signal leg                                     // made changes by TUAN NGUYEN
-   if (next)                                                                                                    // made changes by TUAN NGUYEN
-      next->GetSignalDataObject()->arriveFreq = dsFrequency;                                                    // made changes by TUAN NGUYEN
+   // Set value for arriveFreq in signal data object of the next signal leg
+   if (next)
+      next->GetSignalDataObject()->arriveFreq = dsFrequency;
 
    // 8. Computer media correction
    Rvector3 r1B = theData.tLoc + theData.tOStateSSB.GetR();
@@ -2517,10 +2515,10 @@ void PhysicalSignal::SpecifyBeginEndIndexesOfRampTable()
    searchkey = gsID + " " + scID + " ";
    
    // 2. Search for the beginning index
-   if (rampTable == NULL)                                                                   // made changes by TUAN NGUYEN
-      throw MeasurementException("Error: No ramp table was set for " + GetName() + "\n");   // made changes by TUAN NGUYEN
-   else if ((*rampTable).size() == 0)                                                       // made changes by TUAN NGUYEN
-      throw MeasurementException("Error: Ramp table has no data records.\n");               // made changes by TUAN NGUYEN
+   if (rampTable == NULL)
+      throw MeasurementException("Error: No ramp table was set for " + GetName() + "\n");
+   else if ((*rampTable).size() == 0)
+      throw MeasurementException("Error: Ramp table has no data records.\n");
 
    beginIndex = 0;
    for(; beginIndex < (*rampTable).size(); ++beginIndex)

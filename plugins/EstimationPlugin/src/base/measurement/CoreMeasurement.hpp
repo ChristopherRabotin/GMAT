@@ -66,8 +66,8 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name,
                               const Integer index);
-//   virtual bool         SetParticipantHardware(GmatBase *obj,                       // made changes by TUAN NGUYEN
-//                              const std::string &hwName, Integer hwIndex);          // made changes by TUAN NGUYEN
+//   virtual bool         SetParticipantHardware(GmatBase *obj,
+//                              const std::string &hwName, Integer hwIndex);
 
    virtual MeasurementData*        GetMeasurementDataPointer();
    virtual std::vector<RealArray>* GetDerivativePointer();
@@ -93,7 +93,7 @@ public:
 
    void                       SetNoise(Rvector* ns);
 
-//   virtual bool               SetParticipantHardwareNames(std::vector<StringArray>& participantHardwareNames);    // made changes by TUAN NGUYEN
+//   virtual bool               SetParticipantHardwareNames(std::vector<StringArray>& participantHardwareNames);
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
@@ -228,7 +228,7 @@ protected:
    bool                       CheckSat2SatLOS(Rvector3 p1loc, Rvector3 p2loc, SpacePoint *cb);
    bool                       CheckStation2SatLOS(Real a1Epoch, Rvector3 sLoc, SpacePoint *cb);
 
-   bool                       UpdateHardware();                                              // made changes by TUAN NGUYEN
+   bool                       UpdateHardware();
 
    // Used for debug
    virtual void               DumpParticipantStates(const std::string& ref);

@@ -103,16 +103,16 @@ DataFilter::DataFilter(const std::string name) :
    epochEnd = ConvertToRealEpoch(finalEpoch, epochFormat);
 
    observers.push_back("All");
-   //fileNames.push_back("From_AddTrackingConfig");      // made changes by TUAN NGUYEN
-   fileNames.push_back("All");                           // made changes by TUAN NGUYEN
+   //fileNames.push_back("From_AddTrackingConfig");
+   fileNames.push_back("All");
    trackers.push_back("All");
    dataTypes.push_back("All");
 
-   dataTypesMap["Range_KM"]          = "Range_KM";                 // made changes by TUAN NGUYEN
+   dataTypesMap["Range_KM"]          = "Range_KM";
    dataTypesMap["Range_RU"]          = "DSNRange";
    dataTypesMap["Doppler_HZ"]        = "Doppler";
-   dataTypesMap["Doppler_RangeRate"] = "Doppler_RangeRate";        // made changes by TUAN NGUYEN
-   dataTypesMap["TDRSDoppler_HZ"]    = "TDRSDoppler_HZ";           // made changes by TUAN NGUYEN
+   dataTypesMap["Doppler_RangeRate"] = "Doppler_RangeRate";
+   dataTypesMap["TDRSDoppler_HZ"]    = "TDRSDoppler_HZ";
 }
 
 
@@ -736,8 +736,8 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
          else if (value == "All")
             allObserver = true;          // set flag to indicate choosing all observers
 
-         if (!GmatStringUtil::IsValidIdentity(value))                                                                                                   // made changes by TUAN NGUYEN
-            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".ObservedObjects parameter is an invalid GMAT object name.\n");  // made changes by TUAN NGUYEN
+         if (!GmatStringUtil::IsValidIdentity(value))
+            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".ObservedObjects parameter is an invalid GMAT object name.\n");
 
          if (index == observers.size())
             observers.push_back(value);
@@ -768,8 +768,8 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
          else
             allTracker = true;         // set flag to indicate choosing all trackers
 
-         if (!GmatStringUtil::IsValidIdentity(value))                                                                                             // made changes by TUAN NGUYEN
-            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Trackers parameter is an invalid GMAT object name.\n");   // made changes by TUAN NGUYEN
+         if (!GmatStringUtil::IsValidIdentity(value))
+            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".Trackers parameter is an invalid GMAT object name.\n");
 
          if (index == trackers.size())
             trackers.push_back(value);
@@ -1291,7 +1291,7 @@ StringArray DataFilter::GetListOfMeasurementTypes()
    typeList.push_back("Range_RU");
    typeList.push_back("Doppler_HZ");
    typeList.push_back("Doppler_RangeRate");
-   typeList.push_back("TDRSDoppler_HZ");           // made changes by TUAN NGUYEN
+   typeList.push_back("TDRSDoppler_HZ");
    return typeList;
 }
 
@@ -1396,7 +1396,7 @@ bool DataFilter::ValidateInput()
       std::string strand = strands[i];
       
       //3.2.2. Get a partcipant from the strand and verify it in valid participant list  
-      size_t pos = strand.find_first_of('-');                      // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+      size_t pos = strand.find_first_of('-');                      // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
       while (pos != std::string::npos)
       {
          // Get participant

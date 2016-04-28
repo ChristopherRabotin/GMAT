@@ -135,7 +135,7 @@ protected:
    /// Flag indicate that ValidateInput() function was run
    bool isChecked;
 
-   std::map<std::string, std::string> dataTypesMap;                    // made changes by TUAN NGUYEN
+   std::map<std::string, std::string> dataTypesMap;
 
    /// Class parameter ID enumeration
    enum

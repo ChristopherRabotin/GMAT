@@ -178,17 +178,17 @@ public:
    // Get measurement model object
    virtual MeasureModel * GetMeasurementModel();
 
-   virtual void         AddMediaCorrection(bool isAdd) {withMediaCorrection = isAdd;}                      // made changes by TUAN NGUYEN
-   virtual void         AddBias(bool isAdd) {addBias = isAdd;}                                             // made changes by TUAN NGUYEN
-   virtual void         AddNoise(bool isAdd) {addNoise = isAdd;}                                           // made changes by TUAN NGUYEN
-   virtual void         SetRangeOnly(bool isRangeOnly) {rangeOnly = isRangeOnly;}                          // made changes by TUAN NGUYEN
+   virtual void         AddMediaCorrection(bool isAdd) {withMediaCorrection = isAdd;}
+   virtual void         AddBias(bool isAdd) {addBias = isAdd;}
+   virtual void         AddNoise(bool isAdd) {addNoise = isAdd;}
+   virtual void         SetRangeOnly(bool isRangeOnly) {rangeOnly = isRangeOnly;}
    
-   // Set solve-for and consider objects                                                                   // made changes by TUAN NGUYEN
-   virtual bool         SetUsedForObjects(ObjectArray objArray) {forObjects = objArray; return true;};     // made changes by TUAN NGUYEN
+   // Set solve-for and consider objects
+   virtual bool         SetUsedForObjects(ObjectArray objArray) {forObjects = objArray; return true;};
 
-   virtual StringArray  GetParticipants(Integer forPathIndex);                                             // made changes by TUAN NGUYEN
+   virtual StringArray  GetParticipants(Integer forPathIndex);
 
-   std::string          GetErrorMessage(){ return errMsg; };                                               // made changes by TUAN NGUYEN
+   std::string          GetErrorMessage(){ return errMsg; };
 
 protected:
    /// The ordered list of participants in the measurement
@@ -249,12 +249,12 @@ protected:
    bool                      addNoise;
    /// Add bias to measurement
    bool                      addBias;
-   /// Flag indicating to compute range only (w/o bias and noise model).                     // made changes by TUAN NGUYEN
-   /// It is used in Doppler measurement for E and S-paths before adding noise and bias,     // made changes by TUAN NGUYEN
-   bool                      rangeOnly;                                                      // made changes by TUAN NGUYEN
+   /// Flag indicating to compute range only (w/o bias and noise model).
+   /// It is used in Doppler measurement for E and S-paths before adding noise and bias
+   bool                      rangeOnly;
 
-   /// Flag indicating to compute media correction as seting by GMAT script                  // made changes by TUAN NGUYEN
-   bool                      withMediaCorrection;                                            // made changes by TUAN NGUYEN
+   /// Flag indicating to compute media correction as seting by GMAT script
+   bool                      withMediaCorrection;
 
    /// Measurement error covariance matrix
    Covariance                measErrorCovariance;
@@ -262,11 +262,11 @@ protected:
    /// Measurement type
    std::string               measurementType;  // it's value could be "Range_KM", "DSNRange", "Doppler", "Doppler_RangeRate", "TDRSDoppler_HZ", etc
 
-   /// A list of all objects used for measurement calculation (specificly it contains solver-for objects and consider objects)    // made changes by TUAN NGUYEN
-   ObjectArray               forObjects;                                                                                          // made changes by TUAN NGUYEN
+   /// A list of all objects used for measurement calculation (specificly it contains solver-for objects and consider objects)
+   ObjectArray               forObjects;
 
-   /// Store the error message whenever an error occurs during measurement calculation       // made changes by TUAN NGUYEN
-   std::string               errMsg;                                                         // made changes by TUAN NGUYEN
+   /// Store the error message whenever an error occurs during measurement calculation
+   std::string               errMsg;
 
    /// Parameter IDs for the TrackingDataAdapter
    enum
