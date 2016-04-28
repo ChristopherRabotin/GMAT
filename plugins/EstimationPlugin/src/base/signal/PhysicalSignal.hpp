@@ -117,6 +117,10 @@ protected:
    virtual bool   HardwareDelayCalculation();
 
 private:
+   /// Warning message count for media correction QA check
+   static Integer tropoWarningCount;
+   static Integer ionoWarningCount;
+
    /// ramp table and the beginning index and the ending index
    std::vector<RampTableData>* rampTable;
    UnsignedInt beginIndex;
