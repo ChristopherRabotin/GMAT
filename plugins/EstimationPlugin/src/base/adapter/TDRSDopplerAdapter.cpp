@@ -1397,7 +1397,7 @@ const std::vector<RealArray>& TDRSDopplerAdapter::CalculateMeasurementDerivative
    std::string paramName = obj->GetParameterText(parameterID);
 
    #ifdef DEBUG_DERIVATIVE_CALCULATION
-      MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
+      MessageInterface::ShowMessage("Solve-for parameter: %s\n", paramName.c_str());
    #endif
 
    // Clear derivative variable:

@@ -1654,25 +1654,25 @@ std::string BatchEstimator::GetProgressString()
             switch(estimationStatus)
             {
             case ABSOLUTETOL_CONVERGED:
-               progress << "This iteration is converged due to absolute tolerance convergence criteria\n";
+               progress << "This iteration is converged due to absolute tolerance convergence criteria.\n";
                break;
             case RELATIVETOL_CONVERGED:
-               progress << "This iteration is converged due to relative convergence criteria \n";
+               progress << "This iteration is converged due to relative convergence criteria.\n";
                break;
             case ABS_AND_REL_TOL_CONVERGED:
-               progress << "This iteration is converged due to boths: absolute and relative convergence criteria\n";
+               progress << "This iteration is converged due to boths: absolute and relative convergence criteria.\n";
                break;
             case MAX_CONSECUTIVE_DIVERGED:
-               progress << "This iteration is diverged due to maximum consecutive diverged criteria\n";
+               progress << "This iteration is diverged due to maximum consecutive diverged criteria.\n";
                break;
             case MAX_ITERATIONS_DIVERGED:
-               progress << "This iteration is diverged due to maximum iterations\n";
+               progress << "This iteration is diverged due to exceeding the maximum iterations.\n";
                break;
             case CONVERGING:
-               progress << "This iteration is converging\n";
+               progress << "This iteration is converging.\n";
                break;
             case DIVERGING:
-               progress << "This iteration is diverging\n";
+               progress << "This iteration is diverging.\n";
                break;
             }
             progress << "\n";
@@ -2037,7 +2037,7 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
    if (iterationsTaken == (maxIterations-1))
    {
       retval = MAX_ITERATIONS_DIVERGED;
-      why << "Number of iterations reaches its maximum setting value (" << maxIterations << ")\n";
+      why << "Number of iterations reached its maximum value (" << maxIterations << ").\n";
       reason = why.str();
       return retval;
    }
@@ -2050,7 +2050,7 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
          numDivIterations++;
          if (numDivIterations >= maxConsDivergences)
          {
-            why << "Number of consecutive divergences reaches its maximum setting value (" << maxConsDivergences << ")\n";
+            why << "Number of consecutive divergences reached its maximum value (" << maxConsDivergences << ").\n";
             reason = why.str();
             retval = MAX_CONSECUTIVE_DIVERGED;
          }
@@ -2383,13 +2383,10 @@ void BatchEstimator::WriteReportFileHeader()
 //------------------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart1()
 {
-MessageInterface::ShowMessage("WriteReportFileHeaderPart1() called\n");
    /// 1. Write header 1:
    time_t now = time(NULL);
    std::string runDate = CTime(&now);
-MessageInterface::ShowMessage("   Run time:   %s\n", runDate.c_str());
    std::string buildTime = GetFileCreateTime("GMAT.exe");
-MessageInterface::ShowMessage("   Build time: %s\n", buildTime.c_str());
 
    textFile
       << "                                              *****  G E N E R A L  M I S S I O N  A N A L Y S I S  T O O L  *****\n"
@@ -5266,7 +5263,7 @@ std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const s
          kState = StateConversionUtil::CartesianToKeplerian(mu, cState, "MA");
 
          if ((kState[1] <= 0)||(kState[1] >= 1.0))
-            MessageInterface::ShowMessage("Warning: eccentricity (%lf) is out of range (0,1) when convert Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", kState[1], state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
+            MessageInterface::ShowMessage("Warning: eccentricity (%lf) is out of range (0,1) when converting Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", kState[1], state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
 
          stateMap[(*map)[i]->object] = kState;
          i = i + 5;

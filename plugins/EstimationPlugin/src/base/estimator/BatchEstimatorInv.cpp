@@ -868,7 +868,7 @@ void BatchEstimatorInv::Estimate()
       std::stringstream ss;
       ss << "Error: For Batch estimator " << GetName() 
          << ", there are " << esm.GetStateMap()->size() 
-         << " solver-for parameters, and only " << measurementResiduals.size() 
+         << " solve-for parameters, and only " << measurementResiduals.size() 
          << " valid observable records remaining after editing. Please modify data editing criteria or provide a better a-priori estimate.\n";
       throw EstimatorException(ss.str());
    }
@@ -1052,7 +1052,7 @@ void BatchEstimatorInv::Estimate()
                MessageInterface::ShowMessage("]\n");
             }
          #endif
-         throw EstimatorException("Error: Normal matrix is singular\n");
+         throw EstimatorException("Error: Normal matrix is singular.\n");
       }
    }
 

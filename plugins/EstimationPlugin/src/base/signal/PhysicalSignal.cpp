@@ -759,7 +759,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       parameterID = forId;
    std::string paramName = obj->GetParameterText(parameterID);
    #ifdef DEBUG_DERIVATIVES
-   MessageInterface::ShowMessage("Solver-for parameter: %s.%s\n", obj->GetName().c_str(), obj->GetParameterText(parameterID).c_str());
+   MessageInterface::ShowMessage("Solve-for parameter: %s.%s\n", obj->GetName().c_str(), obj->GetParameterText(parameterID).c_str());
    #endif
 
    // Verify initialization
