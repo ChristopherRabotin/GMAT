@@ -293,11 +293,8 @@ void BatchEstimatorInv::Accumulate()
    else
    {
       // Write to report file measurement type name and its unit:
-      ss = currentObs->typeName + "                    ";
-      sLine << ss.substr(0, 20) << " ";
-
-      ss = currentObs->unit + "    ";
-      sLine << ss.substr(0, 4) << " ";
+      sLine << GmatStringUtil::GetAlignmentString(currentObs->typeName, 19) + " ";
+      sLine << GmatStringUtil::GetAlignmentString(currentObs->unit, 6) << " ";
 
       // Write to report file all participants in signal path:
       ss = "";
@@ -320,22 +317,31 @@ void BatchEstimatorInv::Accumulate()
          sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4) + " ";
 
          // Write to report file O-value, C-value, O-C, and elevation angle 
-         sprintf(&s[0], "%22.6lf                     N/A                  N/A    N/A", currentObs->value[0]);
-         sLine << s;
+         sprintf(&s[0], "%21.5lf", currentObs->value[0]);
+         sLine << s << " ";
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 6);
          sLine << "\n";
       }
       else
       {
          // Write to report file edit status:
-         sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 10, GmatStringUtil::LEFT);
+         sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4, GmatStringUtil::LEFT) + " ";  // Edit status
 
-         // This line crashes on Linux, so comment out there
-         sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A                  N/A", currentObs->value_orig[0], currentObs->value[0]);
-         sLine << s;
+         // Write to report file O-value, C-value, O-C, unit, and elevation angle
+         sprintf(&s[0], "%21.5lf %21.5lf", currentObs->value_orig[0], currentObs->value[0]);
+         sLine << s << " ";
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // O-C
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W*(O-C)^2
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // sqrt(W)*|O-C|
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // elevation angle
 
          // fill out N/A for partial derivative
          for (int i = 0; i < stateMap->size(); ++i)
-            sLine << "                      N/A";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
 
          if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
             sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
@@ -366,8 +372,12 @@ void BatchEstimatorInv::Accumulate()
             sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
             // Write to report file O-value, C-value, O-C, unit, and elevation angle
-            sprintf(&s[0], "%22.6lf                     N/A                  N/A ", currentObs->value[0]);
-            sLine << s;
+            sprintf(&s[0], "%21.5lf", currentObs->value[0]);
+            sLine << s << " ";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";
+            
+            // write elevation angle
             sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
             sLine << s;
             sLine << "\n";
@@ -375,14 +385,23 @@ void BatchEstimatorInv::Accumulate()
          else
          {
             // Write to report file edit status:
-            sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
+            sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
-            sprintf(&s[0], "%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->feasibilityValue);
-            sLine << s;
+            // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
+            sprintf(&s[0], "%21.5lf %21.5lf", currentObs->value_orig[0], currentObs->value[0]);
+            sLine << s << " ";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // O-C
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W*(O-C)^2
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // sqrt(W)*|O-C|
+            sprintf(&s[0], "%18.12lf", calculatedMeas->feasibilityValue);
+            sLine << s << " ";                                                                         // elevation angle
 
             // fill out N/A for partial derivative
             for (int i = 0; i < stateMap->size(); ++i)
-               sLine << "                      N/A";
+               sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
+            
 
             if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
                sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
@@ -435,9 +454,10 @@ void BatchEstimatorInv::Accumulate()
                sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                // Write O-value, C-value, and O-C
-               sprintf(&s[0], "%22.6lf  %22.6lf   %18.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
-               sLine << s;
-               // Write to report file elevation angle:
+               sprintf(&s[0], "%21.5lf %21.5lf %18.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
+               sLine << s << " ";
+
+               // write elevation angle
                sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
                sLine << s;
                sLine << "\n";
@@ -445,14 +465,15 @@ void BatchEstimatorInv::Accumulate()
             else
             {
                // Write to report file edit status:
-               sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
+               sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
-               sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
-               sLine << s;
+               // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
+               sprintf(&s[0], "%21.5lf %21.5lf %21.5lf %18.6lf %.12le %.12le %.12le %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+               sLine << s << " ";
 
                // fill out N/A for partial derivative
                for (int i = 0; i < stateMap->size(); ++i)
-                  sLine << "                      N/A";
+                  sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
 
                if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
                   sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
@@ -653,26 +674,31 @@ void BatchEstimatorInv::Accumulate()
                if (textFileMode == "Normal")
                {
                   // Write to report file edit status:
-                  sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
+                  if (ss == "N")
+                     sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";
+                  else
+                     sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                   // Write to report file O-value, C-value, O-C, 
-                  sprintf(&s[0], "%22.6lf  %22.6lf   %18.6lf ", currentObs->value[k], calculatedMeas->value[k], ocDiff);
-                  sLine << s;
+                  sprintf(&s[0], "%21.5lf %21.5lf %18.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
+                  sLine << s << " ";
+
                   // Write to report file elevation angle:
                   sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
                   sLine << s;
+                  sLine << "\n";
                }
                else
                {
                   // Write to report file edit status:
-                  sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
+                  if (ss == "N")
+                     sLine << GmatStringUtil::GetAlignmentString("-", 4, GmatStringUtil::LEFT) + " ";
+                  else
+                     sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
-                  sprintf(&s[0], "%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
-                  sLine << s;
-               }
-            
-               if (textFileMode != "Normal")
-               {
+                  sprintf(&s[0], "%21.5lf %21.5lf %21.5lf %18.6lf %.12le %.12le %.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+                  sLine << s << " ";
+
                   // fill out N/A for partial derivative
                   for (UnsignedInt p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
                   {
@@ -688,11 +714,7 @@ void BatchEstimatorInv::Accumulate()
                         derivative = derivative/Cd;
                      }
 
-                     // sprintf(&s[0],"   %18.12le", hAccum[hAccum.size()-1][p]);
-                     sprintf(&s[0],"   %18.12le", derivative);
-                     ss.assign(s); 
-                     ss = ss.substr(ss.size()-20,20); 
-                     sLine << "     " << ss;
+                     sLine << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(derivative, false, true, true, 10, 18), 18, GmatStringUtil::RIGHT) << " ";
                   }
 
                   if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
@@ -702,8 +724,8 @@ void BatchEstimatorInv::Accumulate()
                   else
                      sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
                   sLine << s;
+                  sLine << "\n";
                }
-               sLine << "\n";
 
             }
 

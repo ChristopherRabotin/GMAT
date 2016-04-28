@@ -93,8 +93,8 @@
 //#define DUMP_FINAL_RESIDUALS
 
 
-#define SPACECRAFT_TABLE_COLUMN_BREAK_UP             1
-#define CELESTIAL_BODIES_TABLE_COLUMN_BREAK_UP       3
+//#define SPACECRAFT_TABLE_COLUMN_BREAK_UP             1
+#define CELESTIAL_BODIES_TABLE_COLUMN_BREAK_UP       5
 
 //------------------------------------------------------------------------------
 // static data
@@ -1103,7 +1103,7 @@ void BatchEstimator::CompleteInitialization()
 
    
    // Get list of signal paths and specify the length of participants' column
-   pcolumnLen = 12;
+   pcolumnLen = 24;
    std::vector<StringArray> signalPaths = measManager.GetSignalPathList();
    for(UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {
@@ -3115,19 +3115,18 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
                }
                
                // Insert blank lines to paramNames and rowContent
-               StringArray::iterator pos1 = paramNames.begin() + (paramNames.size() - 1);
+               StringArray::iterator pos1 = paramNames.begin() + paramNames.size(); // (paramNames.size() - 1);
                paramNames.insert(pos1, emList.size() - maxNumErrorModels, "");
                
                if (colCount != 0)
                {
-                  StringArray::iterator pos2 = rowContent.begin() + (paramNames.size() - 1);
+                  StringArray::iterator pos2 = rowContent.begin() + paramNames.size(); // (paramNames.size() - 1);
                   rowContent.insert(pos2, emList.size() - maxNumErrorModels, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
                }
                
                maxNumErrorModels = emList.size();
             }
          }
-         ss.str(""); ss << gs->GetRealParameter("Humidity"); paramValues.push_back(ss.str());
          
          // 3.3. Increasing column count by 1
          ++colCount;
@@ -3141,7 +3140,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             if (colCount == 1)
                rowContent[j] += (" " + GmatStringUtil::GetAlignmentString(paramNames[j], nameLen, GmatStringUtil::LEFT) + "  ");
             
-            rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 22, GmatStringUtil::LEFT)+"  ");
+            rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 27, GmatStringUtil::LEFT)+" ");
          }
          
          // 3.5. Beak up columns in a table
@@ -3381,8 +3380,8 @@ void BatchEstimator::WriteReportFileHeaderPart5()
    
    textFile << " Planetary Ephemeris                                 " << solarSystem->GetStringParameter("EphemerisSource") << "\n";
    textFile << " Solar Irradiance (W/m^2 at 1 AU)                    1358.0\n";
-   textFile << " Speed of Light   (km/sec)                           " << GmatStringUtil::RealToString(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0, false, false, false, 6) << "\n";
-   textFile << " Universal Gravitational Constant(km^3/kg*sec^2)     " << GmatStringUtil::RealToString(GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT, false, true, false, 8) << "\n";
+   textFile << " Speed of Light (km/sec)                             " << GmatStringUtil::RealToString(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0, false, false, false, 6) << "\n";
+   textFile << " Universal Gravitational Constant (km^3/kg*sec^2)    " << GmatStringUtil::RealToString(GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT, false, true, true, 6) << "\n";
    textFile << "\n";
 
    // 2. Write information about central bodies to report file
@@ -3458,7 +3457,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
    StringArray paramNames, paramValues, rowContent;
    
    // 2.2.1. Set value to paramNames
-   paramNames.push_back("Central Body");
+   paramNames.push_back("Celestial Body");
    paramNames.push_back("Gravitational Constant (km^3/sec^2)");
    paramNames.push_back("Mean Equatorial Radius (km)");
    paramNames.push_back("Inverse Flattening Coefficient");
@@ -3482,7 +3481,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
       ss.str(""); ss << GmatStringUtil::RealToString(1.0 / cb->GetRealParameter(cb->GetParameterID("Flattening")), false, false, false, 8); paramValues.push_back(ss.str());      // Inverse Flattening Cofficient
       ss.str(""); ss << GmatStringUtil::RealToString(cb->GetRealParameter(cb->GetParameterID("RotationRate")), false, false, false, 8); paramValues.push_back(ss.str());          // Rotation Rate
 
-      Integer valueLen = 0;
+      Integer valueLen = 20;
       for (Integer j = 0; j < paramValues.size(); ++j)
          valueLen = (Integer)GmatMathUtil::Max(valueLen, paramValues[j].size());
 
@@ -3494,7 +3493,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
       }
 
       for (Integer j = 0; j < paramNames.size(); ++j)
-         rowContent[j] += GmatStringUtil::GetAlignmentString(paramValues[j], valueLen+5);
+         rowContent[j] += GmatStringUtil::GetAlignmentString(paramValues[j], valueLen+1);
       
       // increase colCount by 1
       ++colCount;
@@ -3643,14 +3642,14 @@ void BatchEstimator::WritePageHeader()
    textFile << "\n";
    if (textFileMode == "Normal")
    {
-      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit            Observed(O)            Computed (C)       Residual (O-C)  Elev.\n";
+      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit           Observed(O)          Computed (C)     Residual (O-C)  Elev.\n";
    }
    else
    {
-      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type          Units   " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)             Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle      Partial-Derivatives";
+      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)          Weight (W)           W*(O-C)^2       sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size() - 1; ++i)
-         textFile << "                         ";
+         textFile << GmatStringUtil::GetAlignmentString("", 19);
       textFile << "  Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
    }
    textFile << "\n";
@@ -5011,7 +5010,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
    {
       // 1. Write header:
       textFile4 << "\n";
-      textFile4 << "*********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE / CORRELATION MATRIX  *****************************************************\n";
+      textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
       textFile4 << "\n";
 
       // 2. Write covariance and correlation matrxies in Cartesian coordiante system:
