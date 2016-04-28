@@ -1248,7 +1248,7 @@ UnsignedInt MeasurementManager::LoadObservations()
    }
 
    // 7. Display all statistic of data records
-   MessageInterface::ShowMessage("Number of thown records due to:\n");
+   MessageInterface::ShowMessage("Number of thrown records due to:\n");
    //MessageInterface::ShowMessage("      .Invalid measurement value       : %d\n", filter3Num);
    //MessageInterface::ShowMessage("      .Record duplication or time order: %d\n", filter4Num);
    //MessageInterface::ShowMessage("      .Trackers selection              : %d\n", filter5Num);
@@ -1386,9 +1386,9 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
                   }
                }
                if (count == 0)
-                  throw MeasurementException("Error: It is failed to generate tracking configuration due to neither station nor spacecraft defined in your script has Id = '" + participantID + "'.\n" );
+                  throw MeasurementException("Error: Failed to generate tracking configuration due to neither station nor spacecraft defined in your script has Id = '" + participantID + "'\n" );
                else if (count > 1)
-                  throw MeasurementException("Error: It is failed to generate tracking configuation due to 2 or more GMAT objects having the same Id = '" + participantID + "'.\n");
+                  throw MeasurementException("Error: Failed to generate tracking configuation due to 2 or more GMAT objects having the same Id = '" + participantID + "'\n");
 
                // Set name
                participants.push_back(obj->GetName());
@@ -1728,10 +1728,10 @@ UnsignedInt MeasurementManager::LoadObservationsOld()
                od_old = *od;
             }// endwhile(true)   
 
-            MessageInterface::ShowMessage("Number of thown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
+            MessageInterface::ShowMessage("Number of thrown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
             MessageInterface::ShowMessage("      .Filter by Satistic data filters        : %d\n", filter0Num);
             MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter1Num);
-            MessageInterface::ShowMessage("      .Duplication record or time order filter: %d\n", filter2Num);
+            MessageInterface::ShowMessage("      .Duplicated record or time order filter : %d\n", filter2Num);
             MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);
             MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter4Num);
             MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter5Num);

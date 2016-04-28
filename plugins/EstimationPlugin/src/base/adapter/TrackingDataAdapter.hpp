@@ -262,7 +262,7 @@ protected:
    /// Measurement type
    std::string               measurementType;  // it's value could be "Range_KM", "DSNRange", "Doppler", "Doppler_RangeRate", "TDRSDoppler_HZ", etc
 
-   /// A list of all objects used for measurement calculation (specificly it contains solver-for objects and consider objects)
+   /// A list of all objects used for measurement calculation (specificly it contains solve-for objects and consider objects)
    ObjectArray               forObjects;
 
    /// Store the error message whenever an error occurs during measurement calculation
