@@ -36,6 +36,7 @@
 #include <sstream>
 #include <iomanip>
 #include "gmatdefs.hpp"
+//#include "GmatGlobal.hpp"
 #include "EopFile.hpp"
 #include "TimeTypes.hpp"
 #include "UtilityException.hpp"
@@ -144,6 +145,9 @@ const EopFile& EopFile::operator=(const EopFile &eopF)
 //---------------------------------------------------------------------------
 EopFile::~EopFile()
 {
+   #ifdef DEBUG_EOP_INITIALIZE
+      MessageInterface::ShowMessage("--- DESTRUCTING EOPFILE\n");
+   #endif
    delete polarMotion;
    delete ut1UtcOffsets;
 }
@@ -171,8 +175,26 @@ void EopFile::Initialize()
       throw UtilityException("Error opening EopFile " + 
                              eopFileName);
    eopFile.setf(std::ios::skipws);
+   
+   // Delete the old data if a file has already been read
+   if (tableSz > 0)
+   {
+      #ifdef DEBUG_EOP_INITIALIZE
+         MessageInterface::ShowMessage("--- deleting OLD polarMotion and ut1UtcOffsets and resetting ...\n");
+      #endif
+      delete polarMotion;
+      delete ut1UtcOffsets;
+      
+      polarMotion   = new Rmatrix(MAX_TABLE_SIZE,4);
+      ut1UtcOffsets = new Rmatrix(MAX_TABLE_SIZE,2);
+      tableSz       = 0;
+   }
+   
    if (eopFType == GmatEop::EOP_C04)
    {
+      #ifdef DEBUG_EOP_INITIALIZE
+         MessageInterface::ShowMessage("--- attempting to read file %s ...\n", eopFileName.c_str());
+      #endif
       // read up to the first data line
       bool startNow = false;
       std::string   firstWord;
@@ -267,6 +289,21 @@ void EopFile::Initialize()
    previousIndex = lastIndex;
    
    isInitialized = true;
+//   // Set the pointer on the GmatGlobal
+//   GmatGlobal::Instance()->SetEopFile(this);
+}
+
+
+//---------------------------------------------------------------------------
+//  void ResetEopFile(const std::string &toName, 
+//                    GmatEop::EopFileType toType = GmatEop::EOP_C04)
+//---------------------------------------------------------------------------
+void EopFile::ResetEopFile(const std::string &toName, 
+                           GmatEop::EopFileType toType)
+{
+   eopFileName   = toName;
+   eopFType      = toType;
+   isInitialized = false;
 }
 
 //---------------------------------------------------------------------------
@@ -389,6 +426,8 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
 //---------------------------------------------------------------------------
 Rmatrix EopFile::GetPolarMotionData()
 {
+   if (!isInitialized)  Initialize();
+   
    return Rmatrix(*polarMotion);
 }
 
