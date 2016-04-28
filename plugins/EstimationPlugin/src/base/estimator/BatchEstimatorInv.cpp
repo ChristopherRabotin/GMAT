@@ -343,8 +343,8 @@ void BatchEstimatorInv::Accumulate()
          for (int i = 0; i < stateMap->size(); ++i)
             sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
 
-         if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-            sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+         if ((currentObs->typeName == "DSNTwoWayRange") || (currentObs->typeName == "DSNRange"))
+            sprintf(&s[0], "            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
          else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
             sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
          else
@@ -404,7 +404,7 @@ void BatchEstimatorInv::Accumulate()
             
 
             if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-               sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+               sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
             else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
                sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
             else
@@ -476,7 +476,7 @@ void BatchEstimatorInv::Accumulate()
                   sLine << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT) << " ";   // derivative
 
                if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-                  sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+                  sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
                else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
                   sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
                else
@@ -718,7 +718,7 @@ void BatchEstimatorInv::Accumulate()
                   }
 
                   if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
-                     sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+                     sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreqAtRecei, currentObs->rangeModulo);
                   else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
                      sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
                   else

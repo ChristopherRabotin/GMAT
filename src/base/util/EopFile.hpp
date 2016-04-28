@@ -62,6 +62,9 @@ public:
    
    // initializes the EopFile (reads it and stores the data)
    virtual void Initialize();
+   // Rest to a new eop file and type
+   virtual void ResetEopFile(const std::string &toName, 
+                             GmatEop::EopFileType toType = GmatEop::EOP_C04);
    
    // method to return the name of the EOP file
    virtual std::string GetFileName() const;

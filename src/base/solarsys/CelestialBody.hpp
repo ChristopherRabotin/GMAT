@@ -603,7 +603,7 @@ protected:
    //Rmatrix                defaultSij;
    //Rmatrix                defaultCij;
    
-   // initialze the body
+   // initialize the body
    void             InitializeBody(std::string withBodyType = "Planet");
    // methods to read the potential file, if requested
    virtual bool     DeterminePotentialFileNameFromStartup();

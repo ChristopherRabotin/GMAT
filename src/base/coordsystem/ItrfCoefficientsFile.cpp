@@ -169,7 +169,7 @@ Dp                    (NULL)
 /**
  * Assignment operator for ItrfCoefficientsFile structures.
  *
- * @param eopF  The original that is being copied.
+ * @param itrfF  The original that is being copied.
  *
  * @return Reference to this object
  */
