@@ -87,17 +87,17 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    withLighttime        (false),
    thePropagator        (NULL),
    uplinkFreq           (1.0e3),         // unit: Mhz
-   uplinkFreqAtRecei    (1.0e3),         // unit: Mhz     // made changes by TUAN NGUYEN
+   uplinkFreqAtRecei    (1.0e3),         // unit: Mhz
    freqBand             (1),
    obsData              (NULL),
    addNoise             (false),
    addBias              (true),
-   rangeOnly            (false),                    // made changes by TUAN NGUYEN
+   rangeOnly            (false),
    rampTB               (NULL),
    beginIndex           (0),
    endIndex             (0),
-   withMediaCorrection  (true),                     // made changes by TUAN NGUYEN
-   errMsg               ("")                        // made changes by TUAN NGUYEN
+   withMediaCorrection  (true),
+   errMsg               ("")
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter default constructor <%p>\n", this);
@@ -172,19 +172,19 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    withLighttime        (ma.withLighttime),
    thePropagator        (NULL),
    uplinkFreq           (ma.uplinkFreq),
-   uplinkFreqAtRecei    (ma.uplinkFreqAtRecei),                 // made changes by TUAN NGUYEN
+   uplinkFreqAtRecei    (ma.uplinkFreqAtRecei),
    freqBand             (ma.freqBand),
    obsData              (ma.obsData),
    addNoise             (ma.addNoise),
    addBias              (ma.addBias),
-   rangeOnly            (ma.rangeOnly),                         // made changes by TUAN NGUYEN
+   rangeOnly            (ma.rangeOnly),
    rampTB               (ma.rampTB),
    beginIndex           (ma.beginIndex),
    endIndex             (ma.endIndex),
    rampTableNames       (ma.rampTableNames),
-   forObjects           (ma.forObjects),                        // made changes by TUAN NGUYEN
-   withMediaCorrection  (ma.withMediaCorrection),               // made changes by TUAN NGUYEN
-   errMsg               (ma.errMsg)                             // made changes by TUAN NGUYEN
+   forObjects           (ma.forObjects),
+   withMediaCorrection  (ma.withMediaCorrection),
+   errMsg               (ma.errMsg)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter copy constructor  from <%p> to <%p>\n", &ma, this);
@@ -232,14 +232,14 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       obsData            = ma.obsData;
       addNoise           = ma.addNoise;
       addBias            = ma.addBias;
-      rangeOnly          = ma.rangeOnly;                // made changes by TUAN NGUYEN
+      rangeOnly          = ma.rangeOnly;
       rampTB             = ma.rampTB;
       beginIndex         = ma.beginIndex;
       endIndex           = ma.endIndex;
       rampTableNames     = ma.rampTableNames;
-      forObjects         = ma.forObjects;              // made changes by TUAN NGUYEN
-      withMediaCorrection = ma.withMediaCorrection;    // made changes by TUAN NGUYEN
-      errMsg             = ma.errMsg;                  // made changes by TUAN NGUYEN
+      forObjects         = ma.forObjects;
+      withMediaCorrection = ma.withMediaCorrection;
+      errMsg             = ma.errMsg;
 
       if (calcData)
       {
@@ -1543,12 +1543,12 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
 
    // Calculate bias for each measurement (signal path)
    measurementBias.clear();
-   if (rangeOnly)                                             // made changes by TUAN NGUYEN
-   {                                                          // made changes by TUAN NGUYEN
-      for (UnsignedInt i = 0; i < measurementSize; ++i)       // made changes by TUAN NGUYEN
-         measurementBias.push_back(0.0);                      // made changes by TUAN NGUYEN
-      return;                                                 // made changes by TUAN NGUYEN
-   }                                                          // made changes by TUAN NGUYEN
+   if (rangeOnly)
+   {
+      for (UnsignedInt i = 0; i < measurementSize; ++i)
+         measurementBias.push_back(0.0);
+      return;
+   }
 
    Real val, bias;
    for (UnsignedInt i = 0; i < measurementSize; ++i)
@@ -1616,7 +1616,7 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
          UnsignedInt j;
          for (j = 0; j < forObjects.size(); ++j)
          {
-            if (forObjects[j]->GetFullName() == errmodel->GetFullName())               // made changes by TUAN NGUYEN
+            if (forObjects[j]->GetFullName() == errmodel->GetFullName())
                break;
          }
 
@@ -1671,12 +1671,12 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
 
    // Calculate noise sigma for each signal path
    noiseSigma.clear();
-   if (rangeOnly)                                              // made changes by TUAN NGUYEN
-   {                                                           // made changes by TUAN NGUYEN
-      for (UnsignedInt i = 0; i < measurementSize; ++i)        // made changes by TUAN NGUYEN
-         noiseSigma.push_back(0.0);                            // made changes by TUAN NGUYEN
-      return;                                                  // made changes by TUAN NGUYEN
-   }                                                           // made changes by TUAN NGUYEN
+   if (rangeOnly)
+   {
+      for (UnsignedInt i = 0; i < measurementSize; ++i)
+         noiseSigma.push_back(0.0);
+      return;
+   }
 
    Real val, noise;
    for (UnsignedInt i = 0; i < measurementSize; ++i)
@@ -1799,18 +1799,18 @@ void TrackingDataAdapter::BeginEndIndexesOfRampTable(Integer & err)
    searchkey = gsID + " " + scID + " ";
 
    // 2. Search for the beginning index
-   if (rampTB == NULL)                                                                      // made changes by TUAN NGUYEN
-   {                                                                                        // made changes by TUAN NGUYEN
-      err = 2;                                                                              // made changes by TUAN NGUYEN
-      errMsg = "Error: No ramp table was set for " + GetName() + "\n";                      // made changes by TUAN NGUYEN
-      throw MeasurementException("Error: No ramp table was set for " + GetName() + "\n");   // made changes by TUAN NGUYEN
-   }                                                                                        // made changes by TUAN NGUYEN
-   else if ((*rampTB).size() == 0)                                                          // made changes by TUAN NGUYEN
-   {                                                                                        // made changes by TUAN NGUYEN
-      err = 3;                                                                              // made changes by TUAN NGUYEN
-      errMsg = "Error: Ramp table has no data record.\n";                                   // made changes by TUAN NGUYEN
-      throw MeasurementException("Error: Ramp table has no data record.\n");                // made changes by TUAN NGUYEN
-   }                                                                                        // made changes by TUAN NGUYEN
+   if (rampTB == NULL)
+   {
+      err = 2;
+      errMsg = "Error: No ramp table was set for " + GetName() + "\n";
+      throw MeasurementException("Error: No ramp table was set for " + GetName() + "\n");
+   }
+   else if ((*rampTB).size() == 0)
+   {
+      err = 3;
+      errMsg = "Error: Ramp table has no data record.\n";
+      throw MeasurementException("Error: Ramp table has no data record.\n");
+   }
 
    beginIndex = 0;
    for(; beginIndex < (*rampTB).size(); ++beginIndex)

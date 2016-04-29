@@ -42,8 +42,8 @@
 #include "EstimatorHardwareFactory.hpp"
 #include "TrackingSystemFactory.hpp"
 #include "TrackingDataFactory.hpp"
-#include "ErrorModelFactory.hpp"                      // made changes by TUAN NGUYEN
-#include "EstimationDataFilterFactory.hpp"            // made changes by TUAN NGUYEN
+#include "ErrorModelFactory.hpp"
+#include "EstimationDataFilterFactory.hpp"
 #include "NavPropagatorFactory.hpp"
 
 #ifndef USE_DATAFILE_PLUGIN
@@ -137,13 +137,13 @@ extern "C"
             factory = new TrackingDataFactory;
             break;
 
-         case 8:                                                  // made changes by TUAN NGUYEN
-            factory = new EstimationDataFilterFactory;            // made changes by TUAN NGUYEN
-            break;                                                // made changes by TUAN NGUYEN
+         case 8:
+            factory = new EstimationDataFilterFactory;
+            break;
 
-         case 9:                                                  // made changes by TUAN NGUYEN
-            factory = new ErrorModelFactory;                      // made changes by TUAN NGUYEN
-            break;                                                // made changes by TUAN NGUYEN
+         case 9:
+            factory = new ErrorModelFactory;
+            break;
 
          case 10:
             factory = new NavPropagatorFactory;

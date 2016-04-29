@@ -166,6 +166,11 @@ protected:
        PhysicalMeasurementParamCount = CoreMeasurementParamCount
    };
 
+private:
+   /// Media correction warning count
+   static Integer ionoWarningCount;
+   static Integer tropoWarningCount;
+
 };
 
 #endif /* PhysicalMeasurement_hpp */

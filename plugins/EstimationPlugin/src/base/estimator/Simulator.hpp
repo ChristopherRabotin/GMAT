@@ -75,7 +75,7 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
-   virtual bool         IsParameterReadOnly(const Integer id) const;            // made changes by TUAN NGUYEN
+   virtual bool         IsParameterReadOnly(const Integer id) const;
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -211,7 +211,7 @@ protected:
    MeasurementManager  measManager;
    /// The list of measurement models that the measurement manager is managing
    StringArray         measList;   // temporary - may get list from MeasManager;
-   ObjectArray         measModelList;                                             // made changes by TUAN NGUYEN
+   ObjectArray         measModelList;
 
    /// Local storage element for ref object names
    StringArray         refObjectList;

@@ -88,7 +88,7 @@ public:
    const StringArray&      GetMeasurementNames() const;
    const IntegerArray      GetMeasurementId(const std::string &modelName) const;
    const StringArray&      GetParticipantList();
-   std::vector<StringArray> GetSignalPathList();                               // made changes by TUAN NGUYEN
+   std::vector<StringArray> GetSignalPathList();
    Integer                 Calculate(const Integer measurementToCalc,
                                      bool withEvents = false);
    const MeasurementData*  GetMeasurement(const Integer measurementToGet);
@@ -106,7 +106,7 @@ public:
 
    // Observation reader methods needed for estimation
    UnsignedInt             LoadObservations();
-   UnsignedInt             LoadObservationsOld();             // made changes by TUAN NGUYEN    // This function will be removed after the new one working OK
+   UnsignedInt             LoadObservationsOld();                 // This function will be removed after the new one working OK
 
 ///// TBD: Do we want something more generic here?
    // Ramp tables reader method needed for simulator
@@ -130,10 +130,10 @@ public:
 
    //const std::vector<TrackingFileSet*>     GetTrackingSets() const ;              // It is the same as GetAllTrackingFileSets() function
 
-   /// This function is used to generate tracking data adapters for tracking file set objects having no tracking configs     // made changes by TUAN NGUYEN
-   bool                    AutoGenerateTrackingDataAdapters();                                                               // made changes by TUAN NGUYEN
+   /// This function is used to generate tracking data adapters for tracking file set objects having no tracking configs
+   bool                    AutoGenerateTrackingDataAdapters();
 
-   bool                    SetStatisticsDataFiltersToDataFiles(UnsignedInt index);                                           // made changes by TUAN NGUYEN
+   bool                    SetStatisticsDataFiltersToDataFiles(UnsignedInt index);
 
 protected:
    /// List of the managed measurement models
@@ -213,8 +213,8 @@ protected:
    Integer                          FindModelForObservation();
 
 private:
-   /// Maping between data file index and a list of tracking configuration         // made changes by TUAN NGUYEN
-   std::map<UnsignedInt, StringArray> trackingConfigsMap;                          // made changes by TUAN NGUYEN
+   /// Maping between data file index and a list of tracking configuration
+   std::map<UnsignedInt, StringArray> trackingConfigsMap;
 
 };
 

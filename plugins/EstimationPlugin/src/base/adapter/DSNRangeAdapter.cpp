@@ -565,27 +565,25 @@ const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
    std::string paramName = obj->GetParameterText(parameterID);
 
    #ifdef DEBUG_DERIVATIVE_CALCULATION
-      MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
+      MessageInterface::ShowMessage("Solve-for parameter: %s\n", paramName.c_str());
    #endif
 
    // Clear derivative variable
    for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
       theDataDerivatives[i].clear();
-   theDataDerivatives.clear();                                                     // made changes by TUAN NGUYEN
+   theDataDerivatives.clear();
 
    if (paramName == "Bias")
    {
-      //RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
-      //theDataDerivatives.clear();                                                   // made changes by TUAN NGUYEN
-      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_RU")               // made changes by TUAN NGUYEN
-         theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);     // made changes by TUAN NGUYEN
-      else                                                                            // made changes by TUAN NGUYEN
-      {                                                                               // made changes by TUAN NGUYEN
-         Integer size = obj->GetEstimationParameterSize(id);                          // made changes by TUAN NGUYEN
-         RealArray oneRow;                                                            // made changes by TUAN NGUYEN
-         oneRow.assign(size, 0.0);                                                    // made changes by TUAN NGUYEN
-         theDataDerivatives.push_back(oneRow);                                        // made changes by TUAN NGUYEN
-      }                                                                               // made changes by TUAN NGUYEN
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_RU")
+         theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);
+      else
+      {
+         Integer size = obj->GetEstimationParameterSize(id);
+         RealArray oneRow;
+         oneRow.assign(size, 0.0);
+         theDataDerivatives.push_back(oneRow);
+      }
 
    }
    else
