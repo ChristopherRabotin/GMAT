@@ -73,6 +73,8 @@ public:
    // destructor
    virtual ~Planet();
 
+   virtual bool          Initialize();
+
    virtual Rvector       GetBodyCartographicCoordinates(
                             const A1Mjd &forTime) const;
    virtual Real          GetHourAngle(A1Mjd atTime); 
@@ -105,6 +107,9 @@ public:
    virtual Real            GetRealParameter(const std::string &label) const;
    virtual Real            SetRealParameter(const std::string &label,
                                             const Real value);
+   virtual std::string     GetStringParameter(const Integer id) const; 
+   virtual bool            SetStringParameter(const Integer id, 
+                                              const std::string &value); 
                                             
    virtual bool         IsParameterCloaked(const Integer id) const;
    virtual bool         IsParameterEqualToDefault(const Integer id) const;
@@ -115,7 +120,8 @@ protected:
 
    enum
    {
-      NUTATION_UPDATE_INTERVAL = CelestialBodyParamCount,
+      NUTATION_UPDATE_INTERVAL = CelestialBodyParamCount,  // Earth only
+      EOP_FILE_NAME,                                       // Earth only
       PlanetParamCount
    };
    
@@ -123,10 +129,11 @@ protected:
    
    static const Gmat::ParameterType PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount];
    
-   Real     nutationUpdateInterval;
+   Real        nutationUpdateInterval;
+   std::string eopFileName;
 
    /// default values for the parameter(s)
-   Real     default_nutationUpdateInterval;
+   Real        default_nutationUpdateInterval;
 
 private:
 
