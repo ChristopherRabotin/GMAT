@@ -364,6 +364,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    dragArea             (15.0),
    srpArea              (1.0),
    reflectCoeff         (1.8),
+   reflectCoeffSigma    (0.1),
    epochSystem          ("TAI"),
    epochFormat          ("ModJulian"),
    epochType            ("TAIModJulian"),  // Should be A1ModJulian?
@@ -627,6 +628,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    dragArea             (a.dragArea),
    srpArea              (a.srpArea),
    reflectCoeff         (a.reflectCoeff),
+   reflectCoeffSigma    (a.reflectCoeffSigma),
    epochSystem          (a.epochSystem),
    epochFormat          (a.epochFormat),
    epochType            (a.epochType),
@@ -773,6 +775,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    dragArea             = a.dragArea;
    srpArea              = a.srpArea;
    reflectCoeff         = a.reflectCoeff;
+   reflectCoeffSigma    = a.reflectCoeffSigma;
    epochSystem          = a.epochSystem;
    epochFormat          = a.epochFormat;
    epochType            = a.epochType;
