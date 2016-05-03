@@ -1144,6 +1144,16 @@ void BatchEstimator::CompleteInitialization()
    // Clear warning message's count
    warningCount = 0;
 
+
+   // Verify no two different ground station having the same Id
+   std::string errMsg = "";
+   if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(errMsg) == false)
+   {
+      errMsg = errMsg + " in batch estimator '" + GetName() + "'.\n";
+      throw EstimatorException(errMsg);
+   }
+
+
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("BatchEstimator::CompleteInitialization "
             "process complete\n");

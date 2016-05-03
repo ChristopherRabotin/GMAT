@@ -1664,6 +1664,16 @@ void Simulator::CompleteInitialization()
       currentState = PROPAGATING;
 
    isTheFirstMeasurement = true;                                  // fix bug GMT-4909
+   
+   
+   // Verify no two different ground station having the same Id
+   std::string errMsg = "";
+   if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(errMsg) == false)
+   {
+      errMsg = errMsg + " in simulator '" + GetName() + "'.\n";
+      throw SolverException(errMsg);
+   }
+   
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Epoch is %.12lf, Start epoch is %.12lf\n",
