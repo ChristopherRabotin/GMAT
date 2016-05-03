@@ -763,6 +763,19 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
 }
 
 
+//------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft* sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves derivative data used in the force model Parameter code
+ *
+ * @param sc The spacecraft that supplies the needed state data
+ *
+ * @return The derivative data as a 6-vector
+ *
+ * @note: Not yet implemented for the Thrust History File reader code.
+ */
+//------------------------------------------------------------------------------
 Rvector6 FileThrust::GetDerivativesForSpacecraft(Spacecraft* sc)
 {
    Rvector6 dv;
@@ -1100,7 +1113,10 @@ void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
 //------------------------------------------------------------------------------
 void FileThrust::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epoch)
 {
-   MessageInterface::ShowMessage("Rotating into a new frame\n");
+   #ifdef DEBUG_FILETHRUST_EXE
+      MessageInterface::ShowMessage("Rotating into a new frame\n");
+   #endif
+
    Real inDir[6], outDir[6];
    for (Integer i=0; i<3; i++)
       inDir[i] = dir[i];
