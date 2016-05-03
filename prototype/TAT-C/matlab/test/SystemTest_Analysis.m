@@ -17,7 +17,7 @@ sensor = ConicalSensor(pi);
 
 % Create a spacecraft giving it a state and epoch
 sat1 = Spacecraft(date,state);
-%sat1.AddSensor(sensor)
+sat1.AddSensor(sensor)
 
 % Create the propagator
 prop = Propagator(sat1);
@@ -35,7 +35,7 @@ count = 0;
 while date.GetJulianDate() < startDate + 1
     
     % Propagate
-    date.Advance(20);
+    date.Advance(120);
     prop.Propagate(date);
     
     % Compute points in view

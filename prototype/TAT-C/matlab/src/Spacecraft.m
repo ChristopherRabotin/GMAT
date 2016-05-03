@@ -4,7 +4,7 @@ classdef Spacecraft < handle
     properties (Access = private)
         % OrbitState oject.  The orbital state.
         orbitState
-        % OrbitEpoch object.  The orbit epoch.
+        % AbsoluteDate object.  The orbit epoch.
         orbitEpoch
         % Int. The number of attached sensors
         numSensors = 0
