@@ -43,41 +43,39 @@
 #include "SpaceObject.hpp"    // To access epoch data
 #include "Spacecraft.hpp"
 #include "StringUtil.hpp"
-#include "StateConversionUtil.hpp"              // made changes by TUAN NGUYEN
-#include "GroundstationInterface.hpp"           // made changes by TUAN NGUYEN
-#include "SolarRadiationPressure.hpp"           // made changes by TUAN NGUYEN
-#include "ODEModel.hpp"                         // made changes by TUAN NGUYEN
-#include "Propagator.hpp"                       // made changes by TUAN NGUYEN
-#include "CalculationUtilities.hpp"             // made changes by TUAN NGUYEN
-#include "GravityField.hpp"                     // made changes by TUAN NGUYEN
-#include "ErrorModel.hpp"                       // made changes by TUAN NGUYEN
-
-//#include "Moderator.hpp"
+#include "StateConversionUtil.hpp"
+#include "GroundstationInterface.hpp"
+#include "SolarRadiationPressure.hpp"
+#include "ODEModel.hpp"
+#include "Propagator.hpp"
+#include "CalculationUtilities.hpp"
+#include "GravityField.hpp"
+#include "ErrorModel.hpp"
 
 #include <ctime>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 
-// This is used for getting computer operating system name and version // made changes by TUAN NGUYEN
-#ifdef __linux__                                                       // made changes by TUAN NGUYEN
-#include <sys/utsname.h>                                               // made changes by TUAN NGUYEN
-#else                                                                  // made changes by TUAN NGUYEN
-#ifdef __APPLE__                                                       // made changes by TUAN NGUYEN
-#include <sys/utsname.h>                                               // made changes by TUAN NGUYEN
-#endif                                                                 // made changes by TUAN NGUYEN
-#endif                                                                 // made changes by TUAN NGUYEN
+// This is used for getting computer operating system name and version
+#ifdef __linux__
+#include <sys/utsname.h>
+#else
+#ifdef __APPLE__
+#include <sys/utsname.h>
+#endif
+#endif
 
-// This is used for getting hostname and user ID                       // made changes by TUAN NGUYEN
-#ifdef __linux__                                                       // made changes by TUAN NGUYEN
-#include <unistd.h>                                                    // made changes by TUAN NGUYEN
-#endif                                                                 // made changes by TUAN NGUYEN
-#ifdef __APPLE__                                                       // made changes by TUAN NGUYEN
-#include <unistd.h>                                                    // made changes by TUAN NGUYEN
-#endif                                                                 // made changes by TUAN NGUYEN
-#ifdef _MSC_VER                                                        // made changes by TUAN NGUYEN
-#include <WinSock2.h>                                                  // made changes by TUAN NGUYEN
-#endif                                                                 // made changes by TUAN NGUYEN
+// This is used for getting hostname and user ID
+#ifdef __linux__
+#include <unistd.h>
+#endif
+#ifdef __APPLE__
+#include <unistd.h>
+#endif
+#ifdef _MSC_VER
+#include <WinSock2.h>
+#endif
 
 
 //#define DEBUG_STATE_MACHINE
@@ -95,9 +93,8 @@
 //#define DUMP_FINAL_RESIDUALS
 
 
-#define NEW_REPORTFILE_FORMAT
-#define SPACECRAFT_TABLE_COLUMN_BREAK_UP             1
-#define CELESTIAL_BODIES_TABLE_COLUMN_BREAK_UP       3
+//#define SPACECRAFT_TABLE_COLUMN_BREAK_UP             1
+#define CELESTIAL_BODIES_TABLE_COLUMN_BREAK_UP       5
 
 //------------------------------------------------------------------------------
 // static data
@@ -109,6 +106,7 @@ BatchEstimator::PARAMETER_TEXT[] =
    "EstimationEpochFormat",         // The epoch of the solution
    "EstimationEpoch",               // The epoch of the solution
 //   "UsePrioriEstimate",
+   "UseInitialCovariance",
    "InversionAlgorithm",
    "MaxConsecutiveDivergences",
    // todo Add useApriori here
@@ -120,6 +118,7 @@ BatchEstimator::PARAMETER_TYPE[] =
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
 //   Gmat::ON_OFF_TYPE,        // "UsePrioriEstimate"
+   Gmat::BOOLEAN_TYPE,         // "UseInitialCovariance"
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
 };
@@ -658,91 +657,81 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+// bool BatchEstimator::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
- * This method gets "On" or "Off" value
+ * This method gets value from a boolean parameter 
  *
  * @param id   The id number of a parameter
  *
- * @return "On" or "Off" value
+ * @return     a boolean value
  */
 //------------------------------------------------------------------------------
-std::string BatchEstimator::GetOnOffParameter(const Integer id) const
+bool BatchEstimator::GetBooleanParameter(const Integer id) const
 {
-//   if (id == USE_PRIORI_ESTIMATE)
-//      return (useApriori ? "On" : "Off");
+   if (id == USE_INITIAL_COVARIANCE)
+      return useApriori;
 
-   return Estimator::GetOnOffParameter(id);
+   return Estimator::GetBooleanParameter(id);
 }
 
 
 //------------------------------------------------------------------------------
-// bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
+// bool BatchEstimator::SetBooleanParameter(const Integer id, const bool value)
 //------------------------------------------------------------------------------
 /**
- * This method gets "On" or "Off" value
+ * This method sets value to a boolean parameter
  *
- * @param id      The id number of a parameter
- * @param value      value "On" or "Off"
+ * @param id         The id number of a parameter
+ * @param value      value set to the parameter
  *
  * @return true value when it successfully sets the value, false otherwise. 
  */
 //------------------------------------------------------------------------------
-bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
+bool BatchEstimator::SetBooleanParameter(const Integer id, const bool value)
 {
-//   if (id == USE_PRIORI_ESTIMATE)
-//   {
-//      if (value == "On")
-//      {
-//         useApriori = true;
-//         return true;
-//      }
-//      if (value == "Off")
-//      {
-//         useApriori = false;
-//        return true;
-//      }
-//
-//      return false;
-//   }
+   if (id == USE_INITIAL_COVARIANCE)
+   {
+      useApriori = value;
+      return true;
+   }
 
-   return Estimator::SetOnOffParameter(id, value);
+   return Estimator::SetBooleanParameter(id, value);
 }
 
 
 //------------------------------------------------------------------------------
-// std::string BatchEstimator::GetOnOffParameter(const std::string &label) const
+// bool BatchEstimator::GetBooleanParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
-* This method gets "On" or "Off" value
+* This method gets value from a boolean parameter
 *
 * @param label   The name of a parameter
 *
-* @return "On" or "Off" value
+* @return        value of the parameter
 */
 //------------------------------------------------------------------------------
-std::string BatchEstimator::GetOnOffParameter(const std::string &label) const
+bool BatchEstimator::GetBooleanParameter(const std::string &label) const
 {
-   return GetOnOffParameter(GetParameterID(label));
+   return GetBooleanParameter(GetParameterID(label));
 }
 
 
 //------------------------------------------------------------------------------
-// bool BatchEstimator::SetOnOffParameter(const std::string &label, const std::string &value)
+// bool BatchEstimator::SetBooleanParameter(const std::string &label, const bool value)
 //------------------------------------------------------------------------------
 /**
-* This method gets "On" or "Off" value
+* This method sets value to a boolean parameter
 *
 * @param label      The name of a parameter
-* @param value      value "On" or "Off"
+* @param value      value used to set to parameter
 *
 * @return true value when it successfully sets the value, false otherwise.
 */
 //------------------------------------------------------------------------------
-bool BatchEstimator::SetOnOffParameter(const std::string &label, const std::string &value)
+bool BatchEstimator::SetBooleanParameter(const std::string &label, const bool value)
 {
-   return SetOnOffParameter(GetParameterID(label), value);
+   return SetBooleanParameter(GetParameterID(label), value);
 }
 
 
@@ -766,7 +755,7 @@ const StringArray& BatchEstimator::GetPropertyEnumStrings(const Integer id) cons
    {
       enumStrings.push_back("FromParticipants");
 
-      StringArray nameList = TimeConverterUtil::GetValidTimeRepresentations();     // made changes by TUAN NGUYEN
+      StringArray nameList = TimeConverterUtil::GetValidTimeRepresentations();
       for (UnsignedInt i = 0; i < nameList.size(); ++i)
          enumStrings.push_back(nameList[i]);
 
@@ -1014,25 +1003,16 @@ void BatchEstimator::CompleteInitialization()
                "no Spacecraft in the estimation state manager");
       currentEpoch         = ((Spacecraft*)satArray[0])->GetEpoch();
       
-      // This code was moved to Estimator::Reinitilaize()                              // made changes by TUAN NGUYEN
-      //// Tell the measManager to complete its initialization                         // made changes by TUAN NGUYEN
-      //bool measOK = measManager.SetPropagator(propagator);                           // made changes by TUAN NGUYEN
-      //measOK = measOK && measManager.Initialize();                                   // made changes by TUAN NGUYEN
-      //if (!measOK)                                                                   // made changes by TUAN NGUYEN
-      //   throw EstimatorException(                                                   // made changes by TUAN NGUYEN
-      //         "BatchEstimator::CompleteInitialization - error initializing "        // made changes by TUAN NGUYEN
-      //         "MeasurementManager.\n");                                             // made changes by TUAN NGUYEN
-      
       
       // Set all solve-for and consider objects to tracking data adapters
       // Note that: it only sets for tracking data adapters. For measurement models, 
       // it does not has this option due to old GMAT Nav syntax will be removed, 
       // so we do not need to implement this option.
-      ObjectArray objects;                                                                     // made changes by TUAN NGUYEN
-      esm.GetStateObjects(objects);                                                            // made changes by TUAN NGUYEN
-      std::vector<TrackingDataAdapter*> adapters = measManager.GetAllTrackingDataAdapters();   // made changes by TUAN NGUYEN
-      for (UnsignedInt i = 0; i < adapters.size(); ++i)                                        // made changes by TUAN NGUYEN
-         adapters[i]->SetUsedForObjects(objects);                                              // made changes by TUAN NGUYEN
+      ObjectArray objects;
+      esm.GetStateObjects(objects);
+      std::vector<TrackingDataAdapter*> adapters = measManager.GetAllTrackingDataAdapters();
+      for (UnsignedInt i = 0; i < adapters.size(); ++i)
+         adapters[i]->SetUsedForObjects(objects);
 
       
       // Now load up the observations
@@ -1096,10 +1076,10 @@ void BatchEstimator::CompleteInitialization()
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
       residuals[i] = 0.0;
-//      if (useApriori)
-//         x0bar[i] = (*estimationState)[i];
-//      else                                               // Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
-           x0bar[i] = 0.0;
+      if (useApriori)
+         x0bar[i] = (*estimationState)[i];
+      else                                               // Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
+         x0bar[i] = 0.0;
    }
 
    if (useApriori)
@@ -1122,26 +1102,26 @@ void BatchEstimator::CompleteInitialization()
    numDivIterations = 0;                       // It need to reset its value when starting estimatimation calculation
 
    
-   // Get list of signal paths and specify the length of participants' column           // made changes by TUAN NGUYEN
-   pcolumnLen = 12;                                                                     // made changes by TUAN NGUYEN
-   std::vector<StringArray> signalPaths = measManager.GetSignalPathList();              // made changes by TUAN NGUYEN
-   for(UnsignedInt i = 0; i < signalPaths.size(); ++i)                                  // made changes by TUAN NGUYEN
-   {                                                                                    // made changes by TUAN NGUYEN
-      Integer len = 0;                                                                  // made changes by TUAN NGUYEN
-      for (UnsignedInt j = 0; j < signalPaths[i].size(); ++j)                           // made changes by TUAN NGUYEN
-      {                                                                                 // made changes by TUAN NGUYEN
-         GmatBase* obj = GetConfiguredObject(signalPaths[i].at(j));                     // made changes by TUAN NGUYEN
-         std::string id = "";                                                           // made changes by TUAN NGUYEN
-         if (obj->IsOfType(Gmat::SPACECRAFT))                                           // made changes by TUAN NGUYEN
-            id = ((Spacecraft*)obj)->GetStringParameter("Id");                          // made changes by TUAN NGUYEN
-         else if (obj->IsOfType(Gmat::GROUND_STATION))                                  // made changes by TUAN NGUYEN
-            id = ((GroundstationInterface*)obj)->GetStringParameter("Id");              // made changes by TUAN NGUYEN
+   // Get list of signal paths and specify the length of participants' column
+   pcolumnLen = 24;
+   std::vector<StringArray> signalPaths = measManager.GetSignalPathList();
+   for(UnsignedInt i = 0; i < signalPaths.size(); ++i)
+   {
+      Integer len = 0;
+      for (UnsignedInt j = 0; j < signalPaths[i].size(); ++j)
+      {
+         GmatBase* obj = GetConfiguredObject(signalPaths[i].at(j));
+         std::string id = "";
+         if (obj->IsOfType(Gmat::SPACECRAFT))
+            id = ((Spacecraft*)obj)->GetStringParameter("Id");
+         else if (obj->IsOfType(Gmat::GROUND_STATION))
+            id = ((GroundstationInterface*)obj)->GetStringParameter("Id");
          
-         len = len + id.size() + 1;                                                     // made changes by TUAN NGUYEN
-      }                                                                                 // made changes by TUAN NGUYEN
-      if (pcolumnLen < len)                                                             // made changes by TUAN NGUYEN
-         pcolumnLen = len;                                                              // made changes by TUAN NGUYEN
-   }                                                                                    // made changes by TUAN NGUYEN   
+         len = len + id.size() + 1;
+      }
+      if (pcolumnLen < len)
+         pcolumnLen = len;
+   }
 
    WriteToTextFile();
    ReportProgress();
@@ -1159,6 +1139,18 @@ void BatchEstimator::CompleteInitialization()
       timeStep = (nextMeasurementEpoch - currentEpoch) *
             GmatTimeConstants::SECS_PER_DAY;
       currentState = PROPAGATING;
+   }
+
+   // Clear warning message's count
+   warningCount = 0;
+
+
+   // Verify no two different ground station having the same Id
+   std::string errMsg = "";
+   if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(errMsg) == false)
+   {
+      errMsg = errMsg + " in batch estimator '" + GetName() + "'.\n";
+      throw EstimatorException(errMsg);
    }
 
 
@@ -1444,23 +1436,23 @@ void BatchEstimator::CheckCompletion()
       numRemovedRecords["OLSE"] = 0;
       numRemovedRecords["IRMS"] = 0;
 
-      // reset value for statistics table                               // made changes by TUAN NGUYEN
-      statisticsTable.clear();                                          // made changes by TUAN NGUYEN
-      statisticsTable1.clear();                                         // made changes by TUAN NGUYEN
+      // reset value for statistics table
+      statisticsTable.clear();
+      statisticsTable1.clear();
 
-      stationAndType.clear();                // made changes by TUAN NGUYEN
-      stationsList.clear();                  // made changes by TUAN NGUYEN
-      measTypesList.clear();                 // made changes by TUAN NGUYEN
-      sumAllRecords.clear();                 // made changes by TUAN NGUYEN
-      sumAcceptRecords.clear();              // made changes by TUAN NGUYEN
-      sumResidual.clear();                   // made changes by TUAN NGUYEN
-      sumResidualSquare.clear();             // made changes by TUAN NGUYEN
-      sumWeightResidualSquare.clear();       // made changes by TUAN NGUYEN
+      stationAndType.clear();
+      stationsList.clear();
+      measTypesList.clear();
+      sumAllRecords.clear();
+      sumAcceptRecords.clear();
+      sumResidual.clear();
+      sumResidualSquare.clear();
+      sumWeightResidualSquare.clear();
 
-      sumSERecords.clear();                  // made changes by TUAN NGUYEN
-      sumSEResidual.clear();                 // made changes by TUAN NGUYEN
-      sumSEResidualSquare.clear();           // made changes by TUAN NGUYEN
-      sumSEWeightResidualSquare.clear();     // made changes by TUAN NGUYEN
+      sumSERecords.clear();
+      sumSEResidual.clear();
+      sumSEResidualSquare.clear();
+      sumSEWeightResidualSquare.clear();
 
 
       if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
@@ -1515,22 +1507,22 @@ void BatchEstimator::RunComplete()
    measurementEpochs.clear();
    measurementResidualID.clear();
 
-   statisticsTable.clear();                              // made changes by TUAN NGUYEN
-   statisticsTable1.clear();                             // made changes by TUAN NGUYEN
+   statisticsTable.clear();
+   statisticsTable1.clear();
 
-   stationAndType.clear();                // made changes by TUAN NGUYEN
-   stationsList.clear();                  // made changes by TUAN NGUYEN
-   measTypesList.clear();                 // made changes by TUAN NGUYEN
-   sumAllRecords.clear();                 // made changes by TUAN NGUYEN
-   sumAcceptRecords.clear();              // made changes by TUAN NGUYEN
-   sumResidual.clear();                   // made changes by TUAN NGUYEN
-   sumResidualSquare.clear();             // made changes by TUAN NGUYEN
-   sumWeightResidualSquare.clear();       // made changes by TUAN NGUYEN
+   stationAndType.clear();
+   stationsList.clear();
+   measTypesList.clear();
+   sumAllRecords.clear();
+   sumAcceptRecords.clear();
+   sumResidual.clear();
+   sumResidualSquare.clear();
+   sumWeightResidualSquare.clear();
 
-   sumSERecords.clear();                  // made changes by TUAN NGUYEN
-   sumSEResidual.clear();                 // made changes by TUAN NGUYEN
-   sumSEResidualSquare.clear();           // made changes by TUAN NGUYEN
-   sumSEWeightResidualSquare.clear();     // made changes by TUAN NGUYEN
+   sumSERecords.clear();
+   sumSEResidual.clear();
+   sumSEResidualSquare.clear();
+   sumSEWeightResidualSquare.clear();
 
 }
 
@@ -1672,25 +1664,25 @@ std::string BatchEstimator::GetProgressString()
             switch(estimationStatus)
             {
             case ABSOLUTETOL_CONVERGED:
-               progress << "This iteration is converged due to absolute tolerance convergence criteria\n";
+               progress << "This iteration is converged due to absolute tolerance convergence criteria.\n";
                break;
             case RELATIVETOL_CONVERGED:
-               progress << "This iteration is converged due to relative convergence criteria \n";
+               progress << "This iteration is converged due to relative convergence criteria.\n";
                break;
             case ABS_AND_REL_TOL_CONVERGED:
-               progress << "This iteration is converged due to boths: absolute and relative convergence criteria\n";
+               progress << "This iteration is converged due to boths: absolute and relative convergence criteria.\n";
                break;
             case MAX_CONSECUTIVE_DIVERGED:
-               progress << "This iteration is diverged due to maximum consecutive diverged criteria\n";
+               progress << "This iteration is diverged due to maximum consecutive diverged criteria.\n";
                break;
             case MAX_ITERATIONS_DIVERGED:
-               progress << "This iteration is diverged due to maximum iterations\n";
+               progress << "This iteration is diverged due to exceeding the maximum iterations.\n";
                break;
             case CONVERGING:
-               progress << "This iteration is converging\n";
+               progress << "This iteration is converging.\n";
                break;
             case DIVERGING:
-               progress << "This iteration is diverging\n";
+               progress << "This iteration is diverging.\n";
                break;
             }
             progress << "\n";
@@ -1825,8 +1817,7 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalC
 {
    std::stringstream ss;
    
-   //ss << infor->objectName << ".";                        // made changes by TUAN NGUYEN
-   ss << infor->objectFullName << ".";                      // made changes by TUAN NGUYEN
+   ss << infor->objectFullName << ".";
    if (infor->elementName == "CartesianState")
    {
       if (isInternalCS)
@@ -1890,8 +1881,8 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalC
       ss << "Cr";
    else if (infor->elementName == "Cd_Epsilon")
       ss << "Cd";
-   else if (infor->elementName == "Bias")                       // made changes by TUAN NGUYEN
-      ss << "Bias";                                             // made changes by TUAN NGUYEN
+   else if (infor->elementName == "Bias")
+      ss << "Bias";
    else
       ss << infor->elementName << "." << infor->subelement;
 
@@ -2056,7 +2047,7 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
    if (iterationsTaken == (maxIterations-1))
    {
       retval = MAX_ITERATIONS_DIVERGED;
-      why << "Number of iterations reaches its maximum setting value (" << maxIterations << ")\n";
+      why << "Number of iterations reached its maximum value (" << maxIterations << ").\n";
       reason = why.str();
       return retval;
    }
@@ -2069,7 +2060,7 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
          numDivIterations++;
          if (numDivIterations >= maxConsDivergences)
          {
-            why << "Number of consecutive divergences reaches its maximum setting value (" << maxConsDivergences << ")\n";
+            why << "Number of consecutive divergences reached its maximum value (" << maxConsDivergences << ").\n";
             reason = why.str();
             retval = MAX_CONSECUTIVE_DIVERGED;
          }
@@ -2123,12 +2114,7 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
    switch (theState)
    {
       case INITIALIZING:
-#ifdef NEW_REPORTFILE_FORMAT
          WriteReportFileHeader();
-#else
-         WriteScript();
-         WriteHeader();
-#endif
          break;
 
       case ACCUMULATING:
@@ -2139,34 +2125,20 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
          break;
 
       case ESTIMATING:
-#ifdef NEW_REPORTFILE_FORMAT
          WriteReportFileSummary(theState);
-#else
-         WriteSummary(theState);
-#endif
          break;
 
       case CHECKINGRUN:
-#ifdef NEW_REPORTFILE_FORMAT
          WriteReportFileSummary(theState);
          textFile << textFile0.str() << textFile1.str() << textFile1_1.str() << textFile2.str() << textFile3.str() << textFile4.str();
          textFile0.str(""); textFile1.str(""); textFile1_1.str(""); textFile2.str(""); textFile3.str(""); textFile4.str("");
          WriteIterationHeader();
-#else
-         WriteSummary(theState);
-         WriteHeader();
-#endif
          break;
 
       case FINISHED:
-#ifdef NEW_REPORTFILE_FORMAT
          WriteReportFileSummary(theState);
          textFile << textFile0.str() << textFile1.str() << textFile1_1.str() << textFile2.str() << textFile3.str() << textFile4.str();
          textFile0.str(""); textFile1.str(""); textFile1_1.str(""); textFile2.str(""); textFile3.str(""); textFile4.str("");
-#else
-         WriteSummary(theState);
-         WriteConclusion();
-#endif
          break;
 
       default:
@@ -2174,468 +2146,6 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
    }
 }
 
-
-//void BatchEstimator::WriteScript()
-//{
-//   textFile << "********************************************************\n";
-//   textFile << "***  GMAT Script\n";
-//   textFile << "********************************************************\n";
-//   std::string filename = Moderator::Instance()->GetScriptInterpreter()->GetScriptFileName();
-//   std::ifstream inFile;
-//   inFile.open(filename.c_str(),std::ios_base::out);
-//
-//   char s[1000];
-//   while (!inFile.eof())
-//   {
-//      inFile.getline(s, 1000);
-//      std::string st(s);
-//      textFile << st << "\n";
-//   }
-//   textFile << "*** End of GMAT Script *********************************\n\n\n";
-//}
-//
-
-void BatchEstimator::WriteConclusion()
-{
-   Real taiMjdEpoch, utcMjdEpoch;
-   std::string utcEpoch;
-
-   GmatState outputEstimationState;
-   const std::vector<ListItem*> *map = esm.GetStateMap();
-
-   /// 1. Write estimation status
-   textFile << "\n"
-            << "********************************************************\n"
-            << "*** Estimating Completed in " << iterationsTaken << " iterations\n"
-            << "********************************************************\n\n"
-            << "Estimation ";
-   switch(estimationStatus)
-   {
-      case ABSOLUTETOL_CONVERGED:
-      case RELATIVETOL_CONVERGED:
-      case ABS_AND_REL_TOL_CONVERGED:
-         textFile << "converged!\n";
-         break;
-      case MAX_CONSECUTIVE_DIVERGED:
-      case MAX_ITERATIONS_DIVERGED:
-      case CONVERGING:
-      case DIVERGING:
-         textFile << "did not converge!\n";
-         break;
-      case UNKNOWN:
-         break;
-   };
-
-   /// 2. Write convergence reason
-   textFile.precision(15);
-   textFile << "   " << convergenceReason << "\n"
-            << "Final Estimated State:\n";
-
-   if (estEpochFormat != "FromParticipants")
-      textFile << "   Estimation Epoch (" << estEpochFormat
-               << "): " << estEpoch << "\n";
-   else
-   {
-      //textFile << "   Estimation Epoch (A.1 Mod. Julian): "
-      //         << estimationEpoch << "\n";
-      char s[100];
-      textFile << "   Estimation Epoch:\n"
-               << "   " << estimationEpoch <<  " A.1 Mod. Julian\n";
-      taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
-      utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
-      textFile << "   " << taiMjdEpoch << " TAI Mod. Julian\n";
-      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
-      textFile << "   " << utcEpoch << " UTCG\n";
-   }
-   
-   /// 3. Write final state
-   GetEstimationStateForReport(outputEstimationState);
-   textFile.precision(8);
-   for (UnsignedInt i = 0; i < map->size(); ++i)
-   {
-      textFile << "   ";
-      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-          ((*map)[i]->elementName == "Bias"))
-      {
-         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-         StringArray sa = mm->GetStringArrayParameter("Participants");
-         textFile << mm->GetStringParameter("Type") << " ";
-         for( UnsignedInt j=0; j < sa.size(); ++j)
-            textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-         textFile << (*map)[i]->subelement;
-      }
-      else
-      {
-         textFile << GetElementFullName((*map)[i], false);
-      }
-      textFile << " = " << outputEstimationState[i] << "\n";
-   }
-   textFile << "\n";
-
-
-   /// 5. Write previous RMS, current RMS, and the best RMS
-   textFile.precision(12);
-   textFile << "\n   WeightedRMS residuals for previous iteration: "
-            << oldResidualRMS;
-   textFile << "\n   WeightedRMS residuals for this iteration    : "
-            << newResidualRMS ;
-   textFile << "\n   BestRMS residuals for this iteration        : "
-            << bestResidualRMS << "\n\n";
-
-   /// 4. Write covariance matrix and correlation matrix
-   /// 4.1. Write a table containing a list of solve-fors an their index
-   // @todo: add code to do section 4.1. here
-   textFile << "Solve-for variables and their index used in covariance and correlation matrixes in Cartesian coordinate system:\n";
-   textFile << " Index      Solve-for's Name\n";
-   Integer indexLen = 1;
-   for (; GmatMathUtil::Pow(10,indexLen) < map->size(); ++indexLen);
-
-      
-   for (UnsignedInt i = 0; i < map->size(); ++i)
-   {
-      Integer index = i+1;
-      textFile << "    " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(index), indexLen, GmatStringUtil::RIGHT) << "     ";
-      //textFile << "    " << i+1 << "     ";
-      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-          ((*map)[i]->elementName == "Bias"))
-      {
-         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-         StringArray sa = mm->GetStringArrayParameter("Participants");
-         textFile << mm->GetStringParameter("Type") << " ";
-         for( UnsignedInt j=0; j < sa.size(); ++j)
-            textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-         textFile << (*map)[i]->subelement;
-      }
-      else
-      {
-         textFile << GetElementFullName((*map)[i], false);
-      }
-      textFile << "\n";
-   }
-   textFile << "\n\n";
-
-   // Calculate current Cartesian state map:
-   std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
-
-
-   /// 4.2. Write final covariance and correlation matrix 
-   // 4.2.1 Get covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon 
-   Rmatrix finalCovariance = information.Inverse();
-
-   // 4.2.2. Convert covariance matrix for Cr_Epsilon and Cd_Epsilon to covariance matrix for Cr and Cd
-   for (UnsignedInt i = 0; i < map->size(); ++i)
-   {
-      if ((*map)[i]->elementName == "Cr_Epsilon")
-      {
-         // Get Cr0
-         Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
-
-         // multiply row and column i with Cr0
-         for(UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
-            finalCovariance(i,j) *= Cr0;
-         for(UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
-            finalCovariance(j,i) *= Cr0;
-      }
-      if ((*map)[i]->elementName == "Cd_Epsilon")
-      {
-         // Get Cd0
-         Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
-
-         // multiply row and column i with Cd0
-         for(UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
-            finalCovariance(i,j) *= Cd0;
-         for(UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
-            finalCovariance(j,i) *= Cd0;
-      }
-   }
-
-   // 4.2.3. Write covariance matrix to report file 
-   textFile << "Covariance Matrix in Cartesian Coordinate System:\n";
-   textFile << "---------------------------------------------------------------------------------\n";
-   textFile << " Row Index |                     Column Index\n";
-   textFile << "           |---------------------------------------------------------------------\n";
-   textFile << "           |  ";
-   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
-      textFile << i+1 << "                       ";
-   textFile << "\n---------------------------------------------------------------------------------\n";
-   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
-   {
-      //textFile << "  " << i+1 << "      ";
-      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "    ";
-      for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
-      {
-         char s[100];
-         sprintf(&s[0],"  %22.12le\0", finalCovariance(i, j)); 
-         std::string ss(s);
-         textFile << ss.substr(ss.size() - 24); //finalCovariance(i, j);
-      }
-      textFile << "\n";
-   }
-
-   // 4.2.4. Write correlation matrix to report file
-   textFile << "\nCorrelation Matrix in Cartesian Coordinate System:\n";
-   textFile << "---------------------------------------------------------------------------------\n";
-   textFile << " Row Index |                     Column Index\n";
-   textFile << "           |---------------------------------------------------------------------\n";
-   textFile << "           |      ";
-   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
-      textFile << i+1 << "                       ";
-   textFile << "\n---------------------------------------------------------------------------------\n";
-   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
-   {
-      //textFile << "  " << i+1 << "      ";
-      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "    ";
-      for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
-      {
-         char s[100];
-         sprintf(&s[0],"  %22.12lf\0", finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j))); 
-         std::string ss(s);
-         textFile << ss.substr(ss.size() - 24); //finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j));
-      }
-      textFile << "\n";
-   }
-   textFile << "\n\n\n";
-
-   // Calculate and display covariance and correlation matrix for Keplerian Coordinate
-   // Calculate Keplerian covariance matrix
-   Rmatrix convmatrix;
-   bool valid = true;
-   try
-   {
-      convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
-   }
-   catch(...)
-   {
-      valid = false;
-   }
-
-   if (valid)
-   {
-      /// 4.3. Write final covariance and correlation matrix for Keplerian coordinate system 
-      textFile << "Solve-for variables and their index used in covariance and correlation matrixes in Keplerian coordinate system:\n";
-      textFile << "  Index      Solve-for's Name\n";
-      for (UnsignedInt i = 0; i < map->size(); ++i)
-      {
-         Integer index = i+1;
-         textFile << "    " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(index), indexLen, GmatStringUtil::RIGHT) << "a    ";
-         if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-             ((*map)[i]->elementName == "Bias"))
-         {
-            MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-            StringArray sa = mm->GetStringArrayParameter("Participants");
-            textFile << mm->GetStringParameter("Type") << " ";
-            for( UnsignedInt j=0; j < sa.size(); ++j)
-               textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-            textFile << (*map)[i]->subelement;
-         }
-         else
-         {
-            std::string name = GetElementFullName((*map)[i], false);
-            Integer pos = name.find_last_of('.');
-            std::string paraName = name.substr(pos + 1);
-            std::string paraPrefix = name.substr(0, pos);
-            if (paraName == "X")
-               name = paraPrefix + ".SMA";
-            else if (paraName == "Y")
-               name = paraPrefix + ".ECC";
-            else if (paraName == "Z")
-               name = paraPrefix + ".INC";
-            else if (paraName == "VX")
-               name = paraPrefix + ".RAAN";
-            else if (paraName == "VY")
-               name = paraPrefix + ".AOP";
-            else if (paraName == "VZ")
-               name = paraPrefix + ".MA";
-            textFile << name;
-         }
-         textFile << "\n";
-      }
-      textFile << "\n\n";
-
-      // 4.3.1. Calculate covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon
-      Rmatrix finalKeplerCovariance = convmatrix * information.Inverse() * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
-
-      // 4.3.2. Convert covariance matrix for Cr_Epsilon and Cd_Epsilon to covariance matrix for Cr and Cd
-      for (UnsignedInt i = 0; i < map->size(); ++i)
-      {
-         if ((*map)[i]->elementName == "Cr_Epsilon")
-         {
-            // Get Cr0
-            Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
-
-            // multiply row and column i with Cr0
-            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
-               finalKeplerCovariance(i,j) *= Cr0;
-            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumRows(); ++j)
-               finalKeplerCovariance(j,i) *= Cr0;
-         }
-         if ((*map)[i]->elementName == "Cd_Epsilon")
-         {
-            // Get Cd0
-            Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
-
-            // multiply row and column i with Cd0
-            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
-               finalKeplerCovariance(i,j) *= Cd0;
-            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumRows(); ++j)
-               finalKeplerCovariance(j,i) *= Cd0;
-         }
-      }
-
-      textFile << "Covariance Matrix in Keplerian Coordinate System:\n";
-      textFile << "---------------------------------------------------------------------------------\n";
-      textFile << " Row Index |                     Column Index\n";
-      textFile << "           |---------------------------------------------------------------------\n";
-      textFile << "           |  ";
-      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
-         textFile << i+1 << "a                      ";
-      textFile << "\n---------------------------------------------------------------------------------\n";
-      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
-      {
-         textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
-         for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
-         {
-            char s[100];
-            sprintf(&s[0],"  %22.12le\0", finalKeplerCovariance(i, j)); 
-            std::string ss(s);
-            textFile << ss.substr(ss.size() - 24);
-         }
-         textFile << "\n";
-      }
-
-      textFile << "\nCorrelation Matrix in Keplerian Coordinate System:\n";
-      textFile << "---------------------------------------------------------------------------------\n";
-      textFile << " Row Index |                     Column Index\n";
-      textFile << "           |---------------------------------------------------------------------\n";
-      textFile << "           |      ";
-      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
-         textFile << i+1 << "a                      ";
-      textFile << "\n---------------------------------------------------------------------------------\n";
-      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
-      {
-         textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
-         for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
-         {
-            char s[100];
-            sprintf(&s[0],"  %22.12lf\0", finalKeplerCovariance(i, j)/ sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j))); 
-            std::string ss(s);
-            textFile << ss.substr(ss.size() - 24);
-         }
-         textFile << "\n";
-      }
-   }
-
-
-   textFile << "\n********************************************************\n\n";
-   textFile.flush();
-}
-
-
-void BatchEstimator::WriteHeader()
-{
-   Real taiMjdEpoch, utcMjdEpoch;
-   std::string utcEpoch;
-
-   GmatState outputEstimationState;
-   const std::vector<ListItem*> *map = esm.GetStateMap();
-
-   /// 1. Write iteration number
-   textFile << "\n"
-           << "********************************************************\n"
-            << "*** Iteration " << iterationsTaken << "\n"
-            << "********************************************************\n\n";
-
-
-   /// 2. Write state at beginning iteration:
-   textFile << "State at Beginning of Iteration:\n";
-   textFile.precision(15);
-   if (estEpochFormat != "FromParticipants")
-      textFile << "   Estimation Epoch (" << estEpochFormat
-               << "): " << estEpoch << "\n";
-   else
-   {
-      //textFile << "   Estimation Epoch (A.1 Mod. Julian): "
-      //         << estimationEpoch << "\n";
-      char s[100];
-      textFile << "   Estimation Epoch:\n"
-               << "   " << estimationEpoch <<  " A.1 Mod. Julian\n";
-      taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
-      utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
-      textFile << "   " << taiMjdEpoch << " TAI Mod. Julian\n";
-      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
-      textFile << "   " << utcEpoch << " UTCG\n";
-   }
-
-   // Convert state to participants' coordinate system:
-   GetEstimationStateForReport(outputEstimationState);
-   // write out state
-   textFile.precision(8);
-   for (UnsignedInt i = 0; i < map->size(); ++i)
-   {
-      textFile << "   ";
-      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-          ((*map)[i]->elementName == "Bias"))
-      {
-         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-         StringArray sa = mm->GetStringArrayParameter("Participants");
-         textFile << mm->GetStringParameter("Type") << " ";
-         for( UnsignedInt j=0; j < sa.size(); ++j)
-            textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-         textFile << (*map)[i]->subelement;
-      }
-      else
-      {
-         textFile << GetElementFullName((*map)[i], false);
-      }
-      textFile << " = " << outputEstimationState[i] << "\n";
-   }
-   textFile << "\n";
-
-
-   /// 3. Write data editing criteria:
-   textFile.precision(2);
-   textFile << "Data Editing Criteria:\n"
-            << "   " << GetName() << ".OLSEInitialRMSSigma        = ";
-   if ((maxResidualMult == 0.0)||((GmatMathUtil::Abs(maxResidualMult) < 1.0e6)&&(GmatMathUtil::Abs(maxResidualMult) > 1.0e-2)))
-      textFile << maxResidualMult << "\n";
-   else
-      textFile << GmatStringUtil::RealToString(maxResidualMult, false, true) << "\n";
-
-   textFile << "   " << GetName() << ".OLSEMultiplicativeConstant = ";
-   if ((constMult == 0.0)||((GmatMathUtil::Abs(constMult) < 1.0e6)&&(GmatMathUtil::Abs(constMult) > 1.0e-2)))
-      textFile << constMult << "\n";
-   else
-      textFile << GmatStringUtil::RealToString(constMult, false, true) << "\n";
-
-   textFile << "   " << GetName() << ".OLSEAdditiveConstant       = ";
-   if ((additiveConst == 0.0)||((GmatMathUtil::Abs(additiveConst) < 1.0e6)&&(GmatMathUtil::Abs(additiveConst) > 1.0e-2)))
-      textFile << additiveConst << "\n";
-   else
-      textFile << GmatStringUtil::RealToString(additiveConst, false, true) << "\n";
-
-   /// 4. Write notations used in report file:
-   textFile << "Notations Used In Report File: \n" 
-            << "   N    : Not Edited \n"                                
-            << "   U    : Unused Because No Computed Value Configuration Available \n"
-            << "   R    : Out of Ramped Table Range \n"
-            << "   BXY  : Blocked.  X = Path Index.  Y = Count Index (Doppler) \n"
-            << "   IRMS : Edited by Initial RMS Sigma Filter \n"
-            << "   OLSE : Edited by Outer-Loop Sigma Editor \n\n";
-
-   /// 5. Write report header
-   if (textFileMode == "Normal")
-      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << "Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
-   else
-   {
-      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << "Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
-      // fill out N/A for partial derivative
-      for (int i = 0; i < esm.GetStateMap()->size()-1; ++i)
-         textFile << "                         ";
-      textFile << "   Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
-   }
-   textFile.flush();
-
-}
 
 
 //----------------------------------------------------------------------------
@@ -2883,13 +2393,10 @@ void BatchEstimator::WriteReportFileHeader()
 //------------------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart1()
 {
-MessageInterface::ShowMessage("WriteReportFileHeaderPart1() called\n");
    /// 1. Write header 1:
    time_t now = time(NULL);
    std::string runDate = CTime(&now);
-MessageInterface::ShowMessage("   Run time:   %s\n", runDate.c_str());
    std::string buildTime = GetFileCreateTime("GMAT.exe");
-MessageInterface::ShowMessage("   Build time: %s\n", buildTime.c_str());
 
    textFile
       << "                                              *****  G E N E R A L  M I S S I O N  A N A L Y S I S  T O O L  *****\n"
@@ -3615,19 +3122,18 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
                }
                
                // Insert blank lines to paramNames and rowContent
-               StringArray::iterator pos1 = paramNames.begin() + (paramNames.size() - 1);
+               StringArray::iterator pos1 = paramNames.begin() + paramNames.size(); // (paramNames.size() - 1);
                paramNames.insert(pos1, emList.size() - maxNumErrorModels, "");
                
                if (colCount != 0)
                {
-                  StringArray::iterator pos2 = rowContent.begin() + (paramNames.size() - 1);
+                  StringArray::iterator pos2 = rowContent.begin() + paramNames.size(); // (paramNames.size() - 1);
                   rowContent.insert(pos2, emList.size() - maxNumErrorModels, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
                }
                
                maxNumErrorModels = emList.size();
             }
          }
-         ss.str(""); ss << gs->GetRealParameter("Humidity"); paramValues.push_back(ss.str());
          
          // 3.3. Increasing column count by 1
          ++colCount;
@@ -3641,7 +3147,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             if (colCount == 1)
                rowContent[j] += (" " + GmatStringUtil::GetAlignmentString(paramNames[j], nameLen, GmatStringUtil::LEFT) + "  ");
             
-            rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 22, GmatStringUtil::LEFT)+"  ");
+            rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 27, GmatStringUtil::LEFT)+" ");
          }
          
          // 3.5. Beak up columns in a table
@@ -3881,8 +3387,8 @@ void BatchEstimator::WriteReportFileHeaderPart5()
    
    textFile << " Planetary Ephemeris                                 " << solarSystem->GetStringParameter("EphemerisSource") << "\n";
    textFile << " Solar Irradiance (W/m^2 at 1 AU)                    1358.0\n";
-   textFile << " Speed of Light   (km/sec)                           " << GmatStringUtil::RealToString(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0, false, false, false, 6) << "\n";
-   textFile << " Universal Gravitational Constant(km^3/kg*sec^2)     " << GmatStringUtil::RealToString(GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT, false, true, false, 8) << "\n";
+   textFile << " Speed of Light (km/sec)                             " << GmatStringUtil::RealToString(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0, false, false, false, 6) << "\n";
+   textFile << " Universal Gravitational Constant (km^3/kg*sec^2)    " << GmatStringUtil::RealToString(GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT, false, true, true, 6) << "\n";
    textFile << "\n";
 
    // 2. Write information about central bodies to report file
@@ -3901,7 +3407,15 @@ void BatchEstimator::WriteReportFileHeaderPart5()
          // Get central body objects used in spacecrafts' coordinate system
          Spacecraft *sc = (Spacecraft*)obj;
          std::string csName = sc->GetStringParameter("CoordinateSystem");
-         CoordinateSystem *cs = (CoordinateSystem *)GetConfiguredObject(csName);
+         CoordinateSystem *cs = NULL;
+         try
+         {
+            cs = (CoordinateSystem *)GetConfiguredObject(csName);
+         }
+         catch (...)
+         {
+            throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
+         }
          name = cs->GetStringParameter("Origin");
       }
       else if (obj->IsOfType(Gmat::GROUND_STATION))
@@ -3950,7 +3464,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
    StringArray paramNames, paramValues, rowContent;
    
    // 2.2.1. Set value to paramNames
-   paramNames.push_back("Central Body");
+   paramNames.push_back("Celestial Body");
    paramNames.push_back("Gravitational Constant (km^3/sec^2)");
    paramNames.push_back("Mean Equatorial Radius (km)");
    paramNames.push_back("Inverse Flattening Coefficient");
@@ -3974,7 +3488,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
       ss.str(""); ss << GmatStringUtil::RealToString(1.0 / cb->GetRealParameter(cb->GetParameterID("Flattening")), false, false, false, 8); paramValues.push_back(ss.str());      // Inverse Flattening Cofficient
       ss.str(""); ss << GmatStringUtil::RealToString(cb->GetRealParameter(cb->GetParameterID("RotationRate")), false, false, false, 8); paramValues.push_back(ss.str());          // Rotation Rate
 
-      Integer valueLen = 0;
+      Integer valueLen = 20;
       for (Integer j = 0; j < paramValues.size(); ++j)
          valueLen = (Integer)GmatMathUtil::Max(valueLen, paramValues[j].size());
 
@@ -3986,7 +3500,7 @@ void BatchEstimator::WriteReportFileHeaderPart5()
       }
 
       for (Integer j = 0; j < paramNames.size(); ++j)
-         rowContent[j] += GmatStringUtil::GetAlignmentString(paramValues[j], valueLen+5);
+         rowContent[j] += GmatStringUtil::GetAlignmentString(paramValues[j], valueLen+1);
       
       // increase colCount by 1
       ++colCount;
@@ -4135,14 +3649,14 @@ void BatchEstimator::WritePageHeader()
    textFile << "\n";
    if (textFileMode == "Normal")
    {
-      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit            Observed(O)            Computed (C)       Residual (O-C)  Elev.\n";
+      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit           Observed(O)          Computed (C)     Residual (O-C)  Elev.\n";
    }
    else
    {
-      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type          Units   " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)             Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle      Partial-Derivatives";
+      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)          Weight (W)           W*(O-C)^2       sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size() - 1; ++i)
-         textFile << "                         ";
+         textFile << GmatStringUtil::GetAlignmentString("", 19);
       textFile << "  Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
    }
    textFile << "\n";
@@ -5503,7 +5017,7 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
    {
       // 1. Write header:
       textFile4 << "\n";
-      textFile4 << "*********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE / CORRELATION MATRIX  *****************************************************\n";
+      textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
       textFile4 << "\n";
 
       // 2. Write covariance and correlation matrxies in Cartesian coordiante system:
@@ -5722,627 +5236,6 @@ void BatchEstimator::WriteReportFileSummary(Solver::SolverState sState)
 }
 
 
-void BatchEstimator::WriteSummary(Solver::SolverState sState)
-{
-   const std::vector<ListItem*> *map = esm.GetStateMap();
-   GmatState outputEstimationState;
-
-   if (sState == ESTIMATING)
-   {
-      /// 1. Write state summary
-      // Convert state to participants' coordinate system:
-      GetEstimationStateForReport(outputEstimationState);
-      // Write state to report file
-      Integer max_len = 15;
-      for (int i = 0; i < map->size(); ++i) 
-      {
-         std::stringstream ss;
-         if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-             ((*map)[i]->elementName == "Bias"))
-         {
-            MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-            StringArray sa = mm->GetStringArrayParameter("Participants");
-            ss << mm->GetStringParameter("Type") << " ";
-            for( UnsignedInt j=0; j < sa.size(); ++j)
-               ss << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-            ss << (*map)[i]->subelement;
-         }
-         else
-            ss << GetElementFullName((*map)[i], false);
-         max_len = (Integer)GmatMathUtil::Max(max_len, ss.str().length());
-      }
-
-      // Calculate Keplerian state for apriori, previous, current states:
-      std::map<GmatBase*, Rvector6> aprioriKeplerianStateMap = CalculateKeplerianStateMap(map, aprioriSolveForState);
-      std::map<GmatBase*, Rvector6> previousKeplerianStateMap = CalculateKeplerianStateMap(map, previousSolveForState);
-      std::map<GmatBase*, Rvector6> currentKeplerianStateMap = CalculateKeplerianStateMap(map, currentSolveForState);
-
-      std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
-      
-      // Write state information
-      textFile << "\n";
-      textFile << "Iteration " << iterationsTaken << ": State Information \n"
-               << "   " << GmatStringUtil::GetAlignmentString("State Component", max_len, GmatStringUtil::LEFT)                                                
-               << "               Apriori State              Previous State               Current State             Current-Apriori            Current-Previous          Standard Deviation\n";
-
-      textFile.precision(8);
-
-      // covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon
-      Rmatrix covar = information.Inverse();
-
-      // covariance matrix w.r.t. Cr and Cd
-      for (UnsignedInt i = 0; i < map->size(); ++i)
-      {
-         if ((*map)[i]->elementName == "Cr_Epsilon")
-         {
-            // Get Cr0
-            Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
-
-            // multiply row and column i with Cr0
-            for(UnsignedInt j = 0; j < covar.GetNumColumns(); ++j)
-               covar(i,j) *= Cr0;
-            for(UnsignedInt j = 0; j < covar.GetNumRows(); ++j)
-               covar(j,i) *= Cr0;
-         }
-         if ((*map)[i]->elementName == "Cd_Epsilon")
-         {
-            // Get Cd0
-            Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
-
-            // multiply row and column i with Cd0
-            for(UnsignedInt j = 0; j < covar.GetNumColumns(); ++j)
-               covar(i,j) *= Cd0;
-            for(UnsignedInt j = 0; j < covar.GetNumRows(); ++j)
-               covar(j,i) *= Cd0;
-         }
-      }
-
-      for (int i = 0; i < map->size(); ++i) 
-      {
-         textFile << "   ";
-         std::stringstream ss;
-         if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-             ((*map)[i]->elementName == "Bias"))
-         {
-            MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-            StringArray sa = mm->GetStringArrayParameter("Participants");
-            ss << mm->GetStringParameter("Type") << " ";
-            for( UnsignedInt j=0; j < sa.size(); ++j)
-               ss << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-            ss << (*map)[i]->subelement;
-         }
-         else
-         {
-            //textFile << (*map)[i]->objectName << "."
-            //         << (*map)[i]->elementName << "."
-            //         << (*map)[i]->subelement;
-            ss << GetElementFullName((*map)[i], false);
-         }
-     
-         textFile << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 3, GmatStringUtil::LEFT);
-         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i] - aprioriSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i] - previousSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   ";
-         if (covar(i,i) >= 0.0)
-            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(covar(i,i)), false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
-         else
-            textFile << "       N/A\n";
-      }
-      textFile << "\n";
-
-      // Caluclate Keplerian covariance matrix
-      Rmatrix convmatrix;
-      bool valid = true;
-      try
-      {
-         convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
-      }
-      catch(...)
-      {
-         valid = false;
-      }
-      
-      if (valid)
-      {
-         Rmatrix keplerianCovar = convmatrix * covar * convmatrix.Transpose();                 // Equation 8-49 GTDS MathSpec
-         
-         // Display Keplerian apriori, previous, current states
-         std::vector<std::string> nameList;
-         RealArray aprioriArr, previousArr, currentArr, stdArr;
-         for (std::map<GmatBase*,Rvector6>::iterator i = aprioriKeplerianStateMap.begin(); i != aprioriKeplerianStateMap.end(); ++i)
-         {
-            std::string csName = ((Spacecraft*)(i->first))->GetRefObject(Gmat::COORDINATE_SYSTEM,"")->GetName();
-            nameList.push_back(i->first->GetName() + "." + csName + ".SMA");
-            nameList.push_back(i->first->GetName() + "." + csName + ".ECC");
-            nameList.push_back(i->first->GetName() + "." + csName + ".INC");
-            nameList.push_back(i->first->GetName() + "." + csName + ".RAAN");
-            nameList.push_back(i->first->GetName() + "." + csName + ".AOP");
-            nameList.push_back(i->first->GetName() + "." + csName + ".MA");
-            for (UnsignedInt j = 0; j < 6; ++j)
-               aprioriArr.push_back(i->second[j]);
-         }
-         
-         for (std::map<GmatBase*,Rvector6>::iterator i = previousKeplerianStateMap.begin(); i != previousKeplerianStateMap.end(); ++i)
-         {
-            for (UnsignedInt j = 0; j < 6; ++j)
-               previousArr.push_back(i->second[j]);
-         }
-         
-         for (std::map<GmatBase*,Rvector6>::iterator i = currentKeplerianStateMap.begin(); i != currentKeplerianStateMap.end(); ++i)
-         {
-            for (UnsignedInt j = 0; j < 6; ++j)
-               currentArr.push_back(i->second[j]);
-
-            UnsignedInt k = 0;
-            for(; k < map->size(); ++k)
-            {
-               if (((*map)[k]->elementName == "CartesianState")&&((*map)[k]->object == i->first))
-                  break;
-            }
-
-            for(UnsignedInt j = 0; j < 6; ++j)
-            {
-               if (keplerianCovar(k,k) >= 0.0)
-                  stdArr.push_back(GmatMathUtil::Sqrt(keplerianCovar(k,k)));
-               else
-                  stdArr.push_back(-1.0);
-               ++k;
-            }
-         }
-         
-         for(UnsignedInt i = 0; i < nameList.size(); ++i)
-         {
-            textFile << "   ";
-            textFile << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 3, GmatStringUtil::LEFT);
-            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i] - aprioriArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i] - previousArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   ";
-            if (stdArr[i] >= 0.0)
-               textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(stdArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
-            else
-               textFile << "        N/A\n";
-         }         
-      }
-      
-      /// 2. Write statistics
-      /// 2.1. Write statistics summary
-      textFile << "\n\n";
-      textFile << "Iteration " << iterationsTaken << ":  Statistics \n"
-               << "   Total Number Of Records     : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"
-               << "   Records Used For Estimation : " << measurementResiduals.size() << "\n"
-               << "   Records Removed Due To      : \n"
-               << "      No Computed Value Configuration Available : " << numRemovedRecords["U"] << "\n"
-               << "      Out of Ramped Table Range                 : " << numRemovedRecords["R"] << "\n"
-               << "      Signal Blocked                            : " << numRemovedRecords["B"] << "\n"
-               << "      Sigma Editing                             : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n\n";
-      
-      /// 2.2. Write statistics table:
-      if (statisticsTable["TOTAL NUM RECORDS"].size() > 0)
-      {
-         // Only write out statistics table when at least 1 measurement type is used for estimation
-         // 2.2.1. Write statistics table for ground station and measuremnet type
-         std::vector<Real> numberAllRec;                 // store number of all records for each groundstation and measurement type
-         std::vector<Real> numberAcceptedRec;            // store number of accepted records for each groundstation and measurement type
-         std::vector<Real> residual;                     // store residual for each groundstation and measurement type
-         std::vector<Real> allRecSubTotal;               // store number of all records for each ground station
-         std::vector<Real> acceptedRecSubTotal;          // store number of accepted records for each groundstation
-         std::vector<Real> residualSubTotal;             // store residual for each groundstation
-
-         ObjectMap objMap = GetConfiguredObjectMap();
-         ObjectArray groundStations;
-         for (std::map<std::string, GmatBase*>::iterator element = objMap.begin(); element != objMap.end(); ++element)
-         {
-            if (element->second->IsOfType(Gmat::GROUND_STATION))
-               groundStations.push_back(element->second);
-         }
-
-         StringArray sa; 
-         sa.push_back("TOTAL NUM RECORDS");
-         sa.push_back("ACCEPTED RECORDS");
-         sa.push_back("WEIGHTED RMS");
-         sa.push_back("MEAN RESIDUAL");
-         sa.push_back("STANDARD DEVIATION");
-
-         Real sumWeightedResSquare = 0.0;                // sum weighted residual quare
-         Real allNumRec = 0.0;                           // number of records
-         Real numRec = 0.0;                              // number of accepted records 
-         Real sumRes = 0.0;                              // sum of residual
-         Real sumResSquare = 0.0;                        // sum of residual square
-
-         for (UnsignedInt i = 0; i < sa.size(); ++i)
-         {
-            std::string gsName;
-
-            if (i == 0)
-            {
-               // Step 1: write table header:
-               textFile << "Observation Summary by Station\n";
-               std::stringstream ss1, ss2, ss3;
-               gsName = "";
-               ss1 << "                    ";
-               ss2 << "                    ";
-               ss3 << "--------------------";
-               for (std::map<std::string, Real>::iterator column = statisticsTable[sa[i]].begin(); column != statisticsTable[sa[i]].end(); ++column)
-               {
-                  std::string name = column->first;
-                  std::string gs = name.substr(0, name.find_first_of(' '));          // ground station ID
-                  std::string typeName = name.substr(name.find_first_of(' ')+1);     // measurment type
-
-                  // Get groundstation' name
-                  std::string strName = "";
-                  for(UnsignedInt j = 0; j < groundStations.size(); ++j)
-                  {
-                     if (groundStations[j]->GetStringParameter("Id") == gs)
-                     {
-                        strName = groundStations[j]->GetName();
-                        break;
-                     }
-                  }
-
-                  if (gs != gsName)
-                  {
-                     ss1 << GmatStringUtil::GetAlignmentString(strName + "  " + gs, 20, GmatStringUtil::RIGHT);
-                     ss2 << GmatStringUtil::GetAlignmentString("All", 20, GmatStringUtil::RIGHT);
-                     ss3 << "--------------------";
-                     gsName = gs;
-                  }
-                  ss1 << GmatStringUtil::GetAlignmentString(strName + "  " + gs, 20, GmatStringUtil::RIGHT);
-                  ss2 << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::RIGHT);
-                  ss3 << "--------------------";
-               }
-               textFile << ss1.str() << "\n";
-               textFile << ss2.str() << "\n";
-               textFile << ss3.str() << "\n";
-            }
-   
-            // Step 2: Write table contents:
-            gsName = statisticsTable[sa[i]].begin()->first;
-            gsName = gsName.substr(0, gsName.find_first_of(' '));
-            std::stringstream ss4;
-//            MessageInterface::ShowMessage("Line %d: ", i);
-            UnsignedInt index = 0;
-            UnsignedInt index1 = 0;
-            for (std::map<std::string, Real>::iterator column = statisticsTable[sa[i]].begin(); column != statisticsTable[sa[i]].end(); ++column)
-            {
-               std::string name = column->first;
-               std::string gs = name.substr(0, name.find_first_of(' '));
-               std::string typeName = name.substr(name.find_first_of(' ')+1);
-//               MessageInterface::ShowMessage("<%s %s> = %f ", gs.c_str(), typeName.c_str(), column->second); 
-
-               if (column == statisticsTable[sa[i]].begin())
-                  textFile << GmatStringUtil::GetAlignmentString(sa[i],20);
-
-               if (gs != gsName)
-               {
-                  switch (i)
-                  {
-                  case 0:
-                     {
-                        allRecSubTotal.push_back(allNumRec);
-                        Integer value = (Integer)allNumRec;                           // change type from real to integer
-                        textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
-                     }
-                     break;
-                  case 1:
-                     {
-                        acceptedRecSubTotal.push_back(numRec);
-                        Integer value = (Integer)numRec;                              // change type from real to integer
-                        Real percent = numRec*100/allRecSubTotal[index1];    // calculate percentage
-                        std::string sval = GmatStringUtil::RealToString(percent, false, false, false, 2, 5) + "% " + GmatStringUtil::ToString(value, 8);
-                        textFile << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
-                     }
-                     break;
-                  case 2:
-                     textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWeightedResSquare/acceptedRecSubTotal[index1]), 8), 20, GmatStringUtil::RIGHT);
-                     break;
-                  case 3:
-                     {
-                        residualSubTotal.push_back(sumRes);
-                        //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumRes/acceptedRecSubTotal[index1], 8), 20, GmatStringUtil::RIGHT);
-                        textFile << "                 N/A";
-                     }
-                     break;
-                  case 4:
-                     {
-                        Real res_aver = residualSubTotal[index1]/acceptedRecSubTotal[index1];
-                        Real resSquare_aver = sumResSquare/acceptedRecSubTotal[index1];
-                        Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
-                        //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(value, 8), 20, GmatStringUtil::RIGHT);
-                        textFile << "                 N/A";
-                     }
-                     break;
-                  }
-                  ++index1;
-
-                  textFile << ss4.str();
-                  ss4.str(""); 
-                  allNumRec = 0.0;
-                  numRec = 0.0;
-                  sumWeightedResSquare = 0.0;
-                  sumRes = 0.0;
-                  sumResSquare = 0.0;
-
-                  gsName = gs;
-               }
-
-
-               switch (i)
-               {
-               case 0:
-                  {
-                     numberAllRec.push_back(column->second);
-                     allNumRec += column->second;                           // sum of all number of records
-                     Integer value = (Integer)column->second;                        // convert real to integer
-                     ss4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               case 1:
-                  {
-                     numberAcceptedRec.push_back(column->second);
-                     numRec += column->second;                               // sum of all number of accepted records
-                     Integer value = (Integer)column->second;                         // convert real to integer
-                     Real percent = column->second*100/numberAllRec[index];   // calculate percentage
-                     std::string sval = GmatStringUtil::RealToString(percent, false, false, false, 2, 5) + "% " + GmatStringUtil::ToString(value, 8);
-                     ss4 << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               case 2:
-                  {
-                     sumWeightedResSquare += column->second;                 // sum of all weighted residual
-                     ss4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(column->second/numberAcceptedRec[index]), 8), 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               case 3:
-                  {
-                     residual.push_back(column->second);
-                     sumRes += column->second;                               // sum of all residual
-                     ss4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(column->second/numberAcceptedRec[index], 8), 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               case 4:
-                  {
-                     Real res_aver = residual[index]/ numberAcceptedRec[index];
-                     sumResSquare += column->second;                         // sum of all residual square
-                     Real value = GmatMathUtil::Sqrt(column->second/numberAcceptedRec[index] - res_aver*res_aver);
-                     ss4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(value, 8), 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               }
-
-               ++index;
-            }
-
-                  switch (i)
-                  {
-                  case 0:
-                     {
-                        allRecSubTotal.push_back(allNumRec);
-                        Integer value = (Integer)allNumRec;                           // change type from real to integer
-                        textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
-                     }
-                     break;
-                  case 1:
-                     {
-                        acceptedRecSubTotal.push_back(numRec);
-                        Integer value = (Integer)numRec;                              // change type from real to integer
-                        Real percent = numRec*100/allRecSubTotal[index1];    // calculate percentage
-                        std::string sval = GmatStringUtil::RealToString(percent, false, false, false, 2, 5) + "% " + GmatStringUtil::ToString(value, 8);
-                        textFile << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
-                     }
-                     break;
-                  case 2:
-                     textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWeightedResSquare/acceptedRecSubTotal[index1]), 8), 20, GmatStringUtil::RIGHT);
-                     break;
-                  case 3:
-                     {
-                        residualSubTotal.push_back(sumRes);
-                        //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumRes/acceptedRecSubTotal[index1], 8), 20, GmatStringUtil::RIGHT);
-                        textFile << "                 N/A";
-                     }
-                     break;
-                  case 4:
-                     {
-                        Real res_aver = residualSubTotal[index1]/acceptedRecSubTotal[index1];
-                        Real resSquare_aver = sumResSquare/acceptedRecSubTotal[index1];
-                        Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
-                        //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(value, 8), 20, GmatStringUtil::RIGHT);
-                        textFile << "                 N/A";
-                     }
-                     break;
-                  }
-                  ++index1;
-
-                  textFile << ss4.str();
-                  ss4.str(""); 
-                  allNumRec = 0.0;
-                  numRec = 0.0;
-                  sumWeightedResSquare = 0.0;
-                  sumRes = 0.0;
-                  sumResSquare = 0.0;
-
-
-            textFile << "\n";
-//            MessageInterface::ShowMessage("\n");
-         }
-         textFile << "\n\n";
-
-
-         // 2.2.2. Write statistics table for measuremnet type
-         numberAllRec.clear();
-         numberAcceptedRec.clear();
-         residual.clear();
-
-         sumWeightedResSquare = 0.0;          // sum of weighted residual square
-         allNumRec = 0.0;                     // sum of number of all records
-         numRec = 0.0;                        // sum of number of accepted records
-         sumRes = 0.0;                        // sum of residual
-         sumResSquare = 0.0;                  // sum of residual square
-         for (UnsignedInt i = 0; i < sa.size(); ++i)
-         {
-            std::string typeName;
-
-            if (i == 0)
-            {
-               // Step 1: write table header:
-               textFile << "Observation Summary by Data Type\n";
-               std::stringstream ss1, ss2;
-               ss1 << "                         " << "            All";
-               ss2 << "-------------------------" << "---------------";
-               for (std::map<std::string, Real>::iterator column = statisticsTable1[sa[i]].begin(); column != statisticsTable1[sa[i]].end(); ++column)
-               {
-                  typeName = column->first;
-                  ss1 << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::RIGHT);
-                  ss2 << "--------------------";
-               }
-               textFile << ss1.str() << "\n";
-               textFile << ss2.str() << "\n";
-            }
-   
-            // Step 2: Write table contents:   
-            std::stringstream ss5;
-            UnsignedInt index = 0;
-            for (std::map<std::string, Real>::iterator column = statisticsTable1[sa[i]].begin(); column != statisticsTable1[sa[i]].end(); ++column)
-            {
-               switch (i)
-               {
-               case 0:
-                  {
-                     numberAllRec.push_back(column->second);
-                     allNumRec += column->second;                  // sum of all number of records
-                     Integer value = (Integer)column->second;               // convert real to integer
-                     ss5 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               case 1:
-                  {
-                     numberAcceptedRec.push_back(column->second);
-                     numRec += column->second;                    // sum of all accepted records
-                     Integer value = (Integer)column->second;              // convert real to integer
-                     Real percent = column->second*100/ numberAllRec[index];
-                     std::string sval = GmatStringUtil::RealToString(percent, false, false, false, 2, 5) + "% " + GmatStringUtil::ToString(value, 8);
-                     ss5 << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               case 2:
-                  {
-                     sumWeightedResSquare += column->second;      // sum of weighted residual square 
-                     ss5 << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(column->second/numberAcceptedRec[index]), 8), 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               case 3:
-                  {
-                     residual.push_back(column->second);
-                     sumRes += column->second;                    // sum of residuals
-                     ss5 << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(column->second/numberAcceptedRec[index], 8), 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               case 4:
-                  {
-                     sumResSquare += column->second;             // sum of residual square 
-                     Real res_aver = residual[index]/ numberAcceptedRec[index];
-                     Real resSquare_aver = column->second/numberAcceptedRec[index];
-                     Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
-                     ss5 << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(value, 8), 20, GmatStringUtil::RIGHT);
-                  }
-                  break;
-               }
-
-               ++index;
-            }
-            
-            // Calculate total:
-            textFile << GmatStringUtil::GetAlignmentString(sa[i], 20);
-
-            switch(i)
-            {
-            case 0:
-               {
-                  Integer value = (Integer)allNumRec;
-                  textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
-               }
-               break;
-            case 1:
-               {
-                  Integer value = (Integer)numRec;                            // convert real to integer
-                  Real percent = numRec*100/allNumRec;
-                  std::string sval = GmatStringUtil::RealToString(percent, false, false, false, 2, 5) + "% "+ GmatStringUtil::ToString(value, 8);
-                  textFile << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
-               }
-               break;
-            case 2:
-               textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWeightedResSquare/numRec), 8), 20, GmatStringUtil::RIGHT);
-               break;
-            case 3:
-               //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumRes/numRec, 8), 20, GmatStringUtil::RIGHT);
-               textFile << "                 N/A";
-
-               break;
-            case 4:
-               {
-                  Real res_aver = sumRes/numRec;
-                  Real resSquare_aver = sumResSquare/numRec;
-                  Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
-                  //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(value, 8), 20, GmatStringUtil::RIGHT);
-                  textFile << "                 N/A";
-               }
-               break;
-            }
-
-            textFile << ss5.str() << "\n";
-            ss5.str("");
-         }
-
-
-      }
-      textFile << "\n\n";
-
-      /// 2.3. Write WRMS and Predicted WRMS:
-      textFile.precision(12);
-      textFile << "   WeightedRMS Residuals  : " << newResidualRMS << "\n"
-               << "   PredictedRMS Residuals : " << predictedRMS << "\n";
-   }
-   
-
-   if ((sState == CHECKINGRUN)||(sState == FINISHED))
-   {
-      textFile << "   DC Status              : ";
-      switch(estimationStatus)
-      {
-      case ABSOLUTETOL_CONVERGED:
-         textFile << "Absolute Tolerance Converged\n";
-         break;
-      case RELATIVETOL_CONVERGED:
-         textFile << "Relative Tolerance Converged\n";
-         break;
-      case ABS_AND_REL_TOL_CONVERGED:
-         textFile << "Absolute and Relative Tolerance Converged\n";
-         break;
-      case MAX_CONSECUTIVE_DIVERGED:
-         textFile << "Maximum Consecutive Diverged\n";
-         break;
-      case MAX_ITERATIONS_DIVERGED:
-         textFile << "Maximum Iterations Diverged\n";
-         break;
-      case CONVERGING:
-         textFile << "Converging\n";
-         break;
-      case DIVERGING:
-         textFile << "Diverging\n";
-         break;
-      case UNKNOWN:
-         textFile << "Unknown\n";
-         break;
-      }
-   }
-
-   textFile.flush();
-}
-
-
 std::map<GmatBase*, Rvector6> BatchEstimator::CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, Rvector6> stateMap;
@@ -6380,7 +5273,7 @@ std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const s
          kState = StateConversionUtil::CartesianToKeplerian(mu, cState, "MA");
 
          if ((kState[1] <= 0)||(kState[1] >= 1.0))
-            MessageInterface::ShowMessage("Warning: eccentricity (%lf) is out of range (0,1) when convert Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", kState[1], state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
+            MessageInterface::ShowMessage("Warning: eccentricity (%lf) is out of range (0,1) when converting Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", kState[1], state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
 
          stateMap[(*map)[i]->object] = kState;
          i = i + 5;

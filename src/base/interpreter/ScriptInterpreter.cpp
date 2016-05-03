@@ -1915,25 +1915,25 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objs.size() > 0)
       WriteObjects(objs, "DataInterfaces", mode);
 
-   //---------------------------------------------                               // made changes by TUAN NGUYEN
-   // ErrorModel Objects                                                         // made changes by TUAN NGUYEN
-   //---------------------------------------------                               // made changes by TUAN NGUYEN
-   objs = theModerator->GetListOfObjects(Gmat::ERROR_MODEL);                     // made changes by TUAN NGUYEN
-   #ifdef DEBUG_SCRIPT_WRITING                                                   // made changes by TUAN NGUYEN
-   MessageInterface::ShowMessage("   Found %d ErrorModels\n", objs.size());      // made changes by TUAN NGUYEN
-   #endif                                                                        // made changes by TUAN NGUYEN
-   if (objs.size() > 0)                                                          // made changes by TUAN NGUYEN
-      WriteObjects(objs, "ErrorModels", mode);                                   // made changes by TUAN NGUYEN
+   //---------------------------------------------
+   // ErrorModel Objects
+   //---------------------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::ERROR_MODEL);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d ErrorModels\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "ErrorModels", mode);
 
-   //---------------------------------------------                               // made changes by TUAN NGUYEN
-   // DataFilter Objects                                                         // made changes by TUAN NGUYEN
-   //---------------------------------------------                               // made changes by TUAN NGUYEN
-   objs = theModerator->GetListOfObjects(Gmat::DATA_FILTER);                     // made changes by TUAN NGUYEN
-   #ifdef DEBUG_SCRIPT_WRITING                                                   // made changes by TUAN NGUYEN
-   MessageInterface::ShowMessage("   Found %d DataFilters\n", objs.size());      // made changes by TUAN NGUYEN
-   #endif                                                                        // made changes by TUAN NGUYEN
-   if (objs.size() > 0)                                                          // made changes by TUAN NGUYEN
-      WriteObjects(objs, "DataFilters", mode);                                   // made changes by TUAN NGUYEN
+   //---------------------------------------------
+   // DataFilter Objects
+   //---------------------------------------------
+   objs = theModerator->GetListOfObjects(Gmat::DATA_FILTER);
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   Found %d DataFilters\n", objs.size());
+   #endif
+   if (objs.size() > 0)
+      WriteObjects(objs, "DataFilters", mode);
 
    //---------------------------------------------
    // Measurement Models and Tracking Data/Systems

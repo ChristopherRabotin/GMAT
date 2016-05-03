@@ -99,16 +99,30 @@ public:
 
 protected:
    /// The ephem file that is propagated
-   std::string          ephemName;
+   std::string             ephemName;
    /// The ephem reader
-   Code500EphemerisFile ephem;
+   Code500EphemerisFile    ephem;
    /// The Satellite ID for the propagated spacecraft (always 101.0 for now)
-   Real                 satID;
+   Real                    satID;
    /// Flag indicating the file handle status
-   bool                 fileIsOpen;
+   bool                    fileIsOpen;
+   /// Ephemeris data from the file
+   std::vector<Code500EphemerisFile::EphemData>
+                           *ephemRecords;
+   /// Index for the current record in use
+   Integer                 record;
+   /// Last used state index (the index of the ephem state <= current epoch)
+   Integer                 stateIndex;
+   /// Array of A.1 epochs at the start of each data block
+   RealArray               startEpochs;
+   /// Array of time steps in each data block
+   RealArray               timeSteps;
 
-   virtual void         UpdateState();
-   virtual void         SetEphemSpan(Integer whichOne = 0);
+   virtual void            UpdateState();
+   virtual void            SetEphemSpan(Integer whichOne = 0);
+
+   void                    FindRecord(GmatEpoch forEpoch);
+   void                    GetState(GmatEpoch forEpoch, Rvector6 &outstate);
 
    /// Parameter IDs
    enum
@@ -123,6 +137,12 @@ protected:
    /// Code500Propagator parameter labels
    static const std::string PARAMETER_TEXT[Code500PropagatorParamCount -
                                            EphemerisPropagatorParamCount];
+
+   static const Real DUL_TO_KM;
+   static const Real DUL_DUT_TO_KM_SEC;
+   static const Real DUT_TO_DAY;
+   static const Real DUT_TO_SEC;
+
 };
 
 #endif /* Code500Propagator_hpp */

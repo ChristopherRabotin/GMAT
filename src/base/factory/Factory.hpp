@@ -66,8 +66,8 @@ class Interface;
 
 class MeasurementModelBase;
 class CoreMeasurement;
-class ErrorModel;                   // made changes by TUAN NGUYEN
-class DataFilter;                   // made changes by TUAN NGUYEN
+class ErrorModel;
+class DataFilter;
 class DataFile;
 class ObType;
 class TrackingSystem;
@@ -137,10 +137,10 @@ public:
                                            const std::string &withName = "");
    virtual CoreMeasurement* CreateMeasurement(const std::string &ofType,
                                            const std::string &withName = "");
-   virtual ErrorModel*      CreateErrorModel(const std::string &ofType,                    // made changes by TUAN NGUYEN
-                                           const std::string &withName = "");              // made changes by TUAN NGUYEN
-   virtual DataFilter*      CreateDataFilter(const std::string &ofType,                    // made changes by TUAN NGUYEN
-                                           const std::string &withName = "");              // made changes by TUAN NGUYEN
+   virtual ErrorModel*      CreateErrorModel(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual DataFilter*      CreateDataFilter(const std::string &ofType,
+                                           const std::string &withName = "");
    virtual DataFile*        CreateDataFile(const std::string &ofType,
                                            const std::string &withName = "");
    virtual ObType*          CreateObType(const std::string &ofType,

@@ -60,10 +60,10 @@ public:
    virtual bool               SetProperty(std::string prop);
    virtual bool               SetProperty(std::string, Integer);
 
-   virtual bool               IsPropertiesSetupCorrect();                      // made changes by TUAN NGUYEN
+   virtual bool               IsPropertiesSetupCorrect();
 
    virtual bool               SetProperty(std::string, GmatBase*);
-   virtual bool               SetProperty(GmatBase* solveforObj);              // made changes by TUAN NGUYEN
+   virtual bool               SetProperty(GmatBase* solveforObj);
    virtual bool               SetConsider(std::string prop);
    virtual bool               SetConsider(std::string, Integer);
    virtual bool               SetConsider(std::string, GmatBase*);
@@ -159,7 +159,7 @@ protected:
    Integer                    SortVector();
 
 private:
-   StringArray                GetSolveForList(GmatBase* obj);              // made changes by TUAN NGUYEN
+   StringArray                GetSolveForList(GmatBase* obj);
 
 };
 

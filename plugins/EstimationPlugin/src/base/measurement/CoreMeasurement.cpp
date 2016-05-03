@@ -1198,7 +1198,7 @@ Real CoreMeasurement::GetDelay(UnsignedInt forParticipant, Integer whichOne)
             whichOne);
    #endif
 
-   UpdateHardware();                        // made changes by TUAN NGUYEN
+   UpdateHardware();
 
    Real hwDelay = 0.0;
 
@@ -1304,7 +1304,6 @@ void CoreMeasurement::SetNoise(Rvector* ns)
 }
 
 
-// made changes by TUAN NGUYEN
 bool CoreMeasurement::UpdateHardware()
 {
    participantHardware.clear();

@@ -368,18 +368,18 @@ bool TDRSDopplerAdapter::SetStringParameter(const Integer id, const std::string&
 bool TDRSDopplerAdapter::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
-   if (id == SERVICE_ACCESS)                                                         // made changes by TUAN NGUYEN
-   {                                                                                 // made changes by TUAN NGUYEN
-      if (((Integer)serviceAccessList.size() > index) && (index >= 0))               // made changes by TUAN NGUYEN
-         serviceAccessList[index] = value;                                           // made changes by TUAN NGUYEN
-      else if ((Integer)serviceAccessList.size() == index)                           // made changes by TUAN NGUYEN
-         serviceAccessList.push_back(value);                                         // made changes by TUAN NGUYEN
-      else                                                                           // made changes by TUAN NGUYEN
-         throw MeasurementException("Index out of bounds when trying to "            // made changes by TUAN NGUYEN
-            "set a service access name");                                            // made changes by TUAN NGUYEN
+   if (id == SERVICE_ACCESS)
+   {
+      if (((Integer)serviceAccessList.size() > index) && (index >= 0))
+         serviceAccessList[index] = value;
+      else if ((Integer)serviceAccessList.size() == index)
+         serviceAccessList.push_back(value);
+      else
+         throw MeasurementException("Index out of bounds when trying to "
+            "set a service access name");
 
-      return true;                                                                   // made changes by TUAN NGUYEN
-   }                                                                                 // made changes by TUAN NGUYEN
+      return true;
+   }
 
    bool retval = true;
    retval = adapterSL->SetStringParameter(id, value, index) && retval;
@@ -1116,7 +1116,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          switch (node4FreqBand)
          {
          case 1:
-            pilotFreq = 13677.5 - GmatMathUtil::Fix(effFreq*2 + 0.5)/2;                // made changes by TUAN NGUYEN
+            pilotFreq = 13677.5 - GmatMathUtil::Fix(effFreq*2 + 0.5)/2;
             break;
          case 3:
             pilotFreq = -1475.0;      // - 1475 MHz
@@ -1131,7 +1131,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
          switch (node4FreqBand)
          {
          case 1:
-            pilotFreq = 13697.5 - GmatMathUtil::Fix(effFreq*2 + 0.5)/2;                // made changes by TUAN NGUYEN
+            pilotFreq = 13697.5 - GmatMathUtil::Fix(effFreq*2 + 0.5)/2;
             break;
          case 3:
             pilotFreq = -1075.0;      // - 1075 MHz
@@ -1196,7 +1196,7 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
                   pilotFreq = -2279;       // -2270 MHz
                   break;
                case 1:
-                  pilotFreq = -2287.5;       // -2287.5 MHz                  // made changes by TUAN NGUYEN
+                  pilotFreq = -2287.5;       // -2287.5 MHz
                   break;
                default:
                   throw MeasurementException("Error: TDRS data flag has an invalid value.\n");
@@ -1397,7 +1397,7 @@ const std::vector<RealArray>& TDRSDopplerAdapter::CalculateMeasurementDerivative
    std::string paramName = obj->GetParameterText(parameterID);
 
    #ifdef DEBUG_DERIVATIVE_CALCULATION
-      MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
+      MessageInterface::ShowMessage("Solve-for parameter: %s\n", paramName.c_str());
    #endif
 
    // Clear derivative variable:
@@ -1567,7 +1567,6 @@ const std::vector<RealArray>& TDRSDopplerAdapter::CalculateMeasurementDerivative
       // Now assemble the derivative data into the requested derivative
       size = derivativesEL[0].size();               // This is the size of derivative vector for signal path 0
       
-      // theDataDerivatives.clear();                                     // made changes by TUAN NGUYEN
       for (UnsignedInt i = 0; i < derivativesEL.size(); ++i)
       {
          // For each signal path, do the following steps:

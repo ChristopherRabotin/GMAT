@@ -144,7 +144,7 @@ DataFile::DataFile(const DataFile& df) :
    GmatBase          (df),
    streamName        (df.streamName),
    obsType           (df.obsType),
-   filterList        (df.filterList),                           // made changes by TUAN NGUYEN
+   filterList        (df.filterList),
    thinningRatio     (df.thinningRatio),
    selectedStationIDs(df.selectedStationIDs),
    estimationStart   (df.estimationStart),
@@ -192,7 +192,7 @@ DataFile& DataFile::operator=(const DataFile& df)
       obsType    = df.obsType;
 
       // This section is for new design filter 
-      filterList = df.filterList;                       // made changes by TUAN NGUYEN
+      filterList = df.filterList;
 
 	   // This section is for old design filter
       thinningRatio			= df.thinningRatio;
@@ -1225,7 +1225,6 @@ Real DataFile::ConvertToRealEpoch(const std::string &theEpoch,
 }
 
 
-// made changes by TUAN NGUYEN
 //-------------------------------------------------------------------------------
 // bool SetDataFilter(DataFilter *filter)
 //-------------------------------------------------------------------------------

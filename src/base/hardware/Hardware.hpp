@@ -93,7 +93,6 @@ public:
                         SetRvectorParameter(const std::string &label,
                                             const Rvector &value);
 
-//   virtual bool	 VerifyRefObject(std::string subTypeName, GmatBase* obj); // made changes by Tuan Nguyen
 
    DEFAULT_TO_NO_CLONES
 

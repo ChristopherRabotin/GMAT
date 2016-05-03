@@ -402,7 +402,7 @@ public:
    
    // Sandbox
    void ClearAllSandboxes();
-   Sandbox* GetSandbox(Integer sandboxNum = 1);                                         // made changes by TUAN NGUYEN
+   Sandbox* GetSandbox(Integer sandboxNum = 1);
    GmatBase* GetInternalObject(const std::string &name, Integer sandboxNum = 1);
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);

@@ -303,7 +303,7 @@ bool GNDopplerAdapter::SetStringParameter(const Integer id, const std::string& v
 {
    // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
    bool retval = true;
-   if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))                    // made changes by TUAN NGUYEN
+   if ((id != MEASUREMENT_TYPE)&&(id != SIGNAL_PATH))
       retval = adapterS->SetStringParameter(id, value);
 
    retval = RangeAdapterKm::SetStringParameter(id, value) && retval;
@@ -946,7 +946,7 @@ const std::vector<RealArray>& GNDopplerAdapter::CalculateMeasurementDerivatives(
    std::string paramName = obj->GetParameterText(parameterID);
 
    #ifdef DEBUG_DERIVATIVE_CALCULATION
-      MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
+      MessageInterface::ShowMessage("Solve-for parameter: %s\n", paramName.c_str());
    #endif
 
    // Clear derivative variable

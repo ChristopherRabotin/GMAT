@@ -477,7 +477,7 @@ c
       HMF1IN=(.not.jf(14))
        IF(HMF1IN) then
                 AHMF1=OARR(4)
-                if(.not.layver.and.(konsol.gt.1)) write(konsol,1939)
+c                if(.not.layver.and.(konsol.gt.1)) write(konsol,1939)
 1939  format(' *Ne* User input of hmF1 is only possible for the LAY-',
      &          'version')
         else
@@ -523,61 +523,61 @@ c lists the selected options before starting the table
 c
 
       if(icalls.gt.1.or.konsol.eq.1) goto 8201
-          write(konsol,2911) 
+c          write(konsol,2911) 
         if(NODEN) goto 2889
-          if(LAYVER) write(konsol,9012) 
-          if(GULB0) write(konsol,9013) 
-          if(OLD79) write(konsol,9014) 
-          if(TOPO.and.(.not.TOPC)) write(konsol,9206)
-          if(.not.TOPO) then
-                if(TOPC) then
-                      write(konsol,9204) 
-                else
-                      write(konsol,9205) 
-                endif
-                endif
+c          if(LAYVER) write(konsol,9012) 
+c          if(GULB0) write(konsol,9013) 
+c          if(OLD79) write(konsol,9014) 
+c          if(TOPO.and.(.not.TOPC)) write(konsol,9206)
+c          if(.not.TOPO) then
+c                if(TOPC) then
+c                      write(konsol,9204) 
+c                else
+c                      write(konsol,9205) 
+c                endif
+c                endif
           if(FOF2IN) then
-                write(konsol,9015) 
+c                write(konsol,9015) 
                 goto 2889
                 endif
-        if(URSIF2) then
-                write(konsol,9016) 
-        else
-                write(konsol,9017) 
-        endif
-        if(HMF2IN) write(konsol,9018) 
-        if(fof1in) write(konsol,9019) 
-        if(HMF1IN.and.LAYVER) write(konsol,9021) 
-        if(foein) write(konsol,9022) 
-        if(HMEIN) write(konsol,9023) 
-        if(F1_OCPRO) write(konsol,9024) 
-        if(F1_L_COND) write(konsol,9025) 
-        if(DREG) then 
-            write(konsol,9026) 
-        else
-            write(konsol,9027) 
-        endif
+c        if(URSIF2) then
+c                write(konsol,9016) 
+c        else
+c                write(konsol,9017) 
+c        endif
+c        if(HMF2IN) write(konsol,9018) 
+c        if(fof1in) write(konsol,9019) 
+c        if(HMF1IN.and.LAYVER) write(konsol,9021) 
+c        if(foein) write(konsol,9022) 
+c        if(HMEIN) write(konsol,9023) 
+c        if(F1_OCPRO) write(konsol,9024) 
+c        if(F1_L_COND) write(konsol,9025) 
+c        if(DREG) then 
+c            write(konsol,9026) 
+c        else
+c            write(konsol,9027) 
+c        endif
         if(jf(26)) then
             if(fof2in) then 
-                  write(konsol,9028) 
+c                  write(konsol,9028) 
                   jf(26)=.false.
-            else
-                  write(konsol,9029) 
+c            else
+c                  write(konsol,9029) 
             endif
             endif
 
 2889    continue
 
-        if((.not.NOION).and.(DY)) write(konsol,9031) 
-        if((.not.NOION).and.(.not.DY)) write(konsol,9039) 
+c        if((.not.NOION).and.(DY)) write(konsol,9031) 
+c        if((.not.NOION).and.(.not.DY)) write(konsol,9039) 
 
         if(NOTEM) goto 8201
-          if(TENEOP) write(konsol,9032) 
-          if(jf(23)) then 
-            write(konsol,9033) 
-          else
-            write(konsol,9034) 
-          endif
+c          if(TENEOP) write(konsol,9032) 
+c          if(jf(23)) then 
+c            write(konsol,9033) 
+c          else
+c            write(konsol,9034) 
+c          endif
 2911    format('*** IRI parameters are being calculated ***')
 9012    format('Ne, E-F: The LAY-Version is prelimenary.',
      &          ' Erroneous profile features can occur.')
@@ -930,9 +930,9 @@ C
 
         GOTO 4291
         
-8448    WRITE(konsol,8449)
+c8448    WRITE(konsol,8449)
 8449    FORMAT(1X////, ' Invalid month.')
-        GOTO 3330
+8448    GOTO 3330
 C
 C LINEAR INTERPOLATION IN SOLAR ACTIVITY. IG12 used for foF2
 C
@@ -1141,7 +1141,7 @@ c
         IF(ENIGHT) DEPTH=-DEPTH
         CALL TAL(HDEEP,DEPTH,WIDTH,DLNDH,EXT,E)
         IF(.NOT.EXT) GOTO 667
-        if(konsol.gt.1) WRITE(KONSOL,650)
+c        if(konsol.gt.1) WRITE(KONSOL,650)
 650     FORMAT(1X,'*NE* E-REGION VALLEY CAN NOT BE MODELLED')
 600   WIDTH=.0
 667   HEF=HME+WIDTH
@@ -1251,10 +1251,10 @@ c
 c omit F1 feature ....................................................
 c
 
-9427    if(konsol.gt.1) WRITE(KONSOL,11) 
+c9427    if(konsol.gt.1) WRITE(KONSOL,11) 
 11      FORMAT(1X,'*NE* HMF1 IS NOT EVALUATED BY THE FUNCTION XE2'/
      &        1X,'CORR.: NO F1 REGION, B1=3, C1=0.0')
-        HMF1=0.
+9427    HMF1=0.
         F1REG=.FALSE.
 c        NMF1=0.
 c        C1=0.0
@@ -1268,7 +1268,7 @@ c
             IF(ENIGHT) DEPTH=-DEPTH
             CALL TAL(HDEEP,DEPTH,WIDTH,DLNDH,EXT,E)
             IF(.NOT.EXT) GOTO 380
-            if(konsol.gt.1) WRITE(KONSOL,650)
+c            if(konsol.gt.1) WRITE(KONSOL,650)
             WIDTH=.0
             hef=hme
             hefold=hef
@@ -1305,11 +1305,11 @@ c
 c assume linear interpolation between HZ and HEF ..................
 c
 
-3885    if(konsol.gt.1) WRITE(KONSOL,100)
+c3885    if(konsol.gt.1) WRITE(KONSOL,100)
 100     FORMAT(1X,'*NE* HST IS NOT EVALUATED BY THE FUNCTION XE3')
-        HZ=(HEF+HF1)/2.
+3885    HZ=(HEF+HF1)/2.
         xnehz=xe3_1(hz)
-        if(konsol.gt.1) WRITE(KONSOL,901) HZ,HEF
+c        if(konsol.gt.1) WRITE(KONSOL,901) HZ,HEF
 901     FORMAT(6X,'CORR.: LIN. APP. BETWEEN HZ=',F5.1,
      &          ' AND HEF=',F5.1)
         T=(XNEHZ-NME)/(HZ-HEF)
@@ -1331,9 +1331,9 @@ C
         HHMF2 = HMF2
         CALL INILAY(FNIGHT,F1REG,NMF2,NMF1,NME,VNER,HHMF2,HMF1M,HME,
      &                  HV1R,HV2R,HHALF,HXL,SCL,AMP,IIQU)
-        IF((IIQU.EQ.1).and.(konsol.gt.1)) WRITE(KONSOL,7733)
+c        IF((IIQU.EQ.1).and.(konsol.gt.1)) WRITE(KONSOL,7733)
 7733   FORMAT('*NE* LAY amplitudes found with 2nd choice of HXL(1).')
-        IF((IIQU.EQ.2).and.(konsol.gt.1)) WRITE(KONSOL,7722)
+c        IF((IIQU.EQ.2).and.(konsol.gt.1)) WRITE(KONSOL,7722)
 7722   FORMAT('*NE* LAY amplitudes could not be found.')
 
 C

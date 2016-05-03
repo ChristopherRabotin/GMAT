@@ -70,7 +70,7 @@ public:
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
 
-   virtual bool         IsEstimationParameterValid(const Integer id);               // made changes by TUAN NGUYEN
+   virtual bool         IsEstimationParameterValid(const Integer id);
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -201,8 +201,8 @@ public:
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
 
-   virtual Real*        GetEstimationParameterValue(const Integer item);          // made changes by TUAN NGUYEN
-   virtual Integer      GetEstimationParameterSize(const Integer item);           // made changes by TUAN NGUYEN
+   virtual Real*        GetEstimationParameterValue(const Integer item);
+   virtual Integer      GetEstimationParameterSize(const Integer item);
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES

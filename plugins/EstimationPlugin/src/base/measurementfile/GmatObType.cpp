@@ -231,8 +231,8 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
       fullPath += streamName;
 
       // Add the .gmd extension if there is no extension in the file
-      size_t dotLoc = fullPath.find_last_of('.');                    // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
-      size_t slashLoc = fullPath.find_last_of('/');                  // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+      size_t dotLoc = fullPath.find_last_of('.');                    // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
+      size_t slashLoc = fullPath.find_last_of('/');                  // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
       if (slashLoc == std::string::npos)
          slashLoc = fullPath.find_last_of('\\');
 
@@ -392,30 +392,6 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 }
 
 
-//StringArray GmatObType::GetAvailableMeasurementTypes()
-//{
-//   StringArray typeList;
-//
-//   // New syntax's measurement types
-//   typeList.push_back("Range_KM");
-//   typeList.push_back("DSNRange");
-//   typeList.push_back("Doppler");
-//   typeList.push_back("Doppler_RangeRate");
-//   typeList.push_back("TDRSDoppler_HZ");              // made changes by TUAN NGUYEN
-//
-//   // Old syntax's measurement types
-//   typeList.push_back("DSNTwoWayRange");
-//   typeList.push_back("DSNTwoWayDoppler");
-//   typeList.push_back("USNTwoWayRange");
-//   typeList.push_back("GeometricRange");
-//   typeList.push_back("GeometricRangeRate");
-//   typeList.push_back("GeometricRADec");
-//   typeList.push_back("GeometricAzEl");
-//
-//   return typeList;
-//}
-
-
 //-----------------------------------------------------------------------------
 // ObservationData* ReadObservation()
 //-----------------------------------------------------------------------------
@@ -485,8 +461,7 @@ ObservationData* GmatObType::ReadObservation()
    currentObs.type = (Gmat::MeasurementType)type;
 
    // Verify measurement type
-   //StringArray typeList = GetAvailableMeasurementTypes();                          // made changes by TUAN NGUYEN
-   StringArray typeList = currentObs.GetAvailableMeasurementTypes();                 // made changes by TUAN NGUYEN
+   StringArray typeList = currentObs.GetAvailableMeasurementTypes();
    if (find(typeList.begin(), typeList.end(), currentObs.typeName) == typeList.end())
       throw MeasurementException("Error: GMAT cannot handle observation data with type '" + currentObs.typeName + "'.\n");
 
@@ -529,7 +504,7 @@ ObservationData* GmatObType::ReadObservation()
             break;
       }
 
-      for (Integer i = 0; i < participantSize; ++i)           // made changes by TUAN NGUYEN
+      for (Integer i = 0; i < participantSize; ++i)
       {
          theLine >> str;
          currentObs.participantIDs.push_back(str);
@@ -552,9 +527,9 @@ ObservationData* GmatObType::ReadObservation()
       }
 #endif
 
-      if ((currentObs.typeName == "Range_KM")||(currentObs.typeName == "DSNRange")             // made changes by TUAN NGUYEN
-         ||(currentObs.typeName == "Doppler_RangeRate")||(currentObs.typeName == "Doppler")    // made changes by TUAN NGUYEN
-         ||(currentObs.typeName == "TDRSDoppler_HZ"))                                          // made changes by TUAN NGUYEN
+      if ((currentObs.typeName == "Range_KM")||(currentObs.typeName == "DSNRange")
+         ||(currentObs.typeName == "Doppler_RangeRate")||(currentObs.typeName == "Doppler")
+         ||(currentObs.typeName == "TDRSDoppler_HZ"))
       {
          dataSize = 1;
       }
@@ -608,12 +583,12 @@ ObservationData* GmatObType::ReadObservation()
       theLine >> currentObs.dopplerCountInterval;
       currentObs.unit = "Hz";
    }
-   else if (currentObs.typeName == "Doppler_RangeRate")                   // made changes by TUAN NGUYEN
-   {                                                                      // made changes by TUAN NGUYEN
-      theLine >> currentObs.uplinkBand;                                   // made changes by TUAN NGUYEN
-      theLine >> currentObs.dopplerCountInterval;                         // made changes by TUAN NGUYEN
-      currentObs.unit = "km/s";                                           // made changes by TUAN NGUYEN
-   }                                                                      // made changes by TUAN NGUYEN
+   else if (currentObs.typeName == "Doppler_RangeRate")
+   {
+      theLine >> currentObs.uplinkBand;
+      theLine >> currentObs.dopplerCountInterval;
+      currentObs.unit = "km/s";
+   }
    else if (currentObs.typeName == "TDRSDoppler_HZ")
    {
       theLine >> currentObs.tdrsNode4Freq;            // this field is used to received frequency at the return-link TDRS 

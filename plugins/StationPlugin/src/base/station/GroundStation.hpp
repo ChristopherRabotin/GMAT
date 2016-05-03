@@ -129,9 +129,9 @@ public:
 
    virtual Real*        IsValidElevationAngle(const Rvector6 &state_sez);
 
-   virtual bool         CreateErrorModelForSignalPath(std::string spacecraftName);          // made changes by TUAN NGUYEN
+   virtual bool         CreateErrorModelForSignalPath(std::string spacecraftName);
    virtual std::map<std::string,ObjectArray>& 
-                        GetErrorModelMap();                                                 // made changes by TUAN NGUYEN
+                        GetErrorModelMap();
 
    DEFAULT_TO_NO_CLONES
 
@@ -158,14 +158,14 @@ protected:
    /// Visibility vector
    Real az_el_visible[3];
 
-   /// Error models used for measurements in this gound station               // made changes by TUAN NGUYEN
-   StringArray     errorModelNames;                                           // made changes by TUAN NGUYEN
-   ObjectArray     errorModels;                                               // made changes by TUAN NGUYEN
+   /// Error models used for measurements in this gound station
+   StringArray     errorModelNames;
+   ObjectArray     errorModels;
 
    /// Containing all clones of ErrorModels associated with a signal path.
    // The first element containing name of spacecraft in uplink signal. 
    // The second element is an object array containing error model clones.
-   std::map<std::string,ObjectArray>     errorModelMap;                       // made changes by TUAN NGUYEN
+   std::map<std::string,ObjectArray>     errorModelMap;
 
 public:
    /// Published parameters for ground stations
@@ -180,7 +180,7 @@ public:
       PRESSURE,                     // pressure (in hPa) at ground station. It is used for Troposphere correction
       HUMIDITY,                     // humidity (in %) at ground station. It is used for Troposphere correction
       MINIMUM_ELEVATION_ANGLE,      // It is needed for verifying measurement feasibility
-      ERROR_MODELS,                 // ErrorModel contains all information about noise sigma, bias for given measurement types. Therefore, the following parameters have to be removed        // made change by TUAN NGUYEN
+      ERROR_MODELS,                 // ErrorModel contains all information about noise sigma, bias for given measurement types. Therefore, the following parameters have to be removed
       GroundStationParamCount,
    };
 

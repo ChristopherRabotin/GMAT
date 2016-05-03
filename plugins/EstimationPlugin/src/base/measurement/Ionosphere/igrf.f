@@ -795,7 +795,8 @@ C ===============================================================
 2233        CONTINUE                                                    
 2211    CONTINUE
         GOTO 998                                                        
-999     print *, 'Error in GETSHC function: file read error !!!'
+c999     print *, 'Error in GETSHC function: file read error !!!'
+999
 998     RETURN                                                   
         END                                                          
 C

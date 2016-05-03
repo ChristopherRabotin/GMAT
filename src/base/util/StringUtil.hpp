@@ -79,9 +79,9 @@ namespace GmatStringUtil
    GMAT_API std::string RealToString(const Real &val, bool useCurrentFormat = true,
       bool scientific = false, bool showPoint = true,
       Integer precision = GmatGlobal::DATA_PRECISION,
-      Integer width = GmatGlobal::DATA_WIDTH);                                                       // made changes by TUAN NGUYEN
+      Integer width = GmatGlobal::DATA_WIDTH);
    GMAT_API std::string RealToString(const Real &val, Integer precision, bool showPoint = false,
-      Integer width = 1);                                                                            // made changes by TUAN NGUYEN
+      Integer width = 1);
 
    GMAT_API std::string ToString(const bool &val);
    GMAT_API std::string ToString(const Real &val, Integer precision, bool showPoint = false,

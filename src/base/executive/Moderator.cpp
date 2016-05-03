@@ -6767,7 +6767,6 @@ void Moderator::ClearAllSandboxes()
 }
 
 
-// made changes by TUAN NGUYEN
 //------------------------------------------------------------------------------
 // Sandbox* GetSandbox(Integer sandboxNum = 1)
 //------------------------------------------------------------------------------

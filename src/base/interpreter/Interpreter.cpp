@@ -474,19 +474,19 @@ void Interpreter::BuildCreatableObjectMaps()
    for (UnsignedInt i = 0; i < interfaceList.size(); i++)
       objectTypeMap.insert(std::make_pair(interfaceList[i], Gmat::INTERFACE));
 
-   errorModelList.clear();                                                              // made changes by TUAN NGUYEN
-   StringArray erm = theModerator->GetListOfFactoryItems(Gmat::ERROR_MODEL);            // made changes by TUAN NGUYEN
-   copy(erm.begin(), erm.end(), back_inserter(errorModelList));                         // made changes by TUAN NGUYEN
-   copy(erm.begin(), erm.end(), back_inserter(allObjectTypeList));                      // made changes by TUAN NGUYEN
-   for (UnsignedInt i = 0; i < errorModelList.size(); i++)                              // made changes by TUAN NGUYEN
-      objectTypeMap.insert(std::make_pair(errorModelList[i], Gmat::ERROR_MODEL));       // made changes by TUAN NGUYEN
+   errorModelList.clear();
+   StringArray erm = theModerator->GetListOfFactoryItems(Gmat::ERROR_MODEL);
+   copy(erm.begin(), erm.end(), back_inserter(errorModelList));
+   copy(erm.begin(), erm.end(), back_inserter(allObjectTypeList));
+   for (UnsignedInt i = 0; i < errorModelList.size(); i++)
+      objectTypeMap.insert(std::make_pair(errorModelList[i], Gmat::ERROR_MODEL));
 
-   dataFilterList.clear();                                                              // made changes by TUAN NGUYEN
-   StringArray df = theModerator->GetListOfFactoryItems(Gmat::DATA_FILTER);             // made changes by TUAN NGUYEN
-   copy(df.begin(), df.end(), back_inserter(dataFilterList));                           // made changes by TUAN NGUYEN
-   copy(df.begin(), df.end(), back_inserter(allObjectTypeList));                        // made changes by TUAN NGUYEN
-   for (UnsignedInt i = 0; i < dataFilterList.size(); i++)                              // made changes by TUAN NGUYEN
-      objectTypeMap.insert(std::make_pair(dataFilterList[i], Gmat::DATA_FILTER));       // made changes by TUAN NGUYEN
+   dataFilterList.clear();
+   StringArray df = theModerator->GetListOfFactoryItems(Gmat::DATA_FILTER);
+   copy(df.begin(), df.end(), back_inserter(dataFilterList));
+   copy(df.begin(), df.end(), back_inserter(allObjectTypeList));
+   for (UnsignedInt i = 0; i < dataFilterList.size(); i++)
+      objectTypeMap.insert(std::make_pair(dataFilterList[i], Gmat::DATA_FILTER));
 
    #ifdef DEBUG_OBJECT_LIST
       std::vector<std::string>::iterator pos;
@@ -578,13 +578,13 @@ void Interpreter::BuildCreatableObjectMaps()
       for (pos = itf.begin(); pos != itf.end(); ++pos)
          MessageInterface::ShowMessage(*pos + "\n   ");
 
-      MessageInterface::ShowMessage("\nErrorModels:\n   ");             // made changes by TUAN NGUYEN
-      for (pos = erm.begin(); pos != erm.end(); ++pos)                  // made changes by TUAN NGUYEN
-         MessageInterface::ShowMessage(*pos + "\n   ");                 // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("\nErrorModels:\n   ");
+      for (pos = erm.begin(); pos != erm.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
       
-      MessageInterface::ShowMessage("\nDataFilters:\n   ");             // made changes by TUAN NGUYEN
-      for (pos = df.begin(); pos != df.end(); ++pos)                    // made changes by TUAN NGUYEN
-         MessageInterface::ShowMessage(*pos + "\n   ");                 // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("\nDataFilters:\n   ");
+      for (pos = df.begin(); pos != df.end(); ++pos)
+         MessageInterface::ShowMessage(*pos + "\n   ");
       
       MessageInterface::ShowMessage("\nOther SpacePoints:\n   ");
       for (pos = spl.begin(); pos != spl.end(); ++pos)
@@ -726,13 +726,13 @@ StringArray Interpreter::GetCreatableList(Gmat::ObjectType type,
          clist = interfaceList;
          break;
 
-      case Gmat::ERROR_MODEL:                             // made changes by TUAN NGUYEN
-         clist = errorModelList;                          // made changes by TUAN NGUYEN
-         break;                                           // made changes by TUAN NGUYEN
+      case Gmat::ERROR_MODEL:
+         clist = errorModelList;
+         break;
 
-      case Gmat::DATA_FILTER:                             // made changes by TUAN NGUYEN
-         clist = dataFilterList;                          // made changes by TUAN NGUYEN
-         break;                                           // made changes by TUAN NGUYEN
+      case Gmat::DATA_FILTER:
+         clist = dataFilterList;
+         break;
 
       // These are all intentional fall-throughs:
       case Gmat::SPACECRAFT:
@@ -1289,14 +1289,14 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          obj = theModerator->CreateOtherObject(Gmat::INTERFACE, type, name);
       
       // Handle ErrorModels
-      else if (find(errorModelList.begin(), errorModelList.end(), type) !=              // made changes by TUAN NGUYEN
-               errorModelList.end())                                                    // made changes by TUAN NGUYEN
-         obj = theModerator->CreateOtherObject(Gmat::ERROR_MODEL, type, name);          // made changes by TUAN NGUYEN
+      else if (find(errorModelList.begin(), errorModelList.end(), type) !=
+               errorModelList.end())
+         obj = theModerator->CreateOtherObject(Gmat::ERROR_MODEL, type, name);
 
       // Handle DataFilters
-      else if (find(dataFilterList.begin(), dataFilterList.end(), type) !=              // made changes by TUAN NGUYEN
-               dataFilterList.end())                                                    // made changes by TUAN NGUYEN
-         obj = theModerator->CreateOtherObject(Gmat::DATA_FILTER, type, name);          // made changes by TUAN NGUYEN
+      else if (find(dataFilterList.begin(), dataFilterList.end(), type) !=
+               dataFilterList.end())
+         obj = theModerator->CreateOtherObject(Gmat::DATA_FILTER, type, name);
 
       
       // Handle other registered creatable object types

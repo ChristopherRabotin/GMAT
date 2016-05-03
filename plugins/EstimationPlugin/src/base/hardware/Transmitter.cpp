@@ -391,7 +391,7 @@ Real Transmitter::SetRealParameter(const Integer id, const Real value)
          return frequency;
 
       //case HARDWARE_DELAY:
-      //   MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
+      //   MessageInterface::ShowMessage("Warning: the script to assign %lf to '%s.%s' parameter was skipped. In the current GMAT version, this parameter is not used.\n", value, GetName().c_str(), GetParameterText(id).c_str());
       //   return 0.0;
 
       default:
@@ -481,7 +481,7 @@ bool Transmitter::SetStringParameter(const Integer id,
    {
       case FREQUENCY_MODEL:
 //       frequencyModel = value;
-         MessageInterface::ShowMessage("Warning: the setting '%s' to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
+         MessageInterface::ShowMessage("Warning: the script to assign '%s' to '%s.%s' parameter was skipped. In the current GMAT version, this parameter is not used.\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
          return true;
 
       default:

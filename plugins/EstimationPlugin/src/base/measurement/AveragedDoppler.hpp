@@ -64,7 +64,7 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
-   virtual bool         IsParameterReadOnly(const Integer id) const;            // made changes by TUAN NGUYEN
+   virtual bool         IsParameterReadOnly(const Integer id) const;
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
