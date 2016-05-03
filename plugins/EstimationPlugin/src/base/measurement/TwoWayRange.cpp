@@ -415,7 +415,7 @@ void TwoWayRange::InitializeMeasurement()
 void TwoWayRange::SetHardwareDelays(bool loadEvents)
 {
 
-   UpdateHardware();                                                         // made changes by TUAN NGUYEN
+   UpdateHardware();
 
    #ifdef DEBUG_HARDWARE_DELAYS
       MessageInterface::ShowMessage("TwoWayRange::SetHardwareDelays(%s)\n",

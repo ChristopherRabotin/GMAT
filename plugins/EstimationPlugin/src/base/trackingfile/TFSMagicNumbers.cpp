@@ -399,7 +399,7 @@ TFSMagicNumbers::TFSMagicNumbers() :
    lue->nodeCount = -1;             // Arbitrary
    StringArray nodes;
    lue->nodes.push_back(nodes);     // Empty for this one
-   lue->type = "Range_KM";               // "Range";         // made changes by TUAN NGUYEN
+   lue->type = "Range_KM";               // "Range";
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
 
@@ -420,7 +420,7 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "Range_KM";              // "Range";       // made changes by TUAN NGUYEN
+   lue->type = "Range_KM";              // "Range";
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
@@ -440,8 +440,8 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "Range_KM";              // "Range";       // made changes by TUAN NGUYEN
-   lue->multFactor = 1.0;          // 0.5;                // made changes by TUAN NGUYEN
+   lue->type = "Range_KM";              // "Range";
+   lue->multFactor = 1.0;          // 0.5;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
       knownTypes.push_back(lue->type);

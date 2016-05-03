@@ -157,7 +157,6 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
    rampTableStreamName     (mm.rampTableStreamName),
    participantNames        (mm.participantNames),
    participants            (mm.participants),                // made changes for Bug 12 in ticket GMT-4314
-//   participantHardwareNames(mm.participantHardwareNames),         // made changes by TUAN NGUYEN
    measurementType         (mm.measurementType),
    theData                 (NULL),
    theDataDerivatives      (NULL),
@@ -183,7 +182,7 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
          measurementNeedsObjects = true;
 
    participantHardwareNames.clear();
-   for (UnsignedInt i = 0; i < mm.participantHardwareNames.size(); ++i)        // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < mm.participantHardwareNames.size(); ++i)
       participantHardwareNames.push_back(mm.participantHardwareNames[i]);
 
 #ifdef DEBUG_CONSTRUCTION
@@ -217,7 +216,6 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       rampTableStreamName     = mm.rampTableStreamName;
       participantNames        = mm.participantNames;
       participants            = mm.participants;                    // made changes for Bug 12 in ticket GMT-4314
-//      participantHardwareNames= mm.participantHardwareNames;            // made changes by TUAN NGUYEN
       measurementType         = mm.measurementType;
       theData                 = NULL;
       theDataDerivatives      = NULL;
@@ -235,9 +233,8 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       }
 
       // Clear participant list so it can be filled with the local pointers
-      //participants.clear();                                                 // made changes by TUAN NGUYEN
-      participantHardwareNames.clear();                                       // made changes by TUAN NGUYEN
-      for (UnsignedInt i = 0; i < mm.participantHardwareNames.size(); ++i)    // made changes by TUAN NGUYEN
+      participantHardwareNames.clear();
+      for (UnsignedInt i = 0; i < mm.participantHardwareNames.size(); ++i)
          participantHardwareNames.push_back(mm.participantHardwareNames[i]);
    }
 
@@ -299,26 +296,6 @@ bool MeasurementModel::Initialize()
             if (measurementNeedsObjects)
                measurement->SetRefObject(participants[i],
                      participants[i]->GetType(), participants[i]->GetName());
-
-            //#ifdef DEBUG_MEASUREMENT_INITIALIZATION
-            //   MessageInterface::ShowMessage("   Setting hardware for %s\n",
-            //         participants[i]->GetName().c_str());
-            //   MessageInterface::ShowMessage("      %d hardware name arrays\n",
-            //         participantHardwareNames.size());
-            //   MessageInterface::ShowMessage(
-            //         "      %d hardware array has %d elements\n", i,
-            //         participantHardwareNames[i].size());
-            //#endif
-
-            //for (UnsignedInt j = 0; j < participantHardwareNames[i].size(); ++j)    // made changes by TUAN NGUYEN
-            //{                                                                       // made changes by TUAN NGUYEN
-            //   if (measurement->SetParticipantHardware(participants[i],             // made changes by TUAN NGUYEN
-            //         participantHardwareNames[i][j], j) == false)                   // made changes by TUAN NGUYEN
-            //      throw MeasurementException("The measurement participant " +       // made changes by TUAN NGUYEN
-            //            participants[i]->GetName() +                                // made changes by TUAN NGUYEN
-            //            " does not have a hardware component named " +              // made changes by TUAN NGUYEN
-            //            participantHardwareNames[i][j]);                            // made changes by TUAN NGUYEN
-            //}                                                                       // made changes by TUAN NGUYEN
          }
 
 
@@ -1157,7 +1134,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
 
    if (id == Participants)
    {
-      size_t loc = value.find(".");           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+      size_t loc = value.find(".");           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
       std::string parName;
       if (loc != std::string::npos)
          parName = value.substr(0, loc);
@@ -1334,7 +1311,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
    {
    case Participants:
       {
-         size_t loc = value.find(".");         // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+         size_t loc = value.find(".");         // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
          std::string parName;
          std::string hwName;
          if (loc != std::string::npos)

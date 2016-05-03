@@ -62,7 +62,7 @@ public:
    bool SetInStream(std::istream *istrm);
    bool SetOutStream(std::ostream *ostrm);
 
-   std::string GetMainScriptFileName();       // made changes by TUAN NGUYEN
+   std::string GetMainScriptFileName();
    
 protected:
    

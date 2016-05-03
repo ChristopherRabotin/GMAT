@@ -64,12 +64,11 @@ public:
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
 
-   /// This function is used to set tracking configs to data file object in order to use for data filter       // made changes by TUAN NGUYEN
-   virtual bool         SetTrackingConfigs(StringArray tkconfigs);                                             // made changes by TUAN NGUYEN
+   /// This function is used to set tracking configs to data file object in order to use for data filter
+   virtual bool         SetTrackingConfigs(StringArray tkconfigs);
 
    virtual ObservationData* 
                         FilteringData(ObservationData* dataObject, Integer& rejectedReason);
-//   void                 IncreasingRecordCounter();
 
    StringArray          GetAllAvailableThinModes();
 
@@ -81,20 +80,15 @@ protected:
    /// Data thinning
    std::string thinMode;
    Integer     thinningFrequency;
-   ///// Record count;
-   //Integer     recCount;
 
-   /// Record count map.  It contains record count for all measurement configs                 // made changes by TUAN NGUYEN
-   std::map<std::string,Integer> recCountMap;                                                  // made changes by TUAN NGUYEN
+   /// Record count map.  It contains record count for all measurement configs
+   std::map<std::string,Integer> recCountMap;
 
-   ///// Start time window. It is used for thinMode = "T"
-   //GmatEpoch   startTimeWindow;
+   /// Start time window map. It is used for thinMode = "Time"
+   std::map<std::string,GmatEpoch>   startTimeWindowMap;
 
-   /// Start time window map. It is used for thinMode = "T"                                   // made changes by TUAN NGUYEN
-   std::map<std::string,GmatEpoch>   startTimeWindowMap;                                      // made changes by TUAN NGUYEN
-
-   /// List of tracking configs used for data filter                                          // made changes by TUAN NGUYEN
-   StringArray tkConfigList;                                                                  // made changes by TUAN NGUYEN
+   /// List of tracking configs used for data filter
+   StringArray tkConfigList;
 
    /// Check data thinning ratio to be reached
    bool IsThin(ObservationData* dataObject);

@@ -368,11 +368,11 @@ DragForce::DragForce(const DragForce& df) :
    cbLoc[1]  = df.cbLoc[1];
    cbLoc[2]  = df.cbLoc[2];
    
-   //density = new Real[1];                      // made changes by TUAN NGUYEN
-   if (df.satCount < 1)                          // made changes by TUAN NGUYEN
-      density = new Real[1];                     // made changes by TUAN NGUYEN
-   else                                          // made changes by TUAN NGUYEN
-      density = new Real[df.satCount];           // made changes by TUAN NGUYEN
+   //density = new Real[1];
+   if (df.satCount < 1)
+      density = new Real[1];
+   else
+      density = new Real[df.satCount];
    ap = CalculateAp(kp);
    
    area.clear();
@@ -490,11 +490,11 @@ DragForce& DragForce::operator=(const DragForce& df)
    atmos                 = NULL;
    angVel                = NULL;
 //   density               = NULL;
-   //density = new Real[1];                    // made changes by TUAN NGUYEN
-   if (df.satCount < 1)                        // made changes by TUAN NGUYEN
-      density = new Real[1];                   // made changes by TUAN NGUYEN
-   else                                        // made changes by TUAN NGUYEN
-      density = new Real[df.satCount];         // made changes by TUAN NGUYEN
+   //density = new Real[1];
+   if (df.satCount < 1)
+      density = new Real[1];
+   else
+      density = new Real[df.satCount];
    prefactor             = NULL;
    firedOnce             = false;
    hasWindModel          = df.hasWindModel;
@@ -1006,10 +1006,10 @@ bool DragForce::Initialize()
                      atmos->GetStringParameter(schattenWFileID).c_str());
             #endif
 
-            if (cbFixed != NULL)										// made changes by TUAN NGUYEN
-               atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
-            if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
-               atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
+            if (cbFixed != NULL)
+               atmos->SetFixedCoordinateSystem(cbFixed);
+            if (internalCoordSystem != NULL)
+               atmos->SetInternalCoordSystem(internalCoordSystem);
             if (atmos->GetCbJ2000CoordinateSystem() == NULL)                                                        // made changes for bug GMT-5282
             {                                                                                                       // made changes for bug GMT-5282
                // Create an cbJ2000 coordinate system if it is not ready set in atmos                               // made changes for bug GMT-5282

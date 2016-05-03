@@ -876,7 +876,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
       //         objList2 := all receivers in participantHardware list
       //         objList3 := all transponders in participantHardware list
 
-      UpdateHardware();                                                         // made changes by TUAN NGUYEN
+      UpdateHardware();
       
       if (!(participantHardware.empty()||
              ((!participantHardware.empty())&&
@@ -1122,8 +1122,8 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
             (targetDelay + ettaiCorrection)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M;
 
 
-         currentMeasurement.uplinkFreq = uplinkFreq * 1.0e6;                  // made changes by TUAN NGUYEN
-         currentMeasurement.uplinkFreq = uplinkFreqAtRecei * 1.0e6;           // made changes by TUAN NGUYEN
+         currentMeasurement.uplinkFreq = uplinkFreq * 1.0e6;
+         currentMeasurement.uplinkFreq = uplinkFreqAtRecei * 1.0e6;
 
       }
       else

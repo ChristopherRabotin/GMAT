@@ -39,8 +39,8 @@ public:
    ErrorModelFactory(const ErrorModelFactory& fact);
    ErrorModelFactory& operator= (const ErrorModelFactory& fact);
 
-   virtual GmatBase *CreateObject(const std::string &ofType,            // made changes by TUAN NGUYEN
-                                const std::string &withName = "");      // made changes by TUAN NGUYEN
+   virtual GmatBase *CreateObject(const std::string &ofType,
+                                const std::string &withName = "");
 
    virtual ErrorModel *CreateErrorModel(const std::string &ofType,
          const std::string &withName = "");

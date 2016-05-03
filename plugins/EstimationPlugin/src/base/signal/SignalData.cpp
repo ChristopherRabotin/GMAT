@@ -41,12 +41,6 @@ SignalData::SignalData() :
    stationParticipant   (false),
    tPrecTime            (21545.0),
    rPrecTime            (21545.0),
-
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX                                                                                                                                              // made changes by TUAN NGUYEN
-   tSTM                 (true),         //?? tSTM is a Rmatrix66        // Note that: Rmatrix66 A(true) is a contsructor of Rmatrix66. It defines matrix A to be a 6x6 identity matrix   // made changes by TUAN NGUYEN
-   rSTM                 (true),         //?? rSTM is a Rmatrix66        // Note that: Rmatrix66 A(true) is a contsructor of Rmatrix66. It defines matrix A to be a 6x6 identity matrix   // made changes by TUAN NGUYEN
-#endif                                                                                                                                                                                   // made changes by TUAN NGUYEN
-
    tJ2kRotation         (true),                                         // Note that: Rmatrix33 B(true) is a contsructor of Rmatrix33. It defines matrix B to be a 3x3 identity matrix
    rJ2kRotation         (true),                                         // Note that: Rmatrix33 B(true) is a contsructor of Rmatrix33. It defines matrix B to be a 3x3 identity matrix
    tDelay               (0.0),
@@ -55,24 +49,22 @@ SignalData::SignalData() :
    feasibility          (true),
    feasibilityReason    ("N"),
    feasibilityValue     (90.0),
-   arriveFreq           (-1.0),                  // made changes by TUAN NGUYEN
-   transmitFreq         (0.0),                   // made changes by TUAN NGUYEN
-   receiveFreq          (0.0),                   // made changes by TUAN NGUYEN
+   arriveFreq           (-1.0),
+   transmitFreq         (0.0),
+   receiveFreq          (0.0),
    next                 (NULL)
 {
-#ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX      // made changes by TUAN NGUYEN
-   tSTM.ChangeSize(6,6,true);                   // made changes by TUAN NGUYEN
-   rSTM.ChangeSize(6,6,true);                   // made changes by TUAN NGUYEN
-   tSTMtm.ChangeSize(6,6,true);                 // made changes by TUAN NGUYEN
-   rSTMtm.ChangeSize(6,6,true);                 // made changes by TUAN NGUYEN
-   for(UnsignedInt i = 0; i < 6; ++i)           // made changes by TUAN NGUYEN
-   {                                            // made changes by TUAN NGUYEN
-      tSTM(i,i) = 1.0;                          // made changes by TUAN NGUYEN
-      rSTM(i,i) = 1.0;                          // made changes by TUAN NGUYEN
-      tSTMtm(i,i) = 1.0;                        // made changes by TUAN NGUYEN
-      rSTMtm(i,i) = 1.0;                        // made changes by TUAN NGUYEN
-   }                                            // made changes by TUAN NGUYEN
-#endif
+   tSTM.ChangeSize(6,6,true);
+   rSTM.ChangeSize(6,6,true);
+   tSTMtm.ChangeSize(6,6,true);
+   rSTMtm.ChangeSize(6,6,true);
+   for(UnsignedInt i = 0; i < 6; ++i)
+   {
+      tSTM(i,i) = 1.0;
+      rSTM(i,i) = 1.0;
+      tSTMtm(i,i) = 1.0;
+      rSTMtm(i,i) = 1.0;
+   }
 }
 
 
@@ -149,9 +141,9 @@ SignalData::SignalData(const SignalData& sd) :
    feasibility          (sd.feasibility),
    feasibilityReason    (sd.feasibilityReason),
    feasibilityValue     (sd.feasibilityValue),
-   arriveFreq           (sd.arriveFreq),                      // made changes by TUAN NGUYEN
-   transmitFreq         (sd.transmitFreq),                    // made changes by TUAN NGUYEN
-   receiveFreq          (sd.receiveFreq),                     // made changes by TUAN NGUYEN
+   arriveFreq           (sd.arriveFreq),
+   transmitFreq         (sd.transmitFreq),
+   receiveFreq          (sd.receiveFreq),
    next                 (NULL)
 {
 }
@@ -199,25 +191,21 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rangeRateVecInertial = sd.rangeRateVecInertial;
       rangeVecObs          = sd.rangeVecObs;
       rangeRateVecObs      = sd.rangeRateVecObs;
-#ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX      // made changes by TUAN NGUYEN      
-      if ((sd.tSTM.GetNumRows() != tSTM.GetNumRows())||(sd.tSTM.GetNumColumns() != tSTM.GetNumColumns()))            // made changes by TUAN NGUYEN
-         tSTM.ChangeSize(sd.tSTM.GetNumRows(), sd.tSTM.GetNumColumns(), true);                                       // made changes by TUAN NGUYEN
-#endif
+
+      if ((sd.tSTM.GetNumRows() != tSTM.GetNumRows())||(sd.tSTM.GetNumColumns() != tSTM.GetNumColumns()))
+         tSTM.ChangeSize(sd.tSTM.GetNumRows(), sd.tSTM.GetNumColumns(), true);
       tSTM                 = sd.tSTM;
-#ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX      // made changes by TUAN NGUYEN      
-      if ((sd.rSTM.GetNumRows() != rSTM.GetNumRows())||(sd.rSTM.GetNumColumns() != rSTM.GetNumColumns()))            // made changes by TUAN NGUYEN
-         rSTM.ChangeSize(sd.rSTM.GetNumRows(), sd.rSTM.GetNumColumns(), true);                                       // made changes by TUAN NGUYEN
-#endif
+
+      if ((sd.rSTM.GetNumRows() != rSTM.GetNumRows())||(sd.rSTM.GetNumColumns() != rSTM.GetNumColumns()))
+         rSTM.ChangeSize(sd.rSTM.GetNumRows(), sd.rSTM.GetNumColumns(), true);
       rSTM                 = sd.rSTM;
-#ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX      // made changes by TUAN NGUYEN      
-      if ((sd.tSTMtm.GetNumRows() != tSTMtm.GetNumRows())||(sd.tSTMtm.GetNumColumns() != tSTMtm.GetNumColumns()))    // made changes by TUAN NGUYEN
-         tSTMtm.ChangeSize(sd.tSTMtm.GetNumRows(), sd.tSTMtm.GetNumColumns(), true);                                 // made changes by TUAN NGUYEN
-#endif
+
+      if ((sd.tSTMtm.GetNumRows() != tSTMtm.GetNumRows())||(sd.tSTMtm.GetNumColumns() != tSTMtm.GetNumColumns()))
+         tSTMtm.ChangeSize(sd.tSTMtm.GetNumRows(), sd.tSTMtm.GetNumColumns(), true);
       tSTMtm               = sd.tSTMtm;
-#ifdef NEW_TYPE_OF_STATE_TRANSITION_MATRIX      // made changes by TUAN NGUYEN      
-      if ((sd.rSTMtm.GetNumRows() != rSTMtm.GetNumRows())||(sd.rSTMtm.GetNumColumns() != rSTMtm.GetNumColumns()))    // made changes by TUAN NGUYEN
-         rSTMtm.ChangeSize(sd.rSTMtm.GetNumRows(), sd.rSTMtm.GetNumColumns(), true);                                 // made changes by TUAN NGUYEN
-#endif
+
+      if ((sd.rSTMtm.GetNumRows() != rSTMtm.GetNumRows())||(sd.rSTMtm.GetNumColumns() != rSTMtm.GetNumColumns()))
+         rSTMtm.ChangeSize(sd.rSTMtm.GetNumRows(), sd.rSTMtm.GetNumColumns(), true);
       rSTMtm               = sd.rSTMtm;
       
       tJ2kRotation         = sd.tJ2kRotation;
@@ -231,9 +219,9 @@ SignalData& SignalData::operator=(const SignalData& sd)
       feasibility          = sd.feasibility;
       feasibilityReason    = sd.feasibilityReason;
       feasibilityValue     = sd.feasibilityValue;
-      arriveFreq           = sd.arriveFreq;                  // made changes by TUAN NGUYEN
-      transmitFreq         = sd.transmitFreq;                // made changes by TUAN NGUYEN
-      receiveFreq          = sd.receiveFreq;                 // made changes by TUAN NGUYEN 
+      arriveFreq           = sd.arriveFreq;
+      transmitFreq         = sd.transmitFreq;
+      receiveFreq          = sd.receiveFreq;
       next                 = NULL;
    }
 

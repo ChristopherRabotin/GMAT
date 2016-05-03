@@ -62,6 +62,9 @@ public:
    
    // initializes the EopFile (reads it and stores the data)
    virtual void Initialize();
+   // Rest to a new eop file and type
+   virtual void ResetEopFile(const std::string &toName, 
+                             GmatEop::EopFileType toType = GmatEop::EOP_C04);
    
    // method to return the name of the EOP file
    virtual std::string GetFileName() const;
@@ -74,7 +77,8 @@ public:
    // interpolate x, y, and lod to input time
    virtual bool    GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
                                         Real &lodval);
-  
+   void            GetTimeRage(Real& timeMin, Real &timeMax);
+
 protected:
 
    static const Integer MAX_TABLE_SIZE;
@@ -98,6 +102,5 @@ protected:
    
    // Performance code
    Integer              previousIndex;
-   
 };
 #endif // EopFile_hpp

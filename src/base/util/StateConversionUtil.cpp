@@ -5777,7 +5777,6 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
 //------------------------------------------------------------------------------
 // derivative conversion methods
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYEN
 //--------------------------------------------------------------------------------------
 // Rmatrix66 CartesianToKeplerianDerivativeConversion(Real mu, const Rvector6 &cartesianState)
 //--------------------------------------------------------------------------------------
@@ -5816,7 +5815,6 @@ Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
 }
 
 
-// made changes by TUAN NGUYEN
 //-------------------------------------------------------------------------------------
 // Real CalculateEccentricAnomaly(Real e, Real M)
 //-------------------------------------------------------------------------------------
@@ -5849,7 +5847,6 @@ Real StateConversionUtil::CalculateEccentricAnomaly(Real e, Real M)
 }
 
 
-// made changes by TUAN NGUYEN
 //--------------------------------------------------------------------------------------
 // Rmatrix66 KeplerianToCartesianDerivativeConversion(Real mu, const Rvector6 &keplerState)
 //--------------------------------------------------------------------------------------

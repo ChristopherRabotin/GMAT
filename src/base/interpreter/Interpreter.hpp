@@ -403,8 +403,8 @@ private:
    StringArray   celestialBodyList;
    StringArray   eventLocatorList;
    StringArray   interfaceList;
-   StringArray   errorModelList;                   // made changes by TUAN NGUYEN
-   StringArray   dataFilterList;                   // made changes by TUAN NGUYEN
+   StringArray   errorModelList;
+   StringArray   dataFilterList;
 
    StringArray   matlabFunctionNames;
    

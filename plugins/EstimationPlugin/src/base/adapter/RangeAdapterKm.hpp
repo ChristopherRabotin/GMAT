@@ -58,7 +58,7 @@ public:
    
    virtual bool         ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
                               Real uplinkFrequency, 
-                              std::vector<RampTableData>* rampTB);                         // made changes by TUAN NGUYEN
+                              std::vector<RampTableData>* rampTB);
 
    virtual const MeasurementData&
                         CalculateMeasurementAtOffset(bool withEvents = false,

@@ -32,6 +32,7 @@
 
 #include "Estimator.hpp"
 #include "GmatState.hpp"
+#include "GmatGlobal.hpp"
 #include "PropagationStateManager.hpp"
 //#include "SolverException.hpp"
 #include "SpaceObject.hpp"
@@ -63,7 +64,7 @@ Estimator::PARAMETER_TEXT[] =
    "RelativeTol",
    "Propagator",
    "ShowAllResiduals",
-   "AddResidualsPlot ",
+   "AddResidualsPlot",
    "OLSEInitialRMSSigma",
    "OLSEMultiplicativeConstant",
    "OLSEAdditiveConstant",
@@ -105,7 +106,7 @@ Estimator::PARAMETER_TYPE[] =
 //------------------------------------------------------------------------------
 Estimator::Estimator(const std::string &type, const std::string &name) :
    Solver               (type, name),
-   solarSystem          (NULL),                          // made changes by TUAN NGUYEN
+   solarSystem          (NULL),
    absoluteTolerance    (1.0e-3),
    relativeTolerance    (1.0e-4),
    propagatorName       (""),
@@ -127,7 +128,7 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    maxResidualMult      (3000.0),
    constMult            (3.0),
    additiveConst        (0.0),
-   resetBestRMSFlag     (false)                          // made changes by TUAN NGUYEN
+   resetBestRMSFlag     (false)
 {
 
    objectTypeNames.push_back("Estimator");
@@ -138,7 +139,7 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
 
    esm.SetMeasurementManager(&measManager);
 
-   delayInitialization = true;                          // made changes by TUAN NGUYEN
+   delayInitialization = true;
 }
 
 
@@ -170,7 +171,7 @@ Estimator::~Estimator()
 //------------------------------------------------------------------------------
 Estimator::Estimator(const Estimator& est) :
    Solver               (est),
-   solarSystem          (est.solarSystem),                       // made changes by TUAN NGUYEN
+   solarSystem          (est.solarSystem),
    measurementNames     (est.measurementNames),
    modelNames           (est.modelNames),
    solveForStrings      (est.solveForStrings),
@@ -195,7 +196,7 @@ Estimator::Estimator(const Estimator& est) :
    maxResidualMult      (est.maxResidualMult),
    constMult            (est.constMult),
    additiveConst        (est.additiveConst),
-   resetBestRMSFlag     (est.resetBestRMSFlag)                // made changes by TUAN NGUYEN
+   resetBestRMSFlag     (est.resetBestRMSFlag)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("Estimator::Estimator() enter: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
@@ -211,7 +212,7 @@ Estimator::Estimator(const Estimator& est) :
    addedPlots  = est.addedPlots;
    esm.SetMeasurementManager(&measManager);
 
-   delayInitialization = true;                                // made changes by TUAN NGUYEN
+   delayInitialization = true;
 
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("Estimator::Estimator() exit: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
@@ -236,7 +237,7 @@ Estimator& Estimator::operator=(const Estimator& est)
    {
       Solver::operator=(est);
 
-      solarSystem = est.solarSystem;                        // made changes by TUAN NGUYEN
+      solarSystem = est.solarSystem;
 
       measurementNames = est.measurementNames;
       modelNames       = est.modelNames;
@@ -271,14 +272,13 @@ Estimator& Estimator::operator=(const Estimator& est)
       maxResidualMult      = est.maxResidualMult;
       constMult            = est.constMult;
       additiveConst        = est.additiveConst;
-      resetBestRMSFlag     = est.resetBestRMSFlag;             // made changes by TUAN NGUYEN
+      resetBestRMSFlag     = est.resetBestRMSFlag;
    }
 
    return *this;
 }
 
 
-// made changes by TUAN NGUYEN
 void Estimator::SetSolarSystem(SolarSystem *ss)
 {
    solarSystem = ss;
@@ -330,64 +330,61 @@ bool Estimator::Initialize()
          throw EstimatorException("Error: no measurements are set for estimation.\n");
 
 
-      // Check the names of measurement models shown in est.AddData have to be the names of created objects               // made changes by TUAN NGUYEN
-      std::vector<MeasurementModel*> measModels = measManager.GetAllMeasurementModels();   // made changes by TUAN NGUYEN
-      std::vector<TrackingSystem*> tkSystems = measManager.GetAllTrackingSystems();        // made changes by TUAN NGUYEN
-      std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();            // made changes by TUAN NGUYEN
-      StringArray measNames = measManager.GetMeasurementNames();                           // made changes by TUAN NGUYEN
+      // Check the names of measurement models shown in est.AddData have to be the names of created objects
+      std::vector<MeasurementModel*> measModels = measManager.GetAllMeasurementModels();
+      std::vector<TrackingSystem*> tkSystems = measManager.GetAllTrackingSystems();
+      std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();
+      StringArray measNames = measManager.GetMeasurementNames();
 
-      for(UnsignedInt i = 0; i < measNames.size(); ++i)                            // made changes by TUAN NGUYEN
-      {                                                                            // made changes by TUAN NGUYEN
-         std::string name = measNames[i];                                          // made changes by TUAN NGUYEN
-         //MessageInterface::ShowMessage("name = <%s>\n", name.c_str());
-
-         bool found = false;                                                       // made changes by TUAN NGUYEN
-         for(UnsignedInt j = 0; j < measModels.size(); ++j)                        // made changes by TUAN NGUYEN
+      for(UnsignedInt i = 0; i < measNames.size(); ++i)
+      {
+         std::string name = measNames[i];
+         bool found = false;
+         for(UnsignedInt j = 0; j < measModels.size(); ++j)
          {
-            //MessageInterface::ShowMessage("measModels[%d] = <%s>\n", j, measModels[j]->GetName().c_str());          // made changes by TUAN NGUYEN
-            if (measModels[j]->GetName() == name)                                  // made changes by TUAN NGUYEN
-            {                                                                      // made changes by TUAN NGUYEN
-               found = true;                                                       // made changes by TUAN NGUYEN
-               break;                                                              // made changes by TUAN NGUYEN
-            }                                                                      // made changes by TUAN NGUYEN
-         }                                                                         // made changes by TUAN NGUYEN
+            if (measModels[j]->GetName() == name)
+            {
+               found = true;
+               break;
+            }
+         }
 
          if (!found)
          {
-            for(UnsignedInt j = 0; j < tkSystems.size(); ++j)                      // made changes by TUAN NGUYEN
+            for(UnsignedInt j = 0; j < tkSystems.size(); ++j)
             {
-               //MessageInterface::ShowMessage("tkSystems[%d] = <%s>\n", j, tkSystems[j]->GetName().c_str());          // made changes by TUAN NGUYEN
-               if (tkSystems[j]->GetName() == name)                                // made changes by TUAN NGUYEN
-               {                                                                   // made changes by TUAN NGUYEN
-                  found = true;                                                    // made changes by TUAN NGUYEN
-                  break;                                                           // made changes by TUAN NGUYEN
+               if (tkSystems[j]->GetName() == name)
+               {
+                  found = true;
+                  break;
                }
-            }                                                                      // made changes by TUAN NGUYEN
-         }                                                                         // made changes by TUAN NGUYEN
+            }
+         }
       
          if (!found)
          {
-            for(UnsignedInt j = 0; j < tfs.size(); ++j)                            // made changes by TUAN NGUYEN
+            for(UnsignedInt j = 0; j < tfs.size(); ++j)
             {
-               //MessageInterface::ShowMessage("tfs[%d] = <%s>\n", j, tfs[j]->GetName().c_str());          // made changes by TUAN NGUYEN
-               if (tfs[j]->GetName() == name)                                      // made changes by TUAN NGUYEN
-               {                                                                   // made changes by TUAN NGUYEN
-                  found = true;                                                    // made changes by TUAN NGUYEN
-                  break;                                                           // made changes by TUAN NGUYEN
+               if (tfs[j]->GetName() == name)
+               {
+                  found = true;
+                  break;
                }
-            }                                                                      // made changes by TUAN NGUYEN
-         }                                                                         // made changes by TUAN NGUYEN
+            }
+         }
 
-         if (!found)                                                               // made changes by TUAN NGUYEN
+         if (!found)
             throw EstimatorException("Cannot initialize estimator; '" + name +
-                  "' object is not defined in script.\n");                         // made changes by TUAN NGUYEN
-      }                                                                            // made changes by TUAN NGUYEN
+                  "' object is not defined in script.\n");
+      }
 
-      measModels.clear();                                                          // made changes by TUAN NGUYEN
-      tkSystems.clear();                                                           // made changes by TUAN NGUYEN
-      tfs.clear();                                                                 // made changes by TUAN NGUYEN
-      measNames.clear();                                                           // made changes by TUAN NGUYEN
+      measModels.clear();
+      tkSystems.clear();
+      tfs.clear();
+      measNames.clear();
 
+      // Get EOP time range
+      GmatGlobal::Instance()->GetEopFile()->GetTimeRage(eopTimeMin, eopTimeMax);
    }
 
 #ifdef DEBUG_INITIALIZE
@@ -813,25 +810,25 @@ bool Estimator::SetStringParameter(const Integer id,
 {
    if (id == PROPAGATOR)
    {
-      if (!GmatStringUtil::IsValidIdentity(value))                                                                                   // made changes by TUAN NGUYEN
-         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Propagator is an invalid GMAT object name.\n");   // made changes by TUAN NGUYEN
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Propagator is an invalid GMAT object name.\n");
 
       propagatorName = value;
       return true;
    }
 
-   //@Todo: this code will be removed when the bug in Interperter is fixed                                          // made changes by TUAN NGUYEN
-   if (id == MEASUREMENTS)                                                                                          // made changes by TUAN NGUYEN
-   {                                                                                                                // made changes by TUAN NGUYEN
-      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));              // made changes by TUAN NGUYEN
-      if (measName == "")                                                                                           // made changes by TUAN NGUYEN
-         throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");   // made changes by TUAN NGUYEN
+   //@Todo: this code will be removed when the bug in Interperter is fixed
+   if (id == MEASUREMENTS)
+   {
+      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
+      if (measName == "")
+         throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");
 
-      if (!GmatStringUtil::IsValidIdentity(value))                                                                  // made changes by TUAN NGUYEN
-         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Measurements is an invalid GMAT object name.\n");   // made changes by TUAN NGUYEN
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Measurements is an invalid GMAT object name.\n");
 
-      return SetStringParameter(id, measName, measurementNames.size());                                             // made changes by TUAN NGUYEN
-   }                                                                                                                // made changes by TUAN NGUYEN
+      return SetStringParameter(id, measName, measurementNames.size());
+   }
 
    return Solver::SetStringParameter(id, value);
 }
@@ -860,6 +857,13 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 {
    if (id == MEASUREMENTS)
    {
+      // an empty list is set to Measurements parameter when index == -1
+      if (index == -1)
+      {
+         measurementNames.clear();
+         return true;
+      }
+
       // Verify measurement name
       if (!GmatStringUtil::IsValidIdentity(value))
          throw EstimatorException("Error: '" + value + "' set to " + GetName() + ".Measurements is an invalid GMAT object name.\n");
@@ -886,6 +890,13 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == SOLVEFORS)
    {
+      // an empty list is set to SolveFors parameter when index == -1
+      if (index == -1)
+      {
+         measurementNames.clear();
+         return true;
+      }
+
       Integer sz = (Integer) solveForStrings.size();
       if (index == sz) // needs to be added to the end of the list
          solveForStrings.push_back(value);
@@ -906,6 +917,10 @@ bool Estimator::SetStringParameter(const Integer id, const std::string &value,
 
    if (id == ADD_RESIDUAL_PLOT)
    {
+      // Nothing to do when an empty list is added to AddResualPlot parameter
+      if (index == -1)
+         return true;
+
       Integer sz = (Integer)addedPlots.size();
       if (index == sz) // needs to be added to the end of the list
          addedPlots.push_back(value);
@@ -1042,7 +1057,6 @@ bool Estimator::SetOnOffParameter(const std::string &label,
 }
 
 
-// made changes by TUAN NGUYEN
 //------------------------------------------------------------------------------
 // bool GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -1063,7 +1077,6 @@ bool Estimator::GetBooleanParameter(const Integer id) const
 }
 
 
-// made changes by TUAN NGUYEN
 //------------------------------------------------------------------------------
 // bool SetBooleanParameter(const Integer id, const bool value)
 //------------------------------------------------------------------------------
@@ -1372,8 +1385,8 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             MessageInterface::ShowMessage("Handle TrackingSystem: <%s>\n", name.c_str());
          #endif
 
-         // Add to tracking system list                           // made changes by TUAN NGUYEN
-         measManager.AddMeasurement((TrackingSystem*)obj);        // made changes by TUAN NGUYEN
+         // Add to tracking system list
+         measManager.AddMeasurement((TrackingSystem*)obj);
          
          MeasurementModel *meas;
          // Retrieve each measurement model from the tracking system ...
@@ -1419,8 +1432,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& Estimator::GetRefObjectArray(const std::string & typeString)
 {
-   return GetRefObjectArray(GetObjectType(typeString));                  // made changes by TUAN NGUYEN
-   //return Solver::GetRefObjectArray(typeString);                       // made changes by TUAN NGUYEN
+   return GetRefObjectArray(GetObjectType(typeString));
 }
 
 

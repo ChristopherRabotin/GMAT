@@ -271,8 +271,8 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //  NOTE: Measurement participant pointers must initialize before models.
    //        In the current code, that means spacecraft and ground stations, but
    //        the list might grow
-   //  3. Error Models                                                       // made changes by TUAN NGUYEN
-   //  4. Data Filters                                                       // made changes by TUAN NGUYEN
+   //  3. Error Models
+   //  4. Data Filters
    //  5. Measurement Models
    //  6. System Parameters
    //  7. Parameters
@@ -349,41 +349,41 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
 
-   // ErrorModel                                                                  // made changes by TUAN NGUYEN
-   // Handle ErrorModel objects                                                   // made changes by TUAN NGUYEN
-   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::ERROR_MODEL)           // made changes by TUAN NGUYEN
-   {                                                                              // made changes by TUAN NGUYEN
-      #ifdef DEBUG_INITIALIZE_OBJ                                                 // made changes by TUAN NGUYEN
-      MessageInterface::ShowMessage("--- Initialize ErrorModel in LOS\n");        // made changes by TUAN NGUYEN
-      #endif                                                                      // made changes by TUAN NGUYEN
-      InitializeObjectsInTheMap(LOS, Gmat::ERROR_MODEL);                          // made changes by TUAN NGUYEN
+   // ErrorModel
+   // Handle ErrorModel objects
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::ERROR_MODEL)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize ErrorModel in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::ERROR_MODEL);
 
-      if (includeGOS)                                                             // made changes by TUAN NGUYEN
-      {                                                                           // made changes by TUAN NGUYEN
-         #ifdef DEBUG_INITIALIZE_OBJ                                              // made changes by TUAN NGUYEN
-         MessageInterface::ShowMessage("--- Initialize ErrorModel in GOS\n");     // made changes by TUAN NGUYEN
-         #endif                                                                   // made changes by TUAN NGUYEN
-         InitializeObjectsInTheMap(GOS, Gmat::ERROR_MODEL);                       // made changes by TUAN NGUYEN
-      }                                                                           // made changes by TUAN NGUYEN
-   }                                                                              // made changes by TUAN NGUYEN
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize ErrorModel in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::ERROR_MODEL);
+      }
+   }
 
-   // DataFilter                                                                  // made changes by TUAN NGUYEN
-   // Handle DataFilter objects                                                   // made changes by TUAN NGUYEN
-   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::DATA_FILTER)           // made changes by TUAN NGUYEN
-   {                                                                              // made changes by TUAN NGUYEN
-      #ifdef DEBUG_INITIALIZE_OBJ                                                 // made changes by TUAN NGUYEN
-      MessageInterface::ShowMessage("--- Initialize DataFilter in LOS\n");        // made changes by TUAN NGUYEN
-      #endif                                                                      // made changes by TUAN NGUYEN
-      InitializeObjectsInTheMap(LOS, Gmat::DATA_FILTER);                          // made changes by TUAN NGUYEN
+   // DataFilter
+   // Handle DataFilter objects
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::DATA_FILTER)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize DataFilter in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::DATA_FILTER);
 
-      if (includeGOS)                                                             // made changes by TUAN NGUYEN
-      {                                                                           // made changes by TUAN NGUYEN
-         #ifdef DEBUG_INITIALIZE_OBJ                                              // made changes by TUAN NGUYEN
-         MessageInterface::ShowMessage("--- Initialize DataFilter in GOS\n");     // made changes by TUAN NGUYEN
-         #endif                                                                   // made changes by TUAN NGUYEN
-         InitializeObjectsInTheMap(GOS, Gmat::DATA_FILTER);                       // made changes by TUAN NGUYEN
-      }                                                                           // made changes by TUAN NGUYEN
-   }                                                                              // made changes by TUAN NGUYEN
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize DataFilter in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::DATA_FILTER);
+      }
+   }
 
    // MeasurementModel
    // Measurement Models must init before the Estimators/Simulator, so do next

@@ -1065,7 +1065,7 @@ void TDRSSTwoWayRange::SetHardwareDelays(bool loadEvents)
             receiveDelay);
    #endif
 
-   UpdateHardware();                                                         // made changes by TUAN NGUYEN
+   UpdateHardware();
 
    Real satDelay = targetDelay;
    TwoWayRange::SetHardwareDelays(false);

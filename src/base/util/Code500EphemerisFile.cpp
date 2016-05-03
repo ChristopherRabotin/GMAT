@@ -50,6 +50,9 @@
 #include "UtilityException.hpp"      // for UtilityException
 #include "MessageInterface.hpp"
 
+#include "A1Mjd.hpp"
+#include "DateUtil.hpp"
+
 //#define DEBUG_OPEN
 //#define DEBUG_INIT
 //#define DEBUG_SET
@@ -133,6 +136,8 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
    }
    
    mPrecNutIndicator = 1.0; // hardcoded
+   a1StartEpoch = 0.0;
+   a1EndEpoch   = 0.0;
 
    Initialize();
    
@@ -183,6 +188,8 @@ Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef)
    mOutputFileName = ef.mOutputFileName;
    mInputYearFormat = ef.mInputYearFormat;
    mOutputYearFormat = ef.mOutputYearFormat;
+   a1StartEpoch = ef.a1StartEpoch;
+   a1EndEpoch = ef.a1EndEpoch;
    
    Initialize();
 }
@@ -210,6 +217,8 @@ Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile
       mOutputFileName = ef.mOutputFileName;
       mInputYearFormat = ef.mInputYearFormat;
       mOutputYearFormat = ef.mOutputYearFormat;
+      a1StartEpoch = ef.a1StartEpoch;
+      a1EndEpoch = ef.a1EndEpoch;
       
       Initialize();
       return *this;
@@ -470,7 +479,7 @@ void Code500EphemerisFile::CloseForWrite()
 // bool ReadHeader1(int logOption = 0)
 //------------------------------------------------------------------------------
 /**
- * Unpacks heder 1 record and log values to log file on option.
+ * Unpacks header 1 record and log values to log file on option.
  *
  * @param  logOption  0 = no log, 1 = log all header data
  */
@@ -494,10 +503,67 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    //mInputTimeSystem = mEphemHeader1.timeSystemIndicator;
    mInputTimeSystem = ReadDoubleField(&mEphemHeader1.timeSystemIndicator);
    
+//   A1Mjd time = toA1Mjd(, false);
+
    if (logOption == 1)
       UnpackHeader1();
    
+   // Save the data used by the Code500 propagator in GMAT compatible formats
+   double yyymmddStart = ReadDoubleField(&mEphemHeader1.startDateOfEphem_YYYMMDD);
+   if (mInputYearFormat == 2)
+      yyymmddStart = yyymmddStart - 19000000;
+   double secsOfDayStart = ReadDoubleField(&mEphemHeader1.startSecondsOfDay);
+
+   Real startDate = mEphemHeader1.startDateOfEphem_YYYMMDD;
+   Real startSecs = mEphemHeader1.startSecondsOfDay;
+   Real endDate   = mEphemHeader1.endDateOfEphem_YYYMMDD;
+   Real endSecs   = mEphemHeader1.endSecondsOfDay;
+
+   Integer year   = (Integer)(startDate / 10000);
+   Integer month  = (Integer)((startDate - year * 10000) / 100);
+   Integer day    = (Integer)(startDate - year * 10000 - month * 100);
+   year += 1900;
+   Integer hour   = (Integer)(startSecs / 3600);
+   Integer minute = (Integer)((startSecs - hour * 3600) / 60);
+   Real second    = startSecs - hour * 3600 - minute * 60;
+
+      MessageInterface::ShowMessage("Start:  %04d/%02d/%02d %02d:%02d:%lf %s\n",
+            year, month, day, hour, minute, second,
+            (mInputTimeSystem == 1.0 ? "A.1" : "UTC"));
+
+   GmatEpoch epoch = ModifiedJulianDate(year, month, day, hour, minute, second);
+
+   year   = (Integer)(endDate / 10000);
+   month  = (Integer)((endDate - year * 10000) / 100);
+   day    = (Integer)(endDate - year * 10000 - month * 100);
+   year += 1900;
+   hour   = (Integer)(endSecs / 3600);
+   minute = (Integer)((endSecs - hour * 3600) / 60);
+   second = endSecs - hour * 3600 - minute * 60;
+
+      MessageInterface::ShowMessage("End:    %04d/%02d/%02d %02d:%02d:%lf %s\n",
+            year, month, day, hour, minute, second,
+            (mInputTimeSystem == 1.0 ? "A.1" : "UTC"));
+
+   GmatEpoch epochend = ModifiedJulianDate(year, month, day, hour, minute, second);
+
+   if (mInputTimeSystem == 1.0)
+   {
+      a1StartEpoch = epoch;
+      a1EndEpoch   = epochend;
+   }
+   else if (mInputTimeSystem == 2.0) // UTC
+   {
+      a1StartEpoch = TimeConverterUtil::Convert(epoch, TimeConverterUtil::UTCMJD,
+            TimeConverterUtil::A1MJD);
+      a1EndEpoch = TimeConverterUtil::Convert(epochend, TimeConverterUtil::UTCMJD,
+            TimeConverterUtil::A1MJD);
+   }
+
    #ifdef DEBUG_READ_HEADERS
+   MessageInterface::ShowMessage("A.1 Start Epoch: %.12lf\n", a1StartEpoch);
+   MessageInterface::ShowMessage("A.1 End Epoch:   %.12lf\n", a1EndEpoch);
+
    MessageInterface::ShowMessage
       ("Code500EphemerisFile::ReadHeader1() returning true, mInputTimeSystem=%d\n",
        mInputTimeSystem);
@@ -510,7 +576,7 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
 // bool ReadHeader2(int logOption = 0)
 //------------------------------------------------------------------------------
 /**
- * Unpacks heder 2 record and log values to log file on option.
+ * Unpacks header 2 record and log values to log file on option.
  *
  * @param  logOption  0 = no log, 1 = log all header data
  */
@@ -530,6 +596,23 @@ bool Code500EphemerisFile::ReadHeader2(int logOption)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// void GetStartAndEndEpochs(GmatEpoch &startEpoch, GmatEpoch &endEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Accesses the start and end epochs as contained in the header data
+ *
+ * @param startEpoch The start epoch
+ * @param endEpoch The end epoch
+ */
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::GetStartAndEndEpochs(GmatEpoch &startEpoch,
+      GmatEpoch &endEpoch, std::vector<EphemData> **records)
+{
+   startEpoch = a1StartEpoch;
+   endEpoch   = a1EndEpoch;
+   *records = &ephemRecords;
+}
 
 //------------------------------------------------------------------------------
 // bool ReadDataAt(int dataRecNumber, int logOption = 0)
@@ -1982,6 +2065,8 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       MessageInterface::ShowMessage
          ("======================================== End of data record %d\n", recNum);
    }
+
+   ephemRecords.push_back(mEphemData);
 }
 
 
@@ -2035,6 +2120,20 @@ void Code500EphemerisFile::ConvertEbcdicToAscii(char *ebcdic, char *ascii, int n
    }
 }
 
+
+//------------------------------------------------------------------------------
+// Real Code500EphemerisFile::GetTimeSystem()
+//------------------------------------------------------------------------------
+/**
+ * Returns the time system as set mOutputTimeSystem
+ *
+ * @return The real number value for the time system setting
+ */
+//------------------------------------------------------------------------------
+Real Code500EphemerisFile::GetTimeSystem()
+{
+   return mOutputTimeSystem;
+}
 
 //------------------------------------------------------------------------------
 // void ToYearMonthDayHourMinSec(double yyymmdd, double secsOfDay, ...

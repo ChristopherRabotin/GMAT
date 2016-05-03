@@ -987,7 +987,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       Real dtS, dtE, dtdt, preFactor;
 
       // 9. Get sensors used in DSN 2-ways Doppler
-      UpdateHardware();                                                         // made changes by TUAN NGUYEN
+      UpdateHardware();
 
       if (participantHardware.empty()||
             ((!participantHardware.empty())&&

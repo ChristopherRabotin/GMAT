@@ -209,7 +209,7 @@ namespace Gmat
       // Estimation types
       MEASUREMENT_MODEL,   // May be replaced by TrackingSystem
       CORE_MEASUREMENT,    // For the measurement primitives
-      ERROR_MODEL,         // Error model used in a measurement            // made changes by TUAN NGUYEN  
+      ERROR_MODEL,         // Error model used in a measurement
       
       TRACKING_DATA,
       TRACKING_SYSTEM,
@@ -218,7 +218,7 @@ namespace Gmat
       OBTYPE,              // For the specific observation types
 
       // Data filters
-      DATA_FILTER,         // for data filter                              // made changes by TUAN NGUYEN
+      DATA_FILTER,         // for data filter
       
       INTERFACE,           // MatlabInterface and other Interfaces
       MEDIA_CORRECTION,    // For media correction model

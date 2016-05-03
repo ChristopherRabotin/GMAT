@@ -98,7 +98,7 @@ public:
     virtual void SetElement(Integer r, Integer c, const T &value);
     virtual bool IsSized() const;
     virtual void SetSize(Integer r, Integer c, bool zeroElements = true);
-    virtual void ChangeSize(int r, int c, bool zeroElements);                    // made changes by TUAN NGUYEN
+    virtual void ChangeSize(int r, int c, bool zeroElements);
 
     virtual void GetSize(Integer &r, Integer &c) const;
     virtual Integer  GetNumColumns() const;

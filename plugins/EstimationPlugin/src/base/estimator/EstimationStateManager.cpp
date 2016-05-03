@@ -34,7 +34,7 @@
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
 #include "Spacecraft.hpp"
-#include "GroundstationInterface.hpp"                                // made changes by TUAN NGUYEN
+#include "GroundstationInterface.hpp"
 #include <sstream>                  // for stringstream
 
 
@@ -303,9 +303,9 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
             
             // verify valid ID
             if (id == -1)
-               throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");                                               // made changes by TUAN NGUYEN
+               throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");
             if (obj->IsEstimationParameterValid(id) == false)
-               throw EstimatorException("Error: parameter " + obj->GetName() + "." + solveForIDNames[i] + " is not allowed to use as a solve-for variable in this GMAT version.\n");     // made changes by TUAN NGUYEN
+               throw EstimatorException("Error: parameter " + obj->GetName() + "." + solveForIDNames[i] + " is not allowed to use as a solve-for variable in this GMAT version.\n");
 
             // set the object property
             solveForIDs[i] = id;
@@ -525,9 +525,9 @@ bool EstimationStateManager::SetProperty(std::string prop, Integer loc)
    }
    else
    {
-      // Display a message and do nothing                                                                                          // made changes by TUAN NGUYEN
-      MessageInterface::ShowMessage("Solve-for '%s' was set twice to Estimation State Manager. Skip setting...\n", prop.c_str());  // made changes by TUAN NGUYEN
-      return true;                                                                                                                 // made changes by TUAN NGUYEN
+      // Display a message and do nothing
+      MessageInterface::ShowMessage("Solve-for '%s' was set twice to Estimation State Manager. Skip setting...\n", prop.c_str());
+      return true;
    }
 
    #ifdef DEBUG_INITIALIZATION
@@ -596,7 +596,7 @@ bool EstimationStateManager::SetProperty(std::string sf, GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
-// bool SetProperty(GmatBase *obj)                                                // made changes by TUAN NGUYEN
+// bool SetProperty(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Sets a SolveFor parameter associated with a specific object. Assume that the 
@@ -623,7 +623,7 @@ bool EstimationStateManager::SetProperty(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
-// StringArray GetSolveForList(GmatBase* obj)                                     // made changes by TUAN NGUYEN
+// StringArray GetSolveForList(GmatBase* obj)
 //------------------------------------------------------------------------------
 /**
 * This function is used to create a list of solve-for properties for a given object
@@ -803,8 +803,8 @@ bool EstimationStateManager::BuildState()
    {
       std::stringstream sizeVal;
       sizeVal << stateSize;
-      throw EstimatorException("No solve-for parameter is defined for estimator;"     // made changes by TUAN NGUYEN
-            " estimation is not possible.\n");                                        // made changes by TUAN NGUYEN
+      throw EstimatorException("No solve-for parameter is defined for estimator;"
+            " estimation is not possible.\n");
    }
 
    std::map<std::string,Integer> associateMap;
@@ -812,7 +812,7 @@ bool EstimationStateManager::BuildState()
    std::string name;
    for (Integer index = 0; index < stateSize; ++index)
    {
-      name = stateMap[index]->objectFullName;                                         // made changes by TUAN NGUYEN
+      name = stateMap[index]->objectFullName;
       if (associateMap.find(name) == associateMap.end())
          associateMap[name] = index;
    }
@@ -827,7 +827,7 @@ bool EstimationStateManager::BuildState()
 
    for (Integer index = 0; index < stateSize; ++index)
    {
-      name = stateMap[index]->objectFullName;                                         // made changes by TUAN NGUYEN
+      name = stateMap[index]->objectFullName;
       std::stringstream sel("");
       sel << stateMap[index]->subelement;
       state.SetElementProperties(index, stateMap[index]->elementID,
@@ -945,10 +945,10 @@ bool EstimationStateManager::MapVectorToObjects()
       #ifdef DEBUG_OBJECT_UPDATES
          std::stringstream msg("");
          msg << stateMap[index]->subelement;
-         std::string lbl = stateMap[index]->objectFullName + "." +                                    // made changes by TUAN NGUYEN
+         std::string lbl = stateMap[index]->objectFullName + "." + 
             stateMap[index]->elementName + "." + msg.str() + " = ";
          MessageInterface::ShowMessage("   %d: %s%.12lf  for object <%s, %p>\n", index, lbl.c_str(),
-            state[index], stateMap[index]->object->GetFullName().c_str(), stateMap[index]->object);   // made changes by TUAN NGUYEN
+            state[index], stateMap[index]->object->GetFullName().c_str(), stateMap[index]->object);
       #endif
 
       switch (stateMap[index]->parameterType)
@@ -1092,7 +1092,7 @@ bool EstimationStateManager::MapObjectsToVector()
       {
          std::stringstream msg("");
          msg << stateMap[index]->subelement;
-         std::string lbl = stateMap[index]->objectFullName + "." +                   // made changes by TUAN NGUYEN
+         std::string lbl = stateMap[index]->objectFullName + "." + 
             stateMap[index]->elementName + "." + msg.str() + " = ";
          MessageInterface::ShowMessage("   %d: %s%.12lf\n", index, lbl.c_str(),
                state[index]);
@@ -1318,9 +1318,9 @@ void EstimationStateManager::DecomposeParameter(std::string &param,
       Integer howMany)
 {
    chunks.clear();
-   size_t loc;             // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+   size_t loc;             // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
 
-   loc = param.find_last_of('.');                                                         // made changes by TUAN NGUYEN
+   loc = param.find_last_of('.');
    chunks.push_back(param.substr(0,loc));
 
    // todo: handle the howMany parameter.  For now, always split into 2 chunks
@@ -1430,13 +1430,13 @@ Integer EstimationStateManager::SortVector()
    {
       #ifdef DEBUG_STATE_CONSTRUCTION
          MessageInterface::ShowMessage("%d <- %d: %d %s.%s gives ", i, order[i],
-               idList[order[i]], owners[order[i]]->GetFullName().c_str(),           // made changes by TUAN NGUYEN
+               idList[order[i]], owners[order[i]]->GetFullName().c_str(), 
                property[order[i]].c_str());
       #endif
 
       newItem = new ListItem;
       newItem->objectName  = owners[order[i]]->GetName();
-      newItem->objectFullName = owners[order[i]]->GetFullName();                   // made changes by TUAN NGUYEN
+      newItem->objectFullName = owners[order[i]]->GetFullName();
       newItem->elementName = property[order[i]];
       newItem->object      = owners[order[i]];
       newItem->elementID   = idList[order[i]];

@@ -1115,7 +1115,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 
       // 5. Get sensors used in DSN 2-ways range
-      UpdateHardware();                                                         // made changes by TUAN NGUYEN
+      UpdateHardware();
       if (participantHardware.empty()||
            ((!participantHardware.empty())&&
               participantHardware[0].empty()&&

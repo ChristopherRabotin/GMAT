@@ -43,7 +43,7 @@
 #include "GmatConstants.hpp"
 #include "GmatDefaults.hpp"
 #include "Rmatrix33.hpp"
-#include "Rmatrix66.hpp"                    // made changes by TUAN NGUYEN
+#include "Rmatrix66.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 
@@ -292,7 +292,6 @@ static Rvector3 CartesianToDirOfLineOfNode(const Rvector3 &pos,
 static Rvector6 CartesianToAngularMomentum(Real mu, const Rvector3 &pos,
                                            const Rvector3 &vel);
 
-// made changes by TUAN NGUYEN
 //------------------------------------------------------------------------------
 // derivative conversion methods
 //------------------------------------------------------------------------------

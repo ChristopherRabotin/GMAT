@@ -50,8 +50,8 @@ c         Open coefficient file. Read past first header record.
 c         Read degree and order of model and Earth's radius.           
           read(iunit, *)
           read(iunit, *) nmax_shc(ifile), erad_shc(ifile), yy
-          print * ,'Read ', fullpath
-          print * , nmax_shc(ifile), '  ', erad_shc(ifile), '  ', yy
+c          print * ,'Read ', fullpath
+c          print * , nmax_shc(ifile), '  ', erad_shc(ifile), '  ', yy
 
 c         --------------------------------------------------------------
 c         Read the coefficient file, arranged as follows:              
@@ -87,10 +87,10 @@ c                      stop 1
                   end if
 
                   read(iunit, *) (shcfiles(i, irec, ifile), i=1,4)
-                  print *, shcfiles(1, irec, ifile), '  ', 
-     & shcfiles(2, irec, ifile), '  ',
-     & shcfiles(3, irec, ifile), '  ',
-     & shcfiles(4, irec, ifile)
+c                  print *, shcfiles(1, irec, ifile), '  ', 
+c     & shcfiles(2, irec, ifile), '  ',
+c     & shcfiles(3, irec, ifile), '  ',
+c     & shcfiles(4, irec, ifile)
               end do
           end do
       

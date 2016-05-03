@@ -49,10 +49,10 @@ public:
    Estimator(const Estimator& est);
    Estimator& operator=(const Estimator& est);
 
-   virtual void         SetSolarSystem(SolarSystem *ss);       // made changes by TUAN NGUYEN
+   virtual void         SetSolarSystem(SolarSystem *ss);
 
    virtual bool         Initialize();
-   bool                 Reinitialize();                        // made changes by TUAN NGUYEN
+   bool                 Reinitialize();
    virtual void         CompleteInitialization();
    virtual bool         Finalize();
 
@@ -91,9 +91,9 @@ public:
    virtual bool         SetOnOffParameter(const std::string &label,
                                           const std::string &value);
 
-   virtual bool         GetBooleanParameter(const Integer id) const;                 // made changes by TUAN NGUYEN
-   virtual bool         SetBooleanParameter(const Integer id,                        // made changes by TUAN NGUYEN
-                                            const bool value);                       // made changes by TUAN NGUYEN
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
 
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
@@ -271,8 +271,8 @@ protected:
    Real constMult;
    Real additiveConst;
 
-   /// Flag indicating to reset best RMS when estimation is diverged                      // made changes by TUAN NGUYEN 
-   bool resetBestRMSFlag;                                                                  // made changes by TUAN NGUYEN
+   /// Flag indicating to reset best RMS when estimation is diverged
+   bool resetBestRMSFlag;
 
    /// Number of removed observation data records
    std::map<std::string, UnsignedInt> numRemovedRecords;
@@ -280,8 +280,13 @@ protected:
    /// A string as a line/lines buffer to store a line/lines for writing to report file
    std::string linesBuff;
 
-   /// Solar system         // It needs to display information of central bodies in estimation report file      // made changes by TUAN NGUYEN
-   SolarSystem *solarSystem;                                                                                    // made changes by TUAN NGUYEN                  
+   /// Solar system         // It needs to display information of central bodies in estimation report file
+   SolarSystem *solarSystem;
+
+   // EOP time range. It needs to check measurement epoch to be inside that range.
+   Real      eopTimeMin;        // EOP time min
+   Real      eopTimeMax;        // EOP time max
+   Integer   warningCount;      // count number of warning message when check measurement epoch to be inside or outside  EOP time range 
 
    /// Parameters associated with the Estimators
    enum
@@ -296,7 +301,7 @@ protected:
       MAX_RESIDUAL_MULTIPLIER,
       CONSTANT_MULTIPLIER,
       ADDITIVE_CONSTANT,
-      RESET_BEST_RMS,                         // made changes by TUAN NGUYEN
+      RESET_BEST_RMS,
       CONVERGENT_STATUS,
       EstimatorParamCount
    };
@@ -343,7 +348,7 @@ protected:
    };
 
 private:
-   bool      delayInitialization;            // made changes by TUAN NGUYEN
+   bool      delayInitialization;
 };
 
 #endif /* Estimator_hpp */

@@ -532,6 +532,8 @@ bool BeginFileThrust::Execute()
             "ABORTING RUN!!!\n\n");
 
    // Insert the force into the list of transient forces if not found
+   bool fileForceConfigured = false;
+   bool alreadyThere = false;
    if (transientForces->size() == 0)
    {
       #ifdef DEBUG_TRANSIENT_FORCES
@@ -543,7 +545,6 @@ bool BeginFileThrust::Execute()
    }
    else
    {
-      bool alreadyThere = false;
       for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
             i !=transientForces->end(); ++i)
       {
@@ -553,6 +554,7 @@ bool BeginFileThrust::Execute()
             if (transient == burnForce)
             {
                alreadyThere = true;
+               fileForceConfigured = true;
             }
 
             if ((*transient) == (*burnForce))
@@ -562,6 +564,7 @@ bool BeginFileThrust::Execute()
                      "burn will be applied.\n",
                      GetGeneratingString(Gmat::NO_COMMENTS).c_str());
                alreadyThere = true;
+               fileForceConfigured = true;
             }
          }
       }
@@ -573,6 +576,34 @@ bool BeginFileThrust::Execute()
                burnForce->GetName().c_str());
          #endif
          transientForces->push_back(burnForce);
+      }
+   }
+
+   if (fileForceConfigured == false)
+   {
+      // Set up the referenced coordinate systems
+      StringArray csList = burnForce->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%d coordinate systems needed:\n",
+               csList.size());
+      #endif
+
+      GmatBase *mapObj = NULL;
+      for (UnsignedInt i = 0; i < csList.size(); ++i)
+      {
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("   %s\n", csList[i].c_str());
+         #endif
+
+         if ((mapObj = FindObject(csList[i])) == NULL)
+            throw CommandException("Unknown Coordinate System \"" +
+                  csList[i] + "\"");
+
+         if (mapObj->IsOfType(Gmat::COORDINATE_SYSTEM) == false)
+            throw CommandException((csList[i]) + " is not a Coordinate System");
+
+         burnForce->SetRefObject(mapObj, Gmat::COORDINATE_SYSTEM, csList[i]);
       }
    }
 

@@ -114,14 +114,14 @@ public:
    virtual bool         Initialize();
 
    virtual bool CalculateMeasurement(bool withEvents = false,
-                       bool withMediaCorrection = true,                 // made changes by TUAN NGUYEN
+                       bool withMediaCorrection = true,
                        ObservationData* forObservation = NULL,
                        std::vector<RampTableData>* rampTB = NULL,
                        Real atTimeOffset = 0.0, 
                        Integer forStrand = -1);
    virtual bool ReCalculateFrequencyAndMediaCorrection(
                        UnsignedInt pathIndex, Real uplinkFrequency,
-                       std::vector<RampTableData>* rampTB);             // made changes by TUAN NGUYEN
+                       std::vector<RampTableData>* rampTB);
 
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
@@ -167,11 +167,6 @@ protected:
    /// @todo: Extend this code to support multiple propagators
    /// Mapping of participants to (cloned) propagators
    std::map<SpacePoint*,PropSetup*> propMap;
-
-#ifndef NEW_TYPE_OF_STATE_TRANSITION_MATRIX
-   /// Number of rows/columns in the state transition matrix             // made changes by TUAN NGUYEN
-   UnsignedInt stmRowCount;                                              // made changes by TUAN NGUYEN
-#endif
 
    /// Collection of the potential participants
    ObjectArray candidates;

@@ -60,9 +60,8 @@ const Gmat::ParameterType StatisticAcceptFilter::PARAMETER_TYPE[] =
 //------------------------------------------------------------------------------
 StatisticAcceptFilter::StatisticAcceptFilter(const std::string name) :
    DataFilter        (name),
-   thinMode          ("F"),
+   thinMode          ("Frequency"),
    thinningFrequency (1)
-//   recCount          (0)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("StatisticAcceptFilter default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -100,7 +99,6 @@ StatisticAcceptFilter::StatisticAcceptFilter(const StatisticAcceptFilter& saf) :
    DataFilter            (saf),
    thinMode              (saf.thinMode),
    thinningFrequency     (saf.thinningFrequency)
-//   recCount              (0)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("StatisticAcceptFilter copy constructor from <%s,%p>  to  <%s,%p>\n", saf.GetName().c_str(), &saf, GetName().c_str(), this);
@@ -132,7 +130,6 @@ StatisticAcceptFilter& StatisticAcceptFilter::operator=(const StatisticAcceptFil
 
       thinMode          = saf.thinMode;
       thinningFrequency = saf.thinningFrequency;
-//      recCount          = 0;
    }
 
    return *this;
@@ -174,8 +171,6 @@ bool StatisticAcceptFilter::Initialize()
    {
       //@todo: Initialize code is here
 
-//      startTimeWindow = epochStart;              // made changes by TUAN NGUYEN
-//      recCount = 0;
       isInitialized = retval;
    }
 
@@ -291,9 +286,6 @@ std::string StatisticAcceptFilter::GetParameterTypeString(const Integer id) cons
 
 bool StatisticAcceptFilter::IsParameterReadOnly(const Integer id) const
 {
-//   if (id == THIN_MODE)
-//      return true;
-
    return DataFilter::IsParameterReadOnly(id);
 }
 
@@ -648,8 +640,8 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
 StringArray StatisticAcceptFilter::GetAllAvailableThinModes()
 {
    StringArray nameList;
-   nameList.push_back("F");           // data thinning is applied based on record count
-   nameList.push_back("T");           // data thinning is applied based on time range
+   nameList.push_back("Frequency");           // data thinning is applied based on record count
+   nameList.push_back("Time");                // data thinning is applied based on time range
 
    return nameList;
 }
@@ -670,7 +662,7 @@ bool StatisticAcceptFilter::IsThin(ObservationData* dataObject)
    // 1. Get tracking config from observation data 
    std::string trackingConfig = dataObject->GetTrackingConfig();
 
-   if (thinMode == "F")
+   if (thinMode == "Frequency")
    {
       // 2. If tracking config is not in recCountMap, set record count to 0 for that tracking config
       bool found = false;
@@ -686,20 +678,17 @@ bool StatisticAcceptFilter::IsThin(ObservationData* dataObject)
          recCountMap[trackingConfig] = 0;
 
       // 3. Book keeping record count for this tracking config 
-      //if (recCount == (thinningFrequency-1))
       if (recCountMap[trackingConfig] == (thinningFrequency - 1))
       {
          isAccepted = true;
-         //recCount = 0;
          recCountMap[trackingConfig] = 0;
       }
       else
       {
-         //++recCount;
          ++recCountMap[trackingConfig];
       }
    }
-   else if (thinMode == "T")
+   else if (thinMode == "Time")
    {
       // 2. If tracking config is not in startTimeWindowMap, set start time window to epochStart for that tracking config
       bool found = false;
@@ -714,12 +703,9 @@ bool StatisticAcceptFilter::IsThin(ObservationData* dataObject)
       if (!found)
          startTimeWindowMap[trackingConfig] = epochStart;
 
-      //if (dataObject->epoch > startTimeWindow)
       if (dataObject->epoch > startTimeWindowMap[trackingConfig])
       {
          isAccepted = true;
-         //Real step = GmatMathUtil::Floor((dataObject->epoch - startTimeWindow) * GmatTimeConstants::SECS_PER_DAY / thinningFrequency);
-         //startTimeWindow = startTimeWindow + (step+1)*(thinningFrequency / GmatTimeConstants::SECS_PER_DAY);
          Real step = GmatMathUtil::Floor((dataObject->epoch - startTimeWindowMap[trackingConfig]) * GmatTimeConstants::SECS_PER_DAY / thinningFrequency);
          startTimeWindowMap[trackingConfig] = startTimeWindowMap[trackingConfig] + (step + 1)*(thinningFrequency / GmatTimeConstants::SECS_PER_DAY);
       }

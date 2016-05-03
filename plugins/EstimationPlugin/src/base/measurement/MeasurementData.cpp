@@ -58,11 +58,11 @@ MeasurementData::MeasurementData() :
    uplinkFreqAtRecei(0.0),                             // made changes by TUAN NGUYEN
    rangeModulo      (1.0),
    dopplerCountInterval	(1.0e-10),
-   tdrsNode4Freq    (0.0),                             // made changes by TUAN NGUYEN
-   tdrsNode4Band    (0),                               // made changes by TUAN NGUYEN
-   tdrsServiceID    ("SA1"),                           // made changes by TUAN NGUYEN
-   tdrsSMARID       (0),                               // made changes by TUAN NGUYEN
-   tdrsDataFlag     (0)                                // made changes by TUAN NGUYEN
+   tdrsNode4Freq    (0.0),
+   tdrsNode4Band    (0),
+   tdrsServiceID    ("SA1"),
+   tdrsSMARID       (0),
+   tdrsDataFlag     (0)
 {
 }
 
@@ -116,11 +116,11 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    uplinkFreqAtRecei(md.uplinkFreqAtRecei),                    // made changes by TUAN NGUYEN
    rangeModulo      (md.rangeModulo),
    dopplerCountInterval	(md.dopplerCountInterval),
-   tdrsNode4Freq    (md.tdrsNode4Freq),                        // made changes by TUAN NGUYEN
-   tdrsNode4Band    (md.tdrsNode4Band),                        // made changes by TUAN NGUYEN
-   tdrsServiceID    (md.tdrsServiceID),                        // made changes by TUAN NGUYEN
-   tdrsSMARID       (md.tdrsSMARID),                           // made changes by TUAN NGUYEN
-   tdrsDataFlag     (md.tdrsDataFlag)                          // made changes by TUAN NGUYEN
+   tdrsNode4Freq    (md.tdrsNode4Freq),
+   tdrsNode4Band    (md.tdrsNode4Band),
+   tdrsServiceID    (md.tdrsServiceID),
+   tdrsSMARID       (md.tdrsSMARID),
+   tdrsDataFlag     (md.tdrsDataFlag)
 {
 }
 
@@ -158,11 +158,11 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
       uplinkFreqAtRecei = md.uplinkFreqAtRecei;                // made changes by TUAN NGUYEN 
 	  rangeModulo      = md.rangeModulo;
 	  dopplerCountInterval = md.dopplerCountInterval;
-      tdrsNode4Freq    = md.tdrsNode4Freq;                     // made changes by TUAN NGUYEN
-      tdrsNode4Band    = md.tdrsNode4Band;                     // made changes by TUAN NGUYEN
-      tdrsServiceID    = md.tdrsServiceID;                     // made changes by TUAN NGUYEN
-      tdrsSMARID       = md.tdrsSMARID;                        // made changes by TUAN NGUYEN
-      tdrsDataFlag     = md.tdrsDataFlag;                      // made changes by TUAN NGUYEN
+      tdrsNode4Freq    = md.tdrsNode4Freq;
+      tdrsNode4Band    = md.tdrsNode4Band;
+      tdrsServiceID    = md.tdrsServiceID;
+      tdrsSMARID       = md.tdrsSMARID;
+      tdrsDataFlag     = md.tdrsDataFlag;
    }
 
    return *this;
