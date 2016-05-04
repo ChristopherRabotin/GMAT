@@ -456,7 +456,7 @@ bool CubicSplineInterpolator::Estimate(const Real ind, Real *results)
  * @return clone of the CubicSplineInterpolator.
  */
 //------------------------------------------------------------------------------
-GmatBase* CubicSplineInterpolator::Clone() const
+Interpolator* CubicSplineInterpolator::Clone() const
 {
    return (new CubicSplineInterpolator(*this));
 }

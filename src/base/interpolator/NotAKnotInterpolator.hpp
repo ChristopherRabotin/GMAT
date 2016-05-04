@@ -48,7 +48,7 @@ public:
    virtual bool                Interpolate(const Real ind, Real *results);
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual Interpolator* Clone() const;
 
 protected:
    /// Array of ordered independent variables used to construct the splines.
