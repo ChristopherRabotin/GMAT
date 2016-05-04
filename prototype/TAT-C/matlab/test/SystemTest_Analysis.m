@@ -23,7 +23,8 @@ sat1.AddSensor(sensor)
 prop = Propagator(sat1);
 
 % Create the point group and initialize the coverage checker
-pGroup = PointGroup('Helical',200);
+pGroup = PointGroup();
+pGroup.AddHelicalPointsByNumPoints(200);
 covChecker = CoverageChecker(pGroup,sat1);
 if showPlots
     figHandle = pGroup.PlotAllTestPoints();
