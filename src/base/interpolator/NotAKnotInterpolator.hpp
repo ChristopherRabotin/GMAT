@@ -53,7 +53,7 @@ public:
 protected:
    /// Array of ordered independent variables used to construct the splines.
    Real                        x[5];
-   /// Array of ordered independent variables used to construct the splines.
+   /// Array of ordered dependent variables used to construct the splines.
    Real                        *y[5];
    
    /// Coefficients of the splines
