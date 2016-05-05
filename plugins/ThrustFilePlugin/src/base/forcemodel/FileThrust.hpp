@@ -23,6 +23,8 @@
 #include "ThrustFileDefs.hpp"
 #include "PhysicalModel.hpp"
 #include "ThrustSegment.hpp"
+#include "LinearInterpolator.hpp"
+#include "NotAKnotInterpolator.hpp"
 
 class FileThrust: public PhysicalModel
 {
@@ -117,6 +119,9 @@ protected:
    Real dataBlock[5];
    /// dataSet is (up to) 5 dataBlock sets, with the last element set to time
    Real dataSet[5][5];
+
+   LinearInterpolator *liner;
+   NotAKnotInterpolator *spliner; //(const std::string &name = "", Integer dim = 1);
 
    void ComputeAccelerationMassFlow(const GmatEpoch atEpoch, Real burnData[4]);
    void GetSegmentData(Integer atIndex, GmatEpoch atEpoch);

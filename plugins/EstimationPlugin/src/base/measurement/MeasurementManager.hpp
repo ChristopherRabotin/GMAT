@@ -69,6 +69,7 @@ public:
    bool                    ProcessingComplete();
    bool                    Finalize();
 
+   bool                    ValidateDuplicationOfGroundStationID(std::string& errorMsg);
 // bool                    CalculateMeasurements(bool withEvents = false);                     // made changes for Bug 8 in ticket GMT-4314
    bool                    CalculateMeasurements(bool forSimulation = false, bool withEvents = false, bool addNoise = false);   // made changes for Bug 8 in ticket GMT-4314
    const std::vector<RealArray>&

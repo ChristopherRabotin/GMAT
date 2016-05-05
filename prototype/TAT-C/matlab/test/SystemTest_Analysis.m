@@ -12,14 +12,19 @@ date.SetGregorianDate(2017,1,15,22,30,20.111);
 state = OrbitState();
 state.SetKeplerianState(6700,0.002,90*pi/180,pi/4 + pi/6,.2345,pi/6);
 
+% Create a conical sensor
+sensor = ConicalSensor(pi);
+
 % Create a spacecraft giving it a state and epoch
 sat1 = Spacecraft(date,state);
+sat1.AddSensor(sensor)
 
 % Create the propagator
 prop = Propagator(sat1);
 
 % Create the point group and initialize the coverage checker
-pGroup = PointGroup('Helical',200);
+pGroup = PointGroup();
+pGroup.AddHelicalPointsByNumPoints(200);
 covChecker = CoverageChecker(pGroup,sat1);
 if showPlots
     figHandle = pGroup.PlotAllTestPoints();
@@ -31,7 +36,7 @@ count = 0;
 while date.GetJulianDate() < startDate + 1
     
     % Propagate
-    date.Advance(20);
+    date.Advance(120);
     prop.Propagate(date);
     
     % Compute points in view

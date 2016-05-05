@@ -40,7 +40,7 @@
 /**
  * Base class for the GMAT Interpolators
  */
-class GMAT_API Interpolator : public GmatBase
+class GMAT_API Interpolator // : public GmatBase
 {
 public:
    Interpolator(const std::string &name, const std::string &typestr,
@@ -58,6 +58,8 @@ public:
    virtual Integer GetBufferSize();
    virtual Integer GetPointCount();
    
+   std::string     GetName();
+
    //---------------------------------------------------------------------------
    // bool Interpolate(const Real ind, Real *results)
    //---------------------------------------------------------------------------
@@ -77,8 +79,10 @@ public:
    //---------------------------------------------------------------------------
    virtual bool    Interpolate(const Real ind, Real *results) = 0;
    
-   DEFAULT_TO_NO_CLONES
-   DEFAULT_TO_NO_REFOBJECTS
+   virtual Interpolator* Clone() const = 0;
+
+//   DEFAULT_TO_NO_CLONES
+//   DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    /// Data array used for the independent variable
@@ -108,6 +112,8 @@ protected:
    /// Flag used for additional feasiblity checking
    bool forceInterpolation;
    
+   std::string instanceName;
+
    virtual void AllocateArrays();
    virtual void CleanupArrays();
    virtual void CopyArrays(const Interpolator &i);
