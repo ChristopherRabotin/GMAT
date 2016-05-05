@@ -1,7 +1,8 @@
 
 % Create a point group object with 50 points
 testPointNum = 50;
-pg = PointGroup('Helical',testPointNum );
+pg = PointGroup();
+pg.AddHelicalPointsByNumPoints(testPointNum);
 
 % Test stored number of points
 numPoints = pg.GetNumPoints();
@@ -79,7 +80,11 @@ latUpper = pi/3;
 latLower = -pi/3;
 lonUpper = 2*pi - pi/6;
 lonLower = pi/6;
-pg = PointGroup('Helical',300,latUpper,latLower,lonUpper,lonLower);
+pg = PointGroup();
+pg.SetLatLonBounds(latUpper,latLower,lonUpper,lonLower);
+pg.AddHelicalPointsByNumPoints(testPointNum);
+
+
 [latVec,lonVec] = pg.GetLatLonVectors();
 for pointIdx = 1:pg.GetNumPoints()
     if (latVec(pointIdx) < latLower || latVec(pointIdx) > latUpper) || ...
@@ -89,7 +94,7 @@ for pointIdx = 1:pg.GetNumPoints()
 end
 
 %  Test setting your own lat lon using those from the previous test
-pgCustom = PointGroup('Helical',0);
+pgCustom = PointGroup();
 pgCustom.AddUserDefinedPoints(latVec,lonVec);
 if pg.GetNumPoints() ~= pgCustom.GetNumPoints()
     error('error setting user defined points)')
@@ -103,3 +108,16 @@ for pointIdx = 1:pgCustom.GetNumPoints()
         error('error setting user defined points)')
     end
 end
+
+%  Test setting points based on angular separation
+pgByAngle = PointGroup();
+angle = 1*pi/180;
+pgByAngle.AddHelicalPointsByAngle(angle);
+v1 = pgByAngle.GetPointPositionVector(3);
+v2 = pgByAngle.GetPointPositionVector(4);
+angleOut = acos(dot(v1,v2)/norm(v1)/norm(v2));
+if abs(angle - angleOut)>1e-6
+    error('error in angle between points when setting based on angle')
+end
+
+
