@@ -26,6 +26,7 @@
 
 
 //#define DEBUG_FILETHRUST_EXE
+//#define DEBUG_INTERPOLATION
 //#define DEBUG_MASS_FLOW
 //#define DEBUG_SEGMENTS
 //#define DEBUG_REF_OBJECTS
@@ -51,7 +52,8 @@ FileThrust::FileThrust(const std::string &name) :
    depleteMass             (false),
    coordSystem             (NULL),
    liner                   (NULL),
-   spliner                 (NULL)
+   spliner                 (NULL),
+   warnTooFewPoints        (true)
 {
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("FileThrust");
@@ -96,7 +98,8 @@ FileThrust::FileThrust(const FileThrust& ft) :
    csNames                 (ft.csNames),
    coordSystem             (NULL),
    liner                   (NULL),
-   spliner                 (NULL)
+   spliner                 (NULL),
+   warnTooFewPoints        (true)
 {
 }
 
@@ -140,6 +143,7 @@ FileThrust& FileThrust::operator=(const FileThrust& ft)
       }
 
       massFlowWarningNeeded = true;
+      warnTooFewPoints      = true;
    }
 
    return *this;
@@ -584,7 +588,9 @@ bool FileThrust::Initialize()
          }
 
          massFlowWarningNeeded = true;
-         retval = true;
+         warnTooFewPoints      = true;
+         indexPair[0]          = -1;
+         retval                = true;
       }
       else
          isInitialized = false;
@@ -592,6 +598,9 @@ bool FileThrust::Initialize()
 
    if (!isInitialized)
       throw ODEModelException("Unable to initialize FileThrust base");
+
+   interpolatorData[0] = interpolatorData[1] = interpolatorData[2] =
+   interpolatorData[3] = interpolatorData[4] = -1;
 
    return retval;
 }
@@ -914,10 +923,6 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
 
    if (index != -1)
    {
-//      if ((*segments)[index].segData.profile.size() < 2)
-//         throw ODEModelException("Cannot model thrust: The thrust profile does "
-//               "not contain enough data");
-
       // Interpolate the thrust/acceleration
       switch ((*segments)[index].segData.accelIntType)
       {
@@ -1029,18 +1034,65 @@ void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
    }
    else
    {
+      ThfDataSegment::InterpolationType forType =
+            (*segments)[atIndex].segData.accelIntType;
       Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
-      for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
+
+      switch (forType)
       {
-         if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
-             ((*segments)[atIndex].segData.profile[i+1].time > offset))
+      case ThfDataSegment::NONE:
+      case ThfDataSegment::LINEAR:
+         for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
          {
-            dataBlock[0] = (*segments)[atIndex].segData.profile[i].vector[0];
-            dataBlock[1] = (*segments)[atIndex].segData.profile[i].vector[1];
-            dataBlock[2] = (*segments)[atIndex].segData.profile[i].vector[2];
-            dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
-            dataBlock[4] = ThfDataSegment::NONE;
+            if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
+                ((*segments)[atIndex].segData.profile[i+1].time > offset))
+            {
+               dataBlock[0] = (*segments)[atIndex].segData.profile[i].vector[0];
+               dataBlock[1] = (*segments)[atIndex].segData.profile[i].vector[1];
+               dataBlock[2] = (*segments)[atIndex].segData.profile[i].vector[2];
+               dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
+               dataBlock[4] = ThfDataSegment::NONE;
+            }
          }
+         break;
+
+      case ThfDataSegment::SPLINE:
+         {
+            bool reload = false;
+            if (indexPair[0] != atIndex)
+               reload = true;
+            indexPair[0] = atIndex;
+            Integer proIndex = -1;
+
+            // Look up the profile index
+            for (UnsignedInt i = 0;
+                  i < (*segments)[atIndex].segData.profile.size()-1; ++i)
+            {
+               if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
+                   ((*segments)[atIndex].segData.profile[i+1].time > offset))
+               {
+                  proIndex = i;
+                  break;
+               }
+            }
+
+            // Now set the indices for the buffer.  This code selects the region
+            // between the 2nd and 3rd points when possible.
+            if (proIndex == 0)
+               proIndex = 1;
+            else if (proIndex > (Integer)((*segments)[atIndex].segData.profile.size()) - 4)
+               proIndex = (*segments)[atIndex].segData.profile.size() - 4;
+
+            interpolatorData[0] = proIndex - 1;
+            interpolatorData[1] = proIndex;
+            interpolatorData[2] = proIndex + 1;
+            interpolatorData[3] = proIndex + 2;
+            interpolatorData[4] = proIndex + 3;
+         }
+         break;
+
+      default:
+         break;
       }
    }
 }
@@ -1085,7 +1137,9 @@ void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
       }
    }
 
-   Real pct = (offset - dataSet[0][4]) / (dataSet[1][4] - dataSet[0][4]);
+   Real pct = 0.0;
+   if ((dataSet[1][4] != dataSet[0][4]))
+      pct = (offset - dataSet[0][4]) / (dataSet[1][4] - dataSet[0][4]);
 
    dataBlock[0] = dataSet[0][0] + pct * (dataSet[1][0] - dataSet[0][0]);
    dataBlock[1] = dataSet[0][1] + pct * (dataSet[1][1] - dataSet[0][1]);
@@ -1119,11 +1173,59 @@ void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
 //------------------------------------------------------------------------------
 void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
 {
+   // Handle case of too few points by falling back to linear interpolation
+   if ((*segments)[atIndex].segData.profile.size() < 5)
+   {
+      if (warnTooFewPoints)
+      {
+         MessageInterface::ShowMessage("Cannot perform spline interpolation: "
+               "the thrust history data segment contains %d points, but spline "
+               "interpolation requires at least 5.  Linear interpolation will "
+               "be applied instead.\n",
+               (*segments)[atIndex].segData.profile.size());
+         warnTooFewPoints = false;
+      }
+      LinearInterpolate(atIndex, atEpoch);
+   }
+
    if (spliner == NULL)
       spliner = new NotAKnotInterpolator("SplineInterpolator", 4);
 
-   throw ODEModelException("The cubic spline interpolation method is not yet "
-         "implemented");
+   if (spliner == NULL)
+      throw ODEModelException("The cubic spline interpolator failed to build");
+
+   Real data[4];
+   if (interpolatorData[1] == -1)
+   {
+      // Ouside of the span; do nothing
+      data[0] =
+      data[1] =
+      data[2] =
+      data[3] = 0.0;
+   }
+   else
+   {
+      // Reload the interpolator
+      spliner->Clear();
+      for (UnsignedInt i = 0; i < 5; ++i)
+      {
+         data[0] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[0];
+         data[1] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[1];
+         data[2] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[2];
+         data[3] = (*segments)[atIndex].segData.profile[interpolatorData[i]].mdot;
+
+         spliner->AddPoint((*segments)[atIndex].segData.profile[i].time, data);
+      }
+
+      Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
+      spliner->Interpolate(offset, data);
+   }
+
+   dataBlock[0] = data[0];
+   dataBlock[1] = data[1];
+   dataBlock[2] = data[2];
+   dataBlock[3] = data[3];
+   dataBlock[4] = ThfDataSegment::SPLINE;
 }
 
 
