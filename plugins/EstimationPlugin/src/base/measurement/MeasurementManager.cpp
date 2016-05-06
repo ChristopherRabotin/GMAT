@@ -2418,6 +2418,98 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
 }
 
 
+//--------------------------------------------------------------------------------------
+// bool ValidateDouplicationOfGroundStationID()
+//--------------------------------------------------------------------------------------
+/**
+* This function is used to verify 2 different ground stations having the same Id
+*
+* @return      true if each ground station has a unique ID, false otherwise 
+*/
+//--------------------------------------------------------------------------------------
+bool MeasurementManager::ValidateDuplicationOfGroundStationID(std::string& errorMsg)
+{
+   std::map<std::string, std::string> gsNameIdMap;
+   
+   for (Integer i = 0; i < models.size(); ++i)
+   {
+      ObjectArray oa = models[i]->GetParticipants();
+
+      for (Integer j = 0; j < oa.size(); ++j)
+      {
+         if (oa[j]->IsOfType(Gmat::GROUND_STATION))
+         {
+            if (gsNameIdMap.empty())
+               gsNameIdMap[oa[j]->GetName()] = oa[j]->GetStringParameter("Id");
+            else
+            {
+               for (std::map<std::string, std::string>::iterator objPtr = gsNameIdMap.begin(); objPtr != gsNameIdMap.end(); objPtr)
+               {
+                  if (objPtr->first == oa[j]->GetName())
+                     continue;
+                  else
+                  {
+                     if (objPtr->second != oa[j]->GetStringParameter("Id"))
+                     {
+                        // Add to gsNameIdMap
+                        gsNameIdMap[oa[j]->GetName()] = oa[j]->GetStringParameter("Id");
+                        break;
+                     }
+                     else
+                     {
+                        errorMsg = "Error: Both ground stations " + objPtr->first + " and " + oa[j]->GetName() + " have the same Id '" + objPtr->second + "'";
+                        return false;
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   for (Integer i = 0; i < adapters.size(); ++i)
+   {
+      std::vector<ObjectArray*> participantObjLists = adapters[i]->GetMeasurementModel()->GetParticipantObjectLists();
+      ObjectArray* oa = participantObjLists[0];
+
+      for (Integer j = 0; j < (*oa).size(); ++j)
+      {
+         if ((*oa)[j]->IsOfType(Gmat::GROUND_STATION))
+         {
+            if (gsNameIdMap.size() == 0)
+               gsNameIdMap[(*oa)[j]->GetName()] = (*oa)[j]->GetStringParameter("Id");
+            else
+            {
+               for (std::map<std::string, std::string>::iterator objPtr = gsNameIdMap.begin(); objPtr != gsNameIdMap.end(); ++objPtr)
+               {
+                  if (objPtr->first == (*oa)[j]->GetName())
+                     continue;
+                  else
+                  {
+                     if (objPtr->second != (*oa)[j]->GetStringParameter("Id"))
+                     {
+                        // Add to gsNameIdMap
+                        gsNameIdMap[(*oa)[j]->GetName()] = (*oa)[j]->GetStringParameter("Id");
+                        break;
+                     }
+                     else
+                     {
+                        errorMsg = "Error: Both ground stations '" + objPtr->first + "' and '" + (*oa)[j]->GetName() + "' have the same Id '" + objPtr->second + "'";
+                        return false;
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   gsNameIdMap.clear();
+
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 // bool CalculateMeasurements(bool forSimulation, bool withEvents, bool addNoise)   
 //------------------------------------------------------------------------------

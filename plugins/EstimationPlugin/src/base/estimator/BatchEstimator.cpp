@@ -1144,6 +1144,16 @@ void BatchEstimator::CompleteInitialization()
    // Clear warning message's count
    warningCount = 0;
 
+
+   // Verify no two different ground station having the same Id
+   std::string errMsg = "";
+   if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(errMsg) == false)
+   {
+      errMsg = errMsg + " in batch estimator '" + GetName() + "'.\n";
+      throw EstimatorException(errMsg);
+   }
+
+
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("BatchEstimator::CompleteInitialization "
             "process complete\n");
@@ -3111,14 +3121,10 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
                   paramValues.push_back(emList[j]);
                }
                
-               // Insert blank lines to paramNames and rowContent
-               StringArray::iterator pos1 = paramNames.begin() + paramNames.size(); // (paramNames.size() - 1);
-               paramNames.insert(pos1, emList.size() - maxNumErrorModels, "");
-               
-               if (colCount != 0)
+               // Insert blank lines to paramNames
+               for (Integer j = 0; j < emList.size() - maxNumErrorModels; ++j)
                {
-                  StringArray::iterator pos2 = rowContent.begin() + paramNames.size(); // (paramNames.size() - 1);
-                  rowContent.insert(pos2, emList.size() - maxNumErrorModels, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
+                  paramNames.push_back(GmatStringUtil::GetAlignmentString("", nameLen));
                }
                
                maxNumErrorModels = emList.size();
@@ -3132,8 +3138,15 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
          for (UnsignedInt j = 0; j < paramNames.size(); ++j)
          {
             if (j == rowContent.size())
-               rowContent.push_back("");
-            
+            {
+               if (colCount == 1)
+                  rowContent.push_back("");
+               else
+                  rowContent.push_back(GmatStringUtil::GetAlignmentString("", rowContent.at(rowContent.size() - 1).size()));
+            }
+         }
+         for (UnsignedInt j = 0; j < paramNames.size(); ++j)
+         {
             if (colCount == 1)
                rowContent[j] += (" " + GmatStringUtil::GetAlignmentString(paramNames[j], nameLen, GmatStringUtil::LEFT) + "  ");
             
@@ -3141,7 +3154,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
          }
          
          // 3.5. Beak up columns in a table
-         if ((nameLen+3+ colCount*24) > (160-24))
+         if ((nameLen+3+ colCount*24) > (160-48))
          {
             for (UnsignedInt j = 0; j < rowContent.size(); ++j)
                textFile << rowContent[j] << "\n";

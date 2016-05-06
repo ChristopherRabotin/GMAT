@@ -49,7 +49,9 @@ FileThrust::FileThrust(const std::string &name) :
    segments                (NULL),
    mDotIndex               (-1),
    depleteMass             (false),
-   coordSystem             (NULL)
+   coordSystem             (NULL),
+   liner                   (NULL),
+   spliner                 (NULL)
 {
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("FileThrust");
@@ -64,6 +66,10 @@ FileThrust::FileThrust(const std::string &name) :
 //------------------------------------------------------------------------------
 FileThrust::~FileThrust()
 {
+   if (liner != NULL)
+      delete liner;
+   if (spliner != NULL)
+      delete spliner;
 }
 
 //------------------------------------------------------------------------------
@@ -88,7 +94,9 @@ FileThrust::FileThrust(const FileThrust& ft) :
    depleteMass             (ft.depleteMass),
    activeTankName          (ft.activeTankName),
    csNames                 (ft.csNames),
-   coordSystem             (NULL)
+   coordSystem             (NULL),
+   liner                   (NULL),
+   spliner                 (NULL)
 {
 }
 
@@ -120,6 +128,16 @@ FileThrust& FileThrust::operator=(const FileThrust& ft)
       activeTankName = ft.activeTankName;
       csNames       = ft.csNames;
       coordSystem   = NULL;
+      if (liner != NULL)
+      {
+         delete liner;
+         liner = NULL;
+      }
+      if (spliner != NULL)
+      {
+         delete spliner;
+         spliner = NULL;
+      }
 
       massFlowWarningNeeded = true;
    }
@@ -284,7 +302,9 @@ bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 {
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-      MessageInterface::ShowMessage("Setting cs named %s\n", name.c_str());
+      #ifdef DEBUG_REF_OBJECTS
+         MessageInterface::ShowMessage("Setting cs named %s\n", name.c_str());
+      #endif
 
       bool retval = false;
 
@@ -763,6 +783,19 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
 }
 
 
+//------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft* sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves derivative data used in the force model Parameter code
+ *
+ * @param sc The spacecraft that supplies the needed state data
+ *
+ * @return The derivative data as a 6-vector
+ *
+ * @note: Not yet implemented for the Thrust History File reader code.
+ */
+//------------------------------------------------------------------------------
 Rvector6 FileThrust::GetDerivativesForSpacecraft(Spacecraft* sc)
 {
    Rvector6 dv;
@@ -881,6 +914,10 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
 
    if (index != -1)
    {
+//      if ((*segments)[index].segData.profile.size() < 2)
+//         throw ODEModelException("Cannot model thrust: The thrust profile does "
+//               "not contain enough data");
+
       // Interpolate the thrust/acceleration
       switch ((*segments)[index].segData.accelIntType)
       {
@@ -1082,6 +1119,9 @@ void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
 //------------------------------------------------------------------------------
 void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
 {
+   if (spliner == NULL)
+      spliner = new NotAKnotInterpolator("SplineInterpolator", 4);
+
    throw ODEModelException("The cubic spline interpolation method is not yet "
          "implemented");
 }
@@ -1100,7 +1140,10 @@ void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
 //------------------------------------------------------------------------------
 void FileThrust::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epoch)
 {
-   MessageInterface::ShowMessage("Rotating into a new frame\n");
+   #ifdef DEBUG_FILETHRUST_EXE
+      MessageInterface::ShowMessage("Rotating into a new frame\n");
+   #endif
+
    Real inDir[6], outDir[6];
    for (Integer i=0; i<3; i++)
       inDir[i] = dir[i];
