@@ -116,7 +116,7 @@ protected:
    CoordinateSystem              *coordSystem;
 
    /// 5 raw data elements: 3 thrust/accel components, mdot, interpolation method
-   Real                          dataBlock[5];
+   Real                          dataBlock[7];
    /// dataSet is (up to) 5 dataBlock sets, with the last element set to time
    Real                          dataSet[5][5];
 
