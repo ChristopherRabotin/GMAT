@@ -43,12 +43,12 @@ public:
    NotAKnotInterpolator(const std::string &name = "", Integer dim = 1);
    virtual ~NotAKnotInterpolator();
    NotAKnotInterpolator(const NotAKnotInterpolator &csi);
-   NotAKnotInterpolator&    operator=(const NotAKnotInterpolator &csi);
+   NotAKnotInterpolator&      operator=(const NotAKnotInterpolator &csi);
 
-   virtual bool                Interpolate(const Real ind, Real *results);
+   virtual bool               Interpolate(const Real ind, Real *results);
 
    // inherited from GmatBase
-   virtual Interpolator* Clone() const;
+   virtual Interpolator*      Clone() const;
 
 protected:
    /// Array of ordered independent variables used to construct the splines.

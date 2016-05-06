@@ -281,6 +281,51 @@ void Interpolator::Clear()
 
 
 //------------------------------------------------------------------------------
+//  Integer GetBufferSize()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the bufferSize parameter.
+ *
+ * @return  The buffer size.
+ */
+//------------------------------------------------------------------------------
+Integer Interpolator::GetBufferSize()
+{
+   return bufferSize;
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer GetPointCount()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the pointCount parameter.
+ *
+ * @return  The buffer size.
+ */
+//------------------------------------------------------------------------------
+Integer Interpolator::GetPointCount()
+{
+   return pointCount;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name assigned to this interpolator
+ *
+ * @return The instance name
+ */
+//------------------------------------------------------------------------------
+std::string Interpolator::GetName()
+{
+   return instanceName;
+}
+
+
+//------------------------------------------------------------------------------
 //  void AllocateArrays()
 //------------------------------------------------------------------------------
 /**
@@ -377,49 +422,4 @@ void Interpolator::SetRange()
    }
    
    rangeCalculated = true;
-}
-
-
-//------------------------------------------------------------------------------
-//  Integer GetBufferSize()
-//------------------------------------------------------------------------------
-/**
- * Access method for the bufferSize parameter.
- * 
- * @return  The buffer size.
- */
-//------------------------------------------------------------------------------
-Integer Interpolator::GetBufferSize()
-{
-   return bufferSize;
-}
-
-
-//------------------------------------------------------------------------------
-//  Integer GetPointCount()
-//------------------------------------------------------------------------------
-/**
- * Access method for the pointCount parameter.
- * 
- * @return  The buffer size.
- */
-//------------------------------------------------------------------------------
-Integer Interpolator::GetPointCount()
-{
-   return pointCount;
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetName()
-//------------------------------------------------------------------------------
-/**
- * Retrieves the name assigned to this interpolator
- *
- * @return The instance name
- */
-//------------------------------------------------------------------------------
-std::string Interpolator::GetName()
-{
-   return instanceName;
 }
