@@ -115,13 +115,21 @@ protected:
    /// Current coordinate system, used when coversion is needed
    CoordinateSystem              *coordSystem;
 
-   // 5 raw data elements: 3 thrust/accel components, mdot, interpolation method
-   Real dataBlock[5];
+   /// 5 raw data elements: 3 thrust/accel components, mdot, interpolation method
+   Real                          dataBlock[7];
    /// dataSet is (up to) 5 dataBlock sets, with the last element set to time
-   Real dataSet[5][5];
+   Real                          dataSet[5][5];
 
-   LinearInterpolator *liner;
-   NotAKnotInterpolator *spliner; //(const std::string &name = "", Integer dim = 1);
+   /// Linear interpolator object (currently not used
+   LinearInterpolator            *liner;
+   /// Not a knot interpolator, used for spline interpolation
+   NotAKnotInterpolator          *spliner;
+   /// Flag used to mark when the "too few points" warning has been written
+   bool                          warnTooFewPoints;
+   /// Indices into the profile data that is loaded into the interpolator
+   Integer                       interpolatorData[5];
+   /// Last used index pair
+   Integer                       indexPair[2];
 
    void ComputeAccelerationMassFlow(const GmatEpoch atEpoch, Real burnData[4]);
    void GetSegmentData(Integer atIndex, GmatEpoch atEpoch);
