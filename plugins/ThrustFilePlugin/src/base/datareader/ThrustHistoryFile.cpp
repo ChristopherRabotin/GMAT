@@ -13,7 +13,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Jan 13, 2016
 /**
- * 
+ * Code that models thrusts using a time ordered collection of points in a file.
  */
 //------------------------------------------------------------------------------
 

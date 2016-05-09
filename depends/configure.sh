@@ -107,8 +107,10 @@ function download_depends() {
         	if [ $mac == true ]
         	then
 		  cspice_type=MacIntel_OSX_AppleC
+		  export OSXVERSION="-mmacosx-version-min=$osx_min_version"
         	else 
 		  cspice_type=PC_Linux_GCC
+      export OSXVERSION=""
         	fi
 	
 		# Download and extract Spice (32/64-bit)
@@ -136,12 +138,12 @@ function download_depends() {
 		fi
 
 		# Compile debug CSPICE with integer uiolen [GMT-5044]
-		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi -mmacosx-version-min=$osx_min_version -g -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
+		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXVERSION -g -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 		./mkprodct.csh
 		mv ../../lib/cspice.a ../../lib/cspiced.a
 
 		# Compile release CSPICE with integer uiolen [GMT-5044]
-		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi -mmacosx-version-min=$osx_min_version -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
+		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXVERSION -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 		./mkprodct.csh
 	fi	
 
