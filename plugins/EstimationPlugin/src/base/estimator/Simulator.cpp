@@ -1667,11 +1667,11 @@ void Simulator::CompleteInitialization()
    
    
    // Verify no two different ground station having the same Id
-   std::string errMsg = "";
-   if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(errMsg) == false)
+   std::string warningMsg = "";
+   if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(warningMsg) == false)
    {
-      errMsg = errMsg + " in simulator '" + GetName() + "'.\n";
-      throw SolverException(errMsg);
+      warningMsg = warningMsg + " in simulator '" + GetName() + "'.\n";
+      MessageInterface::ShowMessage("Warning: %s", warningMsg.c_str());
    }
    
 

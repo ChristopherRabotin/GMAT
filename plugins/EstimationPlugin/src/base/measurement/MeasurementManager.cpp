@@ -2457,7 +2457,7 @@ bool MeasurementManager::ValidateDuplicationOfGroundStationID(std::string& error
                      }
                      else
                      {
-                        errorMsg = "Error: Both ground stations " + objPtr->first + " and " + oa[j]->GetName() + " have the same Id '" + objPtr->second + "'";
+                        errorMsg = "Both ground stations " + objPtr->first + " and " + oa[j]->GetName() + " have the same Id '" + objPtr->second + "'";
                         return false;
                      }
                   }
@@ -2494,7 +2494,7 @@ bool MeasurementManager::ValidateDuplicationOfGroundStationID(std::string& error
                      }
                      else
                      {
-                        errorMsg = "Error: Both ground stations '" + objPtr->first + "' and '" + (*oa)[j]->GetName() + "' have the same Id '" + objPtr->second + "'";
+                        errorMsg = "Both ground stations '" + objPtr->first + "' and '" + (*oa)[j]->GetName() + "' have the same Id '" + objPtr->second + "'";
                         return false;
                      }
                   }
