@@ -250,6 +250,10 @@ protected:
 
    TrackingDataAdapter *BuildAdapter(const StringArray &strand,
          const std::string &type, Integer configIndex);
+
+private:
+   bool    ParsingStrand(std::string value, Integer configIndex, Integer strandIndex = 0);
+   bool    AddToSignalPath(std::string participantName, Integer configIndex, Integer strandIndex);
 };
 
 #endif /* TrackingFileSet_hpp */
