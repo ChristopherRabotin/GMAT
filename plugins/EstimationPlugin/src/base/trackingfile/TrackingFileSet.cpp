@@ -970,7 +970,18 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
          // case 4:
          if (find(knownTypes.begin(), knownTypes.end(), rawName) == knownTypes.end())
-            throw MeasurementException("Error: In current version, GMAT does not have measurement type '" + rawName + "'.\n");
+         {
+            std::stringstream ss;
+            ss << "Error: In current version, GMAT does not have measurement type '" + rawName + "'.\n This is a list of all available types:\n";
+            for (Integer i = 0; i < knownTypes.size(); ++i)
+            {
+               if (i < knownTypes.size() - 1)
+                  ss << " " << knownTypes[i] << ",";
+               else
+                  ss << " " << knownTypes[i] << ".\n";
+            }
+            throw MeasurementException(ss.str());
+         }
          else
          {
             if ((!trackingConfigs[defIndex].types.empty()) &&
