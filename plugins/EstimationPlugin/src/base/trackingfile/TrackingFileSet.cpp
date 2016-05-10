@@ -803,6 +803,69 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
  * @return The string.
  */
 //------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+* This function is used to add a particpant name to the list of signal path's
+* particicpants list.
+*
+* @param participantName      Name of a partcipant along the signal path
+*
+* @return                     true if a valid participant name, false otherwise
+*/
+//------------------------------------------------------------------------------
+bool TrackingFileSet::AddToSignalPath(std::string participantName, Integer configIndex, Integer strandIndex)
+{
+   // validate participant name
+   if (GmatStringUtil::IsValidIdentity(participantName) == false)
+      throw MeasurementException("Error: Invalid participant name '" + participantName + "' was set to " + GetName() + ".AddTrackingConfig parameter.\n");
+   
+   if (strandIndex > 0)
+      throw MeasurementException("Error: Syntax error when setting value to " + GetName() + ".AddTrackingConfig parameter. In current version, GMAT does not allow two or more participant lists in tracking configuration.\n");
+
+   trackingConfigs[configIndex].strands[strandIndex].push_back(participantName);
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ParsingStrand(const std::string value)
+//------------------------------------------------------------------------------
+/**
+* This function is used to parse strand with syntax {part1,..., partn}
+*
+* @param value    a string containing a list of partcipants a long signal path
+*
+* @return         true if no syntax error, false otherwise
+*/
+//------------------------------------------------------------------------------
+bool TrackingFileSet::ParsingStrand(std::string value, Integer configIndex, Integer strandIndex)
+{
+   // Remove open and close curly brackets at the begin and end of string
+   value = value.substr(1, value.size() - 2);
+
+   // processing each participant in participants list
+   std::string participantName;
+   size_t pos = value.find_first_of(',');
+   while (pos != std::string::npos)
+   {
+      participantName = value.substr(0, pos);
+      participantName = GmatStringUtil::Trim(participantName);
+      if (AddToSignalPath(participantName, configIndex, strandIndex) == false)
+         return false;
+
+      value = value.substr(pos + 1);
+      pos = value.find_first_of(',');
+   }
+
+   participantName = GmatStringUtil::Trim(value);
+   return AddToSignalPath(participantName, configIndex, strandIndex);
+}
+
+
 bool TrackingFileSet::SetStringParameter(const Integer id,
       const std::string& value1, const Integer index)
 {
@@ -818,75 +881,120 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       if (index == -1)
          return true;
 
-      if ((value.size() > 1) && (value.c_str()[0] == '{') && (value.c_str()[value.size()-1] == '}'))
-      {
-         // Processing a tracking config:
-         value = value.substr(1,value.size()-2);
-         std::string term;
-         size_t pos = value.find_first_of(',');       // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
-         Integer newIndex = 0;
-         bool retVal;
+      if (value == "")
+         throw MeasurementException("Error:: Syntax error when GMAT sets value to " + GetName() + ".AddTrackingConfig parameter.\n");
 
-         while (pos != std::string::npos)
-         {
-            term = value.substr(0, pos);
-            retVal = TrackingFileSet::SetStringParameter(id, term, newIndex);
-            if (retVal == false)
-               return false;
 
-            value = value.substr(pos+1);
-            pos = value.find_first_of(',');
-            ++newIndex;
-         }
+      // Get all known measurement types
+      TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
+      StringArray knownTypes = mn->GetKnownTypes();
 
-         return TrackingFileSet::SetStringParameter(id, value, newIndex);
-      }
 
-      
-      if (index == 0)
+      // Create a new tracking config
+      static Integer openBracketCount;
+      if (index == 0)                    // it starts a tracking configuration when index = 0
       {
          // Starting a new definition
          MeasurementDefinition newDef;
          trackingConfigs.push_back(newDef);
+
+         // reset open bracket count and new strand flag
+         openBracketCount = 0;
       }
       Integer defIndex = trackingConfigs.size() - 1;
 
-      std::string rawName = value;
-      TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
-      StringArray knownTypes = mn->GetKnownTypes();
-
-      bool newStrand = false;
-      const char* valarray = value.c_str();
-      if ((valarray[0]=='{') || (trackingConfigs[defIndex].strands.size()==0))
+      if ((value.size() > 1) && (value.c_str()[0] == '{') && (value.c_str()[value.size() - 1] == '}'))
       {
-         newStrand = true;
-         rawName = value.substr(1);
-      }
+         // parsing syntax {part1,..., partn}
+         if (openBracketCount != 0)
+            throw MeasurementException("Error:: Syntax error when GMAT sets value to " + GetName() + ".AddTrackingConfig parameter.\n");
 
-      if (newStrand)
-      {
          StringArray trackList;
          trackingConfigs[defIndex].strands.push_back(trackList);
+         Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
+
+         return ParsingStrand(value, defIndex, strandIndex);
       }
-      Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
-
-      // Strip off trailing '}', and leading and trailing white space
-      size_t loc = rawName.find('}');                           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
-      if (loc != std::string::npos)
-         rawName = rawName.substr(0,loc);
-      valarray = rawName.c_str();
-      loc = 0;
-      while ((valarray[loc] == ' ') || (valarray[loc] == '\t'))
-         ++loc;
-      Integer eloc = rawName.length() - 1;
-      while ((valarray[eloc] == ' ') || (valarray[eloc] == '\t'))
-         --eloc;
-      rawName = rawName.substr(loc, eloc-loc+1);
-
-      if (find(knownTypes.begin(), knownTypes.end(), rawName) == knownTypes.end())
-         trackingConfigs[defIndex].strands[strandIndex].push_back(rawName);
       else
-         trackingConfigs[defIndex].types.push_back(rawName);
+      {
+         // parsing the follwoing cases:
+         // case 1: '{<part>'
+         // case 2: '<part>}'
+         // case 3: '<part>'
+         // case 4: '<typename>'
+
+         std::string rawName = GmatStringUtil::Trim(value);
+         if (rawName.size() == 0)
+            throw MeasurementException("Error:: Syntax error when GMAT sets value to " + GetName() + ".AddTrackingConfig parameter.\n");
+
+         // case 1: '{<part>'
+         if (rawName.at(0) == '{')
+         {
+            if (openBracketCount != 0)
+               throw MeasurementException("Error:: Syntax error when GMAT sets value to " + GetName() + ".AddTrackingConfig parameter.\n");
+
+            ++openBracketCount;
+            rawName = GmatStringUtil::Trim(rawName.substr(1));                          // trim open curly bracket and all white space
+            
+            StringArray trackList;
+            trackingConfigs[defIndex].strands.push_back(trackList);
+            Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
+            AddToSignalPath(rawName, defIndex, strandIndex);
+
+            return true;
+         }
+
+
+         // case 2: '<part>}'
+         if (rawName.at(rawName.size() - 1) == '}')
+         {
+            if (openBracketCount == 0)
+               throw MeasurementException("Error:: Syntax error when GMAT sets value to " + GetName() + ".AddTrackingConfig parameter.\n");
+
+            --openBracketCount;
+            rawName = GmatStringUtil::Trim(rawName.substr(0, rawName.size() - 1));
+            Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
+            AddToSignalPath(rawName, defIndex, strandIndex);
+
+            return true;
+         }
+
+         // case 3: '<part>'
+         if (openBracketCount > 0)
+         {
+            Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
+            AddToSignalPath(rawName, defIndex, strandIndex);
+            
+            return true;
+         }
+
+         // case 4:
+         if (find(knownTypes.begin(), knownTypes.end(), rawName) == knownTypes.end())
+         {
+            std::stringstream ss;
+            ss << "Error: In current version, GMAT does not have measurement type '" + rawName + "'.\n This is a list of all available types:\n";
+            for (Integer i = 0; i < knownTypes.size(); ++i)
+            {
+               if (i < knownTypes.size() - 1)
+                  ss << " " << knownTypes[i] << ",";
+               else
+                  ss << " " << knownTypes[i] << ".\n";
+            }
+            throw MeasurementException(ss.str());
+         }
+         else
+         {
+            if ((!trackingConfigs[defIndex].types.empty()) &&
+                (find(trackingConfigs[defIndex].types.begin(), trackingConfigs[defIndex].types.end(), rawName) != trackingConfigs[defIndex].types.end()))
+               throw MeasurementException("Error: Duplicate measurement type in tracking configuration in " + GetName() + ".AddTrackingConfig parameter.\n");
+            else
+            {
+               trackingConfigs[defIndex].types.push_back(rawName);
+               return true;
+            }
+         }
+      }
+
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("%d members in config:\n",

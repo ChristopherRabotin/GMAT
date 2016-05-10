@@ -1149,7 +1149,7 @@ void BatchEstimator::CompleteInitialization()
    std::string errMsg = "";
    if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(errMsg) == false)
    {
-      errMsg = errMsg + " in batch estimator '" + GetName() + "'.\n";
+      errMsg = "Error: " + errMsg + " in batch estimator '" + GetName() + "'.\n";
       throw EstimatorException(errMsg);
    }
 

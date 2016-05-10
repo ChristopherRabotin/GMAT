@@ -2443,7 +2443,7 @@ bool MeasurementManager::ValidateDuplicationOfGroundStationID(std::string& error
                gsNameIdMap[oa[j]->GetName()] = oa[j]->GetStringParameter("Id");
             else
             {
-               for (std::map<std::string, std::string>::iterator objPtr = gsNameIdMap.begin(); objPtr != gsNameIdMap.end(); objPtr)
+               for (std::map<std::string, std::string>::iterator objPtr = gsNameIdMap.begin(); objPtr != gsNameIdMap.end(); ++objPtr)
                {
                   if (objPtr->first == oa[j]->GetName())
                      continue;
@@ -2457,7 +2457,7 @@ bool MeasurementManager::ValidateDuplicationOfGroundStationID(std::string& error
                      }
                      else
                      {
-                        errorMsg = "Error: Both ground stations " + objPtr->first + " and " + oa[j]->GetName() + " have the same Id '" + objPtr->second + "'";
+                        errorMsg = "Both ground stations " + objPtr->first + " and " + oa[j]->GetName() + " have the same Id '" + objPtr->second + "'";
                         return false;
                      }
                   }
@@ -2494,7 +2494,7 @@ bool MeasurementManager::ValidateDuplicationOfGroundStationID(std::string& error
                      }
                      else
                      {
-                        errorMsg = "Error: Both ground stations '" + objPtr->first + "' and '" + (*oa)[j]->GetName() + "' have the same Id '" + objPtr->second + "'";
+                        errorMsg = "Both ground stations '" + objPtr->first + "' and '" + (*oa)[j]->GetName() + "' have the same Id '" + objPtr->second + "'";
                         return false;
                      }
                   }
@@ -2988,7 +2988,8 @@ const std::vector<RealArray>& MeasurementManager::CalculateDerivatives(
  *
  * This method is used during measurement simulation to generate simulated data.
  *
- * @return true on success, false on failure
+ * @return  true when at least one measurement successed for writing, 
+ *          false when all measurement are unfeasible
  */
 //------------------------------------------------------------------------------
 bool MeasurementManager::WriteMeasurements()
