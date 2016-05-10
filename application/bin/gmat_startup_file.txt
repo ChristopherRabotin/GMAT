@@ -93,12 +93,14 @@ MEASUREMENT_PATH       = OUTPUT_PATH/
 #-----------------------------------------------------------
 VEHICLE_EPHEM_PATH     = OUTPUT_PATH/
 #-----------------------------------------------------------
+GMAT_INCLUDE_PATH      = ROOT_PATH/userincludes/
+#-----------------------------------------------------------
 GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
 #-----------------------------------------------------------
 MATLAB_FUNCTION_PATH   = ROOT_PATH/matlab
 MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
 #-----------------------------------------------------------
-PYTHON_MODULE_PATH       = ROOT_PATH/userfunctions/python
+PYTHON_MODULE_PATH     = ROOT_PATH/userfunctions/python
 #-----------------------------------------------------------
 DATA_PATH              = ROOT_PATH/data/
 FILE_UPDATE_PATH       = ROOT_PATH/data/
@@ -117,7 +119,7 @@ VEHICLE_EPHEM_CCSDS_PATH = DATA_PATH/vehicle/ephem/ccsds/
 PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
 EOP_FILE               = PLANETARY_COEFF_PATH/eopc04_08.62-now
 NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
-PLANETARY_PCK_FILE       = PLANETARY_COEFF_PATH/SPICEPlanetaryConstantsKernel.tpc
+PLANETARY_PCK_FILE     = PLANETARY_COEFF_PATH/SPICEPlanetaryConstantsKernel.tpc
 #-----------------------------------------------------------
 TIME_PATH              = DATA_PATH/time/
 LEAP_SECS_FILE         = TIME_PATH/tai-utc.dat
@@ -163,7 +165,7 @@ BODY_3D_MODEL_PATH     = DATA_PATH/graphics/models/
 STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
 CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
-BORDER_FILE              = STAR_PATH/inp_Border.txt
+BORDER_FILE            = STAR_PATH/inp_Border.txt
 #-----------------------------------------------------------
 VEHICLE_MODEL_PATH     = DATA_PATH/vehicle/models/
 SPACECRAFT_MODEL_FILE  = VEHICLE_MODEL_PATH/aura.3ds
@@ -171,9 +173,9 @@ SPACECRAFT_MODEL_FILE  = VEHICLE_MODEL_PATH/aura.3ds
 SPAD_PATH              = DATA_PATH/vehicle/spad/
 SPAD_SRP_FILE          = SPAD_PATH/SphericalModel.spo
 #-----------------------------------------------------------
-ATMOSPHERE_PATH          = DATA_PATH/atmosphere/earth
-CSSI_FLUX_FILE           = ATMOSPHERE_PATH/SpaceWeather-All-v1.2.txt
-SCHATTEN_FILE            = ATMOSPHERE_PATH/SchattenPredict.txt
+ATMOSPHERE_PATH        = DATA_PATH/atmosphere/earth
+CSSI_FLUX_FILE         = ATMOSPHERE_PATH/SpaceWeather-All-v1.2.txt
+SCHATTEN_FILE          = ATMOSPHERE_PATH/SchattenPredict.txt
 #-----------------------------------------------------------
 HELP_FILE              = ROOT_PATH/docs/help/help.chm
 #-----------------------------------------------------------
@@ -183,7 +185,7 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 # Base location of MATLAB libraries (required only for OS X)
 #-----------------------------------------------------------
-MATLAB_APP_PATH          = /Applications/MATLAB_R2015b/MATLAB_R2015b.app    
+MATLAB_APP_PATH        = /Applications/MATLAB_R2015b/MATLAB_R2015b.app    
 
 #-----------------------------------------------------------
 # Debug options
@@ -191,8 +193,8 @@ MATLAB_APP_PATH          = /Applications/MATLAB_R2015b/MATLAB_R2015b.app
 #RUN_MODE              = TESTING
 #RUN_MODE              = TESTING_NO_PLOTS
 #RUN_MODE              = EXIT_AFTER_RUN
-#DEBUG_MATLAB            = ON
-#DEBUG_PARAMETERS        = ON
+#DEBUG_MATLAB          = ON
+#DEBUG_PARAMETERS      = ON
 #DEBUG_FILE_PATH       = ON
 #HIDE_SAVEMISSION      = TRUE
 #PLOT_MODE             = TILE
