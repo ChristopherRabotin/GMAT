@@ -155,7 +155,7 @@ protected:
    virtual void               SetHardwareDelays(bool loadEvents = true);
 
 ///// TBD: Determine if there is a more generic way to add these
-   Real                       GetFrequencyFromRampTable(Real epoch);         // Get frequency from ramped table for a given epoch (in A1Mjd)
+   Real                       GetFrequencyFromRampTable(Real epoch);         // Get frequency from ramp table for a given epoch (in A1Mjd)
    Integer                    GetUplinkBandFromRampTable(Real epoch);
    virtual Real               IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);
    void                       BeginEndIndexesOfRampTable(UnsignedInt& beginIndex, UnsignedInt & endIndex, Integer & err);

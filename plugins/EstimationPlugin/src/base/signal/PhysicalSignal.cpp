@@ -1279,10 +1279,10 @@ bool PhysicalSignal::SignalFrequencyCalculation(std::vector<RampTableData>* ramp
       if (theData.arriveFreq == -1.0)               // theData.arriveFerq only equals -1.0 when Transmit Node is the first node in signal path 
       {
          // Case 1: Transmit Node is the first node and a ground station: 
-         // Transmit frequency is specified by ramped table at the transmit time or by Transmitter's transmit frequency
+         // Transmit frequency is specified by ramp table at the transmit time or by Transmitter's transmit frequency
          if (rampTB)
          {
-            // Get transmit frequency from ramped table if it is used
+            // Get transmit frequency from ramp table if it is used
             GmatTime t1 = theData.tPrecTime - theData.tDelay/GmatTimeConstants::SECS_PER_DAY;
             frequency = GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;                     // unit: Mhz
          }
@@ -1748,7 +1748,7 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
          // Get frequency from ground station's transmiter or from ramped frequency table
          if (rampTB)
          {
-            // Get transmit frequency from ramped table if it is used
+            // Get transmit frequency from ramp table if it is used
             GmatTime t1 = theData.tPrecTime - theData.tDelay/GmatTimeConstants::SECS_PER_DAY;
             frequency = GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;                     // unit: Mhz
          }

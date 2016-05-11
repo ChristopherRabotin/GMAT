@@ -856,7 +856,7 @@ void BatchEstimatorInv::Estimate()
    {
       MessageInterface::ShowMessage("Number of Records Removed Due To:\n");
       MessageInterface::ShowMessage("   . No Computed Value Configuration Available : %d\n", numRemovedRecords["U"]);
-      MessageInterface::ShowMessage("   . Out of Ramped Table Range : %d\n", numRemovedRecords["R"]);
+      MessageInterface::ShowMessage("   . Out of Ramp Table Range   : %d\n", numRemovedRecords["R"]);
       MessageInterface::ShowMessage("   . Signal Blocked : %d\n", numRemovedRecords["B"]);
       MessageInterface::ShowMessage("   . Initial RMS Sigma Filter  : %d\n", numRemovedRecords["IRMS"]);
       MessageInterface::ShowMessage("   . Outer-Loop Sigma Editor : %d\n", numRemovedRecords["OLSE"]);

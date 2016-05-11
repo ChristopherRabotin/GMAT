@@ -995,9 +995,9 @@ const MeasurementData& TDRSDopplerAdapter::CalculateMeasurement(bool withEvents,
    
    // 2.2.2. Specify uplink frequency
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
-   uplinkFreq        = calcData->GetUplinkFrequency(0, NULL);    // No ramped table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
-   uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0, NULL);    // No ramped table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
-   freqBand          = calcData->GetUplinkFrequencyBand(0, NULL);  // No ramped table is used for TDRS measurement   // calcData->GetUplinkFrequencyBand(0, rampTB);
+   uplinkFreq        = calcData->GetUplinkFrequency(0, NULL);    // No ramp table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
+   uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0, NULL);    // No ramp table is used for TDRS measurement   // calcData->GetUplinkFrequency(0, rampTB);
+   freqBand          = calcData->GetUplinkFrequencyBand(0, NULL);  // No ramp table is used for TDRS measurement   // calcData->GetUplinkFrequencyBand(0, rampTB);
    
    // 2.3.1. Measurement time is the same as the one for End-path
    GmatTime tm = cMeasurement.epoch;                                // Get measurement time
