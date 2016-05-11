@@ -8201,6 +8201,7 @@ void Moderator::CreateDefaultParameters()
    // The ref object of TotalThrust1 is actually Burn object, so we will create
    // Parameters with ImpulsiveBurn to show FiniteBurn property list in the default
    // mission GUI.
+   CreateParameter("TotalMassFlowRate", "DefaultIB.TotalMassFlowRate");
    CreateParameter("TotalThrust1", "DefaultIB.TotalThrust1");
    CreateParameter("TotalThrust2", "DefaultIB.TotalThrust2");
    CreateParameter("TotalThrust3", "DefaultIB.TotalThrust3");
