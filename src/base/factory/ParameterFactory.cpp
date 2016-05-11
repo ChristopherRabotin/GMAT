@@ -390,6 +390,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ImpBurnElements(ofType, withName);   
    if (ofType == "V" || ofType == "N" || ofType == "B")
       return new ImpBurnElements(ofType, withName);
+   if (ofType == "TotalMassFlowRate")
+      return new TotalMassFlowRate(ofType, withName);
+   if (ofType == "TotalThrust1" || ofType == "TotalThrust2" || ofType == "TotalThrust3")
+      return new TotalThrust(ofType, withName);
    
    // Attitude parameters
    if (ofType == "DCM11" || ofType == "DirectionCosineMatrix11")
@@ -730,6 +734,10 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("V");
       creatables.push_back("N");
       creatables.push_back("B");
+      creatables.push_back("TotalMassFlowRate");
+      creatables.push_back("TotalThrust1");
+      creatables.push_back("TotalThrust2");
+      creatables.push_back("TotalThrust3");
       
       // Attitude parameters
       creatables.push_back("DCM11");

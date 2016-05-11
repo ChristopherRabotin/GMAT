@@ -176,6 +176,7 @@ private:
    void ShowSpacecraft();
    void ShowSpacePoints();
    void ShowImpulsiveBurns();
+   void ShowFiniteBurns();
    void ShowArrays();
    void ShowStrings();
    void ShowVariables();

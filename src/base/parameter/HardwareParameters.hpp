@@ -28,7 +28,7 @@
  *    FuelTank: FuelMass, Pressure, Temperature, RefTemperature, Volume,
  *              FuelDensity,
  *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
- *              K1-K16, ThrustDirections, Thrust, Isp
+ *              K1-K16, ThrustDirections, Thrust, Isp, MassFlowRate
  *    PowerSystem: TotalPowerAvailable, RequiredBusPower, ThrustPowerAvailable
  */
 //------------------------------------------------------------------------------

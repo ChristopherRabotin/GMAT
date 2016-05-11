@@ -868,18 +868,32 @@ std::string RefData::FindFirstObjectName(const std::string &typeName) const
 //------------------------------------------------------------------------------
 std::string RefData::FindFirstObjectName(const Gmat::ObjectType type) const
 {
+   #if DEBUG_REFDATA_OBJECT > 1
+   MessageInterface::ShowMessage
+      ("RefData::FindFirstObjectName() entered, type=%d\n", type);
+   #endif
    for (int i=0; i<mNumRefObjects; i++)
    {
       #if DEBUG_REFDATA_OBJECT > 1
       MessageInterface::ShowMessage
-         ("RefData::FindFirstObjectName() mRefObjList[%d].objType=%d, objName=%s\n",
-          i, mRefObjList[i].objType, mRefObjList[i].objName.c_str());
+         ("   mRefObjList[%d].objType=%d, objName=%s\n", i, mRefObjList[i].objType,
+          mRefObjList[i].objName.c_str());
       #endif
       
       if (mRefObjList[i].objType == type)
+      {
+         #if DEBUG_REFDATA_OBJECT > 1
+         MessageInterface::ShowMessage
+            ("RefData::FindFirstObjectName() returnig '%s'\n", mRefObjList[i].objName.c_str());
+         #endif
          return mRefObjList[i].objName;
+      }
    }
    
+   #if DEBUG_REFDATA_OBJECT > 1
+   MessageInterface::ShowMessage
+      ("RefData::FindFirstObjectName() returnig '', no name of given type found\n");
+   #endif
    return "";
 }
 

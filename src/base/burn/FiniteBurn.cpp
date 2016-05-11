@@ -236,6 +236,7 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
    // Accumulate the individual accelerations from the thrusters
    Real dm = 0.0, tMass, tOverM, *dir, norm;
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
+   accel[0]  = accel[1]  = accel[2]  = 0.0;
    Thruster *current;
    
    tMass = spacecraft->GetRealParameter("TotalMass");
@@ -318,6 +319,14 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
       #endif
    }
    
+   // deltaV is in inertial coordinate system, so copy it to deltaVInertial
+   // @note
+   // This deltaV is what TotalThrust Parameter will retrive when TotalThrust
+   // Parameter is evaluated for FiniteBurn
+   deltaVInertial[0] = deltaV[0];
+   deltaVInertial[1] = deltaV[1];
+   deltaVInertial[2] = deltaV[2];
+   
    // Build the acceleration
    burnData[0] = deltaV[0]*frameBasis[0][0] +
                  deltaV[1]*frameBasis[0][1] +
@@ -329,6 +338,14 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
                  deltaV[1]*frameBasis[2][1] +
                  deltaV[2]*frameBasis[2][2];
    burnData[3] = dm;
+
+   // Save total mass flow rate
+   totalMassFlowRate = dm;
+   
+   // Save acceleration
+   accel[0] = burnData[0];
+   accel[1] = burnData[1];
+   accel[2] = burnData[2];
    
    #ifdef DEBUG_FINITEBURN_FIRE
       MessageInterface::ShowMessage(
