@@ -69,7 +69,7 @@ public:
 
    /// Flag to specify reason the record not been used. 
    /// "N": Normal, "U": unused, "IRMS": OLSEInitialRMSSigma, 
-   /// "OLSE": outer-loop sigma filter, "BXY": Blocked, "R": out of ramped table range
+   /// "OLSE": outer-loop sigma filter, "BXY": Blocked, "R": out of ramp table range
    std::string       removedReason;
 
    /// The text name of the data type, if available

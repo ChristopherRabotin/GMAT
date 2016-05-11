@@ -145,7 +145,7 @@ TrackingFileSet::~TrackingFileSet()
    // clear tracking configs
    trackingConfigs.clear();
 
-   // clear file names and ramped table names
+   // clear file names and ramp table names
    filenames.clear();
    rampedTablenames.clear();
 
@@ -678,7 +678,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == RAMPED_TABLENAME)
    {
-      // if it is an empty list, then clear ramped table name list
+      // if it is an empty list, then clear ramp table name list
       if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
       {
          rampedTablenames.clear();
@@ -697,7 +697,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          return true;
       }
       else
-         throw MeasurementException("Error: ramped table name is replicated ('" + value + "')\n");
+         throw MeasurementException("Error: ramp table name is replicated ('" + value + "')\n");
 
    }
 
@@ -764,7 +764,7 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
          return rampedTablenames[index];
       else
          throw MeasurementException("Index out of bounds when trying to access "
-               "a ramped table file name");
+               "a ramp table file name");
    }
 
    if (id == DATA_FILTERS)
@@ -1202,7 +1202,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
       if ((!rampedTablenames.empty())&&
           (find(rampedTablenames.begin(), rampedTablenames.end(), value) != rampedTablenames.end()))
-         throw MeasurementException("Error: replication of ramped table name ('" + value + "').\n");
+         throw MeasurementException("Error: replication of ramp table name ('" + value + "').\n");
 
       if (((Integer)rampedTablenames.size() > index) && (index >= 0))
          rampedTablenames[index] = value;
@@ -1210,7 +1210,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          rampedTablenames.push_back(value);
       else
          throw MeasurementException("Index out of bounds when trying to "
-               "set a ramped table file name");
+               "set a ramp table file name");
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("%d members in config:\n",

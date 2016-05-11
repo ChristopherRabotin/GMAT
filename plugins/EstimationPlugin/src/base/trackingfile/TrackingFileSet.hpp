@@ -179,7 +179,7 @@ protected:
    std::vector<TrackingDataAdapter*> measurements;
    /// Name of the associate tracking data file
    StringArray filenames;
-   /// Name of the associate ramped table
+   /// Name of the associate ramp table
    StringArray rampedTablenames;
    /// Flag for the inclusion of light time solution
    bool        useLighttime;

@@ -415,7 +415,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       {
          // ramped frequency
          #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("Calculate DSNRange based on ramped table\n");
+            MessageInterface::ShowMessage("Calculate DSNRange based on ramp table\n");
          #endif
 
          try

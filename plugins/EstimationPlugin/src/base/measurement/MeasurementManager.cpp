@@ -365,7 +365,7 @@ bool MeasurementManager::Initialize()
       if (!inSimulationMode)
          SetStatisticsDataFiltersToDataFiles(i);
 
-      // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
+      // Step 4: Set stream objects for all ramp tables in trackingSet[i] 
       StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampTable");
       for (UnsignedInt k1 = 0; k1 < rampedTablenames.size(); ++k1)
       {
@@ -2570,7 +2570,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                   std::string tais;
                   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
                   char s[1000];
-                  sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", models[j]->GetName().c_str(), taiTime);
+                  sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", models[j]->GetName().c_str(), taiTime);
                   throw MeasurementException(s); 
                }
             //}                                                                                       // made changes by TUAN NGUYEN
@@ -2589,7 +2589,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                std::string tais;
                TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
                char s[1000];
-               sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[j]->GetName().c_str(), taiTime);
+               sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[j]->GetName().c_str(), taiTime);
                throw MeasurementException(s);
             }
          }
@@ -2621,10 +2621,10 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             rt = &(rampTables[sr[0]]);
 
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage("******** Ramped table names size = %d\n", sr.size());
+            MessageInterface::ShowMessage("******** Ramp table names size = %d\n", sr.size());
             if (sr.size() > 0)
             {
-               MessageInterface::ShowMessage("******** Ramped table [%s] = <%p>\n", sr[0].c_str(), rt);
+               MessageInterface::ShowMessage("******** Ramp table [%s] = <%p>\n", sr[0].c_str(), rt);
                for(int ii=0; ii < rt->size(); ++ii)
                   MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
             }
@@ -2652,7 +2652,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                //   std::string tais;
                //   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
                //   char s[1000];
-               //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
+               //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramp table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
                //   throw MeasurementException(s); 
                   throw MeasurementException(adapters[i]->GetErrorMessage());
                }
@@ -2671,7 +2671,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             //   std::string tais;
             //   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
             //   char s[1000];
-            //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
+            //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramp table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
             //   throw MeasurementException(s);
                throw MeasurementException(adapters[i]->GetErrorMessage());
             }
