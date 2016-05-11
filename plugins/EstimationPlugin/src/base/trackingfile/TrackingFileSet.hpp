@@ -252,7 +252,8 @@ protected:
          const std::string &type, Integer configIndex);
 
 private:
-   bool    ParsingStrand(std::string value, Integer configIndex, Integer strandIndex = 0);
+   bool    ParseTrackingConfig(std::string value, Integer& configIndex, bool& start);
+   bool    ParseStrand(std::string value, Integer configIndex, Integer strandIndex = 0);
    bool    AddToSignalPath(std::string participantName, Integer configIndex, Integer strandIndex);
 };
 
