@@ -39,6 +39,7 @@
 #include "ephempropagator_defs.hpp"
 #include "EphemerisPropagator.hpp"
 #include "Code500EphemerisFile.hpp"
+#include "Interpolator.hpp"
 
 
 class EPHEM_PROPAGATOR_API Code500Propagator : public EphemerisPropagator
@@ -102,10 +103,14 @@ protected:
    std::string             ephemName;
    /// The ephem reader
    Code500EphemerisFile    ephem;
+   /// Interpolator used to propagate to points off of the ephem nodes
+   Interpolator            *interp;
+   /// Time span covered by the current data points in teh interpolator
+   Real                    interpSpan[2];
    /// The Satellite ID for the propagated spacecraft (always 101.0 for now)
    Real                    satID;
    /// Flag indicating the file handle status
-   bool                    fileIsOpen;
+   bool                    fileDataLoaded;
    /// Ephemeris data from the file
    std::vector<Code500EphemerisFile::EphemData>
                            *ephemRecords;
@@ -122,6 +127,7 @@ protected:
    virtual void            SetEphemSpan(Integer whichOne = 0);
 
    void                    FindRecord(GmatEpoch forEpoch);
+   void                    UpdateInterpolator(const GmatEpoch &forEpoch);
    void                    GetState(GmatEpoch forEpoch, Rvector6 &outstate);
 
    /// Parameter IDs
