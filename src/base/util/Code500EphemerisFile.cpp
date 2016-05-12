@@ -526,11 +526,6 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    Integer hour   = (Integer)(startSecs / 3600);
    Integer minute = (Integer)((startSecs - hour * 3600) / 60);
    Real second    = startSecs - hour * 3600 - minute * 60;
-
-      MessageInterface::ShowMessage("Start:  %04d/%02d/%02d %02d:%02d:%lf %s\n",
-            year, month, day, hour, minute, second,
-            (mInputTimeSystem == 1.0 ? "A.1" : "UTC"));
-
    GmatEpoch epoch = ModifiedJulianDate(year, month, day, hour, minute, second);
 
    year   = (Integer)(endDate / 10000);
@@ -540,11 +535,6 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    hour   = (Integer)(endSecs / 3600);
    minute = (Integer)((endSecs - hour * 3600) / 60);
    second = endSecs - hour * 3600 - minute * 60;
-
-      MessageInterface::ShowMessage("End:    %04d/%02d/%02d %02d:%02d:%lf %s\n",
-            year, month, day, hour, minute, second,
-            (mInputTimeSystem == 1.0 ? "A.1" : "UTC"));
-
    GmatEpoch epochend = ModifiedJulianDate(year, month, day, hour, minute, second);
 
    if (mInputTimeSystem == 1.0)
@@ -1875,9 +1865,6 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
          ("======================================== Begin of data record %d\n", recNum);
    
    bool swap = mSwapInputEndian;
-   MessageInterface::ShowMessage
-      ("mSwapInputEndian = %d, mSentinelsFound=%d\n", mSwapInputEndian, mSentinelsFound);
-   
    double sentinels[50];
    sentinels[0] = ReadDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD);
    sentinels[1] = ReadDoubleField(&mEphemData.dayOfYearForFirstEphemPoint);
