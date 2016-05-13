@@ -78,6 +78,9 @@ Thruster::PARAMETER_TEXT[ThrusterParamCount - HardwareParamCount] =
    "Tank",
    "MixRatio",
    "GravitationalAccel",
+   "Thrust",
+   "Isp",
+   "MassFlowRate",
 };
 
 /// Types of the parameters used by thrusters.
@@ -94,6 +97,9 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
    Gmat::OBJECTARRAY_TYPE, // "Tank"
    Gmat::RVECTOR_TYPE,     // "MixRatio"
    Gmat::REAL_TYPE,        // "GravitationalAccel"
+   Gmat::REAL_TYPE,        // "Thrust"
+   Gmat::REAL_TYPE,        // "Isp"
+   Gmat::REAL_TYPE,        // "MassFlowRate"
 };
 
 
@@ -496,6 +502,9 @@ bool Thruster::IsParameterReadOnly(const Integer id) const
       if (coordSystemName != "Local")
          return true;
    
+   if (id == THRUST || id == ISP || id == MASS_FLOW_RATE)
+      return true;
+   
    return Hardware::IsParameterReadOnly(id);
 }
 
@@ -551,7 +560,13 @@ Real Thruster::GetRealParameter(const Integer id) const
          return thrustScaleFactor;
       case GRAVITATIONAL_ACCELERATION:
          return gravityAccel;
-
+      case THRUST:
+         return thrust;
+      case ISP:
+         return impulse;
+      case MASS_FLOW_RATE:
+         return mDot;
+      
       default:
          break;   // Default just drops through
    }
