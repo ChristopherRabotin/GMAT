@@ -662,10 +662,10 @@ void BatchEstimatorInv::Accumulate()
                {
                   for (UnsignedInt j = 0; j < stateSize; ++j)
                      //information(i,j) += hRow[i] * weight * hRow[j];
-                     information(i,j) += hMeas[k][i] * weight * hMeas[k][j];
+                     information(i,j) += hMeas[k][i] * weight * hMeas[k][j];   // the first term in open-close square bracket of equation 8-57 in GTDS MathSpec
 
                   //residuals[i] += hRow[i] * weight * ocDiff;
-                  residuals[i] += hMeas[k][i] * weight * ocDiff;
+                  residuals[i] += hMeas[k][i] * weight * ocDiff;               // the first term in open-close parenthesis of equation 8-57 in GTDS MathSpec
                }
 
             
@@ -1074,7 +1074,7 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   // Calculate state change dx
+   // Calculate state change dx in equation 
    dx.clear();
    Real delta;
    for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -1104,12 +1104,13 @@ void BatchEstimatorInv::Estimate()
       MessageInterface::ShowMessage("]\n");
    #endif
    
-   // Specify RMSP:
+   // Specify RMSP: equation 8-185 in GTDS MathSpec
    predictedRMS = 0;
    if (useApriori)
    {
+      // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
-      Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();
+      Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
@@ -1117,6 +1118,7 @@ void BatchEstimatorInv::Estimate()
       }
    }
    
+   // The first term of RMSP in equation 8-185 in GTDS MathSpec
    for (UnsignedInt j = 0; j < hAccum.size(); ++j)      // j presents for the index of the measurement jth
    {
       Real temp = 0;
