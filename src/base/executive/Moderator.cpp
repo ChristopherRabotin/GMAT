@@ -45,8 +45,9 @@
 #include "CelestialBodyFactory.hpp"
 #include "CommandFactory.hpp"
 #include "CoordinateSystemFactory.hpp"
-#include "ODEModelFactory.hpp"
+#include "FunctionFactory.hpp"
 #include "HardwareFactory.hpp"
+#include "ODEModelFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
 #include "PropagatorFactory.hpp"
@@ -273,9 +274,10 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       theFactoryManager->RegisterFactory(new CalculatedPointFactory());
       theFactoryManager->RegisterFactory(new CommandFactory());
       theFactoryManager->RegisterFactory(new CoordinateSystemFactory());
-      theFactoryManager->RegisterFactory(new ODEModelFactory());
+      theFactoryManager->RegisterFactory(new FunctionFactory());
       theFactoryManager->RegisterFactory(new HardwareFactory());
       theFactoryManager->RegisterFactory(new MathFactory());
+      theFactoryManager->RegisterFactory(new ODEModelFactory());
       theFactoryManager->RegisterFactory(new ParameterFactory());
       theFactoryManager->RegisterFactory(new PhysicalModelFactory());
       theFactoryManager->RegisterFactory(new PropagatorFactory());

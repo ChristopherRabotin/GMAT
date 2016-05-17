@@ -4975,6 +4975,19 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str)
             funcName = str1.substr(index1+1, index2-index1-1);
       }
    }
+   else
+   {
+      // This code block parse function name such as a = function(x)
+      std::string::size_type index1 = str1.find("=");
+      #ifdef DEBUG_FUNCTION_NAME
+      MessageInterface::ShowMessage("   equalSignPos = %u\n", index1);
+      #endif
+      std::string::size_type index2 = str1.find("(", index1 + 1);
+      if (index2 == str1.npos)
+         funcName = str1.substr(index1+1);
+      else
+         funcName = str1.substr(index1+1, index2-index1-1);
+   }
    
    // If function name not found above, try again (LOJ: 2016.03.07)
    if (funcName == "")

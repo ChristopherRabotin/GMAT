@@ -141,6 +141,7 @@ protected:
    
    bool isGmatFunction;
    bool isMatlabFunction;
+   bool isBuiltinGmatFunction;
    
    void ClearInputParameters();
    void ClearOutputParameters();

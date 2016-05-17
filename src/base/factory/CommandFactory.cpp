@@ -55,6 +55,7 @@
 #include "Stop.hpp"           // for Stop command
 #include "FindEvents.hpp"     // forFindEvents command
 //#include "CallGmatFunction.hpp"   // for CallGmatFunction command
+#include "CallBuiltinGmatFunction.hpp"
 #include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
 #include "EndFiniteBurn.hpp"  // for EndFiniteBurn command
 #include "BeginScript.hpp"    // for BeginScript command
@@ -153,6 +154,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
     //   return new CallFunction;
 //    else if (ofType == "CallGmatFunction")
 //        return new CallGmatFunction;
+    else if (ofType == "CallBuiltinGmatFunction")
+       return new CallBuiltinGmatFunction;
     else if (ofType == "BeginFiniteBurn")
         return new BeginFiniteBurn;
     else if (ofType == "EndFiniteBurn")
@@ -217,6 +220,7 @@ CommandFactory::CommandFactory() :
       sequenceStarters.push_back("BeginMissionSequence");
       creatables.push_back("BeginScript");
       creatables.push_back("CallFunction");
+      creatables.push_back("CallBuiltinGmatFunction");
 //      creatables.push_back("CallGmatFunction");
       creatables.push_back("ClearPlot");
       creatables.push_back("Create");
