@@ -1087,7 +1087,7 @@ void BatchEstimator::CompleteInitialization()
       for (Integer i = 0; i < information.GetNumRows(); ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
-            residuals[i] += information(i,j) * x0bar[j];
+            residuals[i] += information(i,j) * x0bar[j];             // It is the last term in open-close parenthesis in equation 8-57 in GTDS MathSpec
       }
    }
 
@@ -2939,7 +2939,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
             if (colCount != 0)
             {
                StringArray::iterator pos2 = rowContent.begin() + 2 + maxNumConfig;
-               rowContent.insert(pos1, trackingConfigs.size() - maxNumConfig, GmatStringUtil::GetAlignmentString("", (pos1-1)->size()));
+               rowContent.insert(pos2, trackingConfigs.size() - maxNumConfig, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
             }
 
             maxNumConfig = trackingConfigs.size();
