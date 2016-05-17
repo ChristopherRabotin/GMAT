@@ -105,8 +105,6 @@ protected:
    Code500EphemerisFile    ephem;
    /// Interpolator used to propagate to points off of the ephem nodes
    Interpolator            *interp;
-   /// Time span covered by the current data points in teh interpolator
-   Real                    interpSpan[2];
    /// The Satellite ID for the propagated spacecraft (always 101.0 for now)
    Real                    satID;
    /// Flag indicating the file handle status
