@@ -75,7 +75,8 @@ EphemWriterWithInterpolator::EphemWriterWithInterpolator(const std::string &name
    afterFinalEpochCount (0),
    handleFinalEpoch     (true),
    processingLargeStep  (false),
-   checkForLargeTimeGap (false)
+   checkForLargeTimeGap (false),
+   timeTolerance        (1.0e-6)
 {
    #ifdef DEBUG_EPHEMFILE_INSTANCE
    MessageInterface::ShowMessage
@@ -135,7 +136,8 @@ EphemWriterWithInterpolator::EphemWriterWithInterpolator(const EphemWriterWithIn
    afterFinalEpochCount (ef.afterFinalEpochCount),
    handleFinalEpoch     (ef.handleFinalEpoch),
    processingLargeStep  (ef.processingLargeStep),
-   checkForLargeTimeGap (ef.checkForLargeTimeGap)
+   checkForLargeTimeGap (ef.checkForLargeTimeGap),
+   timeTolerance        (ef.timeTolerance)
 {
 }
 
@@ -164,7 +166,7 @@ EphemWriterWithInterpolator::operator=(const EphemWriterWithInterpolator& ef)
    handleFinalEpoch     = ef.handleFinalEpoch;
    processingLargeStep  = ef.processingLargeStep;
    checkForLargeTimeGap = ef.checkForLargeTimeGap;
-   
+   timeTolerance        = ef.timeTolerance;
    return *this;
 }
 
@@ -295,8 +297,8 @@ void EphemWriterWithInterpolator::FindNextOutputEpoch(Real reqEpochInSecs,
    #endif
    
    // If the difference between current epoch and requested epoch is less 
-   // than 1.0e-6, write out current state (LOJ: 2010.09.30)
-   if (GmatMathUtil::Abs(currEpochInSecs - reqEpochInSecs) < 1.0e-6)
+   // than timeTolerance, write out current state (LOJ: 2010.09.30)
+   if (GmatMathUtil::Abs(currEpochInSecs - reqEpochInSecs) < timeTolerance)
    {
       outEpochInSecs = currEpochInSecs;
       nextOutEpochInSecs = outEpochInSecs + (stepSizeInSecs * currPropDirection);
@@ -304,7 +306,7 @@ void EphemWriterWithInterpolator::FindNextOutputEpoch(Real reqEpochInSecs,
       #ifdef DEBUG_EPHEMFILE_TIME
       MessageInterface::ShowMessage
          ("***** The difference between current epoch and requested epoch is less "
-          "than 1.0e-6, so writing current state\n");
+          "than timeTolerance:%.15f, so writing current state\n", timeTolerance);
       DebugWriteTime("   outEpochInSecs = ", outEpochInSecs);
       DebugWriteTime("     nextOutEpochInSecs = ", nextOutEpochInSecs);
       DebugWriteOrbit("   =====> current state ", currEpochInSecs, currState,
@@ -601,11 +603,14 @@ void EphemWriterWithInterpolator::ProcessFinalDataOnWaiting(bool canFinish)
    // milliseconds after the last epoch received, so the interpolator flags
    // as epoch after the last buffered epoch, so handle last data point here.
    // If there is 1 epoch left and the difference between the current epoch
-   // is less than 1.0e-6 then use the current epoch
+   // is less than timeTolerance then use the current epoch
    if (epochsOnWaiting.size() == 1)
    {
       Real lastEpoch = epochsOnWaiting.back();
-      if (GmatMathUtil::Abs(lastEpoch - currEpochInSecs) < 1.0e-6)
+      #ifdef DEBUG_EPHEMFILE_FINISH
+      DebugWriteTime("   lastEpoch = ", lastEpoch);
+      #endif
+      if (GmatMathUtil::Abs(lastEpoch - currEpochInSecs) < timeTolerance)
       {
          #ifdef DEBUG_EPHEMFILE_FINISH
          DebugWriteTime
@@ -637,8 +642,11 @@ void EphemWriterWithInterpolator::ProcessFinalDataOnWaiting(bool canFinish)
    // Write last data received if not written yet(Do attitude later)
    if (canFinish)
    {
-      // Write last data received only for CCSDS not for Code500 (GMT-3997 fix)
-      if (fileType == CCSDS_OEM && useFixedStepSize)
+      #ifdef DEBUG_EPHEMFILE_FINISH
+      MessageInterface::ShowMessage("   Checking if last received data should be written out...\n");
+      #endif
+      
+      if (useFixedStepSize)
       {
          #ifdef DEBUG_EPHEMFILE_FINISH
          MessageInterface::ShowMessage("   finalEpochA1Mjd=%f\n", finalEpochA1Mjd);
@@ -646,13 +654,38 @@ void EphemWriterWithInterpolator::ProcessFinalDataOnWaiting(bool canFinish)
          // If not using user defined final epock, do more checking for the final data
          if (finalEpochA1Mjd == -999.999)
          {
+            bool writeFinalData = false;
+            #ifdef DEBUG_EPHEMFILE_FINISH
+            DebugWriteTime("   currEpochInSecs    = ", currEpochInSecs);
+            DebugWriteTime("   lastEpochWrote     = ", lastEpochWrote);
+            DebugWriteTime("   nextReqEpochInSecs = ", nextReqEpochInSecs);
+            MessageInterface::ShowMessage("   stepSizeInSecs     = %.12f\n", stepSizeInSecs);
+            #endif
             // Check if current data needs to be written out
-            if (currEpochInSecs > lastEpochWrote + 1.0e-6)
+            if (fileType == CCSDS_OEM)
+            {
+               // For CCSDS, write out final data if current epoch is after last epoch
+               if (currEpochInSecs > (lastEpochWrote + timeTolerance))
+                  writeFinalData = true;
+            }
+            else if (fileType == CODE500_EPHEM)
+            {
+               // For Code500, write out final data if current epoch is same as the
+               // next output epoch (LOJ: 2016.05.18)
+               Real nextEpoch = lastEpochWrote + stepSizeInSecs;
+               if (GmatMathUtil::Abs(currEpochInSecs - nextEpoch) < timeTolerance)
+                  writeFinalData = true;
+            }
+            
+            #ifdef DEBUG_EPHEMFILE_FINISH
+            MessageInterface::ShowMessage
+               ("   %s final data\n", writeFinalData ? "Write" : "Do not write");
+            #endif
+            if (writeFinalData)
             {
                #ifdef DEBUG_EPHEMFILE_FINISH
                MessageInterface::ShowMessage
-                  ("   ===> %.15f > %.15f and not using user defined final epoch, so writing final data\n",
-                   currEpochInSecs, lastEpochWrote);
+                  ("   ===> Not using user defined final epoch, so writing final data\n");
                #endif
                WriteOrbit(currEpochInSecs, currState);
             }
@@ -726,8 +759,9 @@ void EphemWriterWithInterpolator::ProcessEpochsOnWaiting(bool checkFinalEpoch,
       // Do not write after the final epoch
       if (checkFinalEpoch)
       {
-         if ( (((reqEpochInSecs + 1.0e-6) > currEpochInSecs) && finishDirection == 1) ||
-              (((reqEpochInSecs + 1.0e-6) < currEpochInSecs) && finishDirection == 2) )
+         Real tol = timeTolerance;
+         if ( (((reqEpochInSecs + tol) > currEpochInSecs) && finishDirection == 1) ||
+              (((reqEpochInSecs + tol) < currEpochInSecs) && finishDirection == 2) )
          {
             #ifdef DEBUG_EPHEMFILE_ORBIT
             MessageInterface::ShowMessage
@@ -886,7 +920,7 @@ void EphemWriterWithInterpolator::ProcessEpochsOnWaiting(bool checkFinalEpoch,
 //------------------------------------------------------------------------------
 /**
  * Finds epoch from epochsOnWaiting list.
- * It uses 1.0e-6 tolerance to find matching epoch.
+ * It uses timeTolerance tolerance to find matching epoch.
  */
 //------------------------------------------------------------------------------
 RealArray::iterator EphemWriterWithInterpolator::FindEpochOnWaiting(Real epochInSecs,
@@ -906,7 +940,7 @@ RealArray::iterator EphemWriterWithInterpolator::FindEpochOnWaiting(Real epochIn
       DebugWriteTime("      iterFound, epoch = ", *iterFound);
       #endif
       
-      if (GmatMathUtil::Abs(*iterFound - epochInSecs) < 1.0e-6)
+      if (GmatMathUtil::Abs(*iterFound - epochInSecs) < timeTolerance)
       {
          #ifdef DEBUG_EPHEMFILE_ORBIT
          DebugWriteTime(msg + " epoch = ", *iterFound);
@@ -924,17 +958,18 @@ RealArray::iterator EphemWriterWithInterpolator::FindEpochOnWaiting(Real epochIn
 // void RemoveEpochAlreadyWritten(Real epochInSecs, const std::string &msg = "")
 //------------------------------------------------------------------------------
 /**
- * Erases epoch already processed from epochsOnWaiting list. It uses 1.0e-6
+ * Erases epoch already processed from epochsOnWaiting list. It uses timeTolerance
  * tolerance to find matching epoch.
  */
 //------------------------------------------------------------------------------
-void EphemWriterWithInterpolator::RemoveEpochAlreadyWritten(Real epochInSecs, const std::string &msg)
+void EphemWriterWithInterpolator::RemoveEpochAlreadyWritten(Real epochInSecs,
+                                                            const std::string &msg)
 {
    // Find matching epoch
    RealArray::iterator iterFound = epochsOnWaiting.begin();
    while (iterFound != epochsOnWaiting.end())
    {
-      if (GmatMathUtil::Abs(*iterFound - epochInSecs) < 1.0e-6)
+      if (GmatMathUtil::Abs(*iterFound - epochInSecs) < timeTolerance)
       {
          #ifdef DEBUG_EPHEMFILE_ORBIT
          DebugWriteTime(msg + " epoch = ", *iterFound);
@@ -952,11 +987,12 @@ void EphemWriterWithInterpolator::RemoveEpochAlreadyWritten(Real epochInSecs, co
 // void AddNextEpochToWrite(Real epochInSecs, const std::string &msg);
 //------------------------------------------------------------------------------
 /**
- * Adds epoch to write to epochsOnWaiting list. It uses 1.0e-6
+ * Adds epoch to write to epochsOnWaiting list. It uses timeTolerance
  * tolerance to find matching epoch.
  */
 //------------------------------------------------------------------------------
-void EphemWriterWithInterpolator::AddNextEpochToWrite(Real epochInSecs, const std::string &msg)
+void EphemWriterWithInterpolator::AddNextEpochToWrite(Real epochInSecs,
+                                                      const std::string &msg)
 {
    if (FindEpochOnWaiting(epochInSecs, msg) == epochsOnWaiting.end())
    {
