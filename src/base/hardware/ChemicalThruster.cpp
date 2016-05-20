@@ -785,6 +785,12 @@ bool ChemicalThruster::Initialize()
 //---------------------------------------------------------------------------
 bool ChemicalThruster::CalculateThrustAndIsp()
 {
+   #ifdef DEBUG_THRUST_ISP
+   MessageInterface::ShowMessage
+      ("ChemicalThruster::CalculateThrustAndIsp() <%p>'%s' entered, thrusterFiring=%d, "
+       "constantExpressions=%d\n", this, instanceName.c_str(), thrusterFiring, constantExpressions);
+   #endif
+   
    if (!thrusterFiring)
    {
       thrust  = 0.0;
@@ -859,7 +865,12 @@ bool ChemicalThruster::CalculateThrustAndIsp()
       thrust  += cCoefficients[0] + cCoefficients[1] * pressure;
       impulse += kCoefficients[0] + kCoefficients[1] * pressure;
    }
-
+   
+   #ifdef DEBUG_THRUST_ISP
+   MessageInterface::ShowMessage
+      ("ChemicalThruster::CalculateThrustAndIsp() <%p>'%s' leaving, thrust=%.12f, "
+       "impulse=%.12f\n", this, instanceName.c_str(), thrust, impulse);
+   #endif
    return true;
 }
 

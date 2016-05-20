@@ -221,6 +221,9 @@ protected:
       TANK,
       MIXRATIO,
       GRAVITATIONAL_ACCELERATION,
+      THRUST,
+      ISP,
+      MASS_FLOW_RATE,
       ThrusterParamCount
    };
    

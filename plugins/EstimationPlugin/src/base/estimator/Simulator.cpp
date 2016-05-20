@@ -1649,7 +1649,7 @@ void Simulator::CompleteInitialization()
             "Simulator::CompleteInitialization - error initializing "
             "MeasurementManager.\n");
 
-   // Load ramped table
+   // Load ramp table
    measManager.LoadRampTables();
 
    nextSimulationEpoch = simulationStart;

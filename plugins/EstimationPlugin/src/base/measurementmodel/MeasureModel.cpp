@@ -1942,7 +1942,7 @@ Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTab
       // Get frequency from ground station's transmiter or from ramped frequency table
       if (rampTB)
       {
-         // Get frequency from ramped table if it is used
+         // Get frequency from ramp table if it is used
          GmatTime t1 = sd.tPrecTime - sd.tDelay/GmatTimeConstants::SECS_PER_DAY;
          frequency = fleg->GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;       // unit: Mhz
       }
@@ -2115,7 +2115,7 @@ Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<
       // Get frequency from ground station's transmiter or from ramped frequency table
       if (rampTB)
       {
-         // Get frequency from ramped table if it is used
+         // Get frequency from ramp table if it is used
          GmatTime t1 = sd.tPrecTime - sd.tDelay/GmatTimeConstants::SECS_PER_DAY;
          freqBand = fleg->GetFrequencyBandFromRampTable(t1.GetMjd(), rampTB);
       }

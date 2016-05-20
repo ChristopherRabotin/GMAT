@@ -35,6 +35,7 @@
 //#define DEBUG_EPHEMFILE_INSTANCE
 //#define DEBUG_EPHEMFILE_INIT
 //#define DEBUG_EPHEMFILE_CREATE
+//#define DEBUG_EPHEMFILE_DATA
 //#define DEBUG_EPHEMFILE_CODE500
 //#define DEBUG_CODE500_DATA_SEGMENT
 //#define DEBUG_EPHEMFILE_BUFFER
@@ -767,8 +768,9 @@ void EphemWriterCode500::WriteCode500OrbitDataSegment(bool canFinish)
          #ifdef DEBUG_CODE500_DATA_SEGMENT
          MessageInterface::ShowMessage
             (".....Calling code500EphemFile->WriteDataSegment() isEndOfRun=%d, "
-             "epochsOnWaiting.size()=%d\n", isEndOfRun, epochsOnWaiting.size());
-         DebugWriteTime("   ", epochsOnWaiting.back());
+             "canFinish=%d, epochsOnWaiting.size()=%d\n", isEndOfRun, canFinish,
+             epochsOnWaiting.size());
+         DebugWriteTime("   lastEpochOnWaiting = ", epochsOnWaiting.back());
          #endif
          // Check if Code500 ephemeris file can be finalized (GMT-4060 fix)
          bool finalize = isEndOfRun && canFinish;

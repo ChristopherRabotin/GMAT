@@ -139,6 +139,7 @@ SET(BASE_SRCS
     command/BeginScript.cpp
     command/BranchCommand.cpp
     command/CallFunction.cpp
+    command/CallBuiltinGmatFunction.cpp
     command/CommandException.cpp
     command/FindEvents.cpp
     command/GmatCommand.cpp
@@ -238,10 +239,11 @@ SET(BASE_SRCS
     factory/FactoryException.cpp
     factory/FactoryManager.cpp
     factory/Factory.cpp
-    factory/ODEModelFactory.cpp
+    factory/FunctionFactory.cpp
     factory/HardwareFactory.cpp
     factory/InterfaceFactory.cpp
     factory/MathFactory.cpp
+    factory/ODEModelFactory.cpp
     factory/ParameterFactory.cpp
     factory/PhysicalModelFactory.cpp
     factory/PropagatorFactory.cpp
@@ -277,9 +279,12 @@ SET(BASE_SRCS
     foundation/SpacePoint.cpp
     foundation/StateManager.cpp
     foundation/TriggerManager.cpp
+    function/BuiltinGmatFunction.cpp
     function/Function.cpp
     function/FunctionException.cpp
     function/FunctionManager.cpp
+    function/GetEphemStates.cpp
+    function/GetLastState.cpp
     hardware/ChemicalTank.cpp
     hardware/ChemicalThruster.cpp
     hardware/ElectricTank.cpp

@@ -38,14 +38,14 @@
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
-#include "ImpulsiveBurn.hpp"
+#include "Burn.hpp"
 
 class GMAT_API BurnData : public RefData
 {
 public:
 
    BurnData(const std::string &name = "", const std::string &typeName = "",
-            const Gmat::ObjectType paramOwnerType = Gmat::IMPULSIVE_BURN);
+            const Gmat::ObjectType paramOwnerType = Gmat::BURN);
    BurnData(const BurnData &data);
    BurnData& operator= (const BurnData& right);
    virtual ~BurnData();
@@ -72,7 +72,7 @@ protected:
    void SetInternalCoordSys(CoordinateSystem *cs);
    
    Spacecraft *mSpacecraft;
-   ImpulsiveBurn *mImpBurn;
+   Burn *mBurn;
    SolarSystem *mSolarSystem;
    SpacePoint *mOrigin;
    CoordinateSystem *mInternalCoordSystem;
@@ -83,12 +83,13 @@ protected:
    bool mIsParamCSDep;
    bool firstTimeEpochWarning;
    bool firstTimeHasntFiredWarning;
-
-   enum {ELEMENT1, ELEMENT2, ELEMENT3};
+   
+   enum {ELEMENT1, ELEMENT2, ELEMENT3, TOTAL_MASS_FLOW_RATE, ACCEL1, ACCEL2, ACCEL3};
    
    enum
    {
       IMPULSIVE_BURN,
+      FINITE_BURN,
       SOLAR_SYSTEM,
       COORD_SYSTEM,
       SPACECRAFT,
