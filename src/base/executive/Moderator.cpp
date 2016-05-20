@@ -1791,7 +1791,20 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #if DEBUG_RENAME
    MessageInterface::ShowMessage("   Calling theConfigManager->RenameItem()\n");
    #endif
-   bool renamed = theConfigManager->RenameItem(type, oldName, newName);
+   
+   bool renamed = false;
+   try
+   {
+      renamed = theConfigManager->RenameItem(type, oldName, newName);
+   }
+   catch (BaseException &be)
+   {
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("Moderator::RenameObject() caught exception:\n%s\n", be.GetFullMessage().c_str());
+      #endif
+      return false;
+   }
    
    std::vector<Gmat::ObjectType> relatedItemType;
    StringArray relatedOldName;
@@ -8189,33 +8202,75 @@ void Moderator::CreateDefaultBarycenter()
 //------------------------------------------------------------------------------
 // void CreateDefaultParameters()
 //------------------------------------------------------------------------------
+/**
+ * Creates and sets ref. object of built-in Parameters.
+ *
+ * @note Don't forget to set Parameter object and dependency object below
+ */
+//------------------------------------------------------------------------------
 void Moderator::CreateDefaultParameters()
 {
+   // Create ImpulsiveBurn for ImpulsiveBurn Parameters
+   // We don't need to create if we only need to add Parameters to database
+   // so commented out (LOJ: 2016.05.19)
+   // GetDefaultBurn("ImpulsiveBurn");
+   // #if DEBUG_DEFAULT_MISSION > 0
+   // MessageInterface::ShowMessage("-->default impulsive burn created\n");
+   // #endif
+   
    // ImpulsiveBurn parameters
+   // Create ImpulsiveBurn Parameters to add to ParameterInfo database.
    CreateParameter("Element1", "DefaultIB.Element1");
    CreateParameter("Element2", "DefaultIB.Element2");
    CreateParameter("Element3", "DefaultIB.Element3");
-//   CreateParameter("V", "DefaultIB.V");  // deprecated
-//   CreateParameter("N", "DefaultIB.N");  // deprecated
-//   CreateParameter("B", "DefaultIB.B");  // deprecated
-
-   // FiniteBurn Parameters
-   // The ref object of TotalThrust1 is actually Burn object, so we will create
-   // Parameters with ImpulsiveBurn to show FiniteBurn property list in the default
-   // mission GUI.
-   CreateParameter("TotalMassFlowRate", "DefaultIB.TotalMassFlowRate");
-   CreateParameter("TotalThrust1", "DefaultIB.TotalThrust1");
-   CreateParameter("TotalThrust2", "DefaultIB.TotalThrust2");
-   CreateParameter("TotalThrust3", "DefaultIB.TotalThrust3");
-   
+   // CreateParameter("V", "DefaultIB.V");  // deprecated
+   // CreateParameter("N", "DefaultIB.N");  // deprecated
+   // CreateParameter("B", "DefaultIB.B");  // deprecated
    #if DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage("-->default impulsive burn parameters created\n");
+   #endif
+   
+   // Remove ImpulsiveBurn Parameters since these Parameters info has been
+   // add to database and not used in the default mission
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element1", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element2", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element3", true);
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default impulsive burn parameters deleted\n");
+   #endif
+   
+   // Create FiniteBurn for FiniteBurn Parameters
+   // We don't need to create if we only need to add Parameters to database
+   // so commented out (LOJ: 2016.05.19)
+   // GetDefaultBurn("FiniteBurn");
+   // #if DEBUG_DEFAULT_MISSION > 0
+   // MessageInterface::ShowMessage("-->default finite burn created\n");
+   // #endif
+   
+   // FiniteBurn Parameters
+   // Create FiniteBurn Parameters to add to ParameterInfo database.
+   CreateParameter("TotalMassFlowRate", "DefaultFB.TotalMassFlowRate");
+   CreateParameter("TotalThrust1", "DefaultFB.TotalThrust1");
+   CreateParameter("TotalThrust2", "DefaultFB.TotalThrust2");
+   CreateParameter("TotalThrust3", "DefaultFB.TotalThrust3");
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default finite burn parameters created\n");
+   #endif
+   
+   // Remove FiniteBurn Parameters since these Parameters info already add to database
+   // and not used in the default mission
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalMassFlowRate", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust1", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust2", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust3", true);
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default finite burn parameters deleted\n");
    #endif
    
    // Time parameters
    CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
    CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");      
-//   CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove  // deprecated
+   // CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove  // deprecated
    CreateParameter("A1ModJulian", "DefaultSC.A1ModJulian");
    CreateParameter("A1Gregorian", "DefaultSC.A1Gregorian");
    CreateParameter("TAIModJulian", "DefaultSC.TAIModJulian");
@@ -8557,8 +8612,10 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage("-->default parameters created\n");
    #endif
-   
+
+   //============================================================
    // Set Parameter object and dependency object
+   //============================================================
    StringArray params = GetListOfObjects(Gmat::PARAMETER);
    Parameter *param;
    
@@ -8589,6 +8646,11 @@ void Moderator::CreateDefaultParameters()
          {
             //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
             param->SetRefObjectName(Gmat::IMPULSIVE_BURN, "DefaultIB");
+         }
+         else if (param->GetOwnerType() == Gmat::FINITE_BURN)
+         {
+            //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
+            param->SetRefObjectName(Gmat::FINITE_BURN, "DefaultFB");
          }
       }
    }
@@ -8661,12 +8723,6 @@ void Moderator::CreateDefaultMission()
          #endif
       }
             
-      // ImpulsiveBurn
-      GetDefaultBurn("ImpulsiveBurn");
-      #if DEBUG_DEFAULT_MISSION > 0
-      MessageInterface::ShowMessage("-->default impulsive burn created\n");
-      #endif
-      
       // Default Parameters
       CreateDefaultParameters();
       
