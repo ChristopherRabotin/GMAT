@@ -1056,11 +1056,11 @@ void BatchEstimator::CompleteInitialization()
 
    hAccum.clear();
    if (useApriori)
-   {
-      information = stateCovariance->GetCovariance()->Inverse();
+   {   // [Lambda] = [Px0]^-1
+      information = stateCovariance->GetCovariance()->Inverse();         // stateCovariance is [Px0] matrix
    }
    else
-   {
+   {  // [Lambda] = [0] 
       information.SetSize(stateSize, stateSize);
       for (UnsignedInt i = 0; i <  stateSize; ++i)
          for (UnsignedInt j = 0; j <  stateSize; ++j)
@@ -1076,10 +1076,7 @@ void BatchEstimator::CompleteInitialization()
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
       residuals[i] = 0.0;
-      if (useApriori)
-         x0bar[i] = (*estimationState)[i];
-      else                                               // Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
-         x0bar[i] = 0.0;
+         x0bar[i] = 0.0;                                              // it is delta_XTile(i) in equation 8-22 in GTDS MathSpec. Initialy its value is zero-vector 
    }
 
    if (useApriori)
@@ -1379,7 +1376,7 @@ void BatchEstimator::CheckCompletion()
       // Need to reset STM and covariances
       hAccum.clear();
       if (useApriori)
-         information = stateCovariance->GetCovariance()->Inverse();
+         information = stateCovariance->GetCovariance()->Inverse();   // When starting an iteration, [Lambda] = [Px0]^-1
       else
       {
          information.SetSize(stateSize, stateSize);
@@ -1404,7 +1401,7 @@ void BatchEstimator::CheckCompletion()
          residuals[i] = 0.0;
       
       for (UnsignedInt j = 0; j < stateSize; ++j)
-         x0bar[j] -= dx[j];
+         x0bar[j] -= dx[j];                                      // delta_XTile(i+1) = X[0] - X[i+1] = (X[0] - X[i]) - (X[i+1] - X[i]) = delta_X_Tile(i) - dx
 
       if (useApriori)
       {
@@ -1412,7 +1409,7 @@ void BatchEstimator::CheckCompletion()
          {
             for (UnsignedInt j = 0; j < stateSize; ++j)
             {
-               residuals[i] += information(i,j) * x0bar[j];
+               residuals[i] += information(i,j) * x0bar[j];      // At the beginning of each iteration, [Lambda] = ([Px0]^-1).delta_XTile(i)  the last term in open-close square bracket in euqation 8-57 GTDS MathSpec
             }
          }
       }

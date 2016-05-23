@@ -885,8 +885,21 @@ void BatchEstimatorInv::Estimate()
    // Calculate RMSOLD:
    if (iterationsTaken > 0)
       oldResidualRMS = newResidualRMS;                       // old value is only valid from 1st iteration
-   // Calculate RMS:
+
+   // Calculate RMS:    Equation 8-184 GTDS MathSpec
    newResidualRMS = 0.0;
+   if (useApriori)
+   {
+      // The last term of RMSP in equation 8-185 in GTDS MathSpec
+      GmatState currentEstimationState = (*estimationState);
+      Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+      for (UnsignedInt i = 0; i < stateSize; ++i)
+      {
+         for (UnsignedInt j = 0; j < stateSize; ++j)
+            newResidualRMS += (currentEstimationState[i] - initialEstimationState[i])*Pdx0_inv(i, j)*(currentEstimationState[j] - initialEstimationState[j]);     // The second term inside square brackets of equation 8-184 GTDS MathSpec
+      }
+   }
+
    for (int i = 0; i < measurementResiduals.size(); ++i)
       newResidualRMS += measurementResiduals[i] * measurementResiduals[i]*Weight[i];
    newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / measurementResiduals.size());
@@ -1074,7 +1087,7 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   // Calculate state change dx in equation 
+   // Calculate state change dx in equation 8-57 in GTDS MathSpec
    dx.clear();
    Real delta;
    for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -1083,7 +1096,7 @@ void BatchEstimatorInv::Estimate()
       for (UnsignedInt j = 0; j < stateSize; ++j)
          delta += cov(i,j) * residuals(j);
       dx.push_back(delta);
-      (*estimationState)[i] += delta;
+      (*estimationState)[i] += delta;                              // Equation 8-24 GTSD MathSpec
    }
    esm.RestoreObjects(&outerLoopBuffer);                           // Restore solver-object initial state
    esm.MapVectorToObjects();                                       // update objects state to current state
@@ -1114,7 +1127,7 @@ void BatchEstimatorInv::Estimate()
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
-            predictedRMS += (currentEstimationState[i] - initialEstimationState[i])*Pdx0_inv(i,j)*(currentEstimationState[j] - initialEstimationState[j]);
+            predictedRMS += (currentEstimationState[i] - initialEstimationState[i])*Pdx0_inv(i,j)*(currentEstimationState[j] - initialEstimationState[j]);     // The second term inside square brackets of equation 8-185 GTDS MathSpec
       }
    }
    
@@ -1126,7 +1139,7 @@ void BatchEstimatorInv::Estimate()
       {
          temp += hAccum[j][i]*dx[i];
       }
-      predictedRMS += (measurementResiduals[j] - temp)*(measurementResiduals[j] - temp)*Weight[j];
+      predictedRMS += (measurementResiduals[j] - temp)*(measurementResiduals[j] - temp)*Weight[j];          // The first term in equation 8-185 in GTDS MathSpec
    }
    predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
 
