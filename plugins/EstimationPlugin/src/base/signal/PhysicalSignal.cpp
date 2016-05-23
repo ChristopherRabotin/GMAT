@@ -2273,7 +2273,7 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
             ++tropoWarningCount;
          }
       }
-      else if (tropoCorrection[0] > 1000.0)
+      else if (tropoCorrection[0] > 0.06)          // 60m  GMT-5576                 //1000.0)
       {
          if (tropoWarningCount == 0)
          {
@@ -2318,7 +2318,7 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
                ++ionoWarningCount;
             }
          }
-         else if (ionoCorrection[0] > 1000.0)
+         else if (ionoCorrection[0] > 0.02)             // 20m GMT-5576             //1000.0)
          {
             if (ionoWarningCount == 0)
             {
