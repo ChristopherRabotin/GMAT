@@ -58,8 +58,8 @@ protected:
    bool         handleFinalEpoch;
    bool         processingLargeStep;
    bool         checkForLargeTimeGap;
-
-   
+   /// Time tolerance used for checking time difference
+   Real         timeTolerance;
    
    // Initialization
    void         InitializeData(bool saveEpochInfo = false);

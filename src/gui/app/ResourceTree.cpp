@@ -2476,8 +2476,12 @@ MessageInterface::ShowMessage("ResourceTree::OnRename() oldName = %s, newName = 
       }
       else
       {
-         MessageInterface::ShowMessage
-            ("ResourceTree::OnRename() Unable to rename %s to %s.\n",
+         // MessageInterface::ShowMessage
+         //    ("ResourceTree::OnRename() Unable to rename %s to %s.\n",
+         //     oldName.WX_TO_C_STRING, newName.WX_TO_C_STRING);
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "ResourceTree cannot rename '%s' to '%s' due to "
+             "internal error. See message window for details.\n",
              oldName.WX_TO_C_STRING, newName.WX_TO_C_STRING);
       }
    }
