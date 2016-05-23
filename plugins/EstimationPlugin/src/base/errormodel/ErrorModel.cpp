@@ -78,7 +78,7 @@ ErrorModel::ErrorModel(const std::string name) :
    noiseSigma        (0.01),                  // 0.01 measurement unit (km, RU, Km/s, or Hz)
 //   noiseModel        ("NoiseConstant"), 
    bias              (0.0),                   // 0.0 measurement unit (km, RU, Km/s, or Hz)
-   biasSigma         (0.0)                    // 0.0 measurement unit (km, RU, Km/s, or Hz)
+   biasSigma         (1.0e-3)                 // 0.0 measurement unit (km, RU, Km/s, or Hz)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -88,6 +88,9 @@ ErrorModel::ErrorModel(const std::string name) :
    objectTypeNames.push_back("ErrorModel");
 
    parameterCount = ErrorModelParamCount;
+
+   covariance.AddCovarianceElement("Bias", this);            // made changes by TUAN NGUYEN
+   covariance(0, 0) = biasSigma;                             // made changes by TUAN NGUYEN
 }
 
 
@@ -231,6 +234,9 @@ bool ErrorModel::Initialize()
       return true;
 
    bool retval = true;
+
+   covariance(0,0) = biasSigma;                 // made changes by TUAN NGUYEN
+
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("ErrorModel<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
@@ -919,3 +925,38 @@ StringArray ErrorModel::GetAllAvailableTypes()
    return sa;
 }
 
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------
+// Integer Spacecraft::HasParameterCovariances(Integer parameterId)
+//-------------------------------------------------------------------------
+/**
+* This function is used to verify whether a parameter (with ID specified by
+* parameterId) having a covariance or not.
+*
+* @param parameterId      ID of a parameter
+* @return                 size of covarian matrix associated with the parameter
+*                         return -1 when the parameter has no covariance
+*/
+//-------------------------------------------------------------------------
+Integer ErrorModel::HasParameterCovariances(Integer parameterId)
+{
+   if (parameterId == BIAS)
+      return 1;
+
+   return GmatBase::HasParameterCovariances(parameterId);
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// Rmatrix* GetParameterCovariances(Integer parameterId)
+//------------------------------------------------------------------------------
+Rmatrix* ErrorModel::GetParameterCovariances(Integer parameterId)
+{
+   if (isInitialized)
+      return covariance.GetCovariance(parameterId);
+   else
+      throw GmatBaseException("Error: cannot get " + GetName() + " spacecraft's covariance when it is not initialized.\n");
+   return NULL;
+}
