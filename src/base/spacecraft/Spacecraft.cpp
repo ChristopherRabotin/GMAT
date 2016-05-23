@@ -3792,6 +3792,8 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 
     if (id == ESTIMATION_STATE_TYPE_ID)                     // made changes by TUAN NGUYEN
        return estimationStateType;                          // made changes by TUAN NGUYEN
+    if (id == ORBIT_ERROR_COVARIANCE_ID)                    // made changes by TUAN NGUYEN
+       return orbitErrorCovarianceName;                     // made changes by TUAN NGUYEN
 
     if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
        return stateElementUnits[id - ELEMENT1UNIT_ID];
