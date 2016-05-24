@@ -5033,7 +5033,7 @@ GmatBase* GmatBase::GetConfiguredObject(const std::string &name)
 }
 
 
-const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type)
+const StringArray GmatBase::GetListOfObjects(Gmat::ObjectType type)
 {
    ObjectMap objMap = GetConfiguredObjectMap();
    StringArray nameList;
@@ -5047,7 +5047,7 @@ const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type)
 }
 
 
-const StringArray& GmatBase::GetListOfObjects(const std::string &typeName)
+const StringArray GmatBase::GetListOfObjects(const std::string &typeName)
 {
    ObjectMap objMap = GetConfiguredObjectMap();
    StringArray nameList;
