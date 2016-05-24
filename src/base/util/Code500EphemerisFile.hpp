@@ -7,6 +7,7 @@
 
 #include "gmatdefs.hpp"       // For type Byte
 #include "A1Mjd.hpp"
+#include "Rvector6.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -38,6 +39,9 @@ public:
    bool ReadHeader2(int logOption = 0);
    bool ReadDataAt(int dataRecNumber, int logOption = 0);
    bool ReadDataRecords(int numRecordsToRead = -999, int logOption = 0);
+   
+   bool GetInitialAndFinalStates(Real &initialEpoch, Real &finalEpoch,
+                                 Rvector6 &initialState, Rvector6 &finalState);
    
    void SetCentralBodyMu(double mu);
    void SetTimeIntervalBetweenPoints(double secs);
@@ -240,6 +244,9 @@ protected:
    int            mDataRecWriteCounter;
    int            mLastDataRecRead;
    int            mLastStateIndexRead;
+   int            mNumberOfRecordsInFile;
+   Rvector6       mInitialState;
+   Rvector6       mFinalState;
    std::string    mLastDataRecStartGreg;
    std::string    mLastDataRecEndGreg;
    

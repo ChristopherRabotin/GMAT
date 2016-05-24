@@ -68,6 +68,8 @@ protected:
    Rvector6             ephemFinalState;
    
    bool                 ReadSpiceEphemerisFile();
+   bool                 ReadCode500EphemerisFile();
+   
    ElementWrapper*      CreateOutputEpochWrapper(Real a1MjdEpoch,
                                                  const std::string &outName);
    ElementWrapper*      CreateOutputStateWrapper(Integer outIndex,

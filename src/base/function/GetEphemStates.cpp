@@ -46,13 +46,14 @@
 #include "StringObjectWrapper.hpp"
 #include "FileManager.hpp"
 #include "SpiceOrbitKernelReader.hpp"
+#include "Code500EphemerisFile.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION_INIT
 //#define DEBUG_FUNCTION_EXEC
 //#define DEBUG_WRAPPERS
-//#define DEBUG_SPICE_READ
+//#define DEBUG_READ_EPHEM
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -414,12 +415,18 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    }
    else if (inEphemType == "Code500")
    {
-      MessageInterface::ShowMessage("*** ERROR *** Reading Code500 file is not supported yet\n");
-      return false;
+      if (!ReadCode500EphemerisFile())
+      {
+         #ifdef DEBUG_FUNCTION_EXEC
+         MessageInterface::ShowMessage("GetEphemStates::Execute() returning false\n");
+         #endif
+         return false;
+      }
    }
    else if (inEphemType == "SPK")
    {
-      MessageInterface::ShowMessage("*** ERROR *** Reading SPK file is not supported yet\n");
+      MessageInterface::ShowMessage
+         ("*** ERROR *** Getting SPK file info is not supported yet\n");
       return false;
    }
    
@@ -549,7 +556,7 @@ void GetEphemStates::Copy(const GmatBase* orig)
 //------------------------------------------------------------------------------
 bool GetEphemStates::ReadSpiceEphemerisFile()
 {
-   #ifdef DEBUG_SPICE_READ
+   #ifdef DEBUG_READ_EPHEM
    MessageInterface::ShowMessage
       ("\nGetEphemStates::ReadSpiceEphemerisFile() entered, inEphemType='%s'\n", inEphemType.c_str());
    MessageInterface::ShowMessage("%s", GmatBase::WriteObjectInfo("   ", inSat).c_str());
@@ -557,7 +564,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
    
    StringArray spiceFiles = inSat->GetStringArrayParameter("OrbitSpiceKernelName");
 
-   #ifdef DEBUG_SPICE_READ
+   #ifdef DEBUG_READ_EPHEM
    MessageInterface::ShowMessage("   spiceFiles.size() = %d\n", spiceFiles.size());
    #endif
    
@@ -585,12 +592,12 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
    std::string fullPath;
    StringArray spkFullPathNames;
    
-   for (int i = 0; i < spiceFiles.size(); i++)
+   for (unsigned int i = 0; i < spiceFiles.size(); i++)
    {
       std::string spiceFile = spiceFiles[i];      
       fullPath = fm->FindPath(spiceFile, "VEHICLE_EPHEM_SPK_PATH", true, false, true);
       
-      #ifdef DEBUG_SPICE_READ
+      #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage
          ("   Checking for kernel spiceFile = '%s'\n   fullPath = '%s'\n",
           spiceFile.c_str(), fullPath.c_str());
@@ -623,7 +630,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
       Integer satNaifId = inSat->GetIntegerParameter("NAIFId");
       Integer spkCentralBodyNaifId = sokr->GetNaifID(spkCentralBody);
 
-      #ifdef DEBUG_SPICE_READ
+      #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage
          ("   scName = '%s', satNaifId = '%d', spkCentralBody = '%s, spkCentralBodyNaifId = '%d'\n",
           scName.c_str(), satNaifId, spkCentralBody.c_str(), spkCentralBodyNaifId);
@@ -635,7 +642,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
       // Get initial and final epoch
       sokr->GetCoverageStartAndEnd(spkFullPathNames, satNaifId, fileStart, fileEnd);
       
-      #ifdef DEBUG_SPICE_READ
+      #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage
          ("   fileStart = %.12f, fileEnd = %.12f\n", fileStart, fileEnd);
       #endif
@@ -647,7 +654,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
       Real daysDiff = secsDiff / 86400;
       ephemInitialA1Mjd = fileStart + daysDiff;
       
-      #ifdef DEBUG_SPICE_READ
+      #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage("   secsDiff = %.12f, daysDiff = %.12f\n", secsDiff, daysDiff);
       MessageInterface::ShowMessage("   ephemInitialA1Mjd = %.12f\n", ephemInitialA1Mjd);
       std::string epochStr1;
@@ -664,7 +671,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
           sokr->GetTargetState(scName, satNaifId, ephemInitialA1Mjd,
                                spkCentralBody, spkCentralBodyNaifId);
       
-      #ifdef DEBUG_SPICE_READ
+      #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage
          ("   ephemInitialState = %s\n", ephemInitialState.ToString().c_str());
       #endif
@@ -675,7 +682,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
           sokr->GetTargetState(scName, satNaifId, ephemFinalA1Mjd,
                                spkCentralBody, spkCentralBodyNaifId);
       
-      #ifdef DEBUG_SPICE_READ
+      #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage("   ephemFinalA1Mjd = %.12f\n", ephemFinalA1Mjd);
       std::string epochStr2;
       Real toMjd2;
@@ -707,8 +714,77 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
    sokr->UnloadKernels(spkFullPathNames);
    delete sokr;
 
-   #ifdef DEBUG_SPICE_READ
+   #ifdef DEBUG_READ_EPHEM
    MessageInterface::ShowMessage("GetEphemStates::ReadSpiceEphemerisFile() returning true\n");
+   #endif
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ReadCode500EphemerisFile()
+//------------------------------------------------------------------------------
+bool GetEphemStates::ReadCode500EphemerisFile()
+{
+   #ifdef DEBUG_READ_EPHEM
+   MessageInterface::ShowMessage
+      ("\nGetEphemStates::ReadCode500EphemerisFile() entered, inEphemType='%s'\n", inEphemType.c_str());
+   MessageInterface::ShowMessage("%s", GmatBase::WriteObjectInfo("   ", inSat).c_str());
+   MessageInterface::ShowMessage("*** Reading dummy Code500 file for initial test\n");
+   #endif
+   
+   //std::string fileName = inSat->GetStringArrayParameter("EphemerisFileName");
+   //std::string fileName = "./BUILTIN_FUNCTION_GetEphemStates_Code500.eph";
+   //std::string fileName = "./BUILTIN_FUNCTION_GetEphemStates_Code500_12000sec.eph";
+   std::string fileName = "./BUILTIN_FUNCTION_GetEphemStates_Code500_8540sec.eph";
+   std::string outFileName;
+   std::string fullpathFileName =
+      GmatBase::GetFullPathFileName(outFileName, "GetEphemStates", fileName,
+                                    "", true);
+   #ifdef DEBUG_READ_EPHEM
+   MessageInterface::ShowMessage("   fileName = '%s'\n", fileName.c_str());
+   MessageInterface::ShowMessage("   fullpathFileName = '%s'\n", fullpathFileName.c_str());
+   #endif
+   
+   // Create Code500 ephemeris reader
+   Real initialEpoch, finalEpoch;
+   Rvector6 initialState, finalState;
+   
+   Code500EphemerisFile *code500EphemFile = new Code500EphemerisFile();
+   bool swapByteOrder = false; // Assumes PC format
+   
+   //if (!code500EphemFile->OpenForRead(fullpathFileName, 1, 1))
+   if (!code500EphemFile->OpenForRead(fullpathFileName, 1))
+   {
+      MessageInterface::ShowMessage
+         ("*** ERROR *** Failed to open Code500 ephemeris file: '%s'\n",
+          fileName.c_str());
+      return false;
+   }
+   
+   code500EphemFile->SetSwapEndian(swapByteOrder, 1);
+   if (code500EphemFile->GetInitialAndFinalStates(initialEpoch, finalEpoch,
+                                                  initialState, finalState))
+   {
+      #ifdef DEBUG_READ_EPHEM
+      MessageInterface::ShowMessage
+         ("   initialEpoch = %.12f\n   finalEpoch   = %.12f\n", initialEpoch, finalEpoch);
+      MessageInterface::ShowMessage
+         ("   initialState = %s\n   finalState   = %s\n", initialState.ToString().c_str(),
+          finalState.ToString().c_str());
+      #endif
+      ephemInitialA1Mjd = initialEpoch;
+      ephemFinalA1Mjd   = finalEpoch;
+      ephemInitialState = initialState;
+      ephemFinalState   = finalState;
+   }
+   
+   code500EphemFile->CloseForRead();
+   delete code500EphemFile;
+   
+   #ifdef DEBUG_READ_EPHEM
+   MessageInterface::ShowMessage("GetEphemStates::ReadCode500EphemerisFile() returning true\n");
    #endif
    
    return true;
