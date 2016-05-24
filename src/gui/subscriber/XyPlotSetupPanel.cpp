@@ -289,12 +289,12 @@ void XyPlotSetupPanel::Create()
    // plot option
    //------------------------------------------------------
    showPlotCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show "GUI_ACCEL_KEY"Plot"),
+      new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show " GUI_ACCEL_KEY "Plot"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    showPlotCheckBox->SetToolTip(pConfig->Read(_T("ShowPlotHint")));
    
    showGridCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show "GUI_ACCEL_KEY"Grid"),
+      new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show " GUI_ACCEL_KEY "Grid"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    showGridCheckBox->SetToolTip(pConfig->Read(_T("ShowGridHint")));
    
@@ -336,7 +336,7 @@ void XyPlotSetupPanel::Create()
                     emptyList, wxLB_SINGLE|wxLB_HSCROLL);
    mXSelectedListBox->SetToolTip(pConfig->Read(_T("SelectedXHint")));
    
-   mViewXButton = new wxButton(this, ID_BUTTON, "Edit "GUI_ACCEL_KEY"X",
+   mViewXButton = new wxButton(this, ID_BUTTON, "Edit " GUI_ACCEL_KEY "X",
                                wxDefaultPosition, wxDefaultSize, 0);
    mViewXButton->SetToolTip(pConfig->Read(_T("SelectXHint")));
    
@@ -354,7 +354,7 @@ void XyPlotSetupPanel::Create()
                     emptyList, wxLB_SINGLE|wxLB_HSCROLL);
    mYSelectedListBox->SetToolTip(pConfig->Read(_T("SelectedYHint")));
    
-   mViewYButton = new wxButton(this, ID_BUTTON, "Edit "GUI_ACCEL_KEY"Y",
+   mViewYButton = new wxButton(this, ID_BUTTON, "Edit " GUI_ACCEL_KEY "Y",
                                wxDefaultPosition, wxDefaultSize, 0);
    mViewYButton->SetToolTip(pConfig->Read(_T("SelectYHint")));
    

@@ -563,7 +563,7 @@ void OrbitPanel::Create()
    //-----------------------------------------------------------------
    // label for epoch format
    wxStaticText *epochFormatStaticText = new wxStaticText( this, ID_TEXT,
-      "Epoch "GUI_ACCEL_KEY"Format", wxDefaultPosition, wxDefaultSize, 0 );
+      "Epoch " GUI_ACCEL_KEY "Format", wxDefaultPosition, wxDefaultSize, 0 );
    
    int epochWidth = 170;
    #ifdef __WXMAC__

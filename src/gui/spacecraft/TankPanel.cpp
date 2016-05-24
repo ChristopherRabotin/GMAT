@@ -90,7 +90,7 @@ void TankPanel::Create()
    pConfig->SetPath(wxT("/Spacecraft Tanks"));
 
    // wxButton
-   selectButton = new wxButton( this, ID_BUTTON, wxString("-"GUI_ACCEL_KEY">"),
+   selectButton = new wxButton( this, ID_BUTTON, wxString("-" GUI_ACCEL_KEY ">"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    selectButton->SetToolTip(pConfig->Read(_T("AddTankHint")));
 
@@ -102,7 +102,7 @@ void TankPanel::Create()
                               wxDefaultPosition, wxDefaultSize, 0 );
    selectAllButton->SetToolTip(pConfig->Read(_T("AddAllTanksHint")));
 
-   removeAllButton = new wxButton( this, ID_BUTTON, wxString("<"GUI_ACCEL_KEY"="),
+   removeAllButton = new wxButton( this, ID_BUTTON, wxString("<" GUI_ACCEL_KEY "="),
                               wxDefaultPosition, wxDefaultSize, 0 );
    removeAllButton->SetToolTip(pConfig->Read(_T("ClearTanksHint")));
 

@@ -477,7 +477,7 @@ void CelestialBodyVisualizationPanel::Create()
    pConfig->SetPath(wxT("/Celestial Body Properties"));
    
    // texture file
-   wxStaticText *textureStaticText = new wxStaticText(this, ID_TEXT, wxString("Te"GUI_ACCEL_KEY"xture File"),
+   wxStaticText *textureStaticText = new wxStaticText(this, ID_TEXT, wxString("Te" GUI_ACCEL_KEY "xture File"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    textureFileTextCtrl   = new wxTextCtrl(this, ID_TEXT_CTRL_TEXTURE_FILE, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0);
@@ -488,7 +488,7 @@ void CelestialBodyVisualizationPanel::Create()
    textureFileBrowseButton->SetToolTip(pConfig->Read(_T("BrowseTextureMapFileHint"), "Browse for file"));
    
    // view 3D model file
-   wxStaticText *view3dModelStaticText = new wxStaticText(this, ID_TEXT, wxString("3"GUI_ACCEL_KEY"D Model File"),
+   wxStaticText *view3dModelStaticText = new wxStaticText(this, ID_TEXT, wxString("3" GUI_ACCEL_KEY "D Model File"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_FILE, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0);
@@ -499,34 +499,34 @@ void CelestialBodyVisualizationPanel::Create()
    view3dModelBrowseButton->SetToolTip(pConfig->Read(_T("Browse3DModelFileHint"), "Browse for file"));
    
    // view 3D model offset
-   wxStaticText *view3dModelOffsetXStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model "GUI_ACCEL_KEY"Offset X"),
+   wxStaticText *view3dModelOffsetXStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model " GUI_ACCEL_KEY "Offset X"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelOffsetXTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_OFFSET, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    view3dModelOffsetXTextCtrl->SetToolTip(pConfig->Read("3DModelOffsetXHint"));
-   wxStaticText *view3dModelOffsetYStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model "GUI_ACCEL_KEY"Offset Y"),
+   wxStaticText *view3dModelOffsetYStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model " GUI_ACCEL_KEY "Offset Y"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelOffsetYTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_OFFSET, wxT(""),
                        wxDefaultPosition, wxSize(100,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    view3dModelOffsetYTextCtrl->SetToolTip(pConfig->Read("3DModelOffsetYHint"));
-   wxStaticText *view3dModelOffsetZStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model "GUI_ACCEL_KEY"Offset Z"),
+   wxStaticText *view3dModelOffsetZStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model " GUI_ACCEL_KEY "Offset Z"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelOffsetZTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_OFFSET, wxT(""),
                        wxDefaultPosition, wxSize(100,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    view3dModelOffsetZTextCtrl->SetToolTip(pConfig->Read("3DModelOffsetZHint"));
    
    // view 3D model rotation
-   wxStaticText *view3dModelRotXStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model "GUI_ACCEL_KEY"Rotation X"),
+   wxStaticText *view3dModelRotXStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model " GUI_ACCEL_KEY "Rotation X"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelRotXTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_ROT, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    view3dModelRotXTextCtrl->SetToolTip(pConfig->Read("3DModelRotationXHint"));
-   wxStaticText *view3dModelRotYStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model "GUI_ACCEL_KEY"Rotation Y"),
+   wxStaticText *view3dModelRotYStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model " GUI_ACCEL_KEY "Rotation Y"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelRotYTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_ROT, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    view3dModelRotYTextCtrl->SetToolTip(pConfig->Read("3DModelRotationYHint"));
-   wxStaticText *view3dModelRotZStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model "GUI_ACCEL_KEY"Rotation Z"),
+   wxStaticText *view3dModelRotZStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model " GUI_ACCEL_KEY "Rotation Z"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelRotZTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_ROT, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -539,7 +539,7 @@ void CelestialBodyVisualizationPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    // view 3D model scale
-   wxStaticText *view3dModelScaleStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model S"GUI_ACCEL_KEY"cale"),
+   wxStaticText *view3dModelScaleStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model S" GUI_ACCEL_KEY "cale"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelScaleTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_SCALE, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));

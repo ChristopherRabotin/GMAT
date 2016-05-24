@@ -1626,7 +1626,7 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
    if (depObj == GmatParam::COORD_SYS)
    {
       mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Coordinate "GUI_ACCEL_KEY"System");
+      mCoordSysLabel->SetLabel("Coordinate " GUI_ACCEL_KEY "System");
       
       if (showBlank)
       {
@@ -1723,7 +1723,7 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
    else if (depObj == GmatParam::ORIGIN)
    {
       mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Central "GUI_ACCEL_KEY"Body");
+      mCoordSysLabel->SetLabel("Central " GUI_ACCEL_KEY "Body");
       
       // I had to remove mCoordSysComboBox first and then mCentralBodyComboBox,
       // otherwise, mCentralBodyComboBox shows too far to right
@@ -1740,7 +1740,7 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
    else if (depObj == GmatParam::ODE_MODEL)
    {
       mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("ODE"GUI_ACCEL_KEY"Model");
+      mCoordSysLabel->SetLabel("ODE" GUI_ACCEL_KEY "Model");
       
       mCoordSysSizer->Detach(mCoordSysComboBox);
       mCoordSysSizer->Detach(mCentralBodyComboBox);

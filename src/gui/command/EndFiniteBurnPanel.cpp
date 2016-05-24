@@ -193,7 +193,7 @@ void EndFiniteBurnPanel::Create()
    mSatTextCtrl->SetToolTip(pConfig->Read(_T("SpacecraftHint")));
    
    wxButton *selectSatButton =
-      new wxButton(this, ID_BUTTON, "E"GUI_ACCEL_KEY"dit", wxDefaultPosition, wxDefaultSize);
+      new wxButton(this, ID_BUTTON, "E" GUI_ACCEL_KEY "dit", wxDefaultPosition, wxDefaultSize);
    selectSatButton->SetToolTip(pConfig->Read(_T("SelectSpacecraftHint")));
    
    
