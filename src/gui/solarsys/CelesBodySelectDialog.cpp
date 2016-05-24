@@ -147,13 +147,13 @@ void CelesBodySelectDialog::Create()
    
    // arrow buttons
    mAddBodyButton =
-      new wxButton( this, ID_BUTTON, wxString("-"GUI_ACCEL_KEY">"), wxDefaultPosition, wxDefaultSize, 0 );
+      new wxButton( this, ID_BUTTON, wxString("-" GUI_ACCEL_KEY ">"), wxDefaultPosition, wxDefaultSize, 0 );
    mAddBodyButton->SetToolTip(pConfig->Read(_T("AddBodyHint")));
    mRemoveBodyButton =
       new wxButton( this, ID_BUTTON, wxString(GUI_ACCEL_KEY"<-"), wxDefaultPosition, wxDefaultSize, 0 );
    mRemoveBodyButton->SetToolTip(pConfig->Read(_T("RemoveBodyHint")));
    mClearBodyButton =
-      new wxButton( this, ID_BUTTON, wxString("<"GUI_ACCEL_KEY"="), wxDefaultPosition, wxDefaultSize, 0 );
+      new wxButton( this, ID_BUTTON, wxString("<" GUI_ACCEL_KEY "="), wxDefaultPosition, wxDefaultSize, 0 );
    mClearBodyButton->SetToolTip(pConfig->Read(_T("ClearBodiesHint")));
    
    // add buttons to sizer

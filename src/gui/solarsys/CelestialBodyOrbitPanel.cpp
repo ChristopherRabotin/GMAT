@@ -537,14 +537,14 @@ void CelestialBodyOrbitPanel::Create()
    sourceArrayWX            = new wxString[ephemListSz];
    for (unsigned int jj = 0; jj < ephemListSz; jj++)
       sourceArrayWX[jj] = wxString(sourceArray[jj].c_str());
-   ephemSourceStaticText = new wxStaticText(this, ID_TEXT, wxString("Ephemeris "GUI_ACCEL_KEY"Source"),
+   ephemSourceStaticText = new wxStaticText(this, ID_TEXT, wxString("Ephemeris " GUI_ACCEL_KEY "Source"),
                            wxDefaultPosition, wxSize(-1,-1), 0);
    ephemSourceComboBox   = new wxComboBox(this, ID_COMBO_BOX_EPHEM_SOURCE, wxString(sourceArrayWX[0]),
                            wxDefaultPosition, wxDefaultSize, ephemListSz, sourceArrayWX,
                            wxCB_DROPDOWN|wxCB_READONLY);
    ephemSourceComboBox->SetToolTip(pConfig->Read(_T("EphemerisSourceHint")));
    // ephem file
-   ephemFileStaticText    =  new wxStaticText(this, ID_TEXT, wxString("Ephemeris "GUI_ACCEL_KEY"File"),
+   ephemFileStaticText    =  new wxStaticText(this, ID_TEXT, wxString("Ephemeris " GUI_ACCEL_KEY "File"),
                              wxDefaultPosition, wxSize(-1,-1), 0);
    ephemFileTextCtrl      = new wxTextCtrl(this, ID_TEXT_CTRL_EPHEM_FILE, wxT(""),
                             wxDefaultPosition, wxSize(150,-1), 0);
@@ -585,7 +585,7 @@ void CelestialBodyOrbitPanel::Create()
    }
    
    // central body
-   centralBodyStaticText = new wxStaticText(this, ID_TEXT, wxString("Central "GUI_ACCEL_KEY"Body"),
+   centralBodyStaticText = new wxStaticText(this, ID_TEXT, wxString("Central " GUI_ACCEL_KEY "Body"),
                            wxDefaultPosition, wxSize(-1,-1), 0);
    centralBodyComboBox = guiManager->GetCelestialBodyComboBox(this, ID_COMBO_BOX_CENTRAL_BODY, 
                                                               wxSize(150,-1));
@@ -594,7 +594,7 @@ void CelestialBodyOrbitPanel::Create()
    if (!isSun && includeTwoBody)
    {
       // initial epoch
-      initialEpochStaticText = new wxStaticText(this, ID_TEXT, wxString("Initial A1 "GUI_ACCEL_KEY"Epoch"),
+      initialEpochStaticText = new wxStaticText(this, ID_TEXT, wxString("Initial A1 " GUI_ACCEL_KEY "Epoch"),
                                wxDefaultPosition, wxSize(-1,-1), 0);
       initialEpochTextCtrl   = new wxTextCtrl(this, ID_TEXT_CTRL_INITIAL_EPOCH, wxT(""),
                                wxDefaultPosition, wxSize(140, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));

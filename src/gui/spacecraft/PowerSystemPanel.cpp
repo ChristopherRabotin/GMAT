@@ -121,7 +121,7 @@ void PowerSystemPanel::Create()
 
    // label for power system
    wxStaticText *powerSystemStaticText = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Power System", wxDefaultPosition, wxDefaultSize, 0 );
+      "" GUI_ACCEL_KEY "Power System", wxDefaultPosition, wxDefaultSize, 0 );
 
    int pwrSysWidth = 170;
    #ifdef __WXMAC__
