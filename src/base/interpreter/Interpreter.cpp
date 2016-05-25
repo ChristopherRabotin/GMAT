@@ -9312,7 +9312,18 @@ bool Interpreter::FinalPass()
 
          // To catch as many errors we can, continue with next object
          if (csObj == NULL)
+         {
+            #if DBGLVL_FINAL_PASS > 1
+            MessageInterface::ShowMessage
+               ("   FinalPass: object '%s' does not exist.  continuing ...\n", (*csName).c_str());
+            #endif
+            InterpreterException ex
+               ("The CoordinateSystem \"" + (*csName) + "\" set on Spacecraft "
+                     + obj->GetName() + " does not exist.");
+            HandleError(ex, false);
+            retval = false;
             continue;
+         }
 
          #if DBGLVL_FINAL_PASS > 1
          MessageInterface::ShowMessage
