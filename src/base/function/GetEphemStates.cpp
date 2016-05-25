@@ -415,6 +415,12 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    }
    else if (inEphemType == "Code500")
    {
+      // Code500 is not ready so turned off before commit (LOJ: 2016.05.25)
+      #if 1
+      MessageInterface::ShowMessage
+         ("*** ERROR *** Getting Code500 file info is not supported yet\n");
+      return false;
+      #else
       if (!ReadCode500EphemerisFile())
       {
          #ifdef DEBUG_FUNCTION_EXEC
@@ -422,6 +428,7 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
          #endif
          return false;
       }
+      #endif
    }
    else if (inEphemType == "SPK")
    {
