@@ -68,6 +68,8 @@ namespace GmatStringUtil
    GMAT_API std::string ToUpper(const std::string &str, bool firstLetterOnly = false);
    GMAT_API std::string ToLower(const std::string &str, bool firstLetterOnly = false);
    GMAT_API std::string Capitalize(const std::string &str);
+   GMAT_API std::string ReplaceFirst(const std::string &str, const std::string &from,
+                           const std::string &to, std::string::size_type startIndex = 0);
    GMAT_API std::string Replace(const std::string &str, const std::string &from,
                            const std::string &to, std::string::size_type startIndex = 0);
    GMAT_API std::string ReplaceName(const std::string &str, const std::string &from,
