@@ -367,9 +367,6 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
       // First check for string function which does not need math equation checking
       if (isFunctionCall)
       {
-         #if 1
-         
-         
          #if DEBUG_PARSE_EQUATION
          MessageInterface::ShowMessage("   Check if it has any math function name\n");
          #endif
@@ -424,7 +421,6 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
                }
             }
          }
-         #endif
          
          
          // Check if builtin function name found. Since builtin function cannot
