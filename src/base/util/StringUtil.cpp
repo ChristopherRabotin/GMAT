@@ -833,6 +833,92 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
    return newstr;
 }
 
+//------------------------------------------------------------------------------
+// std::string ReplaceFirst(const std::string &str, const std::string &from,
+//                     const std::string &to, std::string::size_type start)
+//------------------------------------------------------------------------------
+/*
+ * Replaces first occurenece of <from> string to <to> string from start index
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ReplaceFirst(const std::string &str, const std::string &from,
+                                    const std::string &to, std::string::size_type startIndex)
+{
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceFirst()> str=<%s>, from=<%s>, to=<%s>, startIndex=%u\n",
+       str.c_str(), from.c_str(), to.c_str(), startIndex);
+   #endif
+   
+   // if input string is the same as string to replace, just return <to> string
+   if (str == from)
+   {
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::ReplaceFirst()> returning <%s>, input and from string "
+          "is the same\n", to.c_str());
+      #endif
+      return to;
+   }
+   
+   std::string str1 = str;
+   std::string prepend;
+   if (startIndex > 0)
+   {
+      prepend = str.substr(0, startIndex);
+      str1 = str.substr(startIndex);
+   }
+   std::string::size_type pos = str1.find(from);
+   
+   // if string not found, just return input string
+   if (pos == str1.npos)
+   {
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceFirst()> returning <%s>, the string <%s> not found\n",
+       str.c_str(), from.c_str());
+      #endif
+      return str;
+   }
+   
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("   prepend=<%s>, str1=<%s>\n", prepend.c_str(), str1.c_str());
+   #endif
+   
+   bool done = false;
+   std::string::size_type start = 0;
+   
+   while (!done)
+   {
+      pos = str1.find(from, start);
+
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage("===> start=%u, pos=%u\n", start, pos);
+      #endif
+
+      if (pos != str1.npos)
+      {
+         str1.replace(pos, from.size(), to);
+         start = pos + to.size();
+
+         #ifdef DEBUG_REPLACE
+         MessageInterface::ShowMessage("===> start=%u, str1=<%s>\n", start, str1.c_str());
+         #endif
+      }
+      break;
+   }
+   
+   str1 = prepend + str1;
+   
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceFirst()> returning <%s>\n", str1.c_str());
+   #endif
+   
+   return str1;
+}
 
 //------------------------------------------------------------------------------
 // std::string Replace(const std::string &str, const std::string &from,
@@ -4982,11 +5068,17 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str)
       #ifdef DEBUG_FUNCTION_NAME
       MessageInterface::ShowMessage("   equalSignPos = %u\n", index1);
       #endif
-      std::string::size_type index2 = str1.find("(", index1 + 1);
-      if (index2 == str1.npos)
-         funcName = str1.substr(index1+1);
-      else
-         funcName = str1.substr(index1+1, index2-index1-1);
+      
+      // Parse function name if equal sign is not inside quotes
+      std::string::size_type strPos;
+      if (!IsStringInsideSymbols(str1, "=", "'", strPos))
+      {
+         std::string::size_type index2 = str1.find("(", index1 + 1);
+         if (index2 == str1.npos)
+            funcName = str1.substr(index1+1);
+         else
+            funcName = str1.substr(index1+1, index2-index1-1);
+      }
    }
    
    // If function name not found above, try again (LOJ: 2016.03.07)
@@ -6085,7 +6177,11 @@ bool GmatStringUtil::IsValidFullFileName(const std::string &str, Integer &error)
    if (pos != str1.npos)
    {
       if (pos1 != str1.npos)
-         pos = GmatMathUtil::Min(pos, pos1);
+      {
+         // Fix warning: warning C4244: '=' : conversion from 'Real' to 'unsigned int', possible loss of data
+         //pos = GmatMathUtil::Min(pos, pos1);
+         pos = pos < pos1 ? pos : pos1;
+      }
    }
    else
    {

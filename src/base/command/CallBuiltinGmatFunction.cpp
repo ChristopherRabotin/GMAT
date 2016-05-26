@@ -186,20 +186,11 @@ bool CallBuiltinGmatFunction::Execute()
 
    if (isBuiltinGmatFunction)
    {
-      MessageInterface::ShowMessage("Funtion is BuiltinGmatFunction\n");
-      //mFunction->Execute(NULL, false);
-      //status = true;
+      #ifdef DEBUG_CALL_FUNCTION_EXEC
+      MessageInterface::ShowMessage("   Function is BuiltinGmatFunction\n");
+      #endif
       status = fm.Execute(callingFunction);
    }
-   // else if (isGmatFunction)
-   // {
-   //    #ifdef DEBUG_CALL_FUNCTION_EXEC
-   //    MessageInterface::ShowMessage
-   //       ("   calling FunctionManager::Execute() with callingFunction='%s'\n",
-   //        callingFunction ? (callingFunction->GetFunctionName()).c_str() : "NULL");
-   //    #endif
-   //    status = fm.Execute(callingFunction);
-   // }
    else
    {
       // The function is not a BuiltinGmatFunction so throw an exception

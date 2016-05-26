@@ -521,8 +521,8 @@ public:
    /// Functions use information from Moderator
    ObjectMap               GetConfiguredObjectMap();
    GmatBase*               GetConfiguredObject(const std::string &name);
-   const StringArray&      GetListOfObjects(Gmat::ObjectType type);
-   const StringArray&      GetListOfObjects(const std::string &typeName);
+   const StringArray       GetListOfObjects(Gmat::ObjectType type);
+   const StringArray       GetListOfObjects(const std::string &typeName);
 
 protected:
    /// Parameter IDs
@@ -536,7 +536,6 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[GmatBaseParamCount];
    /// GmatBase parameter labels
    static const std::string PARAMETER_LABEL[GmatBaseParamCount];
-
 
    /// count of the number of GmatBase objects currently instantiated
    static Integer      instanceCount;

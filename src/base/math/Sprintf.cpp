@@ -332,7 +332,12 @@ std::string Sprintf::EvaluateString()
    
    // Replace format spec with actual formatted output
    for (unsigned int i = 1; i < inputArgWrappers.size(); i++)
-      result = GmatStringUtil::Replace(result, specArray[i-1], resultArray[i-1]);
+   {
+      result = GmatStringUtil::ReplaceFirst(result, specArray[i-1], resultArray[i-1]);
+      #ifdef DEBUG_EVALUATE
+      MessageInterface::ShowMessage("   result = '%s'\n", result.c_str());
+      #endif
+   }
    
    //@note:
    // Can I use vsnprintf here?

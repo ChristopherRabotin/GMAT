@@ -166,7 +166,7 @@ void PowerSystemConfigPanel::Create()
    //-----------------------------------------------------------------
    // label for epoch format
    epochFormatTxt = new wxStaticText( this, ID_TEXT,
-      "Epoch "GUI_ACCEL_KEY"Format", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+      "Epoch " GUI_ACCEL_KEY "Format", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
 
    // combo box for the epoch format
    epochFormatComboBox = new wxComboBox
@@ -176,7 +176,7 @@ void PowerSystemConfigPanel::Create()
 
    // label for epoch
    epochTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Initial Epoch", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+      "" GUI_ACCEL_KEY "Initial Epoch", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
 
    // textfield for the epoch value
    epochTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
@@ -185,7 +185,7 @@ void PowerSystemConfigPanel::Create()
 
    // static text for initial max power
    initPowerTxt = new wxStaticText( this, ID_TEXT,
-           "Initial "GUI_ACCEL_KEY"Max Power", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+           "Initial " GUI_ACCEL_KEY "Max Power", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    // textfield
    initPowerTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -196,7 +196,7 @@ void PowerSystemConfigPanel::Create()
 
    // static text for decay rate
    decayRateTxt = new wxStaticText( this, ID_TEXT,
-           ""GUI_ACCEL_KEY"Decay Rate", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+           "" GUI_ACCEL_KEY "Decay Rate", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    // textfield
    decayRateTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -207,7 +207,7 @@ void PowerSystemConfigPanel::Create()
 
    // static text for margin
    powerMarginTxt = new wxStaticText( this, ID_TEXT,
-           ""GUI_ACCEL_KEY"Margin", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+           "" GUI_ACCEL_KEY "Margin", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    // textfield
    powerMarginTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -218,7 +218,7 @@ void PowerSystemConfigPanel::Create()
 
    // static text for bus coeff1
    busCoeff1Txt = new wxStaticText( this, ID_TEXT,
-           ""GUI_ACCEL_KEY"Bus Coeff1", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+           "" GUI_ACCEL_KEY "Bus Coeff1", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    // textfield
    busCoeff1TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -227,7 +227,7 @@ void PowerSystemConfigPanel::Create()
    busCoeff1Units = new wxStaticText( this, ID_TEXT, wxT("kW"));
    // static text for bus coeff2
    busCoeff2Txt = new wxStaticText( this, ID_TEXT,
-           ""GUI_ACCEL_KEY"Bus Coeff2", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+           "" GUI_ACCEL_KEY "Bus Coeff2", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    // textfield
    busCoeff2TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -236,7 +236,7 @@ void PowerSystemConfigPanel::Create()
    busCoeff2Units = new wxStaticText( this, ID_TEXT, wxT("kW*AU"));
    // static text for bus coeff3
    busCoeff3Txt = new wxStaticText( this, ID_TEXT,
-           ""GUI_ACCEL_KEY"Bus Coeff3", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+           "" GUI_ACCEL_KEY "Bus Coeff3", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    // textfield
    busCoeff3TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -249,7 +249,7 @@ void PowerSystemConfigPanel::Create()
    {
       // label for power shadow model
       shadowModelTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Shadow Model", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "" GUI_ACCEL_KEY "Shadow Model", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
 
       // combo box for the shadow model
       shadowModelComboBox = new wxComboBox
@@ -258,7 +258,7 @@ void PowerSystemConfigPanel::Create()
       shadowModelComboBox->SetToolTip(pConfig->Read(_T("ShadowModelHint")));
 
       shadowBodiesTxt = new wxStaticText( this, ID_TEXT,
-         "Shadow "GUI_ACCEL_KEY"Bodies", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "Shadow " GUI_ACCEL_KEY "Bodies", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       shadowBodiesTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), wxTE_READONLY  );
       shadowBodiesTxtCtrl->SetToolTip(pConfig->Read(_T("ShadowBodiesHint")));
@@ -269,7 +269,7 @@ void PowerSystemConfigPanel::Create()
 
       // static text for solar coeff1
       solarCoeff1Txt = new wxStaticText( this, ID_TEXT,
-              ""GUI_ACCEL_KEY"Solar Coeff1", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+              "" GUI_ACCEL_KEY "Solar Coeff1", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       // textfield
       solarCoeff1TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -279,7 +279,7 @@ void PowerSystemConfigPanel::Create()
             wxSize(staticTextWidth,-1), 0 );
       // static text for solar coeff2
       solarCoeff2Txt = new wxStaticText( this, ID_TEXT,
-              ""GUI_ACCEL_KEY"Solar Coeff2", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+              "" GUI_ACCEL_KEY "Solar Coeff2", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       // textfield
       solarCoeff2TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -289,7 +289,7 @@ void PowerSystemConfigPanel::Create()
             wxSize(staticTextWidth,-1), 0 );
       // static text for solar coeff3
       solarCoeff3Txt = new wxStaticText( this, ID_TEXT,
-              ""GUI_ACCEL_KEY"Solar Coeff3", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+              "" GUI_ACCEL_KEY "Solar Coeff3", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       // textfield
       solarCoeff3TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -299,7 +299,7 @@ void PowerSystemConfigPanel::Create()
             wxSize(staticTextWidth,-1), 0 );
       // static text for solar coeff4
       solarCoeff4Txt = new wxStaticText( this, ID_TEXT,
-              ""GUI_ACCEL_KEY"Solar Coeff4", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+              "" GUI_ACCEL_KEY "Solar Coeff4", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       // textfield
       solarCoeff4TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -309,7 +309,7 @@ void PowerSystemConfigPanel::Create()
             wxSize(staticTextWidth,-1), 0 );
       // static text for solar coeff5
       solarCoeff5Txt = new wxStaticText( this, ID_TEXT,
-              ""GUI_ACCEL_KEY"Solar Coeff5", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+              "" GUI_ACCEL_KEY "Solar Coeff5", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       // textfield
       solarCoeff5TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
