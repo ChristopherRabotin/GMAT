@@ -32,7 +32,11 @@
 #include "TATCException.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_HELICAL_POINTS
+#define DEBUG_HELICAL_POINTS
+#define DEBUG_POINTS
+
+using namespace GmatMathConstants;
+using namespace GmatMathUtil;
 
 //------------------------------------------------------------------------------
 // static data
@@ -49,9 +53,9 @@
 PointGroup::PointGroup(Spacecraft *sat) :
    numPoints          (0),
    numRequestedPoints (0),
-   latUpper           (GmatMathConstants::PI_OVER_TWO),
-   latLower           (-GmatMathConstants::PI_OVER_TWO),
-   lonUpper           (GmatMathConstants::TWO_PI),
+   latUpper           (PI_OVER_TWO),
+   latLower           (-PI_OVER_TWO),
+   lonUpper           (TWO_PI),
    lonLower           (0.0)
 {
    // lat, lon, and coords are all empty at the start
@@ -154,8 +158,8 @@ void PointGroup::AddHelicalPointsByNumPoints(Integer numGridPoints)
 //------------------------------------------------------------------------------
 void PointGroup::AddHelicalPointsByAngle(Real angleBetweenPoints)
 {
-   Integer numGridPoints = GmatMathUtil::Floor(4.0*GmatMathConstants::PI/
-                           angleBetweenPoints*angleBetweenPoints);
+   Integer numGridPoints = Floor(4.0*PI/
+                           (angleBetweenPoints*angleBetweenPoints));
    ComputeTestPoints("Helical",numGridPoints);
 }
 
@@ -230,20 +234,20 @@ void  PointGroup::SetLatLonBounds(Integer latUp, Integer latLow,
    if (lonLow >= lonUp)
       throw TATCException("lonLower > lonUpper or they are equal\n");
 
-   if (latUp < -GmatMathConstants::PI_OVER_TWO ||
-       latUp > GmatMathConstants::PI_OVER_TWO)
+   if (latUp < -PI_OVER_TWO ||
+       latUp > PI_OVER_TWO)
       throw TATCException("latUpper value is invalid\n");
 
    latUpper = latUp;
 
-   if (latLow < -GmatMathConstants::PI_OVER_TWO ||
-       latLow > GmatMathConstants::PI_OVER_TWO)
+   if (latLow < -PI_OVER_TWO ||
+       latLow > PI_OVER_TWO)
        throw TATCException("latLower value is invalid\n");
 
    latLower = latLow;
 
-   lonUpper = GmatMathUtil::Mod(lonUpper,GmatMathConstants::TWO_PI);
-   lonLower = GmatMathUtil::Mod(lonLower,GmatMathConstants::TWO_PI);
+   lonUpper = Mod(lonUp, TWO_PI);
+   lonLower = Mod(lonLow,TWO_PI);
 }
 
 //------------------------------------------------------------------------------
@@ -261,26 +265,40 @@ bool PointGroup::CheckHasPoints()
 }
 
 //------------------------------------------------------------------------------
-// void AccumulatePoints(Real lat1, Integer lon1)
+// void AccumulatePoints(Real lat1, Real lon1)
 //------------------------------------------------------------------------------
-void PointGroup::AccumulatePoints(Real lat1, Integer lon1)
+void PointGroup::AccumulatePoints(Real lat1, Real lon1)
 {
-   // Accumlates points, only adding them if they pass constraint
+   #ifdef DEBUG_POINTS
+      MessageInterface::ShowMessage(
+       "Entering PG::AccumulatePoints with lat1 = %12.10f and lon1 = %12.10f\n",
+        lat1, lon1);
+   #endif
+   // Accumulates points, only adding them if they pass constraint
    // checks
    if ((lat1 >= latLower) && (lat1 <= latUpper) &&
        (lon1 >= lonLower) && (lon1 <= lonUpper))
    {
-      numPoints++;
       lon.push_back(lon1);
 
       lat.push_back(lat1);
       // TODO:  Use geodetic to Cartesian conversion and don't
       // hard code the Earth radius.
       Rvector3 *newCoord = new Rvector3(
-                     GmatMathUtil::Cos(lon1) * GmatMathUtil::Cos(lat1),
-                     GmatMathUtil::Sin(lon1) * GmatMathUtil::Cos(lat1),
-                     GmatMathUtil::Sin(lat1) * 6378.1363);
+                     Cos(lon1) * Cos(lat1),
+                     Sin(lon1) * Cos(lat1),
+                     Sin(lat1) * 6378.1363);
+      #ifdef DEBUG_POINTS
+         MessageInterface::ShowMessage(
+                 "PG::AccumulatePoints, pushing back %12.10f  %12.10f  %12.10f\n",
+                 newCoord->GetElement(0), newCoord->GetElement(1), newCoord->GetElement(2));
+      #endif
       coords.push_back(newCoord);
+      numPoints++;
+   }
+   else
+   {
+      throw TATCException("lat or lon too big or small!!!!\n");
    }
 }
 
@@ -290,25 +308,32 @@ void PointGroup::AccumulatePoints(Real lat1, Integer lon1)
 void PointGroup::ComputeTestPoints(const std::string &modelName,
                                    Integer numGridPts)
 {
+   #ifdef DEBUG_POINTS
+      MessageInterface::ShowMessage(
+            "Entering PG::ComputeTestPoints with modelName = %s and numGridPoints = %d\n",
+                                    modelName.c_str(), numGridPts);
+   #endif
    // Computes surface grid points
    // Inputs: string modelName
    
    // Place first point at north pole
-   if (numGridPts >= 1)
+   if (numGridPts > 0)
    {
       // One Point at North Pole
-      AccumulatePoints(GmatMathConstants::PI_OVER_TWO,0.0);
+      AccumulatePoints(PI_OVER_TWO,0.0);
    }
    // Place second point at south pole
-   if (numGridPts >= 2)
+   if (numGridPts > 1)
    {
       // One Point at South Pole
-      AccumulatePoints(-GmatMathConstants::PI_OVER_TWO,0.0);
+      AccumulatePoints(-PI_OVER_TWO,0.0);
    }
    // Place remaining points according to requested algorithm
-   if (numGridPts >= 3)
+   if (numGridPts > 2)
+   {
       if (modelName == "Helical")
          ComputeHelicalPoints(numGridPts-2);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -324,56 +349,81 @@ void PointGroup::ComputeHelicalPoints(Integer numReqPts)
    // Inputs: int, numPoints
    
    // Determine how many longitude "bands" and fill them in
-   Integer numDiscreteLatitudes = GmatMathUtil::Floor(
-                                  GmatMathUtil::Sqrt((numReqPts+1) *
-                                  GmatMathConstants::PI/4.0));
-   Rvector discreteLatitudes(numDiscreteLatitudes);  // all zeros by default
+   Real    q                    = ((Real)(numReqPts+1)) * (PI/4.0);
+   Integer numDiscreteLatitudes = (Integer) Floor(Sqrt(q));
    
-   for (Integer latIdx = 0; latIdx < numDiscreteLatitudes-1; latIdx = latIdx + 2)
+   Rvector discreteLatitudes(numDiscreteLatitudes);  // all zeros by default
+   #ifdef DEBUG_HELICAL_POINTS
+      MessageInterface::ShowMessage("In PG::ComputeHelicalPoints, numDiscreteLatitudes = %d\n",
+                                    numDiscreteLatitudes);
+   #endif
+   
+   for (Integer latIdx = 0; latIdx < numDiscreteLatitudes; latIdx += 2)
    {
+      Real latOverNum = (Real) (latIdx + 1) / (Real)(numDiscreteLatitudes + 1);
+      Real latToUse   = PI_OVER_TWO * (1.0 - latOverNum);
       // EVEN numbers
-      discreteLatitudes(latIdx) = (GmatMathConstants::PI/2.0)*
-                                  (1-(latIdx+1)/(numDiscreteLatitudes+1));
-      // ODD NUMBERS
-      discreteLatitudes(latIdx+1) = -discreteLatitudes(latIdx);
+      discreteLatitudes(latIdx)   = latToUse;
+      // ODD numbers
+      #ifdef DEBUG_HELICAL_POINTS
+            MessageInterface::ShowMessage("  latIdx               = %d\n", latIdx);
+            MessageInterface::ShowMessage("  numDiscreteLatitudes = %d\n", numDiscreteLatitudes);
+            MessageInterface::ShowMessage("  latOverNum           = %12.10f\n", latOverNum);
+            MessageInterface::ShowMessage("  latToUse             = %12.10f\n", latToUse);
+            MessageInterface::ShowMessage("  Setting discreteLatitude(%d) = %12.10f\n",
+                                          latIdx, discreteLatitudes(latIdx));
+      #endif
+      // Only do this if it fits in the array (if numDiscreteLatitudes
+      // is odd, latIdx + 1 is too big for the array)
+      if (latIdx < (numDiscreteLatitudes - 1))
+      {
+         discreteLatitudes(latIdx+1) = -latToUse;
+         #ifdef DEBUG_HELICAL_POINTS
+            MessageInterface::ShowMessage("  Setting discreteLatitude(%d) = %12.10f\n",
+                                          latIdx+1, discreteLatitudes(latIdx+1));
+         #endif
+      }
    }
-//   for (Integer latIdx = 1:2:numDiscreteLatitudes
-//      % Odd Numbers
-//      discreteLatitudes(latIdx) = (pi/2)*(1-(latIdx+1)/(numDiscreteLatitudes+1));
-//   % Even Numbers
-//   discreteLatitudes(latIdx+1) = -discreteLatitudes(latIdx);
-//   end
    
    // Now compute the longitude points for each latitude band
-   Rvector alpha(numDiscreteLatitudes+1); // zeros by default
-   alpha(0) = 0.0;
+   Real alpha = 0.0;  // was Real array in MATLAB
    for (Integer latIdx = 0; latIdx < numDiscreteLatitudes; latIdx++)
-      alpha(0) = alpha(0) + GmatMathUtil::Cos(discreteLatitudes(latIdx));
+      alpha += Cos(discreteLatitudes(latIdx));
 
-   Rvector numPointsByLatBand(numDiscreteLatitudes); // zeros by default
+   #ifdef DEBUG_HELICAL_POINTS
+      MessageInterface::ShowMessage("  alpha = %12.10f\n", alpha);
+   #endif
    Integer pointIdx = 2; // this is two because we already added in points at the poles
-   Rvector numRemainingPoints(numDiscreteLatitudes+1); // Array of ints in C++
-//   numRemainingPoints(0) = numRequestedPoints;
-   numRemainingPoints(0) = numReqPts;
-   for (Integer latIdx = 0; latIdx < numDiscreteLatitudes-1; latIdx++) // added -1 here
+   // QUESTION : what is pointIdx used for in this method???
+   
+   Integer      numPtsByBand       = 0;          // this was an int array in MATLAB
+   Integer      numRemainingPoints = numReqPts;  // this was an int array in MATLAB
+   
+   for (Integer latIdx = 0; latIdx < numDiscreteLatitudes; latIdx++)
    {
-      numPointsByLatBand(latIdx) = GmatMathUtil::Round(
-                                   numRemainingPoints(latIdx)*
-                                   GmatMathUtil::Cos(discreteLatitudes(latIdx))/
-                                   alpha(latIdx));
-      numRemainingPoints(latIdx+1) = numRemainingPoints(latIdx) -
-                                     numPointsByLatBand(latIdx);
-      alpha(latIdx+1) = alpha(latIdx) -
-                        GmatMathUtil::Cos(discreteLatitudes(latIdx));
-      for (Integer j = 0; j < numPointsByLatBand(latIdx); j++)
+      Real currentLat      = discreteLatitudes(latIdx);
+      Real cosLat          = Cos(currentLat);
+      Real numToRound      = ((Real) numRemainingPoints) * cosLat / alpha;
+      numPtsByBand         = (Integer) Round(numToRound);
+
+      #ifdef DEBUG_HELICAL_POINTS
+            MessageInterface::ShowMessage("  cosLat(for latIdx = %d) = %12.10f\n",
+                                          latIdx, cosLat);
+            MessageInterface::ShowMessage("  numPtsByBand = %d\n", numPtsByBand);
+      #endif
+      // decrement numRemainingPoints and alpha
+      numRemainingPoints -= numPtsByBand;
+      alpha              -= cosLat;
+      
+      for (Integer pt = 0; pt < numPtsByBand; pt++)
       {
          // Compute the latitude for the next point
-         Real currentLongitude = 2 * GmatMathConstants::PI *
-                                 (j-1)/numPointsByLatBand(latIdx);
+         // WAS (pt-1) but this causes a lat or lon out-of-range!!!
+         Real currentLongitude = TWO_PI * ((Real) (pt)) / ((Real) numPtsByBand);
          // Insert the point into the cartesian and spherical arrays.
-         pointIdx++;
+         pointIdx++;  // used WHERE?
          //  @TODO:  Use geodetic to Cartesian conversion.
-         AccumulatePoints(discreteLatitudes(latIdx),currentLongitude);
+         AccumulatePoints(currentLat,currentLongitude);
       }
    }
 }
