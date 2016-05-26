@@ -48,7 +48,28 @@ typedef int logical;
 typedef int ftnlen;
 #endif
 
-#else
+#endif
+
+#ifdef __APPLE__
+
+//#undef abs  // to work on Mac - the macro for abs confuses the Mac C++ code
+
+#ifndef integer
+typedef int integer;
+#endif
+
+#ifndef logical
+typedef int logical;
+#endif
+
+#ifndef ftnlen
+typedef int ftnlen;
+#endif
+
+#endif
+
+#ifdef _MSC_VER
+//#else
 typedef long int integer;
 typedef long int logical;
 typedef long int ftnlen;
