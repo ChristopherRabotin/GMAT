@@ -45,7 +45,7 @@
 //#define DEBUG_SIMULATOR_WRITE
 //#define DEBUG_SIMULATOR_INITIALIZATION
 //#define DEBUG_INITIALIZATION
-//#define DEBUG_TIMESTEP
+#define DEBUG_TIMESTEP
 //#define DEBUG_EVENT
 //#define DEBUG_INITIALIZE
 //#define DEBUG_CLONED_PARAMETER_UPDATES
@@ -1697,15 +1697,15 @@ void Simulator::CompleteInitialization()
 //------------------------------------------------------------------------------
 void Simulator::FindTimeStep()
 {
-   if (currentEpoch > simulationEnd)
+   if (GmatMathUtil::IsEqual(currentEpoch, nextSimulationEpoch,             // swap order of "if" statements in order to fix bug GMT-5606
+      SIMTIME_ROUNDOFF))
+   {
+      currentState = CALCULATING;
+   }
+   else if (currentEpoch > simulationEnd)
    {
       if (!isTheFirstMeasurement)                                // fix bug GMT-4909
          currentState = FINISHED;
-   }
-   else if (GmatMathUtil::IsEqual(currentEpoch, nextSimulationEpoch,
-            SIMTIME_ROUNDOFF))
-   {
-      currentState = CALCULATING;
    }
    else
    {
