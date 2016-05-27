@@ -9,7 +9,10 @@ function Data = TP319()
 %   -----------------------------------------------------------------------
 %   Sept-08-08  S. Hughes:  Created the initial version.
 
+% Won't converge starting from here:
 Data.x0  = [0 0]';
+% Will converge starting from here:
+%Data.x0  = [1 1]';
 Data.lb  = -inf*ones(2,1);
 Data.ub  =  inf*ones(2,1);
 Data.A   = [];

@@ -1,13 +1,6 @@
 function [x,f,Converged,OutPut] = miNLP(costFunc,x0, A, b, Aeq, beq, lb, ...
     ub, nlconstFunc, Options, varargin)
 
-%  To do:
-%  1)  Fix minQP to remove linearly independent constraints
-%  2)  Fix minQP to identify problems with incompatible constraints.
-%  3)  Fix miNLP to switch to elastic mode when QP subproblem fails.
-%  4)  Add line search and merit function from SNOPT.
-%  5)  Add Hessian update from SNOPT.
-
 %  miNLP finds a constrained minimum of a function of several variables.
 %  miNLP attempts to solve problems of the form:
 %       min F(X)  subject to:  A*X  >= b,  Aeq*X  = beq  (linear constraints)
@@ -58,7 +51,6 @@ function [x,f,Converged,OutPut] = miNLP(costFunc,x0, A, b, Aeq, beq, lb, ...
 %   Sept-08-08  S. Hughes:  Created the initial version.
 
 
-
 %  --------------------------- Internal Variables -------------------------
 %  Variable Name  Dim.  Units  Description
 %  ------------------------------------------------------------------------
@@ -79,10 +71,16 @@ function [x,f,Converged,OutPut] = miNLP(costFunc,x0, A, b, Aeq, beq, lb, ...
 %                                   Lamda = [ LambdaLeq; LambdaNLeq;
 %                                             LambdaLineq; LambdaNLineq];
 %                                   where the multipliers for inactive
-%                                   inequaltiy constraints are zero.
+%                                   inequality constraints are zero.
 %  conVec           mx1 Any    Vector concatenization of all constraints
 %  mu            1x1    N/A    Penalty parameter for constraints in the
 %                              merit function.  mu is always positive.
+%  To do:
+%  1)  Fix minQP to remove linearly independent constraints
+%  2)  Fix minQP to identify problems with incompatible constraints.
+%  3)  Fix miNLP to switch to elastic mode when QP subproblem fails.
+%  4)  Add line search and merit function from SNOPT.
+%  5)  Add Hessian update from SNOPT.
 
 %--------------------------------------------------------------------------
 %---------------------------  Initializations -----------------------------
@@ -96,7 +94,7 @@ n        = length(x0);                  %  Number of optimization variables
 [f,gradF,numGEval] = GetDerivatives(costFunc,x0,Options,varargin{:});
 numfEval = numfEval + numGEval;
 if ~isempty(nlconstFunc)
-    [ci,ce,Ji,Je,numGEval] = GetConDerivatives(nlconstFunc,x0,Options,varargin{:});
+    [ci,ce,Ji,Je] = GetConDerivatives(nlconstFunc,x0,Options,varargin{:});
 else
     ci= []; ce = []; Ji =[]; Je = [];
 end
@@ -180,7 +178,6 @@ disp(iterdata);
 
 %----- Initializations
 lambda    = zeros(m,1);
-mu        = 1;
 method    = '';
 Converged = 0;
 iter      = 0;                    %  The number of optimization iterations
@@ -203,10 +200,7 @@ sigma = 1.0;
 tau   = 0.5;
 eta   = 0.4;
 mu    = 1;
-noHessUpdateCount = 0;
-for i = 1:m
-    muvec(i,1) = norm(gradF)/norm(J(:,i));
-end
+
 %--------------------------------------------------------------------------
 %----------------------  Perform the Algorithm  ---------------------------
 %--------------------------------------------------------------------------
@@ -258,7 +252,7 @@ while ~Converged && iter <= Options.MaxIter && ...
     dirDeriv  = gradF'*px - mu*normc;   %  Eq. 18.29
     meritF    = CalcMeritFunction(f, cviol, mu, Options);
     foundStep = 0;
-    fold      = f;  xold      = x;  Jold      = J; cold      = c;
+    fold      = f;  xold      = x;  Jold      = J;
     gradFold  = gradF;
     srchCount = 0;
     xk        = x;
@@ -268,13 +262,13 @@ while ~Converged && iter <= Options.MaxIter && ...
         srchCount   = srchCount + 1;
         x           = xk + alpha*px;
         
-        %-----  Evaluate objective,constraints, and merit 
+        %-----  Evaluate objective,constraints, and merit
         %       at at x = x + alpha*p
         [f,gradF,numGEval]     = GetDerivatives(...
             costFunc,x,Options,varargin{:});
         numfEval               = numfEval + numGEval;
         if ~isempty(nlconstFunc)
-            [ci,ce,Ji,Je,numGEval] = GetConDerivatives(...
+            [ci,ce,Ji,Je] = GetConDerivatives(...
                 nlconstFunc,x,Options,varargin{:});
         else
             ci= []; ce = []; Ji =[]; Je = [];
@@ -344,8 +338,7 @@ while ~Converged && iter <= Options.MaxIter && ...
                 
             end
             r   = theta*y + (1 - theta)*W*s;            %  Ref 1. Eq. 18.14
-            W   = W - W*s*s'*W/projHess + r*r'/(s'*r);  %  Ref 1. Eq. 18.16
-            noHessUpdateCount = 0;
+            W   = W - W*(s*s')*W/projHess + (r*r')/(s'*r);  %  Ref 1. Eq. 18.16
             
         elseif strcmp(Options.DescentMethod,'SelfScaledBFGS')
             
@@ -355,25 +348,14 @@ while ~Converged && iter <= Options.MaxIter && ...
             if s'*y >= projHess;
                 gamma = 1;
                 method = '   BFGS Update';
-                noHessUpdateCount = 0;
-                W   = gamma*W - gamma*W*s*s'*W/projHess + y*y'/(s'*y);  
+                W   = gamma*W - gamma*W*(s*s')*W/projHess + y*y'/(s'*y);
             elseif 0 < s'*y &&  s'*y <= projHess
                 gamma = y'*s/(projHess);
                 method = '   Self Scaled BFGS ';
-                noHessUpdateCount = 0;
-                W   = gamma*W - gamma*W*s*s'*W/projHess + y*y'/(s'*y);  
+                W   = gamma*W - gamma*W*(s*s')*W/projHess + y*y'/(s'*y);
             else
-                
-                noHessUpdateCount = noHessUpdateCount + 1;
-                if noHessUpdateCount == 10
-                    method = '   Hess Reset ';
-                    W = eye(size(W,1));
-                    noHessUpdateCount = 0;
-                else
-                    method = '   No Update ';
-                end
-                    
-            end            
+                method = '   No Update ';
+            end
         end
         W   = (W' + W)*0.5;
     end
@@ -404,15 +386,10 @@ disp(' ');
 %==========================================================================
 function  phi = CalcMeritFunction(f, cviol, mu, Options)
 
-
 if strcmp(Options.StepSearchMethod,'Powell')
-    
     phi = f + mu'*cviol;
-    
 elseif strcmp(Options.StepSearchMethod,'NocWright')
-    
     phi = f + mu*sum(cviol);
-    
 end
 
 %==========================================================================
@@ -423,8 +400,6 @@ function  [c,J] = ConCatConstraints(x,ci,ce,Ji,Je,A,b,Aeq,beq,mLI,mLE)
 %    is used consistently throughout MiNLP:
 %
 %       c = [ Aeq*x - b; ce; A*x - b; ci];  J = [Aeq',ce,A',ci];
-%
-%
 
 %-----  Initialize matrices
 c = [];
@@ -520,12 +495,12 @@ end
 
 %  B
 %         elseif strcmp(Options.DescentMethod,'ModifiedBFGS')
-%             
+%
 %             %  This method is documented in Matlab's spec for constrained
 %             %  optimization under the section "Updating the Hessian
 %             %  Matrix."
 %             AN = J';
-%             
+%
 %             if y'*s < alpha^2*1e-3
 %                 while t'*s < -1e-5
 %                     [yMax,yInd] = min(y.*s);
@@ -547,7 +522,7 @@ end
 %                     how = ' Hessian modified';
 %                 end
 %             end
-%             
+%
 %             if s'*y > 1e-10
 %                 W = W +(y*y')/(y'*s)-((W*s)*(s'*W'))/(s'*W*s);
 %             else
