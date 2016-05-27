@@ -78,7 +78,7 @@ ErrorModel::ErrorModel(const std::string name) :
    noiseSigma        (0.01),                  // 0.01 measurement unit (km, RU, Km/s, or Hz)
 //   noiseModel        ("NoiseConstant"), 
    bias              (0.0),                   // 0.0 measurement unit (km, RU, Km/s, or Hz)
-   biasSigma         (1.0e-3)                 // 0.0 measurement unit (km, RU, Km/s, or Hz)
+   biasSigma         (1.0e70)                 // 0.0 measurement unit (km, RU, Km/s, or Hz)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel default constructor <%s,%p>\n", GetName().c_str(), this);

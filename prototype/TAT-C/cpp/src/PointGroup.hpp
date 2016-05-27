@@ -67,7 +67,7 @@ protected:
    /// num of points
    Integer                numPoints;
    /// Number of points requested in the point algorithm
-   Integer                numRequestedPoints;
+   Integer                numRequestedPoints;  // WHERE/WHY is this used?
    /// Upper bound on allowable latitude -pi/2 <= latUpper <= pi/2
    Real                   latUpper;
    /// Upper bound on allowable latitude -pi/2 <= latLower <= pi/2
@@ -78,7 +78,7 @@ protected:
    Real                   lonLower;
    
    bool    CheckHasPoints();
-   void    AccumulatePoints(Real lat1, Integer lon1);
+   void    AccumulatePoints(Real lat1, Real lon1);
    void    ComputeTestPoints(const std::string &modelName, Integer numGridPts);
    void    ComputeHelicalPoints(Integer numReqPts);
    

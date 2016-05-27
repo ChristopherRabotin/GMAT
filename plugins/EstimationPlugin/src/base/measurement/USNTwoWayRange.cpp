@@ -29,6 +29,8 @@
  */
 //------------------------------------------------------------------------------
 
+// this needs to be at the top for Ionosphere to work on Mac!
+#include "RandomNumber.hpp"
 
 #include "USNTwoWayRange.hpp"
 #include "gmatdefs.hpp"
@@ -44,7 +46,6 @@
 #include "TimeSystemConverter.hpp"
 
 #include "SpacePoint.hpp"
-#include "RandomNumber.hpp"
 
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
