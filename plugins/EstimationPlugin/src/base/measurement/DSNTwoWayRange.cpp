@@ -29,6 +29,8 @@
  */
 //------------------------------------------------------------------------------
 
+// this needs to be at the top for Ionosphere to work on Mac!
+#include "RandomNumber.hpp" 
 
 #include "DSNTwoWayRange.hpp"
 #include "MeasurementException.hpp"
@@ -42,8 +44,6 @@
 #include "Transponder.hpp"
 #include "Troposphere.hpp"
 #include <sstream>
-
-#include "RandomNumber.hpp"
 
 //#define DEBUG_RANGE_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS

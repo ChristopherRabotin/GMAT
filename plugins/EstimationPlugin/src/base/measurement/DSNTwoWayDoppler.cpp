@@ -31,6 +31,9 @@
 //------------------------------------------------------------------------------
 
 
+// this needs to be at the top for Ionosphere to work on Mac!
+#include "RandomNumber.hpp"
+
 #include "DSNTwoWayDoppler.hpp"
 #include "MeasurementException.hpp"
 #include "GmatConstants.hpp"
@@ -40,8 +43,6 @@
 #include "Receiver.hpp"
 #include "Transponder.hpp"
 #include <sstream>
-
-#include "RandomNumber.hpp"
 
 //#define DEBUG_DOPPLER_CALC_WITH_EVENTS
 //#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
