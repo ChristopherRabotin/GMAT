@@ -16,7 +16,7 @@ switch Options.DerivativeMethod
     case {'ForwardDiff','BackwardDiff','CentralDiff'}
 
         f                  = feval(func,x,varargin{:});
-        [G, NumGFuncEvals] = numdiff(func,x,f,Options,'Gradient',varargin{:});
+        [G, NumGFuncEvals] = Numdiff(func,x,f,Options,'Gradient',varargin{:});
         numfEval           = numfEval + NumGFuncEvals + 1;
 
     case 'Analytic'
