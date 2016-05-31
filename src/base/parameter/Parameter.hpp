@@ -90,7 +90,6 @@ public:
    GmatParam::ParameterKey  GetKey() const;
    GmatBase*                GetOwner() const;
    Gmat::ObjectType         GetOwnerType() const;
-   Gmat::ObjectType         GetOwnedObjectType() const;
    Gmat::ParameterType      GetReturnType() const;
    GmatParam::CycleType     GetCycleType() const;
    std::string              GetParameterClassType() const;

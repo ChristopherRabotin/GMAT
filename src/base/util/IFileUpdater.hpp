@@ -35,7 +35,6 @@
 #define IFileUpdater_hpp
 
 #include "gmatdefs.hpp"
-#include "GmatBase.hpp"
 #include "Date.hpp"
 #include "FileManager.hpp"
 
