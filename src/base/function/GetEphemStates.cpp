@@ -29,15 +29,15 @@
  * [initialEpoch, initialState, finalEpoch, finalState] =
  *    GetEphemStates(ephemType, sat, epochFormat, coordSystem)
  *   Input:
- *      ephemType    : Ephemeris type ('STK', 'SPK', 'Code500')
- *      sat          : Spacecraft with an associated ephemeris file, Otherwise throw error
+ *      ephemType    : Ephemeris type ('SPK', 'Code500', 'STK')
+ *      sat          : Spacecraft with an associated ephemeris file, otherwise throw error
  *      epochFormat  : String containing a valid epoch format for the resulting epoch output
  *      coordSystem  : CoordinateSystem for the resulting state output.
  *   Output:
- *      initialEpoch : String of intial epoch in requested epochFormat
- *      initialState : 6-element Array in the requested coordinateSystem
+ *      initialEpoch : String of initial epoch in requested epochFormat
+ *      initialState : 6-element Array in the requested coordSystem
  *      finalEpoch   : String of final epoch on the file in requested epochFormat
- *      finalState   : 6-element Array in the requested coordinateSystem
+ *      finalState   : 6-element Array in the requested coordSystem
  */
 //------------------------------------------------------------------------------
 
@@ -47,6 +47,7 @@
 #include "FileManager.hpp"
 #include "SpiceOrbitKernelReader.hpp"
 #include "Code500EphemerisFile.hpp"
+#include "STKEphemerisFile.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 
@@ -415,12 +416,6 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    }
    else if (inEphemType == "Code500")
    {
-      // Code500 is not ready so turned off before commit (LOJ: 2016.05.25)
-      #if 1
-      MessageInterface::ShowMessage
-         ("*** ERROR *** Getting Code500 file info is not supported yet\n");
-      return false;
-      #else
       if (!ReadCode500EphemerisFile())
       {
          #ifdef DEBUG_FUNCTION_EXEC
@@ -428,12 +423,25 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
          #endif
          return false;
       }
-      #endif
    }
-   else if (inEphemType == "SPK")
+   else if (inEphemType == "STK")
    {
+      if (!ReadSTKEphemerisFile())
+      {
+         #ifdef DEBUG_FUNCTION_EXEC
+         MessageInterface::ShowMessage("GetEphemStates::Execute() returning false\n");
+         #endif
+         return false;
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_FUNCTION_EXEC
       MessageInterface::ShowMessage
-         ("*** ERROR *** Getting SPK file info is not supported yet\n");
+         ("GetEphemStates::Execute() returning false, unknown ephem type '%s', "
+          "probably coding error\n",
+          inEphemType.c_str());
+      #endif
       return false;
    }
    
@@ -738,13 +746,9 @@ bool GetEphemStates::ReadCode500EphemerisFile()
    MessageInterface::ShowMessage
       ("\nGetEphemStates::ReadCode500EphemerisFile() entered, inEphemType='%s'\n", inEphemType.c_str());
    MessageInterface::ShowMessage("%s", GmatBase::WriteObjectInfo("   ", inSat).c_str());
-   MessageInterface::ShowMessage("*** Reading dummy Code500 file for initial test\n");
    #endif
    
-   //std::string fileName = inSat->GetStringArrayParameter("EphemerisFileName");
-   //std::string fileName = "./BUILTIN_FUNCTION_GetEphemStates_Code500.eph";
-   //std::string fileName = "./BUILTIN_FUNCTION_GetEphemStates_Code500_12000sec.eph";
-   std::string fileName = "./BUILTIN_FUNCTION_GetEphemStates_Code500_8540sec.eph";
+   std::string fileName = inSat->GetStringParameter("EphemerisName");
    std::string outFileName;
    std::string fullpathFileName =
       GmatBase::GetFullPathFileName(outFileName, "GetEphemStates", fileName,
@@ -771,8 +775,8 @@ bool GetEphemStates::ReadCode500EphemerisFile()
    }
    
    code500EphemFile->SetSwapEndian(swapByteOrder, 1);
-   if (code500EphemFile->GetInitialAndFinalStates(initialEpoch, finalEpoch,
-                                                  initialState, finalState))
+   if (code500EphemFile->
+       GetInitialAndFinalStates(initialEpoch, finalEpoch, initialState, finalState))
    {
       #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage
@@ -795,6 +799,76 @@ bool GetEphemStates::ReadCode500EphemerisFile()
    #endif
    
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ReadSTKEphemerisFile()
+//------------------------------------------------------------------------------
+bool GetEphemStates::ReadSTKEphemerisFile()
+{
+   #ifdef DEBUG_READ_EPHEM
+   MessageInterface::ShowMessage
+      ("\nGetEphemStates::ReadSTKEphemerisFile() entered, inEphemType='%s'\n", inEphemType.c_str());
+   MessageInterface::ShowMessage("%s", GmatBase::WriteObjectInfo("   ", inSat).c_str());
+   #endif
+   
+   std::string fileName = inSat->GetStringParameter("EphemerisName");
+   std::string outFileName;
+   std::string fullpathFileName =
+      GmatBase::GetFullPathFileName(outFileName, "GetEphemStates", fileName,
+                                    "", true);
+   #ifdef DEBUG_READ_EPHEM
+   MessageInterface::ShowMessage("   fileName = '%s'\n", fileName.c_str());
+   MessageInterface::ShowMessage("   fullpathFileName = '%s'\n", fullpathFileName.c_str());
+   #endif
+   
+   // Create STK ephemeris reader
+   Real initialEpoch, finalEpoch;
+   Rvector6 initialState, finalState;
+   std::string cbName, csName;
+   
+   STKEphemerisFile *stkEphemFile = new STKEphemerisFile();
+   
+   if (!stkEphemFile->OpenForRead(fullpathFileName, "TimePosVel"))
+   {
+      MessageInterface::ShowMessage
+         ("*** ERROR *** Failed to open STK ephemeris file: '%s'\n",
+          fileName.c_str());
+      return false;
+   }
+   
+   bool retval = false;
+   // Get initial and final state
+   if (stkEphemFile->
+       GetInitialAndFinalStates(initialEpoch, finalEpoch,
+                                initialState, finalState, cbName, csName))
+   {
+      #ifdef DEBUG_READ_EPHEM
+      MessageInterface::ShowMessage
+         ("   initialEpoch = %.12f\n   finalEpoch   = %.12f\n", initialEpoch, finalEpoch);
+      MessageInterface::ShowMessage
+         ("   initialState = %s\n   finalState   = %s\n", initialState.ToString().c_str(),
+          finalState.ToString().c_str());
+      MessageInterface::ShowMessage
+         ("   cbName       = '%s'\n   csName       = '%s'\n", cbName.c_str(), csName.c_str());
+      #endif
+      ephemInitialA1Mjd = initialEpoch;
+      ephemFinalA1Mjd   = finalEpoch;
+      ephemInitialState = initialState;
+      ephemFinalState   = finalState;
+      retval = true;
+   }
+   
+   stkEphemFile->CloseForRead();
+   delete stkEphemFile;
+   
+   #ifdef DEBUG_READ_EPHEM
+   MessageInterface::ShowMessage
+      ("GetEphemStates::ReadSTKEphemerisFile() returning %d\n", retval);
+   #endif
+   
+   return retval;
 }
 
 

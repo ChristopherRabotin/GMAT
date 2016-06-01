@@ -69,6 +69,7 @@ protected:
    
    bool                 ReadSpiceEphemerisFile();
    bool                 ReadCode500EphemerisFile();
+   bool                 ReadSTKEphemerisFile();
    
    ElementWrapper*      CreateOutputEpochWrapper(Real a1MjdEpoch,
                                                  const std::string &outName);
