@@ -135,7 +135,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // DryMass
       Gmat::ENUMERATION_TYPE, // DateFormat
       Gmat::STRING_TYPE,      // EstimationStateType
-      Gmat::OBJECT_TYPE,      // OrbitErrorCovariance
+      Gmat::RMATRIX_TYPE,     // OrbitErrorCovariance        // made changes by TUAN NGUYEN
       Gmat::REAL_TYPE,        // Cd
       Gmat::REAL_TYPE,        // Cr
       Gmat::REAL_TYPE,        // CdSigma
@@ -370,7 +370,6 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    reflectCoeff         (1.8),
    reflectCoeffSigma    (1.0e70),                 // set a large number to parameter's covariance
    estimationStateType  ("Cartesian"),            // made changes by TUAN NGUYEN
-   orbitErrorCovarianceName(""),                  // made changes by TUAN NGUYEN
    orbitErrorCovariance (NULL),                   // made changes by TUAN NGUYEN
    epochSystem          ("TAI"),
    epochFormat          ("ModJulian"),
@@ -656,8 +655,6 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    reflectCoeff         (a.reflectCoeff),
    reflectCoeffSigma    (a.reflectCoeffSigma),
    estimationStateType  (a.estimationStateType),            // made changes by TUAN NGUYEN
-   orbitErrorCovarianceName
-                        (a.orbitErrorCovarianceName),       // made changes by TUAN NGUYEN
    orbitErrorCovariance (NULL),                             // made changes by TUAN NGUYEN
    epochSystem(a.epochSystem),
    epochFormat          (a.epochFormat),
@@ -945,7 +942,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
 
    estimationStateType      = a.estimationStateType;                       // made changes by TUAN NGUYEN
-   orbitErrorCovarianceName = a.orbitErrorCovarianceName;                  // made changes by TUAN NGUYEN
    orbitErrorCovariance     = (Array*)(a.orbitErrorCovariance->Clone());   // made changes by TUAN NGUYEN
 
    #ifdef DEBUG_SPACECRAFT
@@ -1793,9 +1789,6 @@ std::string Spacecraft::GetRefObjectName(const Gmat::ObjectType type) const
    }
    if (type == Gmat::ATTITUDE)   return "";   // Attitude objects don't have names
 
-   if (type == Gmat::ARRAY)                      // made changes by TUAN NGUYEN
-      return orbitErrorCovarianceName;           // made changes by TUAN NGUYEN
-
    return SpaceObject::GetRefObjectName(type);
 }
 
@@ -1826,8 +1819,6 @@ bool Spacecraft::HasRefObjectTypeArray()
 const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
-
-   refObjectTypes.push_back(Gmat::ARRAY);             // made changes by TUAN NGUYEN
 
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    refObjectTypes.push_back(Gmat::HARDWARE);  // includes PowerSystem
@@ -1874,9 +1865,6 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
 
       // Add Spacecraft CS name
       fullList.push_back(coordSysName);
-
-      // Add orbit error covariance name                        // made changes by TUAN NGUYEN
-      fullList.push_back(orbitErrorCovarianceName);             // made changes by TUAN NGUYEN
 
       #ifdef DEBUG_POWER_SYSTEM
             MessageInterface::ShowMessage("Pushing back powerSystemName (\"%s\") to fullList ......\n",
@@ -2120,14 +2108,6 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          "In SC::GetRefObject - returning Attitude pointer <%p>\n", attitude);
          #endif
          return attitude;
-         break;                                           // made changes by TUAN NGUYEN
-
-      case Gmat::ARRAY:                                   // made changes by TUAN NGUYEN
-         if (orbitErrorCovariance != NULL)                // made changes by TUAN NGUYEN
-         {                                                // made changes by TUAN NGUYEN
-            if (orbitErrorCovariance->GetName() == name)  // made changes by TUAN NGUYEN
-               return orbitErrorCovariance;               // made changes by TUAN NGUYEN
-         }                                                // made changes by TUAN NGUYEN
          break;                                           // made changes by TUAN NGUYEN
 
       case Gmat::HARDWARE:
@@ -2498,13 +2478,6 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       #endif
       return true;
    }
-   else if (type == Gmat::ARRAY)                        // made changes by TUAN NGUYEN
-   {                                                    // made changes by TUAN NGUYEN
-      if (obj->IsOfType(Gmat::ARRAY) == false)          // made changes by TUAN NGUYEN
-         throw GmatBaseException("Error: object with name '" + orbitErrorCovarianceName + "' set to " +      // made changes by TUAN NGUYEN
-               GetName() + ".OrbitErrorCovariance parameter has type not a GMAT ARRAY.\n");                  // made changes by TUAN NGUYEN
-      orbitErrorCovariance = (Array*)obj;               // made changes by TUAN NGUYEN
-   }                                                    // made changes by TUAN NGUYEN
    else
    {
       #ifdef DEBUG_SC_REF_OBJECT
@@ -3791,8 +3764,6 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 
     if (id == ESTIMATION_STATE_TYPE_ID)                     // made changes by TUAN NGUYEN
        return estimationStateType;                          // made changes by TUAN NGUYEN
-    if (id == ORBIT_ERROR_COVARIANCE_ID)                    // made changes by TUAN NGUYEN
-       return orbitErrorCovarianceName;                     // made changes by TUAN NGUYEN
 
     if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
        return stateElementUnits[id - ELEMENT1UNIT_ID];
@@ -4331,12 +4302,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          throw GmatBaseException("Error: Estimation state type '" + value + "' was not implemented in current GMAT version.\n");   // made changes by TUAN NGUYEN
       estimationStateType = value;                            // made changes by TUAN NGUYEN
    }                                                          // made changes by TUAN NGUYEN
-   else if (id == ORBIT_ERROR_COVARIANCE_ID)                  // made changes by TUAN NGUYEN
-   {                                                          // made changes by TUAN NGUYEN
-      if (GmatStringUtil::IsValidIdentity(value))             // made changes by TUAN NGUYEN
-         throw GmatBaseException("Error: '" + value + "' set to " + GetName() + ".OrbitErrorCovariance parameter has an invalid name.\n");   // made changes by TUAN NGUYEN
-      orbitErrorCovarianceName = value;                       // made changes by TUAN NGUYEN
-   }                                                          // made changes by TUAN NGUYEN
    else                                                       // made changes by TUAN NGUYEN
       return SpaceObject::SetStringParameter(id, value);      // made changes by TUAN NGUYEN
 
@@ -4555,6 +4520,9 @@ const Rmatrix& Spacecraft::GetRmatrixParameter(const Integer id) const
 //   if (id == ORBIT_COVARIANCE)
 //      return covariance;
 
+   if (id == ORBIT_ERROR_COVARIANCE_ID)                         // made changes by TUAN NGUYEN
+      return orbitErrorCovariance->GetRmatrix();                // made changes by TUAN NGUYEN
+
    return SpaceObject::GetRmatrixParameter(id);
 }
 
@@ -4609,6 +4577,12 @@ const Rmatrix& Spacecraft::SetRmatrixParameter(const Integer id,
 //      covariance = value;
 //      return covariance;
 //   }
+
+   if (id == ORBIT_ERROR_COVARIANCE_ID)                         // made changes by TUAN NGUYEN
+   {                                                            // made changes by TUAN NGUYEN
+      orbitErrorCovariance->SetRmatrix(value);                  // made changes by TUAN NGUYEN
+      return orbitErrorCovariance->GetRmatrix();                // made changes by TUAN NGUYEN
+   }                                                            // made changes by TUAN NGUYEN
 
    return SpaceObject::SetRmatrixParameter(id, value);
 }

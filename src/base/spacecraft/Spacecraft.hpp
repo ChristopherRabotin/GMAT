@@ -527,7 +527,6 @@ protected:
 
    /// Estimation error covariance                        // made changes by TUAN NGUYEN
    std::string       estimationStateType;                 // made changes by TUAN NGUYEN
-   std::string       orbitErrorCovarianceName;            // made changes by TUAN NGUYEN
    Array             *orbitErrorCovariance;               // made changes by TUAN NGUYEN
 
    /// String specifying the epoch time system (A1, TAI, UTC, or TT)
