@@ -562,12 +562,51 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
    return true;
 }
 
+//---------------------------------------------------------------------------
+// bool SetArray(const Rmatrix &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Method to set the Rmatrix value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetArray(const Rmatrix &toValue)
+{
+   if (object == NULL)
+      throw ParameterException(
+      "Cannot set value of ObjectProperty - object pointer is NULL\n");
+   
+   try
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::SetArray, about to set value to %s\n", toValue.ToString().c_str());
+      #endif
+      object->SetRmatrixParameter(propID, toValue);
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::SetRmatrix, value has been set to %s\n", toValue.ToString().c_str());
+      #endif
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+      #endif
+      
+      throw;
+   }
+   
+   return true;
+}
 
 //---------------------------------------------------------------------------
 //  bool SetRvector(const Rvector &toValue)
 //---------------------------------------------------------------------------
 /**
- * Method to set the Real value of the wrapped object.
+ * Method to set the Rvector value of the wrapped object.
  *
  * @return true if successful; false otherwise.
  */

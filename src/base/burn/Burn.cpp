@@ -136,7 +136,7 @@ Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
    
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
    deltaVInertial[0] = deltaVInertial[1] = deltaVInertial[2] = 0.0;
-   accel[0] = accel[1] = accel[3] = 0.0;
+   accel[0] = accel[1] = accel[2] = 0.0;
    
    frameBasis[0][0] = frameBasis[1][1] = frameBasis[2][2] = 1.0;
    frameBasis[0][1] = frameBasis[1][0] = frameBasis[2][0] =
