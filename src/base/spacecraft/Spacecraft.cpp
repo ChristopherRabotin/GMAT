@@ -4626,6 +4626,9 @@ Real Spacecraft::GetRealParameter(const Integer id, const Integer row,
    if (id == FULL_A_MATRIX)
       return fullAMatrix(row, col);
 
+   if (id == ORBIT_ERROR_COVARIANCE_ID)                                                // made changes by TUAN NGUYEN
+      return orbitErrorCovariance->GetRealParameter("SingleValue", row, col);          // made changes by TUAN NGUYEN
+
    return SpaceObject::GetRealParameter(id, row, col);
 }
 
@@ -4709,6 +4712,17 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
          throw SpaceObjectException("SetRealParameter: col requested for fullAMatrix is out-of-range\n");
       fullAMatrix(row, col) = value;
       return fullAMatrix(row, col);
+   }
+
+   if (id == ORBIT_ERROR_COVARIANCE_ID)
+   {
+      if ((row < 0) || (row >= orbitErrorCovariance->GetRmatrix().GetNumRows()))
+         throw SpaceObjectException("SetRealParameter: row requested for orbitErrorCovariance is out-of-range\n");
+      if ((col < 0) || (col >= orbitErrorCovariance->GetRmatrix().GetNumColumns()))
+         throw SpaceObjectException("SetRealParameter: col requested for orbitErrorCovariance is out-of-range\n");
+      orbitErrorCovariance->SetRealParameter("SingleValue", value, row, col);
+
+      return orbitErrorCovariance->GetRealParameter("SingleValue", row, col);
    }
 
    return SpaceObject::SetRealParameter(id, value, row, col);
