@@ -111,7 +111,7 @@ protected:
    virtual bool   MediaCorrectionCalculation1(std::vector<RampTableData>* rampTB = NULL);
    RealArray      TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
    RealArray      IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2);
-   RealArray      MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2);
+   RealArray      MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2, Real minElevationAngle);         // made changes by TUAN NGUYEN
 
    /// This function is used to calculate total hardware delay
    virtual bool   HardwareDelayCalculation();

@@ -1040,7 +1040,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
          #endif
 
          // In uplink leg, r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system
-         uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T, t2R);
+         uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T, t2R, minAngle);                // made changes by TUAN NGUYEN
 
          uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
          Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
@@ -1106,7 +1106,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
             MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
          #endif
          // In down link leg, r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system
-         downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R, t2T);
+         downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R, t2T, minAngle);               // made changes by TUAN NGUYEN
 
          downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
          Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;

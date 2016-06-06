@@ -586,9 +586,10 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
 }
 #endif
 
-//------------------------------------------------------------------------
-// RealArray CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
-//------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+// RealArray CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, 
+//                                    Real epoch1, Real epoch2)
+//---------------------------------------------------------------------------
 /**
  * This function is used to calculate media corrections.
  *
@@ -597,9 +598,14 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
  * @param r2B        Position of spacecraft in SSB FK5 coordinate system
  * @param epoch1     The time at which signal is transmitted or received at ground station
  * @param epoch2     The time at which signal is transmitted or received at spacecraft
+ * @param minElevationAngle     Minimum elevation angle (unit: degree) at 
+ *                              which signal can send or receive at ground station
+ *
+ * return            An array containing results of media correction
  */
-//------------------------------------------------------------------------
-RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
+//---------------------------------------------------------------------------
+RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, 
+                                Real epoch1, Real epoch2, Real minElevationAngle)                     // made changes by TUAN NGUYEN
 {
    #ifdef DEBUG_MEDIA_CORRECTION
       MessageInterface::ShowMessage("start PhysicalMeasurement::CalculateMediaCorrection()\n");
@@ -613,7 +619,8 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
    Real elevationAngle = asin((R_o_j2k*(rangeVector.GetUnitVector())).GetElement(2));       // unit: radian
    // MessageInterface::ShowMessage("CalculateMediaCorrection():   elevationAngle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
 
-   if (elevationAngle > 0.0)
+//   if (elevationAngle > 0.0)                                                        // made changes by TUAN NGUYEN
+   if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)             // made changes by TUAN NGUYEN
    {
       // 2. Run Troposphere correction:
       // MessageInterface::ShowMessage("Calculate Troposphere correction\n");
@@ -633,7 +640,7 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       {
          if (tropoWarningCount == 0)
          {
-            MessageInterface::ShowMessage("Warning: Troposphere correction has an expected large value (%lf km).\n", mediaCorrection[0]);
+            MessageInterface::ShowMessage("Warning: Troposphere correction has a large value (%lf km).\n", mediaCorrection[0]);
             MessageInterface::ShowMessage("The correction is calculated based on signal sent or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", participants[0]->GetName().c_str(), epoch1, participants[1]->GetName().c_str());
             ++tropoWarningCount;
          }
@@ -663,7 +670,7 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       {
          if (ionoWarningCount == 0)
          {
-            MessageInterface::ShowMessage("Warning: Ionosphere correction has an expected large value (%lf km).\n", ionoCorrection[0]);
+            MessageInterface::ShowMessage("Warning: Ionosphere correction has a large value (%lf km).\n", ionoCorrection[0]);
             MessageInterface::ShowMessage("The correction is calculated based on signal sent from or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", participants[0]->GetName().c_str(), epoch1, participants[1]->GetName().c_str());
             ++ionoWarningCount;
          }

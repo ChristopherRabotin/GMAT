@@ -1598,19 +1598,21 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
    {
       // signal is transmitted from ground station
-      MediaCorrection(theData.transmitFreq, r1B, r2B, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());
+      Real minElevAngle = theData.tNode->GetRealParameter("MinimumElevationAngle");                                            // made changes by TUAN NGUYEN
+      MediaCorrection(theData.transmitFreq, r1B, r2B, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd(), minElevAngle);   // made changes by TUAN NGUYEN
       frequency = theData.transmitFreq;
    }
    else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
    {
       // signal is received at ground station
-      MediaCorrection(theData.receiveFreq, r2B, r1B, theData.rPrecTime.GetMjd(), theData.tPrecTime.GetMjd());
+      Real minElevAngle = theData.rNode->GetRealParameter("MinimumElevationAngle");                                            // made changes by TUAN NGUYEN
+      MediaCorrection(theData.receiveFreq, r2B, r1B, theData.rPrecTime.GetMjd(), theData.tPrecTime.GetMjd(), minElevAngle);    // made changes by TUAN NGUYEN
       frequency = theData.receiveFreq;
    }
    else
    {
       // signal is transmited from a spacecraft to a spacecraft
-      MediaCorrection(theData.transmitFreq, r1B, r2B, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());
+      MediaCorrection(theData.transmitFreq, r1B, r2B, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd(), -90.0);          // made changes by TUAN NGUYEN
       frequency = theData.transmitFreq;
    }
 
@@ -1925,15 +1927,17 @@ bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* ram
    Rvector3 r2B = theData.rLoc + theData.rOStateSSB.GetR();
    if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
    {
-      MediaCorrection(frequency, r1B, r2B, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());
+      Real minElevAngle = theData.tNode->GetRealParameter("MinimumElevationAngle");                                       // made changes by TUAN NGUYEN
+      MediaCorrection(frequency, r1B, r2B, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd(), minElevAngle);         // made changes by TUAN NGUYEN
    }
    else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
    {
-      MediaCorrection(dsFrequency, r2B, r1B, theData.rPrecTime.GetMjd(), theData.tPrecTime.GetMjd());
+      Real minElevAngle = theData.rNode->GetRealParameter("MinimumElevationAngle");                                       // made changes by TUAN NGUYEN
+      MediaCorrection(dsFrequency, r2B, r1B, theData.rPrecTime.GetMjd(), theData.tPrecTime.GetMjd(), minElevAngle);       // made changes by TUAN NGUYEN
    }
    else
    {
-      MediaCorrection(frequency, r1B, r2B, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());
+      MediaCorrection(frequency, r1B, r2B, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd(), -90.0);                // made changes by TUAN NGUYEN
    }
 
 #ifdef DEBUG_RANGE_CALCULATION
@@ -2214,9 +2218,10 @@ Real PhysicalSignal::ETminusTAI(Real tA1MJD, SpacePoint* participant)
 }
 
 
-//------------------------------------------------------------------------
-// RealArray MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2)
-//------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// RealArray MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, 
+//                           Real epoch2, Real minElevationAngle)
+//----------------------------------------------------------------------------
 /**
  * This function is used to calculate media corrections.
  *
@@ -2225,10 +2230,14 @@ Real PhysicalSignal::ETminusTAI(Real tA1MJD, SpacePoint* participant)
  * @param r2B     Position of spacecraft in SSB FK5 coordinate system 
  * @param epoch1  The time at which signal is transmitted from or received at ground station
  * @param epoch2  The time at which signal is received from or transmitted at spacecraft
- * return         An array containing results fo media correction
+ * @param minElevationANgle      Minimum elevation angle (unit: degree) at which 
+ *                               signal can send or receive at ground station
+ *
+ * return         An array containing results of media correction
  */
-//------------------------------------------------------------------------
-RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
+//----------------------------------------------------------------------------
+RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, 
+                          Real epoch1, Real epoch2, Real minElevationAngle)                 // made changes by TUAN NGUYEN
 {
    #ifdef DEBUG_MEASUREMENT_CORRECTION
       MessageInterface::ShowMessage("start PhysicalMeasurement::MediaCorrection()\n");
@@ -2255,7 +2264,8 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
    Rvector3 rangeVector = r2B - r1B;                                         // vector pointing from ground station to spacecraft in FK5 coordinate system
    Real elevationAngle = asin((R_Obs_j2k*(rangeVector.GetUnitVector())).GetElement(2));   // unit: radian
    
-   if (elevationAngle > epsilon)
+//   if (elevationAngle > epsilon)                                           // made changes by TUAN NGUYEN
+   if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)    // made changes by TUAN NGUYEN
    {
       tropoCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
       #ifdef DEBUG_MEASUREMENT_CORRECTION
@@ -2277,7 +2287,7 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
       {
          if (tropoWarningCount == 0)
          {
-            MessageInterface::ShowMessage("Warning: Troposphere correction has an expected lager value (%lf km).\n", tropoCorrection[0]);
+            MessageInterface::ShowMessage("Warning: Troposphere correction has a large value (%lf km).\n", tropoCorrection[0]);
             MessageInterface::ShowMessage("The correction is calculated based on signal sent or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", theData.tNode->GetName().c_str(), epoch1, theData.rNode->GetName().c_str());
             ++tropoWarningCount;
          }
@@ -2299,7 +2309,8 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
 
    #ifdef IONOSPHERE
       // 2. Run Ionosphere correction:
-      if (elevationAngle > epsilon)
+//    if (elevationAngle > epsilon)                                                  // made changes by TUAN NGUYEN
+      if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)         // made changes by TUAN NGUYEN
       {
          ionoCorrection = IonosphereCorrection(freq, r1B, r2B, epoch1, epoch2);
          #ifdef DEBUG_MEASUREMENT_CORRECTION
@@ -2322,7 +2333,7 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
          {
             if (ionoWarningCount == 0)
             {
-               MessageInterface::ShowMessage("Warning: Ionosphere correction has an expected large value (%lf km).\n", ionoCorrection[0]);
+               MessageInterface::ShowMessage("Warning: Ionosphere correction has a large value (%lf km).\n", ionoCorrection[0]);
                MessageInterface::ShowMessage("The correction is calculated based on signal sent or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", theData.tNode->GetName().c_str(), epoch1, theData.rNode->GetName().c_str());
                ++ionoWarningCount;
             }
