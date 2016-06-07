@@ -1771,6 +1771,32 @@ bool GmatBase::CanAssignStringToObjectProperty(const Integer id) const
 
 
 //---------------------------------------------------------------------------
+// bool IsSquareBracketAllowedInSetting(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not a value with square bracket can be
+ * assigned to the specified object property.
+ *
+ * @param <id> ID for the property.
+ *
+ * @return true, if a value with square bracket can be assigned; false otherwise
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsSquareBracketAllowedInSetting(const Integer id) const
+{
+   Gmat::ParameterType type = GetParameterType(id);
+   if ((type == Gmat::BOOLEANARRAY_TYPE) ||
+       (type == Gmat::INTARRAY_TYPE) ||
+       (type == Gmat::UNSIGNED_INTARRAY_TYPE) ||
+       (type == Gmat::RVECTOR_TYPE) ||
+       (type == Gmat::RMATRIX_TYPE))
+      return true;
+   else
+      return false;
+}
+
+
+//---------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**

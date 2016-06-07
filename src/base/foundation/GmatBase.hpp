@@ -237,6 +237,7 @@ public:
    virtual const StringArray&
                         GetPropertyEnumStrings(const std::string &label) const;
    virtual bool         CanAssignStringToObjectProperty(const Integer id) const;
+   virtual bool         IsSquareBracketAllowedInSetting(const Integer id) const;
    
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
