@@ -256,7 +256,9 @@ PhysicalModel::~PhysicalModel()
 // PhysicalModel::PhysicalModel(const PhysicalModel& pm)
 //------------------------------------------------------------------------------
 /**
- * The copy constructor for the physical model
+ * The copy constructor for the physical model.
+ *
+ * @param pm The model copied here
  */
 //------------------------------------------------------------------------------
 PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
@@ -313,18 +315,6 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       else
          isInitialized = false;
    }
-   //else
-   //{
-   //   if (modelState != NULL)
-   //   {
-   //      #ifdef DEBUG_STATE_ALLOCATION
-   //         MessageInterface::ShowMessage("Deleting modelState at %p\n",
-   //               modelState);
-   //      #endif
-   //      delete [] modelState;
-   //      modelState = NULL;
-   //   }
-   //}
    rawState = modelState;
    
    if (pm.deriv != NULL) 
@@ -340,11 +330,6 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       else
          isInitialized = false;
    }
-   //else
-   //   deriv = NULL;
-
-   /// @todo: REMOVE THIS LINE!!!  We should not be changing this here; it forces derived classes to also change the count.
-   parameterCount = PhysicalModelParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -352,6 +337,10 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
 //------------------------------------------------------------------------------
 /**
  * The assignment operator for the physical model
+ *
+ * @param pm The model copied into this one.
+ *
+ * @retval This PhysicalModel. configured to match pm.
  */
 //------------------------------------------------------------------------------
 PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
