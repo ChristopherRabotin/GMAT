@@ -2448,16 +2448,18 @@ bool GmatStringUtil::ToOnOff(const std::string &str, std::string &value, bool tr
    return false;
 }
 
-
 //------------------------------------------------------------------------------
-// RealArray ToRealArray(const std::string &str)
+// RealArray ToRealArray(const std::string &str, bool allowOverflow, ...)
 //------------------------------------------------------------------------------
-RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow)
+RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow,
+                                      bool allowSemicolon)
 {
-//   MessageInterface::ShowMessage("ToRealArray() str='%s'\n", str.c_str());
-
+   #ifdef DEBUG_TO_REAL_ARRAY
+   MessageInterface::ShowMessage
+      ("ToRealArray() str='%s', allowSemicolon=%d\n", str.c_str(), allowSemicolon);
+   #endif
    RealArray realArray;
-
+   
    if (!IsBracketBalanced(str, "[]"))
       return realArray;
 
@@ -2466,12 +2468,23 @@ RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow
 
    if (str1 == "")
       return realArray;
-
-   StringArray vals = SeparateBy(str1, " ,");
+   
+   std::string delimiter = " ,";
+   if (allowSemicolon)
+      delimiter = " ,;";
+   
+   #ifdef DEBUG_TO_REAL_ARRAY
+   MessageInterface::ShowMessage("   delimiter='%s'\n", delimiter.c_str());
+   #endif
+   
+   //StringArray vals = SeparateBy(str1, " ,");
+   StringArray vals = SeparateBy(str1, delimiter);
    Real rval;
-
-//   MessageInterface::ShowMessage("   vals.size()=%d\n", vals.size());
-
+   
+   #ifdef DEBUG_TO_REAL_ARRAY
+   MessageInterface::ShowMessage("   vals.size()=%d\n", vals.size());
+   #endif
+   
    for (UnsignedInt i=0; i<vals.size(); i++)
    {
       if (ToReal(vals[i], rval, false, allowOverflow))

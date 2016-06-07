@@ -6904,6 +6904,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   propertyType=%d, valueToUse=<%s>\n", obj->GetParameterType(id), valueToUse.c_str());
+   MessageInterface::ShowMessage("   Checking if value is in array from with []\n");
    #endif
    
    StringArray rhsValues;
@@ -6914,8 +6915,12 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    if ((type == Gmat::BOOLEANARRAY_TYPE) ||
        (type == Gmat::INTARRAY_TYPE) ||
        (type == Gmat::UNSIGNED_INTARRAY_TYPE) ||
-       (type == Gmat::RVECTOR_TYPE))
+       (type == Gmat::RVECTOR_TYPE) ||
+       (type == Gmat::RMATRIX_TYPE)) // LOJ: Added RMATRIX_TYPE
    {
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("   Checking if value is enclosed with []\n");
+      #endif
       if (!GmatStringUtil::IsEnclosedWithBrackets(valueToUse))
       {
          if (errorMsg1 == "")
@@ -6923,18 +6928,32 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
          else
             errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
          errorMsg2 = " Needs [] around values for array type";
-
+         
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage
+            ("Interpreter::SetProperty() returning %d, it is not enclosed with []\n");
+         #endif
          return retval;
       }
    }
    
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage("   Checking if value has {} for setting multiple values\n");
+   #endif
    // if value has braces or brackets, setting multiple values
    if (value.find("{") != value.npos || value.find("}") != value.npos)
    {
       // verify that we accept only OBJECTARRAYTYPE
       if ((type != Gmat::OBJECTARRAY_TYPE) &&
           (type != Gmat::STRINGARRAY_TYPE))
+      {
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage
+            ("Interpreter::SetProperty() returning %d, it is not OBJECTARRAY or STRINGARRAY\n");
+         #endif
          return retval;
+      }
+      
       // first, check to see if it is a list of strings (e.g. file names);
       // in that case, we do not want to remove spaces inside the strings
       // or use space as a delimiter
@@ -6959,22 +6978,26 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
       // verify that we accept only numeric ARRAYTYPE
       // TGG: Short term fix for GMT-3459 GroundTrackPlot.Add allows square brackets
       //      Long term, we need a GetParameterTypeArray or something
-      if (((type != Gmat::BOOLEANARRAY_TYPE) &&
-           (type != Gmat::INTARRAY_TYPE) &&
-           (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
-           (type != Gmat::RVECTOR_TYPE) &&
-           (type != Gmat::COLOR_TYPE)) &&
-          (!((type == Gmat::OBJECT_TYPE) && 
-             ((obj->GetParameterText(id) == "ViewDirection") ||
-              (obj->GetParameterText(id) == "ViewPointVector") || 
-              (obj->GetParameterText(id) == "ViewPointReference") ))))
+      // if (((type != Gmat::BOOLEANARRAY_TYPE) &&
+      //      (type != Gmat::INTARRAY_TYPE) &&
+      //      (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+      //      (type != Gmat::RVECTOR_TYPE) &&
+      //      (type != Gmat::COLOR_TYPE)) &&
+      //     (!((type == Gmat::OBJECT_TYPE) && 
+      //        ((obj->GetParameterText(id) == "ViewDirection") ||
+      //         (obj->GetParameterText(id) == "ViewPointVector") || 
+      //         (obj->GetParameterText(id) == "ViewPointReference") ))))
+      if (!obj->IsSquareBracketAllowedInSetting(id))
       {
          #ifdef DEBUG_SET
-         MessageInterface::ShowMessage("   Error, expects only numbers inside []\n");
+         MessageInterface::ShowMessage("   *** ERROR *** expects only numbers inside []\n");
          #endif
          return retval;
       }
       
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("   Square bracket is alowed in value setting\n");
+      #endif
       // first, check to see if it is a list of strings (e.g. file names);
       // in that case, we do not want to remove spaces inside the strings
       // or use space as a delimiter
@@ -6993,7 +7016,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    count = rhsValues.size();
    
    #ifdef DEBUG_SET
-   MessageInterface::ShowMessage("   count=%d\n", count);
+   MessageInterface::ShowMessage("   number of values = %d\n", count);
    #endif
    
    // If rhs value is an array type, call method for setting whole array
@@ -7002,7 +7025,51 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    {
       bool setWithIndex = true;
       // See if object has a method to handle whole array
-      if (type == Gmat::BOOLEANARRAY_TYPE)
+      // Added RMATRIX_TYPE here (LOJ: 2016.06.07)
+      if (type == Gmat::RMATRIX_TYPE)
+      {
+         RealArray realArray = GmatStringUtil::ToRealArray(value, true, true);
+         try
+         {
+            Rmatrix rmat = obj->GetRmatrixParameter(id);
+            Integer numRows = rmat.GetNumRows();
+            Integer numCols = rmat.GetNumColumns();
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   Checking for array size...\n   realArray.size()=%d, numRows=%d, "
+                "numCols=%d\n", realArray.size(), numRows, numCols);
+            #endif
+            // Check array size
+            if (realArray.size() == (numRows * numCols))
+            {
+               // Set new values
+               for (int i = 0; i < numRows; i++)
+                  for (int j = 0; j < numCols; j++)
+                     rmat.SetElement(i, j, realArray[j*numCols + i]);
+               Rmatrix rmat1 = obj->SetRmatrixParameter(id, rmat);
+               setWithIndex = false;
+               retval = true;
+            }
+            else
+            {
+               if (errorMsg1 == "")
+                  errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+               else
+                  errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
+               errorMsg2 = " Array size does not match";
+               retval = false;
+               #ifdef DEBUG_SET
+               MessageInterface::ShowMessage("   *** ERROR *** Array size does not match\n");
+               #endif
+               return retval;
+            }
+         }
+         catch (BaseException &)
+         {
+            setWithIndex = true;
+         }
+      }
+      else if (type == Gmat::BOOLEANARRAY_TYPE)
       {
          setWithIndex = false;
          BooleanArray boolArray = GmatStringUtil::ToBooleanArray(value);
@@ -7028,6 +7095,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
       if (setWithIndex)
       {
          retval = true;
+         
          // Set value with index
          for (int i=0; i<count; i++)
          {
@@ -7039,7 +7107,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
             //if (type == Gmat::RVECTOR_TYPE)
             //   retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
             //else
-               retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
+            retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
          }
       }
    }

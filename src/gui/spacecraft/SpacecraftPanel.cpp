@@ -69,6 +69,19 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
        scName.WX_TO_C_STRING, theGuiInterpreter);
    #endif
    
+   spacecraftNotebook = NULL;
+   actuatorNotebook = NULL;
+   actuators = NULL;
+   sensors = NULL;
+   theBallisticMassPanel = NULL;
+   theOrbitPanel = NULL;
+   theTankPanel = NULL;
+   theThrusterPanel = NULL;
+   theAttitudePanel = NULL;
+   theVisualModelPanel = NULL;
+   theSpicePanel = NULL;
+   thePwrSysPanel = NULL;
+
    theSpacecraft =
       (Spacecraft*)theGuiInterpreter->GetConfiguredObject(std::string(scName.c_str()));
    
@@ -91,10 +104,16 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
 SpacecraftPanel::~SpacecraftPanel()
 {
    #if DEBUG_SPACECRAFT_PANEL
-   MessageInterface::ShowMessage("SpacecraftPanel::~SpacecraftPanel() entered\n");
+   MessageInterface::ShowMessage
+      ("SpacecraftPanel::~SpacecraftPanel() entered, deleting currentSpacecraft <%p>\n",
+       currentSpacecraft);
    #endif
    
    delete currentSpacecraft;
+   
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::~SpacecraftPanel() leaving\n");
+   #endif
 }
 
 //-------------------------------
@@ -153,20 +172,20 @@ void SpacecraftPanel::Create()
    //wx*Panel
    sensors = NULL;
 //   sensors = new wxPanel( spacecraftNotebook, -1 );
-   
+
    theOrbitPanel = new OrbitPanel
       (this, spacecraftNotebook, currentSpacecraft, theSolarSystem);
    
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   OrbitPanel created\n");
    #endif
-   
+
    theAttitudePanel = new AttitudePanel
       (this, spacecraftNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   AttitudePanel created\n");
    #endif
-   
+
    theBallisticMassPanel = new BallisticsMassPanel
       (this, spacecraftNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
@@ -204,9 +223,8 @@ void SpacecraftPanel::Create()
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   VisualModelPanel created\n");
    #endif
-
+   
    // Adding panels to notebook
-   actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
    spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
    spacecraftNotebook->AddPage( theAttitudePanel, wxT("Attitude") );
    spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
@@ -216,9 +234,10 @@ void SpacecraftPanel::Create()
    #ifdef __USE_SPICE__
       spacecraftNotebook->AddPage( theSpicePanel, wxT("SPICE") );
    #endif
+   actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
    spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
    spacecraftNotebook->AddPage( theVisualModelPanel , wxT("Visualization") );
-   
+
    theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
    
    #if DEBUG_SPACECRAFT_PANEL
@@ -267,6 +286,9 @@ void SpacecraftPanel::LoadData()
       // this is needed for the Mac, as the VisualModelCanvas was messing up the other tabs
       theVisualModelPanel->CanvasOn(false);
       theVisualModelPanel->CanvasOn(true);
+   #endif
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::LoadData() leaving\n");
    #endif
 }
 

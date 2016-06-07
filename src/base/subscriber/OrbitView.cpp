@@ -798,6 +798,16 @@ bool OrbitView::IsParameterReadOnly(const Integer id) const
    return OrbitPlot::IsParameterReadOnly(id);
 }
 
+//---------------------------------------------------------------------------
+// bool IsSquareBracketAllowedInSetting(const Integer id) const
+//---------------------------------------------------------------------------
+bool OrbitView::IsSquareBracketAllowedInSetting(const Integer id) const
+{
+   if (id == VIEW_DIRECTION || id == VIEWPOINT_VECTOR || id == VIEWPOINT_REFERENCE)
+      return true;
+   else
+      return OrbitPlot::IsSquareBracketAllowedInSetting(id);
+}
 
 //------------------------------------------------------------------------------
 // bool IsParameterCommandModeSettable(const Integer id) const

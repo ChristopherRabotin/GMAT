@@ -138,7 +138,7 @@ namespace GmatStringUtil
    GMAT_API bool ToBoolean(const std::string &str, bool &value, bool trimParens = false);
    GMAT_API bool ToOnOff(const std::string &str, std::string &value, bool trimParens = false);
    
-   GMAT_API RealArray ToRealArray(const std::string &str, bool allowOverflow = true);
+   GMAT_API RealArray ToRealArray(const std::string &str, bool allowOverflow = true, bool allowSemicolon = false);
    GMAT_API IntegerArray ToIntegerArray(const char *str, bool allowOverflow = true);
    GMAT_API IntegerArray ToIntegerArray(const std::string &str, bool allowOverflow = true);
    GMAT_API UnsignedIntArray ToUnsignedIntArray(const std::string &str, bool allowOverflow = true);
