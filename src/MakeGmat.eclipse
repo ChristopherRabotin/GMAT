@@ -78,8 +78,8 @@ gui/$(PROGRAM):
 endif
 
 console/$(PROGRAM):
-	cd base; make -f MakeBase.eclipse all
+	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) all
 	cd console; make -f MakeConsole.eclipse all
 
 $(LIBRARY):
-	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) all
+	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) -j $(BUILD_THREADS) all

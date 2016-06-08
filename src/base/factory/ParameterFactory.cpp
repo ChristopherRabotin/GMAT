@@ -390,6 +390,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ImpBurnElements(ofType, withName);   
    if (ofType == "V" || ofType == "N" || ofType == "B")
       return new ImpBurnElements(ofType, withName);
+   if (ofType == "TotalMassFlowRate")
+      return new TotalMassFlowRate(ofType, withName);
+   if (ofType == "TotalThrust1" || ofType == "TotalThrust2" || ofType == "TotalThrust3")
+      return new TotalThrust(ofType, withName);
    
    // Attitude parameters
    if (ofType == "DCM11" || ofType == "DirectionCosineMatrix11")
@@ -493,6 +497,12 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ThrustScaleFactor(withName);
    if (ofType == "GravitationalAccel")
       return new GravitationalAccel(withName);
+   if (ofType == "Thrust")
+      return new Thrust(withName);
+   if (ofType == "Isp")
+      return new Isp(withName);
+   if (ofType == "MassFlowRate")
+      return new MassFlowRate(withName);
    
    if (ofType == "C1"  || ofType == "C2"  || ofType == "C3"  || ofType == "C4"  ||
        ofType == "C5"  || ofType == "C6"  || ofType == "C7"  || ofType == "C8"  ||
@@ -724,6 +734,10 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("V");
       creatables.push_back("N");
       creatables.push_back("B");
+      creatables.push_back("TotalMassFlowRate");
+      creatables.push_back("TotalThrust1");
+      creatables.push_back("TotalThrust2");
+      creatables.push_back("TotalThrust3");
       
       // Attitude parameters
       creatables.push_back("DCM11");
@@ -780,6 +794,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("DutyCycle");
       creatables.push_back("ThrustScaleFactor");
       creatables.push_back("GravitationalAccel");
+      creatables.push_back("Thrust");
+      creatables.push_back("Isp");
+      creatables.push_back("MassFlowRate");
       
       creatables.push_back("C1");
       creatables.push_back("C2");

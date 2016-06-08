@@ -37,6 +37,7 @@
 //#define DEBUG_RENAME 1
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CONFIG_SS 1
+//#define DEBUG_CONFIG_ADD
 //#define DEBUG_CONFIG_ADD_CLONE 1
 //#define DEBUG_CONFIG_REMOVE
 //#define DEBUG_CONFIG_REMOVE_MORE
@@ -609,7 +610,7 @@ void ConfigManager::AddCalculatedPoint(CalculatedPoint *cp)
  * @param mModel Pointer to the MeasurementModel instance.
  */
 //------------------------------------------------------------------------------
-void ConfigManager::AddMeasurementModel(MeasurementModel *mModel)
+void ConfigManager::AddMeasurementModel(MeasurementModelBase *mModel)
 {
    if (mModel == NULL)
       throw ConfigManagerException("Cannot add NULL MeasurementModel object");
@@ -703,6 +704,58 @@ void ConfigManager::AddMeasurement(CoreMeasurement *meas)
 
    MessageInterface::ShowMessage("Warning: Core measurement %s configured; it "
          "should be hidden inside of a MeasurementModel", name.c_str());
+   AddObject(obj);
+}
+
+
+//------------------------------------------------------------------------------
+// void AddErrorModel(ErrorModel *errorModel)
+//------------------------------------------------------------------------------
+/**
+ * Adds a ErrorModel to the configuration.
+ *
+ * @param errorModel Pointer to the ErrorModel instance.
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::AddErrorModel(ErrorModel *errorModel)
+{
+   if (errorModel == NULL)
+      throw ConfigManagerException("Cannot add NULL ErrorModel object");
+
+   GmatBase *obj = (GmatBase*)errorModel;
+   std::string name = obj->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+
+   if (!obj->IsOfType(Gmat::ERROR_MODEL))
+      throw ConfigManagerException(name + " is not an ErrorModel");
+
+   AddObject(obj);
+}
+
+
+//------------------------------------------------------------------------------
+// void AddDataFilter(DataFilter *filter)
+//------------------------------------------------------------------------------
+/**
+ * Adds a DataFilter to the configuration.
+ *
+ * @param filter Pointer to the DataFilter instance.
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::AddDataFilter(DataFilter *filter)
+{
+   if (filter == NULL)
+      throw ConfigManagerException("Cannot add NULL DataFilter object");
+
+   GmatBase *obj = (GmatBase*)filter;
+   std::string name = obj->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+
+   if (!obj->IsOfType(Gmat::DATA_FILTER))
+      throw ConfigManagerException(name + " is not a DataFilter");
+
    AddObject(obj);
 }
 
@@ -979,6 +1032,11 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
          //objString = obj->GetGeneratingString();
          //pos = objString.find(name);
          
+         #if DEBUG_FIND_ITEMS
+         MessageInterface::ShowMessage
+            ("   ==> objName='%s', Calling obj->GetGeneratingStringArray()\n", objName.c_str());
+         #endif
+         
          genStringArray = obj->GetGeneratingStringArray(Gmat::NO_COMMENTS);
          
          #if DEBUG_FIND_ITEMS
@@ -1079,6 +1137,7 @@ const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("*** Error: %s\n", e.GetFullMessage().c_str());
+      throw;
    }
    
    return itemList;
@@ -1266,6 +1325,72 @@ GmatBase* ConfigManager::GetItem(const std::string &name)
    return obj;
 }
 
+//------------------------------------------------------------------------------
+// bool ChangeMappingName(Gmat::ObjectType itemType, const std::string &oldName,
+//                        const std::string &newName, GmatBase *mapObj)
+//------------------------------------------------------------------------------
+bool ConfigManager::ChangeMappingName(Gmat::ObjectType itemType,
+                                      const std::string &oldName,
+                                      const std::string &newName,
+                                      GmatBase **mapObj)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ConfigManager::ChangeMappingName() itemType=%d, oldName='%s', newName='%s'\n",
+       itemType, oldName.c_str(), newName.c_str());
+   #endif
+   
+   //--------------------------------------------------
+   // change mapping name
+   //--------------------------------------------------
+   GmatBase *cfObj = NULL;
+   bool renamed = false;
+   if (mapping.find(oldName) != mapping.end())
+   {
+      cfObj = mapping[oldName];
+      
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("   cfObj=<%p><%s>'%s'\n", cfObj, cfObj ? cfObj->GetTypeName().c_str() : "NULL",
+          cfObj ? cfObj->GetName().c_str() : "NULL");
+      #endif
+      if (cfObj->IsOfType(itemType))
+      {
+         // if newName does not exist, change name
+         if (mapping.find(newName) == mapping.end())
+         {
+            mapping.erase(oldName);
+            mapping[newName] = cfObj;
+            cfObj->SetName(newName);
+            renamed = true;
+            #if DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("   Rename mapping obj=%s\n", cfObj->GetName().c_str());
+            #endif
+         }
+         else
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "%s already exists, Please enter a different name.\n",
+                newName.c_str());
+         }
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("ConfigManager::ChangeMappingName() oldName has different type:%d\n",
+             cfObj->GetType());
+      }
+   }
+   
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ConfigManager::ChangeMappingName() returning %d\n", renamed);
+   #endif
+   
+   *mapObj = cfObj;
+   return renamed;
+}
 
 //------------------------------------------------------------------------------
 // bool RenameItem(Gmat::ObjectType type, const std::string &oldName,
@@ -1281,16 +1406,16 @@ GmatBase* ConfigManager::GetItem(const std::string &name)
  * @return true if the object was renamed, false if not.
  */
 //------------------------------------------------------------------------------
-bool ConfigManager::RenameItem(Gmat::ObjectType type,
+bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
                                const std::string &oldName,
                                const std::string &newName)
 {
    #if DEBUG_RENAME
-      MessageInterface::ShowMessage
-         ("ConfigManager::RenameItem() type=%d, oldName='%s', newName='%s'\n",
-          type, oldName.c_str(), newName.c_str());
+   MessageInterface::ShowMessage
+      ("ConfigManager::RenameItem() itemType=%d, oldName='%s', newName='%s'\n",
+       itemType, oldName.c_str(), newName.c_str());
    #endif
-
+   
    #ifdef DUMP_CONFIGURED_OBJECTS
       MessageInterface::ShowMessage("Before rename, Configured objects:\n");
       for (UnsignedInt i = 0; i < objects.size(); ++i)
@@ -1301,46 +1426,18 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
                newObjects[i]->GetName().c_str());
    #endif
    
-   bool renamed = false;
    changedItemType.clear();
    oldRelatedName.clear();
    newRelatedName.clear();
-   
-   //--------------------------------------------------
-   // change mapping name
-   //--------------------------------------------------
    GmatBase *mapObj = NULL;
-   if (mapping.find(oldName) != mapping.end())
-   {
-      mapObj = mapping[oldName];
-      if (mapObj->IsOfType(type))
-      {
-         // if newName does not exist, change name
-         if (mapping.find(newName) == mapping.end())
-         {
-            mapping.erase(oldName);
-            mapping[newName] = mapObj;
-            mapObj->SetName(newName);
-            renamed = true;
-            #if DEBUG_RENAME
-            MessageInterface::ShowMessage
-               ("   Rename mapping mapObj=%s\n", mapObj->GetName().c_str());
-            #endif
-         }
-         else
-         {
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_, "%s already exists, Please enter a different name.\n",
-                newName.c_str());
-         }
-      }
-      else
-      {
-         MessageInterface::ShowMessage
-            ("ConfigManager::RenameItem() oldName has different type:%d\n",
-             mapObj->GetType());
-      }
-   }
+   
+   bool renamed = ChangeMappingName(itemType, oldName, newName, &mapObj);
+   
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("   mapObj=<%p><%s>'%s'\n", mapObj, mapObj ? mapObj->GetTypeName().c_str() : "NULL",
+       mapObj ? mapObj->GetName().c_str() : "NULL");
+   #endif
    
    if (!renamed)
    {
@@ -1355,7 +1452,25 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    // Rename ref. objects
    //----------------------------------------------------
    GmatBase *obj = NULL;
-   StringArray itemList = GetListOfItemsHas(type, oldName);
+   StringArray itemList;
+   
+   try
+   {
+      itemList = GetListOfItemsHas(itemType, oldName);
+   }
+   catch(BaseException &be)
+   {
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("ConfigManager::RenameItem() Exception Caught so re-changed the name and rethrowing:\n%s\n",
+          be.GetFullMessage().c_str());
+      #endif
+      // Change back name
+      GmatBase *mapObj2 = NULL;
+      bool renamed = ChangeMappingName(itemType, newName, oldName, &mapObj2);
+      throw;
+   }
+   
    #if DEBUG_RENAME
       MessageInterface::ShowMessage("   =====> There are %d items has '%s'\n",
             itemList.size(), oldName.c_str());
@@ -1370,14 +1485,14 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
             ("      calling  %s->RenameRefObject()\n", obj->GetName().c_str());
          #endif
          
-         renamed = obj->RenameRefObject(type, oldName, newName);
+         renamed = obj->RenameRefObject(itemType, oldName, newName);
       }
    }
    
    //----------------------------------------------------
    // Rename owned object ODEModel in the PropSetup.
    //----------------------------------------------------
-   if (type == Gmat::PROP_SETUP)
+   if (itemType == Gmat::PROP_SETUP)
    {
       bool newFMName = false;
       // Change _ForceMode name if _ForceModel is configured
@@ -1411,7 +1526,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       #if DEBUG_RENAME
       MessageInterface::ShowMessage("   Calling PropSetup::RenameRefObject()\n");
       #endif
-      mapObj->RenameRefObject(type, oldName, newName);
+      mapObj->RenameRefObject(itemType, oldName, newName);
 
       if (newFMName)
       {
@@ -1525,7 +1640,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    // GeneratingString()
    //----------------------------------------------------
    
-   if (type == Gmat::HARDWARE)
+   if (itemType == Gmat::HARDWARE)
    {
       itemList = GetListOfItems(Gmat::HARDWARE);
       
@@ -1533,7 +1648,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       {
          obj = GetItem(itemList[i]);
          if (obj->IsOfType("Thruster"))
-             obj->RenameRefObject(type, oldName, newName);
+             obj->RenameRefObject(itemType, oldName, newName);
       }
    }
    
@@ -1542,11 +1657,11 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    //----------------------------------------------------
    // Since new hardware Parameters were added, check for the Hardware also.
    
-   if (type == Gmat::SPACECRAFT || type == Gmat::COORDINATE_SYSTEM ||
-       type == Gmat::CALCULATED_POINT || type == Gmat::BURN ||
-       type == Gmat::IMPULSIVE_BURN || type == Gmat::HARDWARE ||
-       type == Gmat::THRUSTER || type == Gmat::FUEL_TANK ||
-       type == Gmat::ODE_MODEL)
+   if (itemType == Gmat::SPACECRAFT || itemType == Gmat::COORDINATE_SYSTEM ||
+       itemType == Gmat::CALCULATED_POINT || itemType == Gmat::BURN ||
+       itemType == Gmat::IMPULSIVE_BURN || itemType == Gmat::HARDWARE ||
+       itemType == Gmat::THRUSTER || itemType == Gmat::FUEL_TANK ||
+       itemType == Gmat::ODE_MODEL)
    {
       StringArray params = GetListOfItems(Gmat::PARAMETER);
       std::string oldParamName, newParamName;
@@ -2399,28 +2514,79 @@ CalculatedPoint* ConfigManager::GetCalculatedPoint(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// MeasurementModel* GetMeasurementModel(const std::string &name)
+// MeasurementModelBase* GetMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Retrieves a MeasurementModel from the configuration
+ * Retrieves a measurement model from the configuration
  *
  * @param name The name of the MeasurementModel
  *
  * @return A pointer to the MeasurementModel, or NULL if it was not found
  */
 //------------------------------------------------------------------------------
-MeasurementModel* ConfigManager::GetMeasurementModel(const std::string &name)
+MeasurementModelBase* ConfigManager::GetMeasurementModel(const std::string &name)
 {
-   MeasurementModel *mm = NULL;
+   MeasurementModelBase *mm = NULL;
    if (mapping.find(name) != mapping.end())
    {
       if (mapping[name]->IsOfType(Gmat::MEASUREMENT_MODEL))
       {
-         mm = (MeasurementModel *)mapping[name];
+         mm = (MeasurementModelBase *)mapping[name];
       }
    }
    return mm;
 }
+
+
+//------------------------------------------------------------------------------
+// ErrorModel* GetErrorModel(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an error model from the configuration
+ *
+ * @param name The name of the ErrorModel
+ *
+ * @return A pointer to the ErrorModel, or NULL if it was not found
+ */
+//------------------------------------------------------------------------------
+ErrorModel* ConfigManager::GetErrorModel(const std::string &name)
+{
+   ErrorModel *erm = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->IsOfType(Gmat::ERROR_MODEL))
+      {
+         erm = (ErrorModel *)mapping[name];
+      }
+   }
+   return erm;
+}
+
+
+//------------------------------------------------------------------------------
+// DataFilter* GetDataFilter(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a DataFilter from the configuration
+ *
+ * @param name The name of the DataFilter
+ *
+ * @return A pointer to the DataFilter, or NULL if it was not found
+ */
+//------------------------------------------------------------------------------
+DataFilter* ConfigManager::GetDataFilter(const std::string &name)
+{
+   DataFilter *df = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->IsOfType(Gmat::DATA_FILTER))
+      {
+         df = (DataFilter *)mapping[name];
+      }
+   }
+   return df;
+}
+
 
 //------------------------------------------------------------------------------
 // TrackingSystem* GetTrackingSystem(const std::string &name)

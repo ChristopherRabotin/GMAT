@@ -47,7 +47,7 @@ class GMAT_API MathParser
 {
 public:
    
-   MathParser();
+   MathParser(ObjectMap *objMap);
    MathParser(const MathParser &copy);
    MathParser& operator=(const MathParser &right);
    virtual ~MathParser();
@@ -57,7 +57,8 @@ public:
                                    Integer start = 0);
    MathNode*    Parse(const std::string &str);
    StringArray  GetGmatFunctionNames();
-   
+   bool         IsInputRequiredForFunction(const std::string &fn);
+   bool         IsFunctionWithOptionalInput(const std::string &fn);
 protected:
    
    MathNode*    ParseNode(const std::string &str);
@@ -66,6 +67,7 @@ protected:
    
 private:
    
+   ObjectMap    *theObjectMap;
    std::string  originalEquation;
    std::string  theEquation;
    std::string  powerOpStr;
@@ -132,14 +134,17 @@ private:
       MATRIX_FUNCTION,
       MATRIX_OP,
       UNIT_CONVERSION,
+      BUILTIN_FUNCTION,
       GMAT_FUNCTION,
+      ANY_FUNCTION
    };
    
    StringArray  realFuncList;
    StringArray  matrixFuncList;
    StringArray  matrixOpList;
    StringArray  unitConvList;
-   StringArray  gmatFuncList;
+   StringArray  builtinFuncList;
+   StringArray  gmatFuncList;     // This is dynamically built 
 };
 
 

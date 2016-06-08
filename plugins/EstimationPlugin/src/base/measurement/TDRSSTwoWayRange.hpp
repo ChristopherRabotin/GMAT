@@ -85,6 +85,8 @@ protected:
    virtual bool         Evaluate(bool withEvents = false);
 
    void                 SetHardwareDelays(bool loadEvents);
+
+   virtual void         InitializeMeasurement();
 };
 
 #endif /* TDRSSTwoWayRange_hpp */

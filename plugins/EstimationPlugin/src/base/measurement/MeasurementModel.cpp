@@ -33,8 +33,11 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 
-#include "PhysicalMeasurement.hpp"  // For parameters that only apply to
-                                    // real world physical models
+//#include "PhysicalMeasurement.hpp"  // For parameters that only apply to
+                                      // real world physical models
+
+// Moved here from inline location; includes should always be at the top in GMAT
+#include "AveragedDoppler.hpp"
 
 
 //#define TEST_FIRE_MEASUREMENT
@@ -42,6 +45,11 @@
 //#define DEBUG_HARDWARE
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_SET_CORRECTION
+//#define DEBUG_MEASUREMENT_CALCULATION
+//#define DEBUG_BIAS
+//#define DEBUG_SET_REF_OBJECT
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_SET_ONOFF
 
 //------------------------------------------------------------------------------
 // Static data initialization
@@ -50,24 +58,34 @@
 const std::string MeasurementModel::PARAMETER_TEXT[] =
 {
    "ObservationData",
+///// TBD: Do we want something more generic here?
+   "RampTables",
    "Type",
    "Participants",
    "Bias",
    "NoiseSigma",
-   "TimeConstant",
-   "Frequency"
+   "Frequency",
+///// TBD: Do we want something more generic here?
+//   "RangeModuloConstant",
+   "RelativityCorrection",
+   "ETminusTAICorrection",
+//   "ResidualMax",
 };
 
 
 const Gmat::ParameterType MeasurementModel::PARAMETER_TYPE[] =
 {
    Gmat::OBJECTARRAY_TYPE,
+   Gmat::OBJECTARRAY_TYPE,
    Gmat::OBJECT_TYPE,
    Gmat::OBJECTARRAY_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
+//   Gmat::REAL_TYPE,
+   Gmat::ON_OFF_TYPE,
+   Gmat::ON_OFF_TYPE,
+//   Gmat::REAL_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -89,15 +107,21 @@ const Gmat::ParameterType MeasurementModel::PARAMETER_TYPE[] =
  */
 //------------------------------------------------------------------------------
 MeasurementModel::MeasurementModel(const std::string &nomme) :
-   GmatBase                (Gmat::MEASUREMENT_MODEL, "MeasurementModel", nomme),
+   MeasurementModelBase    (nomme, "MeasurementModel"),
    measurementType         ("NoTypeSet"),
    measurement             (NULL),
    theData                 (NULL),
    theDataDerivatives      (NULL),
-   timeConstant            (6000.0),
+   useRelativityCorrection (false),
+   useETminusTAICorrection (false),
+//   residualMax           (1.0e18),
    modelID                 (-1),
    measurementNeedsObjects (false)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel default construction <%p,%s>\n", this, GetName().c_str());
+#endif
+
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("MeasurementModel");
 
@@ -113,6 +137,9 @@ MeasurementModel::MeasurementModel(const std::string &nomme) :
 //------------------------------------------------------------------------------
 MeasurementModel::~MeasurementModel()
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel destructor <%p,%s>\n", this, GetName().c_str());
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -125,17 +152,23 @@ MeasurementModel::~MeasurementModel()
  */
 //------------------------------------------------------------------------------
 MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
-   GmatBase                (mm),
+   MeasurementModelBase    (mm),
    observationStreamName   (mm.observationStreamName),
+   rampTableStreamName     (mm.rampTableStreamName),
    participantNames        (mm.participantNames),
-   participantHardwareNames(mm.participantHardwareNames),
+   participants            (mm.participants),                // made changes for Bug 12 in ticket GMT-4314
    measurementType         (mm.measurementType),
    theData                 (NULL),
    theDataDerivatives      (NULL),
-   timeConstant            (mm.timeConstant),
+   useRelativityCorrection (mm.useRelativityCorrection),
+   useETminusTAICorrection (mm.useETminusTAICorrection),
    modelID                 (mm.modelID),
    measurementNeedsObjects (false)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel copy construction enter: <%p,%s> copy from <%p,%s>\n", this, GetName().c_str(), &mm, mm.GetName().c_str());
+#endif
+
    if (mm.measurement != NULL)
    {
       measurement = (CoreMeasurement*)mm.measurement->Clone();
@@ -144,11 +177,19 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
       noiseSigma.SetSize(measurement->GetMeasurementSize());
       noiseSigma = mm.noiseSigma;
    }
+
    if (participants.size() > 0)
          measurementNeedsObjects = true;
 
-   for (UnsignedInt i = 0; i < participantHardwareNames.size(); ++i)
-      participantHardwareNames[i] = mm.participantHardwareNames[i];
+   participantHardwareNames.clear();
+   for (UnsignedInt i = 0; i < mm.participantHardwareNames.size(); ++i)
+      participantHardwareNames.push_back(mm.participantHardwareNames[i]);
+
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("participants.size() = %d\n",participants.size());
+   MessageInterface::ShowMessage("MeasurementModel copy construction exit: <%p,%s> copy from <%p,%s>\n", this, GetName().c_str(), &mm, mm.GetName().c_str());
+#endif
+
 }
 
 //------------------------------------------------------------------------------
@@ -164,16 +205,22 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
 //------------------------------------------------------------------------------
 MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel '=' operator <%p>\n", this);
+#endif
+
    if (&mm != this)
    {
-      GmatBase::operator=(mm);
+      MeasurementModelBase::operator=(mm);
       observationStreamName   = mm.observationStreamName;
+      rampTableStreamName     = mm.rampTableStreamName;
       participantNames        = mm.participantNames;
-      participantHardwareNames= mm.participantHardwareNames;
+      participants            = mm.participants;                    // made changes for Bug 12 in ticket GMT-4314
       measurementType         = mm.measurementType;
       theData                 = NULL;
       theDataDerivatives      = NULL;
-      timeConstant            = mm.timeConstant;
+      useRelativityCorrection = mm.useRelativityCorrection;
+      useETminusTAICorrection = mm.useETminusTAICorrection;
       modelID                 = mm.modelID;
 
       if (mm.measurement != NULL)
@@ -186,10 +233,9 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       }
 
       // Clear participant list so it can be filled with the local pointers
-      participants.clear();
-
-      for (UnsignedInt i = 0; i < participantHardwareNames.size(); ++i)
-         participantHardwareNames[i] = mm.participantHardwareNames[i];
+      participantHardwareNames.clear();
+      for (UnsignedInt i = 0; i < mm.participantHardwareNames.size(); ++i)
+         participantHardwareNames.push_back(mm.participantHardwareNames[i]);
    }
 
    return *this;
@@ -209,6 +255,10 @@ GmatBase *MeasurementModel::Clone() const
    #ifdef DEBUG_MEASUREMENT_INITIALIZATION
       MessageInterface::ShowMessage("Entered MeasurementModel::Clone()\n");
    #endif
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel Clone()\n");
+#endif
+
 
    return new MeasurementModel(*this);
 }
@@ -226,16 +276,16 @@ GmatBase *MeasurementModel::Clone() const
 bool MeasurementModel::Initialize()
 {
    #ifdef DEBUG_MEASUREMENT_INITIALIZATION
-      MessageInterface::ShowMessage("Entered MeasurementModel::Initialize()\n");
+      MessageInterface::ShowMessage("Entered MeasurementModel::Initialize() <%p,%s>\n", this, GetName().c_str());
    #endif
 
    bool retval = false;
 
-   if (GmatBase::Initialize())
+   if (MeasurementModelBase::Initialize())
    {
       if (measurement != NULL)
       {
-         // Pass in the participants and hardware lists
+         // Pass in the participants                             // Note that: hardware objects are stored in participant objects. Therefore, nothing has to do for hardware
          for (UnsignedInt i = 0; i < participants.size(); ++i)
          {
             #ifdef DEBUG_MEASUREMENT_INITIALIZATION
@@ -246,27 +296,12 @@ bool MeasurementModel::Initialize()
             if (measurementNeedsObjects)
                measurement->SetRefObject(participants[i],
                      participants[i]->GetType(), participants[i]->GetName());
-
-            #ifdef DEBUG_MEASUREMENT_INITIALIZATION
-               MessageInterface::ShowMessage("   Setting hardware for %s\n",
-                     participants[i]->GetName().c_str());
-               MessageInterface::ShowMessage("      %d hardware name arrays\n",
-                     participantHardwareNames.size());
-               MessageInterface::ShowMessage(
-                     "      %d hardware array has %d elements\n", i,
-                     participantHardwareNames[i].size());
-            #endif
-
-            for (UnsignedInt j = 0; j < participantHardwareNames[i].size(); ++j)
-            {
-               if (measurement->SetParticipantHardware(participants[i],
-                     participantHardwareNames[i][j], j) == false)
-                  throw MeasurementException("The measurement participant " +
-                        participants[i]->GetName() +
-                        " does not have a hardware component named " +
-                        participantHardwareNames[i][j]);
-            }
          }
+
+
+         // Pass flags to use relativity correction and ET-TAI correction to CoreMeasurement object:
+         ((PhysicalMeasurement*)measurement)->SetRelativityCorrection(useRelativityCorrection);
+         ((PhysicalMeasurement*)measurement)->SetETMinusTAICorrection(useETminusTAICorrection);
 
          // Validate CoreMeasurement member
          if (measurement->Initialize())
@@ -302,28 +337,13 @@ bool MeasurementModel::Initialize()
                      instanceName.c_str());
             #endif
 
-            #ifdef TEST_FIRE_MEASUREMENT
-               MessageInterface::ShowMessage("Test firing measurement model %s\n",
-                     instanceName.c_str());
-
-               CalculateMeasurement();
-
-               MessageInterface::ShowMessage("   Calculated %s at epoch %.12lf\n",
-                     measurement->GetTypeName().c_str(), theData->epoch);
-               MessageInterface::ShowMessage("   FeasibilityValue = %lf\n",
-                     theData->feasibilityValue);
-               MessageInterface::ShowMessage("   Feasibility:  %s\n",
-                     (theData->isFeasible ? "true" : "false"));
-               MessageInterface::ShowMessage("   Measurement = [");
-               for (RealArray::iterator i = theData->value.begin();
-                     i != theData->value.end(); ++i)
-                  MessageInterface::ShowMessage(" %.12lf ", (*i));
-               MessageInterface::ShowMessage("]\n");
-            #endif
-
          }
       }
    }
+
+   #ifdef DEBUG_MEASUREMENT_INITIALIZATION
+      MessageInterface::ShowMessage("Exit MeasurementModel::Initialize() <%p,%s>\n", this, GetName().c_str());
+   #endif
 
    return retval;
 }
@@ -356,7 +376,7 @@ Integer MeasurementModel::GetParameterID(const std::string & str) const
    // Check the GmatBase parameters
    for (Integer i = 0; i < GmatBaseParamCount; i++)
    {
-      if (str == GmatBase::PARAMETER_LABEL[i])
+      if (str == MeasurementModelBase::PARAMETER_LABEL[i])
          return i;
    }
 
@@ -367,7 +387,7 @@ Integer MeasurementModel::GetParameterID(const std::string & str) const
       return measurement->GetParameterID(str) + MeasurementModelParamCount;
    }
 
-   return GmatBase::GetParameterID(str);
+   return MeasurementModelBase::GetParameterID(str);
 }
 
 
@@ -394,7 +414,7 @@ std::string MeasurementModel::GetParameterText(const Integer id) const
       return measurement->GetParameterText(newId);
    }
 
-   return GmatBase::GetParameterText(id);
+   return MeasurementModelBase::GetParameterText(id);
 }
 
 
@@ -419,7 +439,7 @@ std::string MeasurementModel::GetParameterTypeString(const Integer id) const
    }
 
 
-   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   return MeasurementModelBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -443,7 +463,7 @@ std::string MeasurementModel::GetParameterUnit(const Integer id) const
       return measurement->GetParameterUnit(newId);
    }
 
-   return GmatBase::GetParameterUnit(id);
+   return MeasurementModelBase::GetParameterUnit(id);
 }
 
 
@@ -471,7 +491,7 @@ Gmat::ParameterType MeasurementModel::GetParameterType(const Integer id) const
       return measurement->GetParameterType(newId);
    }
 
-   return GmatBase::GetParameterType(id);
+   return MeasurementModelBase::GetParameterType(id);
 }
 
 
@@ -528,7 +548,7 @@ bool MeasurementModel::IsParameterReadOnly(const Integer id) const
       return measurement->IsParameterReadOnly(newId);
    }
 
-   return GmatBase::IsParameterReadOnly(id);
+   return MeasurementModelBase::IsParameterReadOnly(id);
 }
 
 
@@ -548,6 +568,88 @@ bool MeasurementModel::IsParameterReadOnly(const std::string & label) const
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsEstimationParameterValid(const Integer item)
+//------------------------------------------------------------------------------
+/**
+* This function is used to verify an estimation paramter is either valid or not
+*
+* @param item      Estimation parameter ID (Note that: it is defferent from object ParameterID)
+*
+* return           true if it is valid, false otherwise 
+*/
+//------------------------------------------------------------------------------
+bool MeasurementModel::IsEstimationParameterValid(const Integer item)
+{
+   bool retval = false;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;    // convert Estimation ID to object parameter ID
+
+   switch (id)
+   {
+      case Bias:
+         retval = true;
+         break;
+
+      // All other values call up the hierarchy
+      default:
+         retval = GmatBase::IsEstimationParameterValid(item);
+   }
+
+   return retval;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Integer GetEstimationParameterSize(const Integer item)
+//------------------------------------------------------------------------------
+Integer MeasurementModel::GetEstimationParameterSize(const Integer item)
+{
+   Integer retval = 1;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+   switch (id)
+   {
+      case Bias:
+         retval = 1;
+         break;
+
+      // All other values call up the hierarchy
+      default:
+         retval = GmatBase::GetEstimationParameterSize(item);
+   }
+
+   return retval;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Real* GetEstimationParameterValue(const Integer item)
+//------------------------------------------------------------------------------
+Real* MeasurementModel::GetEstimationParameterValue(const Integer item)
+{
+   Real* retval = NULL;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+
+   switch (id)
+   {
+      case Bias:
+         retval = (Real*) measurementBias.GetDataVector();
+         break;
+
+      // All other values call up the class heirarchy
+      default:
+         retval = GmatBase::GetEstimationParameterValue(item);
+   }
+
+   return retval;
+}
+
+
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -561,13 +663,18 @@ bool MeasurementModel::IsParameterReadOnly(const std::string & label) const
 //------------------------------------------------------------------------------
 Real MeasurementModel::GetRealParameter(const Integer id) const
 {
-   if (id == TimeConstant)
-      return timeConstant;
-      
    if (id == Frequency)
       if (measurement != NULL)
          if (measurement->IsOfType("PhysicalMeasurement"))
             return ((PhysicalMeasurement*)measurement)->GetConstantFrequency();
+
+   //if (id == RangeModuloConstant)
+   //   if (measurement != NULL)
+   //      if (measurement->IsOfType("PhysicalMeasurement"))
+   //         return ((PhysicalMeasurement*)measurement)->GetRangeModulo();
+
+//   if (id == ResidualMaxLimit)
+//      return residualMax;
 
    // Handle parameters from the CoreMeasurement
    if (id >= MeasurementModelParamCount)
@@ -576,7 +683,7 @@ Real MeasurementModel::GetRealParameter(const Integer id) const
       return measurement->GetRealParameter(newId);
    }
 
-   return GmatBase::GetRealParameter(id);
+   return MeasurementModelBase::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -607,12 +714,6 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
 //         noiseSigma = value;
 //      return noiseSigma;
 //   }
-   if (id == TimeConstant)
-   {
-      if (value >= 0)
-         timeConstant = value;
-      return timeConstant;
-   }
 
    // Handle parameters from the CoreMeasurement
    if (id >= MeasurementModelParamCount)
@@ -620,6 +721,21 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
       Integer newId = id - MeasurementModelParamCount;
       return measurement->SetRealParameter(newId, value);
    }
+
+   //if (id == RangeModuloConstant)
+   //{
+   //   if (measurement != NULL)
+   //   {
+   //      if (measurement->IsOfType("PhysicalMeasurement"))
+   //      {
+   //         if (value > 0.0)
+   //         {
+   //            ((PhysicalMeasurement*)measurement)->SetRangeModulo(value);
+   //         }
+   //         return ((PhysicalMeasurement*)measurement)->GetRangeModulo();
+   //      }
+   //   }
+   //}
 
    if (id == Frequency)
    {
@@ -636,7 +752,15 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
       }
    }
 
-   return GmatBase::SetRealParameter(id, value);
+//   if (id == ResidualMaxLimit)
+//   {
+//      if (value <= 0.0)
+//        throw MeasurementException("Error: GMAT cannot accept a non positive value for measurement model's ResidualMax parameter.");
+//      residualMax = value;
+//     return residualMax;
+//   }
+
+   return MeasurementModelBase::SetRealParameter(id, value);
 }
 
 
@@ -753,7 +877,7 @@ Real MeasurementModel::GetRealParameter(const std::string & label,
 Real MeasurementModel::GetRealParameter(const Integer id, const Integer row,
       const Integer col) const
 {
-   return GmatBase::GetRealParameter(id, row, col);
+   return MeasurementModelBase::GetRealParameter(id, row, col);
 }
 
 
@@ -800,19 +924,23 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value,
       #endif
       if ((index >=0) && (index < noiseSigma.GetSize()))
       {
-         if (value >= 0)
+         if (value > 0.0)
             noiseSigma[index] = value;
+         else
+            throw MeasurementException("Error: "+GetName()+".NoiseSigma has invalid value. Valid value is a positive number\n"); 
          return noiseSigma[index];
       }
       else if (index == -1)
       {
-         if (value >= 0)
+         if (value > 0.0)
             noiseSigma[0] = value;
+         else
+            throw MeasurementException("Error: "+GetName()+".NoiseSigma has invalid value. Valid value is a positive number\n"); 
          return noiseSigma[0];
       }
    }
 
-   return GmatBase::SetRealParameter(id, value, index);
+   return MeasurementModelBase::SetRealParameter(id, value, index);
 }
 
 
@@ -834,7 +962,7 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value,
 Real MeasurementModel::SetRealParameter(const Integer id, const Real value,
       const Integer row, const Integer col)
 {
-   return GmatBase::SetRealParameter(id, value, row, col);
+   return MeasurementModelBase::SetRealParameter(id, value, row, col);
 }
 
 //------------------------------------------------------------------------------
@@ -877,9 +1005,64 @@ Real MeasurementModel::GetRealParameter(const Integer id, const Integer index) c
       if ((index >=0) && (index < noiseSigma.GetSize()))
          return noiseSigma[0];
 
-   return GmatBase::GetRealParameter(id, index);
+   return MeasurementModelBase::GetRealParameter(id, index);
 }
 
+
+std::string MeasurementModel::GetOnOffParameter(const Integer id) const
+{
+   if (id == RelativityCorrection)
+      return (useRelativityCorrection ? "On" : "Off");
+   if (id == ETminusTAICorrection)
+      return (useETminusTAICorrection ? "On" : "Off");
+
+   return MeasurementModelBase::GetOnOffParameter(id);
+}
+
+
+bool MeasurementModel::SetOnOffParameter(const Integer id, const std::string &value)
+{
+#ifdef DEBUG_SET_ONOFF
+   if (id == RelativityCorrection)
+      MessageInterface::ShowMessage("MeasurementModel::SetOnOffParameter( RelativityCorrection, %s)\n", value.c_str());
+   if (id == ETminusTAICorrection)
+      MessageInterface::ShowMessage("MeasurementModel::SetOnOffParameter( ET-TAICorrection, %s)\n", value.c_str());
+#endif
+
+   if (id == RelativityCorrection)
+   {
+      if (value == "On")
+      {
+         useRelativityCorrection = true;
+         return true;
+      }
+      if (value == "Off")
+      {
+         useRelativityCorrection = false;
+         return true;
+      }
+
+      return false;
+   }
+
+   if (id == ETminusTAICorrection)
+   {
+      if (value == "On")
+      {
+         useETminusTAICorrection = true;
+         return true;
+      }
+      if (value == "Off")
+      {
+         useETminusTAICorrection = false;
+         return true;
+      }
+
+     return false;
+   }
+
+   return MeasurementModelBase::SetOnOffParameter(id, value);
+}
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -897,7 +1080,7 @@ std::string MeasurementModel::GetStringParameter(const Integer id) const
    if (id == MeasurementType)
       return measurementType;
 
-   return GmatBase::GetStringParameter(id);
+   return MeasurementModelBase::GetStringParameter(id);
 }
 
 
@@ -916,7 +1099,7 @@ std::string MeasurementModel::GetStringParameter(const Integer id) const
 bool MeasurementModel::SetStringParameter(const Integer id,
       const std::string & value)
 {
-   if (id == ObservationData)
+   if (id == ObsData)
    {
       // Only add the obs data if it is not in the list already
       if (find(observationStreamName.begin(), observationStreamName.end(),
@@ -924,6 +1107,23 @@ bool MeasurementModel::SetStringParameter(const Integer id,
       {
          observationStreamName.push_back(value);
          return true;
+      }
+   }
+   if (id == RampTables)
+   {
+      // Only add the ramp table if it is not in the list already
+      if (find(rampTableStreamName.begin(), rampTableStreamName.end(),
+            value) == rampTableStreamName.end())
+      {
+         if (rampTableStreamName.size() == 0)
+         {
+           rampTableStreamName.push_back(value);
+           return true;
+         }
+         else
+            throw MeasurementException(
+               "Error: This GmatEstimation version allows "+GetName()+
+               ".RampTables having only one ramp table!!!\n");
       }
    }
    if (id == MeasurementType)
@@ -934,7 +1134,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
 
    if (id == Participants)
    {
-      UnsignedInt loc = value.find(".");
+      size_t loc = value.find(".");           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
       std::string parName;
       if (loc != std::string::npos)
          parName = value.substr(0, loc);
@@ -981,7 +1181,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
       return true;
    }
 
-   return GmatBase::SetStringParameter(id, value);
+   return MeasurementModelBase::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -1035,10 +1235,12 @@ std::string MeasurementModel::GetStringParameter(const Integer id,
 {
    if (id == Participants)
       return participantNames[index];
-   if (id == ObservationData)
+   if (id == ObsData)
       return observationStreamName[index];
+   if (id == RampTables)
+      return rampTableStreamName[index];
 
-   return GmatBase::GetStringParameter(id, index);
+   return MeasurementModelBase::GetStringParameter(id, index);
 }
 
 //------------------------------------------------------------------------------
@@ -1109,7 +1311,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
    {
    case Participants:
       {
-         UnsignedInt loc = value.find(".");
+         size_t loc = value.find(".");         // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
          std::string parName;
          std::string hwName;
          if (loc != std::string::npos)
@@ -1140,7 +1342,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
          return true;
       }
 
-   case ObservationData:
+   case ObsData:
       {
          if (index < (Integer)observationStreamName.size())
             observationStreamName[index] = value;
@@ -1151,8 +1353,26 @@ bool MeasurementModel::SetStringParameter(const Integer id,
 
          return true;
       }
+///// TBD: Do we want something more generic here?
+   case RampTables:
+      {
+         if (index < (Integer)rampTableStreamName.size())
+            rampTableStreamName[index] = value;
+         else
+            if (find(rampTableStreamName.begin(), rampTableStreamName.end(),
+                  value) == rampTableStreamName.end())
+            {
+               if (rampTableStreamName.size() == 0) 
+                  rampTableStreamName.push_back(value);
+               else
+                  throw MeasurementException(
+                     "Error: This GmatEstimation version allows "+GetName()+
+                     ".RampTables having only one ramp table!!!\n");
+            }
+         return true;
+      }
    default:
-      return GmatBase::SetStringParameter(id, value, index);
+      return MeasurementModelBase::SetStringParameter(id, value, index);
    }
 }
 
@@ -1179,7 +1399,7 @@ const StringArray& MeasurementModel::GetStringArrayParameter(
       #endif
       return participantNames;
    }
-   if (id == ObservationData)
+   if (id == ObsData)
    {
       #ifdef DEBUG_MEASUREMENT_INITIALIZATION
          MessageInterface::ShowMessage("Reporting %d observation streams\n",
@@ -1187,8 +1407,16 @@ const StringArray& MeasurementModel::GetStringArrayParameter(
       #endif
       return observationStreamName;
    }
+   if (id == RampTables)
+   {
+      #ifdef DEBUG_MEASUREMENT_INITIALIZATION
+         MessageInterface::ShowMessage("Reporting %d ramp table streams\n",
+               rampTableStreamName.size());
+      #endif
+      return rampTableStreamName;
+   }
 
-   return GmatBase::GetStringArrayParameter(id);
+   return MeasurementModelBase::GetStringArrayParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1221,7 +1449,7 @@ const StringArray& MeasurementModel::GetStringArrayParameter(
 const StringArray& MeasurementModel::GetStringArrayParameter(const Integer id,
       const Integer index) const
 {
-   return GmatBase::GetStringArrayParameter(id, index);
+   return MeasurementModelBase::GetStringArrayParameter(id, index);
 }
 
 
@@ -1237,7 +1465,7 @@ const StringArray& MeasurementModel::GetStringArrayParameter(const Integer id,
 const StringArray& MeasurementModel::GetStringArrayParameter(
       const std::string &label, const Integer index) const
 {
-   return GmatBase::GetStringArrayParameter(label, index);
+   return MeasurementModelBase::GetStringArrayParameter(label, index);
 }
 
 
@@ -1260,7 +1488,7 @@ const Rvector& MeasurementModel::GetRvectorParameter(const Integer id) const
    if (id == NoiseSigma)
       return noiseSigma;
 
-   return GmatBase::GetRvectorParameter(id);
+   return MeasurementModelBase::GetRvectorParameter(id);
 }
 
 
@@ -1291,7 +1519,7 @@ const Rvector& MeasurementModel::SetRvectorParameter(const Integer id,
       return noiseSigma;
    }
 
-   return GmatBase::SetRvectorParameter(id, value);
+   return MeasurementModelBase::SetRvectorParameter(id, value);
 }
 
 
@@ -1350,7 +1578,7 @@ bool MeasurementModel::RenameRefObject(const Gmat::ObjectType type,
       const std::string & oldName, const std::string & newName)
 {
    /// @todo MeasurementModel rename code needs to be implemented
-   return GmatBase::RenameRefObject(type, oldName, newName);
+   return MeasurementModelBase::RenameRefObject(type, oldName, newName);
 }
 
 
@@ -1369,7 +1597,7 @@ bool MeasurementModel::RenameRefObject(const Gmat::ObjectType type,
 bool MeasurementModel::SetRefObjectName(const Gmat::ObjectType type,
       const std::string & name)
 {
-   return GmatBase::SetRefObjectName(type, name);
+   return MeasurementModelBase::SetRefObjectName(type, name);
 }
 
 
@@ -1384,7 +1612,7 @@ bool MeasurementModel::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const ObjectTypeArray & MeasurementModel::GetRefObjectTypeArray()
 {
-   return GmatBase::GetRefObjectTypeArray();
+   return MeasurementModelBase::GetRefObjectTypeArray();
 }
 
 
@@ -1425,7 +1653,7 @@ const StringArray& MeasurementModel::GetRefObjectNameArray(
       }
    }
    else
-      refObjectList = GmatBase::GetRefObjectNameArray(type);
+      refObjectList = MeasurementModelBase::GetRefObjectNameArray(type);
 
    return refObjectList;
 }
@@ -1445,7 +1673,7 @@ const StringArray& MeasurementModel::GetRefObjectNameArray(
 std::string MeasurementModel::GetRefObjectName(
       const Gmat::ObjectType type) const
 {
-   return GmatBase::GetRefObjectName(type);
+   return MeasurementModelBase::GetRefObjectName(type);
 }
 
 
@@ -1466,7 +1694,7 @@ GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
 {
    if (type == Gmat::CORE_MEASUREMENT)
       return measurement;
-   return GmatBase::GetRefObject(type, name);
+   return MeasurementModelBase::GetRefObject(type, name);
 }
 
 
@@ -1487,7 +1715,7 @@ GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
 GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
       const std::string & name, const Integer index)
 {
-   return GmatBase::GetRefObject(type, name, index);
+   return MeasurementModelBase::GetRefObject(type, name, index);
 }
 
 
@@ -1504,7 +1732,7 @@ GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 GmatBase* MeasurementModel::GetOwnedObject(Integer whichOne)
 {
-   return GmatBase::GetOwnedObject(whichOne);
+   return MeasurementModelBase::GetOwnedObject(whichOne);
 }
 
 
@@ -1527,6 +1755,13 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    #ifdef DEBUG_MEASUREMENT_INITIALIZATION
       MessageInterface::ShowMessage("Setting ref object %s with type %s\n",
+            name.c_str(), obj->GetTypeName().c_str());
+   #endif
+
+   #ifdef DEBUG_SET_REF_OBJECT
+      MessageInterface::ShowMessage("MeasurementModel<%p '%s'> sets ref object <%p '%s'> names as '%s' with type %s\n", 
+          this, this->GetName().c_str(),
+          obj, obj->GetName().c_str(),
             name.c_str(), obj->GetTypeName().c_str());
    #endif
 
@@ -1567,7 +1802,7 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
    }
 
-   return GmatBase::SetRefObject(obj, type, name);
+   return MeasurementModelBase::SetRefObject(obj, type, name);
 }
 
 
@@ -1584,7 +1819,7 @@ Integer MeasurementModel::GetOwnedObjectCount()
 {
    ownedObjectCount = 0;
 
-   return GmatBase::GetOwnedObjectCount();
+   return MeasurementModelBase::GetOwnedObjectCount();
 }
 
 
@@ -1601,7 +1836,8 @@ Integer MeasurementModel::GetOwnedObjectCount()
 //------------------------------------------------------------------------------
 ObjectArray& MeasurementModel::GetRefObjectArray(const std::string & typeString)
 {
-   return GmatBase::GetRefObjectArray(typeString);
+    return GetRefObjectArray(GetObjectType(typeString));            // fix Bug 12 in ticket GMT-4314
+//  return MeasurementModelBase::GetRefObjectArray(typeString);
 }
 
 
@@ -1648,7 +1884,7 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       return true;
    }
 
-   return GmatBase::SetRefObject(obj, type, name, index);
+   return MeasurementModelBase::SetRefObject(obj, type, name, index);
 }
 
 
@@ -1665,7 +1901,10 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& MeasurementModel::GetRefObjectArray(const Gmat::ObjectType type)
 {
-   return GmatBase::GetRefObjectArray(type);
+   if (Gmat::SPACEOBJECT)                         // fix Bug 12 in ticket GMT-4314
+      return participants;
+   
+   return MeasurementModelBase::GetRefObjectArray(type);
 }
 
 
@@ -1686,7 +1925,7 @@ ObjectArray& MeasurementModel::GetRefObjectArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 bool MeasurementModel::IsOwnedObject(Integer id) const
 {
-   return GmatBase::IsOwnedObject(id);
+   return MeasurementModelBase::IsOwnedObject(id);
 }
 
 
@@ -1739,7 +1978,9 @@ void MeasurementModel::SetModelID(Integer newID)
 
 
 //------------------------------------------------------------------------------
-// const MeasurementData& CalculateMeasurement(bool withEvents)
+// const MeasurementData& CalculateMeasurement(bool withEvents,
+//       ObservationData* forObservation, std::vector<RampTableData>* rampTB, 
+//       bool withNoise)
 //------------------------------------------------------------------------------
 /**
  * Calculates the measurement
@@ -1749,15 +1990,60 @@ void MeasurementModel::SetModelID(Integer newID)
  * state, the MeasurementData container is cleared and its isFeasible flag is
  * set to false.
  *
- * @param withEvents Flag indicating is events - if present - should be included
- *                   in the calculations
+ * @param withEvents       Flag indicating is events - if present - should be included
+ *                         in the calculations
+ * @param forObservation   Pointer to an observation data object
+ * @param rampTB           Pointer to a ramped frequency table data object
+ * @param withNoise        Flag indicating noise is added to calculated measurement 
  *
  * @return A reference to the calculated MeasurementData
  */
 //------------------------------------------------------------------------------
-const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents)
+const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents, 
+         ObservationData* forObservation, std::vector<RampTableData>* rampTB, bool withNoise)
 {
+   #ifdef DEBUG_MEASUREMENT_CALCULATION
+      MessageInterface::ShowMessage(" Entered MeasurementModel<%p>::CalculateMeasurement(withEvents = %s, forObservation = %p, rampTB = %p, withNoise = %s)\n", this, (withEvents?"true":"false"), forObservation, rampTB,(withNoise?"true":"false"));
+   #endif
+   
+   // Handle the physical model settings for physical model classes only
+   if (measurement->IsOfType("PhysicalMeasurement"))
+   {
+      // Passing ramp table to measurement object
+      ((PhysicalMeasurement*)measurement)->SetRampTable(rampTB);
+
+      // Passing observation data to measurement object
+      ((PhysicalMeasurement*)measurement)->SetObservationDataRecord(forObservation);
+   }
+   
+   if (forObservation != NULL)
+   {
+      if (forObservation->dataFormat == "GMAT_OD")
+      {
+         ((PhysicalMeasurement*)measurement)->SetConstantFrequency(forObservation->uplinkFreq);
+         ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);
+//       ((PhysicalMeasurement*)measurement)->SetRangeModulo(forObservation->rangeModulo);
+      }
+      else if (forObservation->dataFormat == "GMAT_ODDoppler")
+      {
+         ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);
+         ((AveragedDoppler*)measurement)->SetRealParameter("AveragingInterval", forObservation->dopplerCountInterval);
+      }
+      
+      if (measurement->IsOfType("PhysicalMeasurement"))
+      {
+         ((PhysicalMeasurement*)measurement)->SetObsValue(forObservation->value);
+      }
+   }
+
+   // Specifying the value of calculated measurement C:
+   if (withNoise)
+      measurement->SetNoise(&noiseSigma);
+   
    measurement->CalculateMeasurement(withEvents);
+   
+   if (withNoise)
+      measurement->SetNoise(NULL);
 
    // Add in the Biases if the measurement was feasible
    if (theData->isFeasible)
@@ -1785,6 +2071,10 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents)
          MessageInterface::ShowMessage("]\n");
       #endif
    }
+   
+   #ifdef DEBUG_MEASUREMENT_CALCULATION
+      MessageInterface::ShowMessage(" Exit MeasurementModel::CalculateMeasurement(%s, %p)\n", (withEvents?"true":"false"), forObservation);
+   #endif
 
    return *theData;
 }
@@ -1938,7 +2228,7 @@ Integer MeasurementModel::HasParameterCovariances(Integer parameterId)
       return 1;
    }
 
-   return GmatBase::HasParameterCovariances(parameterId);
+   return MeasurementModelBase::HasParameterCovariances(parameterId);
 }
 
 
@@ -1999,7 +2289,7 @@ bool MeasurementModel::SetEventData(Event *locatedEvent)
 //      return covariance;
 //   }
 //
-//   return GmatBase::GetParameterCovariances(parameterId);
+//   return MeasurementModelBase::GetParameterCovariances(parameterId);
 //}
 
 
@@ -2071,7 +2361,7 @@ void MeasurementModel::SetCorrection(const std::string& correctionName,
          const std::string& correctionType)
 {
    #ifdef DEBUG_SET_CORRECTION
-	  MessageInterface::ShowMessage("Start MeasurementModel::SetCorrection():   correctionName = '%s',   correctionType = '%s'\n", correctionName.c_str(), correctionType.c_str());
+      MessageInterface::ShowMessage("Start MeasurementModel::SetCorrection():   correctionName = '%s',   correctionType = '%s'\n", correctionName.c_str(), correctionType.c_str());
    #endif
    
    // Only PhysicalModels receive corrections
@@ -2079,8 +2369,14 @@ void MeasurementModel::SetCorrection(const std::string& correctionName,
    {
       // We probably ought to also send in the type here
       #ifdef DEBUG_SET_CORRECTION
-	     MessageInterface::ShowMessage("correctionName = '%s' will be added.\n", correctionName.c_str(), correctionType.c_str());
+         MessageInterface::ShowMessage("correctionName = '%s' will be added.\n", correctionName.c_str(), correctionType.c_str());
       #endif
-      ((PhysicalMeasurement *)(measurement))->AddCorrection(correctionName);
+      ((PhysicalMeasurement *)(measurement))->AddCorrection(correctionName, correctionType);
    }
 }
+
+ObjectArray& MeasurementModel::GetParticipants()
+{
+   return participants;
+}
+

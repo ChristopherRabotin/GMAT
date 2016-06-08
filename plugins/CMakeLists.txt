@@ -108,6 +108,7 @@ OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
 OPTION(PLUGIN_PYTHONINTERFACE "PythonInterface Plugin" ON)
 OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
 OPTION(PLUGIN_STATION "Station Plugin" ON)
+OPTION(PLUGIN_THRUSTFILE "ThrustFile Plugin" ON)
 
 # Variable used to collect a list of all enabled plugins
 SET(PluginTargets "")
@@ -279,6 +280,15 @@ endif()
 # Station Plugin
 if (PLUGIN_STATION)
   SET(PLUGINDIR "StationPlugin/src/base")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+# ====================================================================
+# ThrustFile Plugin
+if (PLUGIN_THRUSTFILE)
+  SET(PLUGINDIR "ThrustFilePlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})

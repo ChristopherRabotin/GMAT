@@ -35,7 +35,7 @@
 
 #include "ObservationData.hpp"
 #include "EstimationDefs.hpp"
-
+#include <sstream>
 
 //-----------------------------------------------------------------------------
 // ObservationData()
@@ -45,13 +45,29 @@
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData() :
+   inUsed            (true),
+   removedReason     ("N"),
    typeName          (""),
    type              (Gmat::UNKNOWN_MEASUREMENT),
    uniqueID          (-1),
    epochSystem       (TimeConverterUtil::A1MJD),
    epoch             (-1.0),
-   noiseCovariance   (NULL)
+   noiseCovariance   (NULL),
+///// TBD: Determine if there is a more generic way to add these, and if they go here
+   unit              ("km"),
+   uplinkBand        (0),
+   uplinkFreq        (0.0),
+   uplinkFreqAtRecei (0.0),                                // made changes by TUAN NGUYEN
+   rangeModulo       (1.0),
+   dopplerCountInterval   (1.0e-10),
+   tdrsServiceID     ("SA1"),
+   tdrsNode4Freq     (0.0),
+   tdrsNode4Band     (0),
+   tdrsSMARID        (0),
+   tdrsDataFlag      (0)
 {
+///// TBD: This does not go here -- we'll be adding a new data type, so need to have a way to handle this
+   dataFormat = "GMATInternal";
 }
 
 
@@ -77,18 +93,38 @@ ObservationData::~ObservationData()
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData(const ObservationData& od):
+   inUsed                  (od.inUsed),
+   removedReason           (od.removedReason),
    typeName                (od.typeName),
    type                    (od.type),
    uniqueID                (od.uniqueID),
    epochSystem             (od.epochSystem),
    epoch                   (od.epoch),
+   epochAtEnd              (od.epochAtEnd),
+   epochAtIntegrationEnd   (od.epochAtIntegrationEnd),
    participantIDs          (od.participantIDs),
+   strands                 (od.strands),
    value                   (od.value),
+   dataMap                 (od.dataMap),
+   value_orig              (od.value_orig),
+   unit                    (od.unit),
    noiseCovariance         (od.noiseCovariance),
    extraDataDescriptions   (od.extraDataDescriptions),
    extraTypes              (od.extraTypes),
-   extraData               (od.extraData)
+   extraData               (od.extraData),
+//   dataFormat              (od.dataFormat),
+   uplinkBand              (od.uplinkBand),
+   uplinkFreq              (od.uplinkFreq),
+   uplinkFreqAtRecei       (od.uplinkFreqAtRecei),                // made changes by TUAN NGUYEN
+   rangeModulo             (od.rangeModulo),
+   dopplerCountInterval	   (od.dopplerCountInterval),
+   tdrsServiceID           (od.tdrsServiceID),
+   tdrsNode4Freq           (od.tdrsNode4Freq),
+   tdrsNode4Band           (od.tdrsNode4Band),
+   tdrsSMARID              (od.tdrsSMARID),
+   tdrsDataFlag            (od.tdrsDataFlag)
 {
+   dataFormat = od.dataFormat;
 }
 
 
@@ -107,17 +143,36 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 {
    if (&od != this)
    {
+      inUsed                  = od.inUsed;
+      removedReason           = od.removedReason;
       typeName                = od.typeName;
       type                    = od.type;
       uniqueID                = od.uniqueID;
       epochSystem             = od.epochSystem;
       epoch                   = od.epoch;
+      epochAtEnd              = od.epochAtEnd;
+      epochAtIntegrationEnd   = od.epochAtIntegrationEnd;
       participantIDs          = od.participantIDs;
+      strands                 = od.strands;
       value                   = od.value;
+      dataMap                 = od.dataMap;
+      value_orig              = od.value_orig;
+      unit                    = od.unit;
       noiseCovariance         = od.noiseCovariance;
       extraDataDescriptions   = od.extraDataDescriptions;
       extraTypes              = od.extraTypes;
       extraData               = od.extraData;
+      dataFormat              = od.dataFormat;
+      uplinkBand              = od.uplinkBand;
+      uplinkFreq              = od.uplinkFreq;
+      uplinkFreqAtRecei       = od.uplinkFreqAtRecei;                // made changes by TUAN NGUYEN
+      rangeModulo             = od.rangeModulo;
+      dopplerCountInterval    = od.dopplerCountInterval;
+      tdrsServiceID           = od.tdrsServiceID;
+      tdrsNode4Freq           = od.tdrsNode4Freq;
+      tdrsNode4Band           = od.tdrsNode4Band;
+      tdrsSMARID              = od.tdrsSMARID;
+      tdrsDataFlag            = od.tdrsDataFlag;
    }
 
    return *this;
@@ -133,13 +188,86 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 //-----------------------------------------------------------------------------
 void ObservationData::Clear()
 {
+   inUsed                  = true;
+   removedReason           = "N";
    typeName                = "";
    type                    = Gmat::UNKNOWN_MEASUREMENT;
    uniqueID                = -1;
    epoch                   = 0.0;
    participantIDs.clear();
    value.clear();
+   dataMap.clear();
+   strands.clear();
+   value_orig.clear();
    extraDataDescriptions.clear();
    extraTypes.clear();
    extraData.clear();
+///// TBD: Determine if there is a more generic way to add these
+   uplinkBand              = 0;
+   uplinkFreq              = 0.0;
+   uplinkFreqAtRecei       = 0.0;                      // made changes by TUAN NGUYEN
+   rangeModulo             = 1.0;
+   dopplerCountInterval    = 1.0e-10;
+   tdrsServiceID           = "SA1";
+   tdrsNode4Freq           = 0.0;
+   tdrsNode4Band           = 0;
+   tdrsSMARID              = 0;
+   tdrsDataFlag            = 0;
+}
+
+
+
+std::string ObservationData::GetTrackingConfig()
+{
+   std::stringstream ss;
+   ss << "{{";
+   for (UnsignedInt i = 0; i < participantIDs.size(); ++i)
+   {
+      ss << participantIDs[i];
+      if (i < participantIDs.size()-1)
+         ss << ",";
+   }
+   ss << "}" << typeName << "}";
+
+   return ss.str();
+}
+
+
+StringArray ObservationData::GetAvailableMeasurementTypes()
+{
+   StringArray typeList;
+
+   // New syntax's measurement types
+   typeList.push_back("Range_KM");
+   typeList.push_back("DSNRange");
+   typeList.push_back("Doppler");
+   typeList.push_back("Doppler_RangeRate");
+   typeList.push_back("TDRSDoppler_HZ");
+
+   // Old syntax's measurement types
+   typeList.push_back("DSNTwoWayRange");
+   typeList.push_back("DSNTwoWayDoppler");
+   typeList.push_back("USNTwoWayRange");
+   typeList.push_back("GeometricRange");
+   typeList.push_back("GeometricRangeRate");
+   typeList.push_back("GeometricRADec");
+   typeList.push_back("GeometricAzEl");
+
+   return typeList;
+}
+
+
+bool ObservationData::IsValidMeasurementType(const std::string typeName)
+{
+   StringArray typeList = GetAvailableMeasurementTypes();
+   bool isValid = false;
+   for (Integer i = 0; i < typeList.size(); ++i)
+   {
+      if (typeList[i] == typeName)
+      {
+         isValid = true;
+         break;
+      }
+   }
+   return isValid;
 }

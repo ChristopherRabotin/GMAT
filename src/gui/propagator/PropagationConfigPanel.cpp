@@ -218,7 +218,7 @@ void PropagationConfigPanel::Create()
 
    // Initial Step Size
    initialStepSizeStaticText =
-      new wxStaticText( this, ID_TEXT, "Initial "GUI_ACCEL_KEY"Step Size",
+      new wxStaticText( this, ID_TEXT, "Initial " GUI_ACCEL_KEY "Step Size",
                         wxDefaultPosition, wxDefaultSize);
 
    initialStepSizeTextCtrl =
@@ -231,7 +231,7 @@ void PropagationConfigPanel::Create()
                         wxDefaultPosition, wxDefaultSize );
    // Accuracy
    accuracyStaticText =
-      new wxStaticText( this, ID_TEXT, "A"GUI_ACCEL_KEY"ccuracy",
+      new wxStaticText( this, ID_TEXT, "A" GUI_ACCEL_KEY "ccuracy",
                         wxDefaultPosition, wxDefaultSize );
    accuracyTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_PROP, wxT(""),
@@ -240,7 +240,7 @@ void PropagationConfigPanel::Create()
 
    // Minimum Step Size
    minStepStaticText =
-      new wxStaticText( this, ID_TEXT, "Mi"GUI_ACCEL_KEY"n Step Size",
+      new wxStaticText( this, ID_TEXT, "Mi" GUI_ACCEL_KEY "n Step Size",
                         wxDefaultPosition, wxDefaultSize );
    minStepTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_PROP, wxT(""),
@@ -252,7 +252,7 @@ void PropagationConfigPanel::Create()
 
    // Maximum Step Size
    maxStepStaticText =
-      new wxStaticText( this, ID_TEXT, "Ma"GUI_ACCEL_KEY"x Step Size",
+      new wxStaticText( this, ID_TEXT, "Ma" GUI_ACCEL_KEY "x Step Size",
                         wxDefaultPosition, wxDefaultSize );
    maxStepTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_PROP, wxT(""),
@@ -264,7 +264,7 @@ void PropagationConfigPanel::Create()
 
    // Maximum Step Attempt
    maxStepAttemptStaticText =
-      new wxStaticText( this, ID_TEXT, "Max Step "GUI_ACCEL_KEY"Attempts",
+      new wxStaticText( this, ID_TEXT, "Max Step " GUI_ACCEL_KEY "Attempts",
                         wxDefaultPosition, wxDefaultSize );
    maxStepAttemptTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_PROP, wxT(""),
@@ -273,7 +273,7 @@ void PropagationConfigPanel::Create()
 
    // Minimum Integration Error
    minIntErrorStaticText =
-      new wxStaticText( this, ID_TEXT, "Min "GUI_ACCEL_KEY"Integration Error",
+      new wxStaticText( this, ID_TEXT, "Min " GUI_ACCEL_KEY "Integration Error",
                         wxDefaultPosition, wxDefaultSize );
    minIntErrorTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_PROP, wxT(""),
@@ -436,7 +436,7 @@ void PropagationConfigPanel::Create()
 
    // Central Body
    wxStaticText *centralBodyStaticText =
-      new wxStaticText( this, ID_TEXT, "Central "GUI_ACCEL_KEY"Body",
+      new wxStaticText( this, ID_TEXT, "Central " GUI_ACCEL_KEY "Body",
                         wxDefaultPosition, wxSize(w,-1), wxST_NO_AUTORESIZE);
    theOriginComboBox  =
       theGuiManager->GetCelestialBodyComboBox(this, ID_CB_ORIGIN, wxSize(100,-1));
@@ -449,9 +449,9 @@ void PropagationConfigPanel::Create()
    // Primary Bodies -- for 1.0, changed to allow only one body; commented code
    // is a start on allowing multiple bodies
    GmatStaticBoxSizer *primaryStaticSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "Primary "GUI_ACCEL_KEY"Body");
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Primary " GUI_ACCEL_KEY "Body");
 //   GmatStaticBoxSizer *primaryStaticSizer =
-//      new GmatStaticBoxSizer(wxVERTICAL, this, "Primary "GUI_ACCEL_KEY"Bodies");
+//      new GmatStaticBoxSizer(wxVERTICAL, this, "Primary " GUI_ACCEL_KEY "Bodies");
    wxArrayString bodyArray;
 
    thePrimaryBodyComboBox = theGuiManager->GetCelestialBodyComboBox(this,
@@ -519,7 +519,7 @@ void PropagationConfigPanel::Create()
    degOrdSizer->Add( theGravModelSearchButton, 0, wxALIGN_CENTRE|wxALL, bsize);
 
    potFileStaticText =
-      new wxStaticText( this, ID_TEXT, "Potential "GUI_ACCEL_KEY"File",
+      new wxStaticText( this, ID_TEXT, "Potential " GUI_ACCEL_KEY "File",
                         wxDefaultPosition, wxDefaultSize, 0 );
    potFileTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
@@ -537,7 +537,7 @@ void PropagationConfigPanel::Create()
 
    // Drag
    wxStaticText *type2StaticText =
-      new wxStaticText( this, ID_TEXT, "Atmosphere "GUI_ACCEL_KEY"Model",
+      new wxStaticText( this, ID_TEXT, "Atmosphere " GUI_ACCEL_KEY "Model",
                         wxDefaultPosition, wxDefaultSize, 0 );
 
    theAtmosModelComboBox =

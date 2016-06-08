@@ -74,6 +74,8 @@ RunSimulator::~RunSimulator()
 {
    if (theSimulator)
       delete theSimulator;
+
+   eventList.clear();
 }
 
 
@@ -284,6 +286,9 @@ const std::string& RunSimulator::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 bool RunSimulator::Initialize()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Start RunSimulator::Initialize()\n");
+#endif
    bool retval = false;
 
    // First set the simulator object
@@ -305,8 +310,9 @@ bool RunSimulator::Initialize()
             "object named " + solverName + " is not a simulator.");
 
    theSimulator = (Simulator*)(simObj->Clone());
+   theSimulator->Initialize();
 
-   // Set the streams for the measurement manager
+   // Set the observation data streams for the measurement manager
    MeasurementManager *measman = theSimulator->GetMeasurementManager();
    StringArray streamList = measman->GetStreamList();
    for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)
@@ -323,6 +329,29 @@ bool RunSimulator::Initialize()
       else
          throw CommandException("Did not find the object named " +
                streamList[ms]);
+   }
+
+///// Check for generic approach here   
+   // Set the ramp table data streams for the measurement manager
+   streamList = measman->GetRampTableDataStreamList();
+   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)
+   {
+      GmatBase *obj = FindObject(streamList[ms]);
+      if (obj != NULL)
+      {
+         if (obj->IsOfType(Gmat::DATASTREAM))
+         {
+            DataFile *df = (DataFile*)obj;
+            measman->SetRampTableDataStreamObject(df);
+         }
+         else
+            MessageInterface::ShowMessage(" Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
+      }
+      else
+      {
+         throw CommandException("Error: Did not find the object named " + 
+               streamList[ms]);
+      }
    }
 
    // Find the event manager and store its pointer
@@ -419,6 +448,7 @@ bool RunSimulator::Initialize()
       if (retval == false)
          MessageInterface::ShowMessage("RunSimulator command failed to "
                "initialize; RunSolver::Initialize() call failed.\n");
+      MessageInterface::ShowMessage("Exit RunSimulator::Initialize()\n");
    #endif
 
    return retval;
@@ -445,8 +475,9 @@ void RunSimulator::SetPropagationProperties(PropagationStateManager *psm)
    {
       if ((*p)->IsOfType(Gmat::SPACEOBJECT))
       {
-         if (includeSTMPropagation)
-            psm->SetProperty("STM", *p);
+         // Always include the STM so that simulation and estimation steps are
+         // (nearly) coincident
+         psm->SetProperty("STM", *p);
       }
    }
 }
@@ -469,6 +500,7 @@ void RunSimulator::SetPropagationProperties(PropagationStateManager *psm)
 bool RunSimulator::Execute()
 {
    #ifdef DEBUG_SIMULATOR_EXECUTION
+     MessageInterface::ShowMessage("\nEntered RunSimulator::Execute()\n");
       MessageInterface::ShowMessage("\n\nThe \"%s\" command is running...\n",
             GetTypeName().c_str());
    #endif
@@ -491,26 +523,44 @@ bool RunSimulator::Execute()
    switch (state)
    {
       case Solver::INITIALIZING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): INITIALIZING state\n");
+         #endif
          PrepareToSimulate();
          break;
 
       case Solver::PROPAGATING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): PROPAGATING state\n");
+         #endif
          Propagate();
          break;
 
       case Solver::CALCULATING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): CALCULATING state\n");
+         #endif
          Calculate();
          break;
 
       case Solver::LOCATING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): LOCATING state\n");
+         #endif
          LocateEvent();
          break;
 
       case Solver::SIMULATING:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): SIMULATING state\n");
+         #endif
          Simulate();
          break;
 
       case Solver::FINISHED:
+         #ifdef DEBUG_SIMULATOR_EXECUTION
+            MessageInterface::ShowMessage("RunSimulator::Execute(): FINSIHED state\n");
+         #endif
          Finalize();
          break;
 
@@ -520,6 +570,10 @@ bool RunSimulator::Execute()
    }
 
    state = theSimulator->AdvanceState();
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::Execute()\n");
+   #endif
 
    return true;
 }
@@ -540,6 +594,10 @@ void RunSimulator::RunComplete()
    commandRunning = false;
 
    RunSolver::RunComplete();
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::RunComplete()\n");
+   #endif
 }
 
 
@@ -617,7 +675,10 @@ bool RunSimulator::HasLocalClones()
 //------------------------------------------------------------------------------
 void RunSimulator::UpdateClonedObject(GmatBase *obj)
 {
-   throw CommandException("To do: implement Propagate::UpdateClonedObject");
+   if (obj->IsOfType("Spacecraft"))
+      return;
+   throw CommandException("To do: implement RunSimulator::UpdateClonedObject "
+         "for " + obj->GetTypeName() + " objects");
 }
 
 
@@ -646,15 +707,49 @@ void RunSimulator::PrepareToSimulate()
 
    // Prep the measurement manager
    MeasurementManager *measman = theSimulator->GetMeasurementManager();
+
+   PropSetup *thePropagator = theSimulator->GetPropagator();
    if (measman->PrepareForProcessing(true) == false)
       throw CommandException(
             "Measurement Manager was unable to prepare for processing");
 
    PrepareToPropagate();  // ?? Test return value here?
+   // measman->LoadRampTables();                     // This command is moved to Simulator::CompleteInitialization()
 
    theSimulator->UpdateCurrentEpoch(baseEpoch[0]);
    commandRunning  = true;
    commandComplete = false;
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::PrepareToSimulate()\n");
+   #endif
+
+   #ifdef DEBUG_INITIAL_STATE
+      MessageInterface::ShowMessage("Object states at close of PrepareToSimulate:\n");
+      for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+      {
+         PropObjectArray *poa = propObjects[i];
+         for (UnsignedInt j = 0; j < poa->size(); ++j)
+         {
+            MessageInterface::ShowMessage("   %s:\n", poa->at(j)->GetName().c_str());
+            if (poa->at(j)->IsOfType(Gmat::SPACEOBJECT))
+            {
+               MessageInterface::ShowMessage("      Epoch: [%s]\n",
+                     poa->at(j)->GetStringParameter("Epoch").c_str());
+               MessageInterface::ShowMessage("      [%16.14lf, %16.14lf, %16.14lf]:\n",
+                     poa->at(j)->GetRealParameter("X"),
+                     poa->at(j)->GetRealParameter("Y"),
+                     poa->at(j)->GetRealParameter("Z"));
+               MessageInterface::ShowMessage("      [%16.14lf, %16.14lf, %16.14lf]:\n",
+                     poa->at(j)->GetRealParameter("VX"),
+                     poa->at(j)->GetRealParameter("VY"),
+                     poa->at(j)->GetRealParameter("VZ"));
+            }
+            else
+               MessageInterface::ShowMessage("      Not a SpaceObject\n");
+         }
+      }
+   #endif
 }
 
 
@@ -675,6 +770,10 @@ void RunSimulator::Propagate()
    #endif
    Real dt = theSimulator->GetTimeStep(currEpoch[0]);
 
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("dt = %.15lf\n", dt);
+   #endif
+
    #ifdef DEBUG_EVENT_STATE
       Integer dim = fm[0]->GetDimension();
       Real *odeState = fm[0]->GetState();
@@ -689,9 +788,13 @@ void RunSimulator::Propagate()
 
    // todo: This is a temporary fix; need to evaluate to find a more elegant
    //       solution here
-   Real maxStep = 600.0;
-   if (dt > maxStep)
-      dt = maxStep;
+   //Real maxStep = 600.0;
+   //if (dt > maxStep)
+   //   dt = maxStep;
+   Real maxStep = 60.0;
+   if (fabs(dt) > maxStep)
+      dt = (dt > 0.0 ? maxStep : -maxStep);
+
    Step(dt);
    bufferFilled = false;
 
@@ -707,6 +810,10 @@ void RunSimulator::Propagate()
       for (Integer i = 0; i < dim; ++i)
          MessageInterface::ShowMessage("   %.12lf", odeState[i]);
       MessageInterface::ShowMessage("\n");
+   #endif
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::Propagate()\n");
    #endif
 }
 
@@ -725,6 +832,10 @@ void RunSimulator::Calculate()
 #endif
 
    bufferFilled = false;
+
+#ifdef DEBUG_SIMULATOR_EXECUTION
+   MessageInterface::ShowMessage("Exit RunSimulator::Calculate()\n");
+#endif
 }
 
 
@@ -893,6 +1004,11 @@ void RunSimulator::LocateEvent()
    BufferSatelliteStates(false);
    propagators[0]->GetODEModel()->UpdateFromSpaceObject();
    fm[0]->SetTime(dt);
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::LocateEvent()\n   ");
+   #endif
+
 }
 
 
@@ -951,6 +1067,11 @@ void RunSimulator::Simulate()
                (*i)->GetRealParameter("Z"));
       }
    #endif
+
+   #ifdef DEBUG_SIMULATOR_EXECUTION
+      MessageInterface::ShowMessage("Exit RunSimulator::Simulate()\n");
+   #endif
+
 }
 
 
@@ -976,4 +1097,10 @@ void RunSimulator::Finalize()
 
    commandComplete = true;
    commandRunning  = false;
+
+   BuildCommandSummary(true);
+
+#ifdef DEBUG_SIMULATOR_EXECUTION
+   MessageInterface::ShowMessage("Exit RunSimulator::Finalize()\n");
+#endif
 }

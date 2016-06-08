@@ -197,10 +197,10 @@ void EventLocatorPanel::Create()
    // label for spacecraft/target
    if (isEclipse)
       scTargetTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Spacecraft", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "" GUI_ACCEL_KEY "Spacecraft", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    else
       scTargetTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Target", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "" GUI_ACCEL_KEY "Target", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
 
    scTargetComboBox = theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX,
                                                            wxSize(150,-1));
@@ -210,7 +210,7 @@ void EventLocatorPanel::Create()
    // Occulting Bodies
    //-----------------------------------------------------------------
    bodiesTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Occulting Bodies", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+      "" GUI_ACCEL_KEY "Occulting Bodies", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    bodiesCheckListBox =
      theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX_BODIES, wxSize(200,-1),
            true, false, false, false);
@@ -229,14 +229,14 @@ void EventLocatorPanel::Create()
    if (isEclipse)
    {
       eclipseTypesTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Eclipse Types", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "" GUI_ACCEL_KEY "Eclipse Types", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       eclipseTypesCheckListBox = new wxCheckListBox(this, ID_CHECKLISTBOX_ECLIPSE, wxDefaultPosition,
             wxSize(200,-1), emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {
       observersTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Observers", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "" GUI_ACCEL_KEY "Observers", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       observersCheckListBox =
             theGuiManager->GetGroundStationCheckListBox(this, ID_CHECKLISTBOX_OBSERVER, wxSize(200,-1));
 //        theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,100),
@@ -253,7 +253,7 @@ void EventLocatorPanel::Create()
    // Filename/Report
    //-----------------------------------------------------------------
    fileNameTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Filename", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "" GUI_ACCEL_KEY "Filename", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    fileNameTxtCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
                      wxSize(200, -1), 0);
@@ -262,7 +262,7 @@ void EventLocatorPanel::Create()
                          wxSize(buttonWidth, -1));
 
    runModeTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Run Mode", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "" GUI_ACCEL_KEY "Run Mode", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
 
    runModeComboBox = new wxComboBox
       ( this, ID_RUNMODE_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(epochWidth,-1),
@@ -285,7 +285,7 @@ void EventLocatorPanel::Create()
 
    // label for epoch format
    epochFormatTxt = new wxStaticText( this, ID_TEXT,
-      "Epoch "GUI_ACCEL_KEY"Format", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
+      "Epoch " GUI_ACCEL_KEY "Format", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
 
    // combo box for the epoch format
    epochFormatComboBox = new wxComboBox
@@ -295,7 +295,7 @@ void EventLocatorPanel::Create()
 
    // label for epoch
    initialEpochTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Initial Epoch", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
+      "" GUI_ACCEL_KEY "Initial Epoch", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
 
    // textfield for the initial epoch value
    initialEpochTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
@@ -304,7 +304,7 @@ void EventLocatorPanel::Create()
 
    // label for epoch
    finalEpochTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Final Epoch", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
+      "" GUI_ACCEL_KEY "Final Epoch", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
 
    // textfield for the final epoch value
    finalEpochTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
@@ -327,7 +327,7 @@ void EventLocatorPanel::Create()
    if (!isEclipse)
    {
       lightTimeDirectionTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Light-time direction", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+         "" GUI_ACCEL_KEY "Light-time direction", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       lightTimeDirectionComboBox = new wxComboBox
          ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(epochWidth,-1),
                emptyList, wxCB_DROPDOWN | wxCB_READONLY );
@@ -338,7 +338,7 @@ void EventLocatorPanel::Create()
    }
 
    stepSizeTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Step size", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+      "" GUI_ACCEL_KEY "Step size", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    stepSizeTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    stepSizeUnitsTxt = new wxStaticText( this, ID_TEXT,

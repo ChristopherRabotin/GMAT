@@ -51,6 +51,21 @@ public:
    virtual GmatBase* Clone() const;
    virtual bool Initialize();
 
+   virtual Integer      GetParameterID(const std::string & str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Gmat::ParameterType 
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual std::string  GetParameterUnit(const Integer id) const;
+   virtual Integer      GetParameterCount() const;
+
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+
    virtual const std::vector<RealArray>& CalculateMeasurementDerivatives(
          GmatBase *obj, Integer id);
 
@@ -65,8 +80,34 @@ protected:
    /// Range rate of the downlink
    Real                 downlinkRangeRate;
 
-   virtual bool                  Evaluate(bool withEvents = false);
-   Real                          GetFrequencyFactor(Real frequency = 0.0);
+   /// Range modulo
+   Real                 rangeModulo;
+
+   virtual bool         Evaluate(bool withEvents = false);
+   Real                 GetFrequencyFactor(Real frequency = 0.0);
+
+   // This function is different from  PhysicalMeasurement::IntegralRampedFrequency(Real t0, Real delta_t)
+   // The difference is this function using frequency factor in its calculation instead of frequency  
+   virtual Real         IntegralRampedFrequency(Real t0, Real delta_t, Integer& err);
+
+
+   /// Enumeration defining the DSNTwoWayRange's scriptable parameters
+   enum
+   {
+       RangeModuloConstant = TwoWayRangeParamCount,            // by setting this way, RangeModuloConstant parameter is only used in DSNTwoWayRange
+       DSNTwoWayRangeParamCount
+   };
+
+   // Start with the parameter IDs and associates strings
+   /// Script labels for the DSNTwoWayRange parameters
+   static const std::string
+                PARAMETER_TEXT[DSNTwoWayRangeParamCount -
+                               TwoWayRangeParamCount];
+   /// IDs for the DSNTwoWayRange parameters
+   static const Gmat::ParameterType
+                PARAMETER_TYPE[DSNTwoWayRangeParamCount -
+                               TwoWayRangeParamCount];
+
 };
 
 #endif /* DSNTwoWayRange_hpp */

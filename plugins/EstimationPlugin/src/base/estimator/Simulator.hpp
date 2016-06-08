@@ -75,6 +75,8 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
@@ -87,6 +89,11 @@ public:
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
+
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id,
+                                         const std::string &value);
+
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
@@ -126,6 +133,8 @@ public:
 
    virtual bool         HasLocalClones();
    virtual void         UpdateClonedObject(GmatBase *obj);
+   virtual void         UpdateClonedObjectParameter(GmatBase *obj,
+                              Integer updatedParameterId);
 
 protected:
    /// Enumeration for the scripted parameters on the Simulator
@@ -133,11 +142,11 @@ protected:
    {
       MEASUREMENTS = SolverParamCount,
       PROPAGATOR,
-      INITIAL_EPOCH_FORMAT,
+      EPOCH_FORMAT,
       INITIAL_EPOCH,
-      FINAL_EPOCH_FORMAT,
       FINAL_EPOCH,
       MEASUREMENT_TIME_STEP,
+      ADD_NOISE,
       SimulatorParamCount
    };
    /// Script strings associated with the parameters
@@ -166,12 +175,14 @@ protected:
    /// The current epoch (typically as determined via propagation)
    GmatEpoch           currentEpoch;
 
-   /// Format of the scripted simulation start time
-   std::string         initialEpochFormat;
+   /// Format of the scripted simulation start time and end time
+   std::string         epochFormat;
+//   /// Format of the scripted simulation start time
+//   std::string         initialEpochFormat;
    /// The string specifying the simulation start time
    std::string         initialEpoch;      // ??? is this simulationStart
-   /// Format of the scripted simulation end time
-   std::string         finalEpochFormat;
+//   /// Format of the scripted simulation end time
+//   std::string         finalEpochFormat;
    /// The string specifying the simulation end time
    std::string         finalEpoch;      // ??? is this simulationEnd
 
@@ -182,6 +193,9 @@ protected:
    ObjectArray         activeEvents;
    /// Flag indicating is an Event is currently being located
    bool                locatingEvent;
+
+   /// Flag to indicate option to add noise to calculated measurement
+   bool                addNoise;
 
    /**
     *  The time step that gets returned for the next propagation
@@ -197,6 +211,7 @@ protected:
    MeasurementManager  measManager;
    /// The list of measurement models that the measurement manager is managing
    StringArray         measList;   // temporary - may get list from MeasManager;
+   ObjectArray         measModelList;
 
    /// Local storage element for ref object names
    StringArray         refObjectList;
@@ -215,6 +230,10 @@ protected:
    void                   FindNextSimulationEpoch();
    // progress string for reporting
    virtual std::string    GetProgressString();
+
+private:
+   bool                   isTheFirstMeasurement;                                    // fix bug GMT-4909
+   bool                   isEpochFormatSet;
 };
 
 #endif /* Simulator_hpp */

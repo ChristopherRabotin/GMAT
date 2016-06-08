@@ -641,7 +641,7 @@ void MatlabInterface::RunMatlabString(const std::string &evalString)
    }
    
    // add try/catch to string to evaluate
-   newEvalStr = "try,\n  " + newEvalStr + "\ncatch\n  errormsg = lasterr;\nend";
+   newEvalStr = "try,\n  beep off;\n  " + newEvalStr + "\ncatch\n  errormsg = lasterr;\nend";
    
    bool errorReturned = false;
    std::string errorStr;

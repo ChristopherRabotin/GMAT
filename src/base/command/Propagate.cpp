@@ -6087,6 +6087,7 @@ void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
         i != transientForces->end(); ++i)
    {
       StringArray tfSats = (*i)->GetRefObjectNameArray(Gmat::SPACECRAFT);
+
       // Loop through the spacecraft that go with the force model, and see if
       // they are in the spacecraft list for the current transient force
       for (StringArray::iterator current = satnames->begin();
@@ -6099,12 +6100,13 @@ void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
                ("   Adding transientForce <%p>'%s' to ODEModel\n", *i,
                 (*i)->GetName().c_str());
             #endif
-            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current)
-                  == satsThatManeuver.end())
+//            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current)
+//                  == satsThatManeuver.end())
                p->AddForce(*i);
-            else
-               flagMultipleBurns = true;
-            satsThatManeuver.push_back(*current);
+//            else
+//               flagMultipleBurns = true;
+            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current) == satsThatManeuver.end())
+                  satsThatManeuver.push_back(*current);
             if ((*i)->DepletesMass())
             {
                propMan->SetProperty("MassFlow");

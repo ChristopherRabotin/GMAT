@@ -214,10 +214,16 @@ Rmatrix33 CCSDSAEMEulerAngleSegment::GetState(Real atEpoch)
 //------------------------------------------------------------------------------
 // Adds an epoch/data pair to the dataStore.
 //------------------------------------------------------------------------------
-bool CCSDSAEMEulerAngleSegment::AddData(Real epoch, Rvector data)
+bool CCSDSAEMEulerAngleSegment::AddData(Real epoch, Rvector data,
+                                        bool justCheckDataSize)
 {
+   #ifdef DEBUG_AEM_EULER_DATA
+   MessageInterface::ShowMessage
+      ("CCSDSAEMEulerAngleSegment::AddData() entered, epoch=%f, dataStore.size()=%d\n",
+       epoch, dataStore.size());
+   #endif
    // First, check for data size and ordering
-   CCSDSAEMSegment::AddData(epoch, data);
+   CCSDSAEMSegment::AddData(epoch, data, justCheckDataSize);
    // We need to store the angles in radians
    Rvector useData(3, data[0] * GmatMathConstants::RAD_PER_DEG,
                       data[1] * GmatMathConstants::RAD_PER_DEG,
@@ -235,6 +241,7 @@ bool CCSDSAEMEulerAngleSegment::AddData(Real epoch, Rvector data)
    dataStore.push_back(newData);
 
    #ifdef DEBUG_AEM_EULER_DATA
+      MessageInterface::ShowMessage("   dataStore.size() = %d\n", dataStore.size());
       MessageInterface::ShowMessage("----> For (Euler Angle) segment number %d, added epoch = "
             "%12.10f and data = %12.10f  %12.10f  %12.10f\n",
             segmentNumber, epoch, useData[0], useData[1], useData[2]);

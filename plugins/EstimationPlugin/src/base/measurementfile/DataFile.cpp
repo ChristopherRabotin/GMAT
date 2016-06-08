@@ -32,14 +32,27 @@
 
 
 #include "DataFile.hpp"
+#include "DateUtil.hpp"
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
+#include "StatisticAcceptFilter.hpp"
+#include "StatisticRejectFilter.hpp"
 #include <sstream>
+#include "MeasurementException.hpp"
 
-//#define DEBUG_FILE_WRITE
+
+//#define DEBUG_FILE_ACCESS
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_OBSERVATION_READ
+//#define DEBUG_OBSERVATION_DATA
+//#define DEBUG_RAMP_TABLE_READ
+//#define DEBUG_RAMP_TABLE_DATA
+//#define DEBUG_FILTER
+//#define DEBUG_FILTER_NEW
 
 
+#define TIME_EPSILON   5.0e-11      // 5.0e-11 Mjd
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -47,13 +60,23 @@
 const std::string DataFile::PARAMETER_TEXT[] =
 {
    "Filename",
-   "Format"
+   "Format",
+   "DataThinningRatio",
+   "SelectedStationIDs",
+   "EpochFormat",
+   "StartEpoch",
+   "EndEpoch",
 };
 
 const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::OBJECT_TYPE
+   Gmat::STRING_TYPE,			// "Filename"
+   Gmat::STRING_TYPE,			// "Format"
+   Gmat::REAL_TYPE,				// "DataThinningRatio"
+   Gmat::STRINGARRAY_TYPE,		// "IncludedStations"
+   Gmat::STRING_TYPE,			// "EpochFormat"
+   Gmat::STRING_TYPE,			// "StartEpoch"
+   Gmat::STRING_TYPE,			// "EndEpoch"
 };
 
 
@@ -71,13 +94,26 @@ DataFile::DataFile(const std::string name) :
    GmatBase          (Gmat::DATA_FILE, "DataFile", name),
    theDatastream     (NULL),
    streamName        ("ObsData.gmd"),
-   obsType           ("GMATInternal")
+   obsType           ("GMATInternal"),
+   thinningRatio     (1.0),
+   startEpoch        (DateUtil::EARLIEST_VALID_MJD),
+   endEpoch          (DateUtil::LATEST_VALID_MJD),
+   epochFormat       ("TAIModJulian")
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DataFile default constructor <%s,%p>\n", GetName().c_str(), this);
+#endif
+
    objectTypes.push_back(Gmat::DATA_FILE);
    objectTypes.push_back(Gmat::DATASTREAM);
    objectTypeNames.push_back("DataFile");
 
    parameterCount = DataFileParamCount;
+
+   // estimationStart and estimationEnd are in A1Mjd time format. Those specify timespan filer for observation data
+   estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);
+   estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);
+
 }
 
 
@@ -107,10 +143,24 @@ DataFile::~DataFile()
 DataFile::DataFile(const DataFile& df) :
    GmatBase          (df),
    streamName        (df.streamName),
-   obsType           (df.obsType)
+   obsType           (df.obsType),
+   filterList        (df.filterList),
+   thinningRatio     (df.thinningRatio),
+   selectedStationIDs(df.selectedStationIDs),
+   estimationStart   (df.estimationStart),
+   estimationEnd     (df.estimationEnd),
+   epochFormat       (df.epochFormat),
+   startEpoch        (df.startEpoch),
+   endEpoch          (df.endEpoch)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DataFile copy constructor from <%s,%p>  to  <%s,%p>\n", df.GetName().c_str(), &df, GetName().c_str(), this);
+#endif
+
    if (df.theDatastream != NULL)
+   {
       theDatastream = (ObType*)df.theDatastream->Clone();
+   }
    else
       theDatastream = NULL;
 }
@@ -129,6 +179,11 @@ DataFile::DataFile(const DataFile& df) :
 //------------------------------------------------------------------------------
 DataFile& DataFile::operator=(const DataFile& df)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("DataFile operator = <%s,%p>\n", GetName().c_str(), this);
+#endif
+
+
    if (this != &df)
    {
       GmatBase::operator=(df);
@@ -136,10 +191,23 @@ DataFile& DataFile::operator=(const DataFile& df)
       streamName = df.streamName;
       obsType    = df.obsType;
 
+      // This section is for new design filter 
+      filterList = df.filterList;
+
+	   // This section is for old design filter
+      thinningRatio			= df.thinningRatio;
+	   selectedStationIDs	= df.selectedStationIDs;
+	   estimationStart      = df.estimationStart;
+	   estimationEnd        = df.estimationEnd;
+	   epochFormat          = df.epochFormat;
+	   startEpoch           = df.startEpoch;
+	   endEpoch             = df.endEpoch;
+
       if (df.theDatastream)
          theDatastream = (ObType*)df.theDatastream->Clone();
       else
          theDatastream = NULL;
+
    }
 
    return *this;
@@ -172,13 +240,35 @@ GmatBase* DataFile::Clone() const
 //------------------------------------------------------------------------------
 bool DataFile::Initialize()
 {
+#ifdef DEBUG_INITIALIZATION
+	MessageInterface::ShowMessage("DataFile<%s,%p>::Initialize()   entered\n", GetName().c_str(), this);
+#endif
+
    bool retval = false;
 
    if (theDatastream)
    {
       retval = theDatastream->Initialize();
+	   obsType = theDatastream->GetTypeName();
+      #ifdef DEBUG_INITIALIZATION
+	     MessageInterface::ShowMessage("DataFile::Initialize():   theDatastream = '%s'\n", theDatastream->GetStreamName().c_str());
+	     MessageInterface::ShowMessage("DataFile::Initialize():   obsType = '%s'\n", obsType.c_str());
+      #endif
+
    }
 
+   // Initialize privated variables
+   od_old.epoch = -1.0;
+   acc = 1.0;
+   epoch1 = 0.0;
+   epoch2 = 0.0;
+
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage(" DataFile <%s,%p> script: \n%s\n", GetName().c_str(), this, this->GetGeneratingString().c_str()); 
+   MessageInterface::ShowMessage("DataFile<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
+#endif
+
+   isInitialized = retval;
    return retval;
 }
 
@@ -319,6 +409,13 @@ std::string DataFile::GetStringParameter(const Integer id) const
    if (id == StreamName)
       return streamName;
 
+   if (id == EpochFormat)
+      return epochFormat;
+   if (id == StartEpoch)
+      return startEpoch;
+   if (id == EndEpoch)
+      return endEpoch;
+
    return GmatBase::GetStringParameter(id);
 }
 
@@ -348,6 +445,40 @@ bool DataFile::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
+   if (id == SelectedStationIDs)
+   {
+      if (value == "")
+         throw MeasurementException("Error: "+GetName()+".SelectedStationIDs cannot accept an empty string\n");
+
+	  if (find(selectedStationIDs.begin(), selectedStationIDs.end(), value) ==
+                  selectedStationIDs.end())
+	  {
+	     selectedStationIDs.push_back(value);
+	  }
+	  return true;
+   }
+
+   if (id == EpochFormat)
+   {
+      epochFormat = value;
+      return true;
+   }
+   if (id == StartEpoch)
+   {
+      startEpoch = value;
+      // Convert to a.1 time for internal processing
+      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);
+      return true;
+   }
+   if (id == EndEpoch)
+   {
+      endEpoch = value;
+      // Convert to a.1 time for internal processing
+      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);
+      return true;
+   }
+
+
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -370,6 +501,14 @@ bool DataFile::SetStringParameter(const Integer id, const std::string &value)
 std::string DataFile::GetStringParameter(const Integer id,
       const Integer index) const
 {
+   if (id == SelectedStationIDs)
+   {
+	  if ((index >= 0) && ((Integer)selectedStationIDs.size() > index))
+         return selectedStationIDs[index];
+	  else
+         return "";
+   }
+
    return GmatBase::GetStringParameter(id, index);
 }
 
@@ -394,6 +533,16 @@ std::string DataFile::GetStringParameter(const Integer id,
 bool DataFile::SetStringParameter(const Integer id, const std::string &value,
       const Integer index)
 {
+   if (id == SelectedStationIDs)
+   {
+	  if ((index >= 0) && ((Integer)selectedStationIDs.size() > index))
+		 selectedStationIDs[index] = value;
+	  else
+		  selectedStationIDs.push_back(value);
+
+      return true;      
+   }
+
    return GmatBase::SetStringParameter(id, value, index);
 }
 
@@ -482,6 +631,83 @@ bool DataFile::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of properties contained in a StringArray
+ *
+ * @param The ID of the StringArray
+ *
+ * @return The array
+ */
+//------------------------------------------------------------------------------
+const StringArray& DataFile::GetStringArrayParameter(const Integer id) const
+{
+   if (id == SelectedStationIDs)
+      return selectedStationIDs;
+
+   return GmatBase::GetStringArrayParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a list of properties contained in a StringArray
+ *
+ * @param label Script string used to identify the property
+ *
+ * @return The StringArray
+ */
+//------------------------------------------------------------------------------
+const StringArray& DataFile::GetStringArrayParameter(const std::string & label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+Real DataFile::GetRealParameter(const Integer id) const
+{
+   if (id == DataThinningRatio)
+      return thinningRatio;
+
+   if (id == StartEpoch)
+      return estimationStart;
+   if (id == EndEpoch)
+      return estimationEnd;
+
+   return GmatBase::GetRealParameter(id);
+}
+
+
+Real DataFile::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == DataThinningRatio)
+   {
+      if ((value < 0.0)||(value > 1.0))
+         throw MeasurementException("Error: value of "+ GetName() +".DataThinningRatio parameter is out of range [0, 1]\n");
+
+	  thinningRatio = value;
+	  return thinningRatio;
+   }
+
+   return GmatBase::SetRealParameter(id, value);
+}
+
+
+Real DataFile::GetRealParameter(const std::string& label) const
+{
+	return GetRealParameter(GetParameterID(label));
+}
+
+
+Real DataFile::SetRealParameter(const std::string& label, const Real value)
+{
+	return SetRealParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
 // bool SetStream(ObType *thisStream)
 //------------------------------------------------------------------------------
 /**
@@ -494,10 +720,10 @@ bool DataFile::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 bool DataFile::SetStream(ObType *thisStream)
 {
-//   #ifdef DEBUG_FILE_WRITE
+   #ifdef DEBUG_FILE_ACCESS
       MessageInterface::ShowMessage("Setting ObType to a %s object\n",
             thisStream->GetTypeName().c_str());
-//   #endif
+   #endif
 
    bool retval = false;
 
@@ -510,18 +736,21 @@ bool DataFile::SetStream(ObType *thisStream)
 }
 
 
+///// TBD: This method needs to be documented
 bool DataFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   #ifdef DEBUG_FILE_ACCESS
+      MessageInterface::ShowMessage("DataFile<'%s'>::SetRefObject: Setting object of "
+		  "type %s <%d> named '%s'\n", GetName().c_str(), obj->GetTypeName().c_str(), type,
+            obj->GetName().c_str());
+   #endif
+
    if (obj->IsOfType(Gmat::OBTYPE))
    {
       theDatastream = (ObType*)obj;
       return true;
    }
-
-   MessageInterface::ShowMessage("DataFile::SetRefObject: Setting object of "
-            "type %s <%d> named '%s'\n", obj->GetTypeName().c_str(), type,
-            obj->GetName().c_str());
 
    return GmatBase::SetRefObject(obj, type, name);
 }
@@ -542,9 +771,8 @@ bool DataFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 bool DataFile::OpenStream(bool simulate)
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage(
-            "Entered DataFile::OpenStream(%s)\n",
-            (simulate ? "true" : "false"));
+      MessageInterface::ShowMessage("Entered DataFile<%s>::OpenStream(%s)\n", 
+		  GetName().c_str(), (simulate ? "true" : "false"));
    #endif
 
    bool retval = false;
@@ -552,13 +780,38 @@ bool DataFile::OpenStream(bool simulate)
    if (theDatastream)
    {
       theDatastream->SetStreamName(streamName);
-
+	   obsType = theDatastream->GetTypeName();
+	   #ifdef DEBUG_INITIALIZATION
+		    MessageInterface::ShowMessage("DataFile::OpenStream():   obsType = '%s'\n", obsType.c_str());
+      #endif
       // todo: Currently opens either to simulate or to estimate, but not both
       // at the same time.
-      if (simulate)
-         retval = theDatastream->Open(false, true);
-      else
-         retval = theDatastream->Open(true, false);
+	   // For ramp table, it is opened for read only
+///// TBD: Determine if there is a more generic way to add this
+	   if (obsType == "GMAT_RampTable")
+	   {
+         #ifdef DEBUG_INITIALIZATION
+		      MessageInterface::ShowMessage("DataFile::OpenStream():   open ramp table '%s' for reading\n", GetName().c_str());
+         #endif
+	      retval = theDatastream->Open(true, false);
+	   }
+	   else
+	   {
+         if (simulate)
+		   {
+            #ifdef DEBUG_INITIALIZATION
+		         MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for writing\n", GetName().c_str());
+            #endif
+            retval = theDatastream->Open(false, true);
+		   }
+         else
+		   {
+            #ifdef DEBUG_INITIALIZATION
+		         MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for reading\n", GetName().c_str());
+            #endif
+            retval = theDatastream->Open(true, false);
+		   }
+	   }
    }
 
    return retval;
@@ -600,6 +853,205 @@ void DataFile::WriteMeasurement(MeasurementData* theMeas)
 }
 
 
+ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject, Integer& filterIndex)
+{
+#ifdef DEBUG_FILTER_NEW
+   MessageInterface::ShowMessage("Enter DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>).\n", GetName().c_str(), this, dataObject);
+#endif
+
+   Integer rejReason;
+
+   filterIndex = filterList.size();
+   ObservationData* obdata = dataObject;
+
+   // Run statistic reject filters when it passes accept filters
+   if (obdata)
+   {
+      for (UnsignedInt i = 0; i < filterList.size(); ++i)
+      {
+         if (filterList[i]->IsOfType("StatisticsRejectFilter"))
+         {
+            rejReason = 0;
+            obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+
+            // it is rejected when it has been rejected by any reject filter
+            if (obdata == NULL)
+            {
+               filterIndex = i;
+               break;
+            }
+         }
+      }
+   }
+
+   // Run statistic accept filters
+   if (obdata)
+   {
+      ObservationData* obdata1 = NULL;
+      ObservationData* od;
+      bool hasAcceptFilter = false;
+      for (UnsignedInt i = 0; i < filterList.size(); ++i)
+      {
+         if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
+         {
+            hasAcceptFilter = true;
+
+            rejReason = 0;
+            od = ((StatisticAcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+
+            // it is accepted when it has been accepted by any accept filter
+            if (od)
+            {
+               obdata1 = od;
+            }
+            else
+               filterIndex = i;
+         }
+      }
+
+      if (hasAcceptFilter)
+      {
+         obdata = obdata1;
+         if (obdata1)
+            filterIndex = filterList.size();
+      }
+   }
+
+   //// Increasing record counters in all accept filters
+   //for (UnsignedInt i = 0; i < filterList.size(); ++i)
+   //{
+   //   if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
+   //      ((StatisticAcceptFilter*)filterList[i])->IncreasingRecordCounter();
+   //}
+   
+#ifdef DEBUG_FILTER_NEW
+   MessageInterface::ShowMessage("Exit DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>, filterIndex = %d)  return obdata = <%p>\n", GetName().c_str(), this, dataObject, filterIndex, obdata);
+#endif
+
+   return obdata;
+}
+
+
+ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject, Integer& rejectedReason)
+{
+#ifdef DEBUG_FILTER
+   //MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringDataForOldSyntax(dataObject = <%p>, rejectedReason = %d)   enter\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+
+   ObservationData* od = dataObject;
+   rejectedReason = 0;            // 0; no reject
+
+   if (od != NULL)
+   {
+      // Get start epoch and end epoch when od != NULL
+      if (epoch1 == 0.0)
+      {
+         epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, od->epochSystem);
+         epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, od->epochSystem);
+      }
+      
+      // Data thinning filter
+      acc = acc + thinningRatio;
+      if (acc < 1.0)
+      {
+         #ifdef DEBUG_FILTER
+         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         #endif
+         rejectedReason = 1;             // rejected due to Thinning Ratio
+      }
+      else
+         acc = acc -1.0;
+      
+      // Time span filter
+      if ((od->epoch < (epoch1 - TIME_EPSILON))||(od->epoch > (epoch2 + TIME_EPSILON)))
+      {
+         #ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         #endif
+         rejectedReason = 2;            // rejected due to Time Span
+      }
+      
+      // Invalid measurement value filter
+      if (od->value.size() > 0)
+      {
+         if (od->value[0] == -1.0)      // throw away this observation data if it is invalid
+         {
+            #ifdef DEBUG_FILTER
+               MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            #endif
+            rejectedReason = 3;         // rejected due to invalid measurement value
+         }
+      }
+      
+      // Duplication or time order filter
+      if (od_old.epoch >= (od->epoch + 2.0e-12))
+      {
+         #ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         #endif
+         rejectedReason = 4;           // filter due to duplication or time order filter
+      }
+      
+      // Selected stations filter
+      bool choose = false;
+      if (selectedStationIDs.size() == 0)
+         choose = true;
+      else
+      {
+         for (int j=0; j < selectedStationIDs.size(); ++j)
+         {
+            if (selectedStationIDs[j] == od->participantIDs[0])
+            {
+               choose = true;
+               break;
+            }
+         }
+      }
+      if (choose == false)
+      {
+         #ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         #endif
+         rejectedReason = 5;          // rejected due to Selected Stations
+      }
+   }
+   
+   if (rejectedReason != 0)
+      od = NULL;
+   else
+      od_old = *od;
+
+#ifdef DEBUG_FILTER
+   if (rejectedReason != 0)
+      MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringDataForOldSyntax(dataObject = <%p>, rejectedReason = %d)   exit\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+   return od;
+}
+
+   
+ObservationData* DataFile::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
+{
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)   enter\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+   // filter data using data filters
+   ObservationData* od;
+
+   od = FilteringDataForOldSyntax(dataObject, rejectedReason);
+   if (od)
+   {
+      Integer filterIndex;
+      od = FilteringDataForNewSyntax(od, filterIndex);
+      rejectedReason = filterIndex + 6;                   // specify reject reason from filter index
+   }
+
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)   exit\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+   return od;
+}
+
+
 //------------------------------------------------------------------------------
 // MeasurementData* ReadMeasurement()
 //------------------------------------------------------------------------------
@@ -615,12 +1067,16 @@ void DataFile::WriteMeasurement(MeasurementData* theMeas)
 //------------------------------------------------------------------------------
 ObservationData* DataFile::ReadObservation()
 {
+   #ifdef DEBUG_OBSERVATION_READ
+	  MessageInterface::ShowMessage("Entered DataFile<%s>::ReadObservation()\n", GetName().c_str());
+   #endif
+
    ObservationData *theObs = NULL;
    if (theDatastream)
    {
       theObs = theDatastream->ReadObservation();
 
-      #ifdef DEBUG_OBSERVATION_READ
+      #ifdef DEBUG_OBSERVATION_DATA
          if (theObs)
          {
             MessageInterface::ShowMessage("Observation:\n");
@@ -650,7 +1106,64 @@ ObservationData* DataFile::ReadObservation()
       #endif
    }
 
+   #ifdef DEBUG_OBSERVATION_READ
+	  MessageInterface::ShowMessage("Exit DataFile::ReadObservation()\n");
+   #endif
+
    return theObs;
+}
+
+
+///// TBD: Determine if there is a more generic way to add these
+//------------------------------------------------------------------------------
+// RampTableData* ReadRampTableData()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a frequency ramp table data from a data stream so it can be processed
+ *
+ * This method is used during simualation to simulate a frequency ramp measurement.
+ *
+ * @return The frequency ramp table data from the file, or NULL if no more
+ *         ramp table data are available
+ */
+//------------------------------------------------------------------------------
+RampTableData* DataFile::ReadRampTableData()
+{
+   #ifdef DEBUG_RAMP_TABLE_READ
+	  MessageInterface::ShowMessage("Entered DataFile<%s>::ReadRampTableData()\n", GetName().c_str());
+   #endif
+
+   RampTableData *theData = NULL;
+   if (theDatastream)
+   {
+      theData = theDatastream->ReadRampTableData();
+
+      #ifdef DEBUG_RAMP_TABLE_DATA
+         if (theData)
+         {
+            MessageInterface::ShowMessage("Ramp table data:\n");
+            MessageInterface::ShowMessage("   Epoch:          %.12lf\n",
+                  theData->epoch);
+            MessageInterface::ShowMessage("   Type:           %s\n",
+                  theData->typeName.c_str());
+            MessageInterface::ShowMessage("   TypeID:         %d\n",
+                  theData->type);
+            for (UnsignedInt i = 0; i < theData->participantIDs.size(); ++i)
+               MessageInterface::ShowMessage("   Participant %d: %s\n", i,
+                     theData->participantIDs[i].c_str());
+            MessageInterface::ShowMessage("ramp type = %d     ramp frequency = %.12le    ramp rate = %.12le\n",
+				theData->rampType, theData->rampFrequency, theData->rampRate);
+         }
+         else
+            MessageInterface::ShowMessage("*** Reached End of ramp table data\n");
+      #endif
+   }
+
+   #ifdef DEBUG_RAMP_TABLE_READ
+	  MessageInterface::ShowMessage("Exit DataFile::ReadRampTableData()\n");
+   #endif
+
+   return theData;
 }
 
 
@@ -665,10 +1178,81 @@ ObservationData* DataFile::ReadObservation()
 //------------------------------------------------------------------------------
 bool DataFile::CloseStream()
 {
+   #ifdef DEBUG_FILE_ACCESS
+	  MessageInterface::ShowMessage("Entered DataFile::CloseStream()\n");
+   #endif
+
    bool retval = false;
 
    if (theDatastream)
       retval = theDatastream->Close();
 
+   #ifdef DEBUG_FILE_ACCESS
+	  MessageInterface::ShowMessage("Exit DataFile::CloseStream()\n");
+   #endif
+
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Real ConvertToRealEpoch(const std::string &theEpoch,
+//                         const std::string &theFormat)
+//------------------------------------------------------------------------------
+/**
+ * Converts an epoch string is a specified format into
+ *
+ * @param theEpoch The input epoch
+ * @param theFormat The format of the input epoch
+ *
+ * @return The converted epoch
+ */
+//------------------------------------------------------------------------------
+Real DataFile::ConvertToRealEpoch(const std::string &theEpoch,
+                                   const std::string &theFormat)
+{
+   Real fromMjd = -999.999;
+   Real retval = -999.999;
+   std::string outStr;
+
+   TimeConverterUtil::Convert(theFormat, fromMjd, theEpoch, "A1ModJulian",
+         retval, outStr);
+
+   if (retval == -999.999)
+      throw MeasurementException("Error converting the time string \"" + theEpoch +
+            "\"; please check the format for the input string.");
+   return retval;
+}
+
+
+//-------------------------------------------------------------------------------
+// bool SetDataFilter(DataFilter *filter)
+//-------------------------------------------------------------------------------
+/**
+* This function is used to set a data filter for DataFile object. It adds filter
+* to it's data filter list. 
+*/
+//------------------------------------------------------------------------------
+bool DataFile::SetDataFilter(DataFilter *filter)
+{
+   bool found = false;
+   for (UnsignedInt i = 0; i < filterList.size(); ++i)
+   {
+      if (filterList[i]->GetName() == filter->GetName())
+      {
+         found = true;
+         break;
+      }
+   }
+
+   if (!found)
+      filterList.push_back(filter);
+
+   return true;
+}
+
+
+std::vector<DataFilter*>& DataFile::GetFilterList()
+{
+   return filterList;
 }

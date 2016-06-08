@@ -38,6 +38,9 @@
 #include "Rmatrix33.hpp"
 #include "Rvector3.hpp"
 
+// Forward reference
+class SpacePoint;
+
 /**
  * A structure used to store data calculated in events that is used when
  * computing measurements and their derivatives.
@@ -57,6 +60,10 @@ public:
    Integer participantIndex;
    /// Flag indicating is the participant is fixed during event calculation
    bool fixedState;
+
+   /// Inertial coordinate system used for this event data:
+   // the origin of the inertial coordinate system
+   SpacePoint* cs_origin;
 
    /// Epoch associated with the data
    GmatEpoch epoch;

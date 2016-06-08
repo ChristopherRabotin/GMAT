@@ -62,8 +62,7 @@ TriggerManager& TriggerManager::operator=(const TriggerManager& tm)
 }
 
 
-const Integer TriggerManager::GetTriggerType()
-{
+Integer TriggerManager::GetTriggerType(){
    return triggerType;
 }
 

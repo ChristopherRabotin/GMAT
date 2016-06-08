@@ -185,6 +185,7 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    helpMenu->Append(MENU_HELP_TUTORIAL, wxT("Tutorials"), wxT(""));
    helpMenu->Append(MENU_HELP_FORUM, wxT("Forum"), wxT(""));
    helpMenu->AppendSeparator();
+   helpMenu->Append(MENU_HELP_UPDATE, wxT("Check for Updates..."), wxT(""));
    helpMenu->Append(MENU_HELP_ISSUE, wxT("Report an Issue"), wxT(""));
    helpMenu->Append(MENU_HELP_FEEDBACK, wxT("Provide Feedback"), wxT(""));
    helpMenu->AppendSeparator();

@@ -44,6 +44,7 @@
 //#define DEBUG_EDITORPANEL_CREATE
 //#define DEBUG_EDITORPANEL_LOAD
 //#define DEBUG_EDITORPANEL_CLOSE
+//#define DEBUG_EDITORPANEL_SAVE
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -244,6 +245,12 @@ void EditorPanel::LoadData()
  */
 void EditorPanel::SaveData()
 {
+   #ifdef DEBUG_EDITORPANEL_SAVE
+   MessageInterface::ShowMessage
+      ("EditorPanel::SaveData() entered\n   mScriptFilename='%s'\n   "
+       "mFilename='%s'\n", mScriptFilename.WX_TO_C_STRING, mFilename.WX_TO_C_STRING);
+   #endif
+   
    GmatAppData *gmatAppData = GmatAppData::Instance();
 
    if (mScriptFilename != mFilename)
@@ -256,8 +263,16 @@ void EditorPanel::SaveData()
       mScriptFilename = mFilename;
    }
 
+   #ifdef DEBUG_EDITORPANEL_SAVE
+   MessageInterface::ShowMessage("   Calling mEditor->SaveFile(mScriptFilename)\n");
+   #endif
+   
    mEditor->SaveFile(mScriptFilename);
    gmatAppData->GetMainFrame()->SetActiveChildDirty(false);
+   
+   #ifdef DEBUG_EDITORPANEL_SAVE
+   MessageInterface::ShowMessage("EditorPanel::SaveData() leaving\n");
+   #endif
 }
 
 

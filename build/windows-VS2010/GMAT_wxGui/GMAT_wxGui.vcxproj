@@ -260,7 +260,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;WXUSINGDLL;__USE_STC_EDITOR__;__DISABLE_EMAIL__;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -295,6 +295,7 @@
     <ClCompile Include="..\..\..\src\gui\app\GmatToolBar.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GmatTreeItemData.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiInterpreter.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GuiListenerManager.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiMessageReceiver.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\GuiPlotReceiver.cpp" />
     <ClCompile Include="..\..\..\src\gui\app\InteractiveMatlabDialog.cpp">
@@ -334,6 +335,7 @@
     <ClCompile Include="..\..\..\src\gui\coordsystem\CoordPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\forcemodel\DragInputsDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupPanel.cpp" />
@@ -377,7 +379,10 @@
     <ClCompile Include="..\..\..\src\gui\rendering\ModelManager.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\ModelObject.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\Rendering.cpp" />
-    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\Structure.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\StructureReader3ds.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\SurfaceBase.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\BarycenterPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.cpp" />
@@ -424,6 +429,7 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiGlPlotData.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiTsPlotData.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\OpenGlOptionDialog.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -502,6 +508,7 @@
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GmatTreeItemData.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiInterpreter.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GuiListenerManager.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiMessageReceiver.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\GuiPlotReceiver.hpp" />
     <ClInclude Include="..\..\..\src\gui\app\InteractiveMatlabDialog.hpp">
@@ -541,6 +548,7 @@
     <ClInclude Include="..\..\..\src\gui\coordsystem\CoordPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\forcemodel\DragInputsDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupPanel.hpp" />
@@ -587,7 +595,10 @@
     <ClInclude Include="..\..\..\src\gui\rendering\ModelManager.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\ModelObject.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\Rendering.hpp" />
-    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\Structure.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\StructureReader3ds.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\SurfaceBase.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\BarycenterPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.hpp" />
@@ -634,6 +645,7 @@
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiGlPlotData.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiTsPlotData.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\OpenGlOptionDialog.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

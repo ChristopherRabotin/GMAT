@@ -1163,6 +1163,250 @@ GmatBase* ThrustDirections::Clone(void) const
    return new ThrustDirections(*this);
 }
 
+
+//==============================================================================
+//                                     Thrust
+//==============================================================================
+/**
+ * Implements Thrust class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Thrust(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+Thrust::Thrust(const std::string &name, GmatBase *obj)
+   : HardwareReal(name, "Thrust", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
+                  "Thrust", "")
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::CHESTNUT;
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// Thrust(const Thrust &copy)
+//------------------------------------------------------------------------------
+Thrust::Thrust(const Thrust &copy)
+   : HardwareReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// Thrust& operator=(const Thrust &right)
+//------------------------------------------------------------------------------
+Thrust& Thrust::operator=(const Thrust &right)
+{
+   if (this != &right)
+      HardwareReal::operator=(right);
+   
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~Thrust()
+//------------------------------------------------------------------------------
+Thrust::~Thrust()
+{
+}
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool Thrust::Evaluate()
+{
+   mRealValue = SpacecraftData::GetReal(THRUST);
+   
+   if (mRealValue == GmatBase::REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void Thrust::SetReal(Real val)
+{
+   SpacecraftData::SetReal(THRUST, val);
+   RealVar::SetReal(val);
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* Thrust::Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* Thrust::Clone(void) const
+{
+   return new Thrust(*this);
+}
+
+
+//==============================================================================
+//                                     Isp
+//==============================================================================
+/**
+ * Implements Isp class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Isp(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+Isp::Isp(const std::string &name, GmatBase *obj)
+   : HardwareReal(name, "Isp", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
+                  "Isp", "")
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::CHESTNUT;
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// Isp(const Isp &copy)
+//------------------------------------------------------------------------------
+Isp::Isp(const Isp &copy)
+   : HardwareReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// Isp& operator=(const Isp &right)
+//------------------------------------------------------------------------------
+Isp& Isp::operator=(const Isp &right)
+{
+   if (this != &right)
+      HardwareReal::operator=(right);
+   
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~Isp()
+//------------------------------------------------------------------------------
+Isp::~Isp()
+{
+}
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool Isp::Evaluate()
+{
+   mRealValue = SpacecraftData::GetReal(ISP);
+   
+   if (mRealValue == GmatBase::REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void Isp::SetReal(Real val)
+{
+   SpacecraftData::SetReal(ISP, val);
+   RealVar::SetReal(val);
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* Isp::Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* Isp::Clone(void) const
+{
+   return new Isp(*this);
+}
+
+
+//==============================================================================
+//                                     MassFlowRate
+//==============================================================================
+/**
+ * Implements MassFlowRate class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// MassFlowRate(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+MassFlowRate::MassFlowRate(const std::string &name, GmatBase *obj)
+   : HardwareReal(name, "MassFlowRate", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
+                  "MassFlowRate", "")
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::CHESTNUT;
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// MassFlowRate(const MassFlowRate &copy)
+//------------------------------------------------------------------------------
+MassFlowRate::MassFlowRate(const MassFlowRate &copy)
+   : HardwareReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// MassFlowRate& operator=(const MassFlowRate &right)
+//------------------------------------------------------------------------------
+MassFlowRate& MassFlowRate::operator=(const MassFlowRate &right)
+{
+   if (this != &right)
+      HardwareReal::operator=(right);
+   
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~MassFlowRate()
+//------------------------------------------------------------------------------
+MassFlowRate::~MassFlowRate()
+{
+}
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool MassFlowRate::Evaluate()
+{
+   mRealValue = SpacecraftData::GetReal(MASS_FLOW_RATE);
+   
+   if (mRealValue == GmatBase::REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void MassFlowRate::SetReal(Real val)
+{
+   SpacecraftData::SetReal(ISP, val);
+   RealVar::SetReal(val);
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* MassFlowRate::Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* MassFlowRate::Clone(void) const
+{
+   return new MassFlowRate(*this);
+}
+
+
 //==============================================================================
 //                              TotalPowerAvailable
 //==============================================================================
@@ -1334,6 +1578,7 @@ GmatBase* RequiredBusPower::Clone() const
 {
    return new RequiredBusPower(*this);
 }
+
 
 //==============================================================================
 //                              ThrustPowerAvailable

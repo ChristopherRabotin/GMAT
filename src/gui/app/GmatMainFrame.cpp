@@ -118,6 +118,7 @@
 #include "CompareFilesDialog.hpp"
 #include "TextEphemFileDialog.hpp"
 #include "AboutDialog.hpp"
+#include "FileUpdateDialog.hpp"
 #include "SetPathDialog.hpp"
 #include "WelcomePanel.hpp"
 // email
@@ -230,6 +231,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU (MENU_HELP_TUTORIAL, GmatMainFrame::OnHelpTutorial)
    EVT_MENU (MENU_HELP_FORUM, GmatMainFrame::OnHelpForum)
    EVT_MENU (MENU_HELP_ISSUE, GmatMainFrame::OnHelpIssue)
+   EVT_MENU (MENU_HELP_UPDATE, GmatMainFrame::OnHelpUpdate)
    EVT_MENU (MENU_HELP_FEEDBACK, GmatMainFrame::OnHelpFeedback)
 
    EVT_MENU (MENU_FILE_NEW_SCRIPT, GmatMainFrame::OnNewScript)
@@ -869,7 +871,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    {
       // Create panel if Report or Compare Report or Event Report
       if (itemType == GmatTree::OUTPUT_REPORT ||
-          itemType == GmatTree::OUTPUT_CCSDS_OEM_FILE ||
+          itemType == GmatTree::OUTPUT_TEXT_EPHEM_FILE ||
           itemType == GmatTree::OUTPUT_COMPARE_REPORT ||
           itemType == GmatTree::OUTPUT_EVENT_REPORT)
          newChild = CreateNewOutput(item->GetTitle(), item->GetName(), itemType);
@@ -1637,18 +1639,18 @@ void GmatMainFrame::RemoveOutput(const wxString &name)
 	  if (GmatAppData::Instance()->GetOutputTree() != NULL)
 		GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_REPORT, name, true);
    }
-   else if (IsChildOpen(name, GmatTree::OUTPUT_CCSDS_OEM_FILE, false))
+   else if (IsChildOpen(name, GmatTree::OUTPUT_TEXT_EPHEM_FILE, false))
    {
-      RemoveChild(name, GmatTree::OUTPUT_CCSDS_OEM_FILE);
+      RemoveChild(name, GmatTree::OUTPUT_TEXT_EPHEM_FILE);
 	  if (GmatAppData::Instance()->GetOutputTree() != NULL)
-		GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_CCSDS_OEM_FILE, name, true);
+		GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_TEXT_EPHEM_FILE, name, true);
    }
    else if (IsChildOpen(name, GmatTree::OUTPUT_EVENT_REPORT, false))
       RemoveChild(name, GmatTree::OUTPUT_EVENT_REPORT);
    else if (GmatAppData::Instance()->GetOutputTree() != NULL)
    {
       GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_REPORT, name, true);
-      GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_CCSDS_OEM_FILE, name, true);
+      GmatAppData::Instance()->GetOutputTree()->RemoveItem(GmatTree::OUTPUT_TEXT_EPHEM_FILE, name, true);
    }
    
    #ifdef DEBUG_REMOVE_CHILD
@@ -4006,6 +4008,23 @@ void GmatMainFrame::OnHelpIssue(wxCommandEvent& WXUNUSED(event))
 
 
 //------------------------------------------------------------------------------
+// void OnHelpUpdate(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles check for file updates command from the help menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnHelpUpdate(wxCommandEvent& WXUNUSED(event))
+{
+   FileUpdateDialog dlg(this, -1, "Data File Update Utility");
+   if (!dlg.IsEmpty())
+      dlg.ShowModal();
+}
+
+
+//------------------------------------------------------------------------------
 // void OnHelpFeedback(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
@@ -4528,7 +4547,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
    switch (itemType)
    {
    case GmatTree::OUTPUT_REPORT:
-   case GmatTree::OUTPUT_CCSDS_OEM_FILE:
+   case GmatTree::OUTPUT_TEXT_EPHEM_FILE:
       {
          Integer x = 0.0;
          Integer y = 0.0;
@@ -6367,6 +6386,7 @@ void GmatMainFrame::CompareFiles()
    
    wxString baseDir = dlg.GetBaseDirectory();
    wxArrayString compDirs = dlg.GetCompareDirectories();
+   bool skipBlankLines = dlg.SkipBlankLines();
    bool saveCompareResults = dlg.SaveCompareResults();
    wxString saveFileName = dlg.GetSaveFilename();
    wxString basePrefix = dlg.GetBaseString();
@@ -6502,7 +6522,7 @@ void GmatMainFrame::CompareFiles()
          output = GmatFileUtil::CompareTextLines
             (numDirsToCompare, baseFileName.c_str(), filename1.c_str(),
              filename2.c_str(), filename3.c_str(), file1DiffCount,
-             file2DiffCount, file3DiffCount);
+             file2DiffCount, file3DiffCount, skipBlankLines);
       }
       else if (compareOption == 2)
       {

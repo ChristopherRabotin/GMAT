@@ -785,6 +785,12 @@ bool ChemicalThruster::Initialize()
 //---------------------------------------------------------------------------
 bool ChemicalThruster::CalculateThrustAndIsp()
 {
+   #ifdef DEBUG_THRUST_ISP
+   MessageInterface::ShowMessage
+      ("ChemicalThruster::CalculateThrustAndIsp() <%p>'%s' entered, thrusterFiring=%d, "
+       "constantExpressions=%d\n", this, instanceName.c_str(), thrusterFiring, constantExpressions);
+   #endif
+   
    if (!thrusterFiring)
    {
       thrust  = 0.0;
@@ -801,9 +807,26 @@ bool ChemicalThruster::CalculateThrustAndIsp()
       Integer tempID = tanks[0]->GetParameterID("Temperature");
       Integer refTempID = tanks[0]->GetParameterID("RefTemperature");
 
-      pressure = tanks[0]->GetRealParameter(pressID);
-      temperatureRatio = tanks[0]->GetRealParameter(tempID) /
-                         tanks[0]->GetRealParameter(refTempID);
+//      pressure = tanks[0]->GetRealParameter(pressID);
+//      temperatureRatio = tanks[0]->GetRealParameter(tempID) /
+//                         tanks[0]->GetRealParameter(refTempID);
+
+      // Build the weighted temperature and pressure
+      Real mixTotal = 0.0;
+      Real pressureSum = 0.0;
+      Real tempSum = 0.0;
+      Real refTempSum = 0.0;
+      for (UnsignedInt i = 0; i < mixRatio.GetSize(); ++i)
+      {
+         mixTotal += mixRatio[i];
+         pressureSum += tanks[i]->GetRealParameter(pressID) * mixRatio[i];
+         tempSum += tanks[i]->GetRealParameter(tempID) * mixRatio[i];
+         refTempSum += tanks[i]->GetRealParameter(refTempID) * mixRatio[i];
+      }
+      pressure = pressureSum / mixTotal;
+
+      // Note: numerator and denominator both divide by mixTotal, so dividends cancel
+      temperatureRatio = tempSum / refTempSum;
 
       thrust = cCoefficients[2];
       impulse = kCoefficients[2];
@@ -842,7 +865,12 @@ bool ChemicalThruster::CalculateThrustAndIsp()
       thrust  += cCoefficients[0] + cCoefficients[1] * pressure;
       impulse += kCoefficients[0] + kCoefficients[1] * pressure;
    }
-
+   
+   #ifdef DEBUG_THRUST_ISP
+   MessageInterface::ShowMessage
+      ("ChemicalThruster::CalculateThrustAndIsp() <%p>'%s' leaving, thrust=%.12f, "
+       "impulse=%.12f\n", this, instanceName.c_str(), thrust, impulse);
+   #endif
    return true;
 }
 

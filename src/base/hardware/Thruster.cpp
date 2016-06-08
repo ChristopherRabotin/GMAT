@@ -76,7 +76,11 @@ Thruster::PARAMETER_TEXT[ThrusterParamCount - HardwareParamCount] =
    "ThrustScaleFactor",
    "DecrementMass",
    "Tank",
+   "MixRatio",
    "GravitationalAccel",
+   "Thrust",
+   "Isp",
+   "MassFlowRate",
 };
 
 /// Types of the parameters used by thrusters.
@@ -91,7 +95,11 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
    Gmat::REAL_TYPE,        // "ThrustScaleFactor"
    Gmat::BOOLEAN_TYPE,     // "DecrementMass"
    Gmat::OBJECTARRAY_TYPE, // "Tank"
+   Gmat::RVECTOR_TYPE,     // "MixRatio"
    Gmat::REAL_TYPE,        // "GravitationalAccel"
+   Gmat::REAL_TYPE,        // "Thrust"
+   Gmat::REAL_TYPE,        // "Isp"
+   Gmat::REAL_TYPE,        // "MassFlowRate"
 };
 
 
@@ -166,6 +174,9 @@ Thruster::Thruster(const std::string &typeStr, const std::string &nomme) :
    
    for (Integer i=DUTY_CYCLE; i < ThrusterParamCount; i++)
       parameterWriteOrder.push_back(i);
+
+   // Initialize mix ratio for no tanks
+   mixRatio.SetSize(0);
 }
 
 
@@ -235,7 +246,8 @@ Thruster::Thruster(const Thruster& th) :
    usingLocalCoordSys   (th.usingLocalCoordSys),
    isMJ2000EqAxes       (th.isMJ2000EqAxes),
    isSpacecraftBodyAxes (th.isSpacecraftBodyAxes),
-   tankNames            (th.tankNames)
+   tankNames            (th.tankNames),
+   mixRatio             (th.mixRatio)
 {
    #ifdef DEBUG_THRUSTER_CONSTRUCTOR
    MessageInterface::ShowMessage
@@ -344,6 +356,9 @@ Thruster& Thruster::operator=(const Thruster& th)
    
    localAxesLabels     = th.localAxesLabels;
    tankNames           = th.tankNames;
+
+   mixRatio.SetSize(th.mixRatio.GetSize());
+   mixRatio            = th.mixRatio;
    
    // copy tanks
    tanks               = th.tanks;
@@ -487,6 +502,9 @@ bool Thruster::IsParameterReadOnly(const Integer id) const
       if (coordSystemName != "Local")
          return true;
    
+   if (id == THRUST || id == ISP || id == MASS_FLOW_RATE)
+      return true;
+   
    return Hardware::IsParameterReadOnly(id);
 }
 
@@ -542,7 +560,13 @@ Real Thruster::GetRealParameter(const Integer id) const
          return thrustScaleFactor;
       case GRAVITATIONAL_ACCELERATION:
          return gravityAccel;
-
+      case THRUST:
+         return thrust;
+      case ISP:
+         return impulse;
+      case MASS_FLOW_RATE:
+         return mDot;
+      
       default:
          break;   // Default just drops through
    }
@@ -698,23 +722,13 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value)
          return true;
       }
    case TANK:
-      if ((tankNames.size() > 0) && (value != tankNames[0]))
-      {
-         std::string errmsg;
-         errmsg =  "The value of \"";
-         errmsg += value;
-         errmsg += "\" on Thruster \"";
-         errmsg += instanceName;
-         errmsg += "\" is not an allowed value.  GMAT does not currently "
-               "support more than one tank per thruster; the thruster is "
-               "already associated with tank \"";
-         errmsg += tankNames[0];
-         errmsg += "\".";
-         throw HardwareException(errmsg);
-      }
       // if not the same name push back
       if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end())
          tankNames.push_back(value);
+//      else
+//         throw HardwareException("The same tank cannot be listed twice for " +
+//                     instanceName + "; " + value + " has already been assigned "
+//                     "to the thruster");
       return true;
    default:
       return Hardware::SetStringParameter(id, value);
@@ -764,17 +778,6 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
    {
    case TANK:
       {
-         if (index > 0)
-         {
-            std::string errmsg;
-            errmsg =  "The value of \"";
-            errmsg += value;
-            errmsg += "\" on Thruster \"";
-            errmsg += instanceName;
-            errmsg += "\" is not an allowed value.  GMAT does not currently "
-                  "support more than one tank per thruster";
-            throw HardwareException(errmsg);
-         }
 
          if (index < (Integer)tankNames.size())
             tankNames[index] = value;
@@ -782,6 +785,23 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
             // Only add the tank if it is not in the list already
             if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end()) 
                tankNames.push_back(value);
+            else
+               throw HardwareException("The same tank cannot be listed "
+                     "multiple times for " + instanceName + "; " + value +
+                     " has been assigned more than once to the thruster");
+
+         // Make certain there are no duplicate names
+         for (Integer i = 0; i < tankNames.size(); ++i)
+         {
+            std::string testName = tankNames[i];
+            for (Integer j = i+1; j < tankNames.size(); ++j)
+            {
+               if (tankNames[j] == testName)
+                  throw HardwareException("The same tank cannot be listed "
+                        "twice for " + instanceName + ", but " + testName +
+                        " is assigned more than one time to the thruster");
+            }
+         }
          
          return true;
       }
@@ -868,6 +888,190 @@ bool Thruster::SetBooleanParameter(const Integer id, const bool value)
    }
    
    return Hardware::SetBooleanParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves real valued parameter data from vector containers
+ *
+ * @param id The parameter ID
+ * @param index The element index in the vector
+ *
+ * @return The value of the vector element
+ */
+//------------------------------------------------------------------------------
+Real Thruster::GetRealParameter(const Integer id, const Integer index) const
+{
+   if (id == MIXRATIO)
+   {
+      if ((index >= 0) && (index < mixRatio.GetSize()))
+         return mixRatio.GetElement(index);
+      else
+         throw HardwareException("Index out of bounds getting the mix ratio on " +
+               instanceName);
+   }
+   return Hardware::GetRealParameter(id, index);
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value,
+//                       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Set real valued parameter data in vector containers
+ *
+ * @param id The parameter ID
+ * @param value The new parameter element value
+ * @param index The element index in the vector
+ *
+ * @return The value after the setting has occurred
+ */
+//------------------------------------------------------------------------------
+Real Thruster::SetRealParameter(const Integer id, const Real value,
+                                const Integer index)
+{
+   if (id == MIXRATIO)
+   {
+      Integer size = 0;
+      if (mixRatio.IsSized())
+         size = mixRatio.GetSize();
+
+      if ((index < 0) || (index > mixRatio.GetSize()))
+         throw HardwareException("Index out of bounds setting the mix ratio on " +
+               instanceName);
+
+      if (index > tankNames.size() - 1)
+         throw HardwareException("Index out of bounds setting the mix ratio on " +
+               instanceName + "; there are not enough tanks to support the number "
+                     "of indices in the ratio");
+
+      if (value <= 0.0)
+      {
+         std::stringstream msg;
+         msg << "The value " << value << " for field \"MixRatio\" on object \""
+             << instanceName <<  "\" is not an allowed value.\n"
+             << "The allowed values are: [Real number > 0.0]";
+         throw HardwareException(msg.str());
+      }
+
+      if (index == mixRatio.GetSize())
+      {
+         // Rvector deletes array on resize; gymnastics required to compensate
+         Rvector temp(mixRatio);
+         mixRatio.SetSize(index+1);
+         for (Integer i = 0; i < temp.GetSize(); ++i)
+            mixRatio[i] = temp[i];
+      }
+
+      mixRatio[index] = value;
+      return mixRatio[index];
+   }
+
+   return Hardware::SetRealParameter(id, value, index);
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves real valued parameter data from vector containers
+ *
+ * @param label The parameter script string
+ * @param index The element index in the vector
+ *
+ * @return The value of th4e vector element
+ */
+//------------------------------------------------------------------------------
+Real Thruster::GetRealParameter(const std::string &label, const Integer index) const
+{
+   return GetRealParameter(GetParameterID(label), index);
+}
+
+Real Thruster::SetRealParameter(const std::string &label, const Real value,
+                                const Integer index)
+{
+   return SetRealParameter(GetParameterID(label), value, index);
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& GetRvectorParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves real valued vector of data
+ *
+ * @param id The parameter ID
+ *
+ * @return The data vector
+ */
+//------------------------------------------------------------------------------
+const Rvector& Thruster::GetRvectorParameter(const Integer id) const
+{
+   if (id == MIXRATIO)
+   {
+      return mixRatio;
+   }
+   return Hardware::GetRvectorParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const Integer id, const Rvector &value)
+//------------------------------------------------------------------------------
+/**
+ * Set real valued parameter data in vector containers
+ *
+ * @param id The parameter ID
+ * @param value The new parameter vector of values
+ *
+ * @return The vector after the setting has occurred
+ */
+//------------------------------------------------------------------------------
+const Rvector& Thruster::SetRvectorParameter(const Integer id, const Rvector &value)
+{
+   if (id == MIXRATIO)
+   {
+      if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+         mixRatio.SetSize(tankNames.size());
+      mixRatio = value;
+      return mixRatio;
+   }
+   return Hardware::SetRvectorParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& GetRvectorParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves real valued vector of data
+ *
+ * @param label The script string for the parameter
+ *
+ * @return The data vector
+ */
+//------------------------------------------------------------------------------
+const Rvector& Thruster::GetRvectorParameter(const std::string &label) const
+{
+   return GetRvectorParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const std::string &label,
+//                                    const Rvector &value)
+//------------------------------------------------------------------------------
+/**
+ * Set real valued parameter data in vector containers
+ *
+ * @param label The script string for the parameter
+ * @param value The new parameter vector of values
+ *
+ * @return The vector after the setting has occurred
+ */
+//------------------------------------------------------------------------------
+const Rvector& Thruster::SetRvectorParameter(const std::string &label, const Rvector &value)
+{
+   return SetRvectorParameter(GetParameterID(label), value);
 }
 
 
@@ -1129,7 +1333,6 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       return SetSpacecraft((Spacecraft*)obj);
    }
    
-//   if (obj->GetTypeName() == "FuelTank")
    if (obj->IsOfType("FuelTank"))
    {
       #ifdef DEBUG_THRUSTER_REF_OBJ
@@ -1137,20 +1340,27 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                        name.c_str(), instanceName.c_str());
       #endif
       
-      if (tanks.empty())
+//      if (tanks.empty())
+//      {
+//         tanks.push_back((FuelTank*)obj);
+//         #ifdef DEBUG_THRUSTER_REF_OBJ
+//         MessageInterface::ShowMessage
+//            ("   <%p>'%s' added to tank list, now size is %d\n",
+//             obj, obj->GetName().c_str(), tanks.size());
+//         #endif
+//      }
+//      else
+      if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
       {
-         tanks.push_back((FuelTank*)obj);
          #ifdef DEBUG_THRUSTER_REF_OBJ
          MessageInterface::ShowMessage
-            ("   <%p>'%s' added to tank list, now size is %d\n",
-             obj, obj->GetName().c_str(), tanks.size());
+            ("   ------ the tank pointer of name %s was NOT found in the array (of size %d)\n",
+                  name.c_str(), (Integer) tanks.size());
          #endif
-      }
-      else if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
-      {
          // Replace old tank with new one. We don't want to delete the
          // old tank here since Spacecraft owns it (tank is not cloned in the
          // copy constructor)
+         bool replaced = false;
          for (UnsignedInt i=0; i<tanks.size(); i++)
          {
             if (tanks[i]->GetName() == name)
@@ -1161,8 +1371,11 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                    obj->GetName().c_str(), tanks[i], tanks[i]->GetName().c_str());
                #endif
                tanks[i] = (FuelTank*)obj;
+               replaced = true;
             }
          }
+         if (!replaced)
+            tanks.push_back((FuelTank*)obj);
       }
       
       #ifdef DEBUG_THRUSTER
@@ -1222,9 +1435,6 @@ ObjectArray& Thruster::GetRefObjectArray(const Gmat::ObjectType type)
 //---------------------------------------------------------------------------
 ObjectArray& Thruster::GetRefObjectArray(const std::string& typeString)
 {
-//   if ((typeString == "FuelTank") || (typeString == "Tanks"))
-//      return tanks;
-
    return Hardware::GetRefObjectArray(typeString);
 }
 
@@ -1247,13 +1457,11 @@ ObjectArray& Thruster::GetRefObjectArray(const std::string& typeString)
 bool Thruster::TakeAction(const std::string &action,
                           const std::string &actionData)
 {
-   if (action == "ClearTanks") {
-//      if (thrusterFiring)
-//         throw HardwareException("Thruster " + instanceName +
-//            " is attempting to remove fuel tank access during a finite burn");
-
+   if (action == "ClearTanks")
+   {
       tankNames.clear();
       tanks.clear();
+      mixRatio.SetSize(0);
 
       return true;
    }
@@ -1321,6 +1529,17 @@ bool Thruster::Initialize()
    if (!retval)
       return false;
    
+   if (mixRatio.GetSize() == 0)
+   {
+      mixRatio.SetSize(tankNames.size());
+      for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+         mixRatio[i] = 1.0;
+   }
+   else if (mixRatio.GetSize() != tankNames.size())
+      throw HardwareException("Error in configuring tanks: the mix ratio is "
+            "sized differently from the number of tanks used by thruster " +
+            instanceName);
+
    if (!usingLocalCoordSys)
    {
       if (coordSystem == NULL)

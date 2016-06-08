@@ -35,20 +35,20 @@
 class ESTIMATION_API Signal
 {
 public:
-	Signal();
-	virtual ~Signal();
+   Signal();
+   virtual ~Signal();
    Signal(const Signal& sig);
    Signal& operator=(const Signal& sig);
 
 
-	void SetEpoch(GmatEpoch ep);
-	GmatEpoch GetEpoch();
-	Real GetValue();
-	bool SetValue(Real v);
+   void SetEpoch(GmatEpoch ep);
+   GmatEpoch GetEpoch();
+   Real GetValue();
+   bool SetValue(Real v);
 
 private:
-	GmatEpoch epoch;
-	Real value;
+   GmatEpoch epoch;
+   Real value;
 };
 
 #endif /* Signal_hpp */

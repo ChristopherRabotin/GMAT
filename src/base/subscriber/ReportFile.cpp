@@ -594,7 +594,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
    {
       if (dstream.is_open())
          dstream.close();
-   }
+      }
    
    #if DBGLVL_WRITE_DATA > 0
    MessageInterface::ShowMessage("ReportFile::WriteData() returning true\n");
@@ -633,8 +633,20 @@ bool ReportFile::Initialize()
    // Use member data fullPathFileName (LOJ: 2014.06.19)
    //if (GmatFileUtil::DoesFileExist(GetFullPathFileName()))
 	//   remove(GetFullPathFileName().c_str());
-   if (GmatFileUtil::DoesFileExist(fullPathFileName))
-	   remove(fullPathFileName.c_str());
+
+   // Only do this if the file is not already in use, so that it works
+   // correctly in functions on Mac and Linux
+   if (!dstream.is_open())
+   {
+      if (GmatFileUtil::DoesFileExist(fullPathFileName))
+      {
+         #ifdef DEBUG_REPORTFILE_INIT
+            MessageInterface::ShowMessage("Removing the existing \"%s\" file\n",
+                  fullPathFileName.c_str());
+         #endif
+         remove(fullPathFileName.c_str());
+      }
+   }
    
    // Check if there are parameters selected for report
    if (active)
@@ -1524,7 +1536,7 @@ bool ReportFile::OpenReportFile()
    #endif
    
    if (dstream.is_open())
-     dstream.close();
+      dstream.close();
    
    dstream.open(fullPathFileName.c_str());
    if (!dstream.is_open())

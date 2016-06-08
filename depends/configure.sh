@@ -13,6 +13,7 @@
 # Set defaults
 wx_build=true 
 wx_version=3.0.2
+osx_min_version=10.10
 
 # Get path to gmat (one folder above this script)
 BASEDIR=$( dirname "${BASH_SOURCE[0]}" ) # Path to this script
@@ -106,8 +107,10 @@ function download_depends() {
         	if [ $mac == true ]
         	then
 		  cspice_type=MacIntel_OSX_AppleC
+		  export OSXVERSION="-mmacosx-version-min=$osx_min_version"
         	else 
 		  cspice_type=PC_Linux_GCC
+      export OSXVERSION=""
         	fi
 	
 		# Download and extract Spice (32/64-bit)
@@ -135,12 +138,12 @@ function download_depends() {
 		fi
 
 		# Compile debug CSPICE with integer uiolen [GMT-5044]
-		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi -g -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
+		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXVERSION -g -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 		./mkprodct.csh
 		mv ../../lib/cspice.a ../../lib/cspiced.a
 
 		# Compile release CSPICE with integer uiolen [GMT-5044]
-		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
+		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXVERSION -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 		./mkprodct.csh
 	fi	
 
@@ -156,7 +159,7 @@ function download_depends() {
 		# Checkout wxWidgets source
 		wx_version_download=`echo $wx_version | sed 's/\./_/g'`
 		echo "Downloading wxWidgets $wx_version..."
-		curl -Lk https://github.com/wxWidgets/wxWidgets/archive/WX_$wx_version_download.tar.gz > wxWidgets.tar.gz
+		curl -Lk https://github.com/wxWidgets/wxWidgets/archive/v$wx_version.tar.gz > wxWidgets.tar.gz
 		echo "Extracting wxWidgets $wx_version..."
 		gzip -d wxWidgets.tar.gz
 		mkdir -p wxWidgets-$wx_version
@@ -250,7 +253,7 @@ function build_wxWidgets() {
 
 	  if [ $mac == true ]
 	  then
-	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=10.8
+	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=$osx_min_version
 	    ncores=$(sysctl hw.ncpu | awk '{print $2}')
 	  else
 	    # Configure wxWidgets build

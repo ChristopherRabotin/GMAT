@@ -479,6 +479,7 @@ OBJECTS = \
     solarsys/ExponentialAtmosphere.o \
     solarsys/JacchiaRobertsAtmosphere.o \
     solarsys/LibrationPoint.o \
+    solarsys/MediaCorrectionInterface.o \
     solarsys/Moon.o \
     solarsys/Msise90Atmosphere.o \
     solarsys/PlanetaryEphemException.o \
@@ -542,6 +543,7 @@ OBJECTS = \
     util/FileUtil.o \
     util/Frozen.o \
     util/GmatGlobal.o \
+    util/GmatTime.o \
     util/GravityFileUtil.o \
     util/GregorianDate.o \
     util/LeapSecsFileReader.o \

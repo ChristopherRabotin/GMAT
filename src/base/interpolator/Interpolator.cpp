@@ -48,7 +48,7 @@
 //------------------------------------------------------------------------------
 Interpolator::Interpolator(const std::string &name, const std::string &typestr,
                            Integer dim) :
-   GmatBase           (Gmat::INTERPOLATOR, typestr, name),
+//   GmatBase           (Gmat::INTERPOLATOR, typestr, name),
    independent        (NULL),
    dependent          (NULL),
    previousX          (-9.9999e65),
@@ -59,7 +59,8 @@ Interpolator::Interpolator(const std::string &name, const std::string &typestr,
    latestPoint        (-1),
    rangeCalculated    (false),
    dataIncreases      (true),
-   forceInterpolation (true)
+   forceInterpolation (true),
+   instanceName       (name)
 {
    range[0] = range[1] = 0.0;
 }
@@ -88,7 +89,7 @@ Interpolator::~Interpolator()
  */
 //------------------------------------------------------------------------------
 Interpolator::Interpolator(const Interpolator &i) :
-   GmatBase           (i),
+//   GmatBase           (i),
    previousX          (i.previousX),
    dimension          (i.dimension),
    requiredPoints     (i.requiredPoints),
@@ -97,7 +98,8 @@ Interpolator::Interpolator(const Interpolator &i) :
    latestPoint        (i.latestPoint),
    rangeCalculated    (i.rangeCalculated),
    dataIncreases      (i.dataIncreases),
-   forceInterpolation (i.forceInterpolation)
+   forceInterpolation (i.forceInterpolation),
+   instanceName       (i.instanceName)
 {
    if (i.independent)
       CopyArrays(i);
@@ -131,7 +133,7 @@ Interpolator& Interpolator::operator=(const Interpolator &i)
    if (&i == this)
       return *this;
    
-   GmatBase::operator=(i);
+//   GmatBase::operator=(i);
    
    // Free any allocated memory
    if (independent)
@@ -157,6 +159,7 @@ Interpolator& Interpolator::operator=(const Interpolator &i)
    
    dataIncreases      = i.dataIncreases;
    forceInterpolation = i.forceInterpolation;
+   instanceName       = i.instanceName;
    
    return *this;
 }
@@ -278,6 +281,51 @@ void Interpolator::Clear()
 
 
 //------------------------------------------------------------------------------
+//  Integer GetBufferSize()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the bufferSize parameter.
+ *
+ * @return  The buffer size.
+ */
+//------------------------------------------------------------------------------
+Integer Interpolator::GetBufferSize()
+{
+   return bufferSize;
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer GetPointCount()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the pointCount parameter.
+ *
+ * @return  The buffer size.
+ */
+//------------------------------------------------------------------------------
+Integer Interpolator::GetPointCount()
+{
+   return pointCount;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name assigned to this interpolator
+ *
+ * @return The instance name
+ */
+//------------------------------------------------------------------------------
+std::string Interpolator::GetName()
+{
+   return instanceName;
+}
+
+
+//------------------------------------------------------------------------------
 //  void AllocateArrays()
 //------------------------------------------------------------------------------
 /**
@@ -374,34 +422,4 @@ void Interpolator::SetRange()
    }
    
    rangeCalculated = true;
-}
-
-
-//------------------------------------------------------------------------------
-//  Integer GetBufferSize()
-//------------------------------------------------------------------------------
-/**
- * Access method for the bufferSize parameter.
- * 
- * @return  The buffer size.
- */
-//------------------------------------------------------------------------------
-Integer Interpolator::GetBufferSize()
-{
-   return bufferSize;
-}
-
-
-//------------------------------------------------------------------------------
-//  Integer GetPointCount()
-//------------------------------------------------------------------------------
-/**
- * Access method for the pointCount parameter.
- * 
- * @return  The buffer size.
- */
-//------------------------------------------------------------------------------
-Integer Interpolator::GetPointCount()
-{
-   return pointCount;
 }

@@ -45,11 +45,15 @@ GLStars* GLStars::theInstance = NULL;
 //------------------------------------------------------------------------------
 GLStars::GLStars()
     : DesiredStarCount(42000)   // Fixed uninitialzed value error
-   {
+{
+   LastGroupUsed = 0;
+   MaxDrawStars = 0;
    DesiredStarCount = 0;
    NumLines = 0;
+   NumConstellations = 0;
+   BorderGroupCount = 0;
    InitStars();
-   }
+}
 //------------------------------------------------------------------------------
 // ~GLStars()
 //------------------------------------------------------------------------------
@@ -231,7 +235,7 @@ void GLStars::ReadConstellations()
  */
 //------------------------------------------------------------------------------
 void GLStars::ReadBorders()
-   {
+{
    FileManager *fm = FileManager::Instance();
    wxString borderFileName = (fm->FindPath("", "BORDER_FILE", true, false, true)).c_str();
    
@@ -243,8 +247,7 @@ void GLStars::ReadBorders()
           ("Could not open Constellation Border File at " + borderFileName + "\n");
       return;
       }
-   
-   NumBorders = 0;
+      
    int count = 0;  
    int ix = 0; 
    double oldra = 0;
@@ -252,7 +255,7 @@ void GLStars::ReadBorders()
    Real ra, dec;
    for (buffer = BorderFile.GetFirstLine(); ix < MAXBORDERS && !BorderFile.Eof();
         buffer = BorderFile.GetNextLine())
-      {
+   {
       // Skip empty lines
       if(buffer.IsEmpty())
          continue;
@@ -265,50 +268,56 @@ void GLStars::ReadBorders()
       ra *= 15;
       bool start = split.size() == 3;
       if (start)
-         {
+      {
          count = 0;
          if (ix!=0)
+         {
+            if (BorderGroupCount < MAXBORDERGROUP)
             {
-            BorderGroup[BorderGroupCount] = ix;
-            ++BorderGroupCount;
+               BorderGroup[BorderGroupCount] = ix;
+               ++BorderGroupCount;
             }
          }
+      }
       ++count;
       if (count==1)
-         {
+      {
          SetVector (Borders[ix],ra,dec);
          Correct1875(Borders[ix]);
          ++ix;
-         }
+      }
       else if (ra == oldra)
-         {
+      {
          SetVector (Borders[ix],ra,dec);
          Correct1875(Borders[ix]);
          ++ix;
-         }
+      }
       else
-         {
+      {
          double dra = ra - oldra;
          if (dra > 180) dra -=360;
          if (dra < -180) dra +=360;
          double rastep = dra > 0 ? 1 : -1;
          int steps = floor(abs(dra));
          for (int i=1;  i<=steps;  ++i)
-            {
+         {
             SetVector (Borders[ix],oldra+rastep*i,dec);
             Correct1875(Borders[ix]);
             ++ix;
-            }
+         }
          SetVector (Borders[ix],ra,dec);
          Correct1875(Borders[ix]);
          ++ix;
-         }
-      oldra = ra;
       }
-   BorderGroup[BorderGroupCount] = ix;
-   ++BorderGroupCount;
-   BorderFile.Close();
+      oldra = ra;
    }
+   if (BorderGroupCount < MAXBORDERGROUP)
+   {
+      BorderGroup[BorderGroupCount] = ix;
+      ++BorderGroupCount;
+   }
+   BorderFile.Close();
+}
 //-------------------------------------------------------------------------------
 // void SetVector (GLfloat v[4], Real ra, Real dec)
 //-------------------------------------------------------------------------------

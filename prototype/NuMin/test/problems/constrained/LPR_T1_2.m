@@ -18,3 +18,7 @@ Data.Aeq = [];
 Data.beq = [];
 Data.xstar = [ 0 -1]';
 Data.fstar = 0;
+
+Data.x0  = [.1 .1]';
+Data.lb = [1 0 ]';
+Data.ub = [];

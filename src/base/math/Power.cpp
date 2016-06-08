@@ -171,7 +171,12 @@ bool Power::ValidateInputs()
          retval = true;
    }
    else
-      throw MathException("Input is not a scalar or 1x1 matrix, so can not do Power()");
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type1] + ") for power operator: must be a scalar or 1x1 matrix.\n";
+      throw MathException(errmsg);
+   }
+//      throw MathException("Input is not a scalar or 1x1 matrix, so can not do Power()");
    
    return retval;
 }

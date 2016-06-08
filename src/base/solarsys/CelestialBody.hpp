@@ -170,8 +170,7 @@ public:
 
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
-   virtual const Real           GetFirstStateTime();
-   virtual const Rvector6&      GetState(A1Mjd atTime);
+   virtual Real                 GetFirstStateTime();   virtual const Rvector6&      GetState(A1Mjd atTime);
    virtual const Rvector6&      GetState(Real atTime); 
    virtual void                 GetState(const A1Mjd &atTime, Real *outState);
    
@@ -604,7 +603,7 @@ protected:
    //Rmatrix                defaultSij;
    //Rmatrix                defaultCij;
    
-   // initialze the body
+   // initialize the body
    void             InitializeBody(std::string withBodyType = "Planet");
    // methods to read the potential file, if requested
    virtual bool     DeterminePotentialFileNameFromStartup();

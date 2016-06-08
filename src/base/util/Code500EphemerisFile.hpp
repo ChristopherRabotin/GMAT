@@ -7,6 +7,7 @@
 
 #include "gmatdefs.hpp"       // For type Byte
 #include "A1Mjd.hpp"
+#include "Rvector6.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -39,6 +40,9 @@ public:
    bool ReadDataAt(int dataRecNumber, int logOption = 0);
    bool ReadDataRecords(int numRecordsToRead = -999, int logOption = 0);
    
+   bool GetInitialAndFinalStates(Real &initialEpoch, Real &finalEpoch,
+                                 Rvector6 &initialState, Rvector6 &finalState);
+   
    void SetCentralBodyMu(double mu);
    void SetTimeIntervalBetweenPoints(double secs);
    void SetInitialEpoch(const A1Mjd &a1Mjd);
@@ -61,6 +65,8 @@ public:
    void ConvertAsciiToEbcdic(char *ascii, char *ebcdic, int numChars);
    void ConvertEbcdicToAscii(char *ebcdic, char *ascii, int numChars);
    
+   Real GetTimeSystem();
+
 protected:
    static const int    RECORD_SIZE = 2800;
    static const int    NUM_STATES_PER_RECORD = 50;
@@ -164,6 +170,7 @@ protected:
       char   harmonicsWithTitles2[2800];              // 1-2800
    };
    
+public:                        // Public so C500 propagator sees this struct
    struct GMAT_API EphemData
    {
       double dateOfFirstEphemPoint_YYYMMDD;           // 1-8
@@ -178,7 +185,11 @@ protected:
       char   spares1[344];                            // 2457-2800
    };
    
-   // For swaping endianness
+   void GetStartAndEndEpochs(GmatEpoch &startEpoch, GmatEpoch &endEpoch,
+         std::vector<EphemData> **records);
+
+protected:
+   // For swapping endianness
    struct DoubleByteType
    {
       unsigned byte1 : 8;
@@ -233,6 +244,9 @@ protected:
    int            mDataRecWriteCounter;
    int            mLastDataRecRead;
    int            mLastStateIndexRead;
+   int            mNumberOfRecordsInFile;
+   Rvector6       mInitialState;
+   Rvector6       mFinalState;
    std::string    mLastDataRecStartGreg;
    std::string    mLastDataRecEndGreg;
    
@@ -255,6 +269,11 @@ protected:
    double mLeapSecsEndOutput;
    double mLeapSecsInput;
    
+   // Data used in propagation
+   GmatEpoch a1StartEpoch;
+   GmatEpoch a1EndEpoch;
+   std::vector<EphemData> ephemRecords;
+
    // For cartesian to keplerian state conversion
    double mCentralBodyMu;
    
@@ -298,6 +317,8 @@ protected:
    void WriteDoubleField(double *field, double value);
    void WriteIntegerField(int *field, int value);
    
+   // Propagation
+
    // Data buffering
    void ClearBuffer();
    

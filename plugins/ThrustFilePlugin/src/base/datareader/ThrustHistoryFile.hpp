@@ -1,0 +1,142 @@
+//------------------------------------------------------------------------------
+//                           ThrustHistoryFile
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2015 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS II
+// contract, Task Order 08
+//
+// Author: Darrel J. Conway, Thinking Systems, Inc.
+// Created: Jan 13, 2016
+/**
+ * Code that models thrusts using a time ordered collection of points in a file.
+ */
+//------------------------------------------------------------------------------
+
+#ifndef ThrustHistoryFile_hpp
+#define ThrustHistoryFile_hpp
+
+#include "ThrustFileDefs.hpp"
+#include "FileReader.hpp"
+#include "ThrustSegment.hpp"
+#include "ThfDataSegment.hpp"
+#include "FileThrust.hpp"
+
+/**
+ * Container for the thrust history file functionality
+ */
+class ThrustHistoryFile: public FileReader
+{
+public:
+   ThrustHistoryFile(const std::string& theName = "");
+   virtual ~ThrustHistoryFile();
+   ThrustHistoryFile(const ThrustHistoryFile& thf);
+   ThrustHistoryFile& operator=(const ThrustHistoryFile& thf);
+
+   virtual GmatBase*    Clone() const;
+
+   virtual std::string  GetParameterText(const Integer id) const;
+//   virtual std::string  GetParameterUnit(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const char *value);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const char *value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value,
+                                           const Integer index);
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id,
+                                                const Integer index) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label,
+                                                const Integer index) const;
+
+   // for Ref. objects
+   virtual bool         HasRefObjectTypeArray();
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+
+
+   virtual bool         ReadData();
+
+   virtual bool         Initialize();
+   FileThrust*          GetForce();
+
+   DEFAULT_TO_NO_CLONES
+
+protected:
+
+   /// Name for the thrust history file
+   std::string thrustFileName;
+   /// Data blocks from the file
+   std::vector<ThrustSegment> segments;
+   /// Scripted block names
+   StringArray segmentNames;
+   /// Mass source for each block
+   std::map<std::string, StringArray> massSources;
+
+   StringArray keywords;
+   StringArray dataStartKeys;
+   StringArray interpolationTypes;
+
+   FileThrust theForce;
+
+   void SetSegmentData(ThfDataSegment seg);
+   bool CheckDataStart(std::string theLine, ThfDataSegment &theSegment);
+   bool SetHeaderField(std::string theLine, ThfDataSegment &theSegment);
+   bool ReadThrustProfile(ThfDataSegment &theSegment);
+   void MapField(const std::string &key, const std::string &datum,
+         ThfDataSegment &theSegment);
+   void ValidateSegment(ThfDataSegment &theSegment);
+
+   /// Parameter IDs
+   enum
+   {
+      FILENAME = GmatBaseParamCount,
+      SEGMENTS,
+      ThrustHistoryFileParamCount,
+   };
+
+   /// Interface parameter types
+   static const Gmat::ParameterType PARAMETER_TYPE[ThrustHistoryFileParamCount - GmatBaseParamCount];
+   /// Interface parameter labels
+   static const std::string PARAMETER_LABEL[ThrustHistoryFileParamCount - GmatBaseParamCount];
+};
+
+#endif /* ThrustHistoryFile_hpp */

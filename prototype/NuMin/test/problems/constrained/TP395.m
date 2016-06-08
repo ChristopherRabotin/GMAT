@@ -16,5 +16,5 @@ Data.A   = [];
 Data.b   = [];
 Data.Aeq = [];
 Data.beq = [];
-Data.xstar = nan*ones(50,1);
+Data.xstar = 'N/A';
 Data.fstar = 1.91667;

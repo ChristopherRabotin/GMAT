@@ -64,7 +64,8 @@ const Real ElementWrapper::UNDEFINED_REAL = -999.99;
 //---------------------------------------------------------------------------
 ElementWrapper::ElementWrapper() :
    description  (""),
-   wrapperType  (Gmat::NUMBER_WT)
+   wrapperType  (Gmat::NUMBER_WT),
+   allowOneDimArraySetting (false)
 {
 }
 
@@ -81,7 +82,8 @@ ElementWrapper::ElementWrapper() :
 ElementWrapper::ElementWrapper(const ElementWrapper &er) :
    description    (er.description),
    refObjectNames (er.refObjectNames),
-   wrapperType    (er.wrapperType)
+   wrapperType    (er.wrapperType),
+   allowOneDimArraySetting (er.allowOneDimArraySetting)
 {
 }
 
@@ -101,9 +103,10 @@ const ElementWrapper& ElementWrapper::operator=(const ElementWrapper &er)
    if (&er == this)
       return *this;
 
-   description    = er.description;
-   refObjectNames = er.refObjectNames;
-   wrapperType    = er.wrapperType;
+   description             = er.description;
+   refObjectNames          = er.refObjectNames;
+   wrapperType             = er.wrapperType;
+   allowOneDimArraySetting = er.allowOneDimArraySetting;
 
    return *this;
 }
@@ -137,6 +140,25 @@ std::string ElementWrapper::ToString()
        "type %d, description of \"%s\"", wrapperType, description.c_str());
    throw be;
 }
+
+
+//---------------------------------------------------------------------------
+// void AllowOneDimArraySetting(bool allow)
+//---------------------------------------------------------------------------
+void ElementWrapper::AllowOneDimArraySetting(bool allow)
+{
+   allowOneDimArraySetting = allow;
+}
+
+
+//---------------------------------------------------------------------------
+// bool IsOneDimArraySettingAllowed()
+//---------------------------------------------------------------------------
+bool ElementWrapper::IsOneDimArraySettingAllowed()
+{
+   return allowOneDimArraySetting;
+}
+
 
 //------------------------------------------------------------------------------
 // virtual ElementWrapper* Clone() const
@@ -732,6 +754,9 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             break;
          }
       case Gmat::RMATRIX_TYPE:
+         #ifdef DEBUG_EW_SET_VALUE
+         MessageInterface::ShowMessage("   lhs is Rmatrix type\n");
+         #endif
          if (rhsDataType == Gmat::RMATRIX_TYPE ||
              rhsDataType == Gmat::RVECTOR_TYPE)
          {

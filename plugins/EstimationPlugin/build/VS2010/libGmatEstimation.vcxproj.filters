@@ -49,6 +49,30 @@
     <Filter Include="Source Files\measurement\Troposphere">
       <UniqueIdentifier>{a1e61c86-4e6b-4ab5-8f95-6dbea26388b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\adapter">
+      <UniqueIdentifier>{737f08b0-e351-48d3-963e-71ed107ed4a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\measurementmodel">
+      <UniqueIdentifier>{d71bf45b-5cdc-4822-b1c6-cbedf6c8efdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\reporter">
+      <UniqueIdentifier>{f8293e7a-1040-443e-a8e4-39ab24b25827}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\signal">
+      <UniqueIdentifier>{71ee05b1-5a1c-4c05-b721-4fc0fb0b6668}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\trackingfile">
+      <UniqueIdentifier>{404d12fd-af03-4d42-aa71-609df48dfc47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tdmReader">
+      <UniqueIdentifier>{bd163232-214a-48be-9c8c-bcb3e35e0970}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\datafilter">
+      <UniqueIdentifier>{cb2b4d2b-6bef-4f27-8b11-a305bf37f64c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\errormodel">
+      <UniqueIdentifier>{397421b8-c0a7-4b17-870c-21169c8ca7bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\base\include\estimation_defs.hpp">
@@ -138,9 +162,6 @@
     <ClInclude Include="..\..\src\base\hardware\Transmitter.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\hardware\Transponder.hpp">
-      <Filter>Source Files\hardware</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\hardware\Antenna.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
@@ -207,25 +228,7 @@
     <ClInclude Include="..\..\src\base\measurement\Troposphere\Troposphere.hpp">
       <Filter>Source Files\measurement\Troposphere</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\cira.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\igrf.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\Ionosphere.hpp">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\iridreg.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\irifun.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\irisub.h">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\measurement\Ionosphere\iritec.h">
       <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\base\measurementfile\B3_obtype.hpp">
@@ -269,6 +272,108 @@
     </ClInclude>
     <ClInclude Include="..\..\src\base\event\EstimationRootFinder.hpp">
       <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\GmatData.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\GmatODDopplerType.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\GmatODType.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\RampTableData.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\RampTableType.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\RandomNumber.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\RangeAdapterKm.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\TrackingDataAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementmodel\MeasureModel.hpp">
+      <Filter>Source Files\measurementmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\signal\PhysicalSignal.hpp">
+      <Filter>Source Files\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\signal\SignalBase.hpp">
+      <Filter>Source Files\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\signal\SignalData.hpp">
+      <Filter>Source Files\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\signal\SinglePointSignal.hpp">
+      <Filter>Source Files\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\reporter\ProgressReporter.hpp">
+      <Filter>Source Files\reporter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingfile\TFSMagicNumbers.hpp">
+      <Filter>Source Files\trackingfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingfile\TrackingFileSet.hpp">
+      <Filter>Source Files\trackingfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\MeasurementModelBase.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\DSNRangeAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\Transponder.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\DopplerAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\RangeRateAdapterKps.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\tdmReader\TdmObType.hpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\tdmReader\TdmReadWriter.hpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\tdmReader\TdmErrorHandler.hpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\PointRangeRateAdapterKps.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datafilter\StatisticAcceptFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\EstimationDataFilterFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\ErrorModelFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\errormodel\ErrorModel.hpp">
+      <Filter>Source Files\errormodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datafilter\DataFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datafilter\StatisticRejectFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\GNDopplerAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\TDRSDopplerAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\iri2007.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -419,25 +524,7 @@
     <ClCompile Include="..\..\src\base\measurement\Troposphere\Troposphere.cpp">
       <Filter>Source Files\measurement\Troposphere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\cira.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\igrf.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\Ionosphere.cpp">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\iridreg.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\irifun.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\irisub.c">
-      <Filter>Source Files\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\measurement\Ionosphere\iritec.c">
       <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\measurementfile\B3_obtype.cpp">
@@ -478,6 +565,105 @@
     </ClCompile>
     <ClCompile Include="..\..\src\base\event\EstimationRootFinder.cpp">
       <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\GmatData.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\GmatODDopplerType.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\GmatODType.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\RampTableData.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\RampTableType.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\RandomNumber.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\RangeAdapterKm.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\TrackingDataAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementmodel\MeasureModel.cpp">
+      <Filter>Source Files\measurementmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\signal\PhysicalSignal.cpp">
+      <Filter>Source Files\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\signal\SignalBase.cpp">
+      <Filter>Source Files\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\signal\SignalData.cpp">
+      <Filter>Source Files\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\signal\SinglePointSignal.cpp">
+      <Filter>Source Files\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\reporter\ProgressReporter.cpp">
+      <Filter>Source Files\reporter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingfile\TFSMagicNumbers.cpp">
+      <Filter>Source Files\trackingfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingfile\TrackingFileSet.cpp">
+      <Filter>Source Files\trackingfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\MeasurementModelBase.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\DSNRangeAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\DopplerAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\RangeRateAdapterKps.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\tdmReader\TdmObType.cpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\tdmReader\TdmReadWriter.cpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\tdmReader\TdmErrorHandler.cpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\PointRangeRateAdapterKps.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datafilter\StatisticAcceptFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\EstimationDataFilterFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\ErrorModelFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\errormodel\ErrorModel.cpp">
+      <Filter>Source Files\errormodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datafilter\DataFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datafilter\StatisticRejectFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\GNDopplerAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\TDRSDopplerAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\iri2007.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

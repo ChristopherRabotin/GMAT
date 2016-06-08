@@ -101,9 +101,8 @@ Propagator* PropagatorFactory::CreatePropagator(const std::string &ofType,
       return new AdamsBashforthMoulton(withName);
 //   if (ofType == "Cowell")
 //      return new Cowell(withName);
-   /// @todo add others here as needed
-   else
-      return NULL;
+   // Add others here as needed
+   return NULL;
 }
 
 

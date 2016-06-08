@@ -41,7 +41,7 @@ BEGIN_EVENT_TABLE(FiniteBurnSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   EVT_COMBOBOX(ID_COMBOBOX, FiniteBurnSetupPanel::OnComboBoxChange)
+   EVT_BUTTON(ID_BUTTON, FiniteBurnSetupPanel::OnButtonClick)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -64,11 +64,10 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
    const wxString &burnName):GmatPanel(parent)
 {
    theBurn = 
-      (FiniteBurn*) theGuiInterpreter->GetConfiguredObject(burnName.c_str());
+      (FiniteBurn*)theGuiInterpreter->GetConfiguredObject(burnName.c_str());
    
-   thrusterSelected = "";
    canClose = true;
-   
+
    Create();
    Show();
    
@@ -85,33 +84,13 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 FiniteBurnSetupPanel::~FiniteBurnSetupPanel()
 {
-   theGuiManager->UnregisterComboBox("Thruster", mThrusterComboBox);
+   theGuiManager->UnregisterListBox("Thruster", availableThrusterListBox,
+                                    &mExcludedThrusterList);
 }
 
 //-------------------------------
 // protected methods
 //-------------------------------
-
-//------------------------------------------------------------------------------
-// void OnFrameComboBoxChange(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void FiniteBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
-{
-   if (event.GetEventObject() == mThrusterComboBox)
-   {
-      thrusterSelected = mThrusterComboBox->GetStringSelection().c_str();
-      if (thrusterSelected == "No Thruster Selected")
-         thrusterSelected = "";
-      
-      // remove "No Thruster Selected" once thruster is selected
-      int pos = mThrusterComboBox->FindString("No Thruster Selected");
-      if (pos != wxNOT_FOUND)
-         mThrusterComboBox->Delete(pos);
-      
-      EnableUpdate(true);
-   }
-}
-
 
 //----------------------------------
 // methods inherited from GmatPanel
@@ -121,8 +100,7 @@ void FiniteBurnSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 // void Create()
 //------------------------------------------------------------------------------
 /**
- *
- * @note Creates the panel for the Finite burn data
+ * Creates the panel for the Finite burn data
  */
 //------------------------------------------------------------------------------
 void FiniteBurnSetupPanel::Create()
@@ -130,34 +108,72 @@ void FiniteBurnSetupPanel::Create()
    #if DEBUG_FINITEBURN_PANEL
       MessageInterface::ShowMessage( "FiniteBurnSetupPanel::Create() \n" );
    #endif
-   
-   Integer bsize;
 
-    // get the config object
-    wxConfigBase *pConfig = wxConfigBase::Get();
-    // SetPath() understands ".."
-    pConfig->SetPath(wxT("/Finite Burn Setup"));
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Finite Burn Setup"));
 
-    if (theBurn != NULL)
+   if (theBurn != NULL)
    {
-      bsize = 2; // border size
-      
-      // create sizers
-      wxFlexGridSizer *pageSizer = new wxFlexGridSizer(4, 2, bsize, bsize);
-      
-      // Thrusters
-      wxStaticText *thrusterLabel = new wxStaticText(this, ID_TEXT,
-         GUI_ACCEL_KEY"Thruster", wxDefaultPosition, wxDefaultSize, 0);
-      mThrusterComboBox =
-         theGuiManager->GetThrusterComboBox(this, ID_COMBOBOX, wxSize(150,-1));
-      mThrusterComboBox->SetToolTip(pConfig->Read(_T("ThrusterHint")));
-      
-      // add to page sizer    
-      pageSizer->Add(thrusterLabel, 0, wxALIGN_LEFT | wxALL, bsize);
-      pageSizer->Add(mThrusterComboBox, 0, wxALIGN_LEFT | wxALL, bsize);
-      
-      // add page sizer to middle sizer
-      theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+      // wx*Sizers
+      wxBoxSizer *thrusterSelectionSizer = new wxBoxSizer( wxHORIZONTAL );
+
+      wxBoxSizer *availableSizer = new wxBoxSizer( wxVERTICAL );
+      wxBoxSizer *buttonSizer = new wxBoxSizer( wxVERTICAL );
+      wxBoxSizer *selectedSizer = new wxBoxSizer( wxVERTICAL );
+
+      Integer paramID = theBurn->GetParameterID("Thrusters");
+      StringArray thrusterNames = theBurn->GetStringArrayParameter(paramID);
+
+      Integer count = thrusterNames.size();
+      for (Integer i = 0; i < count; i++)
+         mExcludedThrusterList.Add(thrusterNames[i].c_str());
+
+      // Thruster list boxes
+      availableThrusterListBox =
+         theGuiManager->GetThrusterListBox(this, ID_LISTBOX, wxSize(150,200),
+                                           &mExcludedThrusterList);
+      availableThrusterListBox->SetToolTip(pConfig->Read(_T("AvailableThrustersHint")));
+      availableSizer->Add(availableThrusterListBox, 0, wxALIGN_CENTRE|wxALL, 5);
+
+      wxArrayString selectedList;
+      for (Integer i = 0; i < count; i++)
+         selectedList.Add(thrusterNames[i].c_str());
+      selectedThrusterListBox =
+         new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150,200), //0,
+               selectedList, wxLB_SINGLE);
+      selectedThrusterListBox->SetToolTip(pConfig->Read(_T("SelectedThrustersHint")));
+      selectedSizer->Add(selectedThrusterListBox, 0, wxALIGN_CENTRE|wxALL, 5);
+
+
+      // wxButton
+      selectButton = new wxButton( this, ID_BUTTON, wxString("-" GUI_ACCEL_KEY ">"),
+                                 wxDefaultPosition, wxDefaultSize, 0 );
+      selectButton->SetToolTip(pConfig->Read(_T("AddThrusterHint")));
+
+      removeButton = new wxButton( this, ID_BUTTON, wxString(GUI_ACCEL_KEY"<-"),
+                                 wxDefaultPosition, wxDefaultSize, 0 );
+      removeButton->SetToolTip(pConfig->Read(_T("RemoveThrusterHint")));
+
+      selectAllButton = new wxButton( this, ID_BUTTON, wxString("=>"),
+                                 wxDefaultPosition, wxDefaultSize, 0 );
+      selectAllButton->SetToolTip(pConfig->Read(_T("AddAllThrustersHint")));
+
+      removeAllButton = new wxButton( this, ID_BUTTON, wxString("<" GUI_ACCEL_KEY "="),
+                                 wxDefaultPosition, wxDefaultSize, 0 );
+      removeAllButton->SetToolTip(pConfig->Read(_T("ClearThrustersHint")));
+
+      buttonSizer->Add(selectButton, 0, wxALIGN_CENTRE|wxALL, 5);
+      buttonSizer->Add(removeButton, 0, wxALIGN_CENTRE|wxALL, 5);
+      buttonSizer->Add(selectAllButton, 0, wxALIGN_CENTRE|wxALL, 5);
+      buttonSizer->Add(removeAllButton, 0, wxALIGN_CENTRE|wxALL, 5);
+
+      // Put all the sizers together
+      thrusterSelectionSizer->Add(availableSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+      thrusterSelectionSizer->Add(buttonSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+      thrusterSelectionSizer->Add(selectedSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+      theMiddleSizer->Add(thrusterSelectionSizer, 0, wxALIGN_CENTRE|wxALL, 5);
    }
    else
    {
@@ -181,37 +197,11 @@ void FiniteBurnSetupPanel::LoadData()
    {
       // Set object pointer for "Show Script"
       mObject = theBurn;
-      
-      // load thruster
-      Integer id = theBurn->GetParameterID("Thrusters");
-      StringArray thrusters = theBurn->GetStringArrayParameter(id);
-      
-      #if DEBUG_FINITEBURN_PANEL
-      MessageInterface::ShowMessage
-         ("   # of configured thrusters = %d\n", thrusters.size() );
-      #endif
-      
-      if (thrusters.empty())
-      {
-         if (theGuiManager->GetNumThruster() > 0)
-         {
-            #if DEBUG_FINITEBURN_PANEL
-            MessageInterface::ShowMessage("   Inserting No Thruster Selected\n");
-            #endif
-            mThrusterComboBox->Insert("No Thruster Selected", 0);
-            mThrusterComboBox->SetSelection(0);
-         }
-      }
-      else
-      {
-         thrusterSelected = thrusters[0].c_str(); 
-         mThrusterComboBox->SetValue(thrusterSelected.c_str());
-      }
    }
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("FiniteBurnSetupPanel:LoadData() error occurred!\n%s\n", 
+         ("FiniteBurnSetupPanel:LoadData() error occurred!\n%s\n",
             e.GetFullMessage().c_str());
    }
 }
@@ -235,12 +225,119 @@ void FiniteBurnSetupPanel::SaveData()
    {
       // save thrusters
       Integer id = theBurn->GetParameterID("Thrusters");
-      theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
+      theBurn->TakeAction("ClearThrusterList");
+      Integer count = selectedThrusterListBox->GetCount();
+      for (Integer i = 0; i < count; i++)
+      {
+         theBurn->SetStringParameter(id,
+               selectedThrusterListBox->GetString(i).c_str(), i);
+      }
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnButtonClick(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Event handler for the selection buttons
+ *
+ * @param event The triggerign event
+ */
+//------------------------------------------------------------------------------
+void FiniteBurnSetupPanel::OnButtonClick(wxCommandEvent &event)
+{
+   if (event.GetEventObject() == selectButton)
+   {
+      wxString str = availableThrusterListBox->GetStringSelection();
+
+      if (str.IsEmpty())
+         return;
+
+      int sel = availableThrusterListBox->GetSelection();
+      int found = selectedThrusterListBox->FindString(str);
+
+      if (found == wxNOT_FOUND)
+      {
+         selectedThrusterListBox->Append(str);
+         availableThrusterListBox->Delete(sel);
+         selectedThrusterListBox->SetStringSelection(str);
+         mExcludedThrusterList.Add(str);
+
+         if (sel-1 < 0)
+            availableThrusterListBox->SetSelection(0);
+         else
+            availableThrusterListBox->SetSelection(sel-1);
+
+      }
+
+      dataChanged = true;
+      EnableUpdate(true);
+   }
+   else if (event.GetEventObject() == removeButton)
+   {
+      wxString str = selectedThrusterListBox->GetStringSelection();
+
+      if (str.IsEmpty())
+         return;
+
+      int sel = selectedThrusterListBox->GetSelection();
+
+      selectedThrusterListBox->Delete(sel);
+      availableThrusterListBox->Append(str);
+      availableThrusterListBox->SetStringSelection(str);
+      mExcludedThrusterList.Remove(str.c_str());
+
+      if (sel-1 < 0)
+         selectedThrusterListBox->SetSelection(0);
+      else
+         selectedThrusterListBox->SetSelection(sel-1);
+
+      dataChanged = true;
+      EnableUpdate(true);
+   }
+   else if (event.GetEventObject() == selectAllButton)
+   {
+      Integer count = availableThrusterListBox->GetCount();
+
+      if (count == 0)
+         return;
+
+      for (Integer i=0; i<count; i++)
+      {
+         selectedThrusterListBox->Append(availableThrusterListBox->GetString(i));
+         mExcludedThrusterList.Add(availableThrusterListBox->GetString(i));
+      }
+
+      availableThrusterListBox->Clear();
+      selectedThrusterListBox->SetSelection(0);
+
+      dataChanged = true;
+      EnableUpdate(true);
+   }
+   else if (event.GetEventObject() == removeAllButton)
+   {
+      Integer count = selectedThrusterListBox->GetCount();
+
+      if (count == 0)
+         return;
+
+      for (Integer i=0; i<count; i++)
+      {
+         availableThrusterListBox->Append(selectedThrusterListBox->GetString(i));
+      }
+
+      selectedThrusterListBox->Clear();
+      mExcludedThrusterList.Clear();
+      availableThrusterListBox->SetSelection(0);
+
+      dataChanged = true;
+      EnableUpdate(true);
    }
 }

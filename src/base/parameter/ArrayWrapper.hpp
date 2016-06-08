@@ -69,7 +69,7 @@ public:
    
    virtual const Rmatrix&      EvaluateArray() const;
    virtual bool                SetArray(const Rmatrix &toValue); 
-   
+
 protected:  
    
    /// pointer to the Array object

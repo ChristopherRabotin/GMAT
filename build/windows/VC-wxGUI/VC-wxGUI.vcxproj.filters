@@ -307,6 +307,27 @@
     <Filter Include="Source Files\gui\event">
       <UniqueIdentifier>{b26c0f23-bfd3-4b3f-8385-93fa6bdf5d7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\plugins\EstimationPlugin\trackingfile">
+      <UniqueIdentifier>{4a24e106-eafd-4bc5-8ecc-2dc86a936397}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\EstimationPlugin\adapter">
+      <UniqueIdentifier>{afda6ba4-a801-45d8-a34c-abd2ef46d881}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\EstimationPlugin\tdmReader">
+      <UniqueIdentifier>{e29fb8f5-f352-4665-81d7-f1bc852a003b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\EstimationPlugin\datafilter">
+      <UniqueIdentifier>{9ea0690b-1a58-4272-9f6b-68123a1b79ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\EstimationPlugin\signal">
+      <UniqueIdentifier>{c3a1b378-ad8d-4d9e-b890-2112c410a212}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\EstimationPlugin\measurementmodel">
+      <UniqueIdentifier>{a9fcaad8-8258-49da-befc-1b282c34812a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\EstimationPlugin\reporter">
+      <UniqueIdentifier>{4c59325d-0e06-43b2-8684-04f63b1974c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp">
@@ -1182,9 +1203,6 @@
     <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp">
       <Filter>Source Files\base\stopcond</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp">
-      <Filter>Source Files\base\subscriber</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClCompile>
@@ -1869,24 +1887,6 @@
     <ClCompile Include="..\..\..\src\base\foundation\TriggerManager.cpp">
       <Filter>Source Files\base\foundation</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\cira.c">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\igrf.c">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iridreg.c">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irifun.c">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irisub.c">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iritec.c">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\Ionosphere.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
     </ClCompile>
@@ -2414,6 +2414,204 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\rendering\SurfaceBase.cpp">
       <Filter>Source Files\gui\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisWriter.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterCCSDS.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterCode500.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterSPK.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterWithInterpolator.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\TankAndMixDialog.cpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMWriter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSOEMWriter.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\Display.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\STKEphemerisFile.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemWriterSTK.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Strcat.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\StringFunction.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\BuiltinFunction.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Min.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\NumericFunction.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Sprintf.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Fix.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Floor.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Mod.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Ceil.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Cross3.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Diag.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingfile\TFSMagicNumbers.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\trackingfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\trackingfile\TrackingFileSet.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\trackingfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DopplerAdapter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DSNRangeAdapter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\GNDopplerAdapter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\PointRangeRateAdapterKps.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\RangeAdapterKm.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\RangeRateAdapterKps.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\TDRSDopplerAdapter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\TrackingDataAdapter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmErrorHandler.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmObType.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmReadWriter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\DataFilter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticAcceptFilter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticRejectFilter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\FileUpdaterSVN.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\IFileUpdater.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\FileUpdateDialog.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementModelBase.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\signal\PhysicalSignal.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SignalBase.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SignalData.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SinglePointSignal.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementmodel\MeasureModel.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\reporter\ProgressReporter.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\reporter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatData.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatODDopplerType.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatODType.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\RampTableData.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\RampTableType.cpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iri2007.c">
+      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Strcmp.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Strfind.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Strrep.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\RandomNumber.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Rand.cpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\Code500Propagator.cpp">
+      <Filter>Source Files\plugins\EphemPropagatorPlugin\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\math\Randn.cpp">
+      <Filter>Source Files\base\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3320,9 +3518,6 @@
     <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp">
       <Filter>Source Files\base\stopcond</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp">
-      <Filter>Source Files\base\subscriber</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClInclude>
@@ -4043,25 +4238,7 @@
     <ClInclude Include="..\..\..\src\base\foundation\TriggerManager.hpp">
       <Filter>Source Files\base\foundation</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\cira.h">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\igrf.h">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\Ionosphere.hpp">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iridreg.h">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irifun.h">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\irisub.h">
-      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iritec.h">
       <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere\Troposphere.hpp">
@@ -4597,6 +4774,204 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\rendering\SurfaceBase.hpp">
       <Filter>Source Files\gui\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisWriter.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterCCSDS.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterCode500.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterSPK.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterWithInterpolator.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\TankAndMixDialog.hpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMWriter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSOEMWriter.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\Display.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\STKEphemerisFile.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemWriterSTK.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Strcat.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\StringFunction.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\BuiltinFunction.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Min.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\NumericFunction.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Sprintf.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Fix.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Floor.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Mod.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Ceil.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Cross3.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Diag.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingfile\TFSMagicNumbers.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\trackingfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\trackingfile\TrackingFileSet.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\trackingfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DopplerAdapter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\DSNRangeAdapter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\GNDopplerAdapter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\PointRangeRateAdapterKps.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\RangeAdapterKm.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\RangeRateAdapterKps.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\TDRSDopplerAdapter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\adapter\TrackingDataAdapter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmErrorHandler.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmObType.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\tdmReader\TdmReadWriter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\DataFilter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticAcceptFilter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\datafilter\StatisticRejectFilter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\FileUpdaterSVN.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\IFileUpdater.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\FileUpdateDialog.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\MeasurementModelBase.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\signal\PhysicalSignal.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SignalBase.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SignalData.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\signal\SinglePointSignal.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementmodel\MeasureModel.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\reporter\ProgressReporter.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\reporter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatData.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatODDopplerType.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\GmatODType.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\RampTableData.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurementfile\RampTableType.hpp">
+      <Filter>Source Files\plugins\EstimationPlugin\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere\iri2007.h">
+      <Filter>Source Files\plugins\EstimationPlugin\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Strcmp.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Strfind.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Strrep.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\RandomNumber.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Rand.hpp">
+      <Filter>Source Files\base\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator\Code500Propagator.hpp">
+      <Filter>Source Files\plugins\EphemPropagatorPlugin\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\math\Randn.hpp">
+      <Filter>Source Files\base\math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -86,6 +86,7 @@ INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 # source files
 SET(GUI_SRCS 
     app/AboutDialog.cpp
+    app/FileUpdateDialog.cpp
     app/GmatApp.cpp
     app/GmatAppData.cpp
     app/CompareFilesDialog.cpp
@@ -159,6 +160,7 @@ SET(GUI_SRCS
     function/MatlabFunctionSetupPanel.cpp
     hardware/BurnThrusterPanel.cpp
     hardware/PowerSystemConfigPanel.cpp
+    hardware/TankAndMixDialog.cpp
     hardware/ThrusterCoefficientDialog.cpp
     hardware/ThrusterConfigPanel.cpp
     mission/DecoratedTree.cpp

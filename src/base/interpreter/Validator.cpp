@@ -518,6 +518,11 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    if (theFunction != NULL)
       cmd->SetCurrentFunction(theFunction);
    
+   // Allow ObjectProperty in Assignment and Display command (LOJ: 2016.01.26)
+   // Should we allow in Report command also?
+   if (cmd->IsOfType("Assignment") || cmd->IsOfType("Display"))
+      allowObjectProperty = true;
+   
    // Handle Assignment command (LHS = RHS) separately
    if (cmd->IsOfType("Assignment"))
    {
@@ -806,9 +811,16 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
                }
                else
                {
-                  theErrorMsg = "The Array \"" + arrayName + "\"" + " does not exist";
-                  skipErrorMessage = true;
-                  HandleError();
+                  // Check if it is string function call such as: sprintf('arr33 = [%s]', arr33)
+                  // Figure out how to get list of builtin functions (LOJ: 2016.03.04)
+                  MessageInterface::ShowMessage("===> Check if it is string function call\n");
+                  bool isValid = GmatStringUtil::IsValidFunctionCall(theDescription);
+                  if (!isValid)
+                  {
+                     theErrorMsg = "The Array \"" + arrayName + "\"" + " does not exist";
+                     skipErrorMessage = true;
+                     HandleError();
+                  }
                }
             }
             else if (!(p->IsOfType(Gmat::ARRAY)) )
@@ -1226,14 +1238,46 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
       rhs = GmatStringUtil::RemoveLastString(rhs, ";");
       if (GmatStringUtil::HasMissingQuote(rhs, "'"))
       {
-         std::string fnName;
-         if (theFunction)
-            fnName = "GmatFunction \"" + theFunction->GetFunctionPathAndName() + "\"";
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage
+            ("   Checking rhs if it is string function call which can pass string literals\n");
+         #endif
+         // Do prelimary check if it is string function call. String litereral
+         // can be passed to string function such as '   my string ...' (LOJ: 2016.02.16)
          
-         theErrorMsg = "Assignment command has missing end quote on the "
-            "right-hand-side in " + fnName + "\n   \"" +
-            cmd->GetGeneratingString(Gmat::NO_COMMENTS) + "\"";
-         return HandleError();
+         bool isValid = GmatStringUtil::IsValidFunctionCall(rhs);
+         if (!isValid)
+         {
+            #if DBGLVL_WRAPPERS > 1
+            MessageInterface::ShowMessage
+               ("   Checking rhs by comma and parenthesis since it may have multiple arguments\n");
+            #endif
+            // Separate rhs by comma since it may have multiple arguments for function (LOJ: 2016.02.18)
+            StringArray items = GmatStringUtil::SeparateBy(rhs, "(,)");
+            for (unsigned int jj = 0; jj < items.size(); jj++)
+            {
+               #if DBGLVL_WRAPPERS > 1
+               MessageInterface::ShowMessage("   items[%d] = '%s'\n", jj, items[jj].c_str());
+               #endif
+               if (GmatStringUtil::HasMissingQuote(items[jj], "'"))
+               {
+                  std::string fnName;
+                  if (theFunction)
+                     fnName = "GmatFunction \"" + theFunction->GetFunctionPathAndName() + "\"";
+                  
+                  theErrorMsg = "Assignment command has missing end quote on the "
+                     "right-hand-side in " + fnName + "\n   \"" +
+                     cmd->GetGeneratingString(Gmat::NO_COMMENTS) + "\"";
+                  return HandleError();
+               }
+            }
+         }
+      }
+      else
+      {
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage("   <%s> has no quotes or has matching quotes\n", rhs.c_str());
+         #endif
       }
    }
    

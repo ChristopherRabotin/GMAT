@@ -52,7 +52,7 @@ public:
    virtual ~ObjectPropertyWrapper();
    
    virtual ElementWrapper*     Clone() const;
-
+   virtual std::string         ToString();
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual const StringArray&  GetRefObjectNames();
@@ -65,6 +65,7 @@ public:
    
    virtual Real                EvaluateReal() const;
    virtual bool                SetReal(const Real toValue);
+   virtual bool                SetArray(const Rmatrix &toValue); 
    virtual bool                SetRvector(const Rvector &toValue);
    virtual std::string         EvaluateString() const;
    virtual bool                SetString(const std::string &toValue); 
@@ -76,8 +77,7 @@ public:
    virtual bool                SetInteger(const Integer toValue); 
    virtual bool                SetObject(GmatBase* obj);
    
-   const Integer               GetPropertyId();
-   const StringArray&          GetPropertyNames();
+   Integer                     GetPropertyId();   const StringArray&          GetPropertyNames();
    
    virtual bool                TakeRequiredAction() const;
 

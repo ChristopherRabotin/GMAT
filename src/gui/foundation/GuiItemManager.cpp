@@ -53,7 +53,9 @@
 
 //#define DEBUG_LOAD_ICON
 //#define DEBUG_GUI_ITEM_VALIDATE
+//#define DEBUG_OBJECT_TYPE_COMBOBOX
 //#define DEBUG_PROPERTY_LISTBOX
+//#define DEBUG_PARAM_SIZER 2
 //#define DBGLVL_GUI_ITEM 1
 //#define DBGLVL_GUI_ITEM_UPDATE 2
 //#define DBGLVL_GUI_ITEM_REG 1
@@ -77,7 +79,6 @@
 //#define DBGLVL_GUI_ITEM_FM 2
 //#define DBGLVL_GUI_ITEM_ALL_OBJECT 2
 //#define DBGLVL_SC_LISTBOX 2
-//#define DEBUG_PARAM_SIZER 2
 
 //------------------------------
 // static data
@@ -1498,6 +1499,20 @@ void GuiItemManager::UnregisterListBox(const wxString &type, wxListBox *lb,
       if (pos2 != mImpBurnExcList.end())
          mImpBurnExcList.erase(pos2);
    }
+   else if (type == "FiniteBurn")
+   {
+      std::vector<wxListBox*>::iterator pos1 =
+         find(mFiniteBurnLBList.begin(), mFiniteBurnLBList.end(), lb);
+      
+      if (pos1 != mFiniteBurnLBList.end())
+         mFiniteBurnLBList.erase(pos1);
+      
+      std::vector<wxArrayString*>::iterator pos2 =
+         find(mFiniteBurnExcList.begin(), mFiniteBurnExcList.end(), excList);
+      
+      if (pos2 != mFiniteBurnExcList.end())
+         mFiniteBurnExcList.erase(pos2);
+   }
    else if (type == "Hardware")
    {
       std::vector<wxListBox*>::iterator pos1 =
@@ -1968,13 +1983,23 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
       #endif
       return array;
    }
-   else if (objTypeName == "ImpulsiveBurn")
+   else if (objTypeName == "ImpulsiveBurn" )
    {
       // for now all impulsive burn parameters are reportable and plottable
       array = theImpBurnPropertyList;
       #if DBGLVL_GUI_ITEM_PROPERTY
       MessageInterface::ShowMessage
          ("GuiItemManager::GetPropertyList() returning ImpulsiveBurn properties\n");
+      #endif
+      return array;
+   }
+   else if (objTypeName == "FiniteBurn" )
+   {
+      // for now all finite burn parameters are reportable and plottable
+      array = theFiniteBurnPropertyList;
+      #if DBGLVL_GUI_ITEM_PROPERTY
+      MessageInterface::ShowMessage
+         ("GuiItemManager::GetPropertyList() returning FiniteBurn properties\n");
       #endif
       return array;
    }
@@ -3549,6 +3574,59 @@ wxListBox* GuiItemManager::GetImpBurnListBox(wxWindow *parent, wxWindowID id,
 
 
 //------------------------------------------------------------------------------
+// wxListBox* GetFiniteBurnListBox(wxWindow *parent, wxWindowID id, ...)
+//------------------------------------------------------------------------------
+/**
+ * @return Available FiniteBurn ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetFiniteBurnListBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size,
+                                                wxArrayString *excList,
+                                                bool multiSelect)
+{
+   wxArrayString emptyList;
+   wxListBox *finiteBurnListBox = NULL;
+   
+   if (multiSelect)
+   {
+      finiteBurnListBox = new wxListBox(parent, id, wxDefaultPosition, size,
+                                     emptyList, wxLB_EXTENDED|wxLB_SORT|wxLB_HSCROLL);
+   }
+   else
+   {
+      finiteBurnListBox = new wxListBox(parent, id, wxDefaultPosition, size,
+                                     emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
+   }
+   
+   if (excList != NULL && excList->GetCount() > 0)
+   {
+      for (int i=0; i<theNumFiniteBurn; i++)
+      {
+         if (excList->Index(theFiniteBurnList[i]) == wxNOT_FOUND)
+            finiteBurnListBox->Append(theFiniteBurnList[i]);
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumFiniteBurn; i++)
+         finiteBurnListBox->Append(theFiniteBurnList[i]);
+   }
+   
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mFiniteBurnLBList.push_back(finiteBurnListBox);
+   mFiniteBurnExcList.push_back(excList);
+   
+   if (!multiSelect)
+      finiteBurnListBox->SetSelection(0);
+   
+   return finiteBurnListBox;
+}
+
+
+//------------------------------------------------------------------------------
 // wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
 //            const wxString &objType, int showOption, bool showSettableOnly = false,
 //            bool multiSelect = false, bool forStopCondition = false)
@@ -4216,11 +4294,11 @@ wxSizer* GuiItemManager::CreateParameterSizer
    // Object type and list
    //-----------------------------------------------------------------
    wxStaticText *objectTypeStaticText =
-      new wxStaticText(parent, -1, "Object "GUI_ACCEL_KEY"Type",
+      new wxStaticText(parent, -1, "Object " GUI_ACCEL_KEY "Type",
                        wxDefaultPosition, wxDefaultSize, 0);
    
    *entireObjCheckBox =
-      new wxCheckBox(parent, entireObjCheckBoxId, "Select "GUI_ACCEL_KEY"Entire Object");
+      new wxCheckBox(parent, entireObjCheckBoxId, "Select " GUI_ACCEL_KEY "Entire Object");
    (*entireObjCheckBox)->SetToolTip(pConfig->Read(_T("SelectEntireObjectHint")));
 
    if (showObjectOption == 0)
@@ -4398,7 +4476,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    else
    {
       wxStaticText *propertyStaticText =
-         new wxStaticText(parent, -1, "Object "GUI_ACCEL_KEY"Properties",
+         new wxStaticText(parent, -1, "Object " GUI_ACCEL_KEY "Properties",
                           wxDefaultPosition, wxDefaultSize, 0);
       
       *propertyListBox = 
@@ -4407,7 +4485,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       (*propertyListBox)->SetToolTip(pConfig->Read(_T("ObjectPropertiesHint")));
       
       *coordSysLabel =
-         new wxStaticText(parent, -1, "Coordinate "GUI_ACCEL_KEY"System",
+         new wxStaticText(parent, -1, "Coordinate " GUI_ACCEL_KEY "System",
                           wxDefaultPosition, wxDefaultSize, 0);
       
       *coordSysComboBox =
@@ -4454,7 +4532,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       (*downButton)->Disable();
    
    *addButton = new wxButton
-      (parent, addButtonId, "-"GUI_ACCEL_KEY">", wxDefaultPosition, buttonSize, 0);
+      (parent, addButtonId, "-" GUI_ACCEL_KEY ">", wxDefaultPosition, buttonSize, 0);
    (*addButton)->SetToolTip(pConfig->Read(_T("AddSelectedHint"),"Add Selected Item(s)"));
    
    *removeButton = new wxButton
@@ -4468,7 +4546,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       (*addAllButton)->Disable();
    
    *removeAllButton = new wxButton
-      (parent, removeAllButtonId, "<"GUI_ACCEL_KEY"=", wxDefaultPosition, buttonSize, 0);
+      (parent, removeAllButtonId, "<" GUI_ACCEL_KEY "=", wxDefaultPosition, buttonSize, 0);
    (*removeAllButton)->SetToolTip(pConfig->Read(_T("RemoveAllHint"),"Remove All Items"));
    
    //----- arrowButtonsBoxSizer
@@ -4486,7 +4564,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    // Selected values
    //-----------------------------------------------------------------
    wxStaticText *selectedLabel =
-      new wxStaticText(parent, -1, "Selected "GUI_ACCEL_KEY"Value(s)",
+      new wxStaticText(parent, -1, "Selected " GUI_ACCEL_KEY "Value(s)",
                        wxDefaultPosition, wxDefaultSize, 0);
    
    wxArrayString emptyList;
@@ -4849,9 +4927,14 @@ void GuiItemManager::UpdatePropertyList()
          else if (objectType == Gmat::IMPULSIVE_BURN)
          {
             // update ImpulsiveBurn property list
-            // Do no add depreciated Parameters
+            // Do not add depreciated Parameters
             if (items[i] != "V" && items[i] != "N" && items[i] != "B")
                theImpBurnPropertyList.Add(items[i].c_str());
+         }
+         else if (objectType == Gmat::FINITE_BURN)
+         {
+            // update FiniteBurn property list
+            theFiniteBurnPropertyList.Add(items[i].c_str());
          }
       }
    }
@@ -4859,6 +4942,7 @@ void GuiItemManager::UpdatePropertyList()
    theNumScProperty      = theScPropertyList.GetCount();
    theNumSpacePtProperty = theSpacePointPropertyList.GetCount();
    theNumImpBurnProperty = theImpBurnPropertyList.GetCount();
+   theNumFiniteBurnProperty = theFiniteBurnPropertyList.GetCount();
    
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
@@ -5649,6 +5733,10 @@ void GuiItemManager::UpdateBurnList()
    
    for (int i=0; i<numBurn; i++)
    {
+      #if DBGLVL_GUI_ITEM_BURN
+      MessageInterface::ShowMessage("   items[%d] = '%s'\n", i, items[i].c_str());
+      #endif
+      
       obj = theGuiInterpreter->GetConfiguredObject(items[i]);
       if (obj->GetTypeName() == "ImpulsiveBurn")
       {
@@ -5656,7 +5744,7 @@ void GuiItemManager::UpdateBurnList()
          
          #if DBGLVL_GUI_ITEM_BURN > 1
          MessageInterface::ShowMessage
-            ("   %s added to theImpBurnList\n", theImpBurnList[i].c_str());
+            ("   '%s' added to theImpBurnList\n", theImpBurnList.Last().WX_TO_C_STRING);
          #endif
       }
       else if (obj->GetTypeName() == "FiniteBurn")
@@ -5665,7 +5753,7 @@ void GuiItemManager::UpdateBurnList()
          
          #if DBGLVL_GUI_ITEM_BURN > 1
          MessageInterface::ShowMessage
-            ("   %s added to theFiniteBurnList\n", theFiniteBurnList[i].c_str());
+            ("   '%s' added to theFiniteBurnList\n", theFiniteBurnList.Last().WX_TO_C_STRING);
          #endif
       }
    }

@@ -35,7 +35,9 @@
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"
 #include "ThrusterCoefficientDialog.hpp"
+#include "TankAndMixDialog.hpp"
 #include "GmatStaticBoxSizer.hpp"
+#include "Rmatrix.hpp"
 #include <wx/variant.h>
 #include <wx/config.h>
 
@@ -43,6 +45,7 @@
 //#define DEBUG_BURNPANEL_LOAD
 //#define DEBUG_BURNPANEL_SAVE
 //#define DEBUG_BURNPANEL_SAVE_COEFS
+
 
 //------------------------------
 // event tables for wxWindows
@@ -86,7 +89,6 @@ BurnThrusterPanel::BurnThrusterPanel(wxWindow *parent, const wxString &name)
    isTankChanged     = false;
    isTankEmpty       = false;
    coordSysName      = "";
-   tankName          = "";
 
    // thruster only
    // chemical thruster
@@ -105,6 +107,7 @@ BurnThrusterPanel::BurnThrusterPanel(wxWindow *parent, const wxString &name)
    mfCoefNames.clear();
    thrustModel          = "";
    isThrustModelChanged = false;
+   useMixRatio = true;
 }
 
 
@@ -118,7 +121,7 @@ BurnThrusterPanel::~BurnThrusterPanel()
    theGuiManager->UnregisterComboBox("FuelTank", tankComboBox);
 
    if (localObject != NULL)
-	 delete localObject;
+      delete localObject;
 }
 
 //-------------------------------
@@ -208,7 +211,7 @@ void BurnThrusterPanel::Create()
    
    // ThrustDirection1
    XUnitLabel = new wxStaticText(this, ID_TEXT, gmatwxT(""));
-   XLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"1"));
+   XLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection" GUI_ACCEL_KEY "1"));
    elem1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                       wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -218,7 +221,7 @@ void BurnThrusterPanel::Create()
    YUnitLabel =
       new wxStaticText(this, ID_TEXT, gmatwxT(""));
    YLabel =
-      new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"2"),
+      new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection" GUI_ACCEL_KEY "2"),
                         wxDefaultPosition,wxDefaultSize, 0);
    elem2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
@@ -227,7 +230,7 @@ void BurnThrusterPanel::Create()
    
    // ThrustDirection3
    ZUnitLabel = new wxStaticText(this, ID_TEXT, gmatwxT(""));
-   ZLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"3"));
+   ZLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection" GUI_ACCEL_KEY "3"));
    elem3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -240,7 +243,7 @@ void BurnThrusterPanel::Create()
    {
       // Thruster Duty Cycle
       dutyCycleLabel =
-         new wxStaticText(this, ID_TEXT, gmatwxT("Duty "GUI_ACCEL_KEY"Cycle"));
+         new wxStaticText(this, ID_TEXT, gmatwxT("Duty " GUI_ACCEL_KEY "Cycle"));
       dutyCycleTextCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -248,7 +251,7 @@ void BurnThrusterPanel::Create()
       
       // Thruster Scale Factor
       scaleFactorLabel =
-         new wxStaticText(this, ID_TEXT, gmatwxT("Thrust "GUI_ACCEL_KEY"Scale Factor"));
+         new wxStaticText(this, ID_TEXT, gmatwxT("Thrust " GUI_ACCEL_KEY "Scale Factor"));
       scaleFactorTextCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -295,11 +298,39 @@ void BurnThrusterPanel::Create()
    
    //Tank
    tankLabel =
-      new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Tank"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Tanks"));
+
+   // Use one or the other of these, depending on if mix ratios are active
+   tankTxtCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
+            wxDefaultPosition, wxSize(150,-1), 0);
+   tankTxtCtrl->SetToolTip(pConfig->Read(_T("TankHint")));
+   
    tankComboBox =
       theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    tankComboBox->SetToolTip(pConfig->Read(_T("TankHint")));
-   
+
+   // Sizer for the tank widgets
+   wxBoxSizer *tankSizer = new wxBoxSizer(wxVERTICAL);
+   tankSizer->Add(tankTxtCtrl, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL,
+         bsize);
+   tankSizer->Add(tankComboBox, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL,
+         bsize);
+   // Default to using mix ratio
+   tankComboBox->Hide();
+
+   mixRatioLabel =
+         new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Mix Ratio"));
+   mixRatioTxtCtrl = new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
+         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mixRatioTxtCtrl->SetToolTip(pConfig->Read(_T("DutyCycleHint")));
+
+   tankTxtCtrl->SetEditable(false);
+   mixRatioTxtCtrl->SetEditable(false);
+
+   tankSelectorButton = new wxButton(this, ID_BUTTON, gmatwxT(GUI_ACCEL_KEY"Select Tanks"));
+   tankSelectorButton->SetToolTip(pConfig->Read(_T("TankHint")));
+
    ispLabel = NULL;
    ispTextCtrl = NULL;
    ispUnit = NULL;
@@ -329,11 +360,11 @@ void BurnThrusterPanel::Create()
    // Coefficients for Thruster only
    if (theObject->IsOfType(Gmat::THRUSTER))
    {
-//      cCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit "GUI_ACCEL_KEY"Thruster Coef."));
+//      cCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit " GUI_ACCEL_KEY "Thruster Coef."));
 //      cCoefButton->SetToolTip(pConfig->Read(_T("EditThrusterCoefficientHint")));
-//      kCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit "GUI_ACCEL_KEY"Impulse Coef."));
+//      kCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit " GUI_ACCEL_KEY "Impulse Coef."));
 //      kCoefButton->SetToolTip(pConfig->Read(_T("EditImpulseCoefficientHint")));
-      configButton = new wxButton(this, ID_BUTTON, gmatwxT(""GUI_ACCEL_KEY"Configure Polynomials"));
+      configButton = new wxButton(this, ID_BUTTON, gmatwxT("" GUI_ACCEL_KEY "Configure Polynomials"));
       configButton->SetToolTip(pConfig->Read(_T("ConfigPolynomialsHint")));
    }
    
@@ -352,9 +383,18 @@ void BurnThrusterPanel::Create()
    massSizer->Add(20,20);
    
    massSizer->Add(tankLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
-   massSizer->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   massSizer->Add(20,20);
+
+   // Add in the sizer for the tank controls here
+   massSizer->Add(tankSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+//   massSizer->Add(tankTxtCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+//   massSizer->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   massSizer->Add(tankSelectorButton, 0, wxALIGN_LEFT | wxALL, bsize);
+   massSizer->Add(mixRatioLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+   massSizer->Add(mixRatioTxtCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   massSizer->Add(20, 0);
    
+
    if (theObject->IsOfType(Gmat::IMPULSIVE_BURN))
    {
       massSizer->Add(ispLabel, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
@@ -384,7 +424,7 @@ void BurnThrusterPanel::Create()
       electricBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Thrust Config.");
       // Thrust Model
       thrustModelTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT("Thrust "GUI_ACCEL_KEY"Model"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Thrust " GUI_ACCEL_KEY "Model"),
                            wxDefaultPosition, wxDefaultSize, 0);
       StringArray thrustModels = theObject->GetPropertyEnumStrings("ThrustModel");
       Integer numModels = thrustModels.size();
@@ -400,10 +440,10 @@ void BurnThrusterPanel::Create()
 
       // Minimum and Maximum Usable Power
       minPowerTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT("Mi"GUI_ACCEL_KEY"nimum Usable Power"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Mi" GUI_ACCEL_KEY "nimum Usable Power"),
                            wxDefaultPosition, wxDefaultSize, 0);
       maxPowerTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT("Ma"GUI_ACCEL_KEY"ximum Usable Power"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Ma" GUI_ACCEL_KEY "ximum Usable Power"),
                            wxDefaultPosition, wxDefaultSize, 0);
       minPowerTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
@@ -419,13 +459,13 @@ void BurnThrusterPanel::Create()
 
       // Efficiency and ISP and Constant Thrust
       efficiencyTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Fixed Efficiency"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("" GUI_ACCEL_KEY "Fixed Efficiency"),
                            wxDefaultPosition, wxDefaultSize, 0);
       ispTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Isp"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("" GUI_ACCEL_KEY "Isp"),
                            wxDefaultPosition, wxDefaultSize, 0);
       constantThrustTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Constant Thrust"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("" GUI_ACCEL_KEY "Constant Thrust"),
                            wxDefaultPosition, wxDefaultSize, 0);
       efficiencyTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
@@ -552,29 +592,60 @@ void BurnThrusterPanel::LoadData()
       gravityAccelTextCtrl->SetValue((wxVariant(theObject->GetRealParameter(paramID))));
       
       paramID = theObject->GetParameterID("Tank");
-      StringArray tanks = theObject->GetStringArrayParameter(paramID);   
-      
-      if (tanks.empty())
+      tankNames = theObject->GetStringArrayParameter(paramID);
+
+      if (useMixRatio)
       {
-         if (theGuiManager->GetNumFuelTank() > 0)
-         {
-            tankComboBox->Insert("No Fuel Tank Selected", 0);
-            tankComboBox->SetSelection(0);
-         }
+         paramID = theObject->GetParameterID("MixRatio");
+         Rvector theMix = theObject->GetRvectorParameter(paramID);
+         for (Integer i = 0; i < theMix.GetSize(); ++i)
+            if (i < tankNames.size())
+               mixRatio.push_back(theMix[i]);
+            if (theMix.GetSize() < tankNames.size())
+               for (Integer i = theMix.GetSize(); i < tankNames.size(); ++i)
+                  mixRatio.push_back(1.0);
+
+         LoadTankAndMixControl();
       }
       else
       {
-         tankName = tanks[0];
-         tankComboBox->SetValue(STD_TO_WX_STRING(tankName.c_str()));
-         isTankEmpty = false;
+         if (tankNames.empty())
+         {
+            if (theGuiManager->GetNumFuelTank() > 0)
+            {
+               tankComboBox->Insert("No Fuel Tank Selected", 0);
+               tankComboBox->SetSelection(0);
+            }
+         }
+         else
+         {
+            tankComboBox->SetValue(STD_TO_WX_STRING(tankNames[0].c_str()));
+            isTankEmpty = false;
+         }
+
+         tankTxtCtrl->SetEditable(true);
+         if (tankNames.size() > 0)
+         {
+            if (tankNames.size() > 1)
+               MessageInterface::ShowMessage("Only one tank name is allowed");
+            tankTxtCtrl->SetValue(tankNames[0].c_str());
+         }
+         mixRatioTxtCtrl->Hide();
+         tankTxtCtrl->Hide();
+         tankComboBox->Show();
+         tankSelectorButton->Hide();
+         mixRatioLabel->Hide();
       }
       
       // Disable tank combo box if decrement mass is not checked
       if (!decMassCheckBox->IsChecked())
       {
          // Tanks needed to apply nontrivial coefficients, so don't disable
-         //tankLabel->Disable();
-         //tankComboBox->Disable();
+         tankLabel->Disable();
+         tankTxtCtrl->Disable();
+//         tankComboBox->Disable();
+         mixRatioTxtCtrl->Disable();
+         mixRatioLabel->Disable();
 
          // g is only used to decrement mass
          gravityAccelLabel->Disable();
@@ -686,16 +757,36 @@ void BurnThrusterPanel::LoadData()
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::SaveData()
 {
-   #ifdef DEBUG_BURNPANEL_SAVE
+#ifdef DEBUG_BURNPANEL_SAVE
    MessageInterface::ShowMessage("BurnThrusterPanel::SaveData() entered\n");
-   #endif
+#endif
    // create local copy of mObject
    if (localObject != NULL)
    {
-	   delete localObject;
+      delete localObject;
    }
    localObject = mObject->Clone();
    SaveData(localObject);
+   localObject->TakeAction("ClearTanks");
+
+   if (useMixRatio)
+   {
+      for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+         localObject->SetStringParameter("Tank", tankNames[i]);
+      for (UnsignedInt i = 0; i < mixRatio.size(); ++i)
+         localObject->SetRealParameter("MixRatio", mixRatio[i], i);
+   }
+   else
+   {
+      #ifdef DEBUG_BURNPANEL_SAVE
+         MessageInterface::ShowMessage("Setting tank to '%s'\n",
+               tankTxtCtrl->GetValue().mb_str().data());
+      #endif
+      std::string tankName = tankComboBox->GetValue().mb_str().data();
+      if ((tankName != "No Fuel Tank Selected") &&
+          (tankName != "No Fuel Tank Available"))
+         localObject->SetStringParameter("Tank", tankName);
+   }
 
    // if no errors, save again
    if (canClose)
@@ -708,7 +799,7 @@ void BurnThrusterPanel::SaveData()
 
    
 //------------------------------------------------------------------------------
-// void SaveData()
+// void SaveData(GmatBase *theObject)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::SaveData(GmatBase *theObject)
 {
@@ -810,10 +901,30 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
       {
          isTankChanged = false;
          paramID = theObject->GetParameterID("Tank");
-         
          if (theObject->TakeAction("ClearTanks", ""))
-            if (tankName != "")
-               theObject->SetStringParameter(paramID, tankName);
+         {
+            if (useMixRatio)
+            {
+               Integer mixID   = theObject->GetParameterID("MixRatio");
+               for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+               {
+                  theObject->SetStringParameter(paramID, tankNames[i]);
+                  theObject->SetRealParameter(mixID,
+                        (mixRatio.size() < i ? mixRatio[i] : 1.0), i);
+               }
+            }
+            else
+            {
+               #ifdef DEBUG_BURNPANEL_SAVE
+                  MessageInterface::ShowMessage("Setting tank to '%s'\n",
+                        tankTxtCtrl->GetValue().mb_str().data());
+               #endif
+               std::string tankName = tankComboBox->GetValue().mb_str().data();
+               if ((tankName != "No Fuel Tank Selected") &&
+                   (tankName != "No Fuel Tank Available"))
+                  localObject->SetStringParameter("Tank", tankName);
+            }
+         }
       }
 
       if (theObject->IsOfType(Gmat::THRUSTER))
@@ -896,6 +1007,8 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::OnTextChange(wxCommandEvent &event)
 {
+   if (event.GetEventObject() == tankTxtCtrl)
+      isTankChanged = true;
    EnableUpdate(true);
 }
 
@@ -907,8 +1020,11 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
    if (decMassCheckBox->IsChecked())
    {
       // Disabling disabled so no need to enable
-      //tankLabel->Enable();
-      //tankComboBox->Enable();
+      tankLabel->Enable();
+      tankTxtCtrl->Enable();
+//      tankComboBox->Enable();
+      mixRatioTxtCtrl->Enable();
+      mixRatioLabel->Enable();
 
       // g is only used to decrement mass
       gravityAccelLabel->Enable();
@@ -925,8 +1041,11 @@ void BurnThrusterPanel::OnCheckBoxChange(wxCommandEvent& event)
    else
    {
       // Tanks needed to apply nontrivial coefficients, so don't disable
-      //tankLabel->Disable();
-      //tankComboBox->Disable();
+      tankLabel->Disable();
+      tankTxtCtrl->Disable();
+//      tankComboBox->Disable();
+      mixRatioTxtCtrl->Disable();
+      mixRatioLabel->Disable();
 
       // g is only used to decrement mass
       gravityAccelLabel->Disable();
@@ -959,9 +1078,9 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
    else if (event.GetEventObject() == tankComboBox)
    {
       isTankChanged = true;
-      tankName = tankComboBox->GetStringSelection().WX_TO_STD_STRING;
+      std::string tankName = tankComboBox->GetStringSelection().WX_TO_STD_STRING;
       if (tankName == "No Fuel Tank Selected")
-         tankName = "";
+         tankNames.clear();
       
       // remove "No Tank Selected" once tank is selected
       int pos = tankComboBox->FindString("No Fuel Tank Selected");
@@ -1005,89 +1124,99 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::OnButtonClick(wxCommandEvent &event)
 {  
-//   bool isModified = false;
-//   if (event.GetEventObject() == cCoefButton)
-//   {
-//      ThrusterCoefficientDialog tcDlg(this, -1, "ThrusterCoefficientDialog", theObject, "C", cCoefs);
-//      tcDlg.ShowModal();
-//      isModified = tcDlg.AreCoefsSaved();
-//      if (isModified)
-//      {
-//         cCoefs.clear();
-//         cCoefs      = tcDlg.GetCoefValues();
-//
-//         EnableUpdate(true);
-//      }
-//      areCCoefsChanged = areCCoefsChanged || isModified;
-//   }
-//   else if (event.GetEventObject() == kCoefButton)
-//   {
-//      ThrusterCoefficientDialog tcDlg(this, -1, "ImpulseCoefficientDialog", theObject, "K", kCoefs);
-//      tcDlg.ShowModal();
-//      isModified = tcDlg.AreCoefsSaved();
-//      if (isModified)
-//      {
-//         kCoefs.clear();
-//         kCoefs      = tcDlg.GetCoefValues();
-//
-//         EnableUpdate(true);
-//      }
-//      areKCoefsChanged = areKCoefsChanged || isModified;
-//   }
-
-   if (theObject->IsOfType("ChemicalThruster"))
+   if (event.GetEventObject() == tankSelectorButton)
    {
-      ThrusterCoefficientDialog tcDlg(this, -1, "Chemical Thruster Configuration",
-            theObject, ChemicalThruster::COEFFICIENT_COUNT, cCoefs, kCoefs);
-      tcDlg.ShowModal();
-      bool cSaved = tcDlg.AreCoefs1Saved();
-      bool kSaved = tcDlg.AreCoefs2Saved();
-
-      if (cSaved)
+      if (mixRatio.size() < tankNames.size())
       {
-         cCoefs.clear();
-         cCoefs      = tcDlg.GetCoefs1Values();
-
-         EnableUpdate(true);
+         RealArray newRatio;
+         for (Integer i = 0; i < tankNames.size(); ++i)
+         {
+            if (i < mixRatio.size())
+               newRatio.push_back(mixRatio[i]);
+            else
+               newRatio.push_back(1.0);
+         }
+         mixRatio = newRatio;
       }
-      areCCoefsChanged = areCCoefsChanged || cSaved;
+      wxArrayString tankNamesWx;
+      wxArrayDouble mixRatioWx;
 
-      if (kSaved)
+      for (UnsignedInt i = 0; i < tankNames.size(); ++i)
       {
-         kCoefs.clear();
-         kCoefs      = tcDlg.GetCoefs2Values();
-
-         EnableUpdate(true);
+         tankNamesWx.Add(tankNames[i].c_str());
+         mixRatioWx.Add(mixRatio[i]);
       }
-      areKCoefsChanged = areKCoefsChanged || kSaved;
+      TankAndMixDialog tmDlg(this, tankNamesWx, mixRatioWx);
+      tmDlg.ShowModal();
+      // Pop the data back off
+      if (tmDlg.UpdateTankAndMixArrays(tankNamesWx, mixRatioWx))
+      {
+         tankNames.clear();
+         mixRatio.clear();
+         for (UnsignedInt i = 0; i < tankNamesWx.size(); ++i)
+         {
+            tankNames.push_back(tankNamesWx[i].mb_str().data());
+            mixRatio.push_back(mixRatioWx[i]);
+         }
+         LoadTankAndMixControl();
+      }
    }
-   else // ElectricThruster
+   else
    {
-//      MessageInterface::ShowMessage("Electric Thruster Configuration not yet implemented.\n");
-      ThrusterCoefficientDialog tcDlg(this, -1, "Electric Thruster Configuration",
-            theObject, ElectricThruster::ELECTRIC_COEFF_COUNT, tCoefs, mfCoefs);
-      tcDlg.ShowModal();
-
-      bool tSaved  = tcDlg.AreCoefs1Saved();
-      bool mfSaved = tcDlg.AreCoefs2Saved();
-
-      if (tSaved)
+      if (theObject->IsOfType("ChemicalThruster"))
       {
-         tCoefs.clear();
-         tCoefs      = tcDlg.GetCoefs1Values();
+         ThrusterCoefficientDialog tcDlg(this, -1, "Chemical Thruster Configuration",
+               theObject, ChemicalThruster::COEFFICIENT_COUNT, cCoefs, kCoefs);
+         tcDlg.ShowModal();
+         bool cSaved = tcDlg.AreCoefs1Saved();
+         bool kSaved = tcDlg.AreCoefs2Saved();
 
-         EnableUpdate(true);
+         if (cSaved)
+         {
+            cCoefs.clear();
+            cCoefs      = tcDlg.GetCoefs1Values();
+
+            EnableUpdate(true);
+         }
+         areCCoefsChanged = areCCoefsChanged || cSaved;
+
+         if (kSaved)
+         {
+            kCoefs.clear();
+            kCoefs      = tcDlg.GetCoefs2Values();
+
+            EnableUpdate(true);
+         }
+         areKCoefsChanged = areKCoefsChanged || kSaved;
       }
-      areTCoefsChanged = areTCoefsChanged || tSaved;
-
-      if (mfSaved)
+      else // ElectricThruster
       {
-         mfCoefs.clear();
-         mfCoefs      = tcDlg.GetCoefs2Values();
+   //      MessageInterface::ShowMessage("Electric Thruster Configuration not yet implemented.\n");
+         ThrusterCoefficientDialog tcDlg(this, -1, "Electric Thruster Configuration",
+               theObject, ElectricThruster::ELECTRIC_COEFF_COUNT, tCoefs, mfCoefs);
+         tcDlg.ShowModal();
 
-         EnableUpdate(true);
+         bool tSaved  = tcDlg.AreCoefs1Saved();
+         bool mfSaved = tcDlg.AreCoefs2Saved();
+
+         if (tSaved)
+         {
+            tCoefs.clear();
+            tCoefs      = tcDlg.GetCoefs1Values();
+
+            EnableUpdate(true);
+         }
+         areTCoefsChanged = areTCoefsChanged || tSaved;
+
+         if (mfSaved)
+         {
+            mfCoefs.clear();
+            mfCoefs      = tcDlg.GetCoefs2Values();
+
+            EnableUpdate(true);
+         }
+         areMFCoefsChanged = areMFCoefsChanged || mfSaved;
       }
-      areMFCoefsChanged = areMFCoefsChanged || mfSaved;
    }
 }
 
@@ -1166,3 +1295,47 @@ void BurnThrusterPanel::EnableDataForThrustModel(const std::string &tModel)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// void LoadTankAndMixControl()
+//------------------------------------------------------------------------------
+/**
+ * Updates the tank and mix text controls
+ */
+//------------------------------------------------------------------------------
+void BurnThrusterPanel::LoadTankAndMixControl()
+{
+   std::string tankList;
+   for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+   {
+      if (i > 0)
+         tankList += ", ";
+      tankList += tankNames[i];
+   }
+   tankTxtCtrl->SetValue(tankList.c_str());
+
+   std::stringstream ratio;
+   ratio.precision(14);
+   for (Integer i = 0; i < mixRatio.size(); ++i)
+   {
+      if (i > 0)
+         ratio << " : ";
+      ratio << mixRatio[i];
+   }
+   mixRatioTxtCtrl->SetValue(ratio.str().c_str());
+}
+
+
+//------------------------------------------------------------------------------
+// void BurnThrusterPanel::EnableMixRatio(bool activate)
+//------------------------------------------------------------------------------
+/**
+ * Method used to turn the mix ration controls on or off
+ *
+ * @param activate true to use a mix ratio, false to disable it.
+ */
+//------------------------------------------------------------------------------
+void BurnThrusterPanel::EnableMixRatio(bool activate)
+{
+   useMixRatio = activate;
+}

@@ -39,12 +39,12 @@
 
 #include "gmatdefs.hpp"
 #include "gmatwxdefs.hpp"
-//#include <GL/glu.h>      // GL Utilities
 
 const int   MAXSTARS   = 42101;     // Max Number Stars in arrays
 const int   MAXLINES   = 1600;      // Max Number of Constellation line vertices
 const int   MAXCON     = 90;
-const int   MAXBORDERS = 64000;      // Max Number of Constellation line vertices
+const int   MAXBORDERS = 64000;     // Max Number of Constellation line vertices
+const int   MAXBORDERGROUP = 90;    // Max Number of border groups
 const float STARSTEP   = 0.5f;      // Scale into this size groups
 const int   GROUPCOUNT = 18;        // Number of groups
 
@@ -83,14 +83,14 @@ private:
    int         ConstellationIndex[MAXCON][2]; // The starting and ending indices for each constellation
    int         GroupIndex[GROUPCOUNT];      // Indexes into the m_StarsVA array
    int         GroupCount[GROUPCOUNT];      // # of stars in this group
-   int         BorderGroup[90];
+   //int         BorderGroup[90];
+   int         BorderGroup[MAXBORDERGROUP];
    Real        PointSize[GROUPCOUNT];       // Group GLpointsize
    int         LastGroupUsed;               // Not all groups may be used
    int         MaxDrawStars;                // Not Array Size
    int         DesiredStarCount;            // DesiredStars, if we want it to be adjustable
    int         NumLines;                    // Number of constellation lines loaded
    int         NumConstellations;           // Number of constellations loaded
-   int         NumBorders;                  // Number of constellation lines loaded
    int         BorderGroupCount;
    static      GLStars* theInstance;        // The singleton instance of the Stars
 };

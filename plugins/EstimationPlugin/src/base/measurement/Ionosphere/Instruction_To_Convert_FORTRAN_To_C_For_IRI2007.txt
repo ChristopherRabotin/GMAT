@@ -1,0 +1,19 @@
+INSTRUCTION TO CONVERT IRI2007 FORTRAN CODE TO C CODE
+
+I. Bug fix in IRIR FORTRAN code:
+
+.Step 1: Modify IRI2007 FORTRAN code if needed (for bugs fix)
+.Step 2: Compile FORTRAN code and run a test to make sure the bug is fixed
+
+
+
+II. Convert IRI2007 FORTRAN code to C code
+
+.Step 1: Copy all code from cira.f, igrf.f, iridreg.f, irifun.f, iritec.f, irisub.f, 
+         and loadfiles.f to iri2007.f
+.Step 2: Run command 
+              f2c -C++ -a -E  -Nn802 iri2007.f
+.Step 3: Use an editor to repalce all "Extern" key word to "static" in iri2007.c and save the changes   
+.Step 4: Copy iri2007.c file which is generated in step 2 to 
+         GmatDevelopment\plugins\EstimationPlugin\src\base\measurement\Ionosphere folder
+.Step 5: recompile GMAT

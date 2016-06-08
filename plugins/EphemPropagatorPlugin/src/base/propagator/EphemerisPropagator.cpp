@@ -1172,7 +1172,7 @@ void EphemerisPropagator::SetPropStateManager(PropagationStateManager *sm)
 
 
 //------------------------------------------------------------------------------
-// bool EphemerisPropagator::Initialize()
+// bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes the EphemeridPropagator for use during a run

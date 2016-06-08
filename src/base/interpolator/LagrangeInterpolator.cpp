@@ -561,7 +561,7 @@ bool LagrangeInterpolator::Interpolate(const Real ind, Real *results)
  * @return clone of the LagrangeInterpolator.
  */
 //------------------------------------------------------------------------------
-GmatBase* LagrangeInterpolator::Clone() const
+Interpolator* LagrangeInterpolator::Clone() const
 {
    return (new LagrangeInterpolator(*this));
 }

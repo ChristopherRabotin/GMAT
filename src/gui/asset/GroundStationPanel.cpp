@@ -146,7 +146,7 @@ void GroundStationPanel::Create()
    
    // Central Body
    wxStaticText *centralBodyLabel =
-      new wxStaticText( this, ID_TEXT, "Central "GUI_ACCEL_KEY"Body");
+      new wxStaticText( this, ID_TEXT, "Central " GUI_ACCEL_KEY "Body");
    StringArray centralBodyList;
    centralBodyList.push_back("Earth");
    wxArrayString wxCentralBodyLabels = ToWxArrayString(centralBodyList);
@@ -162,7 +162,7 @@ void GroundStationPanel::Create()
    
    // State Type
    wxStaticText *stateTypeLabel =
-      new wxStaticText( this, ID_TEXT, "State "GUI_ACCEL_KEY"Type");
+      new wxStaticText( this, ID_TEXT, "State " GUI_ACCEL_KEY "Type");
    StringArray stateTypeList =
        localGroundStation->GetPropertyEnumStrings(BodyFixedPoint::STATE_TYPE);
    wxArrayString wxStateTypeLabels = ToWxArrayString(stateTypeList);

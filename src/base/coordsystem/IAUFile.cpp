@@ -98,7 +98,7 @@ void IAUFile::Initialize()
    
    FILE* fpt = fopen(iauFileNameFullPath.c_str(), "r");
    if (fpt == NULL)
-      throw GmatBaseException("Error: GMAT cann't open '" + iauFileName + "' file!!!\n");
+      throw GmatBaseException("Error: GMAT can't open '" + iauFileName + "' file!!!\n");
    
 	// Read IAU2000/2006 data from data file and store to buffer:
 	Real t;

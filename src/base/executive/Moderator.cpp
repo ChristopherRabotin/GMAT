@@ -45,8 +45,9 @@
 #include "CelestialBodyFactory.hpp"
 #include "CommandFactory.hpp"
 #include "CoordinateSystemFactory.hpp"
-#include "ODEModelFactory.hpp"
+#include "FunctionFactory.hpp"
 #include "HardwareFactory.hpp"
+#include "ODEModelFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
 #include "PropagatorFactory.hpp"
@@ -80,6 +81,12 @@
 #include <sstream>                  // for stringstream
 #include <algorithm>                // for sort(), set_difference()
 #include <ctime>                    // for clock()
+#include <errno.h>                 
+
+
+#ifdef CREATE_OUTPUT_FOLDER
+#include <sys/stat.h>               // for mkdir
+#endif
 
 // This symbol is only needed for static link build
 #ifdef __INCLUDE_BUILTIN_PLUGINS__
@@ -186,9 +193,11 @@ Moderator* Moderator::Instance()
 
 
 //------------------------------------------------------------------------------
-// bool Initialize(const std::string &startupFile, bool fromGui = false)
+// bool Initialize(const std::string &startupFile, bool fromGui = false,
+//      const std::string &suffix, const StringArray *forEntries)
 //------------------------------------------------------------------------------
-bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
+bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
+      const std::string &suffix, const StringArray *forEntries)
 {
    #if DEBUG_INITIALIZE
    MessageInterface::ShowMessage
@@ -203,9 +212,30 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       // We don't want to write before startup file is read so commented out
       //MessageInterface::ShowMessage("Moderator is reading startup file...\n");
       
-      // Read startup file, Set Log file
+      // Set theFileManager
       theFileManager = FileManager::Instance();
+
+      // Read startup file, Set Log file
       theFileManager->ReadStartupFile(startupFile);
+      if ((suffix != "") && (forEntries != NULL))
+      {
+         theFileManager->AdjustSettings(suffix, *forEntries);
+
+         #ifdef CREATE_OUTPUT_FOLDER
+            // Create the output path if it does not exist
+            std::string outPath = theFileManager->GetPathname("OUTPUT_PATH");
+            if (theFileManager->DoesDirectoryExist(outPath, true) == false)
+            {
+               mkdir(outPath.c_str(), S_IRWXU | S_IRWXG);
+            }
+         #endif
+         MessageInterface::SetLogFile(theFileManager->GetAbsPathname("LOG_FILE"));
+         MessageInterface::ShowMessage("Logging to %s\n", theFileManager->GetAbsPathname("LOG_FILE").c_str());
+      }
+
+      MessageInterface::ShowMessage("Moderator is updating data files...\n");
+      // update data files from repository
+      UpdateDataFiles();
       
       MessageInterface::ShowMessage("Moderator is creating core engine...\n");
       
@@ -244,9 +274,10 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new CalculatedPointFactory());
       theFactoryManager->RegisterFactory(new CommandFactory());
       theFactoryManager->RegisterFactory(new CoordinateSystemFactory());
-      theFactoryManager->RegisterFactory(new ODEModelFactory());
+      theFactoryManager->RegisterFactory(new FunctionFactory());
       theFactoryManager->RegisterFactory(new HardwareFactory());
       theFactoryManager->RegisterFactory(new MathFactory());
+      theFactoryManager->RegisterFactory(new ODEModelFactory());
       theFactoryManager->RegisterFactory(new ParameterFactory());
       theFactoryManager->RegisterFactory(new PhysicalModelFactory());
       theFactoryManager->RegisterFactory(new PropagatorFactory());
@@ -1760,7 +1791,20 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #if DEBUG_RENAME
    MessageInterface::ShowMessage("   Calling theConfigManager->RenameItem()\n");
    #endif
-   bool renamed = theConfigManager->RenameItem(type, oldName, newName);
+   
+   bool renamed = false;
+   try
+   {
+      renamed = theConfigManager->RenameItem(type, oldName, newName);
+   }
+   catch (BaseException &be)
+   {
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("Moderator::RenameObject() caught exception:\n%s\n", be.GetFullMessage().c_str());
+      #endif
+      return false;
+   }
    
    std::vector<Gmat::ObjectType> relatedItemType;
    StringArray relatedOldName;
@@ -3498,7 +3542,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
 {
    bool debugParameter = true;
    #ifdef DEBUG_ONLY_FOR_SCRIPT
-   if (currentScriptFileName == "")
+   if (mainScriptFileName == "")
       debugParameter = false;
    #endif
    
@@ -4101,7 +4145,7 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
 
 // MeasurementModel
 //------------------------------------------------------------------------------
-// MeasurementModel* CreateMeasurementModel(const std::string &name)
+// MeasurementModelBase* CreateMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Creates a new named MeasurementModel and adds it to the configuration
@@ -4111,7 +4155,8 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
  * @return The new MeasurementModel
  */
 //------------------------------------------------------------------------------
-MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
+MeasurementModelBase* Moderator::CreateMeasurementModel(const std::string &type,
+      const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
@@ -4121,7 +4166,8 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
 
    if (GetMeasurementModel(name) == NULL)
    {
-      MeasurementModel *obj = theFactoryManager->CreateMeasurementModel(name);
+      MeasurementModelBase *obj =
+            theFactoryManager->CreateMeasurementModel(type, name);
 
       if (obj == NULL)
       {
@@ -4170,7 +4216,7 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// MeasurementModel* GetMeasurementModel(const std::string &name)
+// MeasurementModelBase* GetMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a measurement model from the configuration
@@ -4180,12 +4226,12 @@ MeasurementModel* Moderator::CreateMeasurementModel(const std::string &name)
  * @return The named MeasurementModel
  */
 //------------------------------------------------------------------------------
-MeasurementModel* Moderator::GetMeasurementModel(const std::string &name)
+MeasurementModelBase* Moderator::GetMeasurementModel(const std::string &name)
 {
    if (name == "")
       return NULL;
    else
-      return (MeasurementModel*)FindObject(name);
+      return (MeasurementModelBase*)FindObject(name);
 }
 
 // TrackingSystem
@@ -6327,6 +6373,49 @@ void Moderator::SetCommandsUnchanged(Integer whichList)
 
 
 //------------------------------------------------------------------------------
+// bool UpdateDataFiles()
+//------------------------------------------------------------------------------
+/**
+ * Validates the command.
+ */
+//------------------------------------------------------------------------------
+bool Moderator::UpdateDataFiles()
+{
+   std::string file = theFileManager->GetStartupFileDir()+IFileUpdater::ShellFile;
+
+   // no update file, continue with running GMAT
+   if (!GmatFileUtil::DoesFileExist(file)) return false;
+
+   bool retValue;
+   try
+   {
+      errno = 0;
+      int ret_value = system(file.c_str());
+      retValue = (ret_value == 0 && errno == 0);
+      if (retValue)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::INFO_, "Data Files have been successfully updated");
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "Data Files were not successfully updated");
+      }
+   }
+   catch (...)
+   {
+   }
+   Integer retCode;
+
+   if (GmatFileUtil::DoesFileExist(file + ".bak"))
+      remove((file + ".bak").c_str());
+   theFileManager->RenameFile(file, file + ".bak", retCode, true);
+   return retValue;
+}
+
+
+//------------------------------------------------------------------------------
 // void ValidateCommand(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
@@ -6690,6 +6779,15 @@ void Moderator::ClearAllSandboxes()
    MessageInterface::ShowMessage
       ("===> There are %d memory tracks after Sandbox clear\n", tracks.size());
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// Sandbox* GetSandbox(Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+Sandbox* Moderator::GetSandbox(Integer sandboxNum)
+{
+   return sandboxes[sandboxNum-1];
 }
 
 
@@ -7074,6 +7172,22 @@ Gmat::RunState Moderator::GetDetailedRunState(Integer sandboxNum)
 
 
 // Script
+
+//------------------------------------------------------------------------------
+// std::string GetMainScriptFileName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the main script file name if it is open.
+ *
+ * @return  The main script file name opened, "" if no script file opened
+ */
+//------------------------------------------------------------------------------
+std::string Moderator::GetMainScriptFileName()
+{
+   return mainScriptFileName;
+}
+
+
 //------------------------------------------------------------------------------
 // bool InterpretScript(const std::string &filename, bool readBack = false,
 //                      const std::string &newPath = "")
@@ -7093,6 +7207,11 @@ Gmat::RunState Moderator::GetDetailedRunState(Integer sandboxNum)
 bool Moderator::InterpretScript(const std::string &filename, bool readBack,
                                 const std::string &newPath)
 {
+   #if DEBUG_INTERPRET
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretScript() entered\n   filename='%s', readBack=%d, "
+       "newPath='%s'\n", filename.c_str(), readBack, newPath.c_str());
+   #endif
    bool isGoodScript = false;
    bool foundBeginMissionSeq = false;
    isRunReady = false;
@@ -7106,7 +7225,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    try
    {
       PrepareNextScriptReading();
-      currentScriptFileName = filename;
+      mainScriptFileName = filename;
       
       // Set GMAT working directory (for GMT-4408 LOJ: 2014.06.11)
       // GMAT working directory has script file
@@ -7296,6 +7415,11 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
 //------------------------------------------------------------------------------
 bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
 {
+   #if DEBUG_INTERPRET
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretScript() entered, istringstream=<%p>, clearObjs=%d\n",
+       ss, clearObjs);
+   #endif
    bool isGoodScript = false;
    isRunReady = false;
    endOfInterpreter = false;
@@ -7340,6 +7464,8 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
    MessageInterface::ShowMessage(GetScript());
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretScript() returning isGoodScript=%d\n", isGoodScript);
    #endif
    
    return isGoodScript;
@@ -7556,7 +7682,7 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
    objectManageOption = 1;
 
    // Reset current script file
-   currentScriptFileName = "";
+   mainScriptFileName = "";
    
    // Clear SpacePoint instance count so that Spacecraft color starts from the
    // same color for each run
@@ -8076,23 +8202,75 @@ void Moderator::CreateDefaultBarycenter()
 //------------------------------------------------------------------------------
 // void CreateDefaultParameters()
 //------------------------------------------------------------------------------
+/**
+ * Creates and sets ref. object of built-in Parameters.
+ *
+ * @note Don't forget to set Parameter object and dependency object below
+ */
+//------------------------------------------------------------------------------
 void Moderator::CreateDefaultParameters()
 {
+   // Create ImpulsiveBurn for ImpulsiveBurn Parameters
+   // We don't need to create if we only need to add Parameters to database
+   // so commented out (LOJ: 2016.05.19)
+   // GetDefaultBurn("ImpulsiveBurn");
+   // #if DEBUG_DEFAULT_MISSION > 0
+   // MessageInterface::ShowMessage("-->default impulsive burn created\n");
+   // #endif
+   
    // ImpulsiveBurn parameters
+   // Create ImpulsiveBurn Parameters to add to ParameterInfo database.
    CreateParameter("Element1", "DefaultIB.Element1");
    CreateParameter("Element2", "DefaultIB.Element2");
    CreateParameter("Element3", "DefaultIB.Element3");
-//   CreateParameter("V", "DefaultIB.V");  // deprecated
-//   CreateParameter("N", "DefaultIB.N");  // deprecated
-//   CreateParameter("B", "DefaultIB.B");  // deprecated
+   // CreateParameter("V", "DefaultIB.V");  // deprecated
+   // CreateParameter("N", "DefaultIB.N");  // deprecated
+   // CreateParameter("B", "DefaultIB.B");  // deprecated
    #if DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage("-->default impulsive burn parameters created\n");
+   #endif
+   
+   // Remove ImpulsiveBurn Parameters since these Parameters info has been
+   // add to database and not used in the default mission
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element1", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element2", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element3", true);
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default impulsive burn parameters deleted\n");
+   #endif
+   
+   // Create FiniteBurn for FiniteBurn Parameters
+   // We don't need to create if we only need to add Parameters to database
+   // so commented out (LOJ: 2016.05.19)
+   // GetDefaultBurn("FiniteBurn");
+   // #if DEBUG_DEFAULT_MISSION > 0
+   // MessageInterface::ShowMessage("-->default finite burn created\n");
+   // #endif
+   
+   // FiniteBurn Parameters
+   // Create FiniteBurn Parameters to add to ParameterInfo database.
+   CreateParameter("TotalMassFlowRate", "DefaultFB.TotalMassFlowRate");
+   CreateParameter("TotalThrust1", "DefaultFB.TotalThrust1");
+   CreateParameter("TotalThrust2", "DefaultFB.TotalThrust2");
+   CreateParameter("TotalThrust3", "DefaultFB.TotalThrust3");
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default finite burn parameters created\n");
+   #endif
+   
+   // Remove FiniteBurn Parameters since these Parameters info already add to database
+   // and not used in the default mission
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalMassFlowRate", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust1", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust2", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust3", true);
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default finite burn parameters deleted\n");
    #endif
    
    // Time parameters
    CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
    CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");      
-//   CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove  // deprecated
+   // CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove  // deprecated
    CreateParameter("A1ModJulian", "DefaultSC.A1ModJulian");
    CreateParameter("A1Gregorian", "DefaultSC.A1Gregorian");
    CreateParameter("TAIModJulian", "DefaultSC.TAIModJulian");
@@ -8382,6 +8560,9 @@ void Moderator::CreateDefaultParameters()
       CreateParameter("RefTemperature", "DefaultSC.DefaultFuelTank.RefTemperature");
       // Thruster Parameters
       CreateParameter("DutyCycle", "DefaultSC.DefaultThruster.DutyCycle");
+      CreateParameter("Isp", "DefaultSC.DefaultThruster.Isp");
+      CreateParameter("MassFlowRate", "DefaultSC.DefaultThruster.MassFlowRate");
+      CreateParameter("Thrust", "DefaultSC.DefaultThruster.Thrust");
       CreateParameter("ThrustScaleFactor", "DefaultSC.DefaultThruster.ThrustScaleFactor");
       CreateParameter("GravitationalAccel", "DefaultSC.DefaultThruster.GravitationalAccel");
       CreateParameter("C1", "DefaultSC.DefaultThruster.C1");
@@ -8431,8 +8612,10 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage("-->default parameters created\n");
    #endif
-   
+
+   //============================================================
    // Set Parameter object and dependency object
+   //============================================================
    StringArray params = GetListOfObjects(Gmat::PARAMETER);
    Parameter *param;
    
@@ -8463,6 +8646,11 @@ void Moderator::CreateDefaultParameters()
          {
             //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
             param->SetRefObjectName(Gmat::IMPULSIVE_BURN, "DefaultIB");
+         }
+         else if (param->GetOwnerType() == Gmat::FINITE_BURN)
+         {
+            //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
+            param->SetRefObjectName(Gmat::FINITE_BURN, "DefaultFB");
          }
       }
    }
@@ -8535,12 +8723,6 @@ void Moderator::CreateDefaultMission()
          #endif
       }
             
-      // ImpulsiveBurn
-      GetDefaultBurn("ImpulsiveBurn");
-      #if DEBUG_DEFAULT_MISSION > 0
-      MessageInterface::ShowMessage("-->default impulsive burn created\n");
-      #endif
-      
       // Default Parameters
       CreateDefaultParameters();
       
@@ -8766,7 +8948,7 @@ void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
 {
    bool debugParameter = true;
    #ifdef DEBUG_ONLY_FOR_SCRIPT
-   if (currentScriptFileName == "")
+   if (mainScriptFileName == "")
       debugParameter = false;
    #endif
    
@@ -8942,7 +9124,7 @@ GmatBase* Moderator::FindObject(const std::string &name)
 {
    bool debugFindObject = true;
    #ifdef DEBUG_ONLY_FOR_SCRIPT
-   if (currentScriptFileName == "")
+   if (mainScriptFileName == "")
       debugFindObject = false;
    #endif
    
@@ -10094,7 +10276,7 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
 {
    bool showObjectMap = true;
    #ifdef DEBUG_ONLY_FOR_SCRIPT
-   if (currentScriptFileName == "")
+   if (mainScriptFileName == "")
       showObjectMap = false;
    #endif
    // #ifdef DEBUG_ONLY_FOR_FUNCTION
@@ -10246,7 +10428,7 @@ Moderator::Moderator()
    detailedRunState = Gmat::IDLE;
    objectManageOption = 1;
    currentSandboxNumber = 1;
-   currentScriptFileName = "";
+   mainScriptFileName = "";
    theMatlabInterface = NULL;
    
    // The motivation of adding this data member was due to Parameter creation

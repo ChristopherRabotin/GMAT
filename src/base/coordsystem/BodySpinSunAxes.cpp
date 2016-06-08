@@ -346,11 +346,11 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Rvector3 vR    = vSun / rMag;
    Rvector3 xDot  = vR - x * (x * vR);
 
-//   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFK5), x) +						// fix bug GMT-3465;  made change by TUAN NGUYEN
-//                    Cross((fixedToMJ2000 * spinaxisFK5), xDot);						// fix bug GMT-3465;  made change by TUAN NGUYEN
-   Rvector3 spinaxisFixed =  fixedToMJ2000.Transpose()*spinaxisFK5;						// fix bug GMT-3465;  made change by TUAN NGUYEN
-   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFixed), x) +						// fix bug GMT-3465;  made change by TUAN NGUYEN
-                    Cross(spinaxisFK5, xDot);											// fix bug GMT-3465;  made change by TUAN NGUYEN
+//   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFK5), x) +						// fix bug GMT-3465
+//                    Cross((fixedToMJ2000 * spinaxisFK5), xDot);						   // fix bug GMT-3465
+   Rvector3 spinaxisFixed =  fixedToMJ2000.Transpose()*spinaxisFK5;						// fix bug GMT-3465
+   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFixed), x) +						// fix bug GMT-3465
+                    Cross(spinaxisFK5, xDot);											      // fix bug GMT-3465
    Rvector3 yDot  = (yTmp / yMag) - y * (y * (yTmp / yMag));
 
    Rvector3 zDot  = Cross(xDot, y) + Cross(x, yDot);

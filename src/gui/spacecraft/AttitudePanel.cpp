@@ -281,7 +281,7 @@ void AttitudePanel::Create()
       attitudeModelArray[x] = wxString(modelArray[x].c_str());
    
    config1StaticText =
-      new wxStaticText( this, ID_TEXT, "Attitude "GUI_ACCEL_KEY"Model",
+      new wxStaticText( this, ID_TEXT, "Attitude " GUI_ACCEL_KEY "Model",
                         wxDefaultPosition, wxSize(staticTextWidth,defHeight), 0); // wxDefaultSize, 0);
    config1ComboBox = 
       new wxComboBox( this, ID_CB_MODEL, attitudeModelArray[0], 
@@ -317,7 +317,7 @@ void AttitudePanel::Create()
 
    // State Type
    stateTypeStaticText =
-      new wxStaticText( this, ID_TEXT, "Attitude "GUI_ACCEL_KEY"State Type",
+      new wxStaticText( this, ID_TEXT, "Attitude " GUI_ACCEL_KEY "State Type",
                         wxDefaultPosition, wxDefaultSize, 0);
 
    for (ii = 0; ii < AttStateTypeCount; ii++)
@@ -387,7 +387,7 @@ void AttitudePanel::Create()
 
    // Rate State Type
    stateRateTypeStaticText =
-      new wxStaticText( this, ID_TEXT, "Attitude "GUI_ACCEL_KEY"Rate State Type",
+      new wxStaticText( this, ID_TEXT, "Attitude " GUI_ACCEL_KEY "Rate State Type",
                         wxDefaultPosition, wxDefaultSize, 0);
 
    for (ii = 0; ii < AttStateRateTypeCount; ii++)
@@ -580,7 +580,7 @@ void AttitudePanel::Create()
    
    // Now create CCSDS-AEM widgets
    aemFileLabel =
-      new wxStaticText(this, ID_TEXT, "Attitude "GUI_ACCEL_KEY"File Name",
+      new wxStaticText(this, ID_TEXT, "Attitude " GUI_ACCEL_KEY "File Name",
                        wxDefaultPosition, wxDefaultSize, 0);
    aemFileTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_AEM_FILE, wxT(""),
@@ -2624,9 +2624,9 @@ bool AttitudePanel::DisplayEulerAngles()
       attUnits2->Show(true);
       attUnits3->Show(true);
 
-      st1StaticText->SetLabel("Euler Angle "GUI_ACCEL_KEY"1");
-      st2StaticText->SetLabel("Euler Angle "GUI_ACCEL_KEY"2");
-      st3StaticText->SetLabel("Euler Angle "GUI_ACCEL_KEY"3");
+      st1StaticText->SetLabel("Euler Angle " GUI_ACCEL_KEY "1");
+      st2StaticText->SetLabel("Euler Angle " GUI_ACCEL_KEY "2");
+      st3StaticText->SetLabel("Euler Angle " GUI_ACCEL_KEY "3");
    
       st1TextCtrl->SetValue(*eulerAngles[0]);
       st2TextCtrl->SetValue(*eulerAngles[1]);
@@ -2702,10 +2702,10 @@ bool AttitudePanel::DisplayQuaternion()
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
 
-      st1StaticText->SetLabel("q"GUI_ACCEL_KEY"1");
-      st2StaticText->SetLabel("q"GUI_ACCEL_KEY"2");
-      st3StaticText->SetLabel("q"GUI_ACCEL_KEY"3");
-      st4StaticText->SetLabel("q"GUI_ACCEL_KEY"4");  // Dunn changed 4 to c
+      st1StaticText->SetLabel("q" GUI_ACCEL_KEY "1");
+      st2StaticText->SetLabel("q" GUI_ACCEL_KEY "2");
+      st3StaticText->SetLabel("q" GUI_ACCEL_KEY "3");
+      st4StaticText->SetLabel("q" GUI_ACCEL_KEY "4");  // Dunn changed 4 to c
    
       st1TextCtrl->SetValue(*quaternion[0]);
       st2TextCtrl->SetValue(*quaternion[1]);
@@ -2879,9 +2879,9 @@ bool AttitudePanel::DisplayMRPs()
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
 
-      st1StaticText->SetLabel("MRP "GUI_ACCEL_KEY"1");
-      st2StaticText->SetLabel("MRP "GUI_ACCEL_KEY"2");
-      st3StaticText->SetLabel("MRP "GUI_ACCEL_KEY"3");
+      st1StaticText->SetLabel("MRP " GUI_ACCEL_KEY "1");
+      st2StaticText->SetLabel("MRP " GUI_ACCEL_KEY "2");
+      st3StaticText->SetLabel("MRP " GUI_ACCEL_KEY "3");
 
       st1TextCtrl->SetValue(*MRPs[0]);
       st2TextCtrl->SetValue(*MRPs[1]);
@@ -2930,9 +2930,9 @@ bool AttitudePanel::DisplayEulerAngleRates()
       stateRateTypeComboBox->
          SetValue(wxT("EulerAngleRates"));
       attRateStateType = "EulerAngleRates";
-      str1StaticText->SetLabel("Euler Angle Rate "GUI_ACCEL_KEY"1");
-      str2StaticText->SetLabel("Euler Angle Rate "GUI_ACCEL_KEY"2");
-      str3StaticText->SetLabel("Euler Angle Rate "GUI_ACCEL_KEY"3");
+      str1StaticText->SetLabel("Euler Angle Rate " GUI_ACCEL_KEY "1");
+      str2StaticText->SetLabel("Euler Angle Rate " GUI_ACCEL_KEY "2");
+      str3StaticText->SetLabel("Euler Angle Rate " GUI_ACCEL_KEY "3");
 
       str1TextCtrl->SetToolTip(pConfig->Read(_T("EulerAngleRate1Hint")));
       str2TextCtrl->SetToolTip(pConfig->Read(_T("EulerAngleRate2Hint")));
@@ -2976,9 +2976,9 @@ bool AttitudePanel::DisplayAngularVelocity()
       stateRateTypeComboBox->
          SetValue(wxT("AngularVelocity"));
       attRateStateType = "AngularVelocity";
-      str1StaticText->SetLabel("Angular Velocity "GUI_ACCEL_KEY"X");
-      str2StaticText->SetLabel("Angular Velocity "GUI_ACCEL_KEY"Y");
-      str3StaticText->SetLabel("Angular Velocity "GUI_ACCEL_KEY"Z");
+      str1StaticText->SetLabel("Angular Velocity " GUI_ACCEL_KEY "X");
+      str2StaticText->SetLabel("Angular Velocity " GUI_ACCEL_KEY "Y");
+      str3StaticText->SetLabel("Angular Velocity " GUI_ACCEL_KEY "Z");
 
       str1TextCtrl->SetToolTip(pConfig->Read(_T("AngularVelocity1Hint")));
       str2TextCtrl->SetToolTip(pConfig->Read(_T("AngularVelocity2Hint")));

@@ -67,6 +67,7 @@ public:
          const std::string &prefix, const std::string &useName);
 
    virtual bool Initialize();
+   bool         PreExecution();
    virtual bool Execute();
    virtual void RunComplete();
    virtual bool TakeAction(const std::string &action,
@@ -124,6 +125,11 @@ protected:
    // Helper methods
    virtual void SetPropagationProperties(PropagationStateManager *psm);
    virtual void CleanUpEvents();
+
+private:
+   bool delayInitialization;
+
+   void LoadSolveForsToESM();
 };
 
 #endif /* RunEstimator_hpp */
