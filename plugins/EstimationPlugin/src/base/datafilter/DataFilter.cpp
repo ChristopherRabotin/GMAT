@@ -85,6 +85,7 @@ DataFilter::DataFilter(const std::string name) :
    //epochStart        (6116.0000003979367),
    //epochEnd          (58127.500000397937),
    isChecked         (false),
+   allDataFile       (false),                          // made changes by TUAN NGUYEN
    allObserver       (false),
    allTracker        (false),
    allDataType       (false),
@@ -140,6 +141,7 @@ DataFilter::~DataFilter()
 DataFilter::DataFilter(const DataFilter& saf) :
    GmatBase              (saf),
    fileNames             (saf.fileNames),
+   allDataFile           (saf.allDataFile),                           // made changes by TUAN NGUYEN
    observers             (saf.observers),
    observerObjects       (saf.observerObjects),
    allObserver           (saf.allObserver),
@@ -187,6 +189,7 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
       GmatBase::operator=(saf);
 
       fileNames    = saf.fileNames;
+      allDataFile  = saf.allDataFile;                       // made changes by TUAN NGUYEN
       observers    = saf.observers;
       observerObjects = saf.observerObjects;
       allObserver  = saf.allObserver;
@@ -420,20 +423,38 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
    if (id == FILENAMES)
    {
       // Check for empty list
-      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
-         throw MeasurementException("Error: an empty list of file name was set to " + GetName() + ".FileNames parameter.\n");
-
-      // If is not empty list, it is a name containing file name
-      // Check for valid file name
-      Integer err = 0;
-      if (!GmatStringUtil::IsValidFullFileName(value, err))
-         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames parameter is an invalid file name.\n");
-
-      if (find(fileNames.begin(), fileNames.end(), value) == fileNames.end())
-         fileNames.push_back(value);
+      if (value == "")
+         throw MeasurementException("Error: an empty string is set to " + GetName() + ".FileNames parameter.\n");
+      else if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
+      {
+         // throw MeasurementException("Error: an empty list of file name was set to " + GetName() + ".FileNames parameter.\n");
+         // We accept an empty list of file names
+         allDataFile = false;
+         fileNames.clear();
+      }
       else
-         throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames is replicated.\n");
+      {
+         // If is not empty list, it is a name containing file name or "All"
+         if (value == "All")
+         {
+            allDataFile = true;
+         }
+         else
+         {
+            // Check for valid file name
+            Integer err = 0;
+            if (!GmatStringUtil::IsValidFullFileName(value, err))
+               throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames parameter is an invalid file name.\n");
+         }
 
+         if ((allDataFile == false) && (fileNames[0] == "All"))
+            fileNames.erase(fileNames.begin());
+
+         if (find(fileNames.begin(), fileNames.end(), value) == fileNames.end())
+            fileNames.push_back(value);
+         else
+            throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".FileNames is replicated.\n");
+      }
       return true;
    }
 
@@ -1319,6 +1340,19 @@ ObjectArray DataFilter::GetListOfGroundStations()
 }
 
 
+// made changes by TUAN NGUYEN
+ObjectArray DataFilter::GetListOfFiles()
+{
+   StringArray nameList = GetListOfObjects(Gmat::DATA_FILE);
+
+   ObjectArray objectList;
+   for (UnsignedInt i = 0; i < nameList.size(); ++i)
+      objectList.push_back(GetConfiguredObject(nameList[i]));
+
+   return objectList;
+}
+
+
 //StringArray DataFilter::GetListOfValidEpochFormats()
 //{
 //   return TimeConverterUtil::GetListOfTimeSystemTypes();
@@ -1441,6 +1475,40 @@ ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer&
 {
    throw MeasurementException("Error: Do not allow to run DataFilter::FilteringData()\n");
    return NULL;
+}
+
+#include "DataFile.hpp"
+bool DataFilter::HasFile(ObservationData* dataObject)
+{
+   //MessageInterface::ShowMessage("Hello there 1\n");
+   bool has = false;
+   if (!fileNames.empty())
+   {
+      //MessageInterface::ShowMessage("Hello there 2\n");
+      if (find(fileNames.begin(), fileNames.end(), "All") == fileNames.end())
+      {
+         DataFile* df = dataObject->fileIndex;
+         std::string fname = df->GetStringParameter("Filename");
+         //MessageInterface::ShowMessage("Hello there 3: fname = <%s>   fileNames.size() = %d\n", fname.c_str(), fileNames.size());
+         //MessageInterface::ShowMessage("Hello there 3: fileNames[0] = <%s>\n", fname.c_str(), fileNames[0].c_str());
+         for (Integer i = 0; i < fileNames.size(); ++i)
+         {
+            //MessageInterface::ShowMessage("Hello there 4: fname = <%s>   filenames[%d] = <%s>\n", fname.c_str(), i, fileNames[i].c_str());
+            if (fname == fileNames[i])
+            {
+               // When it found a DataFile object with a pointer matching to file index in observation data, it set true to "has" variable
+               has = true;
+               break;
+            }
+         }
+         //MessageInterface::ShowMessage("Hello there 5\n");
+      }
+      else
+         has = true;
+      //MessageInterface::ShowMessage("Hello there 6\n");
+   }
+   //MessageInterface::ShowMessage("Hello there 7\n");
+   return has;
 }
 
 

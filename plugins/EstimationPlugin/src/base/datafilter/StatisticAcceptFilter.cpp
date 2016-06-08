@@ -29,6 +29,7 @@
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
+//#define DEBUG_DATA_FILTER
 //#define DEBUG_FILTER
 
 //------------------------------------------------------------------------------
@@ -533,7 +534,7 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
       #ifdef DEBUG_FILTER
          MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit6 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
       #endif
-      return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 6 
+      return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 8 
    }
 
    // Filter data using tracking configs
@@ -564,7 +565,17 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
          }
       }
    }
-
+   else                                               // made changes by TUAN NGUYEN
+   {                                                  // made changes by TUAN NGUYEN
+      if (!HasFile(dataObject))                       // made changes by TUAN NGUYEN
+      {                                               // made changes by TUAN NGUYEN
+#ifdef DEBUG_FILTER
+         MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit6.1 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+         rejectedReason = 8;                          // made changes by TUAN NGUYEN
+         return NULL;                                 // made changes by TUAN NGUYEN
+      }                                               // made changes by TUAN NGUYEN
+   }                                                  // made changes by TUAN NGUYEN
 
    // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
    if (!HasObserver(dataObject))
@@ -615,7 +626,8 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
    {
       rejectedReason = 1;    // 1: reject due to thinning ratio
       #ifdef DEBUG_FILTER
-         MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit5  return NULL   recCount = %d   thinningFrequency = %d\n", dataObject, rejectedReason, recCount, thinningFrequency);
+         //MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit5  return NULL   recCount = %d   thinningFrequency = %d\n", dataObject, rejectedReason, recCount, thinningFrequency);
+         MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit5  return NULL   thinningFrequency = %d\n", dataObject, rejectedReason, thinningFrequency);
       #endif
       return NULL;
    }
