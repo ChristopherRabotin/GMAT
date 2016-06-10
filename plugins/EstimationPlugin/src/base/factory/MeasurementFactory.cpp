@@ -59,6 +59,7 @@
 CoreMeasurement *MeasurementFactory::CreateMeasurement(
       const std::string & ofType, const std::string & withName)
 {
+#ifndef DISABLE_MEASUREMENTS
    if (ofType == "DSNTwoWayRange")
       return new DSNTwoWayRange(withName);
    if (ofType == "DSNTwoWayDoppler")
@@ -69,6 +70,7 @@ CoreMeasurement *MeasurementFactory::CreateMeasurement(
       return new TDRSSTwoWayRange(withName);
    if (ofType == "OpticalAzEl")
       return new OpticalAzEl(withName);
+#endif
 
    return NULL;
 }
@@ -86,11 +88,13 @@ MeasurementFactory::MeasurementFactory() :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_MEASUREMENTS
       creatables.push_back("DSNTwoWayRange");
       creatables.push_back("DSNTwoWayDoppler");
       creatables.push_back("USNTwoWayRange");
       creatables.push_back("TDRSSTwoWayRange");
       creatables.push_back("OpticalAzEl");
+#endif
    }
 }
 
@@ -125,11 +129,13 @@ MeasurementFactory& MeasurementFactory::operator=(
    if (creatables.empty())
 
    {
+#ifndef DISABLE_MEASUREMENTS
       creatables.push_back("DSNTwoWayRange");
       creatables.push_back("DSNTwoWayDoppler");
       creatables.push_back("USNTwoWayRange");
       creatables.push_back("TDRSSTwoWayRange");
       creatables.push_back("OpticalAzEl");
+#endif
    }
 
    return *this;
@@ -150,11 +156,13 @@ MeasurementFactory::MeasurementFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_MEASUREMENTS
       creatables.push_back("DSNTwoWayRange");
       creatables.push_back("DSNTwoWayDoppler");
       creatables.push_back("USNTwoWayRange");
       creatables.push_back("TDRSSTwoWayRange");
       creatables.push_back("OpticalAzEl");
+#endif
    }
 }
 
@@ -174,10 +182,12 @@ MeasurementFactory::MeasurementFactory(const MeasurementFactory& fact) :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_MEASUREMENTS
       creatables.push_back("DSNTwoWayRange");
       creatables.push_back("DSNTwoWayDoppler");
       creatables.push_back("USNTwoWayRange");
       creatables.push_back("TDRSSTwoWayRange");
       creatables.push_back("OpticalAzEl");
+#endif
    }
 }
