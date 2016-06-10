@@ -31,7 +31,7 @@
 
 //#define DEBUG_ODTYPE_CREATION_INITIALIZATION
 //#define DEBUG_FILE_WRITE
-//#define DEBUG_FILE_READ
+#define DEBUG_FILE_READ
 //#define DEBUG_FILE_ACCESS
 
 //-----------------------------------------------------------------------------
@@ -367,7 +367,8 @@ ObservationData* GmatODType::ReadObservation()
    std::getline (theStream, str);
    
    // Skip header and comment lines or empty lines
-   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == ""))
+   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == "") ||
+          (str.length() < 2))
    {
       std::getline(theStream, str);
 
