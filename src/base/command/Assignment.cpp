@@ -513,7 +513,38 @@ bool Assignment::InterpretAction()
    
    // If there is still ; then report error since ; should have been removed
    if (!isRhsString && (rhs.find(";") != rhs.npos))
-      throw CommandException("Is there a missing \"%\" for inline comment?");
+   {
+      // Allow ; in the vector form [1; 2; 3]
+      #ifdef DEBUG_ASSIGNMENT_IA
+      MessageInterface::ShowMessage
+         ("   Checking if semicolon is inside [] in <%s>\n", rhs.c_str());
+      #endif
+      // Check for all occurance of semicolon
+      std::string::size_type openPos = rhs.find("[");
+      std::string::size_type closePos = rhs.find("]");
+      bool isSemicolonOutside = false;
+      if (openPos != rhs.npos && closePos != rhs.npos)
+      {
+         unsigned int len = rhs.length();
+         for (unsigned int i = 0; i < len; i++)
+         {
+            if (rhs[i] == ';')
+            {
+               #ifdef DEBUG_ASSIGNMENT_IA
+               MessageInterface::ShowMessage("   ; found at %u\n", i);
+               #endif
+               if (i < openPos && i > closePos)
+               {
+                  isSemicolonOutside = true;
+                  break;
+               }
+            }
+         }
+      }
+      
+      if (isSemicolonOutside)
+         throw CommandException("Is there a missing \"%\" for inline comment?");
+   }
    
    #ifdef DEBUG_ASSIGNMENT_IA
    MessageInterface::ShowMessage("RHS %s a string\n", isRhsString ? "is" : "is not");

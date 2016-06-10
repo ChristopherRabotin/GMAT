@@ -21,7 +21,9 @@
 // Created: 2016.05.06
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the PointGroup class.  This class stores latitudes, 
+ * longitudes, and coordinates for points that are either set on input or
+ * computed in the class based on an input number or angle.
  */
 //------------------------------------------------------------------------------
 #ifndef PointGroup_hpp
@@ -38,7 +40,7 @@ class PointGroup
 public:
    
    // class methods
-   PointGroup(Spacecraft *sat);
+   PointGroup();
    PointGroup(const PointGroup &copy);
    PointGroup& operator=(const PointGroup &copy);
    
@@ -52,8 +54,8 @@ public:
    virtual void      GetLatAndLon(Integer idx, Real &theLat, Real &theLon);
    virtual Integer   GetNumPoints();
    virtual void      GetLatLonVectors(RealArray &lats, RealArray &lons);
-   virtual void      SetLatLonBounds(Integer latUp, Integer latLow,
-                                     Integer lonUp, Integer lonLow);
+   virtual void      SetLatLonBounds(Real latUp, Real latLow,
+                                     Real lonUp, Real lonLow);
    
    
 protected:

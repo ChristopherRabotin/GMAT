@@ -68,6 +68,8 @@ namespace GmatStringUtil
    GMAT_API std::string ToUpper(const std::string &str, bool firstLetterOnly = false);
    GMAT_API std::string ToLower(const std::string &str, bool firstLetterOnly = false);
    GMAT_API std::string Capitalize(const std::string &str);
+   GMAT_API std::string ReplaceFirst(const std::string &str, const std::string &from,
+                           const std::string &to, std::string::size_type startIndex = 0);
    GMAT_API std::string Replace(const std::string &str, const std::string &from,
                            const std::string &to, std::string::size_type startIndex = 0);
    GMAT_API std::string ReplaceName(const std::string &str, const std::string &from,
@@ -136,7 +138,7 @@ namespace GmatStringUtil
    GMAT_API bool ToBoolean(const std::string &str, bool &value, bool trimParens = false);
    GMAT_API bool ToOnOff(const std::string &str, std::string &value, bool trimParens = false);
    
-   GMAT_API RealArray ToRealArray(const std::string &str, bool allowOverflow = true);
+   GMAT_API RealArray ToRealArray(const std::string &str, bool allowOverflow = true, bool allowSemicolon = false);
    GMAT_API IntegerArray ToIntegerArray(const char *str, bool allowOverflow = true);
    GMAT_API IntegerArray ToIntegerArray(const std::string &str, bool allowOverflow = true);
    GMAT_API UnsignedIntArray ToUnsignedIntArray(const std::string &str, bool allowOverflow = true);

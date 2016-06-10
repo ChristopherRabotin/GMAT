@@ -208,7 +208,8 @@ void AssignmentPanel::SaveData()
       if (GmatStringUtil::IsEnclosedWithBrackets(newLhs))
       {
          // Parse function name
-         std::string fName = GmatStringUtil::ParseFunctionName(newRhs);
+         std::string argStr;
+         std::string fName = GmatStringUtil::ParseFunctionName(newRhs, argStr);
          #if DEBUG_ASSIGNMENT_PANEL_SAVE
          MessageInterface::ShowMessage("   fName = '%s'\n", fName.c_str());
          #endif

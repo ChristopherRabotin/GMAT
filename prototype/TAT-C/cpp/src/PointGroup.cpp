@@ -21,7 +21,7 @@
 // Created: 2016.05.06
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of the PointGroup class
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -32,8 +32,8 @@
 #include "TATCException.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_HELICAL_POINTS
-#define DEBUG_POINTS
+//#define DEBUG_HELICAL_POINTS
+//#define DEBUG_POINTS
 
 using namespace GmatMathConstants;
 using namespace GmatMathUtil;
@@ -48,9 +48,14 @@ using namespace GmatMathUtil;
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// default constructor
+// PointGroup()
 //------------------------------------------------------------------------------
-PointGroup::PointGroup(Spacecraft *sat) :
+/**
+ * Default constructor for the PointGroup class.
+ *
+ */
+//---------------------------------------------------------------------------
+PointGroup::PointGroup() :
    numPoints          (0),
    numRequestedPoints (0),
    latUpper           (PI_OVER_TWO),
@@ -62,8 +67,15 @@ PointGroup::PointGroup(Spacecraft *sat) :
 }
 
 //------------------------------------------------------------------------------
-// copy constructor
+// PointGroup(const PointGroup &copy)
 //------------------------------------------------------------------------------
+/**
+ * Copy constructor for the PointGroup class.
+ * 
+ * @param copy  PointGroup object to copy
+ *
+ */
+//---------------------------------------------------------------------------
 PointGroup::PointGroup(const PointGroup &copy) :
    numPoints          (copy.numPoints),
    numRequestedPoints (copy.numRequestedPoints),
@@ -86,8 +98,15 @@ PointGroup::PointGroup(const PointGroup &copy) :
 }
 
 //------------------------------------------------------------------------------
-// operator=
+// PointGroup & operator=(const PointGroup &copy)
 //------------------------------------------------------------------------------
+/**
+ * operator= for the PointGroup class.
+ * 
+ * @param copy  PointGroup object to copy
+ *
+ */
+//---------------------------------------------------------------------------
 PointGroup& PointGroup::operator=(const PointGroup &copy)
 {
    if (&copy == this)
@@ -116,8 +135,13 @@ PointGroup& PointGroup::operator=(const PointGroup &copy)
 }
 
 //------------------------------------------------------------------------------
-// destructor
+// ~PointGroup()
 //------------------------------------------------------------------------------
+/**
+ * Destructor for the PointGroup class.
+ *
+ */
+//---------------------------------------------------------------------------
 PointGroup::~PointGroup()
 {
    lat.clear();
@@ -132,6 +156,15 @@ PointGroup::~PointGroup()
 // void AddUserDefinedPoints(const RealArray& lats,
 //                           const RealArray& lons)
 //------------------------------------------------------------------------------
+/**
+ * Adds user-defined points to the list of points, given the input latitudes
+ * and longitudes.
+ * 
+ * @param lats  list of latitudes for the points to add
+ * @param lons  list of longitudes for the points to add
+ *
+ */
+//---------------------------------------------------------------------------
 void PointGroup::AddUserDefinedPoints(const RealArray& lats,
                                       const RealArray& lons)
 {
@@ -148,6 +181,14 @@ void PointGroup::AddUserDefinedPoints(const RealArray& lats,
 //------------------------------------------------------------------------------
 // void AddHelicalPointsByNumPoints(Integer numGridPoints)
 //------------------------------------------------------------------------------
+/**
+ * Computes and adds the specified number of user-defined points to the list of 
+ * points.
+ * 
+ * @param numGridPoints  number of grid points to add
+ *
+ */
+//---------------------------------------------------------------------------
 void PointGroup::AddHelicalPointsByNumPoints(Integer numGridPoints)
 {
    ComputeTestPoints("Helical",numGridPoints);
@@ -156,6 +197,14 @@ void PointGroup::AddHelicalPointsByNumPoints(Integer numGridPoints)
 //------------------------------------------------------------------------------
 // void AddHelicalPointsByAngle(Real angleBetweenPoints)
 //------------------------------------------------------------------------------
+/**
+ * Computes and adds points to the list of points, based on the input
+ * angle.
+ * 
+ * @param angleBetweenPoints  angle between points
+ *
+ */
+//---------------------------------------------------------------------------
 void PointGroup::AddHelicalPointsByAngle(Real angleBetweenPoints)
 {
    Integer numGridPoints = Floor(4.0*PI/
@@ -164,8 +213,17 @@ void PointGroup::AddHelicalPointsByAngle(Real angleBetweenPoints)
 }
 
 //------------------------------------------------------------------------------
-// RealArray GetPointPositionVector(Integer idx)
+// Rvector3* GetPointPositionVector(Integer idx)
 //------------------------------------------------------------------------------
+/**
+ * Returns the coordinates of the specified point.
+ * 
+ * @param idx  index of point whose coordinates to return
+ * 
+ * @return  a 3-vector representing the coordinates of the specifed point
+ *
+ */
+//---------------------------------------------------------------------------
 Rvector3* PointGroup::GetPointPositionVector(Integer idx)
 {
    // Returns body fixed location of point given point index
@@ -175,12 +233,26 @@ Rvector3* PointGroup::GetPointPositionVector(Integer idx)
    // Make sure there are points
    CheckHasPoints();
    
+   #ifdef DEBUG_POINTS
+      MessageInterface::ShowMessage(
+                 "In PG::GetPointPositionVector, returning coords (%p) at idx = %d\n",
+                 coords.at(idx), idx);
+   #endif
   return coords.at(idx);
 }
 
 //------------------------------------------------------------------------------
 // void GetLatAndLon(Integer idx, Real &theLat, Real &theLon)
 //------------------------------------------------------------------------------
+/**
+ * Returns the latitude and longtude of the specified point.
+ * 
+ * @param idx      index of point whose latitude/longitude to return
+ * @param theLat  OUTPUT latitude of the specified point
+ * @param theLon  OUTPUT longitude of the specified point
+ *
+ */
+//---------------------------------------------------------------------------
 void PointGroup::GetLatAndLon(Integer idx, Real &theLat, Real &theLon)
 {
    // Returns body fixed location of point given point index
@@ -197,6 +269,13 @@ void PointGroup::GetLatAndLon(Integer idx, Real &theLat, Real &theLon)
 //------------------------------------------------------------------------------
 // Integer GetNumPoints()
 //------------------------------------------------------------------------------
+/**
+ * Returns the number of points.
+ * 
+ * @return  the number of points
+ *
+ */
+//---------------------------------------------------------------------------
 Integer PointGroup::GetNumPoints()
 {
    return numPoints;
@@ -205,6 +284,14 @@ Integer PointGroup::GetNumPoints()
 //------------------------------------------------------------------------------
 // void GetLatLonVectors(RealArray &lats, RealArray &lons)
 //------------------------------------------------------------------------------
+/**
+ * Returns vectors of latitudes and longitudes for the points.
+ * 
+ * @param lats OUTPUT  array of latitudes for the points
+ * @param lons OUTPUT  array of longitudes for the points
+ *
+ */
+//---------------------------------------------------------------------------
 void PointGroup::GetLatLonVectors(RealArray &lats, RealArray &lons)
 {
    // Returns the latitude and longitude vectors
@@ -217,11 +304,21 @@ void PointGroup::GetLatLonVectors(RealArray &lats, RealArray &lons)
 }
 
 //------------------------------------------------------------------------------
-// void SetLatLonBounds(Integer latUp, Integer latLow,
-//                      Integer lonUp, Integer lonLow)
+// void SetLatLonBounds(Real latUp, Real latLow,
+//                      Real lonUp, Real lonLow)
 //------------------------------------------------------------------------------
-void  PointGroup::SetLatLonBounds(Integer latUp, Integer latLow,
-                                  Integer lonUp, Integer lonLow)
+/**
+ * Sets the latitude and longtude upper and lower bounds.
+ * 
+ * @param latUp    upper bound for latitude (radians)
+ * @param latLow   lower bound for latitude (radians)
+ * @param lonUp    upper bound for longitude (radians)
+ * @param lonLow   lower bound for longitude (radians)
+ *
+ */
+//---------------------------------------------------------------------------
+void  PointGroup::SetLatLonBounds(Real latUp, Real latLow,
+                                  Real lonUp, Real lonLow)
 {
    if (numPoints >0)
       throw TATCException("You must set Lat/Lon Bounds Before adding points\n");
@@ -257,6 +354,13 @@ void  PointGroup::SetLatLonBounds(Integer latUp, Integer latLow,
 //------------------------------------------------------------------------------
 // bool CheckHasPoints()
 //------------------------------------------------------------------------------
+/**
+ * Checks to see if there are any ponts set or computed
+ * 
+ * @return   true if there are points; false otherwise
+ *
+ */
+//---------------------------------------------------------------------------
 bool PointGroup::CheckHasPoints()
 {
    if (numPoints <= 0)
@@ -267,6 +371,15 @@ bool PointGroup::CheckHasPoints()
 //------------------------------------------------------------------------------
 // void AccumulatePoints(Real lat1, Real lon1)
 //------------------------------------------------------------------------------
+/**
+ * Adds a point with the specified latitude and longitude.  The coordinates
+ * are computed from the input latitude and longitude.
+ * 
+ * @param  lat1  latitude for the point to add
+ * @param  lon1  longitude for the point to add
+ *
+ */
+//---------------------------------------------------------------------------
 void PointGroup::AccumulatePoints(Real lat1, Real lon1)
 {
    #ifdef DEBUG_POINTS
@@ -285,26 +398,34 @@ void PointGroup::AccumulatePoints(Real lat1, Real lon1)
       // TODO:  Use geodetic to Cartesian conversion and don't
       // hard code the Earth radius.
       Rvector3 *newCoord = new Rvector3(
-                     Cos(lon1) * Cos(lat1),
-                     Sin(lon1) * Cos(lat1),
-                     Sin(lat1) * 6378.1363);
+                               (Cos(lon1) * Cos(lat1)) * 6378.1363,
+                               (Sin(lon1) * Cos(lat1)) * 6378.1363,
+                                Sin(lat1)              * 6378.1363);
       #ifdef DEBUG_POINTS
          MessageInterface::ShowMessage(
-                 "PG::AccumulatePoints, pushing back %12.10f  %12.10f  %12.10f\n",
-                 newCoord->GetElement(0), newCoord->GetElement(1), newCoord->GetElement(2));
+                 "PG::AccumulatePoints, pushing back (%p) (into position %d, size = %d) %12.10f  %12.10f  %12.10f\n",
+                 newCoord, coords.size(), numPoints, newCoord->GetElement(0), newCoord->GetElement(1), newCoord->GetElement(2));
       #endif
       coords.push_back(newCoord);
       numPoints++;
    }
-   else
-   {
-      throw TATCException("lat or lon too big or small!!!!\n");
-   }
+//   else
+//   {
+//      throw TATCException("lat or lon too big or small!!!!\n");
+//   }
 }
 
 //------------------------------------------------------------------------------
 // void ComputeTestPoints(const std::string &modelName, Integer numGridPts)
 //------------------------------------------------------------------------------
+/**
+ * Computes the number of test points specified, for the model specified.
+ * 
+ * @param  modelName      model for the points
+ * @param  numGridPoints  number of points to compute and add
+ *
+ */
+//---------------------------------------------------------------------------
 void PointGroup::ComputeTestPoints(const std::string &modelName,
                                    Integer numGridPts)
 {
@@ -337,8 +458,15 @@ void PointGroup::ComputeTestPoints(const std::string &modelName,
 }
 
 //------------------------------------------------------------------------------
-// void ComputeHelicalPoints(Integer numReqPts))
+// void ComputeHelicalPoints(Integer numReqPts)
 //------------------------------------------------------------------------------
+/**
+ * Computes the number of test points specified, using a model.
+ * 
+ * @param  numReqPts  number of test points to compute and add
+ *
+ */
+//---------------------------------------------------------------------------
 void PointGroup::ComputeHelicalPoints(Integer numReqPts)
 {
    #ifdef DEBUG_HELICAL_POINTS
@@ -360,7 +488,8 @@ void PointGroup::ComputeHelicalPoints(Integer numReqPts)
    
    for (Integer latIdx = 0; latIdx < numDiscreteLatitudes; latIdx += 2)
    {
-      Real latOverNum = (Real) (latIdx + 1) / (Real)(numDiscreteLatitudes + 1);
+      Real latOverNum = (Real) (((Real) (latIdx + 2)) / ((Real)(numDiscreteLatitudes + 1)));
+//      Real latOverNum = (Real) ((Real) (latIdx + 1)) / (Real)(numDiscreteLatitudes + 1);
       Real latToUse   = PI_OVER_TWO * (1.0 - latOverNum);
       // EVEN numbers
       discreteLatitudes(latIdx)   = latToUse;
@@ -393,8 +522,6 @@ void PointGroup::ComputeHelicalPoints(Integer numReqPts)
    #ifdef DEBUG_HELICAL_POINTS
       MessageInterface::ShowMessage("  alpha = %12.10f\n", alpha);
    #endif
-   Integer pointIdx = 2; // this is two because we already added in points at the poles
-   // QUESTION : what is pointIdx used for in this method???
    
    Integer      numPtsByBand       = 0;          // this was an int array in MATLAB
    Integer      numRemainingPoints = numReqPts;  // this was an int array in MATLAB
@@ -420,8 +547,6 @@ void PointGroup::ComputeHelicalPoints(Integer numReqPts)
          // Compute the latitude for the next point
          // WAS (pt-1) but this causes a lat or lon out-of-range!!!
          Real currentLongitude = TWO_PI * ((Real) (pt)) / ((Real) numPtsByBand);
-         // Insert the point into the cartesian and spherical arrays.
-         pointIdx++;  // used WHERE?
          //  @TODO:  Use geodetic to Cartesian conversion.
          AccumulatePoints(currentLat,currentLongitude);
       }

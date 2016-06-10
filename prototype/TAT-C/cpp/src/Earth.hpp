@@ -21,7 +21,7 @@
 // Created: 2016.05.03
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the Earth class.  This class is a simple model of the Earth.
  */
 //------------------------------------------------------------------------------
 #ifndef Earth_hpp
@@ -50,7 +50,7 @@ public:
                                               Real      jd);
    virtual Rmatrix33        FixedToTopo(Real gdLat, Real gdLon);
    virtual Real             GeocentricToGeodeticLat(Real gcLat);
-   virtual void             GetEarthSunDistRaDec(Real jd,    Rvector &rSun,
+   virtual void             GetEarthSunDistRaDec(Real jd,    Rvector3 &rSun,
                                                  Real rtAsc, Real decl);
    
 protected:

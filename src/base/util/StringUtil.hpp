@@ -108,13 +108,17 @@ namespace GmatStringUtil
    GMAT_API std::string RemoveEnclosingString(const std::string &str, const std::string &enStr);
    GMAT_API std::string RemoveInlineComment(const std::string &str, const std::string &cmStr);
    GMAT_API std::string MakeCommentLines(const std::string &str, bool breakAtCr = false);
-   GMAT_API std::string ParseFunctionName(const std::string &str);
+   GMAT_API std::string ParseFunctionName(const std::string &str, std::string &argStr);
    GMAT_API StringArray ParseFunctionCall(const std::string &str);
    GMAT_API std::string AddEnclosingString(const std::string &str, const std::string &enStr);
    GMAT_API std::string GetInvalidNameMessageFormat();
    
    GMAT_API char GetClosingBracket(const char &openBracket);
    
+   GMAT_API StringArray SeparateBrackets(const std::string &chunk,
+                          const std::string &bracketPair,
+                          const std::string &delim,
+                          bool checkOuterBracket = true);
    GMAT_API StringArray SeparateBy(const std::string &str, const std::string &delim,
                            bool putBracketsTogether = false, bool insertDelim = false,
                            bool insertComma = true);

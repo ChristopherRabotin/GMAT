@@ -285,9 +285,63 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
             // Check for invalid names without removing spaces first
             #if DEBUG_PARSE_EQUATION
             MessageInterface::ShowMessage
-               ("   It is valid math equation. Checking for any invalid names\n");
+               ("   It is valid math equation. Checking for any invalid names in '%s'\n",
+                str1.c_str());
             #endif
-            if (!GmatStringUtil::AreAllNamesValid(str1, true))
+            std::string fnArg;
+            std::string fnName = GmatStringUtil::ParseFunctionName(str1, fnArg);
+            #if DEBUG_PARSE_EQUATION
+            MessageInterface::ShowMessage
+               ("   fnName = '%s', fnArgs = '%s'\n", fnName.c_str(), fnArg.c_str());
+            #endif
+            
+            std::string str2 = str1;
+            
+            // Remove [] before checking if it is a function call with args
+            if (fnName != "" && fnArg != "")
+            {
+               // If function is builtin function, validate more
+               if (HasFunctionName(fnName, builtinFuncList))
+               {
+                  #if DEBUG_PARSE_EQUATION
+                  MessageInterface::ShowMessage
+                     ("   It is a builtin function call, so remove [] from fnArg before "
+                      "checking for valid names\n");
+                  #endif
+                  if (fnArg.find("[") != fnArg.npos && fnArg.find("]") != fnArg.npos)
+                  {
+                     std::string noOuterParen = GmatStringUtil::RemoveOuterParen(fnArg);
+                     // Trim both for validating args with spaces. ex) function( [a  b c ])
+                     noOuterParen = GmatStringUtil::Trim(noOuterParen);
+                     #if DEBUG_PARSE_EQUATION
+                     MessageInterface::ShowMessage
+                        ("   After removing outer () and trim, noOuterParen = '%s'\n",
+                         noOuterParen.c_str());
+                     #endif
+                     if (GmatStringUtil::IsEnclosedWithBrackets(noOuterParen))
+                     {
+                        #if DEBUG_PARSE_EQUATION
+                        MessageInterface::ShowMessage
+                           ("   It is enclosed with [], so removing []\n");
+                        #endif
+                        str2 = GmatStringUtil::ReplaceFirst(str2, "[", "");
+                        str2 = GmatStringUtil::ReplaceFirst(str2, "]", "");
+                        // Replace semicolons with comma since it is allowed inside [] (LOJ: 2016.06.08)
+                        str2 = GmatStringUtil::Replace(str2, ";", ",");
+                        // Replace blank inside [] with command so that [1 2 3] can be validated
+                        str2 = GmatStringUtil::Replace(str2, " ", ",");
+                     }
+                  }
+               }
+               else
+               {
+                  #if DEBUG_PARSE_EQUATION
+                  MessageInterface::ShowMessage("   It is not a builtin function call\n");
+                  #endif
+               }
+            }
+            
+            if (!GmatStringUtil::AreAllNamesValid(str2, true))
             {
                bool isValid = false;
                // Check if valid string literal is passed to a function
@@ -306,7 +360,8 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
                {
                   #if DEBUG_PARSE_EQUATION
                   MessageInterface::ShowMessage
-                     ("MathParser::IsEquation() 3 Throwing exception - Invalid number or names\n");
+                     ("*** ERROR *** MathParser::IsEquation() 3 Throwing exception - "
+                      "Invalid number or names\n");
                   #endif
                   throw MathException("Invalid number or names in math equation");
                }
@@ -315,7 +370,8 @@ bool MathParser::IsEquation(const std::string &str, bool checkMinusSign)
             {
                #if DEBUG_PARSE_EQUATION
                MessageInterface::ShowMessage
-                  ("   All names are valid, check for invalid function call\n");
+                  ("   All names are valid, check for invalid function call for '%s'\n",
+                   str1.c_str());
                #endif
                
                // Do prelimary check if it is string function call. String litereral
@@ -804,12 +860,12 @@ MathNode* MathParser::Parse(const std::string &str)
    {
       #if DEBUG_PARSE
       MessageInterface::ShowMessage
-         ("   '%s' is built-in string function, use original string\n", builtinFuncName.c_str());
+         ("   '%s' is built-in function, use original string\n", builtinFuncName.c_str());
       #endif
       MathNode *topNode = CreateNode(builtinFuncName, str);
       #if DEBUG_PARSE
       MessageInterface::ShowMessage
-         ("MathParser::Parse() newEq<%s> is a buit-in string function, so returning "
+         ("MathParser::Parse() newEq<%s> is a built-in function, so returning "
           "node of %s<%p>\n", newEq.c_str(), builtinFuncName.c_str(), topNode);
       #endif
       return topNode;
@@ -3545,7 +3601,8 @@ void MathParser::BuildFunction(const std::string &str, const StringArray &fnList
    std::string str1 = GmatStringUtil::Trim(str);
    // Check if function name is in the function list
    //std::string fname = GmatStringUtil::ParseFunctionName(str);
-   std::string fname = GmatStringUtil::ParseFunctionName(str1);
+   std::string fnArg;
+   std::string fname = GmatStringUtil::ParseFunctionName(str1, fnArg);
    
    #if DEBUG_FUNCTION > 1
    MessageInterface::ShowMessage("   fname = '%s'\n", fname.c_str());

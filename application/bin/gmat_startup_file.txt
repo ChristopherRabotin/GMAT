@@ -53,7 +53,6 @@ PLUGIN                  = ../plugins/libPythonInterface
 PLUGIN                  = ../plugins/libStation
 PLUGIN                  = ../plugins/libMatlabInterface
 PLUGIN                  = ../plugins/libFminconOptimizer
-PLUGIN                  = ../plugins/libDataInterface
 PLUGIN                  = ../plugins/libProductionPropagators
 PLUGIN                  = ../plugins/libGmatEstimation
 
@@ -63,7 +62,6 @@ PLUGIN                  = ../plugins/libGeometricMeasurements
 PLUGIN                  = ../plugins/libExtraPropagators
 PLUGIN                  = ../plugins/libPolyhedronGravity
 PLUGIN                  = ../plugins/libSaveCommand
-PLUGIN                  = ../plugins/libGmatFunction
 PLUGIN                  = ../plugins/libThrustFile
 
 # Internal-only plugins

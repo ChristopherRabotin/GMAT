@@ -21,7 +21,7 @@
 // Created: 2016.05.05
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the AbsoluteDate class.  This class represents an epoch.
  */
 //------------------------------------------------------------------------------
 #ifndef AbsoluteDate_hpp

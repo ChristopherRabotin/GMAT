@@ -21,7 +21,7 @@
 // Created: 2016.05.05
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the the propagator class.
  */
 //------------------------------------------------------------------------------
 #ifndef Propagator_hpp
@@ -92,7 +92,7 @@ protected:
    /// The orbital mean motion
    Real         meanMotion;
    
-   void       SetOrbitState(OrbitState &orbState);
+   void       SetOrbitState(OrbitState *orbState);
 //   Rvector6   PropagateCartesianState(Real propDuration);
    Rvector6   PropagateOrbitalElements(Real propDuration);
    Real       MeanMotion();
