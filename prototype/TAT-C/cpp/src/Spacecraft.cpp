@@ -21,7 +21,7 @@
 // Created: 2016.05.02
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of the Spacecraft class.
  */
 //------------------------------------------------------------------------------
 
@@ -38,10 +38,18 @@
 // public methods
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// default constructor
-//------------------------------------------------------------------------------
-Spacecraft::Spacecraft(const AbsoluteDate &epoch, const OrbitState &state) :
+//---------------------------------------------------------------------------
+//  Spacecraft(AbsoluteDate *epoch, OrbitState *state)
+//---------------------------------------------------------------------------
+/**
+ * Default constructor for Spacecraft.
+ *
+ * @param epoch The orbit epoch object
+ * @param state The orbit state object
+ * 
+ */
+//---------------------------------------------------------------------------
+Spacecraft::Spacecraft(AbsoluteDate *epoch, OrbitState *state) :
    orbitState (state),
    orbitEpoch (epoch),
    numSensors (0)
@@ -49,12 +57,19 @@ Spacecraft::Spacecraft(const AbsoluteDate &epoch, const OrbitState &state) :
    // sensorList is empty at start
 }
 
-//------------------------------------------------------------------------------
-// copy constructor
-//------------------------------------------------------------------------------
-Spacecraft::Spacecraft( const Spacecraft &copy) :
-   orbitState (copy.orbitState),
-   orbitEpoch (copy.orbitEpoch),
+//---------------------------------------------------------------------------
+//  Spacecraft(const Spacecraft &copy)
+//---------------------------------------------------------------------------
+/**
+ * Copy constructor for Spacecraft.
+ *
+ * @param copy The spacecraft to copy
+ * 
+ */
+//---------------------------------------------------------------------------
+Spacecraft::Spacecraft(const Spacecraft &copy) :
+   orbitState (copy.orbitState),   // Clone these?
+   orbitEpoch (copy.orbitEpoch),   // Clone these?
    numSensors (copy.numSensors)
 {
    if (copy.numSensors > 0)
@@ -65,16 +80,23 @@ Spacecraft::Spacecraft( const Spacecraft &copy) :
    }
 }
 
-//------------------------------------------------------------------------------
-// operator=
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//  Spacecraft& operator=(const Spacecraft &copy)
+//---------------------------------------------------------------------------
+/**
+ * operator= for Spacecraft.
+ *
+ * @param copy The spacecraft whose values to copy
+ * 
+ */
+//---------------------------------------------------------------------------
 Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
 {
    if (&copy == this)
       return *this;
    
-   orbitEpoch    = copy.orbitEpoch;
-   orbitState    = copy.orbitState;
+   orbitEpoch    = copy.orbitEpoch;  // Clone these?
+   orbitState    = copy.orbitState;  // Clone these?
    numSensors    = copy.numSensors;
    
    sensorList.clear();
@@ -84,49 +106,88 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
    return *this;
 }
 
-//------------------------------------------------------------------------------
-// destructor
-//------------------------------------------------------------------------------
-
+//---------------------------------------------------------------------------
+//  ~Spacecraft()
+//---------------------------------------------------------------------------
+/**
+ * destructor for Spacecraft.
+ *
+ */
+//---------------------------------------------------------------------------
 Spacecraft::~Spacecraft()
 {
 }
 
-//------------------------------------------------------------------------------
-//  OrbitState GetOrbitState()
-//------------------------------------------------------------------------------
-OrbitState Spacecraft::GetOrbitState()
+//---------------------------------------------------------------------------
+//  OrbitState* GetOrbitState()
+//---------------------------------------------------------------------------
+/**
+ * Returns a pointer to the Spacecraft's OrbitState object.
+ *
+ * @return  pointer to the spacecraft's OrbitState
+ * 
+ */
+//---------------------------------------------------------------------------
+OrbitState* Spacecraft::GetOrbitState()
 {
    return orbitState;
 }
 
-//------------------------------------------------------------------------------
-//  AbsoluteDate GetOrbitEpoch()
-//------------------------------------------------------------------------------
-AbsoluteDate Spacecraft::GetOrbitEpoch()
+//---------------------------------------------------------------------------
+//  AbsoluteDate* GetOrbitEpoch()
+//---------------------------------------------------------------------------
+/**
+ * Returns a pointer to the Spacecraft's AbsoluteDate object.
+ *
+ * @return  pointer to the spacecraft's AbsoluteDate
+ * 
+ */
+//---------------------------------------------------------------------------
+AbsoluteDate* Spacecraft::GetOrbitEpoch()
 {
    return orbitEpoch;
 }
 
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 //  Real GetJulianDate()
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+/**
+ * Returns the Spacecraft's Julian Date.
+ *
+ * @return  Spacecraft's JulianDate
+ * 
+ */
+//---------------------------------------------------------------------------
 Real Spacecraft::GetJulianDate()
 {
-   return orbitEpoch.GetJulianDate();
+   return orbitEpoch->GetJulianDate();
 }
 
-//------------------------------------------------------------------------------
-//  const Rvector6& GetCartesianState()
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//  Rvector6 GetCartesianState()
+//---------------------------------------------------------------------------
+/**
+ * Returns the Spacecraft's cartesian state.
+ *
+ * @return  Spacecraft's cartesian state
+ * 
+ */
+//---------------------------------------------------------------------------
 Rvector6 Spacecraft::GetCartesianState()
 {
-   return orbitState.GetCartesianState();
+   return orbitState->GetCartesianState();
 }
 
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 //  void AddSensor(ConicalSensor* sensor)
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+/**
+ * Adds the input sensor to the Spacecraft's sensor list.
+ *
+ * @param  sensor Sensor to add to the list
+ * 
+ */
+//---------------------------------------------------------------------------
 void Spacecraft::AddSensor(ConicalSensor* sensor)
 {
    // @todo - check for sensor already on list!!
@@ -134,9 +195,16 @@ void Spacecraft::AddSensor(ConicalSensor* sensor)
    numSensors++;
 }
 
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 //  Real GetSensorFOV(Integer forSensor)
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+/**
+ * Returns the field-of-view of the specified sensor.
+ *
+ * @param  forSensor ID (index) of the spacecraft whose FOV to return
+ * 
+ */
+//---------------------------------------------------------------------------
 Real Spacecraft::GetSensorFOV(Integer forSensor)
 {
    if (numSensors == 0)
@@ -150,9 +218,16 @@ Real Spacecraft::GetSensorFOV(Integer forSensor)
    return sensorList.at(forSensor)->GetFieldOfView();
 }
 
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 //  bool HasSensors()
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+/**
+ * Returns a flag indicating whether or not the spacecraft has sensors.
+ *
+ * @return  flag indicating whether or not the spacecraft has sensors.
+ * 
+ */
+//---------------------------------------------------------------------------
 bool Spacecraft::HasSensors()
 {
    return (numSensors > 0);

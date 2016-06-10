@@ -21,7 +21,7 @@
 // Created: 2016.05.02
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of KeyValueStatistics class.
  */
 //------------------------------------------------------------------------------
 
@@ -38,8 +38,13 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// default constructor
+// KeyValueStatistics()
 //------------------------------------------------------------------------------
+/**
+ * Default constructor.
+ *
+ */
+//---------------------------------------------------------------------------
 KeyValueStatistics::KeyValueStatistics(Real minVal, Real maxVal, Real avgVal) :
    minValue (minVal),
    maxValue (maxVal),
@@ -48,9 +53,16 @@ KeyValueStatistics::KeyValueStatistics(Real minVal, Real maxVal, Real avgVal) :
 }
 
 //------------------------------------------------------------------------------
-// copy constructor
+// KeyValueStatistics(const KeyValueStatistics &copy)
 //------------------------------------------------------------------------------
-KeyValueStatistics::KeyValueStatistics( const KeyValueStatistics &copy) :
+/**
+ * Copy constructor.
+ * 
+ * @param copy  the object to copy
+ *
+ */
+//---------------------------------------------------------------------------
+KeyValueStatistics::KeyValueStatistics(const KeyValueStatistics &copy) :
    minValue   (copy.minValue),
    maxValue   (copy.maxValue),
    avgValue   (copy.avgValue)
@@ -58,8 +70,15 @@ KeyValueStatistics::KeyValueStatistics( const KeyValueStatistics &copy) :
 }
 
 //------------------------------------------------------------------------------
-// operator=
+// KeyValueStatistics& operator=(const KeyValueStatistics &copy)
 //------------------------------------------------------------------------------
+/**
+ * The operator= for the KeyValueStatistics class.
+ * 
+ * @param copy  the object to copy
+ *
+ */
+//---------------------------------------------------------------------------
 KeyValueStatistics& KeyValueStatistics::operator=(const KeyValueStatistics &copy)
 {
    if (&copy == this)
@@ -73,9 +92,13 @@ KeyValueStatistics& KeyValueStatistics::operator=(const KeyValueStatistics &copy
 }
 
 //------------------------------------------------------------------------------
-// destructor
+// ~KeyValueStatistics()
 //------------------------------------------------------------------------------
-
+/**
+ * Destructor.
+ *
+ */
+//---------------------------------------------------------------------------
 KeyValueStatistics::~KeyValueStatistics()
 {
 }
@@ -83,6 +106,13 @@ KeyValueStatistics::~KeyValueStatistics()
 //------------------------------------------------------------------------------
 //  Real GetMinValue()
 //------------------------------------------------------------------------------
+/**
+ * Returns the minimum value.
+ * 
+ * @return   the minimum value
+ *
+ */
+//---------------------------------------------------------------------------
 Real KeyValueStatistics::GetMinValue()
 {
    return minValue;
@@ -91,6 +121,13 @@ Real KeyValueStatistics::GetMinValue()
 //------------------------------------------------------------------------------
 //  Real GetMaxValue()
 //------------------------------------------------------------------------------
+/**
+ * Returns the maximum value.
+ * 
+ * @return   the maximum value
+ *
+ */
+//---------------------------------------------------------------------------
 Real KeyValueStatistics::GetMaxValue()
 {
    return maxValue;
@@ -99,6 +136,13 @@ Real KeyValueStatistics::GetMaxValue()
 //------------------------------------------------------------------------------
 //  Real GetAvgValue()
 //------------------------------------------------------------------------------
+/**
+ * Returns the average value.
+ * 
+ * @return   the average value
+ *
+ */
+//---------------------------------------------------------------------------
 Real KeyValueStatistics::GetAvgValue()
 {
    return avgValue;

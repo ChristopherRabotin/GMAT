@@ -21,7 +21,8 @@
 // Created: 2016.05.09
 //
 /**
- * Implementation of the coverage checker class
+ * Definition of the coverage checker class.  This class checks for point
+ * coverae and generates reports.
  */
 //------------------------------------------------------------------------------
 #ifndef CoverageChecker_hpp
@@ -78,9 +79,6 @@ protected:
    std::vector<Rvector3*>     pointArray;
    /// feasibility values for each point
    std::vector<bool>          feasibilityTest;  
-   
-   static const IntegerArray  noInts;
-   static const Real          noDate;
 };
 #endif // CoverageChecker_hpp
 

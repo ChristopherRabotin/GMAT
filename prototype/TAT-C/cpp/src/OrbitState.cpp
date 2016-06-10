@@ -21,7 +21,7 @@
 // Created: 2016.05.04
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of the OrbitState class
  */
 //------------------------------------------------------------------------------
 
@@ -33,6 +33,8 @@
 #include "Rmatrix33.hpp"
 #include "StateConversionUtil.hpp"
 #include "TATCException.hpp"
+#include "MessageInterface.hpp"
+
 
 //------------------------------------------------------------------------------
 // static data
@@ -44,8 +46,13 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// default constructor
+// OrbitState()
 //------------------------------------------------------------------------------
+/**
+ * Default constructor.
+ *
+ */
+//---------------------------------------------------------------------------
 OrbitState::OrbitState() :
    mu         (3.986004415e+5)
 {
@@ -54,17 +61,31 @@ OrbitState::OrbitState() :
 }
 
 //------------------------------------------------------------------------------
-// copy constructor
+// OrbitState(const OrbitState &copy)
 //------------------------------------------------------------------------------
-OrbitState::OrbitState( const OrbitState &copy) :
+/**
+ * Copy constructor.
+ * 
+ * @param copy  the OrbitState object to copy
+ *
+ */
+//---------------------------------------------------------------------------
+OrbitState::OrbitState(const OrbitState &copy) :
    currentState (copy.currentState),
    mu           (copy.mu)
 {
 }
 
 //------------------------------------------------------------------------------
-// operator=
+// OrbitState& operator=(const OrbitState &copy)
 //------------------------------------------------------------------------------
+/**
+ * The operator= for OrbitState.
+ * 
+ * @param copy  the OrbitState object to copy
+ *
+ */
+//---------------------------------------------------------------------------
 OrbitState& OrbitState::operator=(const OrbitState &copy)
 {
    if (&copy == this)
@@ -77,9 +98,13 @@ OrbitState& OrbitState::operator=(const OrbitState &copy)
 }
 
 //------------------------------------------------------------------------------
-// destructor
+// ~OrbitState()
 //------------------------------------------------------------------------------
-
+/**
+ * Destructor.
+ *
+ */
+//---------------------------------------------------------------------------
 OrbitState::~OrbitState()
 {
 }
@@ -89,6 +114,18 @@ OrbitState::~OrbitState()
 //                        Real INC, Real RAAN,
 //                        Real AOP, Real TA);
 //------------------------------------------------------------------------------
+/**
+ * Sets the keplerian state, element by element.
+ * 
+ * @param SMA  semimajor axis
+ * @param ECC  eccentricity
+ * @param INC  inclination
+ * @param RAAN right ascension of the ascending node
+ * @param AOP  argument of periapsis
+ * @param TA   true anomaly
+ *
+ */
+//---------------------------------------------------------------------------
 void OrbitState::SetKeplerianState(Real SMA, Real ECC,
                                    Real INC, Real RAAN,
                                    Real AOP, Real TA)
@@ -101,6 +138,13 @@ void OrbitState::SetKeplerianState(Real SMA, Real ECC,
 //------------------------------------------------------------------------------
 // void SetKeplerianVectorState(const Rvector6 &kepl)
 //------------------------------------------------------------------------------
+/**
+ * Sets the keplerian state, as a 6-element vector.
+ * 
+ * @param kepl  keplerian state
+ *
+ */
+//---------------------------------------------------------------------------
 void OrbitState::SetKeplerianVectorState(const Rvector6 &kepl)
 {
    // Sets Keplerian state given states in an array
@@ -112,6 +156,13 @@ void OrbitState::SetKeplerianVectorState(const Rvector6 &kepl)
 //------------------------------------------------------------------------------
 // void SetCartesianState(const Rvector6 &cart)
 //------------------------------------------------------------------------------
+/**
+ * Sets the cartesian state, as a 6-element vector.
+ * 
+ * @param cart  cartesian state
+ *
+ */
+//---------------------------------------------------------------------------
 void OrbitState::SetCartesianState(const Rvector6 &cart)
 {
    // Sets the cartesian state
@@ -122,6 +173,13 @@ void OrbitState::SetCartesianState(const Rvector6 &cart)
 //------------------------------------------------------------------------------
 // void SetGravityParameter(Real toGrav)
 //------------------------------------------------------------------------------
+/**
+ * Sets the gravity parameter.
+ * 
+ * @param toGrav  gravity parameter
+ *
+ */
+//---------------------------------------------------------------------------
 void OrbitState::SetGravityParameter(Real toGrav)
 {
    mu = toGrav;
@@ -130,6 +188,13 @@ void OrbitState::SetGravityParameter(Real toGrav)
 //------------------------------------------------------------------------------
 // Rvector6 GetKeplerianState()
 //------------------------------------------------------------------------------
+/**
+ * Returns the keplerian state as a 6-element vector
+ * 
+ * @return  keplerian state
+ *
+ */
+//---------------------------------------------------------------------------
 Rvector6 OrbitState::GetKeplerianState()
 {
    // Returns the Keplerian state
@@ -140,6 +205,13 @@ Rvector6 OrbitState::GetKeplerianState()
 //------------------------------------------------------------------------------
 // Rvector6 GetCartesianState()
 //------------------------------------------------------------------------------
+/**
+ * Returns the cartesian state as a 6-element vector
+ * 
+ * @return  cartesian state
+ *
+ */
+//---------------------------------------------------------------------------
 Rvector6 OrbitState::GetCartesianState()
 {
    // Returns the Cartesian state
@@ -158,6 +230,20 @@ Rvector6 OrbitState::GetCartesianState()
 //                                      Real i,  Real Om,
 //                                      Real om, Real nu)
 //------------------------------------------------------------------------------
+/**
+ * Converts the keplerian state to a cartesian state.
+ * 
+ * @param a    semimajor axis
+ * @param e    eccentricity
+ * @param i    inclination
+ * @param Om   right ascension of the ascending node
+ * @param om   argument of periapsis
+ * @param nu   true anomaly
+ * 
+ * @return the cartesian state as a 6-element vector
+ *
+ */
+//---------------------------------------------------------------------------
 Rvector6 OrbitState::ConvertKeplerianToCartesian(Real a,  Real e,
                                                  Real i,  Real Om,
                                                  Real om, Real nu)
@@ -199,6 +285,14 @@ Rvector6 OrbitState::ConvertKeplerianToCartesian(Real a,  Real e,
 //------------------------------------------------------------------------------
 // Rvector6 ConvertCartesianToKeplerian(const Rvector6 &cart)
 //------------------------------------------------------------------------------
+/**
+ * Converts the cartesian state to a keplerian state.
+ * 
+ * @param cart    cartesian state
+ * 
+ * @return the keplerian state as a 6-element vector
+ *
+ */
 Rvector6 OrbitState::ConvertCartesianToKeplerian(const Rvector6 &cart)
 {
    Rvector6 kepl = StateConversionUtil::CartesianToKeplerian(mu, cart);

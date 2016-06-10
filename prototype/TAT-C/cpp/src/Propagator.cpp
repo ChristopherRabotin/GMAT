@@ -21,7 +21,7 @@
 // Created: 2016.05.06
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of the propagator class
  */
 //------------------------------------------------------------------------------
 
@@ -33,6 +33,7 @@
 #include "Rmatrix33.hpp"
 #include "TATCException.hpp"
 #include "StateConversionUtil.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // static data
@@ -43,9 +44,16 @@
 // public methods
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// default constructor
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//  Propagator(Spacecraft *sat)
+//---------------------------------------------------------------------------
+/**
+ * Default constructor for Propagator.
+ *
+ * @param sat The spacecraft object
+ * 
+ */
+//---------------------------------------------------------------------------
 Propagator::Propagator(Spacecraft *sat) :
    sc                     (sat),
    J2                     (1.0826269e-003),
@@ -65,16 +73,23 @@ Propagator::Propagator(Spacecraft *sat) :
    semiLatusRectum        (0.0),
    meanMotion             (0.0)
 {
-   OrbitState orbSt = sc->GetOrbitState();
+   OrbitState *orbSt = sc->GetOrbitState();
    SetOrbitState(orbSt);
-   refJd = sc->GetOrbitEpoch().GetJulianDate();
+   refJd = sc->GetOrbitEpoch()->GetJulianDate();
    ComputeOrbitRates();
 }
 
-//------------------------------------------------------------------------------
-// copy constructor
-//------------------------------------------------------------------------------
-Propagator::Propagator( const Propagator &copy) :
+//---------------------------------------------------------------------------
+//  Propagator(const Propagator &copy)
+//---------------------------------------------------------------------------
+/**
+ * Copy constructor for Propagator.
+ *
+ * @param copy The propagator to copy
+ * 
+ */
+//---------------------------------------------------------------------------
+Propagator::Propagator(const Propagator &copy) :
    sc                     (copy.sc),   // correct?
    J2                     (copy.J2),
    mu                     (copy.mu),
@@ -96,9 +111,16 @@ Propagator::Propagator( const Propagator &copy) :
 {
 }
 
-//------------------------------------------------------------------------------
-// operator=
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//  Propagator& operator=(const Propagator &copy)
+//---------------------------------------------------------------------------
+/**
+ * operator= for Propagator.
+ *
+ * @param copy The propagator to copy
+ * 
+ */
+//---------------------------------------------------------------------------
 Propagator& Propagator::operator=(const Propagator &copy)
 {
    if (&copy == this)
@@ -126,9 +148,14 @@ Propagator& Propagator::operator=(const Propagator &copy)
    return *this;
 }
 
-//------------------------------------------------------------------------------
-// destructor
-//------------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//  ~Propagator()
+//---------------------------------------------------------------------------
+/**
+ * destructor for Propagator.
+ *
+ */
+//---------------------------------------------------------------------------
 Propagator::~Propagator()
 {
 }
@@ -137,6 +164,15 @@ Propagator::~Propagator()
 // void SetPhysicalConstants(Real bodyMu, Real bodyJ2,
 //                           Real bodyRadius)
 //------------------------------------------------------------------------------
+/**
+ * Sets physical constant values for the Propagator.
+ *
+ * @param bodyMu     gravitational parameter to use
+ * @param bodyJ2 J2  term to use
+ * @param bodyRadius radius of the body
+ * 
+ */
+//---------------------------------------------------------------------------
 void Propagator::SetPhysicalConstants(Real bodyMu, Real bodyJ2,
                                       Real bodyRadius)
 {
@@ -148,6 +184,13 @@ void Propagator::SetPhysicalConstants(Real bodyMu, Real bodyJ2,
 //------------------------------------------------------------------------------
 // Rvector6 Propagate(const AbsoluteDate &toDate)
 //------------------------------------------------------------------------------
+/**
+ * Propagates to the input time.
+ *
+ * @param toDate     date to which to propagate
+ * 
+ */
+//---------------------------------------------------------------------------
 Rvector6 Propagator::Propagate(const AbsoluteDate &toDate)
 {
    // Propgate and return cartesian state given AbsoluteDate
@@ -155,9 +198,9 @@ Rvector6 Propagator::Propagate(const AbsoluteDate &toDate)
                            refJd)*GmatTimeConstants::SECS_PER_DAY;
    Rvector6 orbElem      = PropagateOrbitalElements(propDuration);
    // Get the pointer to the orbit state
-   OrbitState ptrOrbitState = sc->GetOrbitState();
-   ptrOrbitState.SetKeplerianVectorState(orbElem);
-   Rvector6 cartState = ptrOrbitState.GetCartesianState();
+   OrbitState *ptrOrbitState = sc->GetOrbitState();
+   ptrOrbitState->SetKeplerianVectorState(orbElem);
+   Rvector6 cartState = ptrOrbitState->GetCartesianState();
    return cartState;
 }
 
@@ -168,12 +211,19 @@ Rvector6 Propagator::Propagate(const AbsoluteDate &toDate)
 //------------------------------------------------------------------------------
 // void SetOrbitState(OrbitState &orbState)
 //------------------------------------------------------------------------------
-void Propagator::SetOrbitState(OrbitState &orbState)
+/**
+ * Sets the orbit state on the Propagator.
+ *
+ * @param orbState     orbit state
+ * 
+ */
+//---------------------------------------------------------------------------
+void Propagator::SetOrbitState(OrbitState *orbState)
 {
    // Set orbit state given OrbitState object.
    
    // Done at intialization for performance reasons.
-   Rvector6 kepElements = orbState.GetKeplerianState();
+   Rvector6 kepElements = orbState->GetKeplerianState();
    SMA  = kepElements(0);
    ECC  = kepElements(1);
    INC  = kepElements(2);
@@ -187,6 +237,13 @@ void Propagator::SetOrbitState(OrbitState &orbState)
 //------------------------------------------------------------------------------
 // Rvector6 PropagateOrbitalElements(Real propDuration)
 //------------------------------------------------------------------------------
+/**
+ * Propagates the orbital elements for the specificed duration.
+ *
+ * @param propDuration     duration over which to propagate
+ * 
+ */
+//---------------------------------------------------------------------------
 Rvector6 Propagator::PropagateOrbitalElements(Real propDuration)
 {
    // Propagate and return orbital elements
@@ -208,6 +265,13 @@ Rvector6 Propagator::PropagateOrbitalElements(Real propDuration)
 //------------------------------------------------------------------------------
 // Real MeanMotion()
 //------------------------------------------------------------------------------
+/**
+ * Computes the mean motion.
+ *
+ * @return Mean Motion
+ * 
+ */
+//---------------------------------------------------------------------------
 Real Propagator::MeanMotion()
 {
   // Computes the orbital mean motion
@@ -218,6 +282,13 @@ Real Propagator::MeanMotion()
 //------------------------------------------------------------------------------
 // Real SemiParameter()
 //------------------------------------------------------------------------------
+/**
+ * Computes the semi parameter.
+ *
+ * @return SemiParameter
+ * 
+ */
+//---------------------------------------------------------------------------
 Real Propagator::SemiParameter()
 {
    // Computes the orbital semi parameter
@@ -228,6 +299,11 @@ Real Propagator::SemiParameter()
 //------------------------------------------------------------------------------
 // void ComputeOrbitRates()
 //------------------------------------------------------------------------------
+/**
+ * Computes the orbit rates.
+ *
+ */
+//---------------------------------------------------------------------------
 void Propagator::ComputeOrbitRates()
 {
    // Compute orbit element rates
@@ -239,6 +315,11 @@ void Propagator::ComputeOrbitRates()
 //------------------------------------------------------------------------------
 // void ComputeMeanMotionRate()
 //------------------------------------------------------------------------------
+/**
+ * Computes the mean motion rate.
+ * 
+ */
+//---------------------------------------------------------------------------
 void Propagator::ComputeMeanMotionRate()
 {
    // Computes the orbital mean motion Rate
@@ -249,12 +330,17 @@ void Propagator::ComputeMeanMotionRate()
    Real p      = SemiParameter();
    Real sinInc = GmatMathUtil::Sin(INC);
    meanMotionRate = n - 0.75*n*tmpJ2*(eqRadius/p)*(eqRadius/p) *
-                    GmatMathUtil::Sqrt(1-e*e)*(3*sinInc*sinInc - 2.0);
+                    GmatMathUtil::Sqrt(1.0-e*e)*(3.0*sinInc*sinInc - 2.0);
 }
 
 //------------------------------------------------------------------------------
 // void ComputeArgumentOfPeriapsisRate()
 //------------------------------------------------------------------------------
+/**
+ * Computes the argument of periapsis rate.
+ * 
+ */
+//---------------------------------------------------------------------------
 void Propagator::ComputeArgumentOfPeriapsisRate()
 {
    // Computes the argument of periapsis rate
@@ -262,24 +348,29 @@ void Propagator::ComputeArgumentOfPeriapsisRate()
    Real n = MeanMotion();
    Real s = SemiParameter();
    Real sinInc = GmatMathUtil::Sin(INC);
-   argPeriapsisRate = 3.0*n*eqRadius*eqRadius*J2/
+   argPeriapsisRate = 3.0*n*(eqRadius*eqRadius)*J2/
                       4.0/(s*s)*(4.0 - 5.0*(sinInc*sinInc));
 }
 
 //------------------------------------------------------------------------------
 // void ComputeRightAscensionNodeRate()
 //------------------------------------------------------------------------------
+/**
+ * Computes the right ascension node rate.
+ * 
+ */
+//---------------------------------------------------------------------------
 void Propagator::ComputeRightAscensionNodeRate()
 {
    // Computes rate right ascension of node rate
    // Vallado, 3rd. Ed.  Eq9-37
    Real n = MeanMotion();
    Real s = SemiParameter();
-   rightAscensionNodeRate = -3.0*n*eqRadius*eqRadius*J2/
+   rightAscensionNodeRate = -3.0*n*(eqRadius*eqRadius)*J2/
                              2.0/(s*s)*GmatMathUtil::Cos(INC);
 }
 
-
+// These should go away
 //Real       MeanToTrueAnomaly(Real meanAnomaly, Real e);
 //Real       TrueToEccentricAnomaly(Real trueAnomaly, Real e);
 //Real       EccentricTiMeanAnomaly(eccentricAnomaly, Real e);

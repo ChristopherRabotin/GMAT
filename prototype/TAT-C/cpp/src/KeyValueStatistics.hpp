@@ -21,7 +21,7 @@
 // Created: 2016.05.02
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the KeyValueStatistics class.
  */
 //------------------------------------------------------------------------------
 #ifndef KeyValueStatistics_hpp

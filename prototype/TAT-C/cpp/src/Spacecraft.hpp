@@ -21,7 +21,8 @@
 // Created: 2016.05.02
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the Spacecraft class.  This class contains data and
+ * methods for a simple Spacecraft.
  */
 //------------------------------------------------------------------------------
 #ifndef Spacecraft_hpp
@@ -37,14 +38,14 @@ class Spacecraft
 public:
    
    // class methods
-   Spacecraft(const AbsoluteDate &epoch, const OrbitState &state);
+   Spacecraft(AbsoluteDate *epoch, OrbitState *state);
    Spacecraft( const Spacecraft &copy);
    Spacecraft& operator=(const Spacecraft &copy);
    
    virtual ~Spacecraft();
    
-   virtual OrbitState     GetOrbitState();
-   virtual AbsoluteDate   GetOrbitEpoch();
+   virtual OrbitState*    GetOrbitState();
+   virtual AbsoluteDate*  GetOrbitEpoch();
    virtual Real           GetJulianDate();
    virtual Rvector6       GetCartesianState();
    virtual void           AddSensor(ConicalSensor* sensor);
@@ -54,12 +55,12 @@ public:
 protected:
    
    /// Orbit State
-   OrbitState                  orbitState;
+   OrbitState                  *orbitState;
    /// Orbit Epoch
-   AbsoluteDate                orbitEpoch;
+   AbsoluteDate                *orbitEpoch;
    /// Number of attached sensors
    Integer                     numSensors;
-   /// Vector of sensor objects
+   /// Vector of attached sensor objects
    std::vector<ConicalSensor*> sensorList;
 };
 #endif // Spacecraft_hpp

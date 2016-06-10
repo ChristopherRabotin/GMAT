@@ -21,7 +21,8 @@
 // Created: 2016.05.04
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the OrbitState class.  This class computes and converts
+ * Cartesian and Keplerian states.
  */
 //------------------------------------------------------------------------------
 #ifndef OrbitState_hpp
