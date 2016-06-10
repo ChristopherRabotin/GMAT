@@ -2134,7 +2134,8 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       type1 = "CallFunction";
       
       // Figure out which CallFunction to be created.
-      std::string funcName = GmatStringUtil::ParseFunctionName(desc);
+      std::string argStr;
+      std::string funcName = GmatStringUtil::ParseFunctionName(desc, argStr);
       if (funcName != "")
       {
          GmatBase *func = FindObject(funcName);
@@ -2196,15 +2197,18 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       else if (!GmatStringUtil::IsValidName(type1 + desc, true))
       {
          InterpreterException ex
-            ("Found invalid function name \"" + type1 + desc + "\"");
+            ("Found invalid function or command name \"" + type1 + desc + "\"");
          HandleError(ex);
       }
       else
       {
          type1 = "CallFunction";
+         #ifdef DEBUG_CREATE_CALL_FUNCTION
          MessageInterface::ShowMessage
             ("===> It is CallFunction command, about to figure out which CallFunction\n");
-         std::string funcName = GmatStringUtil::ParseFunctionName(desc);
+         #endif
+         std::string argStr;
+         std::string funcName = GmatStringUtil::ParseFunctionName(desc, argStr);
          if (funcName != "")
          {
             GmatBase *func = FindObject(funcName);
@@ -2216,8 +2220,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                if (find(functionList.begin(), functionList.end(), funcName) != 
                    functionList.end())
                {
+                  #ifdef DEBUG_CREATE_CALL_FUNCTION
                   MessageInterface::ShowMessage
                      ("==> 2 %s is builtin GmatFunction\n", funcName.c_str());
+                  #endif
                   type1 = "CallBuiltinGmatFunction";
                }
                else if (gmatFunctionsAvailable)
@@ -2251,7 +2257,8 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       #endif
       
       // Check if function name is a built-in GmatFunction
-      std::string funcName = GmatStringUtil::ParseFunctionName(desc);
+      std::string argStr;
+      std::string funcName = GmatStringUtil::ParseFunctionName(desc, argStr);
       
       #ifdef DEBUG_CREATE_CALL_FUNCTION
       MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());
@@ -2795,7 +2802,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    {
       if (!GmatStringUtil::IsValidName(funcName))
       {
-         InterpreterException ex("Found invalid function name \"" + funcName + "\"");
+         InterpreterException ex("Found invalid function or command name \"" + funcName + "\"");
          HandleError(ex);
          ignoreError = true;
          return false;
@@ -4169,7 +4176,8 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
    // The Validator will catch this later.
    if (!GmatStringUtil::IsThereMathSymbol(rhs))
    {
-      std::string funcName = GmatStringUtil::ParseFunctionName(rhs);
+      std::string argStr;
+      std::string funcName = GmatStringUtil::ParseFunctionName(rhs, argStr);
       #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage("   RHS <%s> has no math symbos\n", rhs.c_str());
       MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());

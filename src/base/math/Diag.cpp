@@ -137,19 +137,14 @@ bool Diag::ValidateInputs()
    #endif
    
    Integer type1 = Gmat::RMATRIX_TYPE;
-   // Set maximum rows and colomns?
-   // Size will be validated upon execution
-   Integer row1 = 100;
-   Integer col1 = 100;
    bool retval = true;   
    
-   // Any more validation to do?
+   // Is there any validation to do?
    
    #ifdef DEBUG_VALIDATE_INPUT
    MessageInterface::ShowMessage
       ("Diag::ValidateInputs() <%p><%s> returning %s, "
-       "type=%d, row=%d, col=%d\n", this, GetTypeName().c_str(),
-       retval ? "true" : "false", type1, row1, col1);
+       "type=%d\n", this, GetTypeName().c_str(), retval ? "true" : "false", type1);
    #endif
    
    return retval;
@@ -166,26 +161,14 @@ void Diag::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
        GetTypeName().c_str(), GetName().c_str());
    #endif
    
+   // Since inputNames are built in the constructor, check for the size
+   if (inputNames.empty())
+      throw MathException("The math function " + GetTypeName() + "() requires input arguments");
+   
    type = Gmat::RMATRIX_TYPE;
-   // Set maximum rows and colomns?
-   // Parse the equation and figure out rows and colums here.
-   std::string str = GetName();
-   StringArray args = GmatStringUtil::ParseFunctionCall(str);
-   if (args.size() != 2)
-      throw MathException(GetTypeName() + "requires input arguments\n");
    
-   std::string strVal = args[1];
-   diagValues = GmatStringUtil::ToRealArray(strVal);
-   #ifdef DEBUG_INPUT_OUTPUT
-   MessageInterface::ShowMessage("   args[1] = '%s'\n", strVal.c_str());
-   MessageInterface::ShowMessage("   diagValues.size() = %d\n", diagValues.size());
-   #endif
-   
-   if (diagValues.size() == 0)
-      throw MathException(GetTypeName() + "requires input arguments\n");
-   
-   rowCount = diagValues.size();
-   colCount = diagValues.size();
+   rowCount = inputNames.size();
+   colCount = rowCount;
    numRows = rowCount;
    numCols = colCount;
    
@@ -219,13 +202,23 @@ Rmatrix Diag::MatrixEvaluate()
    #endif
    
    Rmatrix result(numRows, numCols);
-   
-   for (int i = 0; i < numRows; i++)
+
+   for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
    {
+      ElementWrapper *wrapper = inputArgWrappers[i];
+      #ifdef DEBUG_EVALUATE
+      MessageInterface::ShowMessage
+         ("   inputArgWrappers[%d] = <%p>, desc = '%s'\n", i, wrapper,
+          wrapper ? wrapper->GetDescription().c_str() : "NULL");
+      #endif
+      
+      if (wrapper == NULL)
+         throw MathException("Error evaluating \"" + GetName());
+      
       for (int j = 0; j < numCols; j++)
       {
          if (i == j)
-            result(i,j) = diagValues[i];
+            result(i,j) = wrapper->EvaluateReal();
       }
    }
    

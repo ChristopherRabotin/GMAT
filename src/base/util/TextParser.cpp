@@ -1115,64 +1115,10 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
       ("TextParser::SeparateBrackets() chunk='%s', bracketPair='%s', delim='%s', "
        "checkOuterBracket=%d\n", chunk.c_str(), bracketPair.c_str(), delim.c_str(),
        checkOuterBracket);
+   MessageInterface::ShowMessage("Returning GmatStringUtil::SeparateBrackets()\n");
    #endif
    
-   std::string str1 = chunk;
-   
-   // First remove blank spaces inside array bracket
-   if (chunk[0] != bracketPair[0])
-      str1 = RemoveSpaceInBrackets(chunk, bracketPair);
-   
-   #if DEBUG_TP_SEP_BRACKETS
-   MessageInterface::ShowMessage("   str1=%s\n", str1.c_str());
-   #endif
-   
-   UnsignedInt firstOpen, lastClose;
-   firstOpen = str1.find_first_not_of(whiteSpace);
-   lastClose = str1.find_last_not_of(whiteSpace);
-   bool bracketFound = true;
-   
-   if (str1[firstOpen] != bracketPair[0] || str1[lastClose] != bracketPair[1])
-   {
-      bracketFound = false;
-      if (checkOuterBracket)
-      {
-         sprintf(errorMsg, "TextParser::SeparateBrackets() \"%s\" is not enclosed "
-                 "with \"%s\"", str1.c_str(), bracketPair.c_str());
-
-         #if DEBUG_TP_SEP_BRACKETS
-         MessageInterface::ShowMessage("%s\n", errorMsg);
-         #endif
-
-         sprintf(errorMsg, "\"%s\" is not enclosed with \"%s\"", str1.c_str(),
-                 bracketPair.c_str());
-         throw UtilityException(errorMsg);
-      }
-   }
-   
-   std::string str;
-   
-   if (bracketFound)
-      str = str1.substr(firstOpen+1, lastClose-firstOpen-1);
-   else
-      str = str1.substr(firstOpen, lastClose-firstOpen+1);
-   
-   #if DEBUG_TP_SEP_BRACKETS
-   MessageInterface::ShowMessage("   str=%s\n", str.c_str());
-   #endif
-   
-   
-   StringArray parts;
-   parts = GmatStringUtil::SeparateBy(str, delim, true);
-   
-   #if DEBUG_TP_SEP_BRACKETS
-   MessageInterface::ShowMessage("   Returning:\n");
-   for (unsigned int i=0; i<parts.size(); i++)
-      MessageInterface::ShowMessage
-         ("   parts[%d] = %s\n", i, parts[i].c_str());
-   #endif
-   
-   return parts;
+   return GmatStringUtil::SeparateBrackets(chunk, bracketPair, delim, checkOuterBracket);
 }
 
 
