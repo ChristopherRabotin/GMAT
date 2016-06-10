@@ -583,23 +583,27 @@ bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathInde
    SignalBase *currentleg = paths[pathIndex];
    SignalData *current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
    
-   Real correction = 0.0;
+   ionoCorrection = 0.0;                                              // made changes by TUAN NGUYEN
+   tropoCorrection = 0.0;                                             // made changes by TUAN NGUYEN
    while (currentleg != NULL)
    {
       for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
       {
          if (current->useCorrection[j])
          {
-            if ((current->correctionIDs[j] == "Troposphere")||(current->correctionIDs[j] == "Ionosphere"))
-               correction += current->corrections[j];
+            if (current->correctionIDs[j] == "Troposphere")           // made changes by TUAN NGUYEN
+               tropoCorrection += current->corrections[j];            // made changes by TUAN NGUYEN
+
+            if (current->correctionIDs[j] == "Ionosphere")            // made changes by TUAN NGUYEN
+               ionoCorrection += current->corrections[j];             // made changes by TUAN NGUYEN
          }
       }
       currentleg = currentleg->GetNext();
       current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
    }
-
-   cMeasurement.value[pathIndex] += correction;
-         
+   
+   cMeasurement.value[pathIndex] += (ionoCorrection + tropoCorrection); // made changes by TUAN NGUYEN
+   
    retval = true;
 
    return retval;
