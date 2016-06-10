@@ -452,7 +452,7 @@ bool VisualModelCanvas::LoadModel(const wxString &filePath)
 {
    #ifdef DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
-      ("VisualModelCanvas::LoadModel(filePath) entered, filePath='%s'\n", filePath.c_str());
+      ("VisualModelCanvas::LoadModel(filePath) entered, filePath='%s'\n", filePath.WX_TO_C_STRING);
    #endif
    
    if (GmatFileUtil::DoesFileExist(filePath.c_str()))
@@ -482,7 +482,7 @@ void VisualModelCanvas::LoadModel()
 {
    #ifdef DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
-      ("VisualModelCanvas::LoadModel() entered, modelPath='%s'\n", modelPath.c_str());
+      ("VisualModelCanvas::LoadModel() entered, modelPath='%s'\n", modelPath.WX_TO_C_STRING);
    #endif
    ModelManager *mm = ModelManager::Instance();
    std::string mP = modelPath.WX_TO_STD_STRING;
