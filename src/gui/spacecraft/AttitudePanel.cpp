@@ -1718,6 +1718,10 @@ void AttitudePanel::HideInitialAttitudeAndRate()
 //------------------------------------------------------------------------------
 void AttitudePanel::ShowInitialAttitudeAndRate()
 {
+   #ifdef DEBUG_SHOW_INITIAL_DATA
+   MessageInterface::ShowMessage("AttitudePanel::ShowInitialAttitudeAndRate() entered\n");
+   #endif
+   
    //LOJ: Added to hide precessing spinner data
    rightSizer->Hide(precessingSpinnerSizer);
    rightSizer->Hide(nadirPointingSizer);
@@ -1831,6 +1835,10 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
 
    rightSizer->Layout();
    Refresh();
+   
+   #ifdef DEBUG_SHOW_INITIAL_DATA
+   MessageInterface::ShowMessage("AttitudePanel::ShowInitialAttitudeAndRate() leaving\n");
+   #endif
 }
 
 //LOJ: Added
@@ -2008,23 +2016,28 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    {
       #ifdef DEBUG_SHOW_MODEL
       MessageInterface::ShowMessage
-         ("   Showing data for modelType='%s'\n", modelType.c_str());
+         ("   Showing data for modelType='%s', attDataLoaded=%d\n",
+          modelType.c_str(), attDataLoaded);
       #endif
       // Show everything that should be shown, then enable it all
       if ((modelType == "Spinner") && (!attDataLoaded))
       {
-         Attitude *tmpSpinner = (Attitude *)theGuiInterpreter->
-               CreateObject("Spinner", "");
+         Attitude *tmpSpinner =
+            (Attitude *)theGuiInterpreter->CreateObject("Spinner", "");
+         #ifdef DEBUG_SHOW_MODEL
+         MessageInterface::ShowMessage("   tmpSpinner=<%p> created\n", tmpSpinner);
+         #endif
          // populate attitude and rate fields here
          try
          {
             LoadAttitudeAndRateData(tmpSpinner);
-            delete tmpSpinner;
+            //delete tmpSpinner;
          }
          catch (BaseException &be)
          {
             MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
          }
+         delete tmpSpinner;
       }
       ShowInitialAttitudeAndRate();
       EnableAll();
@@ -2041,9 +2054,13 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    }
    else if (attitudeModel != modelType)
    {
+      #ifdef DEBUG_SHOW_MODEL
+      MessageInterface::ShowMessage
+         ("   Creating tmpAttitude for model '%s'\n", modelType.c_str());
+      #endif
       // Need to create a temporary attitude object in order to query it
-      Attitude *tmpAttitude = (Attitude *)theGuiInterpreter->
-         CreateObject(modelType, "", 0);
+      Attitude *tmpAttitude =
+         (Attitude *)theGuiInterpreter->CreateObject(modelType, "", 0);
       #ifdef DEBUG_SHOW_MODEL
       MessageInterface::ShowMessage
          ("   tmpAttitude<%p> created for modelType: '%s'\n", tmpAttitude, modelType.c_str());
@@ -2429,19 +2446,29 @@ void AttitudePanel::OnCoordinateSystemSelection(wxCommandEvent &event)
 void AttitudePanel::OnAttitudeModelSelection(wxCommandEvent &event)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage("AttitudePanel::OnAttitudeModelSelection() entered\n");
+   MessageInterface::ShowMessage
+      ("AttitudePanel::OnAttitudeModelSelection() entered, attitudeModel = '%s'\n",
+       attitudeModel.c_str());
    #endif
    // if the user changes the attitude model, we will need to create a new one
-    std::string newModel = config1ComboBox->GetValue().WX_TO_STD_STRING;
-    if (newModel != attitudeModel)
-    {
+   std::string newModel = config1ComboBox->GetValue().WX_TO_STD_STRING;
+   if (newModel != attitudeModel)
+   {
       modelModified = true;
       dataChanged   = true;
-      attitudeModel = newModel;
       theScPanel->EnableUpdate(true);
-    }
-
-    DisplayDataForModel(newModel);
+   }
+   
+   DisplayDataForModel(newModel);
+   
+   // Set new model to current model after showing data
+   attitudeModel = newModel;
+   
+   #ifdef DEBUG_ATTITUDE_PANEL
+   MessageInterface::ShowMessage
+      ("AttitudePanel::OnAttitudeModelSelection() leaving, attitudeModel = '%s'\n",
+       attitudeModel.c_str());
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -3460,7 +3487,8 @@ void AttitudePanel::SaveCCSDSAttitudeData(Attitude *useAttitude)
 void AttitudePanel::LoadAttitudeAndRateData(Attitude* forAtt)
 {
    #ifdef DEBUG_ATTITUDE_LOAD
-   MessageInterface::ShowMessage("AttitudePanel::LoadAttitudeAndRateData() entered\n");
+   MessageInterface::ShowMessage
+      ("AttitudePanel::LoadAttitudeAndRateData() entered, forAtt=<%p>\n", forAtt);
    #endif
    unsigned int x, y;
    if (attStateType == "EulerAngles")
