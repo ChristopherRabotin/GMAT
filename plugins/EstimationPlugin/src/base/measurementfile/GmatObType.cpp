@@ -428,7 +428,8 @@ ObservationData* GmatObType::ReadObservation()
    std::getline (theStream, str);
    
    // Skip header and comment lines or empty lines
-   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == ""))
+   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == "") ||
+         (str.length() < 2))
    {
       std::getline(theStream, str);
 
