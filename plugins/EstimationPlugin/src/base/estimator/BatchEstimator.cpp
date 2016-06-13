@@ -3408,14 +3408,15 @@ void BatchEstimator::WriteReportFileHeaderPart5()
          Spacecraft *sc = (Spacecraft*)obj;
          std::string csName = sc->GetStringParameter("CoordinateSystem");
          CoordinateSystem *cs = NULL;
-         try
-         {
+         // undo code to handle bug GMT-5619 due to it was handle by Spacecraft's code
+         //try
+         //{
             cs = (CoordinateSystem *)GetConfiguredObject(csName);
-         }
-         catch (...)
-         {
-            throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
-         }
+         //}
+         //catch (...)
+         //{
+         //   throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
+         //}
          name = cs->GetStringParameter("Origin");
       }
       else if (obj->IsOfType(Gmat::GROUND_STATION))
