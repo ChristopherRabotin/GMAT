@@ -1042,8 +1042,8 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
 
       // Create a new tracking config
-      static Integer openBracketCount;
-      static bool start;
+//      static Integer openBracketCount;
+//      static bool start;
       if (index == 0)                    // it starts a tracking configuration when index = 0
       {
          // reset open bracket count and new strand flag

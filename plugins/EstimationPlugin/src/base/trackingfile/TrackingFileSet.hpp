@@ -255,6 +255,10 @@ private:
    bool    ParseTrackingConfig(std::string value, Integer& configIndex, bool& start);
    bool    ParseStrand(std::string value, Integer configIndex, Integer strandIndex = 0);
    bool    AddToSignalPath(std::string participantName, Integer configIndex, Integer strandIndex);
+
+   Integer openBracketCount;
+   bool    start;
+
 };
 
 #endif /* TrackingFileSet_hpp */
