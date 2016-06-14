@@ -692,6 +692,7 @@ bool BatchEstimator::SetBooleanParameter(const Integer id, const bool value)
 {
    if (id == USE_INITIAL_COVARIANCE)
    {
+//      MessageInterface::ShowMessage("useApriori is set to %s\n", (value ? "true" : "false"));
       useApriori = value;
       return true;
    }
@@ -1058,6 +1059,14 @@ void BatchEstimator::CompleteInitialization()
    if (useApriori)
    {   // [Lambda] = [Px0]^-1
       information = stateCovariance->GetCovariance()->Inverse();         // stateCovariance is [Px0] matrix
+      //MessageInterface::ShowMessage("Hello there 1: information[\n");
+      //for (Integer row = 0; row < information.GetNumRows(); ++row)
+      //{
+      //   for (Integer col = 0; col < information.GetNumColumns(); ++col)
+      //      MessageInterface::ShowMessage("%le   ", information.GetElement(row, col));
+      //   MessageInterface::ShowMessage("\n");
+      //}
+      //MessageInterface::ShowMessage("]\n");
    }
    else
    {  // [Lambda] = [0] 
@@ -1081,6 +1090,7 @@ void BatchEstimator::CompleteInitialization()
 
    if (useApriori)
    {
+      //MessageInterface::ShowMessage("Hello there 2\n");
       for (Integer i = 0; i < information.GetNumRows(); ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
@@ -1376,7 +1386,10 @@ void BatchEstimator::CheckCompletion()
       // Need to reset STM and covariances
       hAccum.clear();
       if (useApriori)
+      {
+         //MessageInterface::ShowMessage("Hello there 3\n");
          information = stateCovariance->GetCovariance()->Inverse();   // When starting an iteration, [Lambda] = [Px0]^-1
+      }
       else
       {
          information.SetSize(stateSize, stateSize);
@@ -1405,6 +1418,7 @@ void BatchEstimator::CheckCompletion()
 
       if (useApriori)
       {
+         //MessageInterface::ShowMessage("Hello there 4\n");
          for (Integer i = 0; i < information.GetNumRows(); ++i)
          {
             for (UnsignedInt j = 0; j < stateSize; ++j)
