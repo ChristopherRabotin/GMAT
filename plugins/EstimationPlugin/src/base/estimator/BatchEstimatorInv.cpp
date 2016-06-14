@@ -468,7 +468,7 @@ void BatchEstimatorInv::Accumulate()
                sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
-               sprintf(&s[0], "%21.5lf %21.5lf %21.5lf %18.6lf %.12le %.12le %.12le %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+               sprintf(&s[0], "%21.5lf %21.5lf %21.5lf %18.6lf %.12le %.12le %.12le %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*GmatMathUtil::Abs(ocDiff), calculatedMeas->feasibilityValue);
                sLine << s << " ";
 
                // fill out N/A for partial derivative
@@ -696,7 +696,7 @@ void BatchEstimatorInv::Accumulate()
                   else
                      sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
-                  sprintf(&s[0], "%21.5lf %21.5lf %21.5lf %18.6lf %.12le %.12le %.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+                  sprintf(&s[0], "%21.5lf %21.5lf %21.5lf %18.6lf %.12le %.12le %.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*GmatMathUtil::Abs(ocDiff), calculatedMeas->feasibilityValue);
                   sLine << s << " ";
 
                   // fill out N/A for partial derivative
