@@ -5273,38 +5273,43 @@ bool CelestialBody::SetUpSPICE()
    // get the NAIF Id from the Spice Kernel(s)   @todo - should this be moved to SpacePoint?
    if (!naifIdSet)
    {
-      // SPICE calls Earth's moon "Moon" ; GMAT calls Earth's moon "Luna"
-      Integer spiceNaifId; 
-      if (instanceName == SolarSystem::MOON_NAME)
-         spiceNaifId = kernelReader->GetNaifID("MOON"); 
-      else if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
-         spiceNaifId = kernelReader->GetNaifID("SSB");
-      else
+      // WCS as of 2016.06.13 we don't want to override with the NAIF ID from the file IF
+      // the user has set a value.  We only want to set the NAIF ID if the
+      // user did NOT set one for the body.
+      if (naifId == UNDEFINED_NAIF_ID)
       {
-            spiceNaifId = kernelReader->GetNaifID(instanceName, false);
-            // if not found with the instanceName, try using the NAIF ID
-            if (spiceNaifId == 0)   // SSB is 0, but that's handled above
-            {
-               std::stringstream ss("");
-               ss << naifId;
-               naifName = ss.str();
-               spiceNaifId = naifId;
-            }
-            else
-            {
-               naifName = instanceName;
-            }
-      }
-      
-      if ((naifId != UNDEFINED_NAIF_ID) && (spiceNaifId != naifId))
-      {
+         // SPICE calls Earth's moon "Moon" ; GMAT calls Earth's moon "Luna"
+         Integer spiceNaifId; 
+         if (instanceName == SolarSystem::MOON_NAME)
+            spiceNaifId = kernelReader->GetNaifID("MOON"); 
+         else if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+            spiceNaifId = kernelReader->GetNaifID("SSB");
+         else
+         {
+               spiceNaifId = kernelReader->GetNaifID(instanceName, false);
+               // if not found with the instanceName, try using the NAIF ID
+               if (spiceNaifId == 0)   // SSB is 0, but that's handled above
+               {
+                  std::stringstream ss("");  // @todo - revisit this code 
+                  ss << naifId;
+                  naifName = ss.str();
+                  spiceNaifId = naifId;
+               }
+               else
+               {
+                  naifName = instanceName;
+               }
+         }
+         
          std::stringstream ss("");
-         ss << "Overriding input NAIF ID for body \"" << instanceName <<
-               "\" with NAIF ID (" << spiceNaifId << ") from SPICE kernel.\n";
-         //         MessageInterface::PopupMessage(Gmat::WARNING_, ss.str());
+         ss << "NAIF ID for body \"" << instanceName << "\" was unset.  Setting to " <<
+               "NAIF ID (" << spiceNaifId << ") retrieved from SPICE kernel.\n";
          MessageInterface::ShowMessage(ss.str().c_str());
+            
+         naifId    = spiceNaifId;
       }
-      naifId    = spiceNaifId;
+      // The user set a value (or we are using the default value for the
+      // built-in bodies)
       naifIdObserver = kernelReader->GetNaifID(j2000BodyName, false);
       naifIdSet = true;
    }
