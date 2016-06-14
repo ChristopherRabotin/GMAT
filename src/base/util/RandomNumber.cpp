@@ -183,6 +183,177 @@ void RandomNumber::ClockSeed()
    generator.seed(clockSeed);
 }
 
+
+Real RandomNumber::rrand()
+{
+   return white(generator);
+}
+
+
+//------------------------------------------------------------------------------
+//  Real Gaussian()
+//------------------------------------------------------------------------------
+/**
+*  Returns a normally distributed Gaussian random deviate (zero mean, unit var)
+*
+*/
+//------------------------------------------------------------------------------
+Real RandomNumber::Gaussian()
+{
+   std::normal_distribution<double> Gauss(0.0, 1.0);
+   return Gauss(generator);
+}
+
+
+//------------------------------------------------------------------------------
+//  Real Gaussian(const Real mean, const Real stdev)
+//------------------------------------------------------------------------------
+/**
+*  Returns a normally distributed Gaussian random deviate.
+*
+*  @param <mean> Mean of Gaussian distribution
+*  @param <stdev> Standard deviation of Gaussian distribution
+*  @return The random deviate.
+*
+*/
+//------------------------------------------------------------------------------
+Real RandomNumber::Gaussian(const Real mean, const Real stdev)
+{
+   std::normal_distribution<double> Gauss(mean, stdev);
+   return Gauss(generator);
+}
+
+
+//------------------------------------------------------------------------------
+//  void GaussianArray(Real *myArray, const Integer size)
+//------------------------------------------------------------------------------
+/**
+*  Returns a normally distributed Gaussian random deviate (zero mean, unit var)
+*
+*  @param <myArray> Pointer to array where random deviates will be stored
+*  @param <size> size of the array of deviates
+*
+*/
+//------------------------------------------------------------------------------
+void RandomNumber::GaussianArray(Real *myArray, const Integer size)
+{
+   for (Integer i = 0; i < size; i++)
+   {
+      myArray[i] = Gaussian();
+   }
+}
+
+//------------------------------------------------------------------------------
+//  void GaussianArray(Real *myArray, const Integer size,
+//	                         const Real mean, const Real stdev)
+//------------------------------------------------------------------------------
+/**
+*  Returns an array of normally distributed Gaussian random deviates
+*  with specified mean and variance.
+*
+*  @param <myArray> Pointer to array where random deviates will be stored
+*  @param <size> size of the array of deviates
+*  @param <mean> Mean of Gaussian distribution
+*  @param <stdev> Standard deviation of Gaussian distribution
+*
+*/
+//------------------------------------------------------------------------------
+void RandomNumber::GaussianArray(Real *myArray, const Integer size,
+   const Real mean, const Real stdev)
+{
+   for (Integer i = 0; i < size; i++)
+   {
+      myArray[i] = Gaussian(mean, stdev);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+//  Real Uniform()
+//------------------------------------------------------------------------------
+/**
+*  Returns an uniformly distributed random deviate in the range [0,1)
+*  The range includes 0.0 but excludes 1.0;
+*
+*  @return The random deviate.
+*
+*/
+//------------------------------------------------------------------------------
+Real RandomNumber::Uniform()
+{
+   Real rn;
+   do
+   {
+      rn = rrand();
+   } while (rn == 1.0);
+
+   return rn;
+}
+
+
+//------------------------------------------------------------------------------
+//  Real Uniform(Real a, Real b)
+//------------------------------------------------------------------------------
+/**
+*  Returns an uniformly distributed random deviate in the range [a,b)
+*  The mean of this distribution is (a+b)/2.
+*  The variance of this distribution is (b-a)^2/12.
+*
+*  @param <a> Distribution start
+*  @param <b> Distribution end
+*  @return The random deviate.
+*
+*/
+//------------------------------------------------------------------------------
+Real RandomNumber::Uniform(const Real a, const Real b)
+{
+   return a + (b - a)*Uniform();
+}
+
+
+//------------------------------------------------------------------------------
+//  void UniformArray(Real *myArray, const Integer size)
+//------------------------------------------------------------------------------
+/**
+*  Returns a uniformly distributed random deviate in the range [0,1)
+*  The range includes 0.0 but excludes 1.0;
+*
+*  @param <myArray> Pointer to array where random deviates will be stored
+*  @param <size> size of the array of deviates
+*
+*/
+//------------------------------------------------------------------------------
+void RandomNumber::UniformArray(Real* myArray, const Integer size)
+{
+   for (Integer i = 0; i < size; ++i)
+      myArray[i] = Uniform();
+}
+
+
+//------------------------------------------------------------------------------
+//  void UniformArray(Real *myArray, Real a, Real b, const Integer size)
+//------------------------------------------------------------------------------
+/**
+*  Returns an uniformly distributed random deviate in the range [a,b)
+*  The mean of this distribution is (a+b)/2.
+*  The variance of this distribution is (b-a)^2/12.
+*
+*  @param <myArray> Pointer to array where random deviates will be stored
+*  @param <size> size of the array of deviates
+*  @param <a> Distribution start
+*  @param <b> Distribution end
+*
+*/
+//------------------------------------------------------------------------------
+void RandomNumber::UniformArray(Real *myArray, const Integer size,
+   const Real a, const Real b)
+{
+   UniformArray(myArray, size);
+   for (Integer i = 0; i < size; i++)
+      myArray[i] = a + (b - a)*myArray[i];
+}
+
+
 ////------------------------------------------------------------------------------
 ////  unsigned int UniformInt()
 ////------------------------------------------------------------------------------
@@ -198,27 +369,6 @@ void RandomNumber::ClockSeed()
 //     return rand();
 //}
 
-//------------------------------------------------------------------------------
-//  Real Uniform()
-//------------------------------------------------------------------------------
-/**
- *  Returns an uniformly distributed random deviate in the range [0,1)
- *  The range includes 0.0 but excludes 1.0;
- *
- *  @return The random deviate.
- *
- */
-//------------------------------------------------------------------------------
-Real RandomNumber::Uniform()
-{
-	Real rn;
-	do 
-	{
-	   rn = rrand();
-   } while (rn == 1.0);
-   
-   return rn;
-}
 
 //------------------------------------------------------------------------------
 //  Real UniformPrimitive()
@@ -233,10 +383,10 @@ Real RandomNumber::Uniform()
  *
  */
 //------------------------------------------------------------------------------
-Real RandomNumber::UniformPrimitive()
-{
-     return (Uniform() + 1.0);
-}
+//Real RandomNumber::UniformPrimitive()
+//{
+//     return (Uniform() + 1.0);
+//}
 
 //------------------------------------------------------------------------------
 //  Real UniformOpenOpen()
@@ -250,15 +400,15 @@ Real RandomNumber::UniformPrimitive()
  *
  */
 //------------------------------------------------------------------------------
-Real RandomNumber::UniformOpenOpen()
-{
-   Real rn;
-   rn = rrand();
-   while ((rn == 1.0)||(rn == 0.0))
-      rn = rrand();
-
-   return rn;
-}
+//Real RandomNumber::UniformOpenOpen()
+//{
+//   Real rn;
+//   rn = rrand();
+//   while ((rn == 1.0)||(rn == 0.0))
+//      rn = rrand();
+//
+//   return rn;
+//}
 
  //------------------------------------------------------------------------------
 //  Real UniformOpenClosed()
@@ -272,34 +422,16 @@ Real RandomNumber::UniformOpenOpen()
  *
  */
 //------------------------------------------------------------------------------
-Real RandomNumber::UniformOpenClosed()
-{
-   Real rn;
-   rn = rrand();
-   while (rn == 0.0)
-	  rn = rrand();
+//Real RandomNumber::UniformOpenClosed()
+//{
+//   Real rn;
+//   rn = rrand();
+//   while (rn == 0.0)
+//	  rn = rrand();
+//
+//   return rn;
+//}
 
-   return rn;
-}
-
-//------------------------------------------------------------------------------
-//  Real Uniform(Real a, Real b)
-//------------------------------------------------------------------------------
-/**
- *  Returns an uniformly distributed random deviate in the range [a,b)
- *  The mean of this distribution is (a+b)/2.
- *  The variance of this distribution is (b-a)^2/12.
- *
- *  @param <a> Distribution start
- *  @param <b> Distribution end
- *  @return The random deviate.
- *
- */
-//------------------------------------------------------------------------------
-Real RandomNumber::Uniform(const Real a, const Real b)
-{
-   return a + (b - a)*Uniform();
-}
 
 //------------------------------------------------------------------------------
 //  Real UniformOpenOpen(Real a, Real b)
@@ -315,10 +447,10 @@ Real RandomNumber::Uniform(const Real a, const Real b)
  *
  */
 //------------------------------------------------------------------------------
-Real RandomNumber::UniformOpenOpen(const Real a, const Real b)
-{
-   return a + (b - a)*UniformOpenOpen();
-}
+//Real RandomNumber::UniformOpenOpen(const Real a, const Real b)
+//{
+//   return a + (b - a)*UniformOpenOpen();
+//}
 
 //------------------------------------------------------------------------------
 //  Real UniformOpenClosed(Real a, Real b)
@@ -334,62 +466,31 @@ Real RandomNumber::UniformOpenOpen(const Real a, const Real b)
  *
  */
 //------------------------------------------------------------------------------
-Real RandomNumber::UniformOpenClosed(const Real a, const Real b)
-{
-   return a + (b - a)*UniformOpenClosed();
-}
-
-//------------------------------------------------------------------------------
-//  Real Gaussian()
-//------------------------------------------------------------------------------
-/**
- *  Returns a normally distributed Gaussian random deviate (zero mean, unit var)
- *
- */
-//------------------------------------------------------------------------------
-Real RandomNumber::Gaussian()
-{
-   std::normal_distribution<double> Gauss(0.0, 1.0);
-   return Gauss(generator);
-}
+//Real RandomNumber::UniformOpenClosed(const Real a, const Real b)
+//{
+//   return a + (b - a)*UniformOpenClosed();
+//}
 
 
-//------------------------------------------------------------------------------
-//  Real G(const Real x, const Real a, const Real b)
-//------------------------------------------------------------------------------
-/**
- *  Inline function that is required for the transformed rejection with
- *  decomposition method.
- *
- *  @param <x>  The independent parameter of the function
- *  @param <a>  Optimized parameter specific to distribution
- *  @param <b>  Optimized parameter specific to distribution
- *  @return G(x)
- *
- */
-//------------------------------------------------------------------------------
-inline Real RandomNumber::G(Real x, Real a, Real b)
-{
-    return (2.0*a/(0.5-GmatMathUtil::Abs(x))+b)*x;
-}
+////------------------------------------------------------------------------------
+////  Real G(const Real x, const Real a, const Real b)
+////------------------------------------------------------------------------------
+///**
+// *  Inline function that is required for the transformed rejection with
+// *  decomposition method.
+// *
+// *  @param <x>  The independent parameter of the function
+// *  @param <a>  Optimized parameter specific to distribution
+// *  @param <b>  Optimized parameter specific to distribution
+// *  @return G(x)
+// *
+// */
+////------------------------------------------------------------------------------
+//inline Real RandomNumber::G(Real x, Real a, Real b)
+//{
+//    return (2.0*a/(0.5-GmatMathUtil::Abs(x))+b)*x;
+//}
 
-//------------------------------------------------------------------------------
-//  Real Gaussian(const Real mean, const Real stdev)
-//------------------------------------------------------------------------------
-/**
- *  Returns a normally distributed Gaussian random deviate.
- *
- *  @param <mean> Mean of Gaussian distribution
- *  @param <stdev> Standard deviation of Gaussian distribution
- *  @return The random deviate.
- *
- */
-//------------------------------------------------------------------------------
-Real RandomNumber::Gaussian(const Real mean, const Real stdev)
-{
-   std::normal_distribution<double> Gauss(mean, stdev);
-   return Gauss(generator);
-}
 
 ////------------------------------------------------------------------------------
 ////  void UniformArray(unsigned int *myArray, const Integer size)
@@ -410,23 +511,6 @@ Real RandomNumber::Gaussian(const Real mean, const Real stdev)
 //	   myArray[i] = UniformInt();
 //}
 
-//------------------------------------------------------------------------------
-//  void UniformArray(Real *myArray, const Integer size)
-//------------------------------------------------------------------------------
-/**
- *  Returns a uniformly distributed random deviate in the range [0,1)
- *  The range includes 0.0 but excludes 1.0;
- *
- *  @param <myArray> Pointer to array where random deviates will be stored
- *  @param <size> size of the array of deviates
- *
- */
-//------------------------------------------------------------------------------
-void RandomNumber::UniformArray(Real* myArray, const Integer size)
-{
-   for (Integer i = 0; i < size; ++i)
-      myArray[i] = Uniform(); 
-}
 
 //------------------------------------------------------------------------------
 //  void UniformPrimitiveArray(Real *myArray, const Integer size)
@@ -442,11 +526,11 @@ void RandomNumber::UniformArray(Real* myArray, const Integer size)
  *
  */
 //------------------------------------------------------------------------------
-void RandomNumber::UniformPrimitiveArray(Real *myArray, const Integer size)
-{
-   for (Integer i = 0; i < size; ++i)
-      myArray[i] = UniformPrimitive(); 
-}
+//void RandomNumber::UniformPrimitiveArray(Real *myArray, const Integer size)
+//{
+//   for (Integer i = 0; i < size; ++i)
+//      myArray[i] = UniformPrimitive(); 
+//}
 
 //------------------------------------------------------------------------------
 //  void UniformOpenOpenArray(Real *myArray, const Integer size)
@@ -461,11 +545,11 @@ void RandomNumber::UniformPrimitiveArray(Real *myArray, const Integer size)
  *
  */
 //------------------------------------------------------------------------------
-void RandomNumber::UniformOpenOpenArray(Real *myArray, const Integer size)
-{
-   for (Integer i = 0; i < size; ++i)
-      myArray[i] = UniformOpenOpen(); 
-}
+//void RandomNumber::UniformOpenOpenArray(Real *myArray, const Integer size)
+//{
+//   for (Integer i = 0; i < size; ++i)
+//      myArray[i] = UniformOpenOpen(); 
+//}
 
 //------------------------------------------------------------------------------
 //  void UniformOpenClosedArray(Real *myArray, const Integer size)
@@ -480,34 +564,12 @@ void RandomNumber::UniformOpenOpenArray(Real *myArray, const Integer size)
  *
  */
 //------------------------------------------------------------------------------
-void RandomNumber::UniformOpenClosedArray(Real *myArray, const Integer size)
-{
-   for (Integer i = 0; i < size; ++i)
-      myArray[i] = UniformOpenClosed(); 
-}
+//void RandomNumber::UniformOpenClosedArray(Real *myArray, const Integer size)
+//{
+//   for (Integer i = 0; i < size; ++i)
+//      myArray[i] = UniformOpenClosed(); 
+//}
 
-//------------------------------------------------------------------------------
-//  void UniformArray(Real *myArray, Real a, Real b, const Integer size)
-//------------------------------------------------------------------------------
-/**
- *  Returns an uniformly distributed random deviate in the range [a,b)
- *  The mean of this distribution is (a+b)/2.
- *  The variance of this distribution is (b-a)^2/12.
- *
- *  @param <myArray> Pointer to array where random deviates will be stored
- *  @param <size> size of the array of deviates
- *  @param <a> Distribution start
- *  @param <b> Distribution end
- *
- */
-//------------------------------------------------------------------------------
-void RandomNumber::UniformArray(Real *myArray, const Integer size, 
-	                         const Real a, const Real b)
-{
-	UniformArray(myArray, size);
-    for (Integer i=0; i < size; i++)
-       myArray[i] = a + (b - a)*myArray[i];
-}
 
 //------------------------------------------------------------------------------
 //  void UniformOpenOpenArray(Real *myArray, const Integer size, Real a, Real b)
@@ -524,13 +586,13 @@ void RandomNumber::UniformArray(Real *myArray, const Integer size,
  *
  */
 //------------------------------------------------------------------------------
-void RandomNumber::UniformOpenOpenArray(Real *myArray, const Integer size, 
-	                         const Real a, const Real b)
-{
-   UniformOpenOpenArray(myArray, size);
-   for (Integer i=0; i < size; i++)
-      myArray[i] = a + (b - a)*myArray[i];
-}
+//void RandomNumber::UniformOpenOpenArray(Real *myArray, const Integer size, 
+//	                         const Real a, const Real b)
+//{
+//   UniformOpenOpenArray(myArray, size);
+//   for (Integer i=0; i < size; i++)
+//      myArray[i] = a + (b - a)*myArray[i];
+//}
 
 //------------------------------------------------------------------------------
 // void UniformOpenClosedArray(Real *myArray, const Integer size, 
@@ -548,60 +610,11 @@ void RandomNumber::UniformOpenOpenArray(Real *myArray, const Integer size,
  *
  */
 //------------------------------------------------------------------------------
-void RandomNumber::UniformOpenClosedArray(Real *myArray, const Integer size, 
-				          const Real a, const Real b)
-{
-   UniformOpenClosedArray(myArray, size);
-   for (Integer i=0; i < size; i++)
-      myArray[i] = a + (b - a)*myArray[i];
-}
-
-//------------------------------------------------------------------------------
-//  void GaussianArray(Real *myArray, const Integer size)
-//------------------------------------------------------------------------------
-/**
- *  Returns a normally distributed Gaussian random deviate (zero mean, unit var)
- *
- *  @param <myArray> Pointer to array where random deviates will be stored
- *  @param <size> size of the array of deviates
- *
- */
-//------------------------------------------------------------------------------
-void RandomNumber::GaussianArray(Real *myArray, const Integer size)
-{
-     for (Integer i=0; i < size; i++)
-     {
-         myArray[i] = Gaussian();
-     }
-}
-
-//------------------------------------------------------------------------------
-//  void GaussianArray(Real *myArray, const Integer size,
-//	                         const Real mean, const Real stdev)
-//------------------------------------------------------------------------------
-/**
- *  Returns an array of normally distributed Gaussian random deviates 
- *  with specified mean and variance.
- *
- *  @param <myArray> Pointer to array where random deviates will be stored
- *  @param <size> size of the array of deviates
- *  @param <mean> Mean of Gaussian distribution
- *  @param <stdev> Standard deviation of Gaussian distribution
- *
- */
-//------------------------------------------------------------------------------
-void RandomNumber::GaussianArray(Real *myArray, const Integer size,
-	                         const Real mean, const Real stdev)
-{
-     for (Integer i=0; i < size; i++)
-     {
-         myArray[i] = Gaussian(mean, stdev);
-     }
-}
-
-
-Real RandomNumber::rrand()
-{
-   return white(generator);
-}
+//void RandomNumber::UniformOpenClosedArray(Real *myArray, const Integer size, 
+//				          const Real a, const Real b)
+//{
+//   UniformOpenClosedArray(myArray, size);
+//   for (Integer i=0; i < size; i++)
+//      myArray[i] = a + (b - a)*myArray[i];
+//}
 
