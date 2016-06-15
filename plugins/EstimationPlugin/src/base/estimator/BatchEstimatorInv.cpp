@@ -890,7 +890,6 @@ void BatchEstimatorInv::Estimate()
    newResidualRMS = 0.0;
    if (useApriori)
    {
-      //MessageInterface::ShowMessage("Hello there 5\n");
       // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
       Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
@@ -1122,7 +1121,6 @@ void BatchEstimatorInv::Estimate()
    predictedRMS = 0;
    if (useApriori)
    {
-      //MessageInterface::ShowMessage("Hello there 6\n");
       // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
       Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
