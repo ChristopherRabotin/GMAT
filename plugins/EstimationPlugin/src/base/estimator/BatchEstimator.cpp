@@ -3630,14 +3630,14 @@ void BatchEstimator::WriteIterationHeader()
       << "\n"
       << "                                                                  Notations Used In Report File\n"
       << "\n"
-      << "                  N : Not edited                                                     BXY  : Blocked, X = Path index, Y = Count index(Doppler)\n"
+      << "                  - : Not edited                                                     BXY  : Blocked, X = Path index, Y = Count index(Doppler)\n"
       << "                  U : Unused because no computed value configuration available       IRMS : Edited by initial RMS sigma filter\n"
       << "                  R : Out of ramp table range                                        OLSE : Edited by outer-loop sigma editor\n"
       << "\n"
       << "                                                                  Measurement and Residual Units\n"
       << "\n"
       << "              Obs-Type            Obs/Computed Units   Residual Units                      Obs-Type            Obs/Computed Units   Residual Units\n"
-      << "              Doppler_RangeRate   kilometers/second    cm/second                           Range_KM            kilometers           meters\n"
+      << "              Doppler_RangeRate   kilometers/second    kilometers/second                   Range_KM            kilometers           kilometers\n"
       << "              Doppler_HZ          Hertz                Hertz                               Range_RU            Range Units          Range Units\n";
 
    textFile.flush();
@@ -3656,10 +3656,10 @@ void BatchEstimator::WritePageHeader()
    }
    else
    {
-      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)          Weight (W)           W*(O-C)^2       sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
+      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size() - 1; ++i)
-         textFile << GmatStringUtil::GetAlignmentString("", 19);
+         textFile << GmatStringUtil::GetAlignmentString(" ", 20);
       textFile << "  Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
    }
    textFile << "\n";
