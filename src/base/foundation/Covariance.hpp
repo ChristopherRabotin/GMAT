@@ -62,6 +62,8 @@ public:
 
    Rmatrix *GetCovariance();
    Rmatrix *GetCovariance(Integer forParameterID);
+   Integer  GetSubMatrixLocationStart(Integer forParameterID);            // made changes by TUAN NGUYEN
+   Integer  GetSubMatrixLocationStart(const std::string paramName);       // made changes by TUAN NGUYEN
 
 protected:
    GmatBase     *covarianceOwner;
