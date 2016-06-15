@@ -561,7 +561,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                                // made changes by TUAN NGUYEN
    //Rvector value(8, 1.0e10, 1.0e10, 1.0e10, 1.0e6, 1.0e6, 1.0e6, 
    Rvector value(8, 1.0e70, 1.0e70, 1.0e70, 1.0e70, 1.0e70, 1.0e70,
-                 Cr_EpsilonSigma, Cd_EpsilonSigma);                                  // made changes by TUAN NGUYEN
+      Cd_EpsilonSigma*Cd_EpsilonSigma, Cr_EpsilonSigma*Cr_EpsilonSigma);             // made changes by TUAN NGUYEN
    covariance.ConstructRHS(value, 0);                                                // made changes by TUAN NGUYEN
    
    // Load default model file
@@ -5401,13 +5401,13 @@ bool Spacecraft::Initialize()
 
       // Set Cr covariance                                                      // made changes by TUAN NGUYEN
       Integer start = orbitErrorCovariance.GetNumRows();                        // made changes by TUAN NGUYEN
-      Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                  // made changes by TUAN NGUYEN
-      covariance(start, start) = Cr_EpsilonSigma * Cr_EpsilonSigma;             // made changes by TUAN NGUYEN
-      // Set Cd covariance                                                      // made changes by TUAN NGUYEN
-      ++start;                                                                  // made changes by TUAN NGUYEN
       Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                        // made changes by TUAN NGUYEN
       covariance(start, start) = Cd_EpsilonSigma * Cd_EpsilonSigma;             // made changes by TUAN NGUYEN
-      
+      // Set Cd covariance                                                      // made changes by TUAN NGUYEN
+      ++start;                                                                  // made changes by TUAN NGUYEN
+      Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                  // made changes by TUAN NGUYEN
+      covariance(start, start) = Cr_EpsilonSigma * Cr_EpsilonSigma;             // made changes by TUAN NGUYEN
+
 
       isInitialized = true;
       retval = true;
