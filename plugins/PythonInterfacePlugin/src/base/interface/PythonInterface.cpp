@@ -406,7 +406,9 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName,
          n += col;
 
          pybuffer->obj = NULL;
-         pybuffer->format = "d";
+         char fmt[2];
+         std::sprintf(fmt, "d");
+         pybuffer->format = fmt;
          pybuffer->ndim = (row != 1 && col != 1) ? 2 : 1;
          pybuffer->shape = (Py_ssize_t *)malloc(
                             sizeof(Py_ssize_t)* pybuffer->ndim);

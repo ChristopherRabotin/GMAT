@@ -459,8 +459,7 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
       troposphere->SetWaveLength(wavelength);
       troposphere->SetElevationAngle(elevationAngle);
       troposphere->SetRange(distance*GmatMathConstants::KM_TO_M);
-      tropoCorrection = troposphere->Correction();
-//    Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
+      tropoCorrection = troposphere->Correction();                      // tropoCorrection[0] unit: m
 
       #ifdef DEBUG_TROPOSPHERE_MEDIA_CORRECTION
          MessageInterface::ShowMessage("       *Run Troposphere media correction:\n");
@@ -561,8 +560,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
       #endif
       
       // 5. Run ionosphere correction:
-      ionoCorrection = ionosphere->Correction();
-      Real rangeCorrection = ionoCorrection[0]*GmatMathConstants::M_TO_KM;            // unit: meter
+      ionoCorrection = ionosphere->Correction();            // ionoCorrection[0] unit: meter
 
       // 6. Clean up
       if (cv)
@@ -572,7 +570,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
 
       #ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
          MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
-         MessageInterface::ShowMessage("         +Range correction = %.12lf m\n", rangeCorrection*GmatMathConstants::KM_TO_M);
+         MessageInterface::ShowMessage("         +Range correction = %.12lf m\n", ionoCorrection[0]);
       #endif
    }
    else
@@ -631,16 +629,16 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       {
          if (tropoWarningCount == 0)
          {
-            MessageInterface::ShowMessage("Warning: Troposphere correction has a negative value (%lf km).\n", mediaCorrection[0]);
+            MessageInterface::ShowMessage("Warning: Troposphere correction has a negative value (%lf km).\n", mediaCorrection[0] * GmatMathConstants::M_TO_KM);
             MessageInterface::ShowMessage("The correction is calculated based on signal sent or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", participants[0]->GetName().c_str(), epoch1, participants[1]->GetName().c_str());
             ++tropoWarningCount;
          }
       }
-      else if (mediaCorrection[0] > 0.06)      // 60m GMT-5576           // 1000.0)
+      else if (mediaCorrection[0] > 60.0)      // 60m GMT-5576           // unit: m
       {
          if (tropoWarningCount == 0)
          {
-            MessageInterface::ShowMessage("Warning: Troposphere correction has a large value (%lf km).\n", mediaCorrection[0]);
+            MessageInterface::ShowMessage("Warning: Troposphere correction has a large value (%lf km).\n", mediaCorrection[0] * GmatMathConstants::M_TO_KM);
             MessageInterface::ShowMessage("The correction is calculated based on signal sent or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", participants[0]->GetName().c_str(), epoch1, participants[1]->GetName().c_str());
             ++tropoWarningCount;
          }
@@ -661,25 +659,25 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       {
          if (ionoWarningCount == 0)
          {
-            MessageInterface::ShowMessage("Warning: Ionosphere correction has a negative value (%lf km).\n", ionoCorrection[0]);
+            MessageInterface::ShowMessage("Warning: Ionosphere correction has a negative value (%lf km).\n", ionoCorrection[0] * GmatMathConstants::M_TO_KM);
             MessageInterface::ShowMessage("The correction is calculated based on signal sent from or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", participants[0]->GetName().c_str(), epoch1, participants[1]->GetName().c_str());
             ++ionoWarningCount;
          }
       }
-      else if (ionoCorrection[0] > 0.02)            // 20m GMT-5576            //1000.0)
+      else if (ionoCorrection[0] > 20.0)            // 20m GMT-5576            // unit: m
       {
          if (ionoWarningCount == 0)
          {
-            MessageInterface::ShowMessage("Warning: Ionosphere correction has a large value (%lf km).\n", ionoCorrection[0]);
+            MessageInterface::ShowMessage("Warning: Ionosphere correction has a large value (%lf km).\n", ionoCorrection[0]*GmatMathConstants::M_TO_KM);
             MessageInterface::ShowMessage("The correction is calculated based on signal sent from or received on station %s at epoch %.12lf A1Mjd to spacecraft %s.\n", participants[0]->GetName().c_str(), epoch1, participants[1]->GetName().c_str());
             ++ionoWarningCount;
          }
       }
 
       // 4. Combine effects:
-      mediaCorrection[0] += ionoCorrection[0];
+      mediaCorrection[0] += ionoCorrection[0];         // unit: m
       mediaCorrection[1] += ionoCorrection[1];
-      mediaCorrection[2] += ionoCorrection[2];
+      mediaCorrection[2] += ionoCorrection[2];         // unit: second
       #endif
    }
    else

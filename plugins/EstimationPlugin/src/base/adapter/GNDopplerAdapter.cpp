@@ -723,6 +723,7 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
    rangeOnly = true;
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
    measDataE = cMeasurement;
+   measDataE.value[0] = (measDataE.value[0] - 2 * GetIonoCorrection());                    // made changes by TUAN NGUYEN
    
    addNoise = addNoiseOption;
    addBias = addBiasOption;
@@ -762,7 +763,8 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
       delete obData;
 
    measDataS = adapterS->GetMeasurement();
-   measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km
+   // measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km                                    // made changes by TUAN NGUYEN
+   measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km   // made changes by TUAN NGUYEN
 
    // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 

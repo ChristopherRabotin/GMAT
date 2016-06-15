@@ -1480,20 +1480,15 @@ ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer&
 #include "DataFile.hpp"
 bool DataFilter::HasFile(ObservationData* dataObject)
 {
-   //MessageInterface::ShowMessage("Hello there 1\n");
    bool has = false;
    if (!fileNames.empty())
    {
-      //MessageInterface::ShowMessage("Hello there 2\n");
       if (find(fileNames.begin(), fileNames.end(), "All") == fileNames.end())
       {
          DataFile* df = dataObject->fileIndex;
          std::string fname = df->GetStringParameter("Filename");
-         //MessageInterface::ShowMessage("Hello there 3: fname = <%s>   fileNames.size() = %d\n", fname.c_str(), fileNames.size());
-         //MessageInterface::ShowMessage("Hello there 3: fileNames[0] = <%s>\n", fname.c_str(), fileNames[0].c_str());
          for (Integer i = 0; i < fileNames.size(); ++i)
          {
-            //MessageInterface::ShowMessage("Hello there 4: fname = <%s>   filenames[%d] = <%s>\n", fname.c_str(), i, fileNames[i].c_str());
             if (fname == fileNames[i])
             {
                // When it found a DataFile object with a pointer matching to file index in observation data, it set true to "has" variable
@@ -1501,13 +1496,11 @@ bool DataFilter::HasFile(ObservationData* dataObject)
                break;
             }
          }
-         //MessageInterface::ShowMessage("Hello there 5\n");
       }
       else
          has = true;
-      //MessageInterface::ShowMessage("Hello there 6\n");
    }
-   //MessageInterface::ShowMessage("Hello there 7\n");
+   
    return has;
 }
 

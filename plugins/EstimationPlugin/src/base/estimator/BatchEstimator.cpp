@@ -692,6 +692,7 @@ bool BatchEstimator::SetBooleanParameter(const Integer id, const bool value)
 {
    if (id == USE_INITIAL_COVARIANCE)
    {
+//      MessageInterface::ShowMessage("useApriori is set to %s\n", (value ? "true" : "false"));
       useApriori = value;
       return true;
    }
@@ -1058,6 +1059,14 @@ void BatchEstimator::CompleteInitialization()
    if (useApriori)
    {   // [Lambda] = [Px0]^-1
       information = stateCovariance->GetCovariance()->Inverse();         // stateCovariance is [Px0] matrix
+      //MessageInterface::ShowMessage("Hello there 1: information[\n");
+      //for (Integer row = 0; row < information.GetNumRows(); ++row)
+      //{
+      //   for (Integer col = 0; col < information.GetNumColumns(); ++col)
+      //      MessageInterface::ShowMessage("%le   ", information.GetElement(row, col));
+      //   MessageInterface::ShowMessage("\n");
+      //}
+      //MessageInterface::ShowMessage("]\n");
    }
    else
    {  // [Lambda] = [0] 
@@ -1081,6 +1090,7 @@ void BatchEstimator::CompleteInitialization()
 
    if (useApriori)
    {
+      //MessageInterface::ShowMessage("Hello there 2\n");
       for (Integer i = 0; i < information.GetNumRows(); ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
@@ -1376,7 +1386,10 @@ void BatchEstimator::CheckCompletion()
       // Need to reset STM and covariances
       hAccum.clear();
       if (useApriori)
+      {
+         //MessageInterface::ShowMessage("Hello there 3\n");
          information = stateCovariance->GetCovariance()->Inverse();   // When starting an iteration, [Lambda] = [Px0]^-1
+      }
       else
       {
          information.SetSize(stateSize, stateSize);
@@ -1405,6 +1418,7 @@ void BatchEstimator::CheckCompletion()
 
       if (useApriori)
       {
+         //MessageInterface::ShowMessage("Hello there 4\n");
          for (Integer i = 0; i < information.GetNumRows(); ++i)
          {
             for (UnsignedInt j = 0; j < stateSize; ++j)
@@ -3408,14 +3422,15 @@ void BatchEstimator::WriteReportFileHeaderPart5()
          Spacecraft *sc = (Spacecraft*)obj;
          std::string csName = sc->GetStringParameter("CoordinateSystem");
          CoordinateSystem *cs = NULL;
-         try
-         {
+         // undo code to handle bug GMT-5619 due to it was handle by Spacecraft's code
+         //try
+         //{
             cs = (CoordinateSystem *)GetConfiguredObject(csName);
-         }
-         catch (...)
-         {
-            throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
-         }
+         //}
+         //catch (...)
+         //{
+         //   throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
+         //}
          name = cs->GetStringParameter("Origin");
       }
       else if (obj->IsOfType(Gmat::GROUND_STATION))
@@ -5513,7 +5528,7 @@ bool BatchEstimator::DataFilter()
                weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
          
          // 2.2. Filter based on maximum residual multiplier
-         if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
+         if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*GmatMathUtil::Abs(O-C) > maximum residual multiplier) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "IRMS";            // "IRMS": represent for OLSEInitialRMSSigma
@@ -5543,7 +5558,7 @@ bool BatchEstimator::DataFilter()
          
          // 2. Filter based on n-sigma
          Real sigmaVal = (chooseRMSP ? predictedRMS : newResidualRMS);
-         if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+         if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*GmatMathUtil::Abs(O-C) > k*sigma+ K) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "OLSE";                     // "OLSE": represent for outer-loop sigma filter
@@ -5732,7 +5747,7 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
    for (k = 1; k <= rowCount; ++k)
    {
       iLeRowCount = k - 1;
-      tolerance = abs(epsilon * sum1[j-1]);
+      tolerance = GmatMathUtil::Abs(epsilon * sum1[j-1]);
       for (i = k; i <= rowCount; ++i)
       {
          dsum = 0.0;
