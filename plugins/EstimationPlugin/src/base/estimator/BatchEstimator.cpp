@@ -5516,7 +5516,7 @@ bool BatchEstimator::DataFilter()
                weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
          
          // 2.2. Filter based on maximum residual multiplier
-         if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
+         if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*GmatMathUtil::Abs(O-C) > maximum residual multiplier) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "IRMS";            // "IRMS": represent for OLSEInitialRMSSigma
@@ -5546,7 +5546,7 @@ bool BatchEstimator::DataFilter()
          
          // 2. Filter based on n-sigma
          Real sigmaVal = (chooseRMSP ? predictedRMS : newResidualRMS);
-         if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+         if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*GmatMathUtil::Abs(O-C) > k*sigma+ K) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "OLSE";                     // "OLSE": represent for outer-loop sigma filter
@@ -5735,7 +5735,7 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
    for (k = 1; k <= rowCount; ++k)
    {
       iLeRowCount = k - 1;
-      tolerance = abs(epsilon * sum1[j-1]);
+      tolerance = GmatMathUtil::Abs(epsilon * sum1[j-1]);
       for (i = k; i <= rowCount; ++i)
       {
          dsum = 0.0;
