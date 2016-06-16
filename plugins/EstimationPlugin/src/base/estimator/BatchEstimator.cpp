@@ -1057,7 +1057,24 @@ void BatchEstimator::CompleteInitialization()
    hAccum.clear();
    if (useApriori)
    {   // [Lambda] = [Px0]^-1
-      information = stateCovariance->GetCovariance()->Inverse();         // stateCovariance is [Px0] matrix
+      try
+      {
+         information = stateCovariance->GetCovariance()->Inverse();         // stateCovariance is [Px0] matrix
+      }
+      catch (...)
+      {
+         MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+         {
+            for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+               MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+            if (row < stateCovariance->GetDimension() - 1)
+               MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+
+         throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+      }
    }
    else
    {  // [Lambda] = [0] 
@@ -1377,7 +1394,24 @@ void BatchEstimator::CheckCompletion()
       hAccum.clear();
       if (useApriori)
       {
-         information = stateCovariance->GetCovariance()->Inverse();   // When starting an iteration, [Lambda] = [Px0]^-1
+         try
+         {
+            information = stateCovariance->GetCovariance()->Inverse();   // When starting an iteration, [Lambda] = [Px0]^-1
+         }
+         catch (...)
+         {
+            MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+            for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+            {
+               for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+                  MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+               if (row < stateCovariance->GetDimension() - 1)
+                  MessageInterface::ShowMessage("\n");
+            }
+            MessageInterface::ShowMessage("]\n");
+
+            throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+         }
       }
       else
       {

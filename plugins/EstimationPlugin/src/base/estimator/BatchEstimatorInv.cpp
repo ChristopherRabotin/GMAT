@@ -892,7 +892,27 @@ void BatchEstimatorInv::Estimate()
    {
       // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
-      Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+      Rmatrix Pdx0_inv;
+      try
+      {
+         Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+      }
+      catch (...)
+      {
+         MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+         {
+            for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+               MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+            if (row < stateCovariance->GetDimension() - 1)
+               MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+
+         throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+      }
+
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
@@ -1128,7 +1148,27 @@ void BatchEstimatorInv::Estimate()
    {
       // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
-      Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+      Rmatrix Pdx0_inv;
+      try
+      {
+         Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+      }
+      catch (...)
+      {
+         MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+         {
+            for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+               MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+            if (row < stateCovariance->GetDimension()-1)
+               MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+
+         throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+      }
+
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
