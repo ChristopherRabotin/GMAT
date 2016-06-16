@@ -852,19 +852,28 @@ bool EstimationStateManager::BuildState()
       Covariance *cov = stateMap[i]->object->GetCovariance();
 
       #ifdef DEBUG_COVARIANCE
-         MessageInterface::ShowMessage("Found length = %d for id = %d\n", size, id);
+         MessageInterface::ShowMessage("Found length = %d for id = %d    object = <%p,%s>\n", size, id, stateMap[i]->object, stateMap[i]->object->GetName().c_str());
       #endif
 
       Rmatrix *subcov = cov->GetCovariance(id);
       if (subcov)
       {
          #ifdef DEBUG_COVARIANCE
-            MessageInterface::ShowMessage("Found %d by %d subcovariance\n",
+            MessageInterface::ShowMessage("Found %d by %d subcovariance: [\n",
                   subcov->GetNumRows(), subcov->GetNumColumns());
          #endif
          for (Integer j = 0; j < size; ++j)
             for (Integer k = 0; k < size; ++k)
-               covariance(i+j,i+k) = (*subcov)(j,k);
+               covariance(i + j, i + k) = (*subcov)(j, k);
+#ifdef DEBUG_COVARIANCE
+         for (Integer j = 0; j < size; ++j)
+         {
+            for (Integer k = 0; k < size; ++k)
+               MessageInterface::ShowMessage("%le   ", (*subcov)(j, k));
+            MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+#endif
       }
       else
       {
@@ -917,7 +926,7 @@ bool EstimationStateManager::BuildState()
       MessageInterface::ShowMessage("State Transition Matrix = %s\n",
             stm.ToString().c_str());
       MessageInterface::ShowMessage("Covariance Matrix = %s\n",
-            covariance.ToString().c_str());
+            covariance.GetCovariance()->ToString().c_str());
    #endif
 
    return retval;

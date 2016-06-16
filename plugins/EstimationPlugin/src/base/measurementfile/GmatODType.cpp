@@ -31,7 +31,7 @@
 
 //#define DEBUG_ODTYPE_CREATION_INITIALIZATION
 //#define DEBUG_FILE_WRITE
-#define DEBUG_FILE_READ
+//#define DEBUG_FILE_READ
 //#define DEBUG_FILE_ACCESS
 
 //-----------------------------------------------------------------------------

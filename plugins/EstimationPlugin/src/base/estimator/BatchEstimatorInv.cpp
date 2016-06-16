@@ -317,7 +317,7 @@ void BatchEstimatorInv::Accumulate()
          sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4) + " ";
 
          // Write to report file O-value, C-value, O-C, and elevation angle 
-         sprintf(&s[0], "%21.5lf", currentObs->value[0]);
+         sprintf(&s[0], "%21.6lf", currentObs->value[0]);
          sLine << s << " ";
          sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
          sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";
@@ -330,10 +330,10 @@ void BatchEstimatorInv::Accumulate()
          sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 4, GmatStringUtil::LEFT) + " ";  // Edit status
 
          // Write to report file O-value, C-value, O-C, unit, and elevation angle
-         sprintf(&s[0], "%21.5lf %21.5lf", currentObs->value_orig[0], currentObs->value[0]);
+         sprintf(&s[0], "%21.6lf %21.6lf", currentObs->value_orig[0], currentObs->value[0]);
          sLine << s << " ";
          sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // O-C
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // O-C
          sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W
          sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W*(O-C)^2
          sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // sqrt(W)*|O-C|
@@ -372,7 +372,7 @@ void BatchEstimatorInv::Accumulate()
             sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
             // Write to report file O-value, C-value, O-C, unit, and elevation angle
-            sprintf(&s[0], "%21.5lf", currentObs->value[0]);
+            sprintf(&s[0], "%21.6lf", currentObs->value[0]);
             sLine << s << " ";
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
             sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";
@@ -388,10 +388,10 @@ void BatchEstimatorInv::Accumulate()
             sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
             // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
-            sprintf(&s[0], "%21.5lf %21.5lf", currentObs->value_orig[0], currentObs->value[0]);
+            sprintf(&s[0], "%21.6lf %21.6lf", currentObs->value_orig[0], currentObs->value[0]);
             sLine << s << " ";
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // C-value
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // O-C
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";      // O-C
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // W*(O-C)^2
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";      // sqrt(W)*|O-C|
@@ -454,7 +454,7 @@ void BatchEstimatorInv::Accumulate()
                sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                // Write O-value, C-value, and O-C
-               sprintf(&s[0], "%21.5lf %21.5lf %18.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
+               sprintf(&s[0], "%21.6lf %21.6lf %18.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
                sLine << s << " ";
 
                // write elevation angle
@@ -468,7 +468,7 @@ void BatchEstimatorInv::Accumulate()
                sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                // Write C, O-C, W, W*(O-C)^2, sqrt(W)*(O-C), and elevation angle
-               sprintf(&s[0], "%21.5lf %21.5lf %21.5lf %18.6lf %.12le %.12le %.12le %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*GmatMathUtil::Abs(ocDiff), calculatedMeas->feasibilityValue);
+               sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
                sLine << s << " ";
 
                // fill out N/A for partial derivative
@@ -680,7 +680,7 @@ void BatchEstimatorInv::Accumulate()
                      sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                   // Write to report file O-value, C-value, O-C, 
-                  sprintf(&s[0], "%21.5lf %21.5lf %18.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
+                  sprintf(&s[0], "%21.6lf %21.6lf %18.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
                   sLine << s << " ";
 
                   // Write to report file elevation angle:
@@ -696,7 +696,7 @@ void BatchEstimatorInv::Accumulate()
                   else
                      sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
-                  sprintf(&s[0], "%21.5lf %21.5lf %21.5lf %18.6lf %.12le %.12le %.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*GmatMathUtil::Abs(ocDiff), calculatedMeas->feasibilityValue);
+                  sprintf(&s[0], "%21.6lf %21.6lf %21.6lf %18.6lf %21.12le %21.12le %21.12le %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
                   sLine << s << " ";
 
                   // fill out N/A for partial derivative
@@ -714,7 +714,7 @@ void BatchEstimatorInv::Accumulate()
                         derivative = derivative/Cd;
                      }
 
-                     sLine << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(derivative, false, true, true, 10, 18), 18, GmatStringUtil::RIGHT) << " ";
+                     sLine << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(derivative, false, true, true, 10, 19), 19, GmatStringUtil::RIGHT) << " ";
                   }
 
                   if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
@@ -890,10 +890,29 @@ void BatchEstimatorInv::Estimate()
    newResidualRMS = 0.0;
    if (useApriori)
    {
-      //MessageInterface::ShowMessage("Hello there 5\n");
       // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
-      Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+      Rmatrix Pdx0_inv;
+      try
+      {
+         Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+      }
+      catch (...)
+      {
+         MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+         {
+            for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+               MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+            if (row < stateCovariance->GetDimension() - 1)
+               MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+
+         throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+      }
+
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
@@ -903,7 +922,12 @@ void BatchEstimatorInv::Estimate()
 
    for (int i = 0; i < measurementResiduals.size(); ++i)
       newResidualRMS += measurementResiduals[i] * measurementResiduals[i]*Weight[i];
-   newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / measurementResiduals.size());
+
+   if (useApriori)
+      newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / (measurementResiduals.size()+1));
+   else
+      newResidualRMS = GmatMathUtil::Sqrt(newResidualRMS / measurementResiduals.size());
+
    // Calculate RMSB:
    if (iterationsTaken == 0)
       bestResidualRMS = newResidualRMS;
@@ -1122,10 +1146,29 @@ void BatchEstimatorInv::Estimate()
    predictedRMS = 0;
    if (useApriori)
    {
-      //MessageInterface::ShowMessage("Hello there 6\n");
       // The last term of RMSP in equation 8-185 in GTDS MathSpec
       GmatState currentEstimationState = (*estimationState);
-      Rmatrix Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+      Rmatrix Pdx0_inv;
+      try
+      {
+         Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+      }
+      catch (...)
+      {
+         MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+         {
+            for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+               MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+            if (row < stateCovariance->GetDimension()-1)
+               MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+
+         throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+      }
+
       for (UnsignedInt i = 0; i < stateSize; ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
@@ -1143,7 +1186,11 @@ void BatchEstimatorInv::Estimate()
       }
       predictedRMS += (measurementResiduals[j] - temp)*(measurementResiduals[j] - temp)*Weight[j];          // The first term in equation 8-185 in GTDS MathSpec
    }
-   predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
+
+   if (useApriori)
+      predictedRMS = sqrt(predictedRMS / (measurementResiduals.size()+1));
+   else
+      predictedRMS = sqrt(predictedRMS/measurementResiduals.size());
 
 
    // Write to report initial state for current iteration
