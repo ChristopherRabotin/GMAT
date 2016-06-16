@@ -55,6 +55,7 @@
 //#define DEBUG_FUNCTION_EXEC
 //#define DEBUG_WRAPPERS
 //#define DEBUG_READ_EPHEM
+//#define DEBUG_LOCAL_CS
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -83,7 +84,10 @@ GetEphemStates::GetEphemStates(const std::string &typeStr, const std::string &na
    BuiltinGmatFunction(typeStr, name),
    inSat             (NULL),
    inEphemType       (""),
+   centralBodyOnFile (""),
+   axisSystemOnFile  (""),
    outEpochFormat    (""),
+   coordSysOnFile    (NULL),
    outCoordSys       (NULL),
    ephemInitialA1Mjd (0.0),
    ephemFinalA1Mjd   (0.0)
@@ -146,6 +150,8 @@ GetEphemStates::GetEphemStates(const std::string &typeStr, const std::string &na
 //------------------------------------------------------------------------------
 GetEphemStates::~GetEphemStates()
 {
+   if (coordSysOnFile != NULL)
+      delete coordSysOnFile;
 }
 
 
@@ -162,7 +168,10 @@ GetEphemStates::GetEphemStates(const GetEphemStates &f) :
    BuiltinGmatFunction(f),
    inSat             (f.inSat),
    inEphemType       (f.inEphemType),
+   centralBodyOnFile (f.centralBodyOnFile),
+   axisSystemOnFile  (f.axisSystemOnFile),
    outEpochFormat    (f.outEpochFormat),
+   coordSysOnFile    (f.coordSysOnFile),
    outCoordSys       (f.outCoordSys),
    ephemInitialA1Mjd (f.ephemInitialA1Mjd),
    ephemFinalA1Mjd   (f.ephemFinalA1Mjd)
@@ -189,7 +198,10 @@ GetEphemStates& GetEphemStates::operator=(const GetEphemStates &f)
    BuiltinGmatFunction::operator=(f);
    inSat             = f.inSat;
    inEphemType       = f.inEphemType;
+   centralBodyOnFile = f.centralBodyOnFile;
+   axisSystemOnFile  = f.axisSystemOnFile;
    outEpochFormat    = f.outEpochFormat;
+   coordSysOnFile    = f.coordSysOnFile;
    outCoordSys       = f.outCoordSys;
    ephemInitialA1Mjd = f.ephemInitialA1Mjd;
    ephemFinalA1Mjd   = f.ephemFinalA1Mjd;
@@ -401,7 +413,19 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
       ("   inSat=<%p>'%s'\n   inEphemType = '%s'\n   outEpochFormat = '%s'\n   "
        "outCoordSys = <%p>'%s'\n", inSat, inSat->GetName().c_str(), inEphemType.c_str(),
        outEpochFormat.c_str(), outCoordSys, outCoordSys->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("   Desired CoordSysName = '%s'\n", inputArgMap[input4_coordSys->GetName()]->GetDescription().c_str());
    #endif
+   
+   // Check for out coordinate system
+   if (outCoordSys == NULL)
+   {
+      std::string outCsName = inputArgMap[input4_coordSys->GetName()]->GetDescription();
+      MessageInterface::ShowMessage
+         ("*** ERROR *** Desired coordinate system '%s' is unknown\n",
+          outCsName.c_str());
+      return false;
+   }
    
    // Now acces ephemeris file specified in the Spacecraft
    if (inEphemType == "SPK")
@@ -634,17 +658,19 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
          spkFullPathNames.push_back(fullPath);
    }
    
+   bool retval = false;
    
    // Load the initial data point
    try
    {
       std::string scName = inSat->GetName();
-      std::string spkCentralBody = inSat->GetOriginName();
+      std::string centralBody = inSat->GetOriginName();
+      std::string spkCentralBody = centralBody;
       if (spkCentralBody == "Luna")
          spkCentralBody = "Moon";
       Integer satNaifId = inSat->GetIntegerParameter("NAIFId");
       Integer spkCentralBodyNaifId = sokr->GetNaifID(spkCentralBody);
-
+      
       #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage
          ("   scName = '%s', satNaifId = '%d', spkCentralBody = '%s, spkCentralBodyNaifId = '%d'\n",
@@ -710,6 +736,37 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
       MessageInterface::ShowMessage
          ("   ephemFinalState  = %s\n", ephemFinalState.ToString().c_str());
       #endif
+      
+      retval = true;
+      
+      // Create coordinate system on file if needed
+      // SpiceOrbitKernelWriter assumes it is in J2000Eq frame for now
+      centralBodyOnFile = centralBody;
+      axisSystemOnFile = "MJ2000Eq";
+      bool needsConversion = false;
+      
+      // Delete old local coordSysOnFile pointer
+      if (coordSysOnFile != NULL)
+      {
+         delete coordSysOnFile;
+         coordSysOnFile = NULL;
+      }
+      coordSysOnFile = CreateLocalCoordSystem("csOnSpk", centralBodyOnFile,
+                                              axisSystemOnFile, needsConversion);
+      
+      if (needsConversion && coordSysOnFile == NULL)
+      {
+         retval = false;
+         MessageInterface::ShowMessage
+            ("*** ERROR *** Cannot convert initial/final states to desired "
+             "coordinate system: '%s' for SpiceOrbitKernel:\n",
+             outCoordSys->GetName().c_str());
+         for (UnsignedInt i = 0; i < spkFullPathNames.size(); i++)
+            MessageInterface::ShowMessage("   '%s'\n", spkFullPathNames[i].c_str());
+         
+         retval = false;
+      }
+      
    }
    catch (BaseException &be)
    {
@@ -719,10 +776,7 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
          MessageInterface::ShowMessage("   '%s'\n", spkFullPathNames[i].c_str());
       MessageInterface::ShowMessage(be.GetFullMessage());
       
-      // unload the SPK kernels so they will not be retained in the kernel pool
-      sokr->UnloadKernels(spkFullPathNames);
-      delete sokr;
-      return false;
+      retval = false;
    }
    
    // unload the SPK kernels so they will not be retained in the kernel pool
@@ -730,10 +784,11 @@ bool GetEphemStates::ReadSpiceEphemerisFile()
    delete sokr;
 
    #ifdef DEBUG_READ_EPHEM
-   MessageInterface::ShowMessage("GetEphemStates::ReadSpiceEphemerisFile() returning true\n");
+   MessageInterface::ShowMessage
+      ("GetEphemStates::ReadSpiceEphemerisFile() returning %d\n", retval);
    #endif
    
-   return true;
+   return retval;
 }
 
 
@@ -761,11 +816,13 @@ bool GetEphemStates::ReadCode500EphemerisFile()
    // Create Code500 ephemeris reader
    Real initialEpoch, finalEpoch;
    Rvector6 initialState, finalState;
+   std::string centralBodyOnFile;
+   std::string coordSystemOnFile;
+   Integer coordSysIndicator;
    
    Code500EphemerisFile *code500EphemFile = new Code500EphemerisFile();
    bool swapByteOrder = false; // Assumes PC format
    
-   //if (!code500EphemFile->OpenForRead(fullpathFileName, 1, 1))
    if (!code500EphemFile->OpenForRead(fullpathFileName, 1))
    {
       MessageInterface::ShowMessage
@@ -774,9 +831,12 @@ bool GetEphemStates::ReadCode500EphemerisFile()
       return false;
    }
    
+   bool retval = false;
+   
    code500EphemFile->SetSwapEndian(swapByteOrder, 1);
    if (code500EphemFile->
-       GetInitialAndFinalStates(initialEpoch, finalEpoch, initialState, finalState))
+       GetInitialAndFinalStates(initialEpoch, finalEpoch, initialState, finalState,
+                                centralBodyOnFile, coordSystemOnFile, coordSysIndicator))
    {
       #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage
@@ -784,21 +844,67 @@ bool GetEphemStates::ReadCode500EphemerisFile()
       MessageInterface::ShowMessage
          ("   initialState = %s\n   finalState   = %s\n", initialState.ToString().c_str(),
           finalState.ToString().c_str());
+      MessageInterface::ShowMessage
+         ("   centralBodyOnFile = '%s', coordSystemOnFile = '%s', coordSysIndicator = %d\n",
+          centralBodyOnFile.c_str(), coordSystemOnFile.c_str(), coordSysIndicator);
       #endif
       ephemInitialA1Mjd = initialEpoch;
       ephemFinalA1Mjd   = finalEpoch;
       ephemInitialState = initialState;
       ephemFinalState   = finalState;
+      
+      retval = true;
+      
+      // Check for coordinate system (only J2000 is supported)
+      // coordSystem: "2000" for J2000, "INER" for true of Reference, "MEAN" for B1950
+      if (coordSystemOnFile != "2000")
+      {
+         std::string csIndicator;
+         if (coordSystemOnFile == "MEAN")
+            csIndicator = "Mean of 1950";
+         else if (coordSystemOnFile == "INER")
+            csIndicator = "True of Reference";
+         MessageInterface::ShowMessage
+            ("*** ERROR *** Unsupported coordinate system: '%s' on Code500 ephemeris file: '%s' \n",
+             csIndicator.c_str(), fileName.c_str());
+         retval = false;
+      }
+      
+      // Convert states to desired coordiniate system
+      if (retval)
+      {
+         std::string axisSystemOnFile = "MJ2000Eq";
+         bool needsConversion = false;
+         // Delete old local coordSysOnFile pointer
+         if (coordSysOnFile != NULL)
+         {
+            delete coordSysOnFile;
+            coordSysOnFile = NULL;
+         }
+         coordSysOnFile = CreateLocalCoordSystem("csOnCode500Ephem", centralBodyOnFile,
+                                                 axisSystemOnFile, needsConversion);
+         
+         if (needsConversion && coordSysOnFile == NULL)
+         {
+            MessageInterface::ShowMessage
+               ("*** ERROR *** Cannot convert initial/final states to desired "
+                "coordinate system: '%s' for Code500 ephem:\n", outCoordSys->GetName().c_str(),
+             fullpathFileName.c_str());
+            retval = false;
+         }
+      }
    }
    
+   // Close and delete Code500 ephem
    code500EphemFile->CloseForRead();
    delete code500EphemFile;
    
    #ifdef DEBUG_READ_EPHEM
-   MessageInterface::ShowMessage("GetEphemStates::ReadCode500EphemerisFile() returning true\n");
+   MessageInterface::ShowMessage
+      ("GetEphemStates::ReadCode500EphemerisFile() returning %d\n", retval);
    #endif
    
-   return true;
+   return retval;
 }
 
 
@@ -826,7 +932,7 @@ bool GetEphemStates::ReadSTKEphemerisFile()
    // Create STK ephemeris reader
    Real initialEpoch, finalEpoch;
    Rvector6 initialState, finalState;
-   std::string cbName, csName;
+   std::string centralBodyOnFile, csName;
    
    STKEphemerisFile *stkEphemFile = new STKEphemerisFile();
    
@@ -842,7 +948,7 @@ bool GetEphemStates::ReadSTKEphemerisFile()
    // Get initial and final state
    if (stkEphemFile->
        GetInitialAndFinalStates(initialEpoch, finalEpoch,
-                                initialState, finalState, cbName, csName))
+                                initialState, finalState, centralBodyOnFile, csName))
    {
       #ifdef DEBUG_READ_EPHEM
       MessageInterface::ShowMessage
@@ -851,15 +957,67 @@ bool GetEphemStates::ReadSTKEphemerisFile()
          ("   initialState = %s\n   finalState   = %s\n", initialState.ToString().c_str(),
           finalState.ToString().c_str());
       MessageInterface::ShowMessage
-         ("   cbName       = '%s'\n   csName       = '%s'\n", cbName.c_str(), csName.c_str());
+         ("   centralBodyOnFile       = '%s'\n   csName       = '%s'\n",
+          centralBodyOnFile.c_str(), csName.c_str());
       #endif
       ephemInitialA1Mjd = initialEpoch;
       ephemFinalA1Mjd   = finalEpoch;
       ephemInitialState = initialState;
       ephemFinalState   = finalState;
+      
       retval = true;
+
+      // Allowed coordinate system on STK ephem to output in GMAT coordinate system
+      // STK       GMAT Axis System
+      // ---       ----------------
+      // ICRF      ICRF
+      // J2000     MJ2000eq
+      // Inertial  BodyInertial
+      // Fixed     BodyFixed
+      
+      // Translate STK coord system to GMAT axis system
+      std::string axisSystemOnFile;
+      if (csName == "ICRF")
+         axisSystemOnFile = "ICRF";
+      else if (csName == "J2000")
+         axisSystemOnFile = "MJ2000Eq";
+      else if (csName == "Inertial")
+         axisSystemOnFile = "BodyInertial";
+      else if (csName == "Fixed")
+         axisSystemOnFile = "BodyFixed";
+      else
+      {
+         MessageInterface::ShowMessage
+            ("*** ERROR *** Unsupported coordinate system: '%s' on STK ephemeris file: '%s' \n",
+             csName.c_str(), fileName.c_str());
+         retval = false;
+      }
+      
+      // Convert states to desired coordinate system if no issues
+      if (retval)
+      {
+         bool needsConversion = false;
+         // Delete old local coordSysOnFile pointer
+         if (coordSysOnFile != NULL)
+         {
+            delete coordSysOnFile;
+            coordSysOnFile = NULL;
+         }
+         coordSysOnFile = CreateLocalCoordSystem("csOnStkEphem", centralBodyOnFile,
+                                                 axisSystemOnFile, needsConversion);
+         
+         if (needsConversion && coordSysOnFile == NULL)
+         {
+            MessageInterface::ShowMessage
+               ("*** ERROR *** Cannot convert initial/final states to desired "
+                "coordinate system: '%s' for Code500 ephem:\n", outCoordSys->GetName().c_str(),
+                fullpathFileName.c_str());
+            retval = false;
+         }
+      }
    }
    
+   // Close and delete STK ephem
    stkEphemFile->CloseForRead();
    delete stkEphemFile;
    
@@ -871,6 +1029,52 @@ bool GetEphemStates::ReadSTKEphemerisFile()
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// CoordinateSystem * CreateLocalCoordSystem(const std::string &csName,
+//                    const std::string &inOrigin, const std::string &inAxisType,
+//                    bool needsConversion)
+//------------------------------------------------------------------------------
+CoordinateSystem * GetEphemStates::CreateLocalCoordSystem(const std::string &csName,
+                                          const std::string &inOrigin,
+                                          const std::string &inAxisType,
+                                          bool &needsConversion)
+{
+   #ifdef DEBUG_LOCAL_CS
+   MessageInterface::ShowMessage
+      ("GetEphemStates::CreateLocalCoordSystem() entered, csName='%s'\n",
+       csName.c_str());
+   #endif
+   // Check if local coordinate system should be created
+   std::string outOrigin = outCoordSys->GetOriginName();
+   std::string outAxisSystem = (outCoordSys->GetAxisSystem())->GetTypeName();
+   #ifdef DEBUG_LOCAL_CS
+   MessageInterface::ShowMessage
+      ("   inOrigin  = '%s', inAxisType    = '%s'\n", inOrigin.c_str(), inAxisType.c_str());
+   MessageInterface::ShowMessage
+      ("   outOrigin = '%s', outAxisSystem = '%s'\n", outOrigin.c_str(),
+       outAxisSystem.c_str());
+   #endif
+   CoordinateSystem *localCs = NULL;
+   if (inOrigin != outOrigin || inAxisType != outAxisSystem)
+   {
+      needsConversion = true;
+      SpacePoint *originPtr = solarSys->GetBody(inOrigin);
+      SpacePoint *j2kBody = solarSys->GetBody(SolarSystem::EARTH_NAME);
+      localCs = CoordinateSystem::CreateLocalCoordinateSystem
+         (csName, inAxisType, originPtr, NULL, NULL, j2kBody, solarSys);
+   }
+   else
+   {
+      needsConversion = false;
+   }
+   
+   #ifdef DEBUG_LOCAL_CS
+   MessageInterface::ShowMessage
+      ("GetEphemStates::CreateLocalCoordSystem() returning cs=<%p>, needsConversion=%d\n",
+       localCs, needsConversion);
+   #endif
+   return localCs;
+}
 
 //------------------------------------------------------------------------------
 // ElementWrapper* CreateOutputEpochWrapper(Real a1MjdEpoch, 
@@ -885,7 +1089,7 @@ ElementWrapper* GetEphemStates::CreateOutputEpochWrapper(Real a1MjdEpoch,
        a1MjdEpoch, outName.c_str());
    #endif
    
-   // Epoch string output
+   // Convert to desired epoch string output
    std::string epochStr;
    Real toMjd;
    TimeConverterUtil::Convert("A1ModJulian", a1MjdEpoch, "",
@@ -955,10 +1159,33 @@ ElementWrapper* GetEphemStates::CreateOutputStateWrapper(Integer outIndex,
    Rmatrix rmat;
    rmat.SetSize(numRows, numCols);
    
-   if (outIndex == 1)
-      state = ephemInitialState;
-   else if (outIndex == 3)
-      state = ephemFinalState;
+   // Convert state to desired output coordinate system if needed
+   if (coordSysOnFile == NULL)
+   {
+      if (outIndex == 1)
+         state = ephemInitialState;
+      else if (outIndex == 3)
+         state = ephemFinalState;
+   }
+   else
+   {
+      CoordinateConverter csConverter;
+      Rvector6 inState;
+      Real epoch;
+      if (outIndex == 1)
+      {
+         epoch = ephemInitialA1Mjd;
+         inState = ephemInitialState;
+      }
+      else if (outIndex == 3)
+      {
+         epoch = ephemFinalA1Mjd;
+         inState = ephemFinalState;
+      }
+      
+      csConverter.Convert(epoch, inState, coordSysOnFile, state, outCoordSys);      
+   }
+   
    
    // Set state
    for (int jj = 0; jj < numRows; jj++)

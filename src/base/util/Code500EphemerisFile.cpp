@@ -66,6 +66,7 @@
 //#define DEBUG_UNPACK_HEADERS
 //#define DEBUG_UNPACK_DATA
 //#define DEBUG_TIME_CONVERSION
+//#define DEBUG_INITIAL_FINAL
 
 //---------------------------------
 // static data
@@ -481,10 +482,30 @@ void Code500EphemerisFile::CloseForWrite()
 
 //------------------------------------------------------------------------------
 // bool GetInitialAndFinalStates(Real &initialEpoch, Real &finalEpoch, 
-//                               Rvector6 &initialState, Rvector6 &finalState)
+//         Rvector6 &initialState, Rvector6 &finalState, std::string &centralBody,
+//         std::string &coordSystem, Integer &coordSysIndicator)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves inital and final epochs and states from the input Code500 ephemeris file.
+ * It also retrieves central body and coordinate system on the file. It assumes
+ * that input file is already opened successfully.
+ *
+ * @param initialEpoch  Initial epoch on the file
+ * @param finalEpoch    Final epoch on the file
+ * @param initialState  Initial state on the file
+ * @param finalState    Final state on the file
+ * @param centralBody   Central body on the file
+ * @param coordSystem   Coordinate system on the file
+ *                      ("2000" for J2000, "INER" for true of reference, "MEAN" for B1950)
+ * @param coordSysIndicator  Coordinate system indicator
+ *                      (2 = Mean of 1950, 3 = True of reference, 4 = J2000)
+ * 
+ */
 //------------------------------------------------------------------------------
 bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &finalEpoch,
-                                                    Rvector6 &initialState, Rvector6 &finalState)
+                                                    Rvector6 &initialState, Rvector6 &finalState,
+                                                    std::string &centralBody, std::string &coordSystem,
+                                                    Integer &coordSysIndicator)
 {
    #ifdef DEBUG_INITIAL_FINAL
    MessageInterface::ShowMessage
@@ -493,7 +514,11 @@ bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &fi
    #endif
    
    // For initial and final epoch/state
+   #ifdef DEBUG_INITIAL_FINAL
+   ReadHeader1(1);
+   #else
    ReadHeader1();
+   #endif
    
    // For final state
    ReadDataAt(mNumberOfRecordsInFile-2);
@@ -523,7 +548,44 @@ bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &fi
    initialState = mInitialState;
    finalState   = mFinalState;
    
+   // Set central body
+   // 1.0 = Earth, 2.0 = Moon, 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter, 6.0 = Saturn, 
+   // 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
+   if (mCentralBodyIndicator == 1.0)
+      centralBody = "Earth";
+   else if (mCentralBodyIndicator = 2.0)
+      centralBody = "Moon";
+   else if (mCentralBodyIndicator == 3.0)
+      centralBody = "Sun";
+   else if (mCentralBodyIndicator == 4.0)
+      centralBody = "Mars";
+   else if (mCentralBodyIndicator == 5.0)
+      centralBody = "Jupiter";
+   else if ( mCentralBodyIndicator == 6.0)
+      centralBody = "Saturn";
+   else if (mCentralBodyIndicator == 7.0)
+      centralBody = "Uranus";
+   else if (mCentralBodyIndicator == 8.0)
+      centralBody = "Neptune";
+   else if (mCentralBodyIndicator == 9.0)
+      centralBody = "Pluto";
+   else if (mCentralBodyIndicator == 10.0)
+      centralBody = "Mercury";
+   else if (mCentralBodyIndicator == 11.0)
+      centralBody = "Venus";
+   else
+      centralBody = "Unknown";
+   
+   // Set coordiante system
+   // "2000" for J2000, "INER" for true of reference, "MEAN" for B1950
+   coordSystem = mCoordSystem;
+   // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
+   coordSysIndicator = mCoordSystemIndicator;
+   
    #ifdef DEBUG_INITIAL_FINAL
+   MessageInterface::ShowMessage
+      ("   centralBody = '%s', coordSystem = '%s', coordSysIndicator = %d\n",
+       centralBody.c_str(), coordSystem.c_str(), coordSysIndicator);
    MessageInterface::ShowMessage
       ("Code500EphemerisFile::GetInitialAndFinalState() returning true\n");
    #endif
@@ -603,6 +665,12 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
       a1EndEpoch = TimeConverterUtil::Convert(epochend, TimeConverterUtil::UTCMJD,
             TimeConverterUtil::A1MJD);
    }
+   
+   // Save central body and coordinate system needed by GetInitialAndFinalState()
+   mCentralBodyIndicator = mEphemHeader1.centralBodyIndicator;
+   std::string coordSystemStr = mEphemHeader1.coordSystemIndicator1;
+   mCoordSystem = coordSystemStr.substr(0,4);
+   mCoordSystemIndicator = mEphemHeader1.coordSystemIndicator2;
    
    // Save initial state needed by GetInitialAndFinalState()
    for (int i = 0; i < 3; i++)
@@ -1835,6 +1903,7 @@ void Code500EphemerisFile::UnpackHeader1()
    DebugDouble("refTimeForDUT_YYMMDD                = % f\n", mEphemHeader1.refTimeForDUT_YYMMDD, swap);
    MessageInterface::ShowMessage("coordSystemIndicator1               = '%s'\n", coordSystemStr.substr(0,4).c_str());
    DebugInteger("coordSystemIndicator2               = %d\n", mEphemHeader1.coordSystemIndicator2, swap);
+   DebugInteger("coordSystemIndicator2               = %d\n", mCoordSystemIndicator, swap);
    MessageInterface::ShowMessage("orbitTheory                         = '%s'\n", orbitTheoryStr.substr(0,8).c_str());
    double timeIntervalDUT = ReadDoubleField(&mEphemHeader1.timeIntervalBetweenPoints_DUT);
    DebugDouble("timeIntervalBetweenPoints_DUT       = % f\n", timeIntervalDUT);
