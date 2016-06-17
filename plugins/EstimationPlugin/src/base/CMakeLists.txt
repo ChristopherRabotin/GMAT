@@ -172,6 +172,7 @@ SET(PLUGIN_SRCS
 # Temporarily disable Ionosphere for Mac/Linux
 #if(WIN32)
   ADD_DEFINITIONS("-DIONOSPHERE")
+# ADD_DEFINITIONS("-DDISABLE_UNNEEDED_GMAT_OBJECTS")
   SET(PLUGIN_SRCS ${PLUGIN_SRCS}
     measurement/Ionosphere/Ionosphere.cpp
     measurement/Ionosphere/iri2007.c

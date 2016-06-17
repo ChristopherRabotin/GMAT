@@ -21,7 +21,8 @@
 // Created: 2016.05.02
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the visibility POI report class.  This class is the 
+ * container for data on POI interval events.
  */
 //------------------------------------------------------------------------------
 #ifndef VisiblePOIReport_hpp
@@ -42,7 +43,8 @@ public:
    
    virtual ~VisiblePOIReport();
    
-   virtual void SetPOIIndex(Integer toIdx);
+   virtual void     SetPOIIndex(Integer toIdx);
+   virtual Integer  GetPOIIndex();
    
 protected:
    

@@ -817,7 +817,6 @@ bool Estimator::SetStringParameter(const Integer id,
       return true;
    }
 
-   //@Todo: this code will be removed when the bug in Interperter is fixed
    if (id == MEASUREMENTS)
    {
       std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));

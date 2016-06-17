@@ -80,7 +80,7 @@ public:
    RealArray   IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2);
 #endif
 
-   RealArray   CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2);
+   RealArray   CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2, Real minElevationAngle);    // made changes by TUAN NGUYEN
 
 ///// TBD: Determine if there is a more generic way to add these
    void         SetFrequencyBand(Integer frequencyBand, Integer index=0);

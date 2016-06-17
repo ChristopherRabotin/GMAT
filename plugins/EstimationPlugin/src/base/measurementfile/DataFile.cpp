@@ -864,7 +864,7 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
    filterIndex = filterList.size();
    ObservationData* obdata = dataObject;
 
-   // Run statistic reject filters when it passes accept filters
+   // Run statistic reject filters
    if (obdata)
    {
       for (UnsignedInt i = 0; i < filterList.size(); ++i)
@@ -884,7 +884,7 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
       }
    }
 
-   // Run statistic accept filters
+   // Run statistic accept filters when it passes reject filters
    if (obdata)
    {
       ObservationData* obdata1 = NULL;
@@ -1038,6 +1038,7 @@ ObservationData* DataFile::FilteringData(ObservationData* dataObject, Integer& r
    ObservationData* od;
 
    od = FilteringDataForOldSyntax(dataObject, rejectedReason);
+   //MessageInterface::ShowMessage("od = <%p>\n", od);
    if (od)
    {
       Integer filterIndex;
@@ -1075,6 +1076,12 @@ ObservationData* DataFile::ReadObservation()
    if (theDatastream)
    {
       theObs = theDatastream->ReadObservation();
+      
+      // Set file index to be the pointer to DataFile object           // made changes by TUAN NGUYEN
+      if (theObs != NULL)                                              // made changes by TUAN NGUYEN
+      {                                                                // made changes by TUAN NGUYEN
+         theObs->fileIndex = this;                                     // made changes by TUAN NGUYEN
+      }                                                                // made changes by TUAN NGUYEN
 
       #ifdef DEBUG_OBSERVATION_DATA
          if (theObs)

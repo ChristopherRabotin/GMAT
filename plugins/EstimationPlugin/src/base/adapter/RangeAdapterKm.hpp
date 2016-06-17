@@ -77,6 +77,9 @@ public:
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
 
+   Real                 GetIonoCorrection() { return ionoCorrection; };            // made changes by TUAN NGUYEN
+   Real                 GetTropoCorrection() { return tropoCorrection; };          // made changes by TUAN NGUYEN
+
    DEFAULT_TO_NO_CLONES
 protected:
    /// Parameter IDs for the RangeAdapterKm
@@ -85,6 +88,8 @@ protected:
       RangeAdapterKmParamCount = AdapterParamCount,
    };
 
+   Real ionoCorrection;                                                            // made changes by TUAN NGUYEN
+   Real tropoCorrection;                                                           // made changes by TUAN NGUYEN
 
 };
 

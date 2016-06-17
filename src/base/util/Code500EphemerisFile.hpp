@@ -41,7 +41,9 @@ public:
    bool ReadDataRecords(int numRecordsToRead = -999, int logOption = 0);
    
    bool GetInitialAndFinalStates(Real &initialEpoch, Real &finalEpoch,
-                                 Rvector6 &initialState, Rvector6 &finalState);
+                                 Rvector6 &initialState, Rvector6 &finalState,
+                                 std::string &centralBody, std::string &coordSystem,
+                                 Integer &coordSysIndicator);
    
    void SetCentralBodyMu(double mu);
    void SetTimeIntervalBetweenPoints(double secs);
@@ -233,9 +235,9 @@ protected:
    std::string    mProductId;
    std::string    mTapeId;
    std::string    mSourceId;
-   std::string    mCentralBody;
+   std::string    mCentralBody;      // Earth, Luna, Sun, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Mercury, Venus
    std::string    mTimeSystem;
-   std::string    mCoordSystem;
+   std::string    mCoordSystem;      // "2000" for J2000
    
    // Header and data records
    EphemHeader1   mEphemHeader1;
@@ -245,6 +247,7 @@ protected:
    int            mLastDataRecRead;
    int            mLastStateIndexRead;
    int            mNumberOfRecordsInFile;
+   int            mCoordSystemIndicator; // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
    Rvector6       mInitialState;
    Rvector6       mFinalState;
    std::string    mLastDataRecStartGreg;

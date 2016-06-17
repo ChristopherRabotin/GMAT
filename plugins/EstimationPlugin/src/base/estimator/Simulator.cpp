@@ -644,20 +644,17 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
             id, value.c_str());
    #endif
 
-   //@Todo: this code will be removed when the bug in Interperter is fixed
    if (id == MEASUREMENTS)
    {
-      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
-         throw SolverException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");
+      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
+      if (measName == "")
+         throw SolverException("Error: No measurement or tracking file set is set to " + GetName() + ".AddData parameter.\n");
 
-      if (find(measList.begin(), measList.end(), value) == measList.end())
-         measList.push_back(value);
+      // verify a valid object name
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw SolverException("Error: An invalid value '" + value + "' is set to " + GetName() + ".AddData parameter.\n");
 
-      return true;
-      //std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
-      //if (measName == "")
-      //   throw SolverException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");
-      //return SetStringParameter(id, measName, measList.size());
+      return SetStringParameter(id, value, measList.size());
    }
 
    if (id == PROPAGATOR)

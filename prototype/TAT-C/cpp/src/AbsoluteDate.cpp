@@ -21,7 +21,7 @@
 // Created: 2016.05.05
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of the AbsoluteDate class
  */
 //------------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@
 #include "DateUtil.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_GREGORIAN_DATE
+//#define DEBUG_GREGORIAN_DATE
 
 //------------------------------------------------------------------------------
 // static data
@@ -49,24 +49,40 @@ const Real AbsoluteDate::JD_1900 = 2415019.5;
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// default constructor
+//  AbsoluteDate()
 //------------------------------------------------------------------------------
+/**
+ * Default constructor
+ */
+//---------------------------------------------------------------------------
 AbsoluteDate::AbsoluteDate() :
    currentDate         (GmatTimeConstants::JD_OF_J2000)
 {
 }
 
 //------------------------------------------------------------------------------
-// copy constructor
+//  AbsoluteDate(const AbsoluteDate &copy)
 //------------------------------------------------------------------------------
-AbsoluteDate::AbsoluteDate( const AbsoluteDate &copy) :
+/**
+ * Copy constructor
+ * 
+ * @param copy the object to copy
+ */
+//---------------------------------------------------------------------------
+AbsoluteDate::AbsoluteDate(const AbsoluteDate &copy) :
    currentDate         (copy.currentDate)
 {
 }
 
 //------------------------------------------------------------------------------
-// operator=
+//  AbsoluteDate & operator=(const AbsoluteDate &copy)
 //------------------------------------------------------------------------------
+/**
+ * The operator= for the AbsolutDate class.
+ * 
+ * @param copy the object to copy
+ */
+//---------------------------------------------------------------------------
 AbsoluteDate& AbsoluteDate::operator=(const AbsoluteDate &copy)
 {
    if (&copy == this)
@@ -78,9 +94,12 @@ AbsoluteDate& AbsoluteDate::operator=(const AbsoluteDate &copy)
 }
 
 //------------------------------------------------------------------------------
-// destructor
+//  ~AbsoluteDate()
 //------------------------------------------------------------------------------
-
+/**
+ * Destructor
+ */
+//---------------------------------------------------------------------------
 AbsoluteDate::~AbsoluteDate()
 {
 }
@@ -89,6 +108,17 @@ AbsoluteDate::~AbsoluteDate()
 //  void SetGregorianDate(Integer year, Integer month,  Integer day,
 //                        Integer hour, Integer minute, Real second)
 //------------------------------------------------------------------------------
+/**
+ * Sets the Gregorian date.
+ * 
+ * @param year   the year
+ * @param month  the month
+ * @param day    the day
+ * @param hour   the hour
+ * @param minute the minute
+ * @param second the seconds 
+ */
+//---------------------------------------------------------------------------
 void  AbsoluteDate::SetGregorianDate(Integer year, Integer month,  Integer day,
                                      Integer hour, Integer minute, Real second)
 {
@@ -120,6 +150,12 @@ void  AbsoluteDate::SetGregorianDate(Integer year, Integer month,  Integer day,
 //------------------------------------------------------------------------------
 // void SetJulianDate(Real jd)
 //------------------------------------------------------------------------------
+/**
+ * Sets the Julian date.
+ * 
+ * @param jd   the Julian date
+ */
+//---------------------------------------------------------------------------
 void AbsoluteDate::SetJulianDate(Real jd)
 {
    currentDate = jd;
@@ -128,6 +164,12 @@ void AbsoluteDate::SetJulianDate(Real jd)
 //------------------------------------------------------------------------------
 // Real GetJulianDate() const
 //------------------------------------------------------------------------------
+/**
+ * Returns the Julian date.
+ * 
+ * @return   the Julian date
+ */
+//---------------------------------------------------------------------------
 Real AbsoluteDate::GetJulianDate() const
 {
    return currentDate;
@@ -136,6 +178,12 @@ Real AbsoluteDate::GetJulianDate() const
 //------------------------------------------------------------------------------
 // Rvector6 GetGregorianDate()
 //------------------------------------------------------------------------------
+/**
+ * Returns the Gregorian date.
+ * 
+ * @return   the Gregorian date
+ */
+//---------------------------------------------------------------------------
 Rvector6 AbsoluteDate::GetGregorianDate()
 {
    
@@ -184,6 +232,12 @@ Rvector6 AbsoluteDate::GetGregorianDate()
 //------------------------------------------------------------------------------
 // void Advance(Real stepInSec)
 //------------------------------------------------------------------------------
+/**
+ * Advances the date by the number of seconds specified.
+ * 
+ * @param  stepInSec   stepsize (seconds)
+ */
+//---------------------------------------------------------------------------
 void AbsoluteDate::Advance(Real stepInSec)
 {
    currentDate += stepInSec / GmatTimeConstants::SECS_PER_DAY;
@@ -197,6 +251,19 @@ void AbsoluteDate::Advance(Real stepInSec)
 // Real GregorianToJulianDate(Integer year, Integer month,  Integer day,
 //                            Integer hour, Integer minute, Real second)
 //------------------------------------------------------------------------------
+/**
+ * Converts a Gregorian date to a Julian date.
+ * 
+ * @param year   the year
+ * @param month  the month
+ * @param day    the day
+ * @param hour   the hour
+ * @param minute the minute
+ * @param second the seconds 
+ * 
+ * @return the Julian date
+ */
+//---------------------------------------------------------------------------
 Real AbsoluteDate::GregorianToJulianDate(Integer year, Integer month,  Integer day,
                                          Integer hour, Integer minute, Real second)
 {

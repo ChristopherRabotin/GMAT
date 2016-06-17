@@ -55,6 +55,7 @@
 
 //#define DEBUG_ATTITUDE_PANEL 1
 //#define DEBUG_ATTITUDE_LOAD
+//#define DEBUG_ATTITUDE_PANEL_UPDATE
 //#define DEBUG_ATTITUDE_SAVE
 //#define DEBUG_ATTITUDE_RATE
 //#define DEBUG_ATTITUDE_ANG_VEL
@@ -206,11 +207,15 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
 //------------------------------------------------------------------------------
 AttitudePanel::~AttitudePanel()
 {
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::~AttitudePanel() entered\n");
+   #endif
+   
    theGuiManager->UnregisterComboBox("CoordinateSystem", coordSysComboBox);
    theGuiManager->UnregisterComboBox("CelestialBody", referenceBodyComboBox);
 
    #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage("AttitudePanel::~AttitudePanel() entered\n");
+      MessageInterface::ShowMessage("AttitudePanel::~AttitudePanel() leaving\n");
    #endif
 }
 
@@ -849,10 +854,13 @@ void AttitudePanel::LoadData()
    #ifdef DEBUG_ATTITUDE_LOAD
       MessageInterface::ShowMessage("AttitudePanel::LoadData() entered\n");
    #endif
-   
+      
    bool newAttitude = false;
    // check to see if the spacecraft has an attitude object
    theAttitude = (Attitude*) theSpacecraft->GetRefObject(Gmat::ATTITUDE, "");
+   #ifdef DEBUG_ATTITUDE_LOAD
+   MessageInterface::ShowMessage("   theAttitude=<%p>\n", theAttitude);
+   #endif
    if (theAttitude == NULL)   // no attitude yet
    {
       #ifdef DEBUG_ATTITUDE_LOAD
@@ -898,7 +906,11 @@ void AttitudePanel::LoadData()
                      GetConfiguredObject(attCoordSystem);
       
       #ifdef DEBUG_ATTITUDE_LOAD
-      MessageInterface::ShowMessage("   attitudeModel = '%s'\n", attitudeModel.c_str());
+      MessageInterface::ShowMessage
+         ("   epoch            = %.12f\n   attStateType     = '%s'\n   attRateStateType = '%s'\n   "
+          "attitudeModel    = '%s'\n   eulerSequence    = '%s'\n   attCoordSystem   = '%s'\n",
+          epoch, attStateType.c_str(), attRateStateType.c_str(), attitudeModel.c_str(),
+          eulerSequence.c_str(), attCoordSystem.c_str());
       #endif
       
 //      LOJ: Load data from the base attitude object   - do we need these here, or just the DisplayDataForModel below?
@@ -1266,7 +1278,7 @@ void AttitudePanel::SaveData()
 //------------------------------------------------------------------------------
 bool AttitudePanel::IsStateModified(const std::string which)
 {
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
       MessageInterface::ShowMessage("AttitudePanel::IsStateModified() entered\n");
    #endif
    if ((which == "State")  || (which == "Both"))
@@ -1366,7 +1378,9 @@ void AttitudePanel::ResetStateFlags(const std::string which,
          str3TextCtrl->DiscardEdits();
       }
    }
-
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("AttitudePanel::ResetStateFlags() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1704,6 +1718,10 @@ void AttitudePanel::HideInitialAttitudeAndRate()
 //------------------------------------------------------------------------------
 void AttitudePanel::ShowInitialAttitudeAndRate()
 {
+   #ifdef DEBUG_SHOW_INITIAL_DATA
+   MessageInterface::ShowMessage("AttitudePanel::ShowInitialAttitudeAndRate() entered\n");
+   #endif
+   
    //LOJ: Added to hide precessing spinner data
    rightSizer->Hide(precessingSpinnerSizer);
    rightSizer->Hide(nadirPointingSizer);
@@ -1817,6 +1835,10 @@ void AttitudePanel::ShowInitialAttitudeAndRate()
 
    rightSizer->Layout();
    Refresh();
+   
+   #ifdef DEBUG_SHOW_INITIAL_DATA
+   MessageInterface::ShowMessage("AttitudePanel::ShowInitialAttitudeAndRate() leaving\n");
+   #endif
 }
 
 //LOJ: Added
@@ -1968,13 +1990,10 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
 {
    #ifdef DEBUG_SHOW_MODEL
    MessageInterface::ShowMessage
-      ("\nAttitudePanel::DisplayDataForModel() entered, modelType='%s'\n", modelType.c_str());
+      ("\nAttitudePanel::DisplayDataForModel() entered, attitudeModel='%s', modelType='%s'\n",
+       attitudeModel.c_str(), modelType.c_str());
    #endif
    
-   // need to create a temporary attitude object in order to query it
-   Attitude *tmpAttitude = (Attitude *)theGuiInterpreter->
-                           CreateObject(modelType, "", 0);
-
    if (modelType == "PrecessingSpinner")
    {
       if (!precessingSpinnerDataLoaded)
@@ -1995,32 +2014,73 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    }
    else
    {
+      #ifdef DEBUG_SHOW_MODEL
+      MessageInterface::ShowMessage
+         ("   Showing data for modelType='%s', attDataLoaded=%d\n",
+          modelType.c_str(), attDataLoaded);
+      #endif
       // Show everything that should be shown, then enable it all
       if ((modelType == "Spinner") && (!attDataLoaded))
       {
-         Attitude *tmpSpinner = (Attitude *)theGuiInterpreter->
-               CreateObject("Spinner", "");
+         Attitude *tmpSpinner =
+            (Attitude *)theGuiInterpreter->CreateObject("Spinner", "");
+         #ifdef DEBUG_SHOW_MODEL
+         MessageInterface::ShowMessage("   tmpSpinner=<%p> created\n", tmpSpinner);
+         #endif
          // populate attitude and rate fields here
          try
          {
             LoadAttitudeAndRateData(tmpSpinner);
+            //delete tmpSpinner;
          }
          catch (BaseException &be)
          {
             MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
          }
+         delete tmpSpinner;
       }
       ShowInitialAttitudeAndRate();
       EnableAll();
    }
-   if (!tmpAttitude->CSModifyAllowed())
+   
+   // Why Creating tmpAttitude causes problem here? (GMT-5664)
+   // Create tempAttitude if attitude model type changed (LOJ)
+   Attitude *useAttitude = NULL;
+   Attitude *tmpAttitude = NULL;
+   bool newAttitude = false;
+   if ((theAttitude != NULL) && attitudeModel == modelType)
+   {
+      useAttitude = theAttitude;
+   }
+   else if (attitudeModel != modelType)
+   {
+      #ifdef DEBUG_SHOW_MODEL
+      MessageInterface::ShowMessage
+         ("   Creating tmpAttitude for model '%s'\n", modelType.c_str());
+      #endif
+      // Need to create a temporary attitude object in order to query it
+      Attitude *tmpAttitude =
+         (Attitude *)theGuiInterpreter->CreateObject(modelType, "", 0);
+      #ifdef DEBUG_SHOW_MODEL
+      MessageInterface::ShowMessage
+         ("   tmpAttitude<%p> created for modelType: '%s'\n", tmpAttitude, modelType.c_str());
+      #endif
+      useAttitude = tmpAttitude;
+      newAttitude = true;
+   }
+   
+   if (!useAttitude->CSModifyAllowed())
    {
       coordSysComboBox->Disable();
    }
-   if (!tmpAttitude->SetInitialAttitudeAllowed())
+   if (!useAttitude->SetInitialAttitudeAllowed())
    {
       HideInitialAttitudeAndRate();
    }
+   
+   if (newAttitude)
+      delete tmpAttitude;
+   
    if (modelType == "SpiceAttitude")
    {
       spiceMessage->Show(true);
@@ -2038,7 +2098,6 @@ void AttitudePanel::DisplayDataForModel(const std::string &modelType)
    MessageInterface::ShowMessage
       ("AttitudePanel::DisplayDataForModel() leaving, modelType='%s'\n", modelType.c_str());
    #endif
-   delete tmpAttitude;
 }
 
 //------------------------------------------------------------------------------
@@ -2104,7 +2163,7 @@ wxString AttitudePanel::ToString(Real rval)
 //------------------------------------------------------------------------------
 void AttitudePanel::OnStateTextUpdate(wxCommandEvent &event)
 {
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
       MessageInterface::ShowMessage("AttitudePanel::OnStateTextUpdate() entered\n");
    #endif
    
@@ -2147,6 +2206,10 @@ void AttitudePanel::OnStateTextUpdate(wxCommandEvent &event)
       dataChanged   = true;
       theScPanel->EnableUpdate(true);
    }
+   
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
+   MessageInterface::ShowMessage("AttitudePanel::OnStateTextUpdate() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -2162,7 +2225,7 @@ void AttitudePanel::OnStateTextUpdate(wxCommandEvent &event)
 void AttitudePanel::OnStateRateTextUpdate(wxCommandEvent &event)
 {
    //if (!canClose) return;  // ??
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
       MessageInterface::ShowMessage("AttitudePanel::OnStateRateTextUpdate() entered\n");
    #endif
    
@@ -2185,6 +2248,9 @@ void AttitudePanel::OnStateRateTextUpdate(wxCommandEvent &event)
       dataChanged   = true;
       theScPanel->EnableUpdate(true);
    }
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
+      MessageInterface::ShowMessage("AttitudePanel::OnStateRateTextUpdate() leaving\n");
+   #endif
 }
 
 //LOJ: Added to trigger new value
@@ -2380,19 +2446,29 @@ void AttitudePanel::OnCoordinateSystemSelection(wxCommandEvent &event)
 void AttitudePanel::OnAttitudeModelSelection(wxCommandEvent &event)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage("AttitudePanel::OnAttitudeModelSelection() entered\n");
+   MessageInterface::ShowMessage
+      ("AttitudePanel::OnAttitudeModelSelection() entered, attitudeModel = '%s'\n",
+       attitudeModel.c_str());
    #endif
    // if the user changes the attitude model, we will need to create a new one
-    std::string newModel = config1ComboBox->GetValue().WX_TO_STD_STRING;
-    if (newModel != attitudeModel)
-    {
+   std::string newModel = config1ComboBox->GetValue().WX_TO_STD_STRING;
+   if (newModel != attitudeModel)
+   {
       modelModified = true;
       dataChanged   = true;
-      attitudeModel = newModel;
       theScPanel->EnableUpdate(true);
-    }
-
-    DisplayDataForModel(newModel);
+   }
+   
+   DisplayDataForModel(newModel);
+   
+   // Set new model to current model after showing data
+   attitudeModel = newModel;
+   
+   #ifdef DEBUG_ATTITUDE_PANEL
+   MessageInterface::ShowMessage
+      ("AttitudePanel::OnAttitudeModelSelection() leaving, attitudeModel = '%s'\n",
+       attitudeModel.c_str());
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -2725,6 +2801,9 @@ bool AttitudePanel::DisplayQuaternion()
       Refresh();
       ResetStateFlags("State", true);
    }
+   #ifdef DEBUG_ATTITUDE_PANEL
+   MessageInterface::ShowMessage("AttitudePanel::DisplayQuaternion() returning %d\n", retval);
+   #endif
    return retval;
 }
 
@@ -2992,6 +3071,9 @@ bool AttitudePanel::DisplayAngularVelocity()
       Refresh();
       ResetStateFlags("Rate", true);
    }
+   #ifdef DEBUG_ATTITUDE_PANEL
+   MessageInterface::ShowMessage("AttitudePanel::DisplayAngularVelocity() returning %d\n", retval);
+   #endif
    return retval;
 }
 
@@ -3404,6 +3486,10 @@ void AttitudePanel::SaveCCSDSAttitudeData(Attitude *useAttitude)
 //------------------------------------------------------------------------------
 void AttitudePanel::LoadAttitudeAndRateData(Attitude* forAtt)
 {
+   #ifdef DEBUG_ATTITUDE_LOAD
+   MessageInterface::ShowMessage
+      ("AttitudePanel::LoadAttitudeAndRateData() entered, forAtt=<%p>\n", forAtt);
+   #endif
    unsigned int x, y;
    if (attStateType == "EulerAngles")
    {
@@ -3467,6 +3553,9 @@ void AttitudePanel::LoadAttitudeAndRateData(Attitude* forAtt)
       }
       DisplayAngularVelocity();
    }
+   #ifdef DEBUG_ATTITUDE_LOAD
+   MessageInterface::ShowMessage("AttitudePanel::LoadAttitudeAndRateData() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -3482,7 +3571,7 @@ void AttitudePanel::LoadAttitudeAndRateData(Attitude* forAtt)
 bool AttitudePanel::UpdateCosineMatrix()
 {
    bool retval = true;
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
       MessageInterface::ShowMessage("AttitudePanel::UpdateCosineMatrix() entered\n");
    #endif
    if (attStateType == stateTypeArray[DCM]) return true;
@@ -3529,10 +3618,18 @@ bool AttitudePanel::UpdateCosineMatrix()
 bool AttitudePanel::UpdateQuaternion()
 {
    bool retval = true;
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
       MessageInterface::ShowMessage("AttitudePanel::UpdateQuaternion() entered\n");
    #endif
-   if (attStateType == stateTypeArray[QUATERNION]) return true;
+   if (attStateType == stateTypeArray[QUATERNION])
+   {
+      #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage
+         ("AttitudePanel::UpdateQuaternion() just returning true, it is quaternion\n");
+      #endif
+      return true;
+   }
+   
    try
    {
       if (attStateType == stateTypeArray[DCM])
@@ -3557,6 +3654,10 @@ bool AttitudePanel::UpdateQuaternion()
       retval = false;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
+   
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
+   MessageInterface::ShowMessage("AttitudePanel::UpdateQuaternion() returning %d\n", retval);
+   #endif
    return retval;
 }
 
@@ -3572,7 +3673,7 @@ bool AttitudePanel::UpdateQuaternion()
 //------------------------------------------------------------------------------
 bool AttitudePanel::UpdateEulerAngles()
 {
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
       MessageInterface::ShowMessage("AttitudePanel::UpdateEulerAngles() entered\n");
    #endif
    bool retval = true;
@@ -3622,7 +3723,7 @@ bool AttitudePanel::UpdateEulerAngles()
 //------------------------------------------------------------------------------
 bool AttitudePanel::UpdateMRPs()
 {
-#ifdef DEBUG_ATTITUDE_PANEL
+#ifdef DEBUG_ATTITUDE_PANEL_UPDATE
    MessageInterface::ShowMessage("AttitudePanel::UpdateMRPs() entered\n");
 #endif
    bool retval = true;
@@ -3668,11 +3769,19 @@ bool AttitudePanel::UpdateMRPs()
 //------------------------------------------------------------------------------
 bool AttitudePanel::UpdateAngularVelocity()
 {
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
       MessageInterface::ShowMessage("AttitudePanel::UpdateAngularVelocity() entered\n");
    #endif
    bool retval = true;
-   if (attRateStateType == stateRateTypeArray[ANGULAR_VELOCITY]) return true;
+   if (attRateStateType == stateRateTypeArray[ANGULAR_VELOCITY])
+   {
+      #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage
+         ("AttitudePanel::UpdateAngularVelocity() just returning true, it is angular velocity\n");
+      #endif
+      return true;
+   }
+   
    if (attRateStateType == stateRateTypeArray[EULER_ANGLE_RATES])
    {
       try
@@ -3711,6 +3820,9 @@ bool AttitudePanel::UpdateAngularVelocity()
          MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
       }
    }
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
+   MessageInterface::ShowMessage("AttitudePanel::UpdateAngularVelocity() returning %d\n", retval);
+   #endif
    return retval;
 }
 
@@ -3726,7 +3838,7 @@ bool AttitudePanel::UpdateAngularVelocity()
 //------------------------------------------------------------------------------
 bool AttitudePanel::UpdateEulerAngleRates()
 {
-   #ifdef DEBUG_ATTITUDE_PANEL
+   #ifdef DEBUG_ATTITUDE_PANEL_UPDATE
       MessageInterface::ShowMessage("AttitudePanel::UpdateEulerAngleRates() entered\n");
    #endif
    bool retval = true;

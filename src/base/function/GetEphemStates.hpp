@@ -60,7 +60,10 @@ public:
 protected:
    Spacecraft*          inSat;
    std::string          inEphemType;
+   std::string          centralBodyOnFile;
+   std::string          axisSystemOnFile;
    std::string          outEpochFormat;
+   CoordinateSystem*    coordSysOnFile;
    CoordinateSystem*    outCoordSys;
    Real                 ephemInitialA1Mjd;
    Real                 ephemFinalA1Mjd;
@@ -70,7 +73,11 @@ protected:
    bool                 ReadSpiceEphemerisFile();
    bool                 ReadCode500EphemerisFile();
    bool                 ReadSTKEphemerisFile();
-   
+
+   CoordinateSystem *   CreateLocalCoordSystem(const std::string &csName,
+                                               const std::string &inOrigin,
+                                               const std::string &inAxisType,
+                                               bool &needsConversion);
    ElementWrapper*      CreateOutputEpochWrapper(Real a1MjdEpoch,
                                                  const std::string &outName);
    ElementWrapper*      CreateOutputStateWrapper(Integer outIndex,

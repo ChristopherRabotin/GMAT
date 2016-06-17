@@ -50,10 +50,12 @@ TrackingSystemFactory::TrackingSystemFactory() :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_TRACKING_SYSTEMS
       creatables.push_back("DSNTrackingSystem");
       creatables.push_back("USNTrackingSystem");
       creatables.push_back("OpticalTrackingSystem");
       creatables.push_back("TDRSSTrackingSystem");
+#endif
    }
 }
 
@@ -79,10 +81,12 @@ TrackingSystemFactory& TrackingSystemFactory::operator=(
 
       if (creatables.empty())
       {
+#ifndef DISABLE_TRACKING_SYSTEMS
          creatables.push_back("DSNTrackingSystem");
          creatables.push_back("USNTrackingSystem");
          creatables.push_back("OpticalTrackingSystem");
          creatables.push_back("TDRSSTrackingSystem");
+#endif
       }
    }
 
@@ -104,10 +108,12 @@ TrackingSystemFactory::TrackingSystemFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_TRACKING_SYSTEMS
       creatables.push_back("DSNTrackingSystem");
       creatables.push_back("USNTrackingSystem");
       creatables.push_back("OpticalTrackingSystem");
       creatables.push_back("TDRSSTrackingSystem");
+#endif
    }
 }
 
@@ -127,10 +133,12 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_TRACKING_SYSTEMS
       creatables.push_back("DSNTrackingSystem");
       creatables.push_back("USNTrackingSystem");
       creatables.push_back("OpticalTrackingSystem");
       creatables.push_back("TDRSSTrackingSystem");
+#endif
    }
 }
 
@@ -154,6 +162,7 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
 TrackingSystem* TrackingSystemFactory::CreateTrackingSystem(
          const std::string &ofType, const std::string &withName)
 {
+#ifndef DISABLE_TRACKING_SYSTEMS
    if (ofType == "DSNTrackingSystem")
       return new DSNTrackingSystem(withName);
    if (ofType == "USNTrackingSystem")
@@ -162,6 +171,7 @@ TrackingSystem* TrackingSystemFactory::CreateTrackingSystem(
       return new OpticalTrackingSystem(withName);
    if (ofType == "TDRSSTrackingSystem")
       return new TDRSSTrackingSystem(withName);
+#endif
 
    return Factory::CreateTrackingSystem(ofType, withName);
 }

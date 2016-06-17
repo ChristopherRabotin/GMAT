@@ -21,7 +21,8 @@
 // Created: 2016.04.29
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the visibility report base class.  This class reports and
+ * stores visibilty data.
  */
 //------------------------------------------------------------------------------
 #ifndef VisibilityReport_hpp
@@ -42,8 +43,8 @@ public:
    
    virtual ~VisibilityReport();
    
-   virtual void                SetStartDate(const AbsoluteDate &toDate);
-   virtual void                SetEndDate(const AbsoluteDate &toDate);
+   virtual void  SetStartDate(const AbsoluteDate &toDate);
+   virtual void  SetEndDate(const AbsoluteDate &toDate);
    
    virtual const AbsoluteDate& GetStartDate();
    virtual const AbsoluteDate& GetEndDate();

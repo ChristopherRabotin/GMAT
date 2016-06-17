@@ -21,7 +21,7 @@
 // Created: 2016.05.02
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of the ConicalSensor class
  */
 //------------------------------------------------------------------------------
 
@@ -38,24 +38,42 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// default constructor
+// ConicalSensor(Real fov)
 //------------------------------------------------------------------------------
+/**
+ * Constructor
+ * 
+ * @param fov field-of-view for the sensor (radians)
+ */
+//---------------------------------------------------------------------------
 ConicalSensor::ConicalSensor(Real fov) :
-   fieldOfView (0.0)
+   fieldOfView (fov)
 {
 }
 
 //------------------------------------------------------------------------------
-// copy constructor
+// ConicalSensor(const ConicalSensor &copy)
 //------------------------------------------------------------------------------
-ConicalSensor::ConicalSensor( const ConicalSensor &copy) :
+/**
+ * Copy constructor
+ * 
+ * @param copy object to copy
+ */
+//---------------------------------------------------------------------------
+ConicalSensor::ConicalSensor(const ConicalSensor &copy) :
    fieldOfView (copy.fieldOfView)
 {
 }
 
 //------------------------------------------------------------------------------
-// operator=
+// ConicalSensor& operator=(const ConicalSensor &copy)
 //------------------------------------------------------------------------------
+/**
+ * The operator= for the ConicalSensor
+ * 
+ * @param copy object to copy
+ */
+//---------------------------------------------------------------------------
 ConicalSensor& ConicalSensor::operator=(const ConicalSensor &copy)
 {
    if (&copy == this)
@@ -67,9 +85,13 @@ ConicalSensor& ConicalSensor::operator=(const ConicalSensor &copy)
 }
 
 //------------------------------------------------------------------------------
-// destructor
+// ~ConicalSensor()
 //------------------------------------------------------------------------------
-
+/**
+ * Destructor
+ * 
+ */
+//---------------------------------------------------------------------------
 ConicalSensor::~ConicalSensor()
 {
 }
@@ -77,6 +99,12 @@ ConicalSensor::~ConicalSensor()
 //------------------------------------------------------------------------------
 //  void SetFieldOfView(Real fov)
 //------------------------------------------------------------------------------
+/**
+ * Sets the field-of-view for the ConicalSensor
+ * 
+ * @param fov field-of-view (radians)
+ */
+//---------------------------------------------------------------------------
 void ConicalSensor::SetFieldOfView(Real fov)
 {
    fieldOfView =fov;
@@ -85,6 +113,12 @@ void ConicalSensor::SetFieldOfView(Real fov)
 //------------------------------------------------------------------------------
 //  Real GetFieldOfView()
 //------------------------------------------------------------------------------
+/**
+ * Returns the field-of-view for the ConicalSensor
+ * 
+ * @return field-of-view (radians)
+ */
+//---------------------------------------------------------------------------
 Real ConicalSensor::GetFieldOfView()
 {
    return fieldOfView;

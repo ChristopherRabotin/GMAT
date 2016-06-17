@@ -1426,7 +1426,8 @@ void GuiItemManager::UnregisterListBox(const wxString &type, wxListBox *lb,
 {
    #if DBGLVL_GUI_ITEM_UNREG
    MessageInterface::ShowMessage
-      ("GuiItemManager::UnregisterListBox() lb=<%p>, excList=<%p>\n", lb, excList);
+      ("GuiItemManager::UnregisterListBox() entered, type='%s', lb=<%p>, excList=<%p>\n",
+       type.WX_TO_C_STRING, lb, excList);
    #endif
    
    if (type == "CelestialPoint")
@@ -1549,6 +1550,10 @@ void GuiItemManager::UnregisterListBox(const wxString &type, wxListBox *lb,
       if (pos2 != mThrusterExcList.end())
          mThrusterExcList.erase(pos2);
    }
+   #if DBGLVL_GUI_ITEM_UNREG
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UnregisterListBox() leaving, type='%s'\n", type.WX_TO_C_STRING);
+   #endif
 }
 
 
@@ -1559,7 +1564,8 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
 {
    #if DBGLVL_GUI_ITEM_UNREG
    MessageInterface::ShowMessage
-      ("GuiItemManager::UnregisterCheckListBox() clb=%d, excList=%d\n", clb, excList);
+      ("GuiItemManager::UnregisterCheckListBox() type='%s', clb=<%p>\n", type.WX_TO_C_STRING,
+       clb);
    #endif
    
    if (type == "Subscriber")
@@ -1666,6 +1672,11 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
 //------------------------------------------------------------------------------
 void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
 {
+   #if DBGLVL_GUI_ITEM_UNREG
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UnregisterComboBox() entered, type='%s', cb=<%p>\n",
+       type.WX_TO_C_STRING, cb);
+   #endif
    if (type == "SpacePoint")
    {
       std::vector<wxComboBox*>::iterator pos =
@@ -1817,7 +1828,20 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mOptimizerCBList.end())
          mOptimizerCBList.erase(pos);
    }
+   else
+   {
+      #if DBGLVL_GUI_ITEM_UNREG
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UnregisterComboBox() *** INTERNAL ERROR *** Unhandled type: '%s'\n",
+          type.WX_TO_C_STRING);
+      #endif
+   }
    
+   #if DBGLVL_GUI_ITEM_UNREG
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UnregisterComboBox() leaving, type='%s'\n",
+       type.WX_TO_C_STRING);
+   #endif
 }
 
 

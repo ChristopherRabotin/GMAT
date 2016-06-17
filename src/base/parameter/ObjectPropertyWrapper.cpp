@@ -183,13 +183,13 @@ std::string ObjectPropertyWrapper::ToString()
    case Gmat::RMATRIX_TYPE:
    {
       Rmatrix rmat = EvaluateArray();
-      retval = rmat.ToString();
+      retval = rmat.ToString(16);
       break;
    }
    case Gmat::RVECTOR_TYPE:
    {
       Rvector rvec = EvaluateRvector();
-      retval = rvec.ToString();
+      retval = rvec.ToString(16);
       break;
    }
    case Gmat::STRING_TYPE:
@@ -600,6 +600,43 @@ bool ObjectPropertyWrapper::SetArray(const Rmatrix &toValue)
    }
    
    return true;
+}
+
+//---------------------------------------------------------------------------
+// const Rmatrix& EvaluateArray() const
+//---------------------------------------------------------------------------
+/**
+ * Method to retrieve the Rmatrix value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+const Rmatrix& ObjectPropertyWrapper::EvaluateArray() const
+{
+   if (object == NULL)
+      throw ParameterException(
+      "Cannot set value of ObjectProperty - object pointer is NULL\n");
+   
+   try
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::EvaluateArray, about to get value of %s\n", GetDescription().ToString().c_str());
+      const Rmatrix rmat = object->GetRmatrixParameter(propID);
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::EvaluateArray, value retrieve is %s\n", rmat.ToString(16).c_str());
+      #endif
+      return object->GetRmatrixParameter(propID);
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+      #endif
+      
+      throw;
+   }
 }
 
 //---------------------------------------------------------------------------

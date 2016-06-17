@@ -5644,8 +5644,9 @@ Attitude* Moderator::CreateAttitude(const std::string &type,
                                     const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateAttitude() type = '%s', "
-                                 "name = '%s'\n", type.c_str(), name.c_str());
+   MessageInterface::ShowMessage
+      ("Moderator::CreateAttitude() type = '%s', name = '%s', objectManageOption=%d\n",
+       type.c_str(), name.c_str(), objectManageOption);
    #endif
    
    Attitude *att = theFactoryManager->CreateAttitude(type, name);
@@ -5670,6 +5671,11 @@ Attitude* Moderator::CreateAttitude(const std::string &type,
    }
    #endif
    
+   #if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::CreateAttitude() returning <%p> for type = '%s'\n", att,
+       type.c_str());
+   #endif
    return att;
 }
 
@@ -9562,12 +9568,24 @@ PropSetup* Moderator::GetDefaultPropSetup()
 Burn* Moderator::GetDefaultBurn(const std::string &type)
 {
    StringArray configList = GetListOfObjects(Gmat::BURN);
-
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultBurn() entered, type='%s', burnList.size()=%d\n",
+       type.c_str(), configList.size());
+   #endif
+   
    if (configList.size() > 0)
    {
       for (UnsignedInt i=0; i<configList.size(); i++)
          if (GetBurn(configList[i])->IsOfType(type))
+         {
+            #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+            MessageInterface::ShowMessage
+               ("Moderator::GetDefaultBurn() returning configured burn <%p>\n",
+                configList[i]);
+            #endif
             return GetBurn(configList[i]);
+         }
    }
    
    Burn *burn = NULL;
@@ -9577,6 +9595,10 @@ Burn* Moderator::GetDefaultBurn(const std::string &type)
    else if (type == "FiniteBurn")
       burn = CreateBurn("FiniteBurn", "DefaultFB");
    
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultBurn() returning new burn <%p>\n", burn);
+   #endif
    return burn;
 }
 
@@ -9749,6 +9771,12 @@ Solver* Moderator::GetDefaultBoundaryValueSolver()
 {
    StringArray configList = GetListOfObjects(Gmat::SOLVER);
    Integer numSolver = configList.size();
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultBoundaryValueSolver() entered, numSolver=%d\n",
+       numSolver);
+   #endif
+   
    GmatBase *obj = NULL;
    
    if (numSolver > 0)
@@ -9757,12 +9785,24 @@ Solver* Moderator::GetDefaultBoundaryValueSolver()
       {
          obj = GetConfiguredObject(configList[i]);
          if (obj->IsOfType("BoundaryValueSolver"))
+         {
+            #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+            MessageInterface::ShowMessage
+               ("Moderator::GetDefaultBoundaryValueSolver() returning configured "
+                "solver <%p>\n", obj);
+            #endif
             return (Solver*)obj;
+         }
       }
    }
    
    // create default boundary value Solver
-   return CreateSolver("DifferentialCorrector", "DefaultDC");
+   Solver *defSolver = CreateSolver("DifferentialCorrector", "DefaultDC");
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultBoundaryValueSolver() returning new solver <%p>\n", defSolver);
+   #endif
+   return defSolver;
 }
 
 //------------------------------------------------------------------------------

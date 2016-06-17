@@ -332,7 +332,17 @@ ObservationData* StatisticRejectFilter::FilteringData(ObservationData* dataObjec
    
    rejectedReason = 0;             // no reject
 
-   // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
+   // 0. File name verify: It will be passed the test when observation data does not contain any file name in "FileNames" array
+   if (!HasFile(dataObject))
+   {
+#ifdef DEBUG_FILTER
+      MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit11 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+#endif
+      return dataObject;             // return dataObject when name of the file specified in dataObject does not match to any file in FileNames list. The value of rejectedReason has to be 0 
+   }
+
+
+   // 1. Observated objects verify: It will be passed the test when observation data does not contain any spacecraft in "observers" array
    if (!HasObserver(dataObject))
    {
       #ifdef DEBUG_FILTER

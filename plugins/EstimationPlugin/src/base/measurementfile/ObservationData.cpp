@@ -45,6 +45,7 @@
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData() :
+   fileIndex         (NULL),                               // made changes by TUAN NGUYEN
    inUsed            (true),
    removedReason     ("N"),
    typeName          (""),
@@ -93,6 +94,7 @@ ObservationData::~ObservationData()
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData(const ObservationData& od):
+   fileIndex               (od.fileIndex),                          // made changes by TUAN NGUYEN
    inUsed                  (od.inUsed),
    removedReason           (od.removedReason),
    typeName                (od.typeName),
@@ -143,6 +145,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 {
    if (&od != this)
    {
+      fileIndex               = od.fileIndex;                        // made changes by TUAN NGUYEN
       inUsed                  = od.inUsed;
       removedReason           = od.removedReason;
       typeName                = od.typeName;
@@ -188,6 +191,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 //-----------------------------------------------------------------------------
 void ObservationData::Clear()
 {
+   fileIndex               = NULL;                                 // made changes by TUAN NGUYEN
    inUsed                  = true;
    removedReason           = "N";
    typeName                = "";

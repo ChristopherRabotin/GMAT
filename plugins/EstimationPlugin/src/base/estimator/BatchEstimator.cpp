@@ -1057,7 +1057,24 @@ void BatchEstimator::CompleteInitialization()
    hAccum.clear();
    if (useApriori)
    {   // [Lambda] = [Px0]^-1
-      information = stateCovariance->GetCovariance()->Inverse();         // stateCovariance is [Px0] matrix
+      try
+      {
+         information = stateCovariance->GetCovariance()->Inverse();         // stateCovariance is [Px0] matrix
+      }
+      catch (...)
+      {
+         MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+         {
+            for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+               MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+            if (row < stateCovariance->GetDimension() - 1)
+               MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+
+         throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+      }
    }
    else
    {  // [Lambda] = [0] 
@@ -1376,7 +1393,26 @@ void BatchEstimator::CheckCompletion()
       // Need to reset STM and covariances
       hAccum.clear();
       if (useApriori)
-         information = stateCovariance->GetCovariance()->Inverse();   // When starting an iteration, [Lambda] = [Px0]^-1
+      {
+         try
+         {
+            information = stateCovariance->GetCovariance()->Inverse();   // When starting an iteration, [Lambda] = [Px0]^-1
+         }
+         catch (...)
+         {
+            MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+            for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+            {
+               for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+                  MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+               if (row < stateCovariance->GetDimension() - 1)
+                  MessageInterface::ShowMessage("\n");
+            }
+            MessageInterface::ShowMessage("]\n");
+
+            throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+         }
+      }
       else
       {
          information.SetSize(stateSize, stateSize);
@@ -3408,14 +3444,15 @@ void BatchEstimator::WriteReportFileHeaderPart5()
          Spacecraft *sc = (Spacecraft*)obj;
          std::string csName = sc->GetStringParameter("CoordinateSystem");
          CoordinateSystem *cs = NULL;
-         try
-         {
+         // undo code to handle bug GMT-5619 due to it was handle by Spacecraft's code
+         //try
+         //{
             cs = (CoordinateSystem *)GetConfiguredObject(csName);
-         }
-         catch (...)
-         {
-            throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
-         }
+         //}
+         //catch (...)
+         //{
+         //   throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
+         //}
          name = cs->GetStringParameter("Origin");
       }
       else if (obj->IsOfType(Gmat::GROUND_STATION))
@@ -3627,14 +3664,14 @@ void BatchEstimator::WriteIterationHeader()
       << "\n"
       << "                                                                  Notations Used In Report File\n"
       << "\n"
-      << "                  N : Not edited                                                     BXY  : Blocked, X = Path index, Y = Count index(Doppler)\n"
+      << "                  - : Not edited                                                     BXY  : Blocked, X = Path index, Y = Count index(Doppler)\n"
       << "                  U : Unused because no computed value configuration available       IRMS : Edited by initial RMS sigma filter\n"
       << "                  R : Out of ramp table range                                        OLSE : Edited by outer-loop sigma editor\n"
       << "\n"
       << "                                                                  Measurement and Residual Units\n"
       << "\n"
       << "              Obs-Type            Obs/Computed Units   Residual Units                      Obs-Type            Obs/Computed Units   Residual Units\n"
-      << "              Doppler_RangeRate   kilometers/second    cm/second                           Range_KM            kilometers           meters\n"
+      << "              Doppler_RangeRate   kilometers/second    kilometers/second                   Range_KM            kilometers           kilometers\n"
       << "              Doppler_HZ          Hertz                Hertz                               Range_RU            Range Units          Range Units\n";
 
    textFile.flush();
@@ -3653,10 +3690,10 @@ void BatchEstimator::WritePageHeader()
    }
    else
    {
-      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)          Weight (W)           W*(O-C)^2       sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
+      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size() - 1; ++i)
-         textFile << GmatStringUtil::GetAlignmentString("", 19);
+         textFile << GmatStringUtil::GetAlignmentString(" ", 20);
       textFile << "  Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
    }
    textFile << "\n";
@@ -5513,7 +5550,7 @@ bool BatchEstimator::DataFilter()
                weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
          
          // 2.2. Filter based on maximum residual multiplier
-         if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
+         if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*GmatMathUtil::Abs(O-C) > maximum residual multiplier) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "IRMS";            // "IRMS": represent for OLSEInitialRMSSigma
@@ -5543,7 +5580,7 @@ bool BatchEstimator::DataFilter()
          
          // 2. Filter based on n-sigma
          Real sigmaVal = (chooseRMSP ? predictedRMS : newResidualRMS);
-         if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+         if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*GmatMathUtil::Abs(O-C) > k*sigma+ K) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "OLSE";                     // "OLSE": represent for outer-loop sigma filter
@@ -5732,7 +5769,7 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
    for (k = 1; k <= rowCount; ++k)
    {
       iLeRowCount = k - 1;
-      tolerance = abs(epsilon * sum1[j-1]);
+      tolerance = GmatMathUtil::Abs(epsilon * sum1[j-1]);
       for (i = k; i <= rowCount; ++i)
       {
          dsum = 0.0;

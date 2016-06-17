@@ -21,7 +21,7 @@
 // Created: 2016.04.29
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of the visibility report base class.
  */
 //------------------------------------------------------------------------------
 
@@ -38,15 +38,27 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// default constructor
+//  VisibilityReport(const std::string &details)
+//------------------------------------------------------------------------------
+/**
+ * Constructs VisibilityReport instance (default constructor).
+ *
+ * @param <details> A message providing the details of the exception.
+ */
 //------------------------------------------------------------------------------
 VisibilityReport::VisibilityReport()
 {
-   // by default, startDate and endDate are the default values
+   // by default, startDate and endDate are the AbsoluteDate default values
 }
 
 //------------------------------------------------------------------------------
-// copy constructor
+//  VisibilityReport(const VisibilityReport &be)
+//------------------------------------------------------------------------------
+/**
+ * Constructs VisibilityReport instance (copy constructor).
+ *
+ * @param be The instance that is copied.
+ */
 //------------------------------------------------------------------------------
 VisibilityReport::VisibilityReport( const VisibilityReport &copy) :
    startDate   (copy.startDate),
@@ -55,7 +67,13 @@ VisibilityReport::VisibilityReport( const VisibilityReport &copy) :
 }
 
 //------------------------------------------------------------------------------
-// operator=
+//  VisibilityReport& operator=(const VisibilityReport &copy)
+//------------------------------------------------------------------------------
+/**
+ * VisibilityReport operator=.
+ *
+ * @param be The instance that is copied.
+ */
 //------------------------------------------------------------------------------
 VisibilityReport& VisibilityReport::operator=(const VisibilityReport &copy)
 {
@@ -68,16 +86,26 @@ VisibilityReport& VisibilityReport::operator=(const VisibilityReport &copy)
    return *this;
 }
 
-//------------------------------------------------------------------------------
-// destructor
-//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+//  ~VisibilityReport()
+//------------------------------------------------------------------------------
+/**
+ * Destructs VisibilityReport instance
+ */
+//------------------------------------------------------------------------------
 VisibilityReport::~VisibilityReport()
 {
 }
 
 //------------------------------------------------------------------------------
-// void SetStartDate(const AbsoluteDate &toDate)
+//  void SetStartDate(const AbsoluteDate &toDate)
+//------------------------------------------------------------------------------
+/**
+ * Sets the start date for the report.
+ *
+ * @param toDate The start time for the report.
+ */
 //------------------------------------------------------------------------------
 void VisibilityReport::SetStartDate(const AbsoluteDate &toDate)
 {
@@ -85,7 +113,13 @@ void VisibilityReport::SetStartDate(const AbsoluteDate &toDate)
 }
 
 //------------------------------------------------------------------------------
-// void SetEndDate(const AbsoluteDate &toDate)
+//  void SetEndDate(const AbsoluteDate &toDate)
+//------------------------------------------------------------------------------
+/**
+ * Sets the end date for the report.
+ *
+ * @param toDate The end time for the report.
+ */
 //------------------------------------------------------------------------------
 void VisibilityReport::SetEndDate(const AbsoluteDate &toDate)
 {
@@ -97,6 +131,12 @@ void VisibilityReport::SetEndDate(const AbsoluteDate &toDate)
 //------------------------------------------------------------------------------
 // const AbsoluteDate& VisibilityReport::GetStartDate()
 //------------------------------------------------------------------------------
+/**
+ * Returns the start date for the report.
+ *
+ * @return  The start time for the report.
+ */
+//------------------------------------------------------------------------------
 const AbsoluteDate& VisibilityReport::GetStartDate()
 {
    return startDate;
@@ -104,6 +144,12 @@ const AbsoluteDate& VisibilityReport::GetStartDate()
 
 //------------------------------------------------------------------------------
 // const AbsoluteDate& VisibilityReport::GetEndDate()
+//------------------------------------------------------------------------------
+/**
+ * Returns the end date for the report.
+ *
+ * @return  The end time for the report.
+ */
 //------------------------------------------------------------------------------
 const AbsoluteDate& VisibilityReport::GetEndDate()
 {

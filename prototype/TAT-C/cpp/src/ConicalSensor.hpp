@@ -21,7 +21,7 @@
 // Created: 2016.05.03
 //
 /**
- * Implementation of the the visibility report base class
+ * Definition of the Conical Sensor class.  This class modles a conical sensor.
  */
 //------------------------------------------------------------------------------
 #ifndef ConicalSensor_hpp

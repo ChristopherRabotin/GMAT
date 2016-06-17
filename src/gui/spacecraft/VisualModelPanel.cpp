@@ -37,6 +37,12 @@
 #include "GmatColorPanel.hpp"
 #include "RgbColor.hpp"             // for RgbColor
 #include <wx/clrpicker.h>           // for wxColorPickerCtrl
+
+//#define DEBUG_PANEL_CREATE
+//#define DEBUG_PANEL_LOAD
+//#define DEBUG_PANEL_SAVE
+
+
 //------------------------------------------------------------------------------
 // event tables for wxWindows
 //------------------------------------------------------------------------------
@@ -474,6 +480,10 @@ void VisualModelPanel::LoadData()
 	}
 	else
 		interfaceEnabled = true;
+
+   // Reset data changed flags
+   dataChanged = false;
+   mTextChanged = false;
    
    #ifdef DEBUG_PANEL_LOAD
    MessageInterface::ShowMessage("VisualModelPanel::LoadData() exiting.\n");
@@ -924,7 +934,7 @@ void VisualModelPanel::SaveData()
    catch (BaseException &ex)
    {
       canClose = false;
-     dataChanged = true;
+      dataChanged = true;
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
    

@@ -21,7 +21,7 @@
 // Created: 2016.05.03
 //
 /**
- * Implementation of the the visibility report base class
+ * Implementation of the Earth class
  */
 //------------------------------------------------------------------------------
 
@@ -40,8 +40,13 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// default constructor
+// Earth()
 //------------------------------------------------------------------------------
+/**
+ * Default constructor.
+ *
+ */
+//---------------------------------------------------------------------------
 Earth::Earth() :
    J2         (1.0826269e-003),
    mu         (3.986004415e+5),
@@ -51,9 +56,15 @@ Earth::Earth() :
 }
 
 //------------------------------------------------------------------------------
-// copy constructor
+// Earth(const Earth &copy)
 //------------------------------------------------------------------------------
-Earth::Earth( const Earth &copy) :
+/**
+ * Copy constructor.
+ *
+ * @param  copy  the Earth object to copy
+ */
+//---------------------------------------------------------------------------
+Earth::Earth(const Earth &copy) :
    J2         (copy.J2),
    mu         (copy.mu),
    radius     (copy.radius),
@@ -62,8 +73,14 @@ Earth::Earth( const Earth &copy) :
 }
 
 //------------------------------------------------------------------------------
-// operator=
+// Earth & operator=(const Earth &copy)
 //------------------------------------------------------------------------------
+/**
+ * The operator= for the Earth.
+ *
+ * @param  copy  the Earth object to copy
+ */
+//---------------------------------------------------------------------------
 Earth& Earth::operator=(const Earth &copy)
 {
    if (&copy == this)
@@ -78,9 +95,12 @@ Earth& Earth::operator=(const Earth &copy)
 }
 
 //------------------------------------------------------------------------------
-// destructor
+// ~Earth ()
 //------------------------------------------------------------------------------
-
+/**
+ * Detructor
+ */
+//---------------------------------------------------------------------------
 Earth::~Earth()
 {
 }
@@ -88,6 +108,14 @@ Earth::~Earth()
 //------------------------------------------------------------------------------
 //  Rmatrix33  GetInertialToFixedRotation(Real jd)
 //------------------------------------------------------------------------------
+/**
+ * Returns the inertial-to-fixed rotation matrix.
+ *
+ * @param  jd  the Julian date at which to compute the rotation matrix.
+ * 
+ * @return  inertial-to-fixed rotation matrix
+ */
+//---------------------------------------------------------------------------
 Rmatrix33 Earth::GetInertialToFixedRotation(Real jd)
 {
    Real gmt = ComputeGMT(jd);
@@ -102,6 +130,14 @@ Rmatrix33 Earth::GetInertialToFixedRotation(Real jd)
 //------------------------------------------------------------------------------
 //  Real ComputeGMT(Real jd)
 //------------------------------------------------------------------------------
+/**
+ * Returns the GMT.
+ *
+ * @param  jd  the Julian date at which to compute the GMT.
+ * 
+ * @return  GMT
+ */
+//---------------------------------------------------------------------------
 Real Earth::ComputeGMT(Real jd)
 {
    Real timeUT1 = (jd - GmatTimeConstants::JD_OF_J2000) /
@@ -119,6 +155,16 @@ Real Earth::ComputeGMT(Real jd)
 //  Rvector3 GetBodyFixedState(Rvector3 inertialState,
 //                             Real      jd)
 //------------------------------------------------------------------------------
+/**
+ * Returns the body-fixed state given the inertial stat and the time.
+ *
+ * @param  inertialState  the inertial state.
+ * @param  jd             the Julian date at which to compute the
+ *                        body-fixed state.
+ * 
+ * @return  body-fixed state
+ */
+//---------------------------------------------------------------------------
 Rvector3 Earth::GetBodyFixedState(Rvector3 inertialState,
                                   Real      jd)
 {
@@ -129,6 +175,15 @@ Rvector3 Earth::GetBodyFixedState(Rvector3 inertialState,
 //------------------------------------------------------------------------------
 //  Rmatrix33 FixedToTopo(Real gdLat, Real gdLon)
 //------------------------------------------------------------------------------
+/**
+ * Returns the rotation matrix to convert from body-fixed to topocentric.
+ *
+ * @param  gdLat  the geodetic latitude
+ * @param  gdLon  the geodetic longitude
+ * 
+ * @return  the rotation matrix from body-fixed to topocentric
+ */
+//---------------------------------------------------------------------------
 Rmatrix33 Earth::FixedToTopo(Real gdLat, Real gdLon)
 {
    // Computes rotation matrix from inertial to topocentric axes
@@ -147,8 +202,16 @@ Rmatrix33 Earth::FixedToTopo(Real gdLat, Real gdLon)
 }
 
 //------------------------------------------------------------------------------
-//  Real GeocentricToGeodeticLat(Real lat)
+//  Real GeocentricToGeodeticLat(Real gcLat)
 //------------------------------------------------------------------------------
+/**
+ * Converts from a geocentric latitude to a geodetic latitude.
+ *
+ * @param gcLat  the geocentric latitude
+ * 
+ * @return  the geodetic latitude
+ */
+//---------------------------------------------------------------------------
 Real Earth::GeocentricToGeodeticLat(Real gcLat)
 {
    // Converts from geocentric latitude to geodetic latitude
@@ -169,10 +232,20 @@ Real Earth::GeocentricToGeodeticLat(Real gcLat)
 }
 
 //------------------------------------------------------------------------------
-//  void GetEarthSunDistRaDec(Real jd,    Rvector &rSun,
+//  void GetEarthSunDistRaDec(Real jd,    Rvector3 &rSun,
 //                            Real rtAsc, Real decl)
 //------------------------------------------------------------------------------
-void Earth::GetEarthSunDistRaDec(Real jd,    Rvector &rSun,
+/**
+ * Returns the Earth-Sun distance.
+ *
+ * @param jd  the Julian data at which to compute the distance
+ * @param rSun  OUTPUT the Earth-to-Sun vector
+ * @param rtAsc OUTPUT right ascension
+ * @param decl  OUTPUT declination
+ * 
+ */
+//---------------------------------------------------------------------------
+void Earth::GetEarthSunDistRaDec(Real jd,    Rvector3 &rSun,
                                  Real rtAsc, Real decl)
 {
    // author        : david vallado                  719-573-2600   27 may 2002

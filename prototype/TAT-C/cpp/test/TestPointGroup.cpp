@@ -72,13 +72,13 @@ int main(int argc, char *argv[])
       // Test the PointGroup
       MessageInterface::ShowMessage("*** TEST*** PointGroup\n");
       
-      AbsoluteDate date;
-      OrbitState   state;
-      Spacecraft   *sat = new Spacecraft(date, state);
+//      AbsoluteDate date;
+//      OrbitState   state;
+//      Spacecraft   *sat = new Spacecraft(date, state);
       
       // Create a point group object with 50 points
       Integer testPointNum = 50;
-      PointGroup pg(sat);
+      PointGroup pg;
       
       pg.AddHelicalPointsByNumPoints(testPointNum);
       
@@ -156,20 +156,15 @@ int main(int argc, char *argv[])
       Real maxDiff = -INFINITY;
       for (Integer pointIdx = 0; pointIdx < testPointNum; pointIdx++)
       {
-//         Rvector  truthPos = truthData.GetRow(pointIdx);
          Rvector3 truthPos3(truthData.GetElement(pointIdx,0),
                             truthData.GetElement(pointIdx,1),
                             truthData.GetElement(pointIdx,2));
-//         MessageInterface::ShowMessage("  truthPos3 values are : %12.10f  %12.10f  %12.10f\n",
-//                                       truthPos3(0), truthPos3(1),truthPos3(2));
          Rvector3 *ptPos = pg.GetPointPositionVector(pointIdx);
          Rvector3 diffVec = truthPos3 - (*ptPos);
-         MessageInterface::ShowMessage("  point position vector values are : %12.10f  %12.10f  %12.10f\n",
-                                       ptPos->GetElement(0)/6378.1363,
-                                       ptPos->GetElement(1)/6378.1363,
-                                       ptPos->GetElement(2)/6378.1363);
-//         MessageInterface::ShowMessage("  diffVec values are : %12.10f  %12.10f  %12.10f\n",
-//                                       diffVec(0), diffVec(1),diffVec(2));
+//         MessageInterface::ShowMessage("  point position vector values are : %12.10f  %12.10f  %12.10f\n",
+//                                       ptPos->GetElement(0),
+//                                       ptPos->GetElement(1),
+//                                       ptPos->GetElement(2));
 
          Real diff = diffVec.GetMagnitude();
          if (diff > maxDiff)
@@ -181,13 +176,17 @@ int main(int argc, char *argv[])
          MessageInterface::ShowMessage("*** ERROR - maxDiff for position is too great\n");
          exit(0);
       }
+      else
+      {
+         MessageInterface::ShowMessage("OK - maxDiff is OK between truth data and data!\n");
+      }
       
       // Test lat/lon contraint setting
       Real latUpper = PI/3;
       Real latLower = -PI/3;
       Real lonUpper = 2*PI - PI/6;
       Real lonLower = PI/6;
-      PointGroup pg2(sat);
+      PointGroup pg2;
       pg2.SetLatLonBounds(latUpper,latLower,lonUpper,lonLower);
       pg2.AddHelicalPointsByNumPoints(testPointNum);
       RealArray latVec;
@@ -204,15 +203,20 @@ int main(int argc, char *argv[])
             exit(0);
          }
      }
-                     
+      MessageInterface::ShowMessage("OK - lat and lon are not out-of-range!\n");
+      
       //  Test setting your own lat lon using those from the previous test
-      PointGroup pgCustom(sat);
+      PointGroup pgCustom;
       pgCustom.AddUserDefinedPoints(latVec,lonVec);
-      if (pg.GetNumPoints() != pgCustom.GetNumPoints())
+      if (pg2.GetNumPoints() != pgCustom.GetNumPoints())
       {
          MessageInterface::ShowMessage(
                 "*** ERROR - error setting user defined points\n");
          exit(0);
+      }
+      else
+      {
+         MessageInterface::ShowMessage("OK - setting user-defined points is OK!\n");
       }
       RealArray latVec2;
       RealArray lonVec2;
@@ -232,9 +236,10 @@ int main(int argc, char *argv[])
             exit(0);
          }
       }
+      MessageInterface::ShowMessage("OK - setting/getting user-defined points is OK!\n");
       
       //  Test setting points based on angular separation
-      PointGroup pgByAngle(sat);
+      PointGroup pgByAngle;
       Real angle = 1*PI/180;
       pgByAngle.AddHelicalPointsByAngle(angle);
       Rvector3 *v1 = pgByAngle.GetPointPositionVector(3);
@@ -246,6 +251,7 @@ int main(int argc, char *argv[])
                                        "*** ERROR - error in angle between points when setting based on angle\n");
          exit(0);
       }
+      MessageInterface::ShowMessage("OK - setting by angular separation is OK!\n");
       
                      
       cout << endl;
