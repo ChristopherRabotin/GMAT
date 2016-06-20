@@ -45,7 +45,9 @@
  */
 //------------------------------------------------------------------------------
 RangeAdapterKm::RangeAdapterKm(const std::string& name) :
-   TrackingDataAdapter      ("RangeKm", name)
+   TrackingDataAdapter      ("RangeKm", name),
+   ionoCorrection           (0.0),                  // made changes by TUAN NGUYEN
+   tropoCorrection          (0.0)                   // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("RangeAdapterKm default constructor <%p>\n", this);
@@ -79,7 +81,9 @@ RangeAdapterKm::~RangeAdapterKm()
  */
 //------------------------------------------------------------------------------
 RangeAdapterKm::RangeAdapterKm(const RangeAdapterKm& rak) :
-   TrackingDataAdapter      (rak)
+   TrackingDataAdapter      (rak),
+   ionoCorrection           (0.0),           // made changes by TUAN NGUYEN
+   tropoCorrection          (0.0)            // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("RangeAdapterKm copy constructor   from <%p> to <%p>\n", &rak, this);
@@ -108,6 +112,8 @@ RangeAdapterKm& RangeAdapterKm::operator=(const RangeAdapterKm& rak)
    if (this != &rak)
    {
       TrackingDataAdapter::operator=(rak);
+      ionoCorrection  = 0.0;                 // made changes by TUAN NGUYEN
+      tropoCorrection = 0.0;                 // made changes by TUAN NGUYEN
    }
 
    return *this;
