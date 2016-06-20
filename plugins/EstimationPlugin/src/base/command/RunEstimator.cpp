@@ -476,6 +476,10 @@ void RunEstimator::SetPropagationProperties(PropagationStateManager *psm)
 //------------------------------------------------------------------------------
 bool RunEstimator::PreExecution()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Start RunEstimator::PreExecution()\n");
+#endif
+
    bool retval = false;
    if (Initialize())
    {
@@ -603,6 +607,9 @@ bool RunEstimator::PreExecution()
       // inheritance tree.
       try
       {
+#ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("RunSolver::Initialize()\n");
+#endif
          isInitialized = RunSolver::Initialize();
       } catch(GmatBaseException e)
       {
@@ -610,6 +617,9 @@ bool RunEstimator::PreExecution()
       }
    }
 
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("End RunEstimator::PreExecution()\n");
+#endif
    return retval;
 }
 
@@ -1346,6 +1356,9 @@ void RunEstimator::Finalize()
    commandComplete = true;
    commandRunning  = false;
    propPrepared    = false;
+
+   overridePropInit = true;                   // made changes by TUAN NGUYEN
+   delayInitialization = true;                // made changes by TUAN NGUYEN
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::Finalize()\n");
