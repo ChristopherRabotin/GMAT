@@ -7043,7 +7043,10 @@ Integer Moderator::RunMission(Integer sandboxNum)
    objectMapInUse = theConfigManager->GetObjectMap();
    SetSolarSystemAndObjectMap(theSolarSystemInUse, objectMapInUse, false,
                               "RunMission()");
-   
+   // Reset the EOP file to its start-up file value (since it may have been 
+   // changed on the Earth object)
+   std::string origEopName = theFileManager->GetFullPathname("EOP_FILE");
+   GmatGlobal::Instance()->GetEopFile()->ResetEopFile(origEopName);
 
    return status;
 } // RunMission()
