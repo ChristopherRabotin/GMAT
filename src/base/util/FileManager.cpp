@@ -3146,8 +3146,10 @@ std::string FileManager::GetGmatPath(GmatPathType type,
    }
    else if (type == GMAT_INCLUDE)
    {
-      if (name.find(".script") == name.npos)
-         name1 = name1 + ".script";
+      // GMAT include file can be any extension
+      // if (name.find(".script") == name.npos)
+      //    name1 = name1 + ".script";
+      name1 = name;
    }
    else
    {
