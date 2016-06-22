@@ -3716,31 +3716,36 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
 
    if (sState == FINISHED)
    {
+      std::stringstream ss;
+
       /// 1.1. Write estimation status
-      textFile0 << "                                                                  ***  Estimation ";
+      ss << "***  Estimation ";
       switch (estimationStatus)
       {
       case ABSOLUTETOL_CONVERGED:
       case RELATIVETOL_CONVERGED:
       case ABS_AND_REL_TOL_CONVERGED:
-         textFile0 << "converged!";
+         ss << "converged!";
          break;
       case MAX_CONSECUTIVE_DIVERGED:
       case MAX_ITERATIONS_DIVERGED:
       case CONVERGING:
       case DIVERGING:
-         textFile0 << "did not converge!";
+         ss << "did not converge!";
          break;
       case UNKNOWN:
          break;
       };
-      textFile0 << "  ***\n";
+      ss << "  ***\n";
+      textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER);
 
       // 1.2. Write reason for convergence 
-      textFile0 << "                                     " << convergenceReason;
+      textFile0 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(convergenceReason, GmatStringUtil::BOTH), 160, GmatStringUtil::CENTER);
 
       // 1.3. Write number of iterations was run for estimation
-      textFile0 << "                                                               Estimating completed in " << iterationsTaken << " iterations\n";
+      ss.str("");
+      ss << "Estimating completed in " << iterationsTaken << " iterations\n";
+      textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER);
       textFile0 << "\n";
       textFile0 << "\n";
       textFile0.flush();
