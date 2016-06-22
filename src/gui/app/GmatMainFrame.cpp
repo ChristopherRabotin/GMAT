@@ -2449,6 +2449,9 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    // Pass false so that it will not reload the file contents
    RefreshActiveScript(filename, false);
    
+   // Reset #Include statement found in the script resource
+   GmatGlobal::Instance()->SetIncludeFoundInScriptResource(false);
+   
    // let's try building the script, Moderator::InterpretScript() will
    // clear all resource and commands
    try
@@ -2501,6 +2504,18 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
 #ifndef __WXMAC__
       wxSafeYield();
 #endif
+
+      // Reset advance status field and ResourceTree background color
+      UpdateAdvancedGuiMode(1);
+      
+      // Check if we are showing non-savable mode
+      // @note: Cannot use theGuiInterpreter to querry this flag since
+      //        GuiInterpreter and ScriptInpreter are two different instances
+      if (GmatGlobal::Instance()->GetIncludeFoundInScriptResource())
+      {
+         // Show advanced status in the toolbar
+         UpdateAdvancedGuiMode(2);
+      }
       
       #ifdef DEBUG_INTERPRET
       MessageInterface::ShowMessage("   Now restoring UndockedMissionPanel\n");
@@ -3207,6 +3222,10 @@ bool GmatMainFrame::ShowScriptOverwriteMessage()
 //------------------------------------------------------------------------------
 bool GmatMainFrame::ShowSaveMessage()
 {
+   // Check if GUI can be saved or not
+   if (!GmatGlobal::Instance()->IsGUISavable())
+      return false;
+   
    // prompt save, if changes were made
    if (theGuiInterpreter->HasConfigurationChanged())
    {
@@ -5253,9 +5272,11 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
 
    toolBar->EnableTool(MENU_FILE_NEW_SCRIPT, enable);
    toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, enable);
-   toolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, enable);
+   // Check if GUI can be saved
+   if (GmatGlobal::Instance()->IsGUISavable())
+      toolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, enable);
    toolBar->EnableTool(MENU_LOAD_DEFAULT_MISSION, enable);
-
+   
    //-----------------------------------
    // Enable child mdi menu bar first
    //-----------------------------------
@@ -5616,6 +5637,61 @@ void GmatMainFrame::UpdateGuiScriptSyncStatus(int guiStatus, int scriptStatus)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void UpdateAdvancedGuiMode(int status)
+//------------------------------------------------------------------------------
+/**
+ * Updates advanced GUI mode. Currently there are normal and non-savable GUI modes.
+ * Non-savable GUI mode is when there are #Include statements in the main script
+ * before the BeginMissionSequence. If mode is non-savable, The Menu->File Save,
+ * Save As and tool bar Save button will be disabled.
+ *
+ * @param <status> input status
+ *                    1 = Normal mode
+ *                    2 = Non-savable mode
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::UpdateAdvancedGuiMode(int status)
+{
+   #ifdef DEBUG_REFRESH_SCRIPT
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::UpdateAdvancedGuiMode() entered, status=%d\n", status);
+   #endif
+   
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
+   // Show advanced GUI mode in the toolbar
+   ((GmatToolBar*)theToolBar)->UpdateAdvancedField(theToolBar, status);
+   
+   // Update menu and tools depends on the status
+   if (status == 1)
+   {
+      gmatAppData->GetResourceTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHITE"));
+      theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT, true);
+      theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT_AS, true);
+      theToolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, true);
+   }
+   else if (status == 2)
+   {
+      // gmatAppData->GetResourceTree()->
+      //    SetForegroundColour(wxTheColourDatabase->Find("ORANGE"));
+      gmatAppData->GetResourceTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHEAT"));
+         //SetBackgroundColour(wxTheColourDatabase->Find("LIGHT STEEL BLUE"));
+         //SetBackgroundColour(wxTheColourDatabase->Find("CADET BLUE"));
+         //SetBackgroundColour(wxTheColourDatabase->Find("THISTLE")); // light pink purple
+         //SetBackgroundColour(wxTheColourDatabase->Find("STEEL BLUE")); // too dark
+      theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT, false);
+      theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT_AS, false);
+      theToolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, false);
+      // @todo: Is there a way to show hint when mouse hovers over this menu items?
+   }
+   
+   #ifdef DEBUG_REFRESH_SCRIPT
+   MessageInterface::ShowMessage("GmatMainFrame::UpdateAdvancedGuiMode() leaving\n");
+   #endif
+}
 
 //------------------------------------------------------------------------------
 // void OnUndo(wxCommandEvent& event)
