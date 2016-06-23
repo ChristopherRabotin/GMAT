@@ -11,7 +11,7 @@ function [Q,R] = qrfac(A)
 
 [m,n] = size(A);
 Beta  = zeros(m);
-if m <= n
+if m < n
     disp('Error:  qrfac.m requires a m x n rectangular matrix with m >= n ') 
     Q = [];
     R = [];

@@ -52,7 +52,9 @@ public:
 
    bool                 IsUsingLocalCoordSystem();
    bool                 HasFired() const;
+   Real                 GetTotalMassFlowRate();
    Real*                GetDeltaVInertial();
+   Real*                GetAcceleration();
    Real                 GetEpochAtLastFire();
    
    // Inherited (GmatBase) methods
@@ -144,10 +146,14 @@ protected:
    std::string          j2000BodyName;
    /// Name of the Spacecraft that gets maneuvered
    std::string          satName;
+   /// Total mass flow rate
+   Real                 totalMassFlowRate;
    /// Orientation vector for maneuver; includes magnitude for impulsive burns
    Real                 deltaV[3];
    /// Orientation vector for maneuver in inertial system
    Real                 deltaVInertial[3];
+   /// Acceleration direction for finite burn
+   Real                 accel[3];
    /// Matrix of maneuver frame vectors
    Real                 frameBasis[3][3];
    /// String array that holds ref. object names

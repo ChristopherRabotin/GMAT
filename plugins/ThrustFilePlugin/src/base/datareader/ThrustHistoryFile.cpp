@@ -13,7 +13,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Jan 13, 2016
 /**
- * 
+ * Code that models thrusts using a time ordered collection of points in a file.
  */
 //------------------------------------------------------------------------------
 
@@ -1199,6 +1199,19 @@ void ThrustHistoryFile::ValidateSegment(ThfDataSegment& theSegment)
    {
       // Convert time in sec to epoch offsets in days
       theSegment.profile[i].time /= GmatTimeConstants::SECS_PER_DAY;
+   }
+
+   if (theSegment.profile.size() < 2)
+   {
+      std::stringstream msg;
+      msg << "The data segment " << theSegment.segmentName << " contains "
+          << theSegment.profile.size() << " data point(s), but file thrusts "
+          << "require at least 2 points on the thrust profile.\nThis error can "
+          << "occur is the segment data is not started with one of the "
+          << "following keywords:\n";
+      for (UnsignedInt i = 0; i < dataStartKeys.size(); ++i)
+         msg << "   \"" << dataStartKeys[i] << "\"\n";
+      throw InterfaceException(msg.str());
    }
 
    theSegment.endEpoch = theSegment.startEpoch +

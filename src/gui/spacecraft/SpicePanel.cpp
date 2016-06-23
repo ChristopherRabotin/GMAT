@@ -477,7 +477,7 @@ void SpicePanel::Create()
    naifIdBlankText    = new wxStaticText(this, ID_TEXT,wxT(""),
                         wxDefaultPosition, wxSize(-1,-1), 0);
    // naif ID of the reference frame for the spacecraft
-   naifIdRefFrameStaticText   = new wxStaticText(this, ID_TEXT,"F"GUI_ACCEL_KEY"rame\nNAIF ID",
+   naifIdRefFrameStaticText   = new wxStaticText(this, ID_TEXT,"F" GUI_ACCEL_KEY "rame\nNAIF ID",
                         wxDefaultPosition, wxSize(-1,-1), 0);
    naifIdRefFrameTextCtrl     = new wxTextCtrl(this, ID_TEXT_CTRL_NAIF_ID_REF_FRAME, wxT(""),
                         wxDefaultPosition, wxSize(80, -1), 0);
@@ -534,7 +534,7 @@ void SpicePanel::Create()
    ckButtonSizer->Add(ckFileRemoveButton,0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
 
    // SCLK file(s)
-   sclkFileStaticText   = new wxStaticText(this, ID_TEXT, wxString("SC"GUI_ACCEL_KEY"LK Files"),
+   sclkFileStaticText   = new wxStaticText(this, ID_TEXT, wxString("SC" GUI_ACCEL_KEY "LK Files"),
                          wxDefaultPosition, wxSize(-1,-1), 0);
    sclkFileListBox      = new wxListBox(this, ID_LIST_BOX_SCLK_FILE, wxDefaultPosition, wxSize(150, 100),
                          emptyList, wxLB_EXTENDED|wxLB_NEEDED_SB|wxLB_HSCROLL);

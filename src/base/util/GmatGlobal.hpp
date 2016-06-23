@@ -115,7 +115,7 @@ public:
    void SetGuiMode(Integer mode);
    Integer GetPlotMode();
    void SetPlotMode(Integer mode);
-   
+
    // MATLAB
    Integer GetMatlabMode();
    void SetMatlabMode(Integer mode);
@@ -137,9 +137,17 @@ public:
    // Write GMAT keyword when saving to script or showing script
    bool IsWritingGmatKeyword();
    void SetWriteGmatKeyword(bool flag);
-   
+
+   // Event location
    void SetEventLocationAvailable(bool flag);
    bool IsEventLocationAvailable();
+   
+   // Script Include statment
+   // ScriptInterpreter sets the flag and ResourceTree gets it
+   void SetIncludeFoundInScriptResource(bool flag);
+   bool GetIncludeFoundInScriptResource();
+   
+   bool IsGUISavable();
    
    // IO formatting
    bool IsScientific();
@@ -266,7 +274,8 @@ private:
    bool isWritingGmatKeyword;
    
    bool isEventLocationAvailable;
-
+   bool includeFoundInScriptResource;
+   
    Integer runMode;
    Integer guiMode;
    Integer plotMode;

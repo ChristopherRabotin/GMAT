@@ -18,7 +18,8 @@ sat1 = Spacecraft(date,state);
 prop = Propagator(sat1);
 
 % Create the point group and initialize the coverage checker
-pGroup = PointGroup('Helical',300);
+pGroup = PointGroup();
+pGroup.AddHelicalPointsByNumPoints(300);
 covChecker = CoverageChecker(pGroup,sat1);
 
 % Propagate for a duration and collect data

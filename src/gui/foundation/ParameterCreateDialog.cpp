@@ -197,7 +197,7 @@ void ParameterCreateDialog::Create()
    #endif
 
    int bsize = 2;
-   std::string CreateLabel = "="GUI_ACCEL_KEY">";
+   std::string CreateLabel = "=" GUI_ACCEL_KEY ">";
    wxBitmap clearBitmap = wxBitmap(Erase_xpm);
    
    // get the config object
@@ -211,16 +211,16 @@ void ParameterCreateDialog::Create()
    wxPanel *strPanel = new wxPanel(notebook);
    //wxStaticText
    wxStaticText *varNameStaticText =
-      new wxStaticText(varPanel, ID_TEXT, "Variable "GUI_ACCEL_KEY"Name",
+      new wxStaticText(varPanel, ID_TEXT, "Variable " GUI_ACCEL_KEY "Name",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *expStaticText =
-      new wxStaticText(varPanel, ID_TEXT, "Variable "GUI_ACCEL_KEY"Value",
+      new wxStaticText(varPanel, ID_TEXT, "Variable " GUI_ACCEL_KEY "Value",
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *varEqualSignStaticText =
       new wxStaticText(varPanel, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arrNameStaticText =
-      new wxStaticText(arrPanel, ID_TEXT, "Array "GUI_ACCEL_KEY"Name",
+      new wxStaticText(arrPanel, ID_TEXT, "Array " GUI_ACCEL_KEY "Name",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arr1RowStaticText =
       new wxStaticText(arrPanel, ID_TEXT, GUI_ACCEL_KEY"Row",
@@ -235,13 +235,13 @@ void ParameterCreateDialog::Create()
       new wxStaticText(arrPanel, ID_TEXT, wxT(" X"),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *stringNameLabel =
-      new wxStaticText(strPanel, ID_TEXT, "String "GUI_ACCEL_KEY"Name",
+      new wxStaticText(strPanel, ID_TEXT, "String " GUI_ACCEL_KEY "Name",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *stringEqualSignStaticText =
       new wxStaticText(strPanel, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *stringValueLabel =
-      new wxStaticText(strPanel, ID_TEXT, "String "GUI_ACCEL_KEY"Value",
+      new wxStaticText(strPanel, ID_TEXT, "String " GUI_ACCEL_KEY "Value",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *configStringLabel =
       new wxStaticText(strPanel, ID_TEXT, GUI_ACCEL_KEY"Strings",

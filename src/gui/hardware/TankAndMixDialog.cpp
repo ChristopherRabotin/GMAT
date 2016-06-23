@@ -122,7 +122,7 @@ void TankAndMixDialog::Create()
    
    // arrow buttons
    addTankButton =
-      new wxButton( this, ID_BUTTON, wxString("-"GUI_ACCEL_KEY">"),
+      new wxButton( this, ID_BUTTON, wxString("-" GUI_ACCEL_KEY ">"),
             wxDefaultPosition, wxDefaultSize, 0 );
    addTankButton->SetToolTip(pConfig->Read(_T("AddTankHint")));
 
@@ -132,7 +132,7 @@ void TankAndMixDialog::Create()
    removeTankButton->SetToolTip(pConfig->Read(_T("RemoveTankHint")));
 
    clearTankButton =
-      new wxButton( this, ID_BUTTON, wxString("<"GUI_ACCEL_KEY"="),
+      new wxButton( this, ID_BUTTON, wxString("<" GUI_ACCEL_KEY "="),
             wxDefaultPosition, wxDefaultSize, 0 );
    clearTankButton->SetToolTip(pConfig->Read(_T("ClearTanksHint")));
    

@@ -85,6 +85,7 @@
 //#define DEBUG_EVENT
 //#define DEBUG_ACCUMULATION_RESULTS
 //#define DEBUG_PROPAGATION
+//#define DEBUG_DATA_FILTER
 
 // Macros for debugging of the state machine
 //#define WALK_STATE_MACHINE
@@ -1056,11 +1057,28 @@ void BatchEstimator::CompleteInitialization()
 
    hAccum.clear();
    if (useApriori)
-   {
-      information = stateCovariance->GetCovariance()->Inverse();
+   {   // [Lambda] = [Px0]^-1
+      try
+      {
+         information = stateCovariance->GetCovariance()->Inverse();         // stateCovariance is [Px0] matrix
+      }
+      catch (...)
+      {
+         MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+         {
+            for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+               MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+            if (row < stateCovariance->GetDimension() - 1)
+               MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+
+         throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+      }
    }
    else
-   {
+   {  // [Lambda] = [0] 
       information.SetSize(stateSize, stateSize);
       for (UnsignedInt i = 0; i <  stateSize; ++i)
          for (UnsignedInt j = 0; j <  stateSize; ++j)
@@ -1076,10 +1094,7 @@ void BatchEstimator::CompleteInitialization()
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
       residuals[i] = 0.0;
-      if (useApriori)
-         x0bar[i] = (*estimationState)[i];
-      else                                               // Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
-         x0bar[i] = 0.0;
+         x0bar[i] = 0.0;                                              // it is delta_XTile(i) in equation 8-22 in GTDS MathSpec. Initialy its value is zero-vector 
    }
 
    if (useApriori)
@@ -1087,7 +1102,7 @@ void BatchEstimator::CompleteInitialization()
       for (Integer i = 0; i < information.GetNumRows(); ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
-            residuals[i] += information(i,j) * x0bar[j];
+            residuals[i] += information(i,j) * x0bar[j];             // It is the last term in open-close parenthesis in equation 8-57 in GTDS MathSpec
       }
    }
 
@@ -1149,7 +1164,7 @@ void BatchEstimator::CompleteInitialization()
    std::string errMsg = "";
    if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(errMsg) == false)
    {
-      errMsg = errMsg + " in batch estimator '" + GetName() + "'.\n";
+      errMsg = "Error: " + errMsg + " in batch estimator '" + GetName() + "'.\n";
       throw EstimatorException(errMsg);
    }
 
@@ -1379,7 +1394,26 @@ void BatchEstimator::CheckCompletion()
       // Need to reset STM and covariances
       hAccum.clear();
       if (useApriori)
-         information = stateCovariance->GetCovariance()->Inverse();
+      {
+         try
+         {
+            information = stateCovariance->GetCovariance()->Inverse();   // When starting an iteration, [Lambda] = [Px0]^-1
+         }
+         catch (...)
+         {
+            MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+            for (Integer row = 0; row < stateCovariance->GetDimension(); ++row)
+            {
+               for (Integer col = 0; col < stateCovariance->GetDimension(); ++col)
+                  MessageInterface::ShowMessage("%le   ", stateCovariance->GetCovariance()->GetElement(row, col));
+               if (row < stateCovariance->GetDimension() - 1)
+                  MessageInterface::ShowMessage("\n");
+            }
+            MessageInterface::ShowMessage("]\n");
+
+            throw EstimatorException("Error: Apriori covariance matrix is singular. GMAT cannot take inverse of that matrix.\n");
+         }
+      }
       else
       {
          information.SetSize(stateSize, stateSize);
@@ -1404,7 +1438,7 @@ void BatchEstimator::CheckCompletion()
          residuals[i] = 0.0;
       
       for (UnsignedInt j = 0; j < stateSize; ++j)
-         x0bar[j] -= dx[j];
+         x0bar[j] -= dx[j];                                      // delta_XTile(i+1) = X[0] - X[i+1] = (X[0] - X[i]) - (X[i+1] - X[i]) = delta_X_Tile(i) - dx
 
       if (useApriori)
       {
@@ -1412,7 +1446,7 @@ void BatchEstimator::CheckCompletion()
          {
             for (UnsignedInt j = 0; j < stateSize; ++j)
             {
-               residuals[i] += information(i,j) * x0bar[j];
+               residuals[i] += information(i,j) * x0bar[j];      // At the beginning of each iteration, [Lambda] = ([Px0]^-1).delta_XTile(i)  the last term in open-close square bracket in euqation 8-57 GTDS MathSpec
             }
          }
       }
@@ -2575,7 +2609,7 @@ void BatchEstimator::WriteReportFileHeaderPart3()
    paramNames.push_back("Solar Radiation Pressure");
    paramNames.push_back("  Solar Radiation Model");
    paramNames.push_back("  Solar Irradiance (W/m^2)");
-   paramNames.push_back("  Nominal Sun (m)");
+   paramNames.push_back("  Astronomical Unit (km)");
    paramNames.push_back("Drag");
    paramNames.push_back("  Atmospheric Density Model");
    paramNames.push_back("Central Body Solid Tides");
@@ -2765,8 +2799,8 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             paramValues.push_back(srp->GetStringParameter(srp->GetParameterID("SRPModel")));              // Solar Radiation Model
             ss.str(""); ss << GmatStringUtil::RealToString(srp->GetRealParameter(srp->GetParameterID("Flux")), false, false, false, 8);
             paramValues.push_back(ss.str());                                                              // Solar Irradiance
-            ss.str(""); ss << GmatStringUtil::RealToString(srp->GetRealParameter(srp->GetParameterID("Nominal_Sun")), false, true, false, 8); 
-            paramValues.push_back(ss.str());                                                              // Nominal Sun
+            ss.str(""); ss << GmatStringUtil::RealToString(srp->GetRealParameter(srp->GetParameterID("Nominal_Sun"))*GmatMathConstants::M_TO_KM, false, true, false, 8); 
+            paramValues.push_back(ss.str());                                                              // Astronomical Unit
 
          }
          else
@@ -2774,7 +2808,7 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             paramValues.push_back("No");                                                                   // Solar Radiation Pressure
             paramValues.push_back("");                                                                     // Solar Radiation Model
             paramValues.push_back("");                                                                     // Solar Irradiance
-            paramValues.push_back("");                                                                     // Nominal Sun
+            paramValues.push_back("");                                                                     // Astronomical Unit
          }
 
          
@@ -2852,7 +2886,7 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             paramNames.push_back("Solar Radiation Pressure");
             paramNames.push_back("  Solar Radiation Model");
             paramNames.push_back("  Solar Irradiance (W/m^2)");
-            paramNames.push_back("  Nominal Sun (m)");
+            paramNames.push_back("  Astronomical Unit (km)");
             paramNames.push_back("Drag");
             paramNames.push_back("  Atmospheric Density Model");
             paramNames.push_back("Central Body Solid Tides");
@@ -2892,7 +2926,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
    paramNames.push_back("Relativistic Corrections");
    paramNames.push_back("ET-TAI Corrections");
    paramNames.push_back("Frequency Model");
-   paramNames.push_back("  Ramped Table");
+   paramNames.push_back("  Ramp Table");
    
    Integer nameLen = 0;
    for (Integer i = 0; i < paramNames.size(); ++i)
@@ -2939,7 +2973,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
             if (colCount != 0)
             {
                StringArray::iterator pos2 = rowContent.begin() + 2 + maxNumConfig;
-               rowContent.insert(pos1, trackingConfigs.size() - maxNumConfig, GmatStringUtil::GetAlignmentString("", (pos1-1)->size()));
+               rowContent.insert(pos2, trackingConfigs.size() - maxNumConfig, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
             }
 
             maxNumConfig = trackingConfigs.size();
@@ -2950,7 +2984,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
       paramValues.push_back(((tfsList[i]->GetBooleanParameter("UseRelativityCorrection")) ? "Yes" : "No"));    // Relativistic Corrections
       paramValues.push_back(((tfsList[i]->GetBooleanParameter("UseETminusTAI")) ? "Yes" : "No"));              // ET-TAI Corrections
 
-      // Ramped Table
+      // Ramp Table
       StringArray rtList = tfsList[i]->GetStringArrayParameter("RampTable");
       if (rtList.size() == 0)
       {
@@ -2959,7 +2993,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
       }
       else
       {
-         paramValues.push_back("Ramped Table");
+         paramValues.push_back("Ramp Table");
          paramValues.push_back("'" + rtList[0] + "'");
       }
       
@@ -3003,7 +3037,7 @@ void BatchEstimator::WriteReportFileHeaderPart4_1()
          paramNames.push_back("Relativistic Corrections");
          paramNames.push_back("ET-TAI Corrections");
          paramNames.push_back("Frequency Model");
-         paramNames.push_back("  Ramped Table");
+         paramNames.push_back("  Ramp Table");
       }
       
       // 3.5. Clear paramValues
@@ -3121,14 +3155,10 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
                   paramValues.push_back(emList[j]);
                }
                
-               // Insert blank lines to paramNames and rowContent
-               StringArray::iterator pos1 = paramNames.begin() + paramNames.size(); // (paramNames.size() - 1);
-               paramNames.insert(pos1, emList.size() - maxNumErrorModels, "");
-               
-               if (colCount != 0)
+               // Insert blank lines to paramNames
+               for (Integer j = 0; j < emList.size() - maxNumErrorModels; ++j)
                {
-                  StringArray::iterator pos2 = rowContent.begin() + paramNames.size(); // (paramNames.size() - 1);
-                  rowContent.insert(pos2, emList.size() - maxNumErrorModels, GmatStringUtil::GetAlignmentString("", (pos2-1)->size()));
+                  paramNames.push_back(GmatStringUtil::GetAlignmentString("", nameLen));
                }
                
                maxNumErrorModels = emList.size();
@@ -3142,16 +3172,23 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
          for (UnsignedInt j = 0; j < paramNames.size(); ++j)
          {
             if (j == rowContent.size())
-               rowContent.push_back("");
-            
+            {
+               if (colCount == 1)
+                  rowContent.push_back("");
+               else
+                  rowContent.push_back(GmatStringUtil::GetAlignmentString("", rowContent.at(rowContent.size() - 1).size()));
+            }
+         }
+         for (UnsignedInt j = 0; j < paramNames.size(); ++j)
+         {
             if (colCount == 1)
                rowContent[j] += (" " + GmatStringUtil::GetAlignmentString(paramNames[j], nameLen, GmatStringUtil::LEFT) + "  ");
             
-            rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 27, GmatStringUtil::LEFT)+" ");
+            rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 27, GmatStringUtil::LEFT)+" ");      // each column has size of 28
          }
          
          // 3.5. Beak up columns in a table
-         if ((nameLen+3+ colCount*24) > (160-24))
+         if ((nameLen+3+ colCount*24) > (160-48))
          {
             for (UnsignedInt j = 0; j < rowContent.size(); ++j)
                textFile << rowContent[j] << "\n";
@@ -3408,14 +3445,15 @@ void BatchEstimator::WriteReportFileHeaderPart5()
          Spacecraft *sc = (Spacecraft*)obj;
          std::string csName = sc->GetStringParameter("CoordinateSystem");
          CoordinateSystem *cs = NULL;
-         try
-         {
+         // undo code to handle bug GMT-5619 due to it was handle by Spacecraft's code
+         //try
+         //{
             cs = (CoordinateSystem *)GetConfiguredObject(csName);
-         }
-         catch (...)
-         {
-            throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
-         }
+         //}
+         //catch (...)
+         //{
+         //   throw EstimatorException("Error: CoordinateSystem object with name '" + csName + "' set to " + sc->GetName() + ".CoordinateSystem was not defined in GMAT script.\n");
+         //}
          name = cs->GetStringParameter("Origin");
       }
       else if (obj->IsOfType(Gmat::GROUND_STATION))
@@ -3627,14 +3665,14 @@ void BatchEstimator::WriteIterationHeader()
       << "\n"
       << "                                                                  Notations Used In Report File\n"
       << "\n"
-      << "                  N : Not edited                                                     BXY  : Blocked, X = Path index, Y = Count index(Doppler)\n"
+      << "                  - : Not edited                                                     BXY  : Blocked, X = Path index, Y = Count index(Doppler)\n"
       << "                  U : Unused because no computed value configuration available       IRMS : Edited by initial RMS sigma filter\n"
-      << "                  R : Out of ramped table range                                      OLSE : Edited by outer-loop sigma editor\n"
+      << "                  R : Out of ramp table range                                        OLSE : Edited by outer-loop sigma editor\n"
       << "\n"
       << "                                                                  Measurement and Residual Units\n"
       << "\n"
       << "              Obs-Type            Obs/Computed Units   Residual Units                      Obs-Type            Obs/Computed Units   Residual Units\n"
-      << "              Doppler_RangeRate   kilometers/second    cm/second                           Range_KM            kilometers           meters\n"
+      << "              Doppler_RangeRate   kilometers/second    kilometers/second                   Range_KM            kilometers           kilometers\n"
       << "              Doppler_HZ          Hertz                Hertz                               Range_RU            Range Units          Range Units\n";
 
    textFile.flush();
@@ -3649,14 +3687,14 @@ void BatchEstimator::WritePageHeader()
    textFile << "\n";
    if (textFileMode == "Normal")
    {
-      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit           Observed(O)          Computed (C)     Residual (O-C)  Elev.\n";
+      textFile << "Iter RecNum  UTCGregorian-Epoch        Obs-Type            " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit           Observed(O)          Computed (C)       Residual (O-C)  Elev.\n";
    }
    else
    {
-      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)          Weight (W)           W*(O-C)^2       sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
+      textFile << "Iter   RecNum  UTCGregorian-Epoch        TAIModJulian-Epoch Obs Type            Units  " << GmatStringUtil::GetAlignmentString("Participants", pcolumnLen) << " Edit               Obs (O)     Obs-Correction(O)               Cal (C)     Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|    Elevation-Angle Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size() - 1; ++i)
-         textFile << GmatStringUtil::GetAlignmentString("", 19);
+         textFile << GmatStringUtil::GetAlignmentString(" ", 20);
       textFile << "  Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
    }
    textFile << "\n";
@@ -3678,31 +3716,36 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
 
    if (sState == FINISHED)
    {
+      std::stringstream ss;
+
       /// 1.1. Write estimation status
-      textFile0 << "                                                                  ***  Estimation ";
+      ss << "***  Estimation ";
       switch (estimationStatus)
       {
       case ABSOLUTETOL_CONVERGED:
       case RELATIVETOL_CONVERGED:
       case ABS_AND_REL_TOL_CONVERGED:
-         textFile0 << "converged!";
+         ss << "converged!";
          break;
       case MAX_CONSECUTIVE_DIVERGED:
       case MAX_ITERATIONS_DIVERGED:
       case CONVERGING:
       case DIVERGING:
-         textFile0 << "did not converge!";
+         ss << "did not converge!";
          break;
       case UNKNOWN:
          break;
       };
-      textFile0 << "  ***\n";
+      ss << "  ***\n";
+      textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER);
 
       // 1.2. Write reason for convergence 
-      textFile0 << "                                     " << convergenceReason;
+      textFile0 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(convergenceReason, GmatStringUtil::BOTH), 160, GmatStringUtil::CENTER);
 
       // 1.3. Write number of iterations was run for estimation
-      textFile0 << "                                                               Estimating completed in " << iterationsTaken << " iterations\n";
+      ss.str("");
+      ss << "Estimating completed in " << iterationsTaken << " iterations\n";
+      textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER);
       textFile0 << "\n";
       textFile0 << "\n";
       textFile0.flush();
@@ -3711,27 +3754,27 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
    if (sState == ESTIMATING)
    {
       std::stringstream ss;
-      ss << "Total Number Of Records     : " << GetMeasurementManager()->GetObservationDataList()->size();
-      textFile1 << GmatStringUtil::GetAlignmentString("", 28) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "Current WRMS Residuals  : " << newResidualRMS << "\n";
-      ss.str(""); ss << "Records Used For Estimation : " << measurementResiduals.size();
-      textFile1 << GmatStringUtil::GetAlignmentString("", 28) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "Predicted WRMS Residuals: " << predictedRMS << "\n";
-
-      textFile1 << GmatStringUtil::GetAlignmentString("", 28) << GmatStringUtil::GetAlignmentString("Records Removed Due To      :", 60);
-      if (iterationsTaken != 0)
-         textFile1 << "Previous WRMS Residuals : " << oldResidualRMS << "\n";
-      else
-         textFile1 << "Previous WRMS Residuals : " << "N/A" << "\n";
+      ss << "Total Number Of Observations              : " << GetMeasurementManager()->GetObservationDataList()->size();
+      textFile1 << GmatStringUtil::GetAlignmentString("", 33) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "Current WRMS Residuals   : " << newResidualRMS << "\n";
+      ss.str(""); ss << "Observations Used For Estimation          : " << measurementResiduals.size();
+      textFile1 << GmatStringUtil::GetAlignmentString("", 33) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "Predicted WRMS Residuals : " << predictedRMS << "\n";
 
       ss.str(""); ss << "No Computed Value Configuration Available : " << numRemovedRecords["U"];
-      textFile1 << GmatStringUtil::GetAlignmentString("", 28) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "Smallest WRMS Residuals : " << bestResidualRMS << "\n";
-      ss.str(""); ss << "Out of Ramped Table Range                 : " << numRemovedRecords["R"] << " ";
-      textFile1 << GmatStringUtil::GetAlignmentString("", 28) << GmatStringUtil::GetAlignmentString(ss.str(), 60);
+      textFile1 << GmatStringUtil::GetAlignmentString("", 33) << GmatStringUtil::GetAlignmentString(ss.str(), 60);
+      if (iterationsTaken != 0)
+         textFile1 << "Previous WRMS Residuals  : " << oldResidualRMS << "\n";
+      else
+         textFile1 << "Previous WRMS Residuals  : " << "N/A" << "\n";
+
+      
+      ss.str(""); ss << "Out of Ramp Table Range                   : " << numRemovedRecords["R"] << " ";
+      textFile1 << GmatStringUtil::GetAlignmentString("", 33) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "Smallest WRMS Residuals  : " << bestResidualRMS << "\n";
 
       // 2. Write data records usage summary:
       ss.str("");  ss << "Signal Blocked                            : " << numRemovedRecords["B"];
-      textFile1_1 << GmatStringUtil::GetAlignmentString("", 28) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "\n";
+      textFile1 << GmatStringUtil::GetAlignmentString("", 33) << GmatStringUtil::GetAlignmentString(ss.str(), 60);
       ss.str(""); ss << "Sigma Editing                             : " << ((iterationsTaken == 0) ? numRemovedRecords["IRMS"] : numRemovedRecords["OLSE"]);
-      textFile1_1 << GmatStringUtil::GetAlignmentString("", 28) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "\n";
+      textFile1_1 << GmatStringUtil::GetAlignmentString("", 33) << GmatStringUtil::GetAlignmentString(ss.str(), 60) << "\n";
       textFile1_1 << "\n";
       textFile1_1.flush();
 
@@ -3741,7 +3784,7 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
    if ((sState == CHECKINGRUN) || (sState == FINISHED))
    {
       // 4. Convergence status summary:
-      textFile1 << "DC Status               : ";
+      textFile1 << "DC Status                : ";
       switch (estimationStatus)
       {
       case ABSOLUTETOL_CONVERGED:
@@ -3781,6 +3824,8 @@ std::string BatchEstimator::GetUnit(std::string type)
    std::string unit = "";
    if (type == "DSNRange")
       unit = "RU";
+   else if (type == "Doppler")
+      unit = "Hz";
    else if (type == "Range_KM")
       unit = "km";
    else if (type == "Doppler_HZ")
@@ -3822,7 +3867,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       textFile2 << GmatStringUtil::GetAlignmentString("", 58) + "Observation Summary by Station and Data Type\n";
       textFile2 << "\n";
       textFile2 << "                                                                                Mean      Standard      Weighted     User          Mean      Standard\n";
-      textFile2 << " Station             Data Type             Total   Accepted    Percent      Residual     Deviation           RMS   Edited      Residual     Deviation  Units\n";
+      textFile2 << " Pad# Station        Data Type             Total   Accepted    Percent      Residual     Deviation           RMS   Edited      Residual     Deviation  Units\n";
       textFile2 << " --------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
       StringArray stList, typeList, keyList;
       IntegerArray sumRec, sumAccRec, sumSERec;
@@ -3894,8 +3939,6 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       Real sumSERes2Total = 0.0;
       Real sumSEWRes2Total = 0.0;
 
-      std::string unit;
-
       std::stringstream lines;
       std::string gsName = stList[0];
       std::string gsName1;
@@ -3905,21 +3948,24 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
          if (stList[i] == gsName)
          {
             // write a line on statistics table
+            Real average = sumRes[i] / sumAccRec[i];
+            Real stdev = GmatMathUtil::Sqrt(sumRes2[i] / sumAccRec[i] - average * average);
+            Real wrms = GmatMathUtil::Sqrt(sumWRes2[i] / sumAccRec[i]);
             lines << " " 
-               << GmatStringUtil::GetAlignmentString("", 20, GmatStringUtil::LEFT) << " "
-               << GmatStringUtil::GetAlignmentString(typeList[i], 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString("", 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString(typeList[i], 19, GmatStringUtil::LEFT) << "  "
                << GmatStringUtil::ToString(sumRec[i], 6) << "     "
                << GmatStringUtil::ToString(sumAccRec[i], 6) << "    "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRec[i] * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumRes[i] / sumAccRec[i], 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumRes2[i] / sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2[i] / sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRec[i] * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(average, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(stdev, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(wrms, 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                //<< GmatStringUtil::ToString(sumSERec[i] + sumAccRec[i], 6) << "    "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -3937,8 +3983,6 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
             sumSEResTotal += sumSERes[i];
             sumSERes2Total += sumSERes2[i];
             sumSEWRes2Total += sumSEWRes2[i];
-
-            unit = GetUnit(typeList[i]);
          }
          else
          {
@@ -3954,20 +3998,20 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
             }
             
             textFile2 << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(gsName, 4) + " " + gsName1, 20) << " "
-               << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(gsName, 4) + " " + gsName1, 19) << " "
+               << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << "  "
                << GmatStringUtil::ToString(sumRecTotal, 6) << "     "
                << GmatStringUtil::ToString(sumAccRecTotal, 6) << "    "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                //<< GmatStringUtil::ToString(sumSERecTotal + sumAccRecTotal, 6) << "    "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal)* 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal)* 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
                //<< GmatStringUtil::GetAlignmentString("N/A", 13, GmatStringUtil::RIGHT) << " "
                //<< GmatStringUtil::GetAlignmentString("N/A", 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -3988,30 +4032,35 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
             sumSERes2Total = 0.0;
             sumSEWRes2Total = 0.0;
 
-            gsName = stList[i];
+            if (i < (stList.size()-1))
+               gsName = stList[i+1];
+
             lines.str("");
 
             // write a line on statistics table
+            Real average = sumRes[i] / sumAccRec[i];
+            Real stdev = GmatMathUtil::Sqrt(sumRes2[i] / sumAccRec[i] - average * average);
+            Real wrms = GmatMathUtil::Sqrt(sumWRes2[i] / sumAccRec[i]);
             lines << " "
-               << GmatStringUtil::GetAlignmentString("", 20, GmatStringUtil::LEFT) << " "
-               << GmatStringUtil::GetAlignmentString(typeList[i], 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString("", 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString(typeList[i], 19, GmatStringUtil::LEFT) << "  "
                << GmatStringUtil::ToString(sumRec[i], 6) << "     "
                << GmatStringUtil::ToString(sumAccRec[i], 6) << "    "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRec[i] * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumRes[i] / sumAccRec[i], 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumRes2[i] / sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2[i] / sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRec[i] * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(average, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(stdev, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(wrms, 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                //<< GmatStringUtil::ToString(sumSERec[i] + sumAccRec[i], 6) << "    "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << "  "
-               << GmatStringUtil::GetAlignmentString(unit, 6, GmatStringUtil::LEFT) << "\n";
+               << GmatStringUtil::GetAlignmentString(GetUnit(typeList[i]), 6, GmatStringUtil::LEFT) << "\n";
 
             // add to total
             sumRecTotal += sumRec[i];
@@ -4039,20 +4088,20 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       }
 
       textFile2 << " "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(gsName, 4) + " " + gsName1, 20) << " "
-         << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(gsName, 4) + " " + gsName1, 19) << " "
+         << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << "  "
          << GmatStringUtil::ToString(sumRecTotal, 6) << "     "
          << GmatStringUtil::ToString(sumAccRecTotal, 6) << "    "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
          << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
          << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
          //<< GmatStringUtil::ToString(sumSERecTotal + sumAccRecTotal, 6) << "    "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal)* 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal)* 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
          //<< GmatStringUtil::GetAlignmentString("N/A", 13, GmatStringUtil::RIGHT) << " "
          //<< GmatStringUtil::GetAlignmentString("N/A", 13, GmatStringUtil::RIGHT) << " "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
          << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
          << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -4068,7 +4117,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       textFile2 << GmatStringUtil::GetAlignmentString("", 58) + "Observation Summary by Data Type and Station\n";
       textFile2 << "\n";
       textFile2 << "                                                                                Mean      Standard      Weighted     User          Mean      Standard\n";
-      textFile2 << " Data Type           Station               Total   Accepted    Percent      Residual     Deviation           RMS   Edited      Residual     Deviation  Units\n";
+      textFile2 << " Data Type           Pad# Station          Total   Accepted    Percent      Residual     Deviation           RMS   Edited      Residual     Deviation  Units\n";
       textFile2 << " --------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
 
       stList.clear(); typeList.clear(); keyList.clear();
@@ -4081,7 +4130,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       {
          // 2.2.1. Get keyword for a statistics record
          std::string keyword = measTypesList[i] + " " + stationsList[i];
-
+         
          // 2.2.2. Search on keyList to find location to store the record
          UnsignedInt j = 0;
          for (; j < keyList.size(); ++j)
@@ -4141,6 +4190,8 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       sumSERes2Total = 0.0;
       sumSEWRes2Total = 0.0;
 
+      std::string unit = "";
+
       lines.str("");
       std::string typeName = typeList[0];
       for (UnsignedInt i = 0; i < stList.size(); ++i)
@@ -4159,21 +4210,24 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
                }
             }
 
+            Real average = sumRes[i] / sumAccRec[i];
+            Real stdev = GmatMathUtil::Sqrt(sumRes2[i] / sumAccRec[i] - average * average);
+            Real wrms = GmatMathUtil::Sqrt(sumWRes2[i] / sumAccRec[i]);
             lines << " "
-               << GmatStringUtil::GetAlignmentString("", 20, GmatStringUtil::LEFT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(stList[i], 4) + " " + gsName1, 19) << " "
+               << GmatStringUtil::GetAlignmentString("", 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(stList[i], 4) + " " + gsName1, 19) << "  "
                << GmatStringUtil::ToString(sumRec[i], 6) << "     "
                << GmatStringUtil::ToString(sumAccRec[i], 6) << "    "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRec[i] * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumRes[i] / sumAccRec[i], 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumRes2[i] / sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2[i] / sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRec[i] * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(average, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(stdev, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(wrms, 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                //<< GmatStringUtil::ToString(sumSERec[i] + sumAccRec[i], 6) << "    "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -4197,21 +4251,25 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
          else
          {
             // write total for all data type
+            Real average = sumResTotal / sumAccRecTotal;
+            Real stdev = GmatMathUtil::Sqrt(sumRes2Total / sumAccRecTotal - average * average);
+            Real wrms = GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal);
+
             textFile2 << " "
-               << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::LEFT) << " "
-               << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString(typeName, 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << "  "
                << GmatStringUtil::ToString(sumRecTotal, 6) << "     "
                << GmatStringUtil::ToString(sumAccRecTotal, 6) << "    "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumResTotal / sumAccRecTotal, 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(average, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(stdev, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(wrms, 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                //<< GmatStringUtil::ToString(sumSERecTotal + sumAccRecTotal, 6) << "    "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal) * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSEResTotal + sumResTotal) / (sumSERecTotal + sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2Total + sumRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal) * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSEResTotal + sumResTotal) / (sumSERecTotal + sumAccRecTotal), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2Total + sumRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -4246,26 +4304,29 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
                }
             }
 
+            average = sumRes[i] / sumAccRec[i];
+            stdev = GmatMathUtil::Sqrt(sumRes2[i] / sumAccRec[i] - average * average);
+            wrms = GmatMathUtil::Sqrt(sumWRes2[i] / sumAccRec[i]);
             lines << " "
-               << GmatStringUtil::GetAlignmentString("", 20, GmatStringUtil::LEFT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(stList[i], 4) + " " + gsName1, 19) << " "
+               << GmatStringUtil::GetAlignmentString("", 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(stList[i], 4) + " " + gsName1, 19) << "  "
                << GmatStringUtil::ToString(sumRec[i], 6) << "     "
                << GmatStringUtil::ToString(sumAccRec[i], 6) << "    "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRec[i] * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumRes[i] / sumAccRec[i], 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumRes2[i] / sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2[i] / sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRec[i] * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(average, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(stdev, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(wrms, 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                //<< GmatStringUtil::ToString(sumSERec[i] + sumAccRec[i], 6) << "    "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << "  "
-               << GmatStringUtil::GetAlignmentString(unit, 6, GmatStringUtil::LEFT) << "\n";
+               << GmatStringUtil::GetAlignmentString(GetUnit(typeList[i]), 6, GmatStringUtil::LEFT) << "\n";
 
             // add to total
             sumRecTotal += sumRec[i];
@@ -4282,21 +4343,25 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
 
       }
       // write total for all data type
+      Real average = sumResTotal / sumAccRecTotal;
+      Real stdev = GmatMathUtil::Sqrt(sumRes2Total / sumAccRecTotal - average * average);
+      Real wrms = GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal);
+
       textFile2 << " "
-         << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::LEFT) << " "
-         << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << " "
+         << GmatStringUtil::GetAlignmentString(typeName, 19, GmatStringUtil::LEFT) << " "
+         << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << "  "
          << GmatStringUtil::ToString(sumRecTotal, 6) << "     "
          << GmatStringUtil::ToString(sumAccRecTotal, 6) << "    "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumResTotal / sumAccRecTotal, 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(average, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(stdev, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(wrms, 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
          //<< GmatStringUtil::ToString(sumSERecTotal + sumAccRecTotal, 6) << "    "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal) * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSEResTotal + sumResTotal) / (sumSERecTotal + sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2Total + sumRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal) * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSEResTotal + sumResTotal) / (sumSERecTotal + sumAccRecTotal), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2Total + sumRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
          << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
          << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -4313,7 +4378,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       textFile2 << GmatStringUtil::GetAlignmentString("", 65) + "Observation Summary by Station\n";
       textFile2 << "\n";
       textFile2 << "                                                                                Mean      Standard      Weighted     User          Mean      Standard\n";
-      textFile2 << " Station             Data Type             Total   Accepted    Percent      Residual     Deviation           RMS   Edited      Residual     Deviation  Units\n";
+      textFile2 << " Pad# Station        Data Type             Total   Accepted    Percent      Residual     Deviation           RMS   Edited      Residual     Deviation  Units\n";
       textFile2 << " --------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
 
       stList.clear(); typeList.clear(); keyList.clear();
@@ -4420,20 +4485,20 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
             }
 
             textFile2 << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(gsName, 4) + " " + gsName1, 20) << " "
-               << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(gsName, 4) + " " + gsName1, 19) << " "
+               << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << "  "
                << GmatStringUtil::ToString(sumRecTotal, 6) << "     "
                << GmatStringUtil::ToString(sumAccRecTotal, 6) << "    "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                //<< GmatStringUtil::ToString(sumSERecTotal + sumAccRecTotal, 6) << "    "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal)* 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal)* 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
                //<< GmatStringUtil::GetAlignmentString("N/A", 13, GmatStringUtil::RIGHT) << " "
                //<< GmatStringUtil::GetAlignmentString("N/A", 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -4480,20 +4545,20 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       }
 
       textFile2 << " "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(gsName, 4) + " " + gsName1, 20) << " "
-         << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::GetAlignmentString(gsName, 4) + " " + gsName1, 19) << " "
+         << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << "  "
          << GmatStringUtil::ToString(sumRecTotal, 6) << "     "
          << GmatStringUtil::ToString(sumAccRecTotal, 6) << "    "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
          << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
          << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
          //<< GmatStringUtil::ToString(sumSERecTotal + sumAccRecTotal, 6) << "    "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal)* 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal)* 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
          //<< GmatStringUtil::GetAlignmentString("N/A", 13, GmatStringUtil::RIGHT) << " "
          //<< GmatStringUtil::GetAlignmentString("N/A", 13, GmatStringUtil::RIGHT) << " "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
          << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
          << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -4604,21 +4669,24 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
          else
          {
             // write total for all data type
+            Real average = sumResTotal / sumAccRecTotal;
+            Real stdev = GmatMathUtil::Sqrt(sumRes2Total / sumAccRecTotal - average * average);
+            Real wrms = GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal);
             textFile2 << " "
-               << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::LEFT) << " "
-               << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString(typeName, 19, GmatStringUtil::LEFT) << " "
+               << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << "  "
                << GmatStringUtil::ToString(sumRecTotal, 6) << "     "
                << GmatStringUtil::ToString(sumAccRecTotal, 6) << "    "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumResTotal / sumAccRecTotal, 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(average, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(stdev, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(wrms, 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                //<< GmatStringUtil::ToString(sumSERec[i] + sumAccRec[i], 6) << "    "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERec[i] + sumAccRec[i]) * 100.0 / sumRec[i], false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERes[i] + sumRes[i]) / (sumSERec[i] + sumAccRec[i]), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2[i] + sumRes2[i]) / (sumSERec[i] + sumAccRec[i])), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+               //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2[i] + sumWRes2[i]) / (sumSERec[i] + sumAccRec[i])), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
                << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
                << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -4654,21 +4722,24 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
 
       }
       // write total for all data type
+      average = sumResTotal / sumAccRecTotal;
+      stdev = GmatMathUtil::Sqrt(sumRes2Total / sumAccRecTotal - average * average);
+      wrms = GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal);
       textFile2 << " "
-         << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::LEFT) << " "
-         << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << " "
+         << GmatStringUtil::GetAlignmentString(typeName, 19, GmatStringUtil::LEFT) << " "
+         << GmatStringUtil::GetAlignmentString("All", 19, GmatStringUtil::LEFT) << "  "
          << GmatStringUtil::ToString(sumRecTotal, 6) << "     "
          << GmatStringUtil::ToString(sumAccRecTotal, 6) << "    "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumResTotal / sumAccRecTotal, 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(sumWRes2Total / sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(sumAccRecTotal * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(average, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(stdev, 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+         << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(wrms, 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
          //<< GmatStringUtil::ToString(sumSERecTotal + sumAccRecTotal, 6) << "    "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal) * 100.0 / sumRecTotal, 2, false, 6), 6, GmatStringUtil::RIGHT) << "% "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSEResTotal + sumResTotal) / (sumSERecTotal + sumAccRecTotal), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2Total + sumRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
-         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, false, 13), 13, GmatStringUtil::RIGHT) << " "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSERecTotal + sumAccRecTotal) * 100.0 / sumRecTotal, false, false, true, 2, 6), 6, GmatStringUtil::RIGHT) << "% "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString((sumSEResTotal + sumResTotal) / (sumSERecTotal + sumAccRecTotal), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSERes2Total + sumRes2Total) / (sumSERecTotal + sumAccRecTotal)), 6, true, 13), 13, GmatStringUtil::RIGHT) << " "
+         //<< GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(GmatMathUtil::Sqrt((sumSEWRes2Total + sumWRes2Total) / (sumSERecTotal + sumAccRecTotal)), 3, true, 13), 13, GmatStringUtil::RIGHT) << " "
 
          << GmatStringUtil::GetAlignmentString("", 8, GmatStringUtil::RIGHT) << " "
          << GmatStringUtil::GetAlignmentString("", 13, GmatStringUtil::RIGHT) << " "
@@ -5484,9 +5555,8 @@ Rmatrix BatchEstimator::CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6>
 //-------------------------------------------------------------------------
 /**
 * This function is used to filter bad observation data records. It has
-*   1. Measurement model's maximum residual filter
-*   2. Data filter based on time span
-*   3. Sigma editting
+*   1. Data filter based on OLSEInitialRMSSigma
+*   2. Data filter based on outer-loop sigma editting
 */
 //-------------------------------------------------------------------------
 bool BatchEstimator::DataFilter()
@@ -5499,8 +5569,8 @@ bool BatchEstimator::DataFilter()
    {
       for (Integer i=0; i < currentObs->value.size(); ++i)
      {
-         // 2.Data filtered based on sigma editting
-         // 2.1. Specify Weight
+         // 1. Data filtered based on OLSEInitialRMSSigma
+         // 1.1. Specify Weight
          Real weight = 1.0;
          if (currentObs->noiseCovariance == NULL)
          {
@@ -5512,13 +5582,18 @@ bool BatchEstimator::DataFilter()
          else
                weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
          
-         // 2.2. Filter based on maximum residual multiplier
-         if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
+         // 1.2. Filter based on maximum residual multiplier
+#ifdef DEBUG_DATA_FILTER
+         MessageInterface::ShowMessage("Epoch = %.12lf A1Mjd   O = %.6lf   C = %.6lf   w = %le    sqrt(w)*Abs(O-C) = %.6lf   maxResidualMult = %lf\n", calculatedMeas->epoch, currentObs->value[i], calculatedMeas->value[i], weight, sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]), maxResidualMult);
+#endif
+         if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*GmatMathUtil::Abs(O-C) > maximum residual multiplier) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "IRMS";            // "IRMS": represent for OLSEInitialRMSSigma
             std::string filterName = "IRMS";
-
+#ifdef DEBUG_DATA_FILTER
+            MessageInterface::ShowMessage("This record is fillted.\n");
+#endif
             retVal = true;
             break;
          }
@@ -5528,8 +5603,8 @@ bool BatchEstimator::DataFilter()
    {
      for (Integer i=0; i < currentObs->value.size(); ++i)
      {
-         // Data filtered based on sigma editting
-         // 1. Specify Weight
+         // 2. Data filtered based on outer-loop sigma editting
+         // 2.1. Specify Weight
          Real weight = 1.0;
          if (currentObs->noiseCovariance == NULL)
          {
@@ -5541,9 +5616,9 @@ bool BatchEstimator::DataFilter()
          else
             weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
          
-         // 2. Filter based on n-sigma
+         // 2.2. Filter based on n-sigma
          Real sigmaVal = (chooseRMSP ? predictedRMS : newResidualRMS);
-         if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
+         if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*GmatMathUtil::Abs(O-C) > k*sigma+ K) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "OLSE";                     // "OLSE": represent for outer-loop sigma filter
@@ -5732,7 +5807,7 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
    for (k = 1; k <= rowCount; ++k)
    {
       iLeRowCount = k - 1;
-      tolerance = abs(epsilon * sum1[j-1]);
+      tolerance = GmatMathUtil::Abs(epsilon * sum1[j-1]);
       for (i = k; i <= rowCount; ++i)
       {
          dsum = 0.0;

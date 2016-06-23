@@ -34,6 +34,10 @@
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_ACCESS
+
+
 Covariance::Covariance(GmatBase *owner) :
    covarianceOwner   (owner),
    subCovariance     (NULL),
@@ -126,7 +130,9 @@ void Covariance::AddCovarianceElement(const std::string &name,
       {
          if (name == elementNames[i])
          {
-            if (elementOwners[i] == owner)
+            // if (elementOwners[i] == owner)                                          // made changes by TUAN NGUYEN
+            // It needs to compare 2 objects by name in order to avoid cloned object   // made changes by TUAN NGUYEN
+            if (elementOwners[i]->GetName() == owner->GetName())                       // made changes by TUAN NGUYEN
             {
                index = i;
                break;
@@ -141,6 +147,9 @@ void Covariance::AddCovarianceElement(const std::string &name,
          elementSizes.push_back(covSize);
          elementOwners.push_back(owner);
          dimension += covSize;
+
+         // It needs to set dimension for Rmatrix before using it   // made changes by TUAN NGUYEN
+         theCovariance.SetSize(dimension, dimension, true);         // made changes by TUAN NGUYEN
       }
    }
    else
@@ -283,6 +292,38 @@ Rmatrix *Covariance::GetCovariance()
    return &theCovariance;
 }
 
+
+// made changes by TUAN NGUYEN
+Integer Covariance::GetSubMatrixLocationStart(Integer forParameterID)
+{
+   Integer locationStart = 0;
+   for (Integer i = 0; i < elementIndices.size(); ++i)
+   {
+      if (elementIndices[i] == forParameterID)
+         break;
+      locationStart += elementSizes[i];
+   }
+
+   return locationStart;
+}
+
+
+// made changes by TUAN NGUYEN
+Integer  Covariance::GetSubMatrixLocationStart(const std::string paramName)
+{
+   Integer index = 0;
+   Integer locationStart = 0;
+   for (; index < elementNames.size(); ++index)
+   {
+      if (elementNames[index] == paramName)
+         break;
+      locationStart += elementSizes[index];
+   }
+   if (index == elementNames.size())
+      throw GmatBaseException("Error: cannot find covariance sub matrix for parameter " + paramName + ".\n");
+
+   return locationStart;
+}
 
 Rmatrix *Covariance::GetCovariance(Integer forParameterID)
 {

@@ -26,6 +26,7 @@
 
 
 //#define DEBUG_FILETHRUST_EXE
+//#define DEBUG_INTERPOLATION
 //#define DEBUG_MASS_FLOW
 //#define DEBUG_SEGMENTS
 //#define DEBUG_REF_OBJECTS
@@ -49,7 +50,10 @@ FileThrust::FileThrust(const std::string &name) :
    segments                (NULL),
    mDotIndex               (-1),
    depleteMass             (false),
-   coordSystem             (NULL)
+   coordSystem             (NULL),
+   liner                   (NULL),
+   spliner                 (NULL),
+   warnTooFewPoints        (true)
 {
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("FileThrust");
@@ -64,6 +68,10 @@ FileThrust::FileThrust(const std::string &name) :
 //------------------------------------------------------------------------------
 FileThrust::~FileThrust()
 {
+   if (liner != NULL)
+      delete liner;
+   if (spliner != NULL)
+      delete spliner;
 }
 
 //------------------------------------------------------------------------------
@@ -88,7 +96,10 @@ FileThrust::FileThrust(const FileThrust& ft) :
    depleteMass             (ft.depleteMass),
    activeTankName          (ft.activeTankName),
    csNames                 (ft.csNames),
-   coordSystem             (NULL)
+   coordSystem             (NULL),
+   liner                   (NULL),
+   spliner                 (NULL),
+   warnTooFewPoints        (true)
 {
 }
 
@@ -120,8 +131,19 @@ FileThrust& FileThrust::operator=(const FileThrust& ft)
       activeTankName = ft.activeTankName;
       csNames       = ft.csNames;
       coordSystem   = NULL;
+      if (liner != NULL)
+      {
+         delete liner;
+         liner = NULL;
+      }
+      if (spliner != NULL)
+      {
+         delete spliner;
+         spliner = NULL;
+      }
 
       massFlowWarningNeeded = true;
+      warnTooFewPoints      = true;
    }
 
    return *this;
@@ -284,7 +306,9 @@ bool FileThrust::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 {
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-      MessageInterface::ShowMessage("Setting cs named %s\n", name.c_str());
+      #ifdef DEBUG_REF_OBJECTS
+         MessageInterface::ShowMessage("Setting cs named %s\n", name.c_str());
+      #endif
 
       bool retval = false;
 
@@ -564,7 +588,9 @@ bool FileThrust::Initialize()
          }
 
          massFlowWarningNeeded = true;
-         retval = true;
+         warnTooFewPoints      = true;
+         indexPair[0]          = -1;
+         retval                = true;
       }
       else
          isInitialized = false;
@@ -572,6 +598,9 @@ bool FileThrust::Initialize()
 
    if (!isInitialized)
       throw ODEModelException("Unable to initialize FileThrust base");
+
+   interpolatorData[0] = interpolatorData[1] = interpolatorData[2] =
+   interpolatorData[3] = interpolatorData[4] = -1;
 
    return retval;
 }
@@ -763,6 +792,19 @@ bool FileThrust::GetDerivatives(Real* state, Real dt, Integer order,
 }
 
 
+//------------------------------------------------------------------------------
+// Rvector6 GetDerivativesForSpacecraft(Spacecraft* sc)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves derivative data used in the force model Parameter code
+ *
+ * @param sc The spacecraft that supplies the needed state data
+ *
+ * @return The derivative data as a 6-vector
+ *
+ * @note: Not yet implemented for the Thrust History File reader code.
+ */
+//------------------------------------------------------------------------------
 Rvector6 FileThrust::GetDerivativesForSpacecraft(Spacecraft* sc)
 {
    Rvector6 dv;
@@ -879,13 +921,21 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
       }
    }
 
+   dataBlock[5] = (*segments)[index].segData.accelIntType;
+   dataBlock[6] = (*segments)[index].segData.massIntType;
+
    if (index != -1)
    {
       // Interpolate the thrust/acceleration
-      switch ((*segments)[index].segData.accelIntType)
+      GetSegmentData(index, atEpoch);
+      switch ((Integer)dataBlock[5])
       {
       case ThfDataSegment::LINEAR:
          LinearInterpolate(index, atEpoch);
+         #ifdef DEBUG_INTERPOLATION
+            MessageInterface::ShowMessage("Thrust/Acceleration: Linear Interpolation "
+                     "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
+         #endif
          burnData[0] = dataBlock[0] * scaleFactors[0];
          burnData[1] = dataBlock[1] * scaleFactors[0];
          burnData[2] = dataBlock[2] * scaleFactors[0];
@@ -893,6 +943,10 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
 
       case ThfDataSegment::SPLINE:
          SplineInterpolate(index, atEpoch);
+         #ifdef DEBUG_INTERPOLATION
+            MessageInterface::ShowMessage("Thrust/Acceleration: Spline Interpolation "
+                     "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
+         #endif
          burnData[0] = dataBlock[0] * scaleFactors[0];
          burnData[1] = dataBlock[1] * scaleFactors[0];
          burnData[2] = dataBlock[2] * scaleFactors[0];
@@ -900,35 +954,49 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
 
       case ThfDataSegment::NONE:
       default:
-         GetSegmentData(index, atEpoch);
+         #ifdef DEBUG_INTERPOLATION
+            MessageInterface::ShowMessage("Thrust/Acceleration: No Interpolation "
+                     "-> VXdot = %.12le\n", dataBlock[0] * scaleFactors[0]);
+         #endif
          burnData[0] = dataBlock[0] * scaleFactors[0];
          burnData[1] = dataBlock[1] * scaleFactors[0];
          burnData[2] = dataBlock[2] * scaleFactors[0];
          break;
       }
 
-      if ((*segments)[index].segData.massIntType == (Integer)dataBlock[4])
+      if (dataBlock[5] == dataBlock[6])
       {
          burnData[3] = dataBlock[3] * scaleFactors[1];
       }
       else
       {
-         // Interpolate the mass flow, usind data already collected
-         switch ((*segments)[index].segData.massIntType)
+         // Interpolate the mass flow, using data already collected
+         switch ((Integer)dataBlock[6])
          {
          case ThfDataSegment::LINEAR:
             LinearInterpolate(index, atEpoch);
+            #ifdef DEBUG_INTERPOLATION
+               MessageInterface::ShowMessage("Mass Flow: Linear Interpolation "
+                     "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
+            #endif
             burnData[3] = dataBlock[3] * scaleFactors[1];
             break;
 
          case ThfDataSegment::SPLINE:
             SplineInterpolate(index, atEpoch);
+            #ifdef DEBUG_INTERPOLATION
+               MessageInterface::ShowMessage("Mass Flow: Spline Interpolation "
+                     "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
+            #endif
             burnData[3] = dataBlock[3] * scaleFactors[1];
             break;
 
          case ThfDataSegment::NONE:
          default:
-            GetSegmentData(index, atEpoch);
+            #ifdef DEBUG_INTERPOLATION
+               MessageInterface::ShowMessage("Mass Flow: No Interpolation "
+                     "-> Mdot = %.12le\n", dataBlock[3] * scaleFactors[1]);
+            #endif
             burnData[3] = dataBlock[3] * scaleFactors[1];
             break;
          }
@@ -980,6 +1048,11 @@ void FileThrust::ComputeAccelerationMassFlow(const GmatEpoch atEpoch,
 //------------------------------------------------------------------------------
 void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
 {
+   #ifdef DEBUG_INTERPOLATION
+      MessageInterface::ShowMessage("Entered GetSegmentData(%d, %.12lf)\n",
+            atIndex, atEpoch);
+   #endif
+
    // If at the end point; use its data
    if ((*segments)[atIndex].segData.endEpoch == atEpoch)
    {
@@ -993,17 +1066,120 @@ void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
    else
    {
       Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
-      for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
+
+      switch ((Integer)dataBlock[5])
       {
-         if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
-             ((*segments)[atIndex].segData.profile[i+1].time > offset))
+      case ThfDataSegment::NONE:
+      case ThfDataSegment::LINEAR:
+         for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
          {
-            dataBlock[0] = (*segments)[atIndex].segData.profile[i].vector[0];
-            dataBlock[1] = (*segments)[atIndex].segData.profile[i].vector[1];
-            dataBlock[2] = (*segments)[atIndex].segData.profile[i].vector[2];
-            dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
-            dataBlock[4] = ThfDataSegment::NONE;
+            if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
+                ((*segments)[atIndex].segData.profile[i+1].time > offset))
+            {
+               dataBlock[0] = (*segments)[atIndex].segData.profile[i].vector[0];
+               dataBlock[1] = (*segments)[atIndex].segData.profile[i].vector[1];
+               dataBlock[2] = (*segments)[atIndex].segData.profile[i].vector[2];
+               if ((dataBlock[6] == ThfDataSegment::LINEAR) ||
+                   (dataBlock[6] == ThfDataSegment::NONE))
+                  dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
+               dataBlock[4] = (*segments)[atIndex].segData.profile[i].time;
+            }
          }
+         break;
+
+      case ThfDataSegment::SPLINE:
+         {
+            bool reload = false;
+            if (indexPair[0] != atIndex)
+               reload = true;
+            indexPair[0] = atIndex;
+            Integer proIndex = -1;
+
+            // Look up the profile index
+            for (UnsignedInt i = 0;
+                  i < (*segments)[atIndex].segData.profile.size()-1; ++i)
+            {
+               if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
+                   ((*segments)[atIndex].segData.profile[i+1].time > offset))
+               {
+                  proIndex = i;
+                  break;
+               }
+            }
+
+            // Now set the indices for the buffer.  This code selects the region
+            // between the 2nd and 3rd points when possible.
+            if (proIndex == 0)
+               proIndex = 1;
+            else if (proIndex > (Integer)((*segments)[atIndex].segData.profile.size()) - 4)
+               proIndex = (*segments)[atIndex].segData.profile.size() - 4;
+
+            interpolatorData[0] = proIndex - 1;
+            interpolatorData[1] = proIndex;
+            interpolatorData[2] = proIndex + 1;
+            interpolatorData[3] = proIndex + 2;
+            interpolatorData[4] = proIndex + 3;
+         }
+         break;
+
+      default:
+         break;
+      }
+
+      // Setup for mass flow
+      switch ((Integer)dataBlock[6])
+      {
+      case ThfDataSegment::NONE:
+      case ThfDataSegment::LINEAR:
+         for (UnsignedInt i = 0; i < (*segments)[atIndex].segData.profile.size()-1; ++i)
+         {
+            if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
+                ((*segments)[atIndex].segData.profile[i+1].time > offset))
+            {
+               dataBlock[3] = (*segments)[atIndex].segData.profile[i].mdot;
+               break;
+            }
+         }
+         break;
+
+      case ThfDataSegment::SPLINE:
+         if ((*segments)[atIndex].segData.accelIntType != ThfDataSegment::SPLINE)
+         {
+            bool reload = false;
+            if (indexPair[0] != atIndex)
+               reload = true;
+            indexPair[0] = atIndex;
+            Integer proIndex = -1;
+
+            // Look up the profile index
+            for (UnsignedInt i = 0;
+                  i < (*segments)[atIndex].segData.profile.size()-1; ++i)
+            {
+               if (((*segments)[atIndex].segData.profile[i].time <= offset) &&
+                   ((*segments)[atIndex].segData.profile[i+1].time > offset))
+               {
+                  proIndex = i;
+                  break;
+               }
+            }
+
+            // Now set the indices for the buffer.  This code selects the region
+            // between the 2nd and 3rd points when possible.
+            if (proIndex == 0)
+               proIndex = 1;
+            else if (proIndex > (Integer)((*segments)[atIndex].segData.profile.size()) - 4)
+               proIndex = (*segments)[atIndex].segData.profile.size() - 4;
+
+            interpolatorData[0] = proIndex - 1;
+            interpolatorData[1] = proIndex;
+            interpolatorData[2] = proIndex + 1;
+            interpolatorData[3] = proIndex + 2;
+            interpolatorData[4] = proIndex + 3;
+         }
+         break;
+
+      default:
+         break;
       }
    }
 }
@@ -1022,6 +1198,7 @@ void FileThrust::GetSegmentData(Integer atIndex, GmatEpoch atEpoch)
 void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
 {
    GetSegmentData(atIndex, atEpoch);
+   bool includeMass = false;
 
    if ((*segments)[atIndex].segData.endEpoch == atEpoch)
    {
@@ -1045,16 +1222,22 @@ void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
          dataSet[1][2] = (*segments)[atIndex].segData.profile[i+1].vector[2];
          dataSet[1][3] = (*segments)[atIndex].segData.profile[i+1].mdot;
          dataSet[1][4] = (*segments)[atIndex].segData.profile[i+1].time;
+         break;
       }
    }
 
-   Real pct = (offset - dataSet[0][4]) / (dataSet[1][4] - dataSet[0][4]);
+   Real pct = 0.0;
+   if ((dataSet[1][4] != dataSet[0][4]))
+      pct = (offset - dataSet[0][4]) / (dataSet[1][4] - dataSet[0][4]);
 
-   dataBlock[0] = dataSet[0][0] + pct * (dataSet[1][0] - dataSet[0][0]);
-   dataBlock[1] = dataSet[0][1] + pct * (dataSet[1][1] - dataSet[0][1]);
-   dataBlock[2] = dataSet[0][2] + pct * (dataSet[1][2] - dataSet[0][2]);
-   dataBlock[3] = dataSet[0][3] + pct * (dataSet[1][3] - dataSet[0][3]);
-   dataBlock[4] = ThfDataSegment::LINEAR;
+   if (dataBlock[5] == ThfDataSegment::LINEAR)
+   {
+      dataBlock[0] = dataSet[0][0] + pct * (dataSet[1][0] - dataSet[0][0]);
+      dataBlock[1] = dataSet[0][1] + pct * (dataSet[1][1] - dataSet[0][1]);
+      dataBlock[2] = dataSet[0][2] + pct * (dataSet[1][2] - dataSet[0][2]);
+   }
+   if (dataBlock[6] == ThfDataSegment::LINEAR)
+      dataBlock[3] = dataSet[0][3] + pct * (dataSet[1][3] - dataSet[0][3]);
 
    #ifdef DEBUG_INTERPOLATION
       MessageInterface::ShowMessage("Linear Interpolating to offset %.12lf "
@@ -1082,8 +1265,62 @@ void FileThrust::LinearInterpolate(Integer atIndex, GmatEpoch atEpoch)
 //------------------------------------------------------------------------------
 void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
 {
-   throw ODEModelException("The cubic spline interpolation method is not yet "
-         "implemented");
+   // Handle case of too few points by falling back to linear interpolation
+   if ((*segments)[atIndex].segData.profile.size() < 5)
+   {
+      if (warnTooFewPoints)
+      {
+         MessageInterface::ShowMessage("Cannot perform spline interpolation: "
+               "the thrust history data segment contains %d points, but spline "
+               "interpolation requires at least 5.  Linear interpolation will "
+               "be applied instead.\n",
+               (*segments)[atIndex].segData.profile.size());
+         warnTooFewPoints = false;
+      }
+      LinearInterpolate(atIndex, atEpoch);
+   }
+
+   if (spliner == NULL)
+      spliner = new NotAKnotInterpolator("SplineInterpolator", 4);
+
+   if (spliner == NULL)
+      throw ODEModelException("The cubic spline interpolator failed to build");
+
+   Real data[4];
+   if (interpolatorData[1] == -1)
+   {
+      // Ouside of the span; do nothing
+      data[0] =
+      data[1] =
+      data[2] =
+      data[3] = 0.0;
+   }
+   else
+   {
+      // Reload the interpolator.  For now, this is done at each call.
+      spliner->Clear();
+      for (UnsignedInt i = 0; i < 5; ++i)
+      {
+         data[0] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[0];
+         data[1] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[1];
+         data[2] = (*segments)[atIndex].segData.profile[interpolatorData[i]].vector[2];
+         data[3] = (*segments)[atIndex].segData.profile[interpolatorData[i]].mdot;
+
+         spliner->AddPoint((*segments)[atIndex].segData.profile[i].time, data);
+      }
+
+      Real offset = atEpoch - (*segments)[atIndex].segData.startEpoch;
+      spliner->Interpolate(offset, data);
+   }
+
+   if (dataBlock[5] == ThfDataSegment::SPLINE)
+   {
+      dataBlock[0] = data[0];
+      dataBlock[1] = data[1];
+      dataBlock[2] = data[2];
+   }
+   if (dataBlock[6] == ThfDataSegment::SPLINE)
+      dataBlock[3] = data[3];
 }
 
 
@@ -1100,7 +1337,10 @@ void FileThrust::SplineInterpolate(Integer atIndex, GmatEpoch atEpoch)
 //------------------------------------------------------------------------------
 void FileThrust::ConvertDirectionToInertial(Real *dir, Real *dirInertial, Real epoch)
 {
-   MessageInterface::ShowMessage("Rotating into a new frame\n");
+   #ifdef DEBUG_FILETHRUST_EXE
+      MessageInterface::ShowMessage("Rotating into a new frame\n");
+   #endif
+
    Real inDir[6], outDir[6];
    for (Integer i=0; i<3; i++)
       inDir[i] = dir[i];

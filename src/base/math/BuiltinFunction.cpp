@@ -31,6 +31,7 @@
 
 #include "BuiltinFunction.hpp"
 #include "MathException.hpp"
+#include "TextParser.hpp"
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
@@ -67,18 +68,45 @@ BuiltinFunction::BuiltinFunction(const std::string &typeStr, const std::string &
    if (items.size() == 2)
    {
       std::string args = GmatStringUtil::RemoveLastString(items[1], ")");
-      StringArray argList = GmatStringUtil::SeparateByComma(args);
+      // Trim both for correct parsing ex) MyFunc( [a b c])
+      args = GmatStringUtil::Trim(args);
       
-      // Add to wrapper object names
-      for (unsigned int i = 0; i < argList.size(); i++)
+      // Check if input arg is in the vector form [1 2 3]
+      if (GmatStringUtil::IsEnclosedWithBrackets(args))
       {
-         #ifdef DEBUG_INSTANCE
-         MessageInterface::ShowMessage("   argList[%d] = '%s'\n", i, argList[i].c_str());
-         #endif
-         inputNames.push_back(argList[i]);
-         inputArgWrappers.push_back(NULL);
+         StringArray argList = GmatStringUtil::SeparateBrackets(args, "[]", " ,;", true);
+         for (unsigned int i = 0; i < argList.size(); i++)
+         {
+            #ifdef DEBUG_INSTANCE
+            MessageInterface::ShowMessage
+               ("   argList[%d] = '%s'\n", i, argList[i].c_str());
+            #endif
+            inputNames.push_back(argList[i]);
+            inputArgWrappers.push_back(NULL);
+         }
+      }
+      else
+      {
+         StringArray argList = GmatStringUtil::SeparateByComma(args);
+         
+         // Add to wrapper object names
+         for (unsigned int i = 0; i < argList.size(); i++)
+         {
+            std::string arg = argList[i];
+            #ifdef DEBUG_INSTANCE
+            MessageInterface::ShowMessage("   argList[%d] = '%s'\n", i, argList[i].c_str());
+            #endif
+            
+            inputNames.push_back(argList[i]);
+            inputArgWrappers.push_back(NULL);
+         }
       }
    }
+   #ifdef DEBUG_INSTANCE
+   MessageInterface::ShowMessage
+      ("BuiltinFunction() constructor leaving, typeStr='%s', name='%s'\n",
+       typeStr.c_str(), name.c_str());
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -286,7 +314,7 @@ const StringArray& BuiltinFunction::GetRefObjectNameArray(const Gmat::ObjectType
 //------------------------------------------------------------------------------
 const StringArray& BuiltinFunction::GetWrapperObjectNameArray(bool completeSet)
 {
-   #ifdef DEBUG_WRAPPER_CODE
+   #ifdef DEBUG_WRAPPERS
    MessageInterface::ShowMessage
       ("BuiltinFunction::GetWrapperObjectNameArray() returning %d wrapper names\n",
        inputNames.size());

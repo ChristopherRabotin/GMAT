@@ -644,20 +644,17 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
             id, value.c_str());
    #endif
 
-   //@Todo: this code will be removed when the bug in Interperter is fixed
    if (id == MEASUREMENTS)
    {
-      if (GmatStringUtil::RemoveSpaceInBrackets(value, "{}") == "{}")
-         throw SolverException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");
+      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
+      if (measName == "")
+         throw SolverException("Error: No measurement or tracking file set is set to " + GetName() + ".AddData parameter.\n");
 
-      if (find(measList.begin(), measList.end(), value) == measList.end())
-         measList.push_back(value);
+      // verify a valid object name
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw SolverException("Error: An invalid value '" + value + "' is set to " + GetName() + ".AddData parameter.\n");
 
-      return true;
-      //std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
-      //if (measName == "")
-      //   throw SolverException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");
-      //return SetStringParameter(id, measName, measList.size());
+      return SetStringParameter(id, value, measList.size());
    }
 
    if (id == PROPAGATOR)
@@ -1649,7 +1646,7 @@ void Simulator::CompleteInitialization()
             "Simulator::CompleteInitialization - error initializing "
             "MeasurementManager.\n");
 
-   // Load ramped table
+   // Load ramp table
    measManager.LoadRampTables();
 
    nextSimulationEpoch = simulationStart;
@@ -1667,11 +1664,11 @@ void Simulator::CompleteInitialization()
    
    
    // Verify no two different ground station having the same Id
-   std::string errMsg = "";
-   if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(errMsg) == false)
+   std::string warningMsg = "";
+   if (GetMeasurementManager()->ValidateDuplicationOfGroundStationID(warningMsg) == false)
    {
-      errMsg = errMsg + " in simulator '" + GetName() + "'.\n";
-      throw SolverException(errMsg);
+      warningMsg = warningMsg + " in simulator '" + GetName() + "'.\n";
+      MessageInterface::ShowMessage("Warning: %s", warningMsg.c_str());
    }
    
 
@@ -1697,15 +1694,15 @@ void Simulator::CompleteInitialization()
 //------------------------------------------------------------------------------
 void Simulator::FindTimeStep()
 {
-   if (currentEpoch > simulationEnd)
+   if (GmatMathUtil::IsEqual(currentEpoch, nextSimulationEpoch,             // swap order of "if" statements in order to fix bug GMT-5606
+      SIMTIME_ROUNDOFF))
+   {
+      currentState = CALCULATING;
+   }
+   else if (currentEpoch > simulationEnd)
    {
       if (!isTheFirstMeasurement)                                // fix bug GMT-4909
          currentState = FINISHED;
-   }
-   else if (GmatMathUtil::IsEqual(currentEpoch, nextSimulationEpoch,
-            SIMTIME_ROUNDOFF))
-   {
-      currentState = CALCULATING;
    }
    else
    {

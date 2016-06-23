@@ -43,6 +43,8 @@
 #include "Covariance.hpp"
 #include "TimeSystemConverter.hpp"
 
+class DataFile;
+
 
 /**
  * Class used to set and retrieve observation data
@@ -64,12 +66,15 @@ public:
 
 // Explicitly public so that this class acts like a struct
 public:
+   /// File index: contain a pointer to DataFile. This field is needed for data filter based on data file          // made changes by TUAN NGUYEN
+   DataFile*         fileIndex;                                                                                    // made changes by TUAN NGUYEN
+
    /// Flag to specify this data record is in use or not
-   bool inUsed;
+   bool              inUsed;
 
    /// Flag to specify reason the record not been used. 
    /// "N": Normal, "U": unused, "IRMS": OLSEInitialRMSSigma, 
-   /// "OLSE": outer-loop sigma filter, "BXY": Blocked, "R": out of ramped table range
+   /// "OLSE": outer-loop sigma filter, "BXY": Blocked, "R": out of ramp table range
    std::string       removedReason;
 
    /// The text name of the data type, if available

@@ -36,6 +36,9 @@
 #include "estimation_defs.hpp"
 #include "Factory.hpp"
 
+#ifdef DISABLE_UNNEEDED_GMAT_OBJECTS
+   #define DISABLE_TRACKING_SYSTEMS
+#endif
 /**
  * The factory used to make TrackingSystem objects.
  */

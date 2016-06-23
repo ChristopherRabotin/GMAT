@@ -120,6 +120,10 @@ public:
                                          bool includeSysParam = true);
    GmatBase*           GetItem(const std::string &name);
    
+   bool                ChangeMappingName(Gmat::ObjectType itemType,
+                                         const std::string &oldName,
+                                         const std::string &newName,
+                                         GmatBase **mapObj);
    bool                RenameItem(Gmat::ObjectType itemType,
                                   const std::string &oldName,
                                   const std::string &newName);

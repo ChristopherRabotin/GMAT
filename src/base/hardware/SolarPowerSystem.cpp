@@ -165,6 +165,11 @@ SolarPowerSystem::SolarPowerSystem(const SolarPowerSystem& copy) :
    {
       defaultShadowBodyNames.push_back((copy.defaultShadowBodyNames).at(j));
    }
+   // copy the list of body pointers - do I want to do this???
+   for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
+   {
+      shadowBodies.push_back((copy.shadowBodies).at(i));
+   }
 
    shadowState    = new ShadowState();
 }
@@ -212,11 +217,11 @@ SolarPowerSystem& SolarPowerSystem::operator=(const SolarPowerSystem& copy)
          defaultShadowBodyNames.push_back((copy.defaultShadowBodyNames).at(i));
       }
       shadowBodies.clear();
-//      // copy the list of body pointers - do I want to do this???
-//      for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
-//      {
-//         shadowBodies.push_back((copy.shadowBodies).at(i));
-//      }
+      // copy the list of body pointers - do I want to do this???
+      for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
+      {
+         shadowBodies.push_back((copy.shadowBodies).at(i));
+      }
 
       shadowModel = copy.shadowModel;
 
@@ -363,6 +368,8 @@ Real SolarPowerSystem::GetPowerGenerated() const
       MessageInterface::ShowMessage("ShadowModel = %s\n", shadowModel.c_str());
       MessageInterface::ShowMessage("number of shadow bodies = %d\n",
             (Integer) shadowBodies.size());
+      MessageInterface::ShowMessage("number of shadow body NAMES = %d\n",
+            (Integer) shadowBodyNames.size());
    #endif
 
    Real generatedPower = 0;

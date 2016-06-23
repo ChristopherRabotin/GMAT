@@ -361,9 +361,9 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
       if (md->typeName == "DSNRange")
-         sprintf(databuffer, "%18.6lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));
+         sprintf(databuffer, "%20.8lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));      // increasing 6 decimal places to 8 decimal places
       else
-         sprintf(databuffer, "%18.6lf", md->value[k]);
+         sprintf(databuffer, "%20.8lf", md->value[k]);                                        // increasing 6 decimal places to 8 decimal places
       dataLine << databuffer;
       if (k < md->value.size()-1)
          dataLine << "    ";
@@ -428,7 +428,8 @@ ObservationData* GmatObType::ReadObservation()
    std::getline (theStream, str);
    
    // Skip header and comment lines or empty lines
-   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == ""))
+   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == "") ||
+         (str.length() < 2))
    {
       std::getline(theStream, str);
 

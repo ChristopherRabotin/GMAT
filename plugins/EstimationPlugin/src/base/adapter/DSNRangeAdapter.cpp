@@ -415,7 +415,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       {
          // ramped frequency
          #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("Calculate DSNRange based on ramped table\n");
+            MessageInterface::ShowMessage("Calculate DSNRange based on ramp table\n");
          #endif
 
          try
@@ -917,12 +917,12 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    {
       // Specify frequency at the begining and lenght of the current interval   
       if (i == end_interval)
-         interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+         interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;                         // convert day to second
       else
-         interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+         interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;       // convert day to second
 
-      f0 = (*rampTB)[i].rampFrequency;
-      f_dot = (*rampTB)[i].rampRate;
+      f0 = (*rampTB)[i].rampFrequency;                              // unit: Hz
+      f_dot = (*rampTB)[i].rampRate;                                // unit: Hz/second
       if (dt < interval_len)
       {
          f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);

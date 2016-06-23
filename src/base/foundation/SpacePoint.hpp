@@ -180,6 +180,7 @@ public:
 
    virtual bool            IsParameterReadOnly(const Integer id) const;
    virtual bool            IsParameterReadOnly(const std::string &label) const;
+   virtual bool            IsSquareBracketAllowedInSetting(const Integer id) const;
    virtual bool            IsParameterCommandModeSettable(const Integer id) const;
    
    virtual Integer         GetIntegerParameter(const Integer id) const;

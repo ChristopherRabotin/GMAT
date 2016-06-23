@@ -133,7 +133,7 @@ void BallisticsMassPanel::Create()
     item2->AddGrowableCol(1);
 
     wxStaticText *dryMassStaticText = new wxStaticText( this, ID_TEXT, 
-                            "Dry "GUI_ACCEL_KEY"Mass", 
+                            "Dry " GUI_ACCEL_KEY "Mass",
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( dryMassStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -148,7 +148,7 @@ void BallisticsMassPanel::Create()
     item2->Add( dryMassUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *dragCoeffStaticText = new wxStaticText( this, ID_TEXT, 
-                            "Coefficient of "GUI_ACCEL_KEY"Drag", wxDefaultPosition, 
+                            "Coefficient of " GUI_ACCEL_KEY "Drag", wxDefaultPosition,
                             wxDefaultSize, 0 );
     item2->Add( dragCoeffStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -159,7 +159,7 @@ void BallisticsMassPanel::Create()
     item2->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *reflectCoeffStaticText = new wxStaticText( this, ID_TEXT, 
-                            "Coefficient of "GUI_ACCEL_KEY"Reflectivity", 
+                            "Coefficient of " GUI_ACCEL_KEY "Reflectivity",
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( reflectCoeffStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -170,7 +170,7 @@ void BallisticsMassPanel::Create()
     item2->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *dragAreaStaticText = new wxStaticText( this, ID_TEXT, 
-                            "Drag "GUI_ACCEL_KEY"Area", 
+                            "Drag " GUI_ACCEL_KEY "Area",
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( dragAreaStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 

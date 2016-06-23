@@ -1771,6 +1771,32 @@ bool GmatBase::CanAssignStringToObjectProperty(const Integer id) const
 
 
 //---------------------------------------------------------------------------
+// bool IsSquareBracketAllowedInSetting(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not a value with square bracket can be
+ * assigned to the specified object property.
+ *
+ * @param <id> ID for the property.
+ *
+ * @return true, if a value with square bracket can be assigned; false otherwise
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsSquareBracketAllowedInSetting(const Integer id) const
+{
+   Gmat::ParameterType type = GetParameterType(id);
+   if ((type == Gmat::BOOLEANARRAY_TYPE) ||
+       (type == Gmat::INTARRAY_TYPE) ||
+       (type == Gmat::UNSIGNED_INTARRAY_TYPE) ||
+       (type == Gmat::RVECTOR_TYPE) ||
+       (type == Gmat::RMATRIX_TYPE))
+      return true;
+   else
+      return false;
+}
+
+
+//---------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**
@@ -5033,7 +5059,7 @@ GmatBase* GmatBase::GetConfiguredObject(const std::string &name)
 }
 
 
-const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type)
+const StringArray GmatBase::GetListOfObjects(Gmat::ObjectType type)
 {
    ObjectMap objMap = GetConfiguredObjectMap();
    StringArray nameList;
@@ -5047,7 +5073,7 @@ const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type)
 }
 
 
-const StringArray& GmatBase::GetListOfObjects(const std::string &typeName)
+const StringArray GmatBase::GetListOfObjects(const std::string &typeName)
 {
    ObjectMap objMap = GetConfiguredObjectMap();
    StringArray nameList;

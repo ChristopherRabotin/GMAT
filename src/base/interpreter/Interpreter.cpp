@@ -62,7 +62,7 @@
 //#define DEBUG_INIT
 //#define DEBUG_COMMAND_LIST
 //#define DEBUG_COMMAND_VALIDATION
-//#define DEBUG_OBJECT_LIST
+//#define DEBUG_OBJECT_TYPE_LIST
 //#define DEBUG_ARRAY_GET
 //#define DEBUG_CREATE_OBJECT
 //#define DEBUG_CREATE_CELESTIAL_BODY
@@ -257,22 +257,27 @@ void Interpreter::Initialize()
 //------------------------------------------------------------------------------
 void Interpreter::BuildCreatableObjectMaps()
 {
+   static bool firstTimeBuild = true;
    // Build a mapping for all of the defined commands
    commandList.clear();
    StringArray cmds = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
    copy(cmds.begin(), cmds.end(), back_inserter(commandList));
    
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("\nNumber of commands = %d\n", cmds.size());
+   if (firstTimeBuild)
+      MessageInterface::ShowMessage("\nNumber of commands = %d\n", cmds.size());
    #endif
    
    #ifdef DEBUG_COMMAND_LIST
+   if (firstTimeBuild)
+   {
       std::vector<std::string>::iterator pos1;
       MessageInterface::ShowMessage("Commands:\n");      
       for (pos1 = cmds.begin(); pos1 != cmds.end(); ++pos1)
          MessageInterface::ShowMessage("   " + *pos1 + "\n");
+   }
    #endif
-      
+   
    if (cmds.size() == 0)
    {
       throw InterpreterException("Command list is empty.");
@@ -284,14 +289,18 @@ void Interpreter::BuildCreatableObjectMaps()
    copy(cmds.begin(), cmds.end(), back_inserter(viewableCommandList));
    
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("\nNumber of viewable commands = %d\n", cmds.size());
+   if (firstTimeBuild)
+      MessageInterface::ShowMessage("\nNumber of viewable commands = %d\n", cmds.size());
    #endif
    
    #ifdef DEBUG_COMMAND_LIST
-   std::vector<std::string>::iterator pos;
-   MessageInterface::ShowMessage("Viewable Commands:\n");      
-   for (pos = cmds.begin(); pos != cmds.end(); ++pos)
-      MessageInterface::ShowMessage("   " + *pos + "\n");   
+   if (firstTimeBuild)
+   {
+      std::vector<std::string>::iterator pos;
+      MessageInterface::ShowMessage("Viewable Commands:\n");      
+      for (pos = cmds.begin(); pos != cmds.end(); ++pos)
+         MessageInterface::ShowMessage("   " + *pos + "\n");
+   }
    #endif
    
    // Build a mapping for all of the defined objects
@@ -488,7 +497,10 @@ void Interpreter::BuildCreatableObjectMaps()
    for (UnsignedInt i = 0; i < dataFilterList.size(); i++)
       objectTypeMap.insert(std::make_pair(dataFilterList[i], Gmat::DATA_FILTER));
 
-   #ifdef DEBUG_OBJECT_LIST
+   #ifdef DEBUG_OBJECT_TYPE_LIST
+   if (firstTimeBuild)
+   {
+      firstTimeBuild = false;
       std::vector<std::string>::iterator pos;
       
       MessageInterface::ShowMessage("\nSpacecraft:\n   ");
@@ -592,8 +604,9 @@ void Interpreter::BuildCreatableObjectMaps()
       
       MessageInterface::ShowMessage("GmatFunctions %s available\n",
             gmatFunctionsAvailable ? "are" : "are not");
-
+      
       MessageInterface::ShowMessage("\n");
+   }
    #endif
    
    // Update the Parameter list in the Validator
@@ -1144,6 +1157,9 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    }
    
    
+   #ifdef DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage("In CreateObject, about to create object by name\n");
+   #endif
    // Create objects by type names
    if (type == "Spacecraft") 
       obj = (GmatBase*)theModerator->CreateSpacecraft(type, name, createDefault);
@@ -2069,7 +2085,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
 {
    #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("Interpreter::CreateCommand() type=<%s>, inCmd=<%p>, \n   desc=<%s>\n",
+      ("Interpreter::CreateCommand() entered, type=<%s>, inCmd=<%p>, \n   desc=<%s>\n",
        type.c_str(), inCmd, desc.c_str());
    MessageInterface::ShowMessage
       ("   inFunctionMode=%d, hasFunctionDefinition=%d\n", inFunctionMode,
@@ -2118,7 +2134,8 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       type1 = "CallFunction";
       
       // Figure out which CallFunction to be created.
-      std::string funcName = GmatStringUtil::ParseFunctionName(desc);
+      std::string argStr;
+      std::string funcName = GmatStringUtil::ParseFunctionName(desc, argStr);
       if (funcName != "")
       {
          GmatBase *func = FindObject(funcName);
@@ -2126,7 +2143,15 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             type1 = "CallMatlabFunction";
          else
          {
-            if (gmatFunctionsAvailable)
+            // Check if function name is built-in GmatFunction
+            if (find(functionList.begin(), functionList.end(), funcName) != 
+                functionList.end())
+            {
+               MessageInterface::ShowMessage
+                  ("==> 1 %s is builtin GmatFunction\n", funcName.c_str());
+               type1 = "CallBuiltinGmatFunction";
+            }
+            else if (gmatFunctionsAvailable)
                type1 = "CallGmatFunction";
             else
                throw InterpreterException("The function \"" + funcName +
@@ -2154,6 +2179,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    else if ((desc1.find("=") == desc1.npos) && (desc != "")
             && (!commandFound))
    {
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("Interpreter::CreateCommand() Processing CallFunction without retun parameter ...\n");
+      #endif
       StringArray parts = theTextParser.SeparateSpaces(desc1);
       
       #ifdef DEBUG_CREATE_CALL_FUNCTION
@@ -2168,14 +2197,18 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       else if (!GmatStringUtil::IsValidName(type1 + desc, true))
       {
          InterpreterException ex
-            ("Found invalid function name \"" + type1 + desc + "\"");
+            ("Found invalid function or command name \"" + type1 + desc + "\"");
          HandleError(ex);
       }
       else
       {
          type1 = "CallFunction";
-         
-         std::string funcName = GmatStringUtil::ParseFunctionName(desc);
+         #ifdef DEBUG_CREATE_CALL_FUNCTION
+         MessageInterface::ShowMessage
+            ("===> It is CallFunction command, about to figure out which CallFunction\n");
+         #endif
+         std::string argStr;
+         std::string funcName = GmatStringUtil::ParseFunctionName(desc, argStr);
          if (funcName != "")
          {
             GmatBase *func = FindObject(funcName);
@@ -2183,7 +2216,17 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                type1 = "CallMatlabFunction";
             else
             {
-               if (gmatFunctionsAvailable)
+               // Check if function name is built-in GmatFunction
+               if (find(functionList.begin(), functionList.end(), funcName) != 
+                   functionList.end())
+               {
+                  #ifdef DEBUG_CREATE_CALL_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("==> 2 %s is builtin GmatFunction\n", funcName.c_str());
+                  #endif
+                  type1 = "CallBuiltinGmatFunction";
+               }
+               else if (gmatFunctionsAvailable)
                   type1 = "CallGmatFunction";
                else
                   throw InterpreterException("The function \"" + funcName +
@@ -2208,14 +2251,27 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    }
    else
    {
-      if (type1 == "CallFunction")
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("Interpreter::CreateCommand() Trying to figure out CallFunction or Assignment command ...\n");
+      #endif
+      
+      // Check if function name is a built-in GmatFunction
+      std::string argStr;
+      std::string funcName = GmatStringUtil::ParseFunctionName(desc, argStr);
+      
+      #ifdef DEBUG_CREATE_CALL_FUNCTION
+      MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());
+      #endif
+      
+      bool isBuiltinFunction = false;
+      if (find(functionList.begin(), functionList.end(), funcName) != 
+          functionList.end())
+         isBuiltinFunction = true;
+      
+      if (type1 == "CallFunction" || isBuiltinFunction)
       {
          isPythonFunction = false;
-         std::string funcName = GmatStringUtil::ParseFunctionName(desc);
-         
-         #ifdef DEBUG_CREATE_CALL_FUNCTION
-         MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());
-         #endif
          
          if (funcName != "")
          {
@@ -2255,7 +2311,18 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                   }
                   else
                   {
-                     if (gmatFunctionsAvailable)
+                     // Check if function name is built-in GmatFunction
+                     // if (find(functionList.begin(), functionList.end(), funcName) != 
+                     //     functionList.end())
+                     if (isBuiltinFunction)
+                     {
+                        #ifdef DEBUG_CREATE_CALL_FUNCTION
+                        MessageInterface::ShowMessage
+                           ("==> 3 %s is builtin GmatFunction\n", funcName.c_str());
+                        #endif
+                        type1 = "CallBuiltinGmatFunction";
+                     }
+                     else if (gmatFunctionsAvailable)
                         type1 = "CallGmatFunction";
                      else
                         throw InterpreterException("The function \"" + funcName +
@@ -2293,6 +2360,21 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       // If command is not call function, parse command name
       if (cmd != NULL && !cmd->IsOfType("CallFunction"))
          nameParsed = ParseAndSetCommandName(cmd, type1, desc, realDesc);
+
+      // If it is CallBuiltinGmatFunction command, make sure LHS has [] around it
+      // for single output
+      if (cmd->IsOfType("CallBuiltinGmatFunction"))
+      {
+         if (desc.find('[') == desc.npos)
+         {
+            #ifdef DEBUG_CREATE_CALL_FUNCTION
+            MessageInterface::ShowMessage("==> [ not found in LHS for CallBuiltinGmatFunction\n");
+            #endif
+            StringArray items = GmatStringUtil::SeparateBy(desc, "=");
+            if (items.size() == 2)
+               realDesc = "[" + items[0] + "] = " + items[1];
+         }
+      }
       
       #if defined (DEBUG_CREATE_COMMAND) || defined (DEBUG_CREATE_CALL_FUNCTION)      
       MessageInterface::ShowMessage
@@ -2720,7 +2802,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    {
       if (!GmatStringUtil::IsValidName(funcName))
       {
-         InterpreterException ex("Found invalid function name \"" + funcName + "\"");
+         InterpreterException ex("Found invalid function or command name \"" + funcName + "\"");
          HandleError(ex);
          ignoreError = true;
          return false;
@@ -2819,6 +2901,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          if (GmatStringUtil::IsEnclosedWith(inArray[i], "'"))
          {
             if ((cmdTypeName == "CallGmatFunction") ||
+                (cmdTypeName == "CallBuiltinGmatFunction") ||
                 (cmdTypeName == "CallPythonFunction"))
                validInput = true;
          }
@@ -2826,7 +2909,8 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          else if (GmatStringUtil::ToReal(inArray[i], rval))
          {
             if ((cmdTypeName == "CallGmatFunction") ||
-                  (cmdTypeName == "CallPythonFunction"))
+                (cmdTypeName == "CallBuiltinGmatFunction") ||
+                (cmdTypeName == "CallPythonFunction"))
                validInput = true;
          }
          // Parameter or object property
@@ -2858,6 +2942,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
             else
             {
                if ((cmdTypeName == "CallGmatFunction") ||
+                   (cmdTypeName == "CallBuiltinGmatFunction") ||
                    (cmdTypeName == "CallPythonFunction"))
                   validInput = true;
             }
@@ -2931,8 +3016,10 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    for (UnsignedInt i=0; i<outArray.size(); i++)
    {
       retval = cmd->SetStringParameter("AddOutput", outArray[i]);
-      if (retval && ((cmd->GetTypeName() == "CallGmatFunction") ||
-          (cmd->GetTypeName() == "CallPythonFunction")))
+      if (retval &&
+          ((cmd->GetTypeName() == "CallGmatFunction") ||
+           (cmd->GetTypeName() == "CallBuiltinGmatFunction") ||
+           (cmd->GetTypeName() == "CallPythonFunction")))
       {
          validOutput = true;
       }
@@ -2958,7 +3045,8 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
                }
                else
                {
-                  if (cmdTypeName == "CallGmatFunction")
+                  if ((cmdTypeName == "CallGmatFunction") ||
+                      (cmdTypeName == "CallBuiltinGmatFunction"))
                      validOutput = true;
                }
             }
@@ -3023,7 +3111,15 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    if (func == NULL)
    {
       if (!isPythonFunction)
-         func = CreateObject("GmatFunction", funcName);
+      {
+         // Check if function name is built-in GmatFunction
+         if (find(functionList.begin(), functionList.end(), funcName) != 
+             functionList.end())
+            //func = CreateObject("BuiltinGmatFunction", funcName);
+            func = CreateObject(funcName, funcName);
+         else
+            func = CreateObject("GmatFunction", funcName);
+      }
       else
          func = NULL;
    }
@@ -4080,7 +4176,8 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
    // The Validator will catch this later.
    if (!GmatStringUtil::IsThereMathSymbol(rhs))
    {
-      std::string funcName = GmatStringUtil::ParseFunctionName(rhs);
+      std::string argStr;
+      std::string funcName = GmatStringUtil::ParseFunctionName(rhs, argStr);
       #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage("   RHS <%s> has no math symbos\n", rhs.c_str());
       MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());
@@ -6815,6 +6912,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   propertyType=%d, valueToUse=<%s>\n", obj->GetParameterType(id), valueToUse.c_str());
+   MessageInterface::ShowMessage("   Checking if value is in array from with []\n");
    #endif
    
    StringArray rhsValues;
@@ -6825,8 +6923,12 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    if ((type == Gmat::BOOLEANARRAY_TYPE) ||
        (type == Gmat::INTARRAY_TYPE) ||
        (type == Gmat::UNSIGNED_INTARRAY_TYPE) ||
-       (type == Gmat::RVECTOR_TYPE))
+       (type == Gmat::RVECTOR_TYPE) ||
+       (type == Gmat::RMATRIX_TYPE)) // LOJ: Added RMATRIX_TYPE
    {
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("   Checking if value is enclosed with []\n");
+      #endif
       if (!GmatStringUtil::IsEnclosedWithBrackets(valueToUse))
       {
          if (errorMsg1 == "")
@@ -6834,18 +6936,32 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
          else
             errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
          errorMsg2 = " Needs [] around values for array type";
-
+         
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage
+            ("Interpreter::SetProperty() returning %d, it is not enclosed with []\n");
+         #endif
          return retval;
       }
    }
    
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage("   Checking if value has {} for setting multiple values\n");
+   #endif
    // if value has braces or brackets, setting multiple values
    if (value.find("{") != value.npos || value.find("}") != value.npos)
    {
       // verify that we accept only OBJECTARRAYTYPE
       if ((type != Gmat::OBJECTARRAY_TYPE) &&
           (type != Gmat::STRINGARRAY_TYPE))
+      {
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage
+            ("Interpreter::SetProperty() returning %d, it is not OBJECTARRAY or STRINGARRAY\n");
+         #endif
          return retval;
+      }
+      
       // first, check to see if it is a list of strings (e.g. file names);
       // in that case, we do not want to remove spaces inside the strings
       // or use space as a delimiter
@@ -6870,22 +6986,26 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
       // verify that we accept only numeric ARRAYTYPE
       // TGG: Short term fix for GMT-3459 GroundTrackPlot.Add allows square brackets
       //      Long term, we need a GetParameterTypeArray or something
-      if (((type != Gmat::BOOLEANARRAY_TYPE) &&
-           (type != Gmat::INTARRAY_TYPE) &&
-           (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
-           (type != Gmat::RVECTOR_TYPE) &&
-           (type != Gmat::COLOR_TYPE)) &&
-          (!((type == Gmat::OBJECT_TYPE) && 
-             ((obj->GetParameterText(id) == "ViewDirection") ||
-              (obj->GetParameterText(id) == "ViewPointVector") || 
-              (obj->GetParameterText(id) == "ViewPointReference") ))))
+      // if (((type != Gmat::BOOLEANARRAY_TYPE) &&
+      //      (type != Gmat::INTARRAY_TYPE) &&
+      //      (type != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+      //      (type != Gmat::RVECTOR_TYPE) &&
+      //      (type != Gmat::COLOR_TYPE)) &&
+      //     (!((type == Gmat::OBJECT_TYPE) && 
+      //        ((obj->GetParameterText(id) == "ViewDirection") ||
+      //         (obj->GetParameterText(id) == "ViewPointVector") || 
+      //         (obj->GetParameterText(id) == "ViewPointReference") ))))
+      if (!obj->IsSquareBracketAllowedInSetting(id))
       {
          #ifdef DEBUG_SET
-         MessageInterface::ShowMessage("   Error, expects only numbers inside []\n");
+         MessageInterface::ShowMessage("   *** ERROR *** expects only numbers inside []\n");
          #endif
          return retval;
       }
       
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("   Square bracket is alowed in value setting\n");
+      #endif
       // first, check to see if it is a list of strings (e.g. file names);
       // in that case, we do not want to remove spaces inside the strings
       // or use space as a delimiter
@@ -6904,7 +7024,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    count = rhsValues.size();
    
    #ifdef DEBUG_SET
-   MessageInterface::ShowMessage("   count=%d\n", count);
+   MessageInterface::ShowMessage("   number of values = %d\n", count);
    #endif
    
    // If rhs value is an array type, call method for setting whole array
@@ -6913,7 +7033,51 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    {
       bool setWithIndex = true;
       // See if object has a method to handle whole array
-      if (type == Gmat::BOOLEANARRAY_TYPE)
+      // Added RMATRIX_TYPE here (LOJ: 2016.06.07)
+      if (type == Gmat::RMATRIX_TYPE)
+      {
+         RealArray realArray = GmatStringUtil::ToRealArray(value, true, true);
+         try
+         {
+            Rmatrix rmat = obj->GetRmatrixParameter(id);
+            Integer numRows = rmat.GetNumRows();
+            Integer numCols = rmat.GetNumColumns();
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   Checking for array size...\n   realArray.size()=%d, numRows=%d, "
+                "numCols=%d\n", realArray.size(), numRows, numCols);
+            #endif
+            // Check array size
+            if (realArray.size() == (numRows * numCols))
+            {
+               // Set new values
+               for (int i = 0; i < numRows; i++)
+                  for (int j = 0; j < numCols; j++)
+                     rmat.SetElement(i, j, realArray[j*numCols + i]);
+               Rmatrix rmat1 = obj->SetRmatrixParameter(id, rmat);
+               setWithIndex = false;
+               retval = true;
+            }
+            else
+            {
+               if (errorMsg1 == "")
+                  errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" ";
+               else
+                  errorMsg1 = errorMsg1 + "and \"" + valueToUse + "\" ";
+               errorMsg2 = " Array size does not match";
+               retval = false;
+               #ifdef DEBUG_SET
+               MessageInterface::ShowMessage("   *** ERROR *** Array size does not match\n");
+               #endif
+               return retval;
+            }
+         }
+         catch (BaseException &)
+         {
+            setWithIndex = true;
+         }
+      }
+      else if (type == Gmat::BOOLEANARRAY_TYPE)
       {
          setWithIndex = false;
          BooleanArray boolArray = GmatStringUtil::ToBooleanArray(value);
@@ -6939,6 +7103,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
       if (setWithIndex)
       {
          retval = true;
+         
          // Set value with index
          for (int i=0; i<count; i++)
          {
@@ -6950,7 +7115,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
             //if (type == Gmat::RVECTOR_TYPE)
             //   retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
             //else
-               retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
+            retval = retval & SetPropertyValue(obj, id, type, rhsValues[i], i);
          }
       }
    }
@@ -9223,7 +9388,18 @@ bool Interpreter::FinalPass()
 
          // To catch as many errors we can, continue with next object
          if (csObj == NULL)
+         {
+            #if DBGLVL_FINAL_PASS > 1
+            MessageInterface::ShowMessage
+               ("   FinalPass: object '%s' does not exist.  continuing ...\n", (*csName).c_str());
+            #endif
+            InterpreterException ex
+               ("The CoordinateSystem \"" + (*csName) + "\" set on Spacecraft "
+                     + obj->GetName() + " does not exist.");
+            HandleError(ex, false);
+            retval = false;
             continue;
+         }
 
          #if DBGLVL_FINAL_PASS > 1
          MessageInterface::ShowMessage

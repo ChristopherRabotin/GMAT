@@ -279,7 +279,7 @@ std::string Array::ToString()
 {
    // use default global precision to convert to string (loj: 2008.03.05)
    return mRmatValue.ToString(false, false, false, GmatGlobal::DATA_PRECISION, 1,
-                              true, 1, "", false);
+                              false, 1, "", false);
    
 }
 

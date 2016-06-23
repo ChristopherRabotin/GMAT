@@ -572,7 +572,7 @@ bool NotAKnotInterpolator::Estimate(const Real ind, Real *results)
  * @return clone of the NotAKnotInterpolator.
  */
 //------------------------------------------------------------------------------
-GmatBase* NotAKnotInterpolator::Clone() const
+Interpolator* NotAKnotInterpolator::Clone() const
 {
    return (new NotAKnotInterpolator(*this));
 }

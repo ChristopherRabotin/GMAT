@@ -313,7 +313,7 @@ bool GmatODDopplerType::AddMeasurement(MeasurementData *md)
 
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
-      sprintf(databuffer, "%18.6lf", md->value[k]);
+      sprintf(databuffer, "%20.8lf", md->value[k]);           // increasing 6 decimal places to 8
       dataLine << databuffer;
       if (k < md->value.size()-1)
          dataLine << "    ";
@@ -369,7 +369,8 @@ ObservationData* GmatODDopplerType::ReadObservation()
    std::getline (theStream, str);
    
    // Skip header and comment lines or empty lines
-   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == ""))
+   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == "") ||
+          (str.length() < 2))
    {
       std::getline(theStream, str);
 

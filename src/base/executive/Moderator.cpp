@@ -45,8 +45,9 @@
 #include "CelestialBodyFactory.hpp"
 #include "CommandFactory.hpp"
 #include "CoordinateSystemFactory.hpp"
-#include "ODEModelFactory.hpp"
+#include "FunctionFactory.hpp"
 #include "HardwareFactory.hpp"
+#include "ODEModelFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
 #include "PropagatorFactory.hpp"
@@ -273,9 +274,10 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui,
       theFactoryManager->RegisterFactory(new CalculatedPointFactory());
       theFactoryManager->RegisterFactory(new CommandFactory());
       theFactoryManager->RegisterFactory(new CoordinateSystemFactory());
-      theFactoryManager->RegisterFactory(new ODEModelFactory());
+      theFactoryManager->RegisterFactory(new FunctionFactory());
       theFactoryManager->RegisterFactory(new HardwareFactory());
       theFactoryManager->RegisterFactory(new MathFactory());
+      theFactoryManager->RegisterFactory(new ODEModelFactory());
       theFactoryManager->RegisterFactory(new ParameterFactory());
       theFactoryManager->RegisterFactory(new PhysicalModelFactory());
       theFactoryManager->RegisterFactory(new PropagatorFactory());
@@ -1789,7 +1791,20 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #if DEBUG_RENAME
    MessageInterface::ShowMessage("   Calling theConfigManager->RenameItem()\n");
    #endif
-   bool renamed = theConfigManager->RenameItem(type, oldName, newName);
+   
+   bool renamed = false;
+   try
+   {
+      renamed = theConfigManager->RenameItem(type, oldName, newName);
+   }
+   catch (BaseException &be)
+   {
+      #if DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("Moderator::RenameObject() caught exception:\n%s\n", be.GetFullMessage().c_str());
+      #endif
+      return false;
+   }
    
    std::vector<Gmat::ObjectType> relatedItemType;
    StringArray relatedOldName;
@@ -5629,8 +5644,9 @@ Attitude* Moderator::CreateAttitude(const std::string &type,
                                     const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateAttitude() type = '%s', "
-                                 "name = '%s'\n", type.c_str(), name.c_str());
+   MessageInterface::ShowMessage
+      ("Moderator::CreateAttitude() type = '%s', name = '%s', objectManageOption=%d\n",
+       type.c_str(), name.c_str(), objectManageOption);
    #endif
    
    Attitude *att = theFactoryManager->CreateAttitude(type, name);
@@ -5655,6 +5671,11 @@ Attitude* Moderator::CreateAttitude(const std::string &type,
    }
    #endif
    
+   #if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::CreateAttitude() returning <%p> for type = '%s'\n", att,
+       type.c_str());
+   #endif
    return att;
 }
 
@@ -7022,7 +7043,10 @@ Integer Moderator::RunMission(Integer sandboxNum)
    objectMapInUse = theConfigManager->GetObjectMap();
    SetSolarSystemAndObjectMap(theSolarSystemInUse, objectMapInUse, false,
                               "RunMission()");
-   
+   // Reset the EOP file to its start-up file value (since it may have been 
+   // changed on the Earth object)
+   std::string origEopName = theFileManager->GetFullPathname("EOP_FILE");
+   GmatGlobal::Instance()->GetEopFile()->ResetEopFile(origEopName);
 
    return status;
 } // RunMission()
@@ -8187,23 +8211,75 @@ void Moderator::CreateDefaultBarycenter()
 //------------------------------------------------------------------------------
 // void CreateDefaultParameters()
 //------------------------------------------------------------------------------
+/**
+ * Creates and sets ref. object of built-in Parameters.
+ *
+ * @note Don't forget to set Parameter object and dependency object below
+ */
+//------------------------------------------------------------------------------
 void Moderator::CreateDefaultParameters()
 {
+   // Create ImpulsiveBurn for ImpulsiveBurn Parameters
+   // We don't need to create if we only need to add Parameters to database
+   // so commented out (LOJ: 2016.05.19)
+   // GetDefaultBurn("ImpulsiveBurn");
+   // #if DEBUG_DEFAULT_MISSION > 0
+   // MessageInterface::ShowMessage("-->default impulsive burn created\n");
+   // #endif
+   
    // ImpulsiveBurn parameters
+   // Create ImpulsiveBurn Parameters to add to ParameterInfo database.
    CreateParameter("Element1", "DefaultIB.Element1");
    CreateParameter("Element2", "DefaultIB.Element2");
    CreateParameter("Element3", "DefaultIB.Element3");
-//   CreateParameter("V", "DefaultIB.V");  // deprecated
-//   CreateParameter("N", "DefaultIB.N");  // deprecated
-//   CreateParameter("B", "DefaultIB.B");  // deprecated
+   // CreateParameter("V", "DefaultIB.V");  // deprecated
+   // CreateParameter("N", "DefaultIB.N");  // deprecated
+   // CreateParameter("B", "DefaultIB.B");  // deprecated
    #if DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage("-->default impulsive burn parameters created\n");
+   #endif
+   
+   // Remove ImpulsiveBurn Parameters since these Parameters info has been
+   // add to database and not used in the default mission
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element1", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element2", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultIB.Element3", true);
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default impulsive burn parameters deleted\n");
+   #endif
+   
+   // Create FiniteBurn for FiniteBurn Parameters
+   // We don't need to create if we only need to add Parameters to database
+   // so commented out (LOJ: 2016.05.19)
+   // GetDefaultBurn("FiniteBurn");
+   // #if DEBUG_DEFAULT_MISSION > 0
+   // MessageInterface::ShowMessage("-->default finite burn created\n");
+   // #endif
+   
+   // FiniteBurn Parameters
+   // Create FiniteBurn Parameters to add to ParameterInfo database.
+   CreateParameter("TotalMassFlowRate", "DefaultFB.TotalMassFlowRate");
+   CreateParameter("TotalThrust1", "DefaultFB.TotalThrust1");
+   CreateParameter("TotalThrust2", "DefaultFB.TotalThrust2");
+   CreateParameter("TotalThrust3", "DefaultFB.TotalThrust3");
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default finite burn parameters created\n");
+   #endif
+   
+   // Remove FiniteBurn Parameters since these Parameters info already add to database
+   // and not used in the default mission
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalMassFlowRate", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust1", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust2", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust3", true);
+   #if DEBUG_DEFAULT_MISSION
+   MessageInterface::ShowMessage("-->default finite burn parameters deleted\n");
    #endif
    
    // Time parameters
    CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
    CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");      
-//   CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove  // deprecated
+   // CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); // Still used in some scripts so cannot remove  // deprecated
    CreateParameter("A1ModJulian", "DefaultSC.A1ModJulian");
    CreateParameter("A1Gregorian", "DefaultSC.A1Gregorian");
    CreateParameter("TAIModJulian", "DefaultSC.TAIModJulian");
@@ -8493,6 +8569,9 @@ void Moderator::CreateDefaultParameters()
       CreateParameter("RefTemperature", "DefaultSC.DefaultFuelTank.RefTemperature");
       // Thruster Parameters
       CreateParameter("DutyCycle", "DefaultSC.DefaultThruster.DutyCycle");
+      CreateParameter("Isp", "DefaultSC.DefaultThruster.Isp");
+      CreateParameter("MassFlowRate", "DefaultSC.DefaultThruster.MassFlowRate");
+      CreateParameter("Thrust", "DefaultSC.DefaultThruster.Thrust");
       CreateParameter("ThrustScaleFactor", "DefaultSC.DefaultThruster.ThrustScaleFactor");
       CreateParameter("GravitationalAccel", "DefaultSC.DefaultThruster.GravitationalAccel");
       CreateParameter("C1", "DefaultSC.DefaultThruster.C1");
@@ -8542,8 +8621,10 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage("-->default parameters created\n");
    #endif
-   
+
+   //============================================================
    // Set Parameter object and dependency object
+   //============================================================
    StringArray params = GetListOfObjects(Gmat::PARAMETER);
    Parameter *param;
    
@@ -8574,6 +8655,11 @@ void Moderator::CreateDefaultParameters()
          {
             //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
             param->SetRefObjectName(Gmat::IMPULSIVE_BURN, "DefaultIB");
+         }
+         else if (param->GetOwnerType() == Gmat::FINITE_BURN)
+         {
+            //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
+            param->SetRefObjectName(Gmat::FINITE_BURN, "DefaultFB");
          }
       }
    }
@@ -8646,12 +8732,6 @@ void Moderator::CreateDefaultMission()
          #endif
       }
             
-      // ImpulsiveBurn
-      GetDefaultBurn("ImpulsiveBurn");
-      #if DEBUG_DEFAULT_MISSION > 0
-      MessageInterface::ShowMessage("-->default impulsive burn created\n");
-      #endif
-      
       // Default Parameters
       CreateDefaultParameters();
       
@@ -9491,12 +9571,24 @@ PropSetup* Moderator::GetDefaultPropSetup()
 Burn* Moderator::GetDefaultBurn(const std::string &type)
 {
    StringArray configList = GetListOfObjects(Gmat::BURN);
-
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultBurn() entered, type='%s', burnList.size()=%d\n",
+       type.c_str(), configList.size());
+   #endif
+   
    if (configList.size() > 0)
    {
       for (UnsignedInt i=0; i<configList.size(); i++)
          if (GetBurn(configList[i])->IsOfType(type))
+         {
+            #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+            MessageInterface::ShowMessage
+               ("Moderator::GetDefaultBurn() returning configured burn <%p>\n",
+                configList[i]);
+            #endif
             return GetBurn(configList[i]);
+         }
    }
    
    Burn *burn = NULL;
@@ -9506,6 +9598,10 @@ Burn* Moderator::GetDefaultBurn(const std::string &type)
    else if (type == "FiniteBurn")
       burn = CreateBurn("FiniteBurn", "DefaultFB");
    
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultBurn() returning new burn <%p>\n", burn);
+   #endif
    return burn;
 }
 
@@ -9678,6 +9774,12 @@ Solver* Moderator::GetDefaultBoundaryValueSolver()
 {
    StringArray configList = GetListOfObjects(Gmat::SOLVER);
    Integer numSolver = configList.size();
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultBoundaryValueSolver() entered, numSolver=%d\n",
+       numSolver);
+   #endif
+   
    GmatBase *obj = NULL;
    
    if (numSolver > 0)
@@ -9686,12 +9788,24 @@ Solver* Moderator::GetDefaultBoundaryValueSolver()
       {
          obj = GetConfiguredObject(configList[i]);
          if (obj->IsOfType("BoundaryValueSolver"))
+         {
+            #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+            MessageInterface::ShowMessage
+               ("Moderator::GetDefaultBoundaryValueSolver() returning configured "
+                "solver <%p>\n", obj);
+            #endif
             return (Solver*)obj;
+         }
       }
    }
    
    // create default boundary value Solver
-   return CreateSolver("DifferentialCorrector", "DefaultDC");
+   Solver *defSolver = CreateSolver("DifferentialCorrector", "DefaultDC");
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDefaultBoundaryValueSolver() returning new solver <%p>\n", defSolver);
+   #endif
+   return defSolver;
 }
 
 //------------------------------------------------------------------------------

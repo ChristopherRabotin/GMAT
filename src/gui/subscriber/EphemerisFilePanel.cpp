@@ -147,7 +147,7 @@ void EphemerisFilePanel::Create()
    
 //   id = mObject->GetParameterID("StateType");
 //   wxStaticText * stateTypeStaticText =
-//      new wxStaticText(this, ID_TEXT, wxString("State T"GUI_ACCEL_KEY"ype"),
+//      new wxStaticText(this, ID_TEXT, wxString("State T" GUI_ACCEL_KEY "ype"),
 //            wxDefaultPosition, wxDefaultSize, 0 );
 //   stateTypeComboBox = (wxComboBox*) BuildControl(this, id);
 //   stateTypeComboBox->SetToolTip(pConfig->Read(_T("StateTypeHint")));
@@ -189,7 +189,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("FileFormat");
    wxStaticText * fileFormatStaticText =
-      new  wxStaticText(this, ID_TEXT, wxString("File For"GUI_ACCEL_KEY"mat"),
+      new  wxStaticText(this, ID_TEXT, wxString("File For" GUI_ACCEL_KEY "mat"),
             wxDefaultPosition, wxDefaultSize, 0 );
    fileFormatComboBox = (wxComboBox*) BuildControl(this, id);
    fileFormatComboBox->SetToolTip(pConfig->Read(_T("FileFormatHint")));
@@ -199,7 +199,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("Filename");
    wxStaticText * fileNameStaticText =
-      new  wxStaticText(this, ID_TEXT, wxString("File "GUI_ACCEL_KEY"Name"),
+      new  wxStaticText(this, ID_TEXT, wxString("File " GUI_ACCEL_KEY "Name"),
             wxDefaultPosition, wxDefaultSize, 0 );
    fileNameTextCtrl = (wxTextCtrl*) BuildControl(this, id);
    fileNameTextCtrl->SetToolTip(pConfig->Read(_T("FilenameHint")));
@@ -213,7 +213,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("Interpolator");
    wxStaticText * interpolatorStaticText =
-      new  wxStaticText(this, ID_TEXT, wxString("Interpolato"GUI_ACCEL_KEY"r"),
+      new  wxStaticText(this, ID_TEXT, wxString("Interpolato" GUI_ACCEL_KEY "r"),
             wxDefaultPosition, wxDefaultSize, 0 );
    interpolatorComboBox = (wxComboBox*) BuildControl(this, id);
    interpolatorComboBox->SetToolTip(pConfig->Read(_T("InterpolatorHint")));
@@ -224,7 +224,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("InterpolationOrder");
    wxStaticText * interpolationOrderStaticText =
-      new  wxStaticText(this, ID_TEXT, wxString("Interpolation "GUI_ACCEL_KEY
+      new  wxStaticText(this, ID_TEXT, wxString("Interpolation " GUI_ACCEL_KEY
             "Order"), wxDefaultPosition, wxDefaultSize, 0 );
    interpolationOrderTextCtrl = (wxTextCtrl*) BuildControl(this, id);
    interpolationOrderTextCtrl->SetToolTip(pConfig->Read(
@@ -236,7 +236,7 @@ void EphemerisFilePanel::Create()
    // StepSize
    id = mObject->GetParameterID("StepSize");
    allStepSizeStaticText =
-      new wxStaticText(this, ID_TEXT, wxString("S"GUI_ACCEL_KEY"tep Size"),
+      new wxStaticText(this, ID_TEXT, wxString("S" GUI_ACCEL_KEY "tep Size"),
                        wxDefaultPosition, wxDefaultSize, 0 );
    allStepSizeComboBox = (wxComboBox*) BuildControl(this, id);
    allStepSizeComboBox->SetToolTip(pConfig->Read(_T("StepSizeHint")));
@@ -246,7 +246,7 @@ void EphemerisFilePanel::Create()
    // StepSize for code 500 takes real numbers only, so create TextCtrl,
    // add to sizer and hide
    numericStepSizeStaticText =
-      new wxStaticText(this, ID_TEXT, wxString("S"GUI_ACCEL_KEY"tep Size"),
+      new wxStaticText(this, ID_TEXT, wxString("S" GUI_ACCEL_KEY "tep Size"),
                        wxDefaultPosition, wxDefaultSize, 0);
    numericStepSizeTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(180,-1),
@@ -267,7 +267,7 @@ void EphemerisFilePanel::Create()
    // OutputFormat
    id = mObject->GetParameterID("OutputFormat");
    wxStaticText *outputFormatStaticText =
-      new wxStaticText(this, ID_TEXT, wxString("O"GUI_ACCEL_KEY"utput Format"),
+      new wxStaticText(this, ID_TEXT, wxString("O" GUI_ACCEL_KEY "utput Format"),
             wxDefaultPosition, wxDefaultSize, 0 );
    outputFormatComboBox = (wxComboBox*) BuildControl(this, id);
    outputFormatComboBox->SetToolTip(pConfig->Read(_T("OutputFormatHint")));

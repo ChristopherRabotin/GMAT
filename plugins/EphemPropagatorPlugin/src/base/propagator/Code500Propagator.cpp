@@ -33,11 +33,13 @@
 #include "Code500Propagator.hpp"
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
-#include <sstream>                 // for stringstream
+#include "NotAKnotInterpolator.hpp"    // Only one supported for now
+#include <sstream>                        // for stringstream
 
-#define DEBUG_INITIALIZATION
-#define DEBUG_PROPAGATION
-//#define TEST_TDB_ROUND_TRIP
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_PROPAGATION
+//#define DEBUG_INTERPOLATION
+
 
 //---------------------------------
 // static data
@@ -81,8 +83,9 @@ const Real Code500Propagator::DUT_TO_SEC        = 864.0;
 Code500Propagator::Code500Propagator(const std::string &name) :
    EphemerisPropagator        ("Code500", name),
    ephemName                  (""),
+   interp                     (NULL),
    satID                      (101.0),
-   fileIsOpen                 (false),
+   fileDataLoaded             (false),
    ephemRecords               (NULL),
    record                     (-1),
    stateIndex                 (-1)
@@ -102,6 +105,8 @@ Code500Propagator::Code500Propagator(const std::string &name) :
 //------------------------------------------------------------------------------
 Code500Propagator::~Code500Propagator()
 {
+   if (interp != NULL)
+      delete interp;
 }
 
 
@@ -117,8 +122,9 @@ Code500Propagator::~Code500Propagator()
 Code500Propagator::Code500Propagator(const Code500Propagator & prop) :
    EphemerisPropagator        (prop),
    ephemName                  (prop.ephemName),
+   interp                     (NULL),
    satID                      (prop.satID),
-   fileIsOpen                 (false),
+   fileDataLoaded             (false),
    ephemRecords               (NULL),
    record                     (-1),
    stateIndex                 (-1)
@@ -137,17 +143,20 @@ Code500Propagator::Code500Propagator(const Code500Propagator & prop) :
  * @return This propagator, configured to match prop.
  */
 //------------------------------------------------------------------------------
-Code500Propagator & Code500Propagator::operator =(const Code500Propagator & prop)
+Code500Propagator & Code500Propagator::operator=(const Code500Propagator & prop)
 {
    if (this != &prop)
    {
       EphemerisPropagator::operator=(prop);
 
       ephemName = prop.ephemName;
+      if (interp != NULL)
+      {
+         delete interp;
+         interp = NULL;
+      }
       satID = prop.satID;
-      if (fileIsOpen)
-         ephem.CloseForRead();
-      fileIsOpen = false;
+      fileDataLoaded = false;
       ephemRecords = NULL;
       record = -1;
       stateIndex = -1;
@@ -586,7 +595,7 @@ bool Code500Propagator::Initialize()
 
       // The PSM isn't set until PrepareToPropagate fires.  The following is
       // also last minute setup, so only do it if the PSM has been set
-      if (psm != NULL)
+      if ((psm != NULL) && (!fileDataLoaded))
       {
          for (UnsignedInt i = 0; i < propObjects.size(); ++i)
          {
@@ -598,11 +607,12 @@ bool Code500Propagator::Initialize()
                ephemName = propObjects[i]->GetStringParameter(
                      "EphemerisName");
                currentEpoch = ((Spacecraft*)propObjects[i])->GetEpoch();
+               initialEpoch = currentEpoch;
 
                #ifdef DEBUG_INITIALIZATION
                   MessageInterface::ShowMessage("Spacecraft epoch is %.12lf\n",
                         currentEpoch);
-               #endif
+                #endif
             }
             else
                throw PropagatorException("Code 500 ephemeris propagators only "
@@ -624,6 +634,7 @@ bool Code500Propagator::Initialize()
             ephem.ReadHeader1(logOption);
             ephem.ReadHeader2(logOption);
             ephem.ReadDataRecords(-999, 0);
+
             Real timeSystem = ephem.GetTimeSystem();
 
             ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
@@ -632,9 +643,8 @@ bool Code500Propagator::Initialize()
                if (ephemRecords != NULL)
                   MessageInterface::ShowMessage("EphemRecords contains %d "
                         "data blocks\n", ephemRecords->size());
+               MessageInterface::ShowMessage("Record contents:\n");
             #endif
-
-            MessageInterface::ShowMessage("Record contents:\n");
 
             startEpochs.clear();
             timeSteps.clear();
@@ -703,8 +713,14 @@ bool Code500Propagator::Initialize()
                      "%.12lf\nRecords pointer = %p\n", ephemStart, ephemEnd,
                      ephemRecords);
             #endif
-            fileIsOpen = true;
+            fileDataLoaded = true;
          }
+
+         // Build the interpolator.  For now, use not-a-knot splines
+         if (interp != NULL)
+            delete interp;
+         interp = new NotAKnotInterpolator("Code500NotAKnot", 6);
+         ephem.CloseForRead();
       }
    }
 
@@ -740,8 +756,8 @@ bool Code500Propagator::Step()
    }
 
    if (record < 0)
-      throw PropagatorException("Unable to propagate: is the epoch outside "
-            "of the span of the ephemeris file?");
+      throw PropagatorException("Unable to propagate " + instanceName +
+            ": is the epoch outside of the span of the ephemeris file?");
 
    Rvector6  outState;
 
@@ -840,61 +856,6 @@ void Code500Propagator::UpdateState()
       MessageInterface::ShowMessage("Updating state to epoch %.12lf\n",
             currentEpoch);
    #endif
-
-//   if (skr)
-//   {
-//      try
-//      {
-//         Rvector6  outState;
-//
-//         for (UnsignedInt i = 0; i < propObjects.size(); ++i)
-//         {
-//            std::string scName = propObjectNames[i];
-//            Integer id = naifIds[i];
-//
-//            // Allow for slop in the last few bits
-//            if ((currentEpoch < ephemStart - 1e-10) ||
-//                (currentEpoch > ephemEnd + 1e-10))
-//            {
-//               std::stringstream errmsg;
-//               errmsg.precision(16);
-//               errmsg << "The Code500Propagator "
-//                      << instanceName
-//                      << " is attempting to access state data outside of the "
-//                         "span of the ephemeris data; halting.  ";
-//               errmsg << "The current Code 500 ephemeris covers the A.1 "
-//                      << "modified Julian span "
-//                      << ephemStart << " to " << ephemEnd << " and the "
-//                         "requested epoch is " << currentEpoch << ".";
-//               throw PropagatorException(errmsg.str());
-//            }
-//
-////            outState = skr->GetTargetState(scName, id, currentEpoch,
-////                  spkCentralBody, spkCentralBodyNaifId);
-//
-//            std::memcpy(state, outState.GetDataVector(),
-//                  dimension*sizeof(Real));
-//
-//            #ifdef DEBUG_PROPAGATION
-//               MessageInterface::ShowMessage("(UpdateState for %p) State at "
-//                     "epoch %.12lf is [", this, currentEpoch);
-//               for (Integer i = 0; i < dimension; ++i)
-//               {
-//                  MessageInterface::ShowMessage("%.12lf", state[i]);
-//                  if (i < 5)
-//                     MessageInterface::ShowMessage("   ");
-//                  else
-//                     MessageInterface::ShowMessage("]\n");
-//               }
-//            #endif
-//         }
-//      }
-//      catch (BaseException &e)
-//      {
-//         MessageInterface::ShowMessage(e.GetFullMessage());
-//         throw;
-//      }
-//   }
 }
 
 
@@ -910,6 +871,7 @@ void Code500Propagator::UpdateState()
 //------------------------------------------------------------------------------
 void Code500Propagator::SetEphemSpan(Integer whichOne)
 {
+   ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
 }
 
 //------------------------------------------------------------------------------
@@ -948,24 +910,171 @@ void Code500Propagator::FindRecord(GmatEpoch forEpoch)
       stateIndex = (Integer)(secsPastStart / timeSteps[record]);
    }
 
+   #ifdef DEBUG_PROPAGATION
       MessageInterface::ShowMessage("Epoch %.12lf has index %d in block %d\n",
             forEpoch, stateIndex, record);
+   #endif
 }
 
+//------------------------------------------------------------------------------
+// void GetState(GmatEpoch forEpoch, Rvector6 &outstate)
+//------------------------------------------------------------------------------
+/**
+ * Returns the state data at the specified epoch
+ *
+ * @param forEpoch The epoch for the data
+ * @param outstate The state vector that receives the data
+ */
+//------------------------------------------------------------------------------
 void Code500Propagator::GetState(GmatEpoch forEpoch, Rvector6 &outstate)
 {
-   FindRecord(forEpoch);
-   for (Integer i = 0; i < 3; ++i)
+   UpdateInterpolator(forEpoch);
+
+   Real theState[6];
+   if (interp->Interpolate(forEpoch, theState))
+      outstate.Set(theState);
+   else
    {
-      if (stateIndex == 0)
-      {
-         outstate[i] = ephemRecords->at(record).firstStateVector_DULT[i] * DUL_TO_KM;
-         outstate[i+3] = ephemRecords->at(record).firstStateVector_DULT[i+3] * DUL_DUT_TO_KM_SEC;
-      }
+      throw PropagatorException("The propagator " + instanceName +
+               " failed to interpolate a valid state");
+   }
+
+   #ifdef DEBUG_INTERPOLATION
+      MessageInterface::ShowMessage("Interpolated state: %.12lf  [%.15lf  "
+            "%.15lf  %.15lf  %.15lf  %.15lf  %.15lf]\n", forEpoch, theState[0],
+            theState[1], theState[2], theState[3], theState[4], theState[5]);
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// void UpdateInterpolator(forEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Method that updates buffer data in the interpolator as propagation proceeds
+ *
+ * This method passes ephem data to the interpolator and resets the time span
+ * data to track the data loaded.  The "sweet" region used for interpolation
+ * moves as propagation progresses, and is generally chosen, when possible, to
+ * keep the points used for interpolation centered on the interpolation epoch.
+ * Thus for the cubic spline interpolator used in this implementation, the
+ * interpolator data is set so that the interpolation epoch (forEpoch) falls
+ * between the second and third ephemeris points when possible, minimizing the
+ * likelihood that the interpolation will ring.
+ *
+ * @param forEpoch The epoch that needs to be covered in the preferred region of
+ *                 the interpolator data
+ */
+//------------------------------------------------------------------------------
+void Code500Propagator::UpdateInterpolator(const GmatEpoch &forEpoch)
+{
+   FindRecord(forEpoch);
+
+   Integer usedRecords[5][2];
+   Integer block = record, line = stateIndex - 1;
+
+   if (line < 0)
+   {
+      if (block == 0)
+         // Handle the first data point
+         line = 0;
       else
       {
-         outstate[i] = ephemRecords->at(record).stateVector2Thru50_DULT[stateIndex-1][i] * DUL_TO_KM;
-         outstate[i+3] = ephemRecords->at(record).stateVector2Thru50_DULT[stateIndex-1][i+3] * DUL_DUT_TO_KM_SEC;
+         // Handle spanning the records
+         --block;
+         line = 49;
       }
    }
+
+   // Handle the end of the ephem
+   if (block >= ephemRecords->size() - 2)
+   {
+      Integer lastBlock = ephemRecords->size()-1;
+
+      // Last block has indeterminate number of records, so figure it out
+      GmatEpoch startEpochLastBlock = startEpochs[lastBlock];
+      Integer lastBlockLastData = (ephemEnd - startEpochLastBlock) *
+            GmatTimeConstants::SECS_PER_DAY / timeSteps[lastBlock];
+
+      #ifdef DEBUG_INTERPOLATION
+         MessageInterface::ShowMessage("End of data is at [%d, %d]\n",
+               lastBlock, lastBlockLastData);
+      #endif
+
+      // Fix up the indexing!
+      if ((block == lastBlock) && (line > lastBlockLastData - 4))
+      {
+         line = lastBlockLastData - 4;
+         if (line < 0)
+         {
+            --block;
+            line += 50;
+         }
+      }
+   }
+
+   for (UnsignedInt i = 0; i < 5; ++i)
+   {
+      usedRecords[i][0] = block;
+      usedRecords[i][1] = line;
+      ++line;
+      if (line == 50)
+      {
+         // transition to the next record
+         ++block;
+         line = 0;
+      }
+   }
+
+   Integer startIndex = 1;
+   Integer endIndex   = 2;
+
+   // Start of the ephem
+   if (/*(record == 0) &&*/ (stateIndex == 0))
+      startIndex = 0;
+   if (/*(record == 0) &&*/ (stateIndex > 45))
+      startIndex = stateIndex - 45;
+
+   Real epoch;
+   Real state[6];
+
+   // Brute force for now: refill the interpolator
+   interp->Clear();
+
+   #ifdef DEBUG_INTERPOLATION
+      MessageInterface::ShowMessage("Pairs used for epoch %.12lf:\n", forEpoch);
+   #endif
+
+   for (UnsignedInt i = 0; i < 5; ++i)
+   {
+      epoch = startEpochs[usedRecords[i][0]] + timeSteps[usedRecords[i][0]] *
+            (usedRecords[i][1]) / GmatTimeConstants::SECS_PER_DAY;
+
+      #ifdef DEBUG_INTERPOLATION
+         MessageInterface::ShowMessage("  [%d, %d]", usedRecords[i][0],
+               usedRecords[i][1]);
+      #endif
+
+      for (UnsignedInt j = 0; j < 3; ++j)
+      {
+         if (usedRecords[i][1] == 0)
+         {
+            state[j] = ephemRecords->at(usedRecords[i][0]).firstStateVector_DULT[j] * DUL_TO_KM;
+            state[j+3] = ephemRecords->at(usedRecords[i][0]).firstStateVector_DULT[j+3] * DUL_DUT_TO_KM_SEC;
+         }
+         else
+         {
+            state[j] = ephemRecords->at(usedRecords[i][0]).stateVector2Thru50_DULT[usedRecords[i][1]-1][j] * DUL_TO_KM;
+            state[j+3] = ephemRecords->at(usedRecords[i][0]).stateVector2Thru50_DULT[usedRecords[i][1]-1][j+3] * DUL_DUT_TO_KM_SEC;
+         }
+      }
+
+      interp->AddPoint(epoch, state);
+      #ifdef DEBUG_INTERPOLATION
+         MessageInterface::ShowMessage(" --> [%.12lf %lf %lf...\n", epoch,
+               state[0], state[1]);
+      #endif
+   }
+   #ifdef DEBUG_INTERPOLATION
+      MessageInterface::ShowMessage("\n");
+   #endif
 }

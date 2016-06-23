@@ -237,6 +237,7 @@ public:
    virtual const StringArray&
                         GetPropertyEnumStrings(const std::string &label) const;
    virtual bool         CanAssignStringToObjectProperty(const Integer id) const;
+   virtual bool         IsSquareBracketAllowedInSetting(const Integer id) const;
    
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -521,8 +522,8 @@ public:
    /// Functions use information from Moderator
    ObjectMap               GetConfiguredObjectMap();
    GmatBase*               GetConfiguredObject(const std::string &name);
-   const StringArray&      GetListOfObjects(Gmat::ObjectType type);
-   const StringArray&      GetListOfObjects(const std::string &typeName);
+   const StringArray       GetListOfObjects(Gmat::ObjectType type);
+   const StringArray       GetListOfObjects(const std::string &typeName);
 
 protected:
    /// Parameter IDs
@@ -536,7 +537,6 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[GmatBaseParamCount];
    /// GmatBase parameter labels
    static const std::string PARAMETER_LABEL[GmatBaseParamCount];
-
 
    /// count of the number of GmatBase objects currently instantiated
    static Integer      instanceCount;

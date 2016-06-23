@@ -43,6 +43,7 @@
 #include "TimeSystemConverter.hpp"
 #include "Attitude.hpp"
 #include "SPADFileReader.hpp"
+#include "Array.hpp"
 
 // Declare forward reference
 class EphemManager;
@@ -273,6 +274,7 @@ public:
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
    virtual Integer         GetStmRowId(const Integer forRow);
    virtual Integer         HasParameterCovariances(Integer parameterId);
+   virtual Rmatrix*        GetParameterCovariances(Integer parameterId);          // made changes by TUAN NGUYEN
 
    // Cloned object update management
    virtual bool HasLocalClones();
@@ -305,6 +307,8 @@ protected:
       COORD_SYS_ID,
       DRY_MASS_ID,
       DATE_FORMAT_ID,
+      ESTIMATION_STATE_TYPE_ID,            // made changes by TUAN NGUYEN
+      ORBIT_ERROR_COVARIANCE_ID,           // made changes by TUAN NGUYEN
       CD_ID,
       CR_ID,
       CD_SIGMA_ID,
@@ -520,6 +524,11 @@ protected:
    Real              srpArea;
    Real              reflectCoeff;
    Real              reflectCoeffSigma;
+
+   /// Estimation error covariance                        // made changes by TUAN NGUYEN
+   std::string       estimationStateType;                 // made changes by TUAN NGUYEN
+   Rmatrix           orbitErrorCovariance;                // made changes by TUAN NGUYEN
+
    /// String specifying the epoch time system (A1, TAI, UTC, or TT)
    std::string       epochSystem;
    /// String specifying the epoch time format (Gregorian or ModJulian)

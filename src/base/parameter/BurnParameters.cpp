@@ -26,7 +26,7 @@
 //
 /**
  * Implements Burn related Parameter classes.
- *   ImpBurnElements
+ *   ImpBurnElements, TotalThrust
  */
 //------------------------------------------------------------------------------
 
@@ -39,16 +39,6 @@
 
 // To use preset colors, uncomment this line:
 //#define USE_PREDEFINED_COLORS
-
-//==============================================================================
-//                              ImpBurnElements
-//==============================================================================
-/**
- * Implements ImpulsiveBurn element Parameters.
- *    Element1, Element2, Element3
- */
-//------------------------------------------------------------------------------
-
 //------------------------------------------------------------------------------
 // ImpBurnElements(const std::string &type, const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
@@ -202,6 +192,295 @@ void ImpBurnElements::SetReal(Real val)
 GmatBase* ImpBurnElements::Clone(void) const
 {
    return new ImpBurnElements(*this);
+}
+
+
+//==============================================================================
+//                              TotalMassFlowRate
+//==============================================================================
+/**
+ * Implements Finiteburn total mass flow rate
+ *    TotalMassFlowRate
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// TotalMassFlowRate(const std::string &type, const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <type> type of the parameter
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+TotalMassFlowRate::TotalMassFlowRate(const std::string &type, const std::string &name,
+                                 GmatBase *obj)
+   : BurnReal(name, type, Gmat::FINITE_BURN, obj, "Finite Burn " + type,
+              "Km/s", GmatParam::COORD_SYS, true)
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::BLUE32;
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// TotalMassFlowRate(const TotalMassFlowRate &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+TotalMassFlowRate::TotalMassFlowRate(const TotalMassFlowRate &copy)
+   : BurnReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// TotalMassFlowRate& operator=(const TotalMassFlowRate &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+TotalMassFlowRate& TotalMassFlowRate::operator=(const TotalMassFlowRate &right)
+{
+   if (this != &right)
+      BurnReal::operator=(right);
+   
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~TotalMassFlowRate()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+TotalMassFlowRate::~TotalMassFlowRate()
+{
+}
+
+//-------------------------------------
+// methods inherited from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool TotalMassFlowRate::Evaluate()
+{
+   mRealValue = BurnData::GetReal(TOTAL_MASS_FLOW_RATE);
+   
+   #ifdef DEBUG_BURN_EVAL
+   MessageInterface::ShowMessage
+      ("TotalMassFlowRate::Evaluate() mRealValue=%f\n", mRealValue);
+   #endif
+   
+   if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TotalMassFlowRate::SetReal(Real val)
+{
+   BurnData::SetReal(TOTAL_MASS_FLOW_RATE, val);
+   RealVar::SetReal(val);
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* TotalMassFlowRate::Clone(void) const
+{
+   return new TotalMassFlowRate(*this);
+}
+
+
+//==============================================================================
+//                              TotalThrust
+//==============================================================================
+/**
+ * Implements Finiteburn total thrust Parameters.
+ *    TotalThrust1, TotalThrust2, TotalThrust3
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// TotalThrust(const std::string &type, const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <type> type of the parameter
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+TotalThrust::TotalThrust(const std::string &type, const std::string &name,
+                                 GmatBase *obj)
+   : BurnReal(name, type, Gmat::FINITE_BURN, obj, "Finite Burn " + type,
+              "Km/s", GmatParam::COORD_SYS, true)
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
+   
+   // Write deprecated message for each once per GMAT session
+   static bool writeDeprecatedMsg = true;
+   
+   if (type == "TotalThrust1")
+      mTotalThrustId = ELEMENT1;
+   else if (type == "TotalThrust2")
+      mTotalThrustId = ELEMENT2;
+   else if (type == "TotalThrust3")
+      mTotalThrustId = ELEMENT3;
+   else
+      mTotalThrustId = -1;
+}
+
+
+//------------------------------------------------------------------------------
+// TotalThrust(const TotalThrust &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+TotalThrust::TotalThrust(const TotalThrust &copy)
+   : BurnReal(copy)
+{
+   mTotalThrustId = copy.mTotalThrustId;
+}
+
+
+//------------------------------------------------------------------------------
+// TotalThrust& operator=(const TotalThrust &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+TotalThrust& TotalThrust::operator=(const TotalThrust &right)
+{
+   if (this != &right)
+   {
+      BurnReal::operator=(right);
+      mTotalThrustId = right.mTotalThrustId;
+   }
+   
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~TotalThrust()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+TotalThrust::~TotalThrust()
+{
+}
+
+
+//-------------------------------------
+// methods inherited from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool TotalThrust::Evaluate()
+{
+   mRealValue = BurnData::GetReal(mTotalThrustId);
+
+   #ifdef DEBUG_BURN_EVAL
+   MessageInterface::ShowMessage
+      ("TotalThrust::Evaluate() mRealValue=%f\n", mRealValue);
+   #endif
+   
+   if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TotalThrust::SetReal(Real val)
+{
+   BurnData::SetReal(mTotalThrustId, val);
+   RealVar::SetReal(val);
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* TotalThrust::Clone(void) const
+{
+   return new TotalThrust(*this);
 }
 
 

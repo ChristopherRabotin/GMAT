@@ -59,8 +59,11 @@
 MeasurementModelBase* MeasurementModelFactory::CreateMeasurementModel(
       const std::string & ofType, const std::string & withName)
 {
+#ifndef DISABLE_MEASUREMENT_MODEL
    if (ofType == "MeasurementModel")
       return new MeasurementModel(withName);
+#endif
+
    if (ofType == "TrackingFileSet")
       return new TrackingFileSet(withName);
 
@@ -81,7 +84,10 @@ MeasurementModelFactory::MeasurementModelFactory() :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_MEASUREMENT_MODEL
       creatables.push_back("MeasurementModel");
+#endif
+
       creatables.push_back("TrackingFileSet");
    }
 }
@@ -113,7 +119,10 @@ MeasurementModelFactory::MeasurementModelFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_MEASUREMENT_MODEL
       creatables.push_back("MeasurementModel");
+#endif
+
       creatables.push_back("TrackingFileSet");
    }
 }
@@ -134,7 +143,10 @@ MeasurementModelFactory::MeasurementModelFactory(const MeasurementModelFactory &
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_MEASUREMENT_MODEL
       creatables.push_back("MeasurementModel");
+#endif
+
       creatables.push_back("TrackingFileSet");
    }
 }
@@ -158,7 +170,10 @@ MeasurementModelFactory&
    Factory::operator=(fact);
    if (creatables.empty())
    {
+#ifndef DISABLE_MEASUREMENT_MODEL
       creatables.push_back("MeasurementModel");
+#endif
+
       creatables.push_back("TrackingFileSet");
    }
    return *this;

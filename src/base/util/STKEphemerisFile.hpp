@@ -28,6 +28,7 @@
 #define STKEphemerisFile_hpp
 
 #include "gmatdefs.hpp"
+#include "Rvector6.hpp"
 #include <fstream>
 
 class GMAT_API STKEphemerisFile
@@ -47,6 +48,12 @@ public:
    void CloseForRead();
    void CloseForWrite();
    
+   // For ephemeris file reading
+   bool GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA1Mjd,
+                                 Rvector6 &initialState, Rvector6 &finalState,
+                                 std::string &cbName, std::string &csName);
+   
+   // For ephemeris file writing
    void SetVersion(const std::string &version);
    void SetInterpolationOrder(Integer order);
    bool SetHeaderForWriting(const std::string &fieldName,
@@ -97,9 +104,20 @@ protected:
    std::ifstream stkInStream;
    std::ofstream stkOutStream;
    
-   // Epoch and state buffer for read
+   // Epoch and state buffer for read/write
    RealArray     a1MjdArray;
    StateArray    stateArray;
+   
+   // Initial/Final epochs and states read from file
+   Real          initialSecsFromEpoch;
+   Real          finalSecsFromEpoch;
+   Rvector6      initialState;
+   Rvector6      finalState;
+   
+   // Fore ephemeris reading
+   bool          GetEpochAndState(const std::string &line, Real &epoch, Rvector6 &state);
+   std::string   GetLastLine();
+   std::istream& IgnoreLine(std::ifstream::pos_type& pos);
    
    // For ephemeris writing
    void WriteTimePosVel(const EpochArray &epochArray, const StateArray &stateArray);
@@ -109,6 +127,7 @@ protected:
    
    // Time conversion
    std::string A1ModJulianToUtcGregorian(Real epochInDays, Integer format);
+   bool        UTCGregorianToA1ModJulian(const std::string &utcGreg, Real &a1Mjd);
 };
 
 #endif // STKEphemerisFile_hpp

@@ -77,6 +77,8 @@ public:
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
 
+   Real                 GetIonoCorrection();            // made changes by TUAN NGUYEN
+
    DEFAULT_TO_NO_CLONES
 protected:
    /// Parameter IDs for the RangeAdapterKm
@@ -84,8 +86,6 @@ protected:
    {
       RangeAdapterKmParamCount = AdapterParamCount,
    };
-
-
 };
 
 #endif /* RangeAdapterKm_hpp */

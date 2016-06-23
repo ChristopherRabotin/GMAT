@@ -179,7 +179,7 @@ protected:
    std::vector<TrackingDataAdapter*> measurements;
    /// Name of the associate tracking data file
    StringArray filenames;
-   /// Name of the associate ramped table
+   /// Name of the associate ramp table
    StringArray rampedTablenames;
    /// Flag for the inclusion of light time solution
    bool        useLighttime;
@@ -250,6 +250,15 @@ protected:
 
    TrackingDataAdapter *BuildAdapter(const StringArray &strand,
          const std::string &type, Integer configIndex);
+
+private:
+   bool    ParseTrackingConfig(std::string value, Integer& configIndex, bool& start);
+   bool    ParseStrand(std::string value, Integer configIndex, Integer strandIndex = 0);
+   bool    AddToSignalPath(std::string participantName, Integer configIndex, Integer strandIndex);
+
+   Integer openBracketCount;
+   bool    start;
+
 };
 
 #endif /* TrackingFileSet_hpp */

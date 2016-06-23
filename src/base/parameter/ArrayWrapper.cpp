@@ -323,12 +323,12 @@ const Rmatrix& ArrayWrapper::EvaluateArray() const
 {
    #ifdef DEBUG_ARRAY_WRAPPER
       MessageInterface::ShowMessage(
-         "ArrayWrapper::EvaluateArray called on array %s\n", 
-         arrayName.c_str());
+         "ArrayWrapper::EvaluateArray called on array %s, array=<%p>'%s'\n", 
+         arrayName.c_str(), array, array ? array->GetName().c_str() : "NULL");
    #endif
    if (array == NULL)
       throw ParameterException(
-      "Cannot return value of Array - object pointer is NULL\n");
+      "ArrayWrapper::EvaluateArray() Cannot return value of Array - object pointer is NULL\n");
    return array->EvaluateRmatrix();
 }
 

@@ -78,6 +78,9 @@ Thruster::PARAMETER_TEXT[ThrusterParamCount - HardwareParamCount] =
    "Tank",
    "MixRatio",
    "GravitationalAccel",
+   "Thrust",
+   "Isp",
+   "MassFlowRate",
 };
 
 /// Types of the parameters used by thrusters.
@@ -94,6 +97,9 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
    Gmat::OBJECTARRAY_TYPE, // "Tank"
    Gmat::RVECTOR_TYPE,     // "MixRatio"
    Gmat::REAL_TYPE,        // "GravitationalAccel"
+   Gmat::REAL_TYPE,        // "Thrust"
+   Gmat::REAL_TYPE,        // "Isp"
+   Gmat::REAL_TYPE,        // "MassFlowRate"
 };
 
 
@@ -496,6 +502,13 @@ bool Thruster::IsParameterReadOnly(const Integer id) const
       if (coordSystemName != "Local")
          return true;
    
+   if (id == THRUST || id == ISP || id == MASS_FLOW_RATE)
+      return true;
+   
+   if (tankNames.size() == 0)
+      if (id == MIXRATIO)
+         return true;
+
    return Hardware::IsParameterReadOnly(id);
 }
 
@@ -551,7 +564,13 @@ Real Thruster::GetRealParameter(const Integer id) const
          return thrustScaleFactor;
       case GRAVITATIONAL_ACCELERATION:
          return gravityAccel;
-
+      case THRUST:
+         return thrust;
+      case ISP:
+         return impulse;
+      case MASS_FLOW_RATE:
+         return mDot;
+      
       default:
          break;   // Default just drops through
    }
@@ -709,7 +728,26 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value)
    case TANK:
       // if not the same name push back
       if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end())
+      {
          tankNames.push_back(value);
+
+         // Size mix ratio vector to match tank count, and fill missing entries
+         if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+         {
+            Rvector temp(mixRatio);
+            mixRatio.SetSize(tankNames.size());
+            if (temp.IsSized())
+            {
+               Integer max = (temp.GetSize() < mixRatio.GetSize() ?
+                  temp.GetSize() : mixRatio.GetSize());
+
+               for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+               {
+                  mixRatio[i] = (i < max ? temp[i] : 1.0);
+               }
+            }
+         }
+      }
 //      else
 //         throw HardwareException("The same tank cannot be listed twice for " +
 //                     instanceName + "; " + value + " has already been assigned "
@@ -788,6 +826,27 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
             }
          }
          
+         // Size mix ratio vector to match tank count, and fill missing entries
+         if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+         {
+            #ifdef DEBUG_TANK_SETTINGS
+               MessageInterface::ShowMessage("Sizing Mix Ratio to %d\n",
+                     tankNames.size());
+            #endif
+            Rvector temp(mixRatio);
+            mixRatio.SetSize(tankNames.size());
+            if (temp.IsSized())
+            {
+               Integer max = (temp.GetSize() < mixRatio.GetSize() ?
+                              temp.GetSize() : mixRatio.GetSize());
+
+               for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+               {
+                  mixRatio[i] = (i < max ? temp[i] : 1.0);
+               }
+            }
+         }
+
          return true;
       }
    default:

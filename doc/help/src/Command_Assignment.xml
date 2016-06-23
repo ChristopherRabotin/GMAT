@@ -20,8 +20,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -606,6 +604,77 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         non-negative.</para>
                       </listitem>
                     </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>mod</literal></term>
+
+                      <listitem>
+                        <para>Modulus after division. <literal>
+                        mod(x,y)</literal> returns <literal>x - n*y</literal>,
+                        where <literal>n = floor(x/y)</literal> if <literal>y
+                        ~= 0</literal>. By convention,
+                        <literal>mod(x,x)</literal> is
+                        <literal>x</literal>.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>ceil</literal></term>
+
+                      <listitem>
+                        <para>Round towards plus infinity. <literal>
+                        ceil(X)</literal> rounds <literal>X</literal> to the
+                        nearest integer towards plus infinity.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>floor</literal></term>
+
+                      <listitem>
+                        <para>Round towards minus infinity. <literal>
+                        floor(X)</literal> rounds <literal>X</literal> to the
+                        nearest integer towards minus infinity.</para>
+                      </listitem>
+                    </varlistentry>
+					
+					<varlistentry>
+                      <term><literal>fix</literal></term>
+
+                      <listitem>
+                        <para>Round towards zero. <literal>
+                        fix(X)</literal> rounds <literal>X</literal> to the
+                        nearest integer towards zero.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>randn</literal></term>
+
+                      <listitem>
+                        <para>Normally distributed pseudorandom numbers.
+                        <literal> R = randn(N)</literal> returns an
+                        <literal>N</literal>-by-<literal>N</literal> matrix
+                        containing pseudorandom values drawn from the standard
+                        normal distribution. <literal> R = randn()</literal>
+                        returns a single random number.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>rand</literal></term>
+
+                      <listitem>
+                        <para>Uniformly distributed pseudorandom numbers.
+                        <literal> R = rand(N)</literal> returns an
+                        <literal>N</literal>-by-<literal>N</literal> matrix
+                        containing pseudorandom values drawn from the standard
+                        uniform distribution on the open interval
+                        <literal>(0,1)</literal>. <literal>R =
+                        rand()</literal> returns a single random
+                        number.</para>
+                      </listitem>
+                    </varlistentry>
                   </variablelist></entry>
               </row>
 
@@ -631,15 +700,26 @@ aSat2.X = aSat1.X</code>        </programlisting>
 
                       <listitem>
                         <para>Determinant. In <literal>Y = det(X)</literal>,
-                        <literal>Y</literal> is the determinant of
-                        <literal>X</literal>. <literal>X</literal> must be a
-                        matrix or a scalar. If <literal>X</literal> is a
-                        matrix, the number of rows must equal the number of
-                        columns. If <literal>X</literal> is a scalar,
-                        <literal>Y</literal> is equal to <literal>X</literal>.
-                        For efficiency, GMAT’s implementation of the
-                        determinant is currently limited to matrices 9×9 or
-                        smaller.</para>
+                        <literal>Y</literal> is tthe cross product of the
+                        vectors <literal>A</literal> and <literal>B</literal>.
+                        If <literal>X</literal> is a matrix, the number of
+                        rows must equal the number of columns. If
+                        <literal>X</literal> is a scalar, <literal>Y</literal>
+                        is equal to <literal>X</literal>. For efficiency,
+                        GMAT’s implementation of the determinant is currently
+                        limited to matrices 9×9 or smaller.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>cross</literal></term>
+
+                      <listitem>
+                        <para>Vector cross product. In <literal>C =
+                        cross(A,B)</literal>, <literal>C</literal> is the
+                        vector cross product of <literal>A</literal> and
+                        <literal>B</literal> . <literal>A</literal> and
+                        <literal>B</literal> must be 3 element arrays.</para>
                       </listitem>
                     </varlistentry>
 

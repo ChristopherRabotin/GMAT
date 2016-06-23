@@ -307,6 +307,11 @@ public:
                                 wxArrayString *excList = NULL,
                                 bool multiSelect = false);
    
+   wxListBox* GetFiniteBurnListBox(wxWindow *parent, wxWindowID id,
+                                   const wxSize &size,
+                                   wxArrayString *excList = NULL,
+                                   bool multiSelect = false);
+   
    wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                  const wxSize &size,
                                  const wxString &objType,
@@ -451,6 +456,7 @@ private:
    std::vector<wxListBox*> mSpaceObjectLBList;
    std::vector<wxListBox*> mSpacecraftLBList;
    std::vector<wxListBox*> mImpBurnLBList;
+   std::vector<wxListBox*> mFiniteBurnLBList;
    std::vector<wxCheckListBox*> mSubscriberCLBList;
    std::vector<wxCheckListBox*> mXyPlotCLBList;
    std::vector<wxCheckListBox*> mSpacePointCLBList;
@@ -488,6 +494,7 @@ private:
    std::vector<wxArrayString*> mSpacecraftExcList;
    std::vector<wxArrayString*> mGroundStationExcList;
    std::vector<wxArrayString*> mImpBurnExcList;
+   std::vector<wxArrayString*> mFiniteBurnExcList;
    std::vector<wxArrayString*> mAllObjectExcList;
    std::vector<wxArrayString*> mFuelTankExcList;
    std::vector<wxArrayString*> mThrusterExcList;

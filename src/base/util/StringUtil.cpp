@@ -50,6 +50,7 @@
 //#define DEBUG_ARRAY_INDEX 2
 //#define DEBUG_STRING_UTIL_ARRAY 1
 //#define DEBUG_STRING_UTIL_SEP 2
+//#define DEBUG_SEP_BRACKETS 1
 //#define DEBUG_NO_BRACKETS
 //#define DEBUG_BALANCED_BRACKETS
 //#define DEBUG_MATH_EQ 2
@@ -833,6 +834,92 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
    return newstr;
 }
 
+//------------------------------------------------------------------------------
+// std::string ReplaceFirst(const std::string &str, const std::string &from,
+//                     const std::string &to, std::string::size_type start)
+//------------------------------------------------------------------------------
+/*
+ * Replaces first occurenece of <from> string to <to> string from start index
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ReplaceFirst(const std::string &str, const std::string &from,
+                                    const std::string &to, std::string::size_type startIndex)
+{
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceFirst()> str=<%s>, from=<%s>, to=<%s>, startIndex=%u\n",
+       str.c_str(), from.c_str(), to.c_str(), startIndex);
+   #endif
+   
+   // if input string is the same as string to replace, just return <to> string
+   if (str == from)
+   {
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::ReplaceFirst()> returning <%s>, input and from string "
+          "is the same\n", to.c_str());
+      #endif
+      return to;
+   }
+   
+   std::string str1 = str;
+   std::string prepend;
+   if (startIndex > 0)
+   {
+      prepend = str.substr(0, startIndex);
+      str1 = str.substr(startIndex);
+   }
+   std::string::size_type pos = str1.find(from);
+   
+   // if string not found, just return input string
+   if (pos == str1.npos)
+   {
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceFirst()> returning <%s>, the string <%s> not found\n",
+       str.c_str(), from.c_str());
+      #endif
+      return str;
+   }
+   
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("   prepend=<%s>, str1=<%s>\n", prepend.c_str(), str1.c_str());
+   #endif
+   
+   bool done = false;
+   std::string::size_type start = 0;
+   
+   while (!done)
+   {
+      pos = str1.find(from, start);
+
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage("===> start=%u, pos=%u\n", start, pos);
+      #endif
+
+      if (pos != str1.npos)
+      {
+         str1.replace(pos, from.size(), to);
+         start = pos + to.size();
+
+         #ifdef DEBUG_REPLACE
+         MessageInterface::ShowMessage("===> start=%u, str1=<%s>\n", start, str1.c_str());
+         #endif
+      }
+      break;
+   }
+   
+   str1 = prepend + str1;
+   
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceFirst()> returning <%s>\n", str1.c_str());
+   #endif
+   
+   return str1;
+}
 
 //------------------------------------------------------------------------------
 // std::string Replace(const std::string &str, const std::string &from,
@@ -1399,6 +1486,101 @@ char GmatStringUtil::GetClosingBracket(const char &openBracket)
    }
 }
 
+//-------------------------------------------------------------------------------
+// StringArray SeparateBrackets(const std::string &chunk,
+//                              const std::string &bracketPair,
+//                              const std::string &delim,
+//                              bool checkOuterBracket)
+//-------------------------------------------------------------------------------
+/*
+ * Breaks chunk into parts separated by space or comma but keeps bracket together,
+ * except outer most brackets.
+ *
+ * For example:
+ * string = "{Pert=P(1,1),MaxStep=M(1,1),Lower=L(1,1),Upper=U(1,1)}"
+ * SeparateBrackets(string, "{}", ",", false) will return
+ *    <Pert=P(1,1)> <MaxStep=M(1,1)> <Lower=L(1,1)> <Upper=U(1,1)>
+ *
+ * @param <chunk> input chunk to be break apart
+ * @param <bracketPair> input bracket pair (open and close) to keep together
+ *                      (), [], {}
+ * @param <checkOuterBracket> true if outer bracket pair must be exist (true)
+ *
+ * @exception <InterpreterException> thrown
+ *    If checkOuterBracket is set to true, and there is no matching bracket pair
+ */
+//-------------------------------------------------------------------------------
+StringArray GmatStringUtil::SeparateBrackets(const std::string &chunk,
+                                         const std::string &bracketPair,
+                                         const std::string &delim,
+                                         bool checkOuterBracket)
+{
+   #if DEBUG_SEP_BRACKETS
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::SeparateBrackets() chunk='%s', bracketPair='%s', delim='%s', "
+       "checkOuterBracket=%d\n", chunk.c_str(), bracketPair.c_str(), delim.c_str(),
+       checkOuterBracket);
+   #endif
+   
+   std::string str1 = chunk;
+   
+   // First remove blank spaces inside array bracket
+   if (chunk[0] != bracketPair[0])
+      str1 = RemoveSpaceInBrackets(chunk, bracketPair);
+   
+   #if DEBUG_SEP_BRACKETS
+   MessageInterface::ShowMessage("   str1=%s\n", str1.c_str());
+   #endif
+   
+   UnsignedInt firstOpen, lastClose;
+   std::string whiteSpace = " \t";
+   firstOpen = str1.find_first_not_of(whiteSpace);
+   lastClose = str1.find_last_not_of(whiteSpace);
+   bool bracketFound = true;
+   
+   if (str1[firstOpen] != bracketPair[0] || str1[lastClose] != bracketPair[1])
+   {
+      bracketFound = false;
+      if (checkOuterBracket)
+      {
+         char errorMsg[1024];
+         sprintf(errorMsg, "GmatStringUtil::SeparateBrackets() \"%s\" is not enclosed "
+                 "with \"%s\"", str1.c_str(), bracketPair.c_str());
+         
+         #if DEBUG_SEP_BRACKETS
+         MessageInterface::ShowMessage("*** ERROR *** %s\n", errorMsg);
+         #endif
+
+         sprintf(errorMsg, "\"%s\" is not enclosed with \"%s\"", str1.c_str(),
+                 bracketPair.c_str());
+         throw UtilityException(errorMsg);
+      }
+   }
+   
+   std::string str;
+   
+   if (bracketFound)
+      str = str1.substr(firstOpen+1, lastClose-firstOpen-1);
+   else
+      str = str1.substr(firstOpen, lastClose-firstOpen+1);
+   
+   #if DEBUG_SEP_BRACKETS
+   MessageInterface::ShowMessage("   str=%s\n", str.c_str());
+   #endif
+   
+   
+   StringArray parts;
+   parts = SeparateBy(str, delim, true);
+   
+   #if DEBUG_SEP_BRACKETS
+   MessageInterface::ShowMessage("   Returning:\n");
+   for (unsigned int i=0; i<parts.size(); i++)
+      MessageInterface::ShowMessage
+         ("   parts[%d] = %s\n", i, parts[i].c_str());
+   #endif
+   
+   return parts;
+}
 
 //------------------------------------------------------------------------------
 // StringArray SeparateBy(const std::string &str, const std::string &delim,
@@ -2362,16 +2544,18 @@ bool GmatStringUtil::ToOnOff(const std::string &str, std::string &value, bool tr
    return false;
 }
 
-
 //------------------------------------------------------------------------------
-// RealArray ToRealArray(const std::string &str)
+// RealArray ToRealArray(const std::string &str, bool allowOverflow, ...)
 //------------------------------------------------------------------------------
-RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow)
+RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow,
+                                      bool allowSemicolon)
 {
-//   MessageInterface::ShowMessage("ToRealArray() str='%s'\n", str.c_str());
-
+   #ifdef DEBUG_TO_REAL_ARRAY
+   MessageInterface::ShowMessage
+      ("ToRealArray() str='%s', allowSemicolon=%d\n", str.c_str(), allowSemicolon);
+   #endif
    RealArray realArray;
-
+   
    if (!IsBracketBalanced(str, "[]"))
       return realArray;
 
@@ -2380,12 +2564,23 @@ RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow
 
    if (str1 == "")
       return realArray;
-
-   StringArray vals = SeparateBy(str1, " ,");
+   
+   std::string delimiter = " ,";
+   if (allowSemicolon)
+      delimiter = " ,;";
+   
+   #ifdef DEBUG_TO_REAL_ARRAY
+   MessageInterface::ShowMessage("   delimiter='%s'\n", delimiter.c_str());
+   #endif
+   
+   //StringArray vals = SeparateBy(str1, " ,");
+   StringArray vals = SeparateBy(str1, delimiter);
    Real rval;
-
-//   MessageInterface::ShowMessage("   vals.size()=%d\n", vals.size());
-
+   
+   #ifdef DEBUG_TO_REAL_ARRAY
+   MessageInterface::ShowMessage("   vals.size()=%d\n", vals.size());
+   #endif
+   
    for (UnsignedInt i=0; i<vals.size(); i++)
    {
       if (ToReal(vals[i], rval, false, allowOverflow))
@@ -3765,7 +3960,7 @@ bool GmatStringUtil::IsValidFunctionCall(const std::string &str)
       ("GmatStringUtil::IsValidFunctionCall() entered, str='%s'\n", str.c_str());
    #endif
    
-   StringArray callItems = GmatStringUtil::ParseFunctionCall(str);
+   StringArray callItems = ParseFunctionCall(str);
    if (callItems.size() == 0)
    {
       #ifdef DEBUG_PARSE_EQUATION
@@ -4922,7 +5117,7 @@ std::string GmatStringUtil::MakeCommentLines(const std::string &str, bool breakA
 
 
 //------------------------------------------------------------------------------
-// std::string ParseFunctionName(const std::string &str)
+// std::string ParseFunctionName(const std::string &str, std::string &argStr)
 //------------------------------------------------------------------------------
 /**
  * Parses function name from the following syntax:
@@ -4931,16 +5126,18 @@ std::string GmatStringUtil::MakeCommentLines(const std::string &str, bool breakA
  *    Function3;
  *
  * @param  str  Input string
+ * @param  argStr output function argument including ()
  * @return  Function name or blank if name not found
  */
 //------------------------------------------------------------------------------
-std::string GmatStringUtil::ParseFunctionName(const std::string &str)
+std::string GmatStringUtil::ParseFunctionName(const std::string &str, std::string &argStr)
 {
    #ifdef DEBUG_FUNCTION_NAME
    MessageInterface::ShowMessage
       ("GmatStringUtil::ParseFunctionName() entered, str='%s'\n", str.c_str());
    #endif
-   
+
+   argStr = "";
    if (str == "")
       return "";
    
@@ -4975,6 +5172,25 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str)
             funcName = str1.substr(index1+1, index2-index1-1);
       }
    }
+   else
+   {
+      // This code block parse function name such as a = function(x)
+      std::string::size_type index1 = str1.find("=");
+      #ifdef DEBUG_FUNCTION_NAME
+      MessageInterface::ShowMessage("   equalSignPos = %u\n", index1);
+      #endif
+      
+      // Parse function name if equal sign is not inside quotes
+      std::string::size_type strPos;
+      if (!IsStringInsideSymbols(str1, "=", "'", strPos))
+      {
+         std::string::size_type index2 = str1.find("(", index1 + 1);
+         if (index2 == str1.npos)
+            funcName = str1.substr(index1+1);
+         else
+            funcName = str1.substr(index1+1, index2-index1-1);
+      }
+   }
    
    // If function name not found above, try again (LOJ: 2016.03.07)
    if (funcName == "")
@@ -4985,10 +5201,14 @@ std::string GmatStringUtil::ParseFunctionName(const std::string &str)
       else
          funcName = str1.substr(0, index2);
    }
+
+   // Get function arguments
+   argStr = str.substr(funcName.size());
    
    #ifdef DEBUG_FUNCTION_NAME
    MessageInterface::ShowMessage
-      ("GmatStringUtil::ParseFunctionName() returning '%s'\n", funcName.c_str());
+      ("GmatStringUtil::ParseFunctionName() returning function name: '%s', arg: '%s'\n",
+       funcName.c_str(), argStr.c_str());
    #endif
    return funcName;
 }
@@ -5018,7 +5238,8 @@ StringArray GmatStringUtil::ParseFunctionCall(const std::string &str)
    if (str == "")
       return nameAndArgs;
    
-   std::string fname = ParseFunctionName(str);
+   std::string argStr;
+   std::string fname = ParseFunctionName(str, argStr);
    #ifdef DEBUG_PARSE_EQUATION
    MessageInterface::ShowMessage("   fname='%s'\n", fname.c_str());
    #endif
@@ -5042,7 +5263,16 @@ StringArray GmatStringUtil::ParseFunctionCall(const std::string &str)
    MessageInterface::ShowMessage("   substr within parenthesis = '%s'\n", str1.c_str());
    #endif
    
-   StringArray args = SeparateByComma(str1, true);
+   // If no arguments, return
+   if (str1 == "")
+      return nameAndArgs;
+   
+   // Use SeparateBrackets() for separating array elements such as arr22(1,1) (LOJ: 2016.06.08)
+   //StringArray args = SeparateByComma(str1, true);
+   bool checkBrackets = false;
+   if (str1.find("[") != str1.npos && str1.find("]") != str1.npos)
+      checkBrackets = true;
+   StringArray args = SeparateBrackets(str1, "[]", " ,;", checkBrackets);
    for (unsigned int i = 0; i < args.size(); i++)
    {
       #ifdef DEBUG_PARSE_EQUATION
@@ -5561,6 +5791,10 @@ bool GmatStringUtil::HasMissingQuote(const std::string &str,
  * Checks if reqStr is inside symbols. Return true if reqStr found and it is inside
  * symbols. It updates position of reqStr.
  *
+ * If symbol has two characters, it will check reqStr between first and second characters.
+ * for example:
+ * IsStringInsideSymbols(inputStr, ";", "[]", strPos);
+ *
  * @return true if reqStr found and it is inside symbols
  *         false if reqStr not found or reqStr is not between symbols
  */
@@ -5577,20 +5811,36 @@ bool GmatStringUtil::IsStringInsideSymbols(const std::string &str, const std::st
    // reqStrPos is output
    reqStrPos = str.find(reqStr);
    bool isStrInsideSymbols = false;
+   std::string symbol1 = symbol;
+   std::string symbol2 = symbol;
+   
+   if (symbol.size() == 2)
+   {
+      symbol1 = symbol.substr(0,1);
+      symbol2 = symbol.substr(1,1);
+   }
+   
+   #ifdef DEBUG_STRING_INSIDE
+   MessageInterface::ShowMessage
+      ("   symbol1 = '%s', symbol2 = '%s'\n", symbol1.c_str(), symbol2.c_str());
+   #endif
+   
    if (reqStrPos != str.npos)
    {
       // Check if reqStr is inside symbols
-      std::string::size_type symbol1 = str.find(symbol);
-      if (symbol1 != str.npos)
+      //std::string::size_type symbol1Pos = str.find(symbol);
+      std::string::size_type symbol1Pos = str.find(symbol1);
+      if (symbol1Pos != str.npos)
       {
-         std::string::size_type symbol2 = str.find(symbol, symbol1 + 1);
+         //std::string::size_type symbol2Pos = str.find(symbol, symbol1Pos + 1);
+         std::string::size_type symbol2Pos = str.find(symbol2, symbol1Pos + 1);
          #ifdef DEBUG_STRING_INSIDE
          MessageInterface::ShowMessage
-            ("   reqStrPos=%u, symbol1=%u, symbol2=%u\n", reqStrPos, symbol1, symbol2);
+            ("   reqStrPos=%u, symbol1Pos=%u, symbol2Pos=%u\n", reqStrPos, symbol1Pos, symbol2Pos);
          #endif
-         if (symbol2 != str.npos)
+         if (symbol2Pos != str.npos)
          {
-            if (reqStrPos > symbol1 && reqStrPos < symbol2)
+            if (reqStrPos > symbol1Pos && reqStrPos < symbol2Pos)
             {
                #ifdef DEBUG_STRING_INSIDE
                MessageInterface::ShowMessage("   '%s' is inside symbols\n", reqStr.c_str());
@@ -6072,7 +6322,11 @@ bool GmatStringUtil::IsValidFullFileName(const std::string &str, Integer &error)
    if (pos != str1.npos)
    {
       if (pos1 != str1.npos)
-         pos = GmatMathUtil::Min(pos, pos1);
+      {
+         // Fix warning: warning C4244: '=' : conversion from 'Real' to 'unsigned int', possible loss of data
+         //pos = GmatMathUtil::Min(pos, pos1);
+         pos = pos < pos1 ? pos : pos1;
+      }
    }
    else
    {

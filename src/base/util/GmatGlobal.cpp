@@ -395,6 +395,53 @@ bool GmatGlobal::IsEventLocationAvailable()
    return isEventLocationAvailable;
 }
 
+//------------------------------------------------------------------------------
+// void SetIncludeFoundInScriptResource(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Sets the #Include statement found in the script resouce flag. Normally this
+ * flag is set from the ScriptInterpreter and the ResourceTree retrieves it.
+ *
+ * @param flag Flag that is true if there are #Include statements, false if not
+ */
+//------------------------------------------------------------------------------
+void GmatGlobal::SetIncludeFoundInScriptResource(bool flag)
+{
+   includeFoundInScriptResource = flag;
+}
+
+//------------------------------------------------------------------------------
+// bool GetIncludeFoundInScriptResource()
+//------------------------------------------------------------------------------
+/**
+ * Returns the #Include statement found in the script resouce flag. Normally this
+ * flag is set from the ScriptInterpreter and the ResourceTree retrieves it.
+ *
+ * @return The flag
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::GetIncludeFoundInScriptResource()
+{
+   return includeFoundInScriptResource;
+}
+
+//------------------------------------------------------------------------------
+// bool IsGUISavable()
+//------------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether GUI can be saved or not.
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsGUISavable()
+{
+   // Currently GUI cannot be saved when a main script contains #Include
+   // before the BeginMissinSequence
+   // Are there any other situations GUI cannot be saved?
+   if (includeFoundInScriptResource)
+      return false;
+   else
+      return true;
+}
 
 //------------------------------------------------------------------------------
 // bool IsMissionTreeDebugOn()
@@ -874,6 +921,7 @@ GmatGlobal::GmatGlobal()
    isMatlabAvailable = false;
    isMatlabDebugOn = false;
    isEventLocationAvailable = false;
+   includeFoundInScriptResource = false;
    isMissionTreeDebugOn = false;
    isWritingParameterInfo = false;
    isWritingFilePathInfo = false;

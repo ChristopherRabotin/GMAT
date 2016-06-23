@@ -46,7 +46,9 @@ DataFileFactory::DataFileFactory() :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_DATA_FILE
       creatables.push_back("DataFile");
+#endif
    }
 }
 
@@ -77,7 +79,9 @@ DataFileFactory::DataFileFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_DATA_FILE
       creatables.push_back("DataFile");
+#endif
    }
 }
 
@@ -96,7 +100,9 @@ DataFileFactory::DataFileFactory(const DataFileFactory& fact) :
 {
    if (creatables.empty())
    {
+#ifndef DISABLE_DATA_FILE
       creatables.push_back("DataFile");
+#endif
    }
 }
 
@@ -120,7 +126,9 @@ DataFileFactory& DataFileFactory::operator= (const DataFileFactory& fact)
 
       if (creatables.empty())
       {
+#ifndef DISABLE_DATA_FILE
          creatables.push_back("DataFile");
+#endif
       }
    }
 
@@ -146,8 +154,10 @@ DataFile* DataFileFactory::CreateDataFile(const std::string &ofType,
 {
    DataFile *retval = NULL;
 
+#ifndef DISABLE_DATA_FILE
    if (ofType == "DataFile")
       retval = new DataFile(withName);
+#endif
 
    return retval;
 }

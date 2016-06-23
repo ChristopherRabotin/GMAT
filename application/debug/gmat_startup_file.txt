@@ -113,11 +113,11 @@ VEHICLE_EPHEM_CCSDS_PATH = DATA_PATH/vehicle/ephem/ccsds/
 PLANETARY_COEFF_PATH     = DATA_PATH/planetary_coeff/
 EOP_FILE                 = PLANETARY_COEFF_PATH/eopc04_08.62-now
 NUTATION_COEFF_FILE      = PLANETARY_COEFF_PATH/NUTATION.DAT
-PLANETARY_PCK_FILE       = PLANETARY_COEFF_PATH/pck00010.tpc
+PLANETARY_PCK_FILE       = PLANETARY_COEFF_PATH/SPICEPlanetaryConstantsKernel.tpc
 #-----------------------------------------------------------
 TIME_PATH                = DATA_PATH/time/
 LEAP_SECS_FILE           = TIME_PATH/tai-utc.dat
-LSK_FILE                 = TIME_PATH/naif0011.tls
+LSK_FILE                 = TIME_PATH/SPICELeapSecondKernel.tls
 #-----------------------------------------------------------
 EARTH_POT_PATH           = DATA_PATH/gravity/earth/
 LUNA_POT_PATH            = DATA_PATH/gravity/luna/
@@ -168,7 +168,7 @@ SPAD_PATH                = DATA_PATH/vehicle/spad/
 SPAD_SRP_FILE            = SPAD_PATH/SphericalModel.spo
 #-----------------------------------------------------------
 ATMOSPHERE_PATH          = DATA_PATH/atmosphere/earth
-CSSI_FLUX_FILE           = ATMOSPHERE_PATH/CSSI_2004To2026.txt
+CSSI_FLUX_FILE           = ATMOSPHERE_PATH/SpaceWeather-All-v1.2.txt
 SCHATTEN_FILE            = ATMOSPHERE_PATH/SchattenPredict.txt
 #-----------------------------------------------------------
 HELP_FILE                = ROOT_PATH/docs/help/help.chm

@@ -87,11 +87,16 @@ Solver* EstimatorFactory::CreateSolver(const std::string &ofType,
       return new Simulator(withName);
    if (ofType == "BatchEstimatorInv")
       return new BatchEstimatorInv(withName);
+
+#ifndef DISABLE_BATCH_ESTIMATOR_SVD
    if (ofType == "BatchEstimatorSVD")
       return new BatchEstimatorSVD(withName);
+#endif
+
+#ifndef DISABLE_EXTENDED_KALMAN_INV
    if (ofType == "ExtendedKalmanInv")
       return new ExtendedKalmanInv(withName);
-
+#endif
    // Here's a list of other potential estimators:
    //if (ofType == "BatchLeastSquares")
    //   return new BatchLeastSquares(withName);
@@ -138,8 +143,14 @@ EstimatorFactory::EstimatorFactory() :
    {
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
+
+#ifndef DISABLE_BATCH_ESTIMATOR_SVD
       creatables.push_back("BatchEstimatorSVD");
+#endif
+
+#ifndef DISABLE_EXTENDED_KALMAN_INV
       creatables.push_back("ExtendedKalmanInv");
+#endif
 
       //creatables.push_back("BatchLeastSquares");
       //creatables.push_back("SequentialLeastSquares");
@@ -192,8 +203,14 @@ EstimatorFactory::EstimatorFactory(const EstimatorFactory& fact) :
    {
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
+
+#ifndef DISABLE_BATCH_ESTIMATOR_SVD
       creatables.push_back("BatchEstimatorSVD");
+#endif
+
+#ifndef DISABLE_EXTENDED_KALMAN_INV
       creatables.push_back("ExtendedKalmanInv");
+#endif
 
       //creatables.push_back("BatchLeastSquares");
       //creatables.push_back("SequentialLeastSquares");
@@ -272,9 +289,12 @@ bool EstimatorFactory::DoesObjectTypeMatchSubtype(const std::string &theType,
          retval = true;
    }
 
-   if ((theType == "BatchEstimatorInv") ||
-//       (theType == "BatchEstimatorSVD") ||  // Not yet implemented; leave off menu
-       (theType == "ExtendedKalmanInv"))
+   if ((theType == "BatchEstimatorInv")
+//       ||(theType == "BatchEstimatorSVD")  // Not yet implemented; leave off menu
+#ifndef DISABLE_EXTENDED_KALMAN_INV
+       || (theType == "ExtendedKalmanInv")
+#endif
+       )
    {
       if (theSubtype == "Estimator")
          retval = true;

@@ -1235,6 +1235,17 @@ bool SpacePoint::IsParameterReadOnly(const std::string &label) const
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+//---------------------------------------------------------------------------
+// bool IsSquareBracketAllowedInSetting(const Integer id) const
+//---------------------------------------------------------------------------
+bool SpacePoint::IsSquareBracketAllowedInSetting(const Integer id) const
+{
+   if (id == ORBIT_COLOR || id == TARGET_COLOR)
+      return true;
+   else
+      return GmatBase::IsSquareBracketAllowedInSetting(id);
+}
+
 //------------------------------------------------------------------------------
 // bool IsParameterCommandModeSettable(const Integer id) const
 //------------------------------------------------------------------------------

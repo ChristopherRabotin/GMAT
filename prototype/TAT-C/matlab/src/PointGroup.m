@@ -2,8 +2,6 @@ classdef PointGroup < handle
     %POINTGROUP. Computes and stores grid points on a sphere.
     
     properties (Access = private)
-        % String. The name of the model used to create points
-        modelName
         % Real array length num points. Latitude coordinates of grid points
         latVec
         % Real array length num points. Longitude coordinates of grid points
@@ -27,18 +25,6 @@ classdef PointGroup < handle
     
     methods (Access = public)
         
-        function obj = PointGroup(modelName,numRequestedPoints,latUpper,latLower,lonUpper,lonLower)
-            % Class constructor
-            % Inputs:  string modelName, int numRequestedPoints, double
-            % latUpper, double latLower, double, lonUpper, double lonLower
-            obj.numRequestedPoints = numRequestedPoints;
-            obj.modelName = modelName;
-            if nargin > 2
-                obj.SetLatLonBounds(latUpper,latLower,lonUpper,lonLower);
-            end
-            obj.ComputeTestPoints('Helical');
-        end
-        
         function obj = AddUserDefinedPoints(obj,latVec,lonVec)
             %  Add user defined latitude and longitude points
             %  Inputs are real arrays of longitude and latitude in radians
@@ -50,17 +36,34 @@ classdef PointGroup < handle
             end
         end
         
+        function obj = AddHelicalPointsByNumPoints(obj,numGridPoints)
+            obj.ComputeTestPoints('Helical',numGridPoints);
+        end
+        
+        function obj = AddHelicalPointsByAngle(obj,angleBetweenPoints)
+            numGridPoints = floor(4*pi/angleBetweenPoints^2);
+            obj.ComputeTestPoints('Helical',numGridPoints);
+        end
+        
         function posVec = GetPointPositionVector(obj,poiIndex)
             % Returns body fixed location of point given point index
             % Inputs. int poiIndex
             % Outputs. Rvector 3x1 containing the position.
+                 
+            % Make sure there are points
+            obj.CheckHasPoints()
+            
             posVec = obj.testPointsArray{poiIndex};
         end
         
-        function [lat,lon] = GetLatAndLon(obj,poiIndex)
+        function [lat,lon] = GetLatAndLon(obj,poiIndex)            
             % Returns body fixed location of point given point index
             % Inputs. int poiIndex
             % Outputs. double lat, double lon
+            
+            % Make sure there are points
+            obj.CheckHasPoints()
+            
             lat = obj.latVec(poiIndex);
             lon = obj.lonVec(poiIndex);
         end
@@ -73,15 +76,20 @@ classdef PointGroup < handle
         
         function [latVec,lonVec] = GetLatLonVectors(obj)
             % Returns the latitude and longitude vectors
+                        
+            % Make sure there are points
+            obj.CheckHasPoints()
+            
             latVec = obj.latVec;
             lonVec = obj.lonVec;
         end
         
-    end
-    
-    methods (Access = private)
-        
         function SetLatLonBounds(obj,latUpper,latLower,lonUpper,lonLower)
+            
+            if obj.numPoints >0
+                error('You must set Lat/Lon Bounds Before adding points')
+            end
+            
             % Sets bounds on latitude and longitude for grid points
             % angle inputs are in radians
             if latLower > latUpper || latLower == latUpper
@@ -102,6 +110,21 @@ classdef PointGroup < handle
             end
             obj.lonUpper = mod(lonUpper,2*pi);
             obj.lonLower = mod(lonLower,2*pi);
+            
+        end
+        
+        
+        
+    end
+    
+    methods (Access = private)
+        
+        function CheckHasPoints(obj)
+            %  Checks to see if points have been added before performing
+            %  computations that require points
+            if obj.numPoints == 0
+                error('The point group does not have any points')
+            end
         end
         
         function AccumulatePoints(obj,lat,lon)
@@ -112,31 +135,32 @@ classdef PointGroup < handle
                 obj.numPoints = obj.numPoints + 1;
                 obj.lonVec(obj.numPoints) = lon;
                 obj.latVec(obj.numPoints) = lat;
-                %  TODO:  Use geodetic to Cartesian conversion.
+                %  TODO:  Use geodetic to Cartesian conversion and don't
+                %  hard code the Earth radius.
                 obj.testPointsArray{obj.numPoints} = [ cos(lon) * cos(lat);
                     sin(lon) * cos(lat);
-                    sin(lat)];
+                    sin(lat)]*6378.1363;
             end
         end
         
-        function ComputeTestPoints(obj,modelName)
+        function ComputeTestPoints(obj,modelName,numGridPoints)
             %  Computes surface grid points
             %  Inputs: string modelName
             
             % Place first point at north pole
-            if (obj.numRequestedPoints >= 1)
+            if (numGridPoints >= 1)
                 % One Point at North Pole
                 AccumulatePoints(obj,pi/2,0)
             end
             % Place second point at south pole
-            if (obj.numRequestedPoints >= 2)
+            if (numGridPoints >= 2)
                 % One Point at South Pole
                 AccumulatePoints(obj,-pi/2,0)
             end
             % Place remaining points according to requested algorithm
-            if (obj.numRequestedPoints >= 3)
+            if (numGridPoints >= 3)
                 if strcmp(modelName,'Helical')
-                    ComputeHelicalPoints(obj,obj.numRequestedPoints-2);
+                    ComputeHelicalPoints(obj,numGridPoints-2);
                 end
             end
         end
@@ -174,20 +198,14 @@ classdef PointGroup < handle
                 for j = 1:1:numPointsByLatBand(latIdx)
                     % Compute the latitude for the next point
                     currentLongitude = 2*pi*(j-1)/numPointsByLatBand(latIdx);
-                    % Insert the point into the cartesian and spherical
-                    % arrays.
+                    % Insert the point into the cartesian and spherical arrays.
                     pointIdx = pointIdx + 1;
                     %  TODO:  Use geodetic to Cartesian conversion.
                     obj.AccumulatePoints(discreteLatitudes(latIdx),currentLongitude);
-                    %                     obj.testPointsArray{pointIdx} = [ cos(currentLongitude) *...
-                    %                         cos(discreteLatitudes(latIdx));
-                    %                         sin(currentLongitude) * cos(discreteLatitudes(latIdx));
-                    %                         sin(discreteLatitudes(latIdx))];
-                    %                     obj.latVec(1,pointIdx) = discreteLatitudes(latIdx);
-                    %                     obj.lonVec(1,pointIdx) = currentLongitude;
                 end
             end
         end
+        
     end
     
     methods (Access = public)
@@ -197,6 +215,9 @@ classdef PointGroup < handle
             %  Used to visualize points. not needed in GMAT.
             %  DO NOT CONVERT TO C++
             [xSphere,ySphere,zSphere] = sphere(25);
+            xSphere = xSphere*6378.1363;
+            ySphere = ySphere*6378.1363;
+            zSphere = zSphere*6378.1363;
             figHandle = figure(100);
             surf(xSphere,ySphere,zSphere,'EdgeColor',[0.784 0.816 0.831])
             colormap('white')

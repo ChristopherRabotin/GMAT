@@ -49,7 +49,7 @@ public:
     virtual bool Interpolate(const Real ind, Real *results);
     
     // inherited from GmatBase
-    virtual GmatBase* Clone() const;
+    virtual Interpolator* Clone() const;
 
 };
 
