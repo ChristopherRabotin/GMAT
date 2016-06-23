@@ -195,10 +195,6 @@ protected:
    /// ID for the spacecraft epoch parameter
    Integer                      epochID;
    
-   /// The spacecraft and formations that are propagated
-   ObjectArray                  sats;
-//   /// Flag indicating a formation was detected
-//   bool                         hasFormation;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
    /// The time step that we need to interpolate across
@@ -344,9 +340,12 @@ protected:
    virtual bool            TakeAStep(Real propStep = 0.0);
    
    
-   void                    AddTransientForce(StringArray *sats, ODEModel *p,
-                                 PropagationStateManager *propMan);
-   void                    ClearTransientForces();
+//------------------------------------------------------------------------------
+// MOVED TO PROPAGATIONENABLEDCOMMAND
+//------------------------------------------------------------------------------
+//   void                    AddTransientForce(StringArray *sats, ODEModel *p,
+//                                 PropagationStateManager *propMan);
+//   void                    ClearTransientForces();
    
    bool                    CheckFirstStepStop(Integer i);
    
