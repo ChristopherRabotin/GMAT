@@ -148,8 +148,8 @@ EopFile::~EopFile()
    #ifdef DEBUG_EOP_INITIALIZE
       MessageInterface::ShowMessage("--- DESTRUCTING EOPFILE\n");
    #endif
-   delete polarMotion;
-   delete ut1UtcOffsets;
+   if (polarMotion)   delete polarMotion;
+   if (ut1UtcOffsets) delete ut1UtcOffsets;
 }
 
 
@@ -301,9 +301,12 @@ void EopFile::Initialize()
 void EopFile::ResetEopFile(const std::string &toName, 
                            GmatEop::EopFileType toType)
 {
-   eopFileName   = toName;
-   eopFType      = toType;
-   isInitialized = false;
+   if (eopFileName != toName)
+   {
+      eopFileName   = toName;
+      eopFType      = toType;
+      isInitialized = false;
+   }
 }
 
 //---------------------------------------------------------------------------

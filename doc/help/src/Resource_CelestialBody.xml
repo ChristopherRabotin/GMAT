@@ -623,6 +623,64 @@
           </row>
 
           <row>
+            <entry><guilabel>EopFileName </guilabel></entry>
+
+            <entry><para> Optional Earth EOP file to use instead of the EOP
+            file defined in the startup file. Note that an emtpy string is the
+            default, and when set to an empty string, the EOP file defined in
+            the GMAT startup file is used. This field is only valid for
+            <guilabel>Earth </guilabel>. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Filename</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Valid file name</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>''</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>FileName</guilabel></entry>
 
             <entry><para> Path and/or name of texture map file used in

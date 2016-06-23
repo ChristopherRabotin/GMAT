@@ -85,6 +85,7 @@
 //#define DEBUG_EVENT
 //#define DEBUG_ACCUMULATION_RESULTS
 //#define DEBUG_PROPAGATION
+//#define DEBUG_DATA_FILTER
 
 // Macros for debugging of the state machine
 //#define WALK_STATE_MACHINE
@@ -5521,9 +5522,8 @@ Rmatrix BatchEstimator::CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6>
 //-------------------------------------------------------------------------
 /**
 * This function is used to filter bad observation data records. It has
-*   1. Measurement model's maximum residual filter
-*   2. Data filter based on time span
-*   3. Sigma editting
+*   1. Data filter based on OLSEInitialRMSSigma
+*   2. Data filter based on outer-loop sigma editting
 */
 //-------------------------------------------------------------------------
 bool BatchEstimator::DataFilter()
@@ -5536,8 +5536,8 @@ bool BatchEstimator::DataFilter()
    {
       for (Integer i=0; i < currentObs->value.size(); ++i)
      {
-         // 2.Data filtered based on sigma editting
-         // 2.1. Specify Weight
+         // 1. Data filtered based on OLSEInitialRMSSigma
+         // 1.1. Specify Weight
          Real weight = 1.0;
          if (currentObs->noiseCovariance == NULL)
          {
@@ -5549,13 +5549,18 @@ bool BatchEstimator::DataFilter()
          else
                weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
          
-         // 2.2. Filter based on maximum residual multiplier
+         // 1.2. Filter based on maximum residual multiplier
+#ifdef DEBUG_DATA_FILTER
+         MessageInterface::ShowMessage("Epoch = %.12lf A1Mjd   O = %.6lf   C = %.6lf   w = %le    sqrt(w)*Abs(O-C) = %.6lf   maxResidualMult = %lf\n", calculatedMeas->epoch, currentObs->value[i], calculatedMeas->value[i], weight, sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]), maxResidualMult);
+#endif
          if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*GmatMathUtil::Abs(O-C) > maximum residual multiplier) then throw away this data record
          {
             measManager.GetObsDataObject()->inUsed = false;
             measManager.GetObsDataObject()->removedReason = "IRMS";            // "IRMS": represent for OLSEInitialRMSSigma
             std::string filterName = "IRMS";
-
+#ifdef DEBUG_DATA_FILTER
+            MessageInterface::ShowMessage("This record is fillted.\n");
+#endif
             retVal = true;
             break;
          }
@@ -5565,8 +5570,8 @@ bool BatchEstimator::DataFilter()
    {
      for (Integer i=0; i < currentObs->value.size(); ++i)
      {
-         // Data filtered based on sigma editting
-         // 1. Specify Weight
+         // 2. Data filtered based on outer-loop sigma editting
+         // 2.1. Specify Weight
          Real weight = 1.0;
          if (currentObs->noiseCovariance == NULL)
          {
@@ -5578,7 +5583,7 @@ bool BatchEstimator::DataFilter()
          else
             weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
          
-         // 2. Filter based on n-sigma
+         // 2.2. Filter based on n-sigma
          Real sigmaVal = (chooseRMSP ? predictedRMS : newResidualRMS);
          if (sqrt(weight)*GmatMathUtil::Abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*GmatMathUtil::Abs(O-C) > k*sigma+ K) then throw away this data record
          {
