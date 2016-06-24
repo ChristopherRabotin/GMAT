@@ -229,6 +229,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mViewAll = true;
    mUsingViewLevel = true;
    mIsMissionTreeDocked = true;
+   mEnableShowScript = true;
    mWriteMissionSeq = false;
    mViewLevel = 10;
    
@@ -601,6 +602,13 @@ void MissionTree::SetViewCommands(const wxArrayString &viewCmds)
    UpdateMission(true, false, false);
 }
 
+//------------------------------------------------------------------------------
+// void EnableShowScript(bool flag)
+//------------------------------------------------------------------------------
+void MissionTree::EnableShowScript(bool flag)
+{
+   mEnableShowScript = flag;
+}
 
 //------------------------------------------------------------------------------
 // const wxArrayString& GetCommandList(bool forViewControl = false)
@@ -3097,6 +3105,11 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Check(MT_SHOW_DETAIL, mShowDetailedItem);
       menu.Append(MT_SHOW_MISSION_SEQUENCE, wxT("Show Mission Sequence"));
       menu.Append(MT_SHOW_SCRIPT, wxT("Show Script"));
+      
+      // We want to enable/disable these menu items depends on GUI savable/non-savable mode
+      menu.Enable(MT_SHOW_MISSION_SEQUENCE, mEnableShowScript);
+      menu.Enable(MT_SHOW_SCRIPT, mEnableShowScript);
+      
       menu.AppendSeparator();
       menu.Append(MT_MISSION_SUMMARY_ALL, wxT("Mission Summary - All"));
       menu.Append(MT_MISSION_SUMMARY_PHYSICS, wxT("Mission Summary - Physics"));

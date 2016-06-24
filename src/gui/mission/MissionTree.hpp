@@ -69,6 +69,7 @@ public:
    void SetViewAll(bool viewAll = true);
    void SetViewLevel(int level);
    void SetViewCommands(const wxArrayString &viewCmds);
+   void EnableShowScript(bool flag);
    const wxArrayString& GetCommandList(bool forViewControl = false);
    
 protected:
@@ -88,6 +89,7 @@ private:
    bool            mViewAll;
    bool            mUsingViewLevel;
    bool            mIsMissionTreeDocked;
+   bool            mEnableShowScript;
    int             mViewLevel;
    
    // For debug or DEBUG_MISSION_TREE = ON in the startup file
