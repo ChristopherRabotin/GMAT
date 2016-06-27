@@ -765,6 +765,17 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
    measDataS = adapterS->GetMeasurement();
    // measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km                                    // made changes by TUAN NGUYEN
    measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km   // made changes by TUAN NGUYEN
+//   MessageInterface::ShowMessage("Measurement epoch: %.12lf A1Mjd   E-path and S-path iono correction = %lf    %lf   Blockinh status for E-path and S-path: <%s>  <%s>\n",
+//      measDataE.epoch, GetIonoCorrection() * 1000, adapterS->GetIonoCorrection() * 1000, measDataE.unfeasibleReason.c_str(), measDataS.unfeasibleReason.c_str());
+
+
+   // No ionosphere correction is added to measurement when signal was blocked in either E-path or S-path           // made changes by TUAN NGUYEN
+   if ((measDataE.unfeasibleReason.at(0) == 'B') || (measDataS.unfeasibleReason.at(0) == 'B'))                      // made changes by TUAN NGUYEN
+   {                                                                                                                // made changes by TUAN NGUYEN
+      measDataE.value[0] = measDataE.value[0] + GetIonoCorrection();                                                // made changes by TUAN NGUYEN
+      measDataS.value[0] = measDataS.value[0] + (adapterS->GetIonoCorrection() / adapterS->GetMultiplierFactor());  // made changes by TUAN NGUYEN
+   }                                                                                                                // made changes by TUAN NGUYEN
+
 
    // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
