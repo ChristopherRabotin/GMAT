@@ -897,6 +897,17 @@ void BatchEstimatorInv::Estimate()
       try
       {
          Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+         //MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         //for (Integer row = 0; row < Pdx0_inv.GetNumRows(); ++row)
+         //{
+         //   for (Integer col = 0; col < Pdx0_inv.GetNumColumns(); ++col)
+         //      MessageInterface::ShowMessage("%le   ", Pdx0_inv.GetElement(row, col));
+         //   if (row < Pdx0_inv.GetNumRows() - 1)
+         //      MessageInterface::ShowMessage("\n");
+         //}
+         //MessageInterface::ShowMessage("]\n");
+
       }
       catch (...)
       {
