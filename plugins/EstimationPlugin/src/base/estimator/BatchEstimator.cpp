@@ -3945,6 +3945,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       for (UnsignedInt i = 0; i < stList.size(); ++i)
       {
          std::string keyword = stList[i] + " " + typeList[i];
+
          if (stList[i] == gsName)
          {
             // write a line on statistics table
@@ -4032,9 +4033,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
             sumSERes2Total = 0.0;
             sumSEWRes2Total = 0.0;
 
-            if (i < (stList.size()-1))
-               gsName = stList[i+1];
-
+            gsName = stList[i];
             lines.str("");
 
             // write a line on statistics table
