@@ -2263,9 +2263,10 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
    UpdateRotationMatrix(epoch1, "o_j2k");
    Rvector3 rangeVector = r2B - r1B;                                         // vector pointing from ground station to spacecraft in FK5 coordinate system
    Real elevationAngle = asin((R_Obs_j2k*(rangeVector.GetUnitVector())).GetElement(2));   // unit: radian
-   
-//   if (elevationAngle > epsilon)                                           // made changes by TUAN NGUYEN
-   if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)    // made changes by TUAN NGUYEN
+
+   // we always get media correction when elevationAngle > 0               // made changes by TUAN NGUYEN
+   if (elevationAngle > epsilon)                                           // made changes by TUAN NGUYEN
+//   if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)    // made changes by TUAN NGUYEN
    {
       tropoCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
       #ifdef DEBUG_MEASUREMENT_CORRECTION
@@ -2309,8 +2310,9 @@ RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B,
 
    #ifdef IONOSPHERE
       // 2. Run Ionosphere correction:
-//    if (elevationAngle > epsilon)                                                  // made changes by TUAN NGUYEN
-      if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)         // made changes by TUAN NGUYEN
+      // we always get media correction when elevationAngle > 0                      // made changes by TUAN NGUYEN
+      if (elevationAngle > epsilon)                                                  // made changes by TUAN NGUYEN
+//      if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)         // made changes by TUAN NGUYEN
       {
          ionoCorrection = IonosphereCorrection(freq, r1B, r2B, epoch1, epoch2);
          #ifdef DEBUG_MEASUREMENT_CORRECTION
