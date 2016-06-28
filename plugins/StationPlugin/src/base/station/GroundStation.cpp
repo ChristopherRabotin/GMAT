@@ -42,6 +42,7 @@
 #include "MessageInterface.hpp"
 #include "AssetException.hpp"
 #include "ColorTypes.hpp"               // for namespace GmatColor::
+#include "StringUtil.hpp"
 
 //#define DEBUG_OBJECT_MAPPING
 //#define DEBUG_CONSTRUCTION
@@ -451,6 +452,9 @@ bool GroundStation::SetStringParameter(const Integer id,
 
    if (id == ADD_HARDWARE)
    {
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw AssetException("Error: '" + value + "' set to " + GetName() + ".AddHardware parameter is an invalid name.\n");
+
       // Only add the hardware if it is not in the list already
       if (find(hardwareNames.begin(), hardwareNames.end(), value) ==
                   hardwareNames.end())
@@ -491,6 +495,9 @@ bool GroundStation::SetStringParameter(const Integer id,
 
    if (id == ERROR_MODELS)
    {
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw AssetException("Error: '" + value + "' set to " + GetName() + ".ErrorModels parameter is an invalid name.\n");
+
       // Only add error model if it is not in the list already
       if (find(errorModelNames.begin(), errorModelNames.end(), value) == 
                   errorModelNames.end())
@@ -650,6 +657,9 @@ bool GroundStation::SetStringParameter(const Integer id,
    switch (id)
    {
    case ADD_HARDWARE:
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw AssetException("Error: '" + value + "' set to " + GetName() + ".AddHardware parameter is an invalid name.\n");
+
       // Only add the hardware if it is not in the list already
       if (find(hardwareNames.begin(), hardwareNames.end(), value) ==
                   hardwareNames.end())
@@ -659,6 +669,9 @@ bool GroundStation::SetStringParameter(const Integer id,
       return true;
 
    case ERROR_MODELS:
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw AssetException("Error: '" + value + "' set to " + GetName() + ".ErrorModels parameter is an invalid name.\n");
+
       // Only add the error model if it is not in the list already
       if (find(errorModelNames.begin(), errorModelNames.end(), value) == 
                   errorModelNames.end())
