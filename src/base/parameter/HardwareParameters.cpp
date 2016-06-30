@@ -28,7 +28,7 @@
  *    FuelTak : FuelMass, Pressure, Temperature, RefTemperature, Volume,
  *              FuelDensity
  *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
- *              K1-K16, ThrustDirections
+ *              K1-K16, ThrustDirections, ThrustMagnitude, Isp, MassFlowRate
  *    PowerSystem: TotalPowerAvailable, RequiredBusPower, ThrustPowerAvailable
  */
 //------------------------------------------------------------------------------
@@ -1165,19 +1165,19 @@ GmatBase* ThrustDirections::Clone(void) const
 
 
 //==============================================================================
-//                                     Thrust
+//                                ThrustMagnitude
 //==============================================================================
 /**
- * Implements Thrust class.
+ * Implements ThrustMagnitude class.
  */
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Thrust(const std::string &name, GmatBase *obj)
+// ThrustMagnitude(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
-Thrust::Thrust(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "Thrust", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
-                  "Thrust", "")
+ThrustMagnitude::ThrustMagnitude(const std::string &name, GmatBase *obj)
+   : HardwareReal(name, "ThrustMagnitude", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
+                  "ThrustMagnitude", "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;
@@ -1185,17 +1185,17 @@ Thrust::Thrust(const std::string &name, GmatBase *obj)
 }
 
 //------------------------------------------------------------------------------
-// Thrust(const Thrust &copy)
+// ThrustMagnitude(const ThrustMagnitude &copy)
 //------------------------------------------------------------------------------
-Thrust::Thrust(const Thrust &copy)
+ThrustMagnitude::ThrustMagnitude(const ThrustMagnitude &copy)
    : HardwareReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// Thrust& operator=(const Thrust &right)
+// ThrustMagnitude& operator=(const ThrustMagnitude &right)
 //------------------------------------------------------------------------------
-Thrust& Thrust::operator=(const Thrust &right)
+ThrustMagnitude& ThrustMagnitude::operator=(const ThrustMagnitude &right)
 {
    if (this != &right)
       HardwareReal::operator=(right);
@@ -1204,16 +1204,16 @@ Thrust& Thrust::operator=(const Thrust &right)
 }
 
 //------------------------------------------------------------------------------
-// ~Thrust()
+// ~ThrustMagnitude()
 //------------------------------------------------------------------------------
-Thrust::~Thrust()
+ThrustMagnitude::~ThrustMagnitude()
 {
 }
 
 //------------------------------------------------------------------------------
 // bool Evaluate()
 //------------------------------------------------------------------------------
-bool Thrust::Evaluate()
+bool ThrustMagnitude::Evaluate()
 {
    mRealValue = SpacecraftData::GetReal(THRUST);
    
@@ -1230,18 +1230,18 @@ bool Thrust::Evaluate()
  * Sets value to the owner of the parameter.
  */
 //------------------------------------------------------------------------------
-void Thrust::SetReal(Real val)
+void ThrustMagnitude::SetReal(Real val)
 {
    SpacecraftData::SetReal(THRUST, val);
    RealVar::SetReal(val);
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* Thrust::Clone(void) const
+// GmatBase* ThrustMagnitude::Clone(void) const
 //------------------------------------------------------------------------------
-GmatBase* Thrust::Clone(void) const
+GmatBase* ThrustMagnitude::Clone(void) const
 {
-   return new Thrust(*this);
+   return new ThrustMagnitude(*this);
 }
 
 
@@ -1327,7 +1327,7 @@ GmatBase* Isp::Clone(void) const
 
 
 //==============================================================================
-//                                     MassFlowRate
+//                                  MassFlowRate
 //==============================================================================
 /**
  * Implements MassFlowRate class.

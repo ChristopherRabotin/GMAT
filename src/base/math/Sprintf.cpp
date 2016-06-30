@@ -168,7 +168,7 @@ std::string Sprintf::EvaluateString()
    {
       throw MathException
          ("Error evaluating \"" + GetName() +
-          "() function. Number of formatting spec and argment doesn't match.");
+          "\"; Number of formatting specs and arguments doesn't match.");
    }
    
    StringArray specArray;
@@ -257,7 +257,7 @@ std::string Sprintf::EvaluateString()
             ("***** Invalid format specifier found in Sprintf::EvaluateString()\n");
          #endif
          throw MathException("Error evaluating \"" + GetName() +
-                             "() function. Invalid format specifier found");
+                             "\"; Invalid format specifier found");
       }
    }
    
@@ -284,6 +284,17 @@ std::string Sprintf::EvaluateString()
          MessageInterface::ShowMessage
             ("   It is a real, specArray[%d] = '%s', rval=%f\n", i, specArray[i-1].c_str(), rval);
          #endif
+         
+         // Check for format spec, it cannot be '%s' or '%c' otherwise sprintf will crash,
+         // So throw an exception
+         if (specArray[i-1].find_last_of("sc") != std::string::npos)
+         {
+            std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
+            throw MathException
+               ("Error evaluating \"" + GetName() + "\"; The data type \"" +
+                typeStr + "\" is not compatible with format spec in sprintf()");
+         }
+         
          // Visual Studio implemented snprintf in VS 2015
          //snprintf(outBuffer, MAX_OUTPUT_LENGTH, specArray[i].c_str(), rval);
          sprintf(outBuffer, specArray[i-1].c_str(), rval);
@@ -299,6 +310,16 @@ std::string Sprintf::EvaluateString()
             ("   It is a string, specArray[%d] = '%s', sval='%s'\n",
              i, specArray[i-1].c_str(), sval.c_str());
          #endif
+         
+         // Check for format spec, it should be '%s' otherwise throw an exception
+         if (specArray[i-1].find_last_of("s") == std::string::npos)
+         {
+            std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
+            throw MathException
+               ("Error evaluating \"" + GetName() + "\"; The data type \"" +
+                typeStr + "\" is not compatible with format spec in sprintf()");
+         }
+         
          sprintf(outBuffer, specArray[i-1].c_str(), sval.c_str());
          #ifdef DEBUG_EVALUATE
          MessageInterface::ShowMessage("   outBuffer = '%s'\n", outBuffer);
@@ -322,7 +343,7 @@ std::string Sprintf::EvaluateString()
          {
             std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
             throw MathException
-               ("Error evaluating \"" + GetName() + "() function. The data type \"" +
+               ("Error evaluating \"" + GetName() + "\"; The data type \"" +
                 typeStr + "\" is not compatible with format spec in sprintf()");
          }
       }
