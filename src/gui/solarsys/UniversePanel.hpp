@@ -56,7 +56,6 @@ private:
    bool        mHasFileTypesInUseChanged;
    bool        mHasFileNameChanged;
    bool        mHasSPKFileNameChanged;
-   bool        mHasLSKFileNameChanged;
    bool        mHasPCKFileNameChanged;
    bool        mHasTextModified;
    
@@ -65,12 +64,10 @@ private:
    wxTextCtrl *mIntervalTextCtrl;
    wxTextCtrl *mDEFileNameTextCtrl;
    wxTextCtrl *mSPKFileNameTextCtrl;
-   wxTextCtrl *mLSKFileNameTextCtrl;
    wxTextCtrl *mPCKFileNameTextCtrl;
    
    wxBitmapButton *mBrowseButton;
    wxBitmapButton *mSPKBrowseButton;
-   wxBitmapButton *mLSKBrowseButton;
    wxBitmapButton *mPCKBrowseButton;
 
    wxCheckBox     *mOverrideCheckBox;
@@ -81,18 +78,15 @@ private:
    
    wxStaticText *deFileNameLabel;
    wxStaticText *spkNameLabel;
-   wxStaticText *lskNameLabel;
    wxStaticText *pckNameLabel;
 
    std::map<wxString, wxString> mPreviousFileTypeNameMap;
    wxString      previousSpkFile;
-   wxString      previousLskFile;
    wxString      previousPckFile;
 
 
    void OnBrowseButton(wxCommandEvent& event);
    void OnSPKBrowseButton(wxCommandEvent& event);
-   void OnLSKBrowseButton(wxCommandEvent& event);
    void OnPCKBrowseButton(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
@@ -113,7 +107,6 @@ private:
       ID_TEXT_CTRL,
       ID_BUTTON_BROWSE,
       ID_SPK_BUTTON_BROWSE,
-      ID_LSK_BUTTON_BROWSE,
       ID_PCK_BUTTON_BROWSE,
       ID_CHECKBOX,
    };
