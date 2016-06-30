@@ -276,7 +276,7 @@ protected:
       EPHEMERIS_SOURCE, 
       DE_FILE_NAME,
       SPK_FILE_NAME,
-      LSK_FILE_NAME,
+      LSK_FILE_NAME, // deprecated!!!!!!
       PCK_FILE_NAME,
       OVERRIDE_TIME_SYSTEM,
       EPHEM_UPDATE_INTERVAL,
@@ -341,7 +341,7 @@ private:
    StringArray  default_planetarySourceTypesInUse;  // deprecated!!
    std::string  default_ephemerisSource;
    std::string  default_DEFilename[4];
-   std::string  default_SPKFilename;
+   std::string  default_SPKFilename;               // deprecated!!!!!!
    std::string  default_LSKFilename;
    std::string  default_PCKFilename;
    bool         default_overrideTimeForAll;
@@ -370,6 +370,10 @@ private:
    
    // method to set solar system body texture map file
    void           SetTextureMapFile(SpacePoint *sp, const std::string &bodyName);
+   
+   // Deprecated field(s)
+   void           WriteDeprecatedMessage(Integer id) const;
+
    
    /// @todo review the use of the validModels and corresponding constants, e.g. PLANET_ATMOSPHERE_MODELS
    /// default values for CelestialBody data
