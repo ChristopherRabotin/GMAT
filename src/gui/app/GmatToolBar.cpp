@@ -31,6 +31,7 @@
 #include "FileUtil.hpp"           // for DoesDirectoryExist()
 #include "FileManager.hpp"        // for GetFullPathname()
 #include "MessageInterface.hpp"
+#include <wx/config.h>
 
 #include "bitmaps/NewScript.xpm"
 #include "bitmaps/OpenScript.xpm"
@@ -74,6 +75,7 @@ GmatToolBar::GmatToolBar(wxWindow* parent, long style, wxWindowID id,
    CreateToolBar(this);
    AddAnimationTools(this);
    AddGuiScriptSyncStatus(this);
+   AddAdvancedStatusField(this);
 }
 
 
@@ -323,12 +325,68 @@ void GmatToolBar::AddGuiScriptSyncStatus(wxToolBar* toolBar)
    theSyncStatus->SetBackgroundColour(bgcolor);
    theSyncStatus->SetForegroundColour(*wxGREEN);
    
-   toolBar->AddSeparator();
+   //toolBar->AddSeparator();
    
 #ifndef __WXMAC__
    toolBar->AddControl(syncLabel);
 #endif
    toolBar->AddControl(theSyncStatus);
+
+   // now realize to make tools appear
+   toolBar->Realize();
+}
+
+//------------------------------------------------------------------------------
+// void AddAdvancedStatusField(wxToolBar* toolBar)
+//------------------------------------------------------------------------------
+/**
+ * Adds GUI and Script file synchronization status to tool bar.
+ *
+ * @param <toolBar> input tool bar.
+ */
+//------------------------------------------------------------------------------
+void GmatToolBar::AddAdvancedStatusField(wxToolBar* toolBar)
+{
+   // Set blank initially
+#ifndef __WXMAC__
+   // Add GUI/Script status text
+   wxStaticText *advancedLabel = new wxStaticText(this, -1, wxT(""));
+   theAdvancedField = new wxStaticText
+      (this, -1, wxT(""), wxDefaultPosition, wxSize(120, -1), wxALIGN_CENTRE);
+#else
+   theAdvancedField = new wxStaticText
+      (this, -1, wxT(""), wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTRE);
+#endif
+
+   // Set tool tip
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   pConfig->SetPath(wxT("/Advanced Mode"));
+   wxString hint = pConfig->Read("NonSavableGUIModeHint");
+   #ifdef DEBUG_ADVANCED_FIELD
+   MessageInterface::ShowMessage
+      ("In GmatToolBar::AddAdvancedStatusField() hint = '%s'\n", hint.WX_TO_C_STRING);
+   #endif
+   theAdvancedField->SetToolTip(hint);
+   
+   // Make font bold face
+   wxFont font = theAdvancedField->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   // Make font size little bigger
+   int fontSize = font.GetPointSize();
+   font.SetPointSize(fontSize + 1);
+   theAdvancedField->SetFont(font);
+   
+   // Set color
+   //theAdvancedField->SetBackgroundColour(wxTheColourDatabase->Find("THISTLE"));
+   theAdvancedField->SetForegroundColour(wxTheColourDatabase->Find("ORANGE"));
+   
+   //toolBar->AddSeparator();
+   
+#ifndef __WXMAC__
+   toolBar->AddControl(advancedLabel);
+#endif
+   toolBar->AddControl(theAdvancedField);
    
    // now realize to make tools appear
    toolBar->Realize();
@@ -451,6 +509,23 @@ void GmatToolBar::UpdateGuiScriptSyncStatus(wxToolBar* toolBar, int guiStat,
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void UpdateAdvancedField(wxToolBar* toolBar, int status)
+//------------------------------------------------------------------------------
+void GmatToolBar::UpdateAdvancedField(wxToolBar* toolBar, int status)
+{
+   wxString statusText = "";
+#ifndef __WXMAC__
+   statusText = "Non-Savable GUI Mode";
+#else
+   statusText = "NS";
+#endif
+   
+   if (status == 1)
+      theAdvancedField->SetLabel("");
+   else if (status == 2)
+      theAdvancedField->SetLabel(statusText);
+}
 
 //------------------------------------------------------------------------------
 // void LoadIcon(const wxString &filename, long bitmapType, wxBitmap *bitmap, const char* xpm[]

@@ -86,6 +86,7 @@ ReportPanel::ReportPanel(wxWindow *parent, GmatCommand *cmd)
       mObjectTypeList.Add("Spacecraft");
       mObjectTypeList.Add("SpacePoint");
       mObjectTypeList.Add("ImpulsiveBurn");
+      mObjectTypeList.Add("FiniteBurn");
       Create();
       Show();
       EnableUpdate(false);

@@ -191,7 +191,15 @@ Real BurnData::GetReal(Integer item)
          ("Cannot find Burn object so returning %f\n", BURN_REAL_UNDEFINED);
       return BURN_REAL_UNDEFINED;
    }
+
    
+   Real lastFireEpoch = mBurn->GetEpochAtLastFire();
+   #ifdef DEBUG_BURNDATA_GET
+   MessageInterface::ShowMessage
+      ("   lastFireEpoch=%.12f, fired=%d\n", lastFireEpoch, mBurn->HasFired());
+   #endif
+   
+   Real result;
    if (mIsParamCSDep)
    {
       #ifdef DEBUG_BURNDATA_GET
@@ -263,11 +271,14 @@ Real BurnData::GetReal(Integer item)
       switch (item)
       {
       case ELEMENT1:
-         return burnOut[3];
+         result = burnOut[3];
+         break;
       case ELEMENT2:
-         return burnOut[4];
+         result = burnOut[4];
+         break;
       case ELEMENT3:
-         return burnOut[5];
+         result = burnOut[5];
+         break;
       default:
          throw ParameterException("BurnData::GetReal() Unknown ELEMENT id: " +
                                   GmatRealUtil::ToString(item));
@@ -276,44 +287,83 @@ Real BurnData::GetReal(Integer item)
    else
    {
       #ifdef DEBUG_BURNDATA_GET
-      MessageInterface::ShowMessage("It is not a CS dependent Parameter\n");
+      MessageInterface::ShowMessage("   It is not a CS dependent Parameter\n");
       #endif
+      
       // if there is no dependency object, then return the values from the
       // burn in the burn coordinate system
       switch (item)
       {
       case ELEMENT1:
-         return mBurn->GetRealParameter(mBurn->GetParameterID("Element1"));
+         result = mBurn->GetRealParameter(mBurn->GetParameterID("Element1"));
+         break;
       case ELEMENT2:
-         return mBurn->GetRealParameter(mBurn->GetParameterID("Element2"));
+         result = mBurn->GetRealParameter(mBurn->GetParameterID("Element2"));
+         break;
       case ELEMENT3:
-         return mBurn->GetRealParameter(mBurn->GetParameterID("Element3"));
+         result = mBurn->GetRealParameter(mBurn->GetParameterID("Element3"));
+         break;
       case TOTAL_MASS_FLOW_RATE:
-         return mBurn->GetTotalMassFlowRate();
-      case ACCEL1:
-      case ACCEL2:
-      case ACCEL3:
+         result = mBurn->GetTotalMassFlowRate();
+         break;
+      case TOTAL_ACCEL1:
+      case TOTAL_ACCEL2:
+      case TOTAL_ACCEL3:
       {
-         Real *accel = mBurn->GetAcceleration();
+         Real *accel = mBurn->GetTotalAcceleration();
          #ifdef DEBUG_BURNDATA_GET
-         MessageInterface::ShowMessage("accel[0] = %.15e\n", accel[0]);
+         MessageInterface::ShowMessage
+            ("   totalAccel = [%.15e %.15e %.15e]\n", accel[0], accel[1], accel[2]);
          #endif
          switch (item)
          {
-         case ACCEL1:
-            return accel[0];
-         case ACCEL2:
-            return accel[1];
-         case ACCEL3:
-            return accel[2];
+         case TOTAL_ACCEL1:
+            result = accel[0];
+            break;
+         case TOTAL_ACCEL2:
+            result = accel[1];
+            break;
+         case TOTAL_ACCEL3:
+            result = accel[2];
+            break;
          }
+         break;
+      }
+      case TOTAL_THRUST1:
+      case TOTAL_THRUST2:
+      case TOTAL_THRUST3:
+      {
+         Real *thrust = mBurn->GetTotalThrust();
+         #ifdef DEBUG_BURNDATA_GET
+         MessageInterface::ShowMessage
+            ("   totalThrust = [%.15e %.15e %.15e]\n", thrust[0], thrust[1], thrust[2]);
+         #endif
+         switch (item)
+         {
+         case TOTAL_THRUST1:
+            result = thrust[0];
+            break;
+         case TOTAL_THRUST2:
+            result = thrust[1];
+            break;
+         case TOTAL_THRUST3:
+            result = thrust[2];
+            break;
+         }
+         break;
       }
       default:
          throw ParameterException("BurnData::GetReal() Unknown ELEMENT id: " +
                                   GmatRealUtil::ToString(item));
       }
    }
-
+   
+   #ifdef DEBUG_BURNDATA_GET
+   MessageInterface::ShowMessage
+      ("BurnData::GetReal() <%p> returning %.12f for Parameter '%s'\n", this,
+       result, mActualParamName.c_str());
+   #endif
+   return result;
 }
 
 

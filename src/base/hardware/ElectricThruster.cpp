@@ -836,7 +836,12 @@ bool ElectricThruster::CalculateThrustAndIsp()
                   (isp * gravityAccel * 0.001);
       }
    }
-
+   
+   // Calculate applied thrust magnitude
+   // Value of appliedThrustMag will be returned when ThrustMagnitude Parameter
+   // gets evaluated
+   appliedThrustMag = thrustScaleFactor * dutyCycle * thrust;
+   
    return true;
 }
 
@@ -934,5 +939,8 @@ Real ElectricThruster::CalculateMassFlow()
             thrust/impulse);
    #endif
 
-   return mDot * -dutyCycle;  // Flow rate should be negative in ODEs - CORRECT?
+   // Update mDot here so that MassFlowRate Parameter can retrieve this mDot
+   mDot = mDot * -dutyCycle;
+   //return mDot * -dutyCycle;  // Flow rate should be negative in ODEs - CORRECT?
+   return mDot;
 }

@@ -90,7 +90,7 @@ ErrorModel::ErrorModel(const std::string name) :
    parameterCount = ErrorModelParamCount;
 
    covariance.AddCovarianceElement("Bias", this);            // made changes by TUAN NGUYEN
-   covariance(0, 0) = biasSigma;                             // made changes by TUAN NGUYEN
+   covariance(0, 0) = biasSigma*biasSigma;                   // made changes by TUAN NGUYEN
 }
 
 
@@ -130,6 +130,9 @@ ErrorModel::ErrorModel(const ErrorModel& em) :
 	MessageInterface::ShowMessage("ErrorModel copy constructor from <%s,%p>  to  <%s,%p>\n", em.GetName().c_str(), &em, GetName().c_str(), this);
 #endif
 
+   Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");        // made changes by TUAN NGUYEN
+   covariance(locationStart, locationStart) = biasSigma*biasSigma;              // made changes by TUAN NGUYEN
+
 }
 
 
@@ -162,6 +165,10 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
       bias                = em.bias;
       biasSigma           = em.biasSigma;
       solveforNames       = em.solveforNames;
+
+      Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");        // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = biasSigma * biasSigma;            // made changes by TUAN NGUYEN
+
    }
 
    return *this;
@@ -234,9 +241,6 @@ bool ErrorModel::Initialize()
       return true;
 
    bool retval = true;
-
-   covariance(0,0) = biasSigma;                 // made changes by TUAN NGUYEN
-
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("ErrorModel<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
@@ -418,36 +422,6 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
          throw MeasurementException("Error: '" + value + "' set to " + GetName() + ".SolveFors parameter is replicated.\n");
 
       return true;
-
-      //if (value1.at(0) != '{')
-      //{
-      //   if (value1 != "Bias")
-      //      throw GmatBaseException("Error: '" + value + "' is an invalid value. "
-      //      + GetName() + ".SolveFors parameter only accepts Bias as a solve-for.\n");
-
-      //   solveforNames.push_back(value1);
-      //   return true;
-      //}
-      //else
-      //{
-      //   std::string value1 = GmatStringUtil::RemoveOuterString(value1, "{", "}");
-      //   if (value1 == "")
-      //      return true;
-
-      //   std::string::size_type pos = value1.find_first_of(',');
-      //   Integer i = 0;
-      //   while (pos != value.npos)
-      //   {
-      //      std::string value2 = value1.substr(0, pos);
-      //      value1 = value1.substr(pos + 1);
-      //      SetStringParameter(id, value2, i);
-      //      ++i;
-      //      pos = value1.find_first_of(',');
-      //   }
-
-      //   SetStringParameter(id, value1, i);
-      //   return true;
-      //}
    }
 
    if (id == TYPE)
@@ -748,6 +722,9 @@ Real ErrorModel::GetRealParameter(const Integer id) const
 
 Real ErrorModel::SetRealParameter(const Integer id, const Real value)
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("ErrorModel::SetRealParameter(id = %d, value = %le\n", id, value);
+#endif
    if (id == NOISE_SIGMA)
    {
       if (value <= 0.0)
@@ -769,6 +746,9 @@ Real ErrorModel::SetRealParameter(const Integer id, const Real value)
          throw GmatBaseException("Error: value set to " + GetName() + ".BiasSigma is a nonpositive number. It has to be a positive number.\n");
 
       biasSigma = value;
+      Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");        // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = biasSigma * biasSigma;            // made changes by TUAN NGUYEN
+
       return biasSigma;
    }
 

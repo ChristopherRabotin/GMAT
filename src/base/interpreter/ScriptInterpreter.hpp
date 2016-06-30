@@ -63,6 +63,7 @@ public:
    bool SetOutStream(std::ostream *ostrm);
 
    std::string GetMainScriptFileName();
+   bool IncludeFoundInResource();
    
 protected:
    
@@ -71,6 +72,9 @@ protected:
    
    std::istream *inStream;
    std::ostream *outStream;
+   
+   /// Flag indicating #Include statement fouond in the resource mode
+   bool includeFoundInResource;
    
    bool InterpretIncludeFile(GmatCommand *inCmd);
    
