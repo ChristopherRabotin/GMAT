@@ -42,10 +42,13 @@ public:
    void CreateToolBar(wxToolBar *toolBar);
    void AddAnimationTools(wxToolBar* toolBar);
    void AddGuiScriptSyncStatus(wxToolBar* toolBar);
+   void AddAdvancedStatusField(wxToolBar* toolBar);
    void UpdateGuiScriptSyncStatus(wxToolBar* toolBar, int guiStat, int scriptStat);
+   void UpdateAdvancedField(wxToolBar* toolBar, int status);
 
 protected:
    wxStaticText *theSyncStatus;
+   wxStaticText *theAdvancedField;
 
    void LoadIcon(const wxString &filename, long bitmapType, wxBitmap **bitmap, const char* xpm[]);
 };

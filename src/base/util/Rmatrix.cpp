@@ -1036,9 +1036,47 @@ Rmatrix Rmatrix::Inverse() const
 
    if (rowsD != colsD)
       throw Rmatrix::NotSquare();
+
+   Rmatrix A = *this;
+
+   // Verify information matrix is a diagonal matrix
+   bool isDiagonal = true;
+   for (Integer i = 0; i < A.GetNumRows(); ++i)
+   {
+      for (Integer j = i; j < A.GetNumColumns(); ++j)
+      {
+         if ((i != j) && (A.GetElement(i, j) != 0.0))
+         {
+            isDiagonal = false;
+            break;
+         }
+      }
+      if (!isDiagonal)
+         break;
+   }
+
+   if (isDiagonal)
+   {
+      // Verify all diagonal elements not zero
+      for (Integer i = 0; i < A.GetNumRows(); ++i)
+         if (A.GetElement(i, i) == 0.0)
+            throw Rmatrix::IsSingular();
+
+      // Take inverse all elements on diagonal
+      Real val;
+      for (Integer i = 0; i < this->GetNumRows(); ++i)
+      {
+         val = 1.0 / A.GetElement(i, i);
+         A.SetElement(i, i, val);
+      }
+
+      return A;
+   }
+
+
    //int dummy_marker = 4;
    int IndexRange = rowsD;
-   Rmatrix A = *this;
+   
    ArrayTemplate<bool> PivotAllowed(IndexRange);
    ArrayTemplate<int> PivotRowList(IndexRange), PivotColumnList(IndexRange);
    Real PivotElement;

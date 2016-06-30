@@ -55,7 +55,6 @@ BEGIN_EVENT_TABLE(UniversePanel, GmatPanel)
 
    EVT_BUTTON(ID_BUTTON_BROWSE, UniversePanel::OnBrowseButton)
    EVT_BUTTON(ID_SPK_BUTTON_BROWSE, UniversePanel::OnSPKBrowseButton)
-   EVT_BUTTON(ID_LSK_BUTTON_BROWSE, UniversePanel::OnLSKBrowseButton)
    EVT_BUTTON(ID_PCK_BUTTON_BROWSE, UniversePanel::OnPCKBrowseButton)
    EVT_COMBOBOX(ID_COMBOBOX, UniversePanel::OnComboBoxChange)
    EVT_CHECKBOX(ID_CHECKBOX, UniversePanel::OnCheckBoxChange)
@@ -81,7 +80,6 @@ UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
    mHasFileTypesInUseChanged = false;
    mHasFileNameChanged = false;
    mHasSPKFileNameChanged = false;
-   mHasLSKFileNameChanged = false;
    mHasPCKFileNameChanged = false;
    mHasTextModified = false;
    theSolarSystem = NULL;
@@ -238,24 +236,6 @@ void UniversePanel::Create()
 
 
    //-------------------------------------------------------
-   // SPICE Leap Second Kernel (LSK)
-   //-------------------------------------------------------
-   lskNameLabel =
-      new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Leap Second Kernel"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-
-   mLSKFileNameTextCtrl =
-      new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
-                     wxDefaultPosition, wxSize(300, -1),  0);
-   mLSKFileNameTextCtrl->SetToolTip(pConfig->Read(_T("LeapSecondFilenameHint")));
-
-
-   mLSKBrowseButton =
-      new wxBitmapButton(this, ID_LSK_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, -1));
-   mLSKBrowseButton->SetToolTip(pConfig->Read(_T("BrowseLSKFilenameHint")));
-
-   //-------------------------------------------------------
    // SPICE Planetary Constants Kernel (PSK)
    //-------------------------------------------------------
    pckNameLabel =
@@ -304,9 +284,6 @@ void UniversePanel::Create()
    bottomGridSizer->Add(spkNameLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    bottomGridSizer->Add(mSPKFileNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    bottomGridSizer->Add(mSPKBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   bottomGridSizer->Add(lskNameLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   bottomGridSizer->Add(mLSKFileNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   bottomGridSizer->Add(mLSKBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    bottomGridSizer->Add(pckNameLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    bottomGridSizer->Add(mPCKFileNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    bottomGridSizer->Add(mPCKBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -406,13 +383,9 @@ void UniversePanel::LoadData()
          mBrowseButton->Disable();
          spkNameLabel->Show(false);
          mSPKBrowseButton->Show(false);
-         lskNameLabel->Show(false);
-         mLSKBrowseButton->Show(false);
          pckNameLabel->Show(false);
          mPCKBrowseButton->Show(false);
          wxWindow *windowWithFocus = FindFocus();
-         if (windowWithFocus == mLSKFileNameTextCtrl)  mDEFileNameTextCtrl->SetFocus();
-         mLSKFileNameTextCtrl->Show(false);
       }
       else
       {
@@ -421,9 +394,6 @@ void UniversePanel::LoadData()
          mSPKFileNameTextCtrl->Enable();
          spkNameLabel->Enable();
          mSPKBrowseButton->Enable();
-         mLSKFileNameTextCtrl->Enable();
-         lskNameLabel->Enable();
-         mLSKBrowseButton->Enable();
          mPCKFileNameTextCtrl->Enable();
          pckNameLabel->Enable();
          mPCKBrowseButton->Enable();
@@ -432,20 +402,12 @@ void UniversePanel::LoadData()
             mDEFileNameTextCtrl->Disable();
             mBrowseButton->Disable();
 //            deFilenameLabel->SetLabel(wxString("SPK " GUI_ACCEL_KEY "Kernel"));
-//            lskNameLabel->Show(true);
-//            mLSKBrowseButton->Show(true);
-//            mLSKFileNameTextCtrl->Show(true);
          }
          else
          {
             mDEFileNameTextCtrl->Enable();
             mBrowseButton->Enable();
 //            deFilenameLabel->SetLabel(wxString("DE " GUI_ACCEL_KEY "Filename"));
-//            lskNameLabel->Show(false);
-//            mLSKBrowseButton->Show(false);
-//            wxWindow *windowWithFocus = FindFocus();
-//            if (windowWithFocus == mLSKFileNameTextCtrl)  mDEFileNameTextCtrl->SetFocus();
-//            mLSKFileNameTextCtrl->Show(false);
          }
       }
       
@@ -479,10 +441,6 @@ void UniversePanel::LoadData()
       wxString spkFile = (theSolarSystem->GetStringParameter("SPKFilename")).c_str();
       mSPKFileNameTextCtrl->SetValue(spkFile);
       previousSpkFile  = spkFile;
-
-      wxString lskFile = (theSolarSystem->GetStringParameter("LSKFilename")).c_str();
-      mLSKFileNameTextCtrl->SetValue(lskFile);
-      previousLskFile  = lskFile;
 
       wxString pckFile = (theSolarSystem->GetStringParameter("PCKFilename")).c_str();
       mPCKFileNameTextCtrl->SetValue(pckFile);
@@ -528,8 +486,6 @@ void UniversePanel::SaveData()
          (mHasFileTypesInUseChanged? "true": "false"));
    MessageInterface::ShowMessage(" mHasFileNameChanged = %s\n",
          (mHasFileNameChanged? "true": "false"));
-   MessageInterface::ShowMessage(" mHasLSKFileNameChanged = %s\n",
-         (mHasLSKFileNameChanged? "true": "false"));
    #endif
    
    canClose = true;
@@ -664,37 +620,6 @@ void UniversePanel::SaveData()
          }
 
          mHasSPKFileNameChanged = false;
-      }
-
-      if (mHasLSKFileNameChanged)
-      {
-         wxString type = mFileTypeComboBox->GetStringSelection();
-         str = mLSKFileNameTextCtrl->GetValue();
-         std::ifstream filename(str.c_str());
-
-         // Check if the file doesn't exist then stop
-         if (type == "SPICE" && !filename)
-         {
-            std::string fieldName = "LSKFilename";
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, mMsgFormat.c_str(),
-                str.c_str(), fieldName.c_str(), "", "File must exist");
-            canClose = false;
-            return;
-         }
-         filename.close();
-
-         if (theSolarSystem->SetStringParameter("LSKFilename", str))
-         {
-            previousLskFile = str.c_str();
-         }
-         else
-         {
-            // if there was an error, set it back to what it was the last time it was saved
-            mLSKFileNameTextCtrl->SetValue(previousLskFile);
-         }
-
-         mHasLSKFileNameChanged = false;
       }
       
       if (mHasPCKFileNameChanged)
@@ -836,37 +761,6 @@ void UniversePanel::OnPCKBrowseButton(wxCommandEvent& event)
 
 }
 
-//------------------------------------------------------------------------------
-// void OnLSKBrowseButton(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-/**
- * Event handler - handles event triggered when user pushes the LSK Browse
- * Button
- *
- * @param <event>   event being handled
- */
-//------------------------------------------------------------------------------
-void UniversePanel::OnLSKBrowseButton(wxCommandEvent& event)
-{
-   wxString oldname = mLSKFileNameTextCtrl->GetValue();
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
-
-   if (dialog.ShowModal() == wxID_OK)
-   {
-      wxString filename;
-
-      filename = dialog.GetPath().c_str();
-
-      if (!filename.IsSameAs(oldname))
-      {
-         mLSKFileNameTextCtrl->SetValue(filename);
-         mHasLSKFileNameChanged = true;
-         EnableUpdate(true);
-      }
-   }
-
-}
-
 
 
 //------------------------------------------------------------------------------
@@ -903,14 +797,9 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
          deFileNameLabel->SetLabel(wxString("Ephemeris " GUI_ACCEL_KEY "Filename"));
          mBrowseButton->Disable();
          mDEFileNameTextCtrl->Disable();
-         lskNameLabel->Show(false);
-         mLSKBrowseButton->Show(false);
-         mLSKFileNameTextCtrl->Show(false);
-         lskNameLabel->Disable();
-         mLSKBrowseButton->Disable();
-         lskNameLabel->Layout();
          // this next line is needed for the Mac - otherwise, when switching from SPICE,
          // the LSK text ctrl is still visible (even though it is disabled and hidden)
+         // WCS 2016.06.30 we may be able to remove this sicne LSK has been removed
          mIntervalTextCtrl->SetFocus();
       }
       else
@@ -919,31 +808,17 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
          mDEFileNameTextCtrl->Enable();
          spkNameLabel->Enable();
          mSPKBrowseButton->Enable();
-         lskNameLabel->Enable();
-         mLSKBrowseButton->Enable();
          pckNameLabel->Enable();
          mPCKBrowseButton->Enable();
          if (type == "SPICE")
          {
 //            deFilenameLabel->SetLabel(wxString("SPK " GUI_ACCEL_KEY "Kernel"));
-//            lskNameLabel->Enable();
-//            mLSKBrowseButton->Enable();
-//            mLSKFileNameTextCtrl->Enable();
-//            lskNameLabel->Show(true);
-//            mLSKBrowseButton->Show(true);
-//            mLSKFileNameTextCtrl->Show(true);
             mBrowseButton->Disable();
             mDEFileNameTextCtrl->Disable();
          }
          else // "DE"
          {
 //            deFilenameLabel->SetLabel(wxString("DE " GUI_ACCEL_KEY "Filename"));
-//            lskNameLabel->Disable();
-//            mLSKFileNameTextCtrl->Disable();
-//            mLSKBrowseButton->Disable();
-//            lskNameLabel->Show(false);
-//            mLSKBrowseButton->Show(false);
-//            mLSKFileNameTextCtrl->Show(false);
 //            // this next line is needed for the Mac - otherwise, when switching from SPICE,
 //            // the LSK text ctrl is still visible (even though it is disabled and hidden)
             mBrowseButton->Enable();
@@ -992,8 +867,6 @@ void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
          (mHasFileTypesInUseChanged? "true": "false"));
    MessageInterface::ShowMessage(" mHasFileNameChanged = %s\n",
          (mHasFileNameChanged? "true": "false"));
-   MessageInterface::ShowMessage(" mHasLSKFileNameChanged = %s\n",
-         (mHasLSKFileNameChanged? "true": "false"));
    #endif
    if (event.GetEventObject() == mIntervalTextCtrl)
    {
@@ -1023,12 +896,6 @@ void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
       }
    }
 
-   if (event.GetEventObject() == mLSKFileNameTextCtrl)
-   {
-      if (mLSKFileNameTextCtrl->IsModified())
-         mHasLSKFileNameChanged = true;
-   }
-
    if (event.GetEventObject() == mPCKFileNameTextCtrl)
    {
       if (mPCKFileNameTextCtrl->IsModified())
@@ -1046,7 +913,5 @@ void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
          (mHasFileTypesInUseChanged? "true": "false"));
    MessageInterface::ShowMessage(" mHasFileNameChanged = %s\n",
          (mHasFileNameChanged? "true": "false"));
-   MessageInterface::ShowMessage(" mHasLSKFileNameChanged = %s\n",
-         (mHasLSKFileNameChanged? "true": "false"));
    #endif
 }

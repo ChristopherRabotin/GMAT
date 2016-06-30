@@ -45,9 +45,7 @@
  */
 //------------------------------------------------------------------------------
 RangeAdapterKm::RangeAdapterKm(const std::string& name) :
-   TrackingDataAdapter      ("RangeKm", name),
-   ionoCorrection           (0.0),                  // made changes by TUAN NGUYEN
-   tropoCorrection          (0.0)                   // made changes by TUAN NGUYEN
+   TrackingDataAdapter      ("RangeKm", name)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("RangeAdapterKm default constructor <%p>\n", this);
@@ -81,9 +79,7 @@ RangeAdapterKm::~RangeAdapterKm()
  */
 //------------------------------------------------------------------------------
 RangeAdapterKm::RangeAdapterKm(const RangeAdapterKm& rak) :
-   TrackingDataAdapter      (rak),
-   ionoCorrection           (0.0),           // made changes by TUAN NGUYEN
-   tropoCorrection          (0.0)            // made changes by TUAN NGUYEN
+   TrackingDataAdapter      (rak)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("RangeAdapterKm copy constructor   from <%p> to <%p>\n", &rak, this);
@@ -112,8 +108,6 @@ RangeAdapterKm& RangeAdapterKm::operator=(const RangeAdapterKm& rak)
    if (this != &rak)
    {
       TrackingDataAdapter::operator=(rak);
-      ionoCorrection  = 0.0;                 // made changes by TUAN NGUYEN
-      tropoCorrection = 0.0;                 // made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -560,6 +554,31 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 }
 
 
+// made changes by TUAN NGUYEN
+Real RangeAdapterKm::GetIonoCorrection()
+{
+   Real correction = 0.0;
+
+   std::vector<SignalBase*> paths = calcData->GetSignalPaths();
+   SignalBase *currentleg = paths[0]; // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
+   SignalData *current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
+
+   while (currentleg != NULL)
+   {
+      // accumulate all range corrections for signal path ith
+      for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+      {
+         if ((current->useCorrection[j]) && (current->correctionIDs[j] == "Ionosphere"))
+            correction += current->corrections[j];
+      }// for j loop
+
+      currentleg = currentleg->GetNext();
+      current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
+   }
+   
+   return correction;
+}
+
 //------------------------------------------------------------------------------
 // bool ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
 //        Real uplinkFrequency, std::vector<RampTableData>* rampTB)
@@ -589,26 +608,22 @@ bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathInde
    SignalBase *currentleg = paths[pathIndex];
    SignalData *current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
    
-   ionoCorrection = 0.0;                                              // made changes by TUAN NGUYEN
-   tropoCorrection = 0.0;                                             // made changes by TUAN NGUYEN
+   Real correction = 0.0;
    while (currentleg != NULL)
    {
       for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
       {
          if (current->useCorrection[j])
          {
-            if (current->correctionIDs[j] == "Troposphere")           // made changes by TUAN NGUYEN
-               tropoCorrection += current->corrections[j];            // made changes by TUAN NGUYEN
-
-            if (current->correctionIDs[j] == "Ionosphere")            // made changes by TUAN NGUYEN
-               ionoCorrection += current->corrections[j];             // made changes by TUAN NGUYEN
+            if ((current->correctionIDs[j] == "Troposphere") || (current->correctionIDs[j] == "Ionosphere"))
+               correction += current->corrections[j];
          }
       }
       currentleg = currentleg->GetNext();
       current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
    }
    
-   cMeasurement.value[pathIndex] += (ionoCorrection + tropoCorrection); // made changes by TUAN NGUYEN
+   cMeasurement.value[pathIndex] += correction;
    
    retval = true;
 

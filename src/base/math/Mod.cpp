@@ -130,7 +130,7 @@ Real Mod::Evaluate()
    Real result;
 
    if (inputArgWrappers.size() != 2)
-      throw MathException(GetTypeName() + "requires two input arguments\n");
+      throw MathException("mod() function requires two input arguments");
    
    for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
    {
@@ -142,7 +142,7 @@ Real Mod::Evaluate()
       #endif
       
       if (wrapper == NULL)
-         throw MathException("Error evaluating \"" + GetName());
+         throw MathException("Error evaluating \"" + GetName() + "\"");
    }
    
    Real a = inputArgWrappers[0]->EvaluateReal();

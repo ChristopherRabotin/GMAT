@@ -244,6 +244,7 @@ public:
    void RefreshActiveScript(const wxString &filename, bool reloadFile = true);
    std::string GetActiveScriptFileName();
    void UpdateGuiScriptSyncStatus(int guiStatus, int scriptStatus);
+   void UpdateAdvancedGuiMode(int status);
    
    virtual bool Show(bool show = true);
    

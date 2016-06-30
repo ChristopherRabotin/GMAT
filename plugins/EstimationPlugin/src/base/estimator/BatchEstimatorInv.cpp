@@ -320,8 +320,8 @@ void BatchEstimatorInv::Accumulate()
          sprintf(&s[0], "%21.6lf", currentObs->value[0]);
          sLine << s << " ";
          sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 6);
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 20, GmatStringUtil::RIGHT) << " ";
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 6, GmatStringUtil::RIGHT);
          sLine << "\n";
       }
       else
@@ -375,7 +375,7 @@ void BatchEstimatorInv::Accumulate()
             sprintf(&s[0], "%21.6lf", currentObs->value[0]);
             sLine << s << " ";
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 20, GmatStringUtil::RIGHT) << " ";
             
             // write elevation angle
             sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
@@ -454,7 +454,7 @@ void BatchEstimatorInv::Accumulate()
                sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                // Write O-value, C-value, and O-C
-               sprintf(&s[0], "%21.6lf %21.6lf %18.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
+               sprintf(&s[0], "%21.6lf %21.6lf %20.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
                sLine << s << " ";
 
                // write elevation angle
@@ -680,7 +680,7 @@ void BatchEstimatorInv::Accumulate()
                      sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                   // Write to report file O-value, C-value, O-C, 
-                  sprintf(&s[0], "%21.6lf %21.6lf %18.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
+                  sprintf(&s[0], "%21.6lf %21.6lf %20.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
                   sLine << s << " ";
 
                   // Write to report file elevation angle:
@@ -897,6 +897,17 @@ void BatchEstimatorInv::Estimate()
       try
       {
          Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+         //MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         //for (Integer row = 0; row < Pdx0_inv.GetNumRows(); ++row)
+         //{
+         //   for (Integer col = 0; col < Pdx0_inv.GetNumColumns(); ++col)
+         //      MessageInterface::ShowMessage("%le   ", Pdx0_inv.GetElement(row, col));
+         //   if (row < Pdx0_inv.GetNumRows() - 1)
+         //      MessageInterface::ShowMessage("\n");
+         //}
+         //MessageInterface::ShowMessage("]\n");
+
       }
       catch (...)
       {

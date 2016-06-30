@@ -196,7 +196,7 @@ Rmatrix Cross3::MatrixEvaluate()
    Rmatrix result(1,3);
    
    if (inputArgWrappers.size() != 2)
-      throw MathException(GetTypeName() + "requires two input arguments\n");
+      throw MathException("cross() function requires two input arguments");
    
    for (unsigned int i = 0; i < inputArgWrappers.size(); i++)
    {
@@ -208,7 +208,7 @@ Rmatrix Cross3::MatrixEvaluate()
       #endif
       
       if (wrapper == NULL)
-         throw MathException("Error evaluating \"" + GetName());
+         throw MathException("Error evaluating \"" + GetName() + "\"");
    }
    
    Rmatrix mat1 = inputArgWrappers[0]->EvaluateArray();
@@ -219,8 +219,13 @@ Rmatrix Cross3::MatrixEvaluate()
    Integer row2 = mat2.GetNumRows();
    Integer col2 = mat2.GetNumColumns();
    
-   if ((row1 == 3 && col1 == 1) || (row1 == 1 && col1 == 3) &&
-       (row2 == 3 && col2 == 1) || (row2 == 1 && col2 == 3))
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("   row1=%d, col1=%d, row2=%d, col2=%d\n", row1, col1, row2, col2);
+   #endif
+   
+   if (((row1 == 3 && col1 == 1) || (row1 == 1 && col1 == 3)) &&
+       ((row2 == 3 && col2 == 1) || (row2 == 1 && col2 == 3)))
    {
       if (row1 == 3)
          vec1.Set(mat1(0,0), mat1(1,0), mat1(2,0));
@@ -241,7 +246,7 @@ Rmatrix Cross3::MatrixEvaluate()
    else
    {
       throw MathException("Error evaluating \"" + GetName() +
-                          ". Cross product requires two 3-element vectors");
+                          "\"; Cross product requires two 3-element vectors");
    }
    
    #ifdef DEBUG_EVALUATE

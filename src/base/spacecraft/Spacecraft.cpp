@@ -548,18 +548,11 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    covariance.AddCovarianceElement("Cd_Epsilon", this);      // locationStart = 6    // made changes by TUAN NGUYEN
    covariance.AddCovarianceElement("Cr_Epsilon", this);      // locationStart = 7    // made changes by TUAN NGUYEN
 
-   //covariance.ConstructLHS();                                                      // made changes by TUAN NGUYEN   
-   //covariance(0,0) = covariance(1,1) = covariance(2,2) = 1.0e10;                   // made changes by TUAN NGUYEN
-   //covariance(3,3) = covariance(4,4) = covariance(5,5) = 1.0e6;                    // made changes by TUAN NGUYEN
-
    for (Integer i = 0; i < 6; ++i)                                                   // made changes by TUAN NGUYEN
-   {
       orbitErrorCovariance(i,i) = 1.0e70;                                            // made changes by TUAN NGUYEN
-   }
 
    Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                          // made changes by TUAN NGUYEN
    Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                                // made changes by TUAN NGUYEN
-   //Rvector value(8, 1.0e10, 1.0e10, 1.0e10, 1.0e6, 1.0e6, 1.0e6, 
    Rvector value(8, 1.0e70, 1.0e70, 1.0e70, 1.0e70, 1.0e70, 1.0e70,
       Cd_EpsilonSigma*Cd_EpsilonSigma, Cr_EpsilonSigma*Cr_EpsilonSigma);             // made changes by TUAN NGUYEN
    covariance.ConstructRHS(value, 0);                                                // made changes by TUAN NGUYEN
@@ -747,10 +740,24 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    // set cloned hardware
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);            // made changes on 09/23/2014
 
-//   orbitErrorCovariance = (Array*)(a.orbitErrorCovariance->Clone());            // made changes by TUAN NGUYEN
-
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
+
+
+   // Set value to covariance matrix                                                // made changes by TUAN NGUYEN
+   // Set state covariance                                                          // made changes by TUAN NGUYEN
+   Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");  // made changes by TUAN NGUYEN
+   covariance.ConstructRHS(orbitErrorCovariance, locationStart);                    // made changes by TUAN NGUYEN
+
+   // Set Cd covariance                                                             // made changes by TUAN NGUYEN
+   locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");              // made changes by TUAN NGUYEN
+   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                               // made changes by TUAN NGUYEN
+   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;    // made changes by TUAN NGUYEN
+   // Set Cr covariance                                                             // made changes by TUAN NGUYEN
+   locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");      // made changes by TUAN NGUYEN
+   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                         // made changes by TUAN NGUYEN
+   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;    // made changes by TUAN NGUYEN
+
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -937,8 +944,23 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    constrainCr        = a.constrainCr;
 
 
-   estimationStateType      = a.estimationStateType;                       // made changes by TUAN NGUYEN
-   orbitErrorCovariance     = a.orbitErrorCovariance;                      // made changes by TUAN NGUYEN
+   estimationStateType      = a.estimationStateType;                                // made changes by TUAN NGUYEN
+   orbitErrorCovariance     = a.orbitErrorCovariance;                               // made changes by TUAN NGUYEN
+
+   // Set value to covariance matrix                                                // made changes by TUAN NGUYEN
+   // Set state covariance                                                          // made changes by TUAN NGUYEN
+   Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");  // made changes by TUAN NGUYEN
+   covariance.ConstructRHS(orbitErrorCovariance, locationStart);                    // made changes by TUAN NGUYEN
+
+   // Set Cd covariance                                                             // made changes by TUAN NGUYEN
+   locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");              // made changes by TUAN NGUYEN
+   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                               // made changes by TUAN NGUYEN
+   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;    // made changes by TUAN NGUYEN
+   // Set Cr covariance                                                             // made changes by TUAN NGUYEN
+   locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");      // made changes by TUAN NGUYEN
+   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                         // made changes by TUAN NGUYEN
+   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;    // made changes by TUAN NGUYEN
+
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -3175,12 +3197,9 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          throw SpaceObjectException("Error: a nonpositive number was set to CrSigma. A valid value has to be a positive number.\n");
       
       coeffDragSigma = value;
-      if (isInitialized)                                                              // made changes by TUAN NGUYEN
-      {                                                                               // made changes by TUAN NGUYEN
-         Real CdEpsilonSigma = coeffDragSigma / coeffDrag;                            // made changes by TUAN NGUYEN
-         Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");  // made changes by TUAN NGUYEN
-         covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;  // made changes by TUAN NGUYEN
-      }                                                                               // made changes by TUAN NGUYEN
+      Real CdEpsilonSigma = coeffDragSigma / coeffDrag;                            // made changes by TUAN NGUYEN
+      Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");  // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;  // made changes by TUAN NGUYEN
 
       return coeffDragSigma; 
    }
@@ -3190,12 +3209,9 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          throw SpaceObjectException("Error: a nonpositive number was set to CdSigma. A valid value has to be a positive number.\n");
 
       reflectCoeffSigma = value;
-      if (isInitialized)                                                              // made changes by TUAN NGUYEN
-      {                                                                               // made changes by TUAN NGUYEN
-         Real CrEpsilonSigma = reflectCoeffSigma / reflectCoeff;                      // made changes by TUAN NGUYEN
-         Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");  // made changes by TUAN NGUYEN
-         covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;  // made changes by TUAN NGUYEN
-      }                                                                               // made changes by TUAN NGUYEN
+      Real CrEpsilonSigma = reflectCoeffSigma / reflectCoeff;                      // made changes by TUAN NGUYEN
+      Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");  // made changes by TUAN NGUYEN
+      covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;  // made changes by TUAN NGUYEN
 
       return reflectCoeffSigma;
    }
@@ -5395,18 +5411,18 @@ bool Spacecraft::Initialize()
 //      }
 
 
-      // Set value to covariance matrix                                         // made changes by TUAN NGUYEN
-      // Set state covariance                                                   // made changes by TUAN NGUYEN
-      covariance.ConstructRHS(orbitErrorCovariance, 0);                         // made changes by TUAN NGUYEN
+      //// Set value to covariance matrix                                         // made changes by TUAN NGUYEN
+      //// Set state covariance                                                   // made changes by TUAN NGUYEN
+      //covariance.ConstructRHS(orbitErrorCovariance, 0);                         // made changes by TUAN NGUYEN
 
-      // Set Cr covariance                                                      // made changes by TUAN NGUYEN
-      Integer start = orbitErrorCovariance.GetNumRows();                        // made changes by TUAN NGUYEN
-      Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                        // made changes by TUAN NGUYEN
-      covariance(start, start) = Cd_EpsilonSigma * Cd_EpsilonSigma;             // made changes by TUAN NGUYEN
-      // Set Cd covariance                                                      // made changes by TUAN NGUYEN
-      ++start;                                                                  // made changes by TUAN NGUYEN
-      Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                  // made changes by TUAN NGUYEN
-      covariance(start, start) = Cr_EpsilonSigma * Cr_EpsilonSigma;             // made changes by TUAN NGUYEN
+      //// Set Cr covariance                                                      // made changes by TUAN NGUYEN
+      //Integer start = orbitErrorCovariance.GetNumRows();                        // made changes by TUAN NGUYEN
+      //Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                        // made changes by TUAN NGUYEN
+      //covariance(start, start) = Cd_EpsilonSigma * Cd_EpsilonSigma;             // made changes by TUAN NGUYEN
+      //// Set Cd covariance                                                      // made changes by TUAN NGUYEN
+      //++start;                                                                  // made changes by TUAN NGUYEN
+      //Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                  // made changes by TUAN NGUYEN
+      //covariance(start, start) = Cr_EpsilonSigma * Cr_EpsilonSigma;             // made changes by TUAN NGUYEN
 
 
       isInitialized = true;

@@ -84,7 +84,10 @@ protected:
    bool firstTimeEpochWarning;
    bool firstTimeHasntFiredWarning;
    
-   enum {ELEMENT1, ELEMENT2, ELEMENT3, TOTAL_MASS_FLOW_RATE, ACCEL1, ACCEL2, ACCEL3};
+   enum {ELEMENT1, ELEMENT2, ELEMENT3,
+         TOTAL_MASS_FLOW_RATE,
+         TOTAL_ACCEL1, TOTAL_ACCEL2, TOTAL_ACCEL3,
+         TOTAL_THRUST1, TOTAL_THRUST2, TOTAL_THRUST3};
    
    enum
    {

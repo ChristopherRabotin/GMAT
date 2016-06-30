@@ -390,8 +390,12 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ImpBurnElements(ofType, withName);   
    if (ofType == "V" || ofType == "N" || ofType == "B")
       return new ImpBurnElements(ofType, withName);
+   
+   // FiniteBurn parameters
    if (ofType == "TotalMassFlowRate")
       return new TotalMassFlowRate(ofType, withName);
+   if (ofType == "TotalAcceleration1" || ofType == "TotalAcceleration2" || ofType == "TotalAcceleration3")
+      return new TotalAcceleration(ofType, withName);
    if (ofType == "TotalThrust1" || ofType == "TotalThrust2" || ofType == "TotalThrust3")
       return new TotalThrust(ofType, withName);
    
@@ -497,8 +501,8 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ThrustScaleFactor(withName);
    if (ofType == "GravitationalAccel")
       return new GravitationalAccel(withName);
-   if (ofType == "Thrust")
-      return new Thrust(withName);
+   if (ofType == "ThrustMagnitude")
+      return new ThrustMagnitude(withName);
    if (ofType == "Isp")
       return new Isp(withName);
    if (ofType == "MassFlowRate")
@@ -735,6 +739,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("N");
       creatables.push_back("B");
       creatables.push_back("TotalMassFlowRate");
+      creatables.push_back("TotalAcceleration1");
+      creatables.push_back("TotalAcceleration2");
+      creatables.push_back("TotalAcceleration3");
       creatables.push_back("TotalThrust1");
       creatables.push_back("TotalThrust2");
       creatables.push_back("TotalThrust3");
@@ -794,7 +801,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("DutyCycle");
       creatables.push_back("ThrustScaleFactor");
       creatables.push_back("GravitationalAccel");
-      creatables.push_back("Thrust");
+      creatables.push_back("ThrustMagnitude");
       creatables.push_back("Isp");
       creatables.push_back("MassFlowRate");
       
