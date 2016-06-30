@@ -346,6 +346,31 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
    // Fire the measurement model to build the collection of signal data
    if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))
    {
+      // QA Media correction:
+      cMeasurement.isIonoCorrectWarning = false;
+      cMeasurement.ionoCorrectWarningValue = 0.0;
+      cMeasurement.isTropoCorrectWarning = false;
+      cMeasurement.tropoCorrectWarningValue = 0.0;
+
+      if (withMediaCorrection)
+      {  
+         Real correction = GetIonoCorrection();                                  // unit: km
+         if ((correction < 0.0) || (correction > 0.02))
+         {
+            // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.02 km]
+            cMeasurement.isIonoCorrectWarning = true;
+            cMeasurement.ionoCorrectWarningValue = correction;                   // unit: km
+         }
+         
+         correction = GetTropoCorrection();                                      // unit: km
+         if ((correction < 0.0) || (correction > 0.06))
+         {
+            // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.06 km]
+            cMeasurement.isTropoCorrectWarning = true;
+            cMeasurement.tropoCorrectWarningValue = correction;                  // unit: km
+         }
+      }
+
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
       Real        unfeasibilityValue;
@@ -555,6 +580,15 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 
 
 // made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------------------
+// Real GetIonoCorrection()
+//-------------------------------------------------------------------------------------
+/**
+* This function is used to get ionosphere correction (unit: km)
+*
+* @return     ionosphere correction of a measurment in km
+*/
+//-------------------------------------------------------------------------------------
 Real RangeAdapterKm::GetIonoCorrection()
 {
    Real correction = 0.0;
@@ -578,6 +612,42 @@ Real RangeAdapterKm::GetIonoCorrection()
    
    return correction;
 }
+
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------------------
+// Real GetTropoCorrection()
+//-------------------------------------------------------------------------------------
+/**
+* This function is used to get troposphere correction (unit: km)
+*
+* @return     troposphere correction of a measurment in km
+*/
+//-------------------------------------------------------------------------------------
+Real RangeAdapterKm::GetTropoCorrection()
+{
+   Real correction = 0.0;
+
+   std::vector<SignalBase*> paths = calcData->GetSignalPaths();
+   SignalBase *currentleg = paths[0]; // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
+   SignalData *current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
+
+   while (currentleg != NULL)
+   {
+      // accumulate all range corrections for signal path ith
+      for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+      {
+         if ((current->useCorrection[j]) && (current->correctionIDs[j] == "Troposphere"))
+            correction += current->corrections[j];
+      }// for j loop
+
+      currentleg = currentleg->GetNext();
+      current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
+   }
+
+   return correction;
+}
+
 
 //------------------------------------------------------------------------------
 // bool ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 

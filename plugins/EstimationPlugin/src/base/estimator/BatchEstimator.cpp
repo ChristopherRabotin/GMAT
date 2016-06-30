@@ -1488,6 +1488,9 @@ void BatchEstimator::CheckCompletion()
       sumSEResidualSquare.clear();
       sumSEWeightResidualSquare.clear();
 
+      // Clear all media correct warning lists                          // made changes by TUAN NGUYEN
+      ionoWarningList.clear();                                          // made changes by TUAN NGUYEN
+      tropoWarningList.clear();                                         // made changes by TUAN NGUYEN
 
       if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
          currentState = CALCULATING;
