@@ -1625,6 +1625,9 @@ void Simulator::CompleteInitialization()
    // tell the measManager to complete its initialization
    bool measOK = measManager.Initialize();
 
+   // Prepare for processing                                              // made changes by TUAN NGUYEN
+   measManager.PrepareForProcessing(true);                                // made changes by TUAN NGUYEN
+
    // Get time range of EOP file
    EopFile* eop = GmatGlobal::Instance()->GetEopFile();
    if (eop != NULL)
@@ -1832,7 +1835,10 @@ void Simulator::SimulateData()
 
       // Write measurements to data file
       if (measManager.WriteMeasurements() == false)
-         throw SolverException("Measurement writing failed");
+      {
+         throw SolverException("Measurement writing failed.\n");
+      }
+
 //   }
    
    // Prep for the next measurement simulation
