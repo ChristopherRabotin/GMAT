@@ -45,6 +45,7 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_OBSERVATION_READ
+//#define DEBUG_OBSERVATION_WRITE
 //#define DEBUG_OBSERVATION_DATA
 //#define DEBUG_RAMP_TABLE_READ
 //#define DEBUG_RAMP_TABLE_DATA
@@ -771,8 +772,8 @@ bool DataFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 bool DataFile::OpenStream(bool simulate)
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Entered DataFile<%s>::OpenStream(%s)\n", 
-		  GetName().c_str(), (simulate ? "true" : "false"));
+      MessageInterface::ShowMessage("Entered DataFile<%s>::OpenStream(%s) for <%p>\n", 
+		  GetName().c_str(), (simulate ? "true" : "false"), this);
    #endif
 
    bool retval = false;
@@ -791,7 +792,7 @@ bool DataFile::OpenStream(bool simulate)
 	   if (obsType == "GMAT_RampTable")
 	   {
          #ifdef DEBUG_INITIALIZATION
-		      MessageInterface::ShowMessage("DataFile::OpenStream():   open ramp table '%s' for reading\n", GetName().c_str());
+		      MessageInterface::ShowMessage("DataFile<%p>::OpenStream():   open ramp table '%s' for reading throu stream <%p>\n", this, GetName().c_str(), theDatastream);
          #endif
 	      retval = theDatastream->Open(true, false);
 	   }
@@ -800,14 +801,14 @@ bool DataFile::OpenStream(bool simulate)
          if (simulate)
 		   {
             #ifdef DEBUG_INITIALIZATION
-		         MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for writing\n", GetName().c_str());
+		         MessageInterface::ShowMessage("DataFile<%p>::OpenStream():   open observation data file '%s' for writing throu stream <%p>\n", this, GetName().c_str(), theDatastream);
             #endif
             retval = theDatastream->Open(false, true);
 		   }
          else
 		   {
             #ifdef DEBUG_INITIALIZATION
-		         MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for reading\n", GetName().c_str());
+		         MessageInterface::ShowMessage("DataFile<%p>::OpenStream():   open observation data file '%s' for reading throu stream <%p>\n", this, GetName().c_str(), theDatastream);
             #endif
             retval = theDatastream->Open(true, false);
 		   }
@@ -848,8 +849,16 @@ bool DataFile::IsOpen()
 //------------------------------------------------------------------------------
 void DataFile::WriteMeasurement(MeasurementData* theMeas)
 {
+#ifdef DEBUG_OBSERVATION_WRITE
+   MessageInterface::ShowMessage("Entered DataFile<%p,%s>::Write() write throu stream <%p>\n", this, GetName().c_str(), theDatastream);
+#endif
+
    if (theDatastream)
       theDatastream->AddMeasurement(theMeas);
+
+#ifdef DEBUG_OBSERVATION_WRITE
+   MessageInterface::ShowMessage("Exit DataFile<%p,%s>::Write() write throu stream <%p>\n", this, GetName().c_str(), theDatastream);
+#endif
 }
 
 
@@ -1186,7 +1195,7 @@ RampTableData* DataFile::ReadRampTableData()
 bool DataFile::CloseStream()
 {
    #ifdef DEBUG_FILE_ACCESS
-	  MessageInterface::ShowMessage("Entered DataFile::CloseStream()\n");
+	  MessageInterface::ShowMessage("Entered DataFile::CloseStream() for <%p>\n", this);
    #endif
 
    bool retval = false;
@@ -1195,7 +1204,7 @@ bool DataFile::CloseStream()
       retval = theDatastream->Close();
 
    #ifdef DEBUG_FILE_ACCESS
-	  MessageInterface::ShowMessage("Exit DataFile::CloseStream()\n");
+	  MessageInterface::ShowMessage("Exit DataFile::CloseStream() for <%p>\n", this);
    #endif
 
    return retval;

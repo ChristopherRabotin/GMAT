@@ -62,7 +62,11 @@ MeasurementData::MeasurementData() :
    tdrsNode4Band    (0),
    tdrsServiceID    ("SA1"),
    tdrsSMARID       (0),
-   tdrsDataFlag     (0)
+   tdrsDataFlag     (0),
+   isTropoCorrectWarning      (false),                 // made changes by TUAN NGUYEN
+   isIonoCorrectWarning       (false),                 // made changes by TUAN NGUYEN
+   tropoCorrectWarningValue   (0.0),                   // made changes by TUAN NGUYEN
+   ionoCorrectWarningValue    (0.0)                    // made changes by TUAN NGUYEN
 {
 }
 
@@ -120,7 +124,11 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    tdrsNode4Band    (md.tdrsNode4Band),
    tdrsServiceID    (md.tdrsServiceID),
    tdrsSMARID       (md.tdrsSMARID),
-   tdrsDataFlag     (md.tdrsDataFlag)
+   tdrsDataFlag     (md.tdrsDataFlag),
+   isTropoCorrectWarning    (md.isTropoCorrectWarning),        // made changes by TUAN NGUYEN
+   isIonoCorrectWarning     (md.isIonoCorrectWarning),         // made changes by TUAN NGUYEN
+   tropoCorrectWarningValue (md.tropoCorrectWarningValue),     // made changes by TUAN NGUYEN
+   ionoCorrectWarningValue  (md.ionoCorrectWarningValue)       // made changes by TUAN NGUYEN
 {
 }
 
@@ -149,20 +157,26 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
       participantIDs   = md.participantIDs;
       value            = md.value;
       isFeasible       = md.isFeasible;
-	  unfeasibleReason = md.unfeasibleReason;
-	  feasibilityValue = md.feasibilityValue;
+	   unfeasibleReason = md.unfeasibleReason;
+	   feasibilityValue = md.feasibilityValue;
       covariance       = md.covariance;
       eventCount       = md.eventCount;
-	  uplinkBand       = md.uplinkBand;
-	  uplinkFreq       = md.uplinkFreq;
+	   uplinkBand       = md.uplinkBand;
+	   uplinkFreq       = md.uplinkFreq;
       uplinkFreqAtRecei = md.uplinkFreqAtRecei;                // made changes by TUAN NGUYEN 
-	  rangeModulo      = md.rangeModulo;
-	  dopplerCountInterval = md.dopplerCountInterval;
+	   rangeModulo      = md.rangeModulo;
+	   dopplerCountInterval = md.dopplerCountInterval;
       tdrsNode4Freq    = md.tdrsNode4Freq;
       tdrsNode4Band    = md.tdrsNode4Band;
       tdrsServiceID    = md.tdrsServiceID;
       tdrsSMARID       = md.tdrsSMARID;
       tdrsDataFlag     = md.tdrsDataFlag;
+
+      isTropoCorrectWarning    = md.isTropoCorrectWarning;      // made changes by TUAN NGUYEN
+      isIonoCorrectWarning     = md.isIonoCorrectWarning;       // made changes by TUAN NGUYEN
+      tropoCorrectWarningValue = md.tropoCorrectWarningValue;   // made changes by TUAN NGUYEN
+      ionoCorrectWarningValue  = md.ionoCorrectWarningValue;    // made changes by TUAN NGUYEN
+
    }
 
    return *this;

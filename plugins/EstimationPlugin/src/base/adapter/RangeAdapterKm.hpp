@@ -78,6 +78,7 @@ public:
          const std::string& correctionType);
 
    Real                 GetIonoCorrection();                    // made changes by TUAN NGUYEN
+   Real                 GetTropoCorrection();                   // made changes by TUAN NGUYEN
 
    DEFAULT_TO_NO_CLONES
 protected:

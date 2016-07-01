@@ -115,6 +115,12 @@ public:
    Integer        tdrsSMARID;               // TDRS SMAR id
    Integer        tdrsDataFlag;             // TDRS data flag would be 0 or 1
 
+
+   // This part for media correction QA       GMT-5576       // made changes by TUAN NGUYEN
+   bool isTropoCorrectWarning;                               // made changes by TUAN NGUYEN
+   bool isIonoCorrectWarning;                                // made changes by TUAN NGUYEN
+   Real tropoCorrectWarningValue;          // unit: km       // made changes by TUAN NGUYEN
+   Real ionoCorrectWarningValue;           // unit: km       // made changes by TUAN NGUYEN
 };
 
 #endif /* MeasurementData_hpp */
