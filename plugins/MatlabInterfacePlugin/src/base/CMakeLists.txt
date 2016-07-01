@@ -60,7 +60,11 @@ SET(PLUGIN_SRCS
     interface/MatlabInterface.cpp
     plugin/GmatPluginFunctions.cpp
     subscriber/MatlabWorkspace.cpp
-)
+    matwriter/MatWriter.cpp
+    matwriter/MatData.cpp
+    matwriter/RealMatData.cpp
+    matwriter/StringMatData.cpp
+    )
 if(UNIX)
   SET(PLUGIN_SRCS
     ${PLUGIN_SRCS}

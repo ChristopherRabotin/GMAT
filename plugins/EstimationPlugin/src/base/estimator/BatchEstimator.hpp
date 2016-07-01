@@ -38,6 +38,9 @@
 #include "MeasurementManager.hpp"
 
 #include "OwnedPlot.hpp"
+#include "MatWriter.hpp"
+#include "RealMatData.hpp"
+#include "StringMatData.hpp"
 
 /**
  * Implementation of a standard batch estimation state machine
@@ -135,6 +138,9 @@ protected:
    Rmatrix                 weights;
    /// Flag used to indicate propagation to estimation epoch is executing
    bool                    advanceToEstimationEpoch;
+
+   // instantiate the MatWriter object to write data
+   MatWriter *matWriter;
 
 //   /// Estimation status
 //   Integer                 estimationStatus;         // This variable is moved to Estimator class

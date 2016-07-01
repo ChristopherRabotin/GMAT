@@ -92,7 +92,7 @@ RealMatData& RealMatData::operator=(const RealMatData &rd)
 }
 
 //-------------------------------------------------------------------------------------
-// RealMatData::AddData(Matrix data))
+// RealMatData::AddData(std::vector< RealArray> data))
 //-------------------------------------------------------------------------------------
 /**
  * Sets up an array of input reals for writing to an mxArray/.mat file.
@@ -101,7 +101,7 @@ RealMatData& RealMatData::operator=(const RealMatData &rd)
  *
  */
 //-------------------------------------------------------------------------------------
-bool RealMatData::AddData(Matrix data)
+bool RealMatData::AddData(std::vector< RealArray> data)
 {
     // get matrix size
     m_size = data.size();

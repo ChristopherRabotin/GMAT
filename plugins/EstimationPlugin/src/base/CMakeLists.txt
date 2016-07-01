@@ -34,6 +34,7 @@ ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
 # ====================================================================
 # extra include directory for header file
 INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIR})
 
 # ====================================================================
 # list of directories containing source/header files
@@ -59,6 +60,8 @@ SET(PLUGIN_DIRS
   tdmReader
   trackingfile
   trackingsystem
+  ../../../MatlabInterfacePlugin/src/base/matwriter
+  /usr/local/MATLAB/R2016a/extern/include
   )
 
 # ====================================================================

@@ -33,6 +33,7 @@
 
 #include "mat.h"
 #include <vector>
+#include "gmatdefs.hpp"
 #include "MatData.hpp"
 
 /*
@@ -51,12 +52,12 @@ class RealMatData : public MatData
         RealMatData(const RealMatData &rd);
         RealMatData& operator=(const RealMatData &rd);
         
-        virtual bool AddData(Matrix data);
+        virtual bool AddData(std::vector< RealArray> data);
         virtual void WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct);
 
     protected:
         // The data array to be written
-        Matrix realData;
+        std::vector< RealArray> realData;
         
         // Row count for the data
         int m_size;

@@ -34,7 +34,7 @@
 #include "EstimatorException.hpp"
 #include <sstream>
 #include "StringUtil.hpp"
-
+#include "MatWriter.hpp"
 
 //#define DEBUG_ACCUMULATION
 //#define DEBUG_ACCUMULATION_RESULTS
@@ -484,7 +484,24 @@ void BatchEstimatorInv::Accumulate()
                sLine << s;
                sLine << "\n";
             }
+            
+            // write data to .mat file
+            RealMatData * realData;
+            realData = new RealMatData("observation");
 
+
+            matWriter->AddData(realData);
+            std::vector< RealArray> current_obs; 
+            current_obs.push_back(currentObs->value);
+            realData->AddData(current_obs); 
+
+            std::string object_name;
+            std::stringstream convert;
+            convert << "iteration" << iterationsTaken;
+            object_name = convert.str();
+                
+            matWriter->WriteData(object_name.c_str());
+            
 
             // Reset value for removed reason for all reuseable data records
             if (isReUsed)

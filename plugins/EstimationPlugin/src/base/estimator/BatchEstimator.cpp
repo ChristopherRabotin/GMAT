@@ -148,7 +148,8 @@ BatchEstimator::BatchEstimator(const std::string &type,
 //   estimationStatus           (UNKNOWN),
    chooseRMSP                 (true),
    maxConsDivergences         (3),
-   inversionType              ("Internal")
+   inversionType              ("Internal"),
+   matWriter                  (NULL)
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -167,6 +168,13 @@ BatchEstimator::~BatchEstimator()
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
       delete outerLoopBuffer[i];
    outerLoopBuffer.clear();
+
+
+  if (matWriter != NULL)
+  {
+     delete matWriter;
+  }
+
 }
 
 
@@ -191,12 +199,14 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
 //   estimationStatus           (UNKNOWN),
    chooseRMSP                 (est.chooseRMSP),
    maxConsDivergences         (est.maxConsDivergences),
-   inversionType              (est.inversionType)
+   inversionType              (est.inversionType),
+   matWriter                  (NULL)
 {
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
       delete outerLoopBuffer[i];
    outerLoopBuffer.clear();
+   
 }
 
 
@@ -237,6 +247,13 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       outerLoopBuffer.clear();
 
       inversionType = est.inversionType;
+
+      if (matWriter != NULL)
+      {
+         delete matWriter;
+      }
+      matWriter = NULL;
+
    }
 
    return *this;
@@ -822,6 +839,11 @@ bool BatchEstimator::Initialize()
    {
       //estimationStatus = UNKNOWN;          // This code is moved to Estimator::Initialize()      
       retval    = true;
+
+      // the mat writer
+      matWriter = new MatWriter;
+      std::string filename = instanceName + "matlab_file.mat";
+      matWriter->Initialize(filename.c_str(),"w5");
    }
 
    return retval;
@@ -1558,6 +1580,7 @@ void BatchEstimator::RunComplete()
    sumSEResidualSquare.clear();
    sumSEWeightResidualSquare.clear();
 
+   matWriter->CloseFile();
 }
 
 
