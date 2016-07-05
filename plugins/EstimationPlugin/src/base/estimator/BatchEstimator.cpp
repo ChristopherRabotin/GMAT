@@ -1488,6 +1488,9 @@ void BatchEstimator::CheckCompletion()
       sumSEResidualSquare.clear();
       sumSEWeightResidualSquare.clear();
 
+      // Clear all media correct warning lists                          // made changes by TUAN NGUYEN
+      ionoWarningList.clear();                                          // made changes by TUAN NGUYEN
+      tropoWarningList.clear();                                         // made changes by TUAN NGUYEN
 
       if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
          currentState = CALCULATING;
@@ -3736,15 +3739,15 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
       case UNKNOWN:
          break;
       };
-      ss << "  ***\n";
-      textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER);
+      ss << "  ***";
+      textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER) << "\n";
 
-      // 1.2. Write reason for convergence 
-      textFile0 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(convergenceReason, GmatStringUtil::BOTH), 160, GmatStringUtil::CENTER);
+      // 1.2. Write reason for convergence
+      textFile0 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(convergenceReason.substr(0,convergenceReason.size()-1), GmatStringUtil::BOTH), 160, GmatStringUtil::CENTER) << "\n";
 
       // 1.3. Write number of iterations was run for estimation
       ss.str("");
-      ss << "Estimating completed in " << iterationsTaken << " iterations\n";
+      ss << "Estimating completed in " << iterationsTaken << " iterations";
       textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER);
       textFile0 << "\n";
       textFile0 << "\n";
@@ -3945,6 +3948,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       for (UnsignedInt i = 0; i < stList.size(); ++i)
       {
          std::string keyword = stList[i] + " " + typeList[i];
+
          if (stList[i] == gsName)
          {
             // write a line on statistics table
@@ -4032,9 +4036,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
             sumSERes2Total = 0.0;
             sumSEWRes2Total = 0.0;
 
-            if (i < (stList.size()-1))
-               gsName = stList[i+1];
-
+            gsName = stList[i];
             lines.str("");
 
             // write a line on statistics table

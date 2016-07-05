@@ -358,6 +358,9 @@ void BatchEstimatorInv::Accumulate()
       int count = measManager.Calculate(modelsToAccess[0], true);
       calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
       
+      // verify media correction to be in acceptable range. It is [0m, 60m] for troposphere correction and [0m, 20m] for ionosphere correction
+      ValidateMediaCorrection(calculatedMeas);
+
       if (count == 0)
       {
          std::string ss = measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
@@ -897,6 +900,17 @@ void BatchEstimatorInv::Estimate()
       try
       {
          Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+         //MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         //for (Integer row = 0; row < Pdx0_inv.GetNumRows(); ++row)
+         //{
+         //   for (Integer col = 0; col < Pdx0_inv.GetNumColumns(); ++col)
+         //      MessageInterface::ShowMessage("%le   ", Pdx0_inv.GetElement(row, col));
+         //   if (row < Pdx0_inv.GetNumRows() - 1)
+         //      MessageInterface::ShowMessage("\n");
+         //}
+         //MessageInterface::ShowMessage("]\n");
+
       }
       catch (...)
       {
@@ -1213,3 +1227,54 @@ Real BatchEstimatorInv::ObservationDataCorrection(Real cValue, Real oValue, Real
 
    return (oValue + N*moduloConstant);
 }
+
+
+// made changes by TUAN NGUYEN
+void BatchEstimatorInv::ValidateMediaCorrection(const MeasurementData* measData)
+{
+   if (measData->isIonoCorrectWarning)
+   {
+      // Get measurement pass:
+      std::stringstream ss1;
+      ss1 << "{{";
+      for (Integer i = 0; i < measData->participantIDs.size(); ++i)
+      {
+         ss1 << measData->participantIDs[i] << (((i + 1) < measData->participantIDs.size()) ? "," : "");
+      }
+      ss1 << "}," << measData->typeName << "}";
+
+      // if the pass is not in warning list, then display warning message
+      if (find(ionoWarningList.begin(), ionoWarningList.end(), ss1.str()) == ionoWarningList.end())
+      {
+         // generate warning message
+         MessageInterface::ShowMessage("Warning: When running estimator '%s', ionosphere correction (%lf m) for measurement %s at measurement time tag %.12lf A1Mjd is out side of accepetable range [0m , 20m].\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+
+         // add pass to the list
+         ionoWarningList.push_back(ss1.str());
+      }
+
+   }
+
+   if (measData->isTropoCorrectWarning)
+   {
+      // Get measurement path:
+      std::stringstream ss1;
+      ss1 << "{{";
+      for (Integer i = 0; i < measData->participantIDs.size(); ++i)
+      {
+         ss1 << measData->participantIDs[i] << (((i + 1) < measData->participantIDs.size()) ? "," : "");
+      }
+      ss1 << "}," << measData->typeName << "}";
+
+      // if the pass is not in warning list, then display warning message
+      if (find(tropoWarningList.begin(), tropoWarningList.end(), ss1.str()) == tropoWarningList.end())
+      {
+         // generate warning message
+         MessageInterface::ShowMessage("Warning: When running estimator '%s', troposphere correction (%lf m) for measurement %s at measurement time tag %.12lf A1Mjd is out side of accepetable range [0m , 60m].\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+
+         // add pass to the list
+         tropoWarningList.push_back(ss1.str());
+      }
+   }
+}
+

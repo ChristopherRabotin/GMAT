@@ -288,6 +288,10 @@ protected:
    Real      eopTimeMax;        // EOP time max
    Integer   warningCount;      // count number of warning message when check measurement epoch to be inside or outside  EOP time range 
 
+   /// Media correction QA
+   StringArray ionoWarningList;            // list contains all measurement passes with ionosphere correction to be outside acceptable range [0m, 20m]
+   StringArray tropoWarningList;           // list contians all measurement passes with troposphere correction to be outside acceptable range [0m, 60m]
+
    /// Parameters associated with the Estimators
    enum
    {

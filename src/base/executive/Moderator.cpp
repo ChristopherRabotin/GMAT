@@ -8259,6 +8259,9 @@ void Moderator::CreateDefaultParameters()
    // FiniteBurn Parameters
    // Create FiniteBurn Parameters to add to ParameterInfo database.
    CreateParameter("TotalMassFlowRate", "DefaultFB.TotalMassFlowRate");
+   CreateParameter("TotalAcceleration1", "DefaultFB.TotalAcceleration1");
+   CreateParameter("TotalAcceleration2", "DefaultFB.TotalAcceleration2");
+   CreateParameter("TotalAcceleration3", "DefaultFB.TotalAcceleration3");
    CreateParameter("TotalThrust1", "DefaultFB.TotalThrust1");
    CreateParameter("TotalThrust2", "DefaultFB.TotalThrust2");
    CreateParameter("TotalThrust3", "DefaultFB.TotalThrust3");
@@ -8269,6 +8272,9 @@ void Moderator::CreateDefaultParameters()
    // Remove FiniteBurn Parameters since these Parameters info already add to database
    // and not used in the default mission
    RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalMassFlowRate", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalAcceleration1", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalAcceleration2", true);
+   RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalAcceleration3", true);
    RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust1", true);
    RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust2", true);
    RemoveObject(Gmat::PARAMETER, "DefaultFB.TotalThrust3", true);
@@ -8571,7 +8577,7 @@ void Moderator::CreateDefaultParameters()
       CreateParameter("DutyCycle", "DefaultSC.DefaultThruster.DutyCycle");
       CreateParameter("Isp", "DefaultSC.DefaultThruster.Isp");
       CreateParameter("MassFlowRate", "DefaultSC.DefaultThruster.MassFlowRate");
-      CreateParameter("Thrust", "DefaultSC.DefaultThruster.Thrust");
+      CreateParameter("ThrustMagnitude", "DefaultSC.DefaultThruster.ThrustMagnitude");
       CreateParameter("ThrustScaleFactor", "DefaultSC.DefaultThruster.ThrustScaleFactor");
       CreateParameter("GravitationalAccel", "DefaultSC.DefaultThruster.GravitationalAccel");
       CreateParameter("C1", "DefaultSC.DefaultThruster.C1");

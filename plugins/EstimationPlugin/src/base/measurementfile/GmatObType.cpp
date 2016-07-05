@@ -187,10 +187,10 @@ bool GmatObType::Initialize()
 bool GmatObType::Open(bool forRead, bool forWrite, bool append)
 {
    #ifdef DEBUG_FILE_ACCESS
-      MessageInterface::ShowMessage("GmatObType::Open(%s, %s, %s) Executing\n",
+      MessageInterface::ShowMessage("GmatObType::Open(%s, %s, %s) Executing for \n",
             (forRead ? "true" : "false"),
             (forWrite ? "true" : "false"),
-            (append ? "true" : "false") );
+            (append ? "true" : "false"), this);
    #endif
    bool retval = false;
 
@@ -297,7 +297,7 @@ bool GmatObType::IsOpen()
 bool GmatObType::AddMeasurement(MeasurementData *md)
 {
    #ifdef DEBUG_FILE_WRITE
-      MessageInterface::ShowMessage("GmatObType::AddMeasurement() Executing\n");
+      MessageInterface::ShowMessage("GmatObType<%p>::AddMeasurement() Executing\n", this);
    #endif
    bool retval = false;
 

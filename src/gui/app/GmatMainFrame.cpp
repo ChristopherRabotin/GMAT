@@ -5668,6 +5668,11 @@ void GmatMainFrame::UpdateAdvancedGuiMode(int status)
    {
       gmatAppData->GetResourceTree()->
          SetBackgroundColour(wxTheColourDatabase->Find("WHITE"));
+      gmatAppData->GetMissionTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHITE"));
+      gmatAppData->GetOutputTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHITE"));
+      gmatAppData->GetMissionTree()->EnableShowScript(true);
       theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT, true);
       theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT_AS, true);
       theToolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, true);
@@ -5678,10 +5683,11 @@ void GmatMainFrame::UpdateAdvancedGuiMode(int status)
       //    SetForegroundColour(wxTheColourDatabase->Find("ORANGE"));
       gmatAppData->GetResourceTree()->
          SetBackgroundColour(wxTheColourDatabase->Find("WHEAT"));
-         //SetBackgroundColour(wxTheColourDatabase->Find("LIGHT STEEL BLUE"));
-         //SetBackgroundColour(wxTheColourDatabase->Find("CADET BLUE"));
-         //SetBackgroundColour(wxTheColourDatabase->Find("THISTLE")); // light pink purple
-         //SetBackgroundColour(wxTheColourDatabase->Find("STEEL BLUE")); // too dark
+      gmatAppData->GetMissionTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHEAT"));
+      gmatAppData->GetOutputTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHEAT"));
+      gmatAppData->GetMissionTree()->EnableShowScript(false);
       theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT, false);
       theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT_AS, false);
       theToolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, false);

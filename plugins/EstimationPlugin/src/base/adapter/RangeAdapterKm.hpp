@@ -77,7 +77,8 @@ public:
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
 
-   Real                 GetIonoCorrection();            // made changes by TUAN NGUYEN
+   Real                 GetIonoCorrection();                    // made changes by TUAN NGUYEN
+   Real                 GetTropoCorrection();                   // made changes by TUAN NGUYEN
 
    DEFAULT_TO_NO_CLONES
 protected:

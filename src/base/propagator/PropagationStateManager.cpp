@@ -55,6 +55,8 @@
 //------------------------------------------------------------------------------
 /**
  * Default constructor
+ *
+ * @param size The size of the (initial) propagation state vector
  */
 //------------------------------------------------------------------------------
 PropagationStateManager::PropagationStateManager(Integer size) :
@@ -73,8 +75,6 @@ PropagationStateManager::PropagationStateManager(Integer size) :
 //------------------------------------------------------------------------------
 PropagationStateManager::~PropagationStateManager()
 {
-//   for (StringArray::iterator i = elements.begin(); i != elements.end(); ++i)
-//      delete (i.second());
 }
 
 
