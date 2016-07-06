@@ -390,8 +390,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       rangeModulo = obsData->rangeModulo;                                                                         // unit: RU
    
    // 2. Compute range in km
-   //RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
-   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation);
+   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);             // it needs to include ramp table in calculation  // made changes by TUAN NGUYEN
    
    // 3. Convert range from km to RU and store in cMeasurement:
    for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
