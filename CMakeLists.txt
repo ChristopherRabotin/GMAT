@@ -111,10 +111,6 @@ FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv
 
 # User option for SPICE
 OPTION(GMAT_USE_SPICE "Use CSPICE" ON)
-if(GMAT_USE_SPICE)
-  ADD_DEFINITIONS("-D__USE_SPICE__")
-  INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-endif()
 
 # Search for CSPICE even if it is not selected, because
 # the CSPICE libs contain the F2C implementation
@@ -162,6 +158,12 @@ if(CSPICE_DIR)
   endif()
 else()
   MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
+endif()
+
+# Include SPICE directories if it is selected
+if(GMAT_USE_SPICE)
+  ADD_DEFINITIONS("-D__USE_SPICE__")
+  INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 endif()
 
 # By default use the CSPICE version of F2C
@@ -227,35 +229,18 @@ else()
 endif()
 
 # ====================================================================
-# Added by LOJ for XERCES
 # Find Xerces
-MESSAGE(STATUS "Searching for Xerces")
-SET(XERCES_DIR "${PROJECT_SOURCE_DIR}/depends/Xerces")
-SET(XERCES_LIB_DIR "" CACHE PATH "Path to location of the Xerces library.")
-SET(XERCES_INCLUDE_DIR "" CACHE PATH "Path to location of xerces/src")
-MESSAGE(STATUS "Please set the Xerces locations")
-# FIND_PACKAGE(XercesLibs)
-
-# @todo: set correct lib for Mac/Linux
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    SET(XERCES_LIBRARY "xerces-c-3.1")
-  else()
-    SET(XERCES_LIBRARY "")
-  endif()
+if(WIN32)
+  SET(CMAKE_INCLUDE_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/src")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces//Build/Win64/VC12/Release")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/xerces-c-3.1.4/Build/Win64/VC12/Debug")
+elseif(APPLE)
+  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/cocoa-install")
 else()
-  SET(XERCES_LIBRARY "xerces-c_3.lib")
+  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/linux-install")
 endif()
 
-
-MESSAGE(STATUS "Xerces Library: " ${XERCES_LIBRARY})
-
-if(XERCES_LIB_DIR)
-  MESSAGE(STATUS "Found Xerces: " ${XERCES_LIB_DIR})
-else()
-  MESSAGE(WARNING "Xerces NOT FOUND. Set XERCES_LIB_DIR to your Xerces34.lib library path, and XERCES_INCLUDE_DIR to the path to Xerces.h and re-configure.")
-endif()
+FIND_PACKAGE(XercesC)
 # ====================================================================
 
 

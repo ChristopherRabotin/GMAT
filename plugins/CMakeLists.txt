@@ -66,7 +66,7 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
 
   # ====================================================================
   # All plugins link to GmatBase
-  TARGET_LINK_LIBRARIES(${TargetName} GmatBase)
+  TARGET_LINK_LIBRARIES(${TargetName} PUBLIC GmatBase)
 
   # ====================================================================
   # Specify where to install plugin

@@ -21,7 +21,7 @@ if(NOT EXISTS ${F2C_DIR})
   RETURN()
 endif()
 
-if(NOT XERCES_LIB_DIR)
+if(NOT XercesC_FOUND)
   MESSAGE(WARNING "Skipping Estimation: Xerces missing")
   RETURN()
 endif()
@@ -33,7 +33,7 @@ ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
 
 # ====================================================================
 # extra include directory for header file
-INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${XercesC_INCLUDE_DIRS})
 
 # ====================================================================
 # list of directories containing source/header files
@@ -185,17 +185,7 @@ _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
 # Additional link libraries
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
-  else()
-    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
-  endif()
-else()
-  set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
-  set(WS2_32_LIB Ws2_32)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${XercesC_LIBRARIES})
+if(NOT UNIX)
+  TARGET_LINK_LIBRARIES(${TargetName} PUBLIC Ws2_32)
 endif()
-
-TARGET_LINK_LIBRARIES(${TargetName} ${XERCES_LIB})
-TARGET_LINK_LIBRARIES(${TargetName} ${WS2_32_LIB})

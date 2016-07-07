@@ -53,4 +53,4 @@ _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
 # Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} GmatEstimation)
+TARGET_LINK_LIBRARIES(${TargetName} PUBLIC GmatEstimation)

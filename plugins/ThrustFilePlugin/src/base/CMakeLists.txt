@@ -50,4 +50,4 @@ _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
 # Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} DataInterface)
+TARGET_LINK_LIBRARIES(${TargetName} PUBLIC DataInterface)

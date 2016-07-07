@@ -21,11 +21,6 @@ ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DGMAT_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
-# ====================================================================
-# SPICE specifics
-# SPICE is linked because it contains the F2C implementation
-LINK_LIBRARIES(optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
-
 if(GMAT_USE_SPICE)
   SET(SPICE_SRCS
     "attitude/SpiceAttitude.cpp"
@@ -36,21 +31,6 @@ if(GMAT_USE_SPICE)
     "util/SpiceKernelWriter.cpp"
     "util/SpiceOrbitKernelWriter.cpp")
 endif()
-
-# ====================================================================
-# Additional link libraries (xerces)
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
-  else()
-    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
-  endif()
-else()
-  set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
-endif()
-
-LINK_LIBRARIES(${XERCES_LIB})
 
 # ====================================================================
 # F2C
@@ -106,8 +86,8 @@ ENDFOREACH(currdir)
 INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 
 # ====================================================================
-# extra include directory for header file (LOJ)
-INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
+# Include directory for Xerces
+INCLUDE_DIRECTORIES(${XercesC_INCLUDE_DIRS})
 
 # ====================================================================
 # source files
@@ -578,6 +558,12 @@ FILE(GLOB_RECURSE BASE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 # Create GmatBase as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS} ${BASE_HEADERS})
 
+# Link needed libraries
+# Note: Xerces is PRIVATE so that all GMAT Plugins won't have it as an
+#       explicit link dependency
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${XercesC_LIBRARIES})
+TARGET_LINK_LIBRARIES(${TargetName} PUBLIC optimized ${CSPICE_LIB} PUBLIC debug ${CSPICE_LIB_DEBUG})
+
 # Library name should start with "lib"
 # This is always true for Mac/Linux, but needs to be specified for Windows
 SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
@@ -587,7 +573,7 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
 # Macro defined in top-level CMakeLists.txt
 _ADDSOURCEGROUPS("${BASE_DIRS}")
 
-# specify the version of the library. 
+# Windows-specific link flags
 if(WIN32)
   SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\" /INCREMENTAL:NO")
 endif()

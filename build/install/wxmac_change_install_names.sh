@@ -7,7 +7,10 @@
 #  ${4+}: Additional GMAT binaries that use wxWidgets, e.g. Gui
 
 # Find all wxWidgets dylibs
-wxlibnames=`cd ${1} ; find *.dylib`
+wxlibnames=`cd ${1} ; find *.dylib 2> /dev/null`
+if [[ -z "$wxlibnames" ]]; then
+  exit
+fi
 
 # Collect all changes from old name to new name
 changes=''

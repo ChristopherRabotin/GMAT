@@ -75,9 +75,9 @@ _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
 # Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} ${Matlab_LIBRARIES})
+TARGET_LINK_LIBRARIES(${TargetName} PUBLIC ${Matlab_LIBRARIES})
 if(UNIX)
-  TARGET_LINK_LIBRARIES(${TargetName} ${wxWidgets_LIBRARIES})
+  TARGET_LINK_LIBRARIES(${TargetName} PUBLIC ${wxWidgets_LIBRARIES})
 endif()
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux

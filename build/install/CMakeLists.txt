@@ -103,3 +103,29 @@ if(wxWidgets_FOUND)
     endif()
   endif()
 endif()
+
+# ====================================================================
+# Install XercesC libraries
+if(XercesC_FOUND)
+  if(WIN32)
+    INSTALL(FILES ${XercesC_LIBRARIES}
+      DESTINATION bin
+      USE_SOURCE_PERMISSIONS
+      )
+  else()
+    # For Mac/Linux, Xerces libs are in bin/libwx or Mac app bundle
+    if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+      SET(XercesC_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
+    else()
+      SET(XercesC_INSTALL_DIR bin/libwx)
+    endif()
+
+    GET_FILENAME_COMPONENT(XercesC_LIBRARY_DIR ${XercesC_LIBRARY_RELEASE} DIRECTORY)
+    INSTALL(DIRECTORY ${XercesC_LIBRARY_DIR}/
+      DESTINATION ${XercesC_INSTALL_DIR}
+      USE_SOURCE_PERMISSIONS
+      FILES_MATCHING PATTERN "*.dylib"
+      PATTERN "pkgconfig" EXCLUDE
+      )
+  endif()
+endif()

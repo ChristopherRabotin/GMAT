@@ -309,7 +309,7 @@ function build_xerces() {
 	  echo "Prepping Xerces to compile..."
 	  mkdir -p "$xerces_build_path"
 	  cd "$xerces_build_path"
-	  ../configure --prefix="$xerces_install_path" > "$logs_path/xerces_configure.log" 2>&1
+	  ../configure --disable-static --enable-rpath CFLAGS=-O2 CXXFLAGS=-O2 --prefix="$xerces_install_path" > "$logs_path/xerces_configure.log" 2>&1
 
 	  echo "Compiling Xerces $xerces_version. This may take a while..."
 	  make -j$ncores > "$logs_path/xerces_build.log" 2>&1
