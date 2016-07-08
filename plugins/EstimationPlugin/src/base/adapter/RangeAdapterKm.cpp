@@ -363,9 +363,9 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          }
          
          correction = GetTropoCorrection();                                      // unit: km
-         if ((correction < 0.0) || (correction > 0.06))
+         if ((correction < 0.0) || (correction > 0.12))
          {
-            // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.06 km]
+            // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.12 km]
             cMeasurement.isTropoCorrectWarning = true;
             cMeasurement.tropoCorrectWarningValue = correction;                  // unit: km
          }
