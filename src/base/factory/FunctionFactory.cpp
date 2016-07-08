@@ -37,6 +37,7 @@
 // include list of Function classes here
 #include "GetLastState.hpp"
 #include "GetEphemStates.hpp"
+#include "SetSeed.hpp"
 
 //#define DEBUG_MATH_FACTORY 1
 
@@ -72,6 +73,8 @@ Function* FunctionFactory::CreateFunction(const std::string &ofType,
       builtinFunction = new GetLastState(ofType, withName);
    if (ofType == "GetEphemStates")
       builtinFunction = new GetEphemStates(ofType, withName);
+   if (ofType == "SetSeed")
+      builtinFunction = new SetSeed(ofType, withName);
    
    return builtinFunction;
 }
@@ -177,5 +180,6 @@ void FunctionFactory::BuildCreatables()
    
    creatables.push_back("GetLastState");
    creatables.push_back("GetEphemStates");
+   creatables.push_back("SetSeed");
 }
 
