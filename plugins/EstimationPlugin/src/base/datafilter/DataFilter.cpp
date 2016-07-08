@@ -27,6 +27,7 @@
 #include "MeasurementException.hpp"
 #include "DateUtil.hpp" 
 #include "StringUtil.hpp"
+#include "DataFile.hpp"
 #include <sstream>
 
 
@@ -1477,7 +1478,7 @@ ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer&
    return NULL;
 }
 
-#include "DataFile.hpp"
+
 bool DataFilter::HasFile(ObservationData* dataObject)
 {
    bool has = false;
