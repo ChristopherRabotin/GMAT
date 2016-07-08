@@ -587,11 +587,11 @@ endif()
 if(UNIX)
   if(APPLE)
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
-      "@loader_path/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/"
+      "@loader_path/;@loader_path/libxerces/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/"
       )
   else()
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
-      "\$ORIGIN/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/"
+      "\$ORIGIN/;\$ORIGIN/libxerces/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/"
       )
   endif()
 endif()

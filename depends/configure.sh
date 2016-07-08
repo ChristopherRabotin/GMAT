@@ -282,6 +282,11 @@ function build_wxWidgets() {
 	    cd ..; rm -Rf "$wx_build_path"
 	  else
 	    echo "wxWidgets build failed. Fix errors and try again."
+	    if [ $mac == false ]
+	    then
+	      # Report common OpenGL install bug on Linux
+	      echo "On Linux, please make sure that /usr/lib/x86_64-linux-gnu/libGL.so (symbolic link) resolves to the actual OpenGL library."
+	    fi
 	    return
 	  fi
 	fi

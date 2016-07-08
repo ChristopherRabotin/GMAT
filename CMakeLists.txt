@@ -19,8 +19,8 @@
 #
 
 # Require CMake minimum version
-cmake_minimum_required(VERSION 2.8.12)
-CMAKE_POLICY(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5.2)
+CMAKE_POLICY(VERSION 3.5.2)
 
 # Support OSX 10.8+ -> go to 10.10 as minimum
 IF(APPLE)
@@ -32,6 +32,11 @@ ENDIF()
 PROJECT(GMAT C CXX)
 SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "GMAT version name")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
+
+# Enforce C++11
+SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
 
 # Path to custom Find****.cmake files
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
@@ -307,7 +312,8 @@ if(UNIX)
     # GMAT GUI has many instances of text like "XX"GUI_ACCEL_KEY"YY"
     # This is incompatible with the C++11 standard, and should be fixed
     # For now, disable this compile error (-Wreserved-user-defined-literal)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-user-defined-literal")
+    # [UPDATE] Removed since this no longer seems to create build errors.
+    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-user-defined-literal")
   endif()
 endif()
 

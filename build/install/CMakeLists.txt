@@ -124,7 +124,7 @@ if(XercesC_FOUND)
     INSTALL(DIRECTORY ${XercesC_LIBRARY_DIR}/
       DESTINATION ${XercesC_INSTALL_DIR}
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "*.dylib"
+      FILES_MATCHING PATTERN "libxerces*"
       PATTERN "pkgconfig" EXCLUDE
       )
 
