@@ -1646,11 +1646,11 @@ std::string BatchEstimator::GetProgressString()
          case CHECKINGRUN:
             progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration     : "
+            progress << "\n   BestRMS residuals                        : "
                      << bestResidualRMS;
             if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                 // fix bug GMT-5711
             {                                                                          // fix bug GMT-5711
-               progress << "\n   Reset value of BestRMS residuals         : "          // fix bug GMT-5711
+            progress << "\n   Reset value of BestRMS residuals         : "          // fix bug GMT-5711
                         << resetBestResidualRMS;                                       // fix bug GMT-5711
             }                                                                          // fix bug GMT-5711
             progress << "\n   PredictedRMS residuals for next iteration: "
@@ -1708,7 +1708,7 @@ std::string BatchEstimator::GetProgressString()
          case FINISHED:
             progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration     : "
+            progress << "\n   BestRMS residuals                        : "
                      << bestResidualRMS;
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
@@ -1795,7 +1795,7 @@ std::string BatchEstimator::GetProgressString()
             {
                progress << "\n   WeightedRMS residuals for previous iteration: "
                         << oldResidualRMS;
-               progress << "\n   WeightedRMS residuals for this iteration    : "
+               progress << "\n   WeightedRMS residuals                       : "
                         << newResidualRMS;
                progress << "\n   BestRMS residuals for this iteration        : "
                         << bestResidualRMS << "\n\n";
