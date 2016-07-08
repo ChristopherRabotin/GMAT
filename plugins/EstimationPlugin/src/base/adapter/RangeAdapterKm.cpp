@@ -355,9 +355,9 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       if (withMediaCorrection)
       {  
          Real correction = GetIonoCorrection();                                  // unit: km
-         if ((correction < 0.0) || (correction > 0.02))
+         if ((correction < 0.0) || (correction > 0.04))
          {
-            // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.02 km]
+            // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.04 km]
             cMeasurement.isIonoCorrectWarning = true;
             cMeasurement.ionoCorrectWarningValue = correction;                   // unit: km
          }
