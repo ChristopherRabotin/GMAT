@@ -2589,8 +2589,8 @@ Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData
 
    if (t <= (*rampTB)[beginIndex].epoch)
 	   return (*rampTB)[beginIndex].rampFrequency;
-   else if (t >= (*rampTB)[endIndex-1].epoch)
-	   return (*rampTB)[endIndex-1].rampFrequency;
+//   else if (t >= (*rampTB)[endIndex-1].epoch)                                                         // made changes by TUAN NGUYEN
+//	   return (*rampTB)[endIndex-1].rampFrequency;                                                       // made changes by TUAN NGUYEN
 
    // search for interval which contains time t:
    UnsignedInt interval_index = beginIndex;
@@ -2605,11 +2605,11 @@ Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData
    
    // specify frequency at time t:
    Real t_start = (*rampTB)[interval_index].epoch;
-   Real f0 = (*rampTB)[interval_index].rampFrequency;
-   Real f_dot = (*rampTB)[interval_index].rampRate;
+   Real f0 = (*rampTB)[interval_index].rampFrequency;                    // unit: Hz
+   Real f_dot = (*rampTB)[interval_index].rampRate;                      // unit: Hz/second
 	   
-   Real f = f0 + f_dot*(t - t_start);
-
+   Real f = f0 + f_dot*(t - t_start)*GmatTimeConstants::SECS_PER_DAY;    // unit: Hz                    // made changes by TUAN NGUYEN
+//   MessageInterface::ShowMessage("f0 = %lf Hz     f_dot = %lf Hz/s    f = %lf\n", f0, f_dot, f);
    return f;
 }
 
@@ -2620,7 +2620,7 @@ Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData
 /**
 * This function is used to get frequency band at a given epoch from ramped frequency table
 *
-* @param t        Epoch (in A1Mjd) at which frequency needed to spicify
+* @param t        Epoch (in A1Mjd) at which frequency needed to specify
 * @param rampTB   Table containing information about ramped frequency
 *
 * return          band index of frequency
@@ -2642,7 +2642,7 @@ Integer PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTa
 
    if (t <= (*rampTB)[beginIndex].epoch)
       return (*rampTB)[beginIndex].uplinkBand;
-   else if (t >= (*rampTB)[endIndex-1].epoch)
+   else if (t >= (*rampTB)[endIndex-1].epoch)                                             
       return (*rampTB)[endIndex-1].uplinkBand;
 
    // search for interval which contains time t:

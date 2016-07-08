@@ -1358,6 +1358,13 @@ void BatchEstimator::CheckCompletion()
    convergenceReason = "";
    estimationStatus = TestForConvergence(convergenceReason);
    
+   // Reset best RMS as needed                           // fix bug GMT-5711
+   if (resetBestRMSFlag)                                 // fix bug GMT-5711
+   {                                                     // fix bug GMT-5711
+      if (estimationStatus == DIVERGING)                 // fix bug GMT-5711
+         resetBestResidualRMS = newResidualRMS;          // fix bug GMT-5711
+   }                                                     // fix bug GMT-5711
+
    #ifdef RUN_SINGLE_PASS
       converged = true;
    #endif
@@ -1463,6 +1470,9 @@ void BatchEstimator::CheckCompletion()
 
       WriteToTextFile();
       ReportProgress();
+      // After writing to GmatLog.txt file, bestResidualRMS is set to resetBestResdualRMS    // fix bug GMT-5711
+      if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                             // fix bug GMT-5711
+         bestResidualRMS = resetBestResidualRMS;                                             // fix bug GMT-5711
 
       numRemovedRecords["U"] = 0;
       numRemovedRecords["R"] = 0;
@@ -1638,6 +1648,11 @@ std::string BatchEstimator::GetProgressString()
                      << newResidualRMS;
             progress << "\n   BestRMS residuals for this iteration     : "
                      << bestResidualRMS;
+            if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                 // fix bug GMT-5711
+            {                                                                          // fix bug GMT-5711
+               progress << "\n   Reset value of BestRMS residuals         : "          // fix bug GMT-5711
+                        << resetBestResidualRMS;                                       // fix bug GMT-5711
+            }                                                                          // fix bug GMT-5711
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
          
@@ -1783,7 +1798,7 @@ std::string BatchEstimator::GetProgressString()
                progress << "\n   WeightedRMS residuals for this iteration    : "
                         << newResidualRMS;
                progress << "\n   BestRMS residuals for this iteration        : "
-                     << bestResidualRMS << "\n\n";
+                        << bestResidualRMS << "\n\n";
             }
 
             finalCovariance = information.Inverse();

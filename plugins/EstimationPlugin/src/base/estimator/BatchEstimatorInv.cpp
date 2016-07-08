@@ -947,12 +947,12 @@ void BatchEstimatorInv::Estimate()
       bestResidualRMS = newResidualRMS;
    else
    {
-      // Reset best RMS as needed
-      if (resetBestRMSFlag)
-      {
-         if (estimationStatus == DIVERGING)
-            bestResidualRMS = oldResidualRMS;
-      }
+      //// Reset best RMS as needed                                     // fix bug GMT-5711
+      //if (resetBestRMSFlag)                                           // fix bug GMT-5711
+      //{                                                               // fix bug GMT-5711
+      //   if (estimationStatus == DIVERGING)                           // fix bug GMT-5711
+      //      bestResidualRMS = oldResidualRMS;                         // fix bug GMT-5711
+      //}                                                               // fix bug GMT-5711
 
       bestResidualRMS = GmatMathUtil::Min(bestResidualRMS, newResidualRMS);
    }
