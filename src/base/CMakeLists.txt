@@ -71,25 +71,6 @@ SET(BASE_DIRS
   )
 
 # ====================================================================
-# Globally available list of GMAT Base include directories
-# Use absolute path so other GMAT dependencies can refer to them
-FOREACH(currdir ${BASE_DIRS})
-  SET(GMAT_BASE_INCLUDE_DIRECTORIES
-      ${GMAT_BASE_INCLUDE_DIRECTORIES}
-	  "${CMAKE_CURRENT_SOURCE_DIR}/${currdir}"
-	  CACHE INTERNAL "base includes"
-	  )
-ENDFOREACH(currdir)
-
-# ====================================================================
-# Include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-
-# ====================================================================
-# Include directory for Xerces
-INCLUDE_DIRECTORIES(${XercesC_INCLUDE_DIRS})
-
-# ====================================================================
 # source files
 SET(BASE_SRCS
     asset/AssetException.cpp
@@ -558,11 +539,14 @@ FILE(GLOB_RECURSE BASE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 # Create GmatBase as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS} ${BASE_HEADERS})
 
+# Add necessary include directories
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${BASE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${CSPICE_INCLUDE_DIR})
+
 # Link needed libraries
-# Note: Xerces is PRIVATE so that all GMAT Plugins won't have it as an
-#       explicit link dependency
-TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${XercesC_LIBRARIES})
-TARGET_LINK_LIBRARIES(${TargetName} PUBLIC optimized ${CSPICE_LIB} PUBLIC debug ${CSPICE_LIB_DEBUG})
+TARGET_LINK_LIBRARIES(${TargetName} PUBLIC optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE XercesC::XercesC)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${CMAKE_DL_LIBS})
 
 # Library name should start with "lib"
 # This is always true for Mac/Linux, but needs to be specified for Windows

@@ -19,7 +19,8 @@
 #
 
 # Require CMake minimum version
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
+CMAKE_POLICY(VERSION 2.8.12)
 
 # Support OSX 10.8+ -> go to 10.10 as minimum
 IF(APPLE)
@@ -153,6 +154,7 @@ if(CSPICE_DIR)
   endif()
   SET(CSPICE_LIB "${CSPICE_DIR}/lib/cspice.${CSPICE_EXT}")
   SET(CSPICE_LIB_DEBUG "${CSPICE_DIR}/lib/cspiced.${CSPICE_EXT}")
+  SET(CSPICE_INCLUDE_DIR "${CSPICE_DIR}/include")
   if(NOT EXISTS ${CSPICE_LIB_DEBUG})
     SET(CSPICE_LIB_DEBUG ${CSPICE_LIB})
   endif()
@@ -163,11 +165,10 @@ endif()
 # Include SPICE directories if it is selected
 if(GMAT_USE_SPICE)
   ADD_DEFINITIONS("-D__USE_SPICE__")
-  INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 endif()
 
 # By default use the CSPICE version of F2C
-SET(F2C_DEPENDS_DIR "${CSPICE_DIR}/include")
+SET(F2C_DEPENDS_DIR ${CSPICE_INCLUDE_DIR})
 
 # Search for F2C folder in default paths
 # User can change this via CMake GUI or command line
@@ -284,13 +285,6 @@ ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 # Mark debug libraries with a "d" suffix
 SET(CMAKE_DEBUG_POSTFIX "d")
 
-# Linker Flags
-if(UNIX)
-  if(NOT APPLE)
-    LINK_LIBRARIES("dl")	
-  endif()
-endif()
-
 # Warning suppression definitions
 # Note that warning C4430 presents as an error in the MatlabInterface plugin
 if(WIN32)
@@ -331,10 +325,6 @@ if(UNIX)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--enable-new-dtags")
   endif()
 endif()
-
-# Declare global var for GmatBase header directories
-# This will be defined in the GmatBase CMakeLists.txt file
-SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
 
 # ====================================================================
 # Define macro that sets the output directory for build products,

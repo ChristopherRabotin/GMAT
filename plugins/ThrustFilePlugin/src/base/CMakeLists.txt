@@ -24,12 +24,6 @@ ADD_DEFINITIONS("-DTHRUSTFILE_EXPORTS")
 SET(PLUGIN_DIRS command datareader factory forcemodel include plugin)
 
 # ====================================================================
-# extra include directories for header files
-INCLUDE_DIRECTORIES("../../../DataInterfacePlugin/src/base/include")
-INCLUDE_DIRECTORIES("../../../DataInterfacePlugin/src/base/datareader")
-INCLUDE_DIRECTORIES("../../../DataInterfacePlugin/src/base/datainterface")
-
-# ====================================================================
 # source files
 SET(PLUGIN_SRCS
     command/BeginFileThrust.cpp
@@ -50,4 +44,4 @@ _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
 # Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} PUBLIC DataInterface)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE DataInterface)

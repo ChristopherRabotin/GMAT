@@ -32,10 +32,6 @@ SET(TargetName GmatEstimation)
 ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
 
 # ====================================================================
-# extra include directory for header file
-INCLUDE_DIRECTORIES(${XercesC_INCLUDE_DIRS})
-
-# ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS
   adapter
@@ -60,10 +56,6 @@ SET(PLUGIN_DIRS
   trackingfile
   trackingsystem
   )
-
-# ====================================================================
-# Include F2C
-INCLUDE_DIRECTORIES(${F2C_DIR})
 
 # ====================================================================
 # source files
@@ -183,9 +175,33 @@ SET(PLUGIN_SRCS
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
+
+# ====================================================================
+# Additional includes
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${F2C_DIR})
+
 # ====================================================================
 # Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${XercesC_LIBRARIES})
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE XercesC::XercesC)
 if(NOT UNIX)
   TARGET_LINK_LIBRARIES(${TargetName} PUBLIC Ws2_32)
 endif()
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    if(GMAT_MAC_APPBUNDLE_PATH)
+      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and Xerces in Frameworks
+    else()
+      SET(MAC_BASEPATH ";@loader_path/libxerces/") # Separate base/xerces dirs
+    endif()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/${MAC_BASEPATH}"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/libxerces/"
+      )
+  endif()
+endif()
+

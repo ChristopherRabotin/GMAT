@@ -31,10 +31,6 @@ SET(CONSOLE_SRCS
 FILE(GLOB_RECURSE CONSOLE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-	
-# ====================================================================
 # compilation
 
 # add the install targets
@@ -47,7 +43,7 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTF
 
 # ====================================================================
 # Link libraries
-TARGET_LINK_LIBRARIES(${TargetName} GmatBase)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatBase)
 
 # ====================================================================
 # Add source/header files to IDE-based project source groups

@@ -26,11 +26,6 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
   ADD_DEFINITIONS("-D_DYNAMICLINK")
 
   # ====================================================================
-  # prepend include directories for header files
-  INCLUDE_DIRECTORIES(BEFORE ${GMAT_BASE_INCLUDE_DIRECTORIES})
-  INCLUDE_DIRECTORIES(BEFORE ${PLUGIN_DIRS})
-
-  # ====================================================================
   # Recursively find all include files in specified directories
   FOREACH(I_DIR ${PLUGIN_DIRS})
     FILE(GLOB_RECURSE IDIR_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${I_DIR}/*.hpp ${I_DIR}/*.h)
@@ -44,6 +39,10 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
     MESSAGE("HEADERS: ${PLUGIN_HEADERS}")
   endif()
   ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS} ${PLUGIN_HEADERS})
+
+  # ====================================================================
+  # prepend include directories for header files
+  TARGET_INCLUDE_DIRECTORIES(${TargetName} BEFORE PUBLIC ${PLUGIN_DIRS})
 
   # ====================================================================
   # Add source/header files to IDE-based project source groups
@@ -66,7 +65,7 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
 
   # ====================================================================
   # All plugins link to GmatBase
-  TARGET_LINK_LIBRARIES(${TargetName} PUBLIC GmatBase)
+  TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatBase)
 
   # ====================================================================
   # Specify where to install plugin

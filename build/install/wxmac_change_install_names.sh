@@ -1,29 +1,31 @@
 #!/bin/sh
-# Change the install names of the Mac wxWidgets libraries
+# Change the install names of specified Mac dynamic libraries
 # Arguments:
-#  ${1}: wxWidgets library location, typically GMAT bin/libwx directory
-#  ${2}: old install path, typically wxWidgets/lib directory
-#  ${3}: new install path, typically "@rpath"
-#  ${4+}: Additional GMAT binaries that use wxWidgets, e.g. Gui
+#  ${1}: library location, typically GMAT bin directory
+#  ${2}: library name wildcard, typically "libXXX*.dylib"
+#  ${3}: old install path, typically library's lib directory
+#  ${4}: new install path, typically "@rpath"
+#  ${5+}: Additional GMAT binaries that use the libraries, e.g. Gui
 
-# Find all wxWidgets dylibs
-wxlibnames=`cd ${1} ; find *.dylib 2> /dev/null`
-if [[ -z "$wxlibnames" ]]; then
+# Find all specified dylibs
+libnames=`cd ${1} ; find ${2} 2> /dev/null`
+if [[ -z "$libnames" ]]; then
   exit
 fi
 
 # Collect all changes from old name to new name
 changes=''
-for dep in ${wxlibnames} ; do
-  changes="${changes} -change ${2}/${dep} ${3}/${dep}"
+for i in ${libnames} ; do
+  changes="${changes} -change ${3}/${i} ${4}/${i}"
 done
 
-# Change install names of wxWidgets libraries
-for i in ${wxlibnames} ; do
-  install_name_tool ${changes} -id ${3}/${i} ${1}/${i}
+# Change install names of libraries
+for i in ${libnames} ; do
+  install_name_tool ${changes} -id ${4}/${i} ${1}/${i}
+  echo Changing ${1}/${i} to ${4}/${i}
 done
 
-# Change wxWidgets install names inside GMAT binaries
-for i in ${@:4}; do
+# Change library names inside GMAT binaries
+for i in ${@:5}; do
   install_name_tool ${changes} ${i}
 done

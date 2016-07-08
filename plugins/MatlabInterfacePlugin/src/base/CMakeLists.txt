@@ -40,15 +40,6 @@ if(UNIX)
 endif()
 
 # ====================================================================
-# extra include directories for header files
-INCLUDE_DIRECTORIES(${Matlab_INCLUDE_DIRS})
-if(UNIX)
-  INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/include")
-  INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/app")
-  INCLUDE(${wxWidgets_USE_FILE})
-endif()
-
-# ====================================================================
 # source files
 SET(PLUGIN_SRCS
     command/CallMatlabFunction.cpp
@@ -72,6 +63,17 @@ endif()
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# ====================================================================
+# Includes
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${Matlab_INCLUDE_DIRS})
+if(UNIX)
+  TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/gui/include"
+    "${PROJECT_SOURCE_DIR}/src/gui/app"
+    )
+  INCLUDE(${wxWidgets_USE_FILE})
+endif()
 
 # ====================================================================
 # Additional link libraries

@@ -22,6 +22,13 @@ if(NOT wxWidgets_FOUND)
   RETURN()
 endif()
 
+# Find OpenGL
+FIND_PACKAGE(OpenGL)
+if(NOT OPENGL_FOUND)
+  MESSAGE(WARMING "Skipping GUI: OpenGL missing")
+  RETURN()
+endif()
+
 # ====================================================================
 SET(TargetName GmatGUI)
 
@@ -30,20 +37,6 @@ SET(TargetName GmatGUI)
 if(GMAT_USE_SPICE)
   SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
 endif()
-
-# ====================================================================
-# wxWidgets specifics
-INCLUDE(${wxWidgets_USE_FILE})
-LINK_LIBRARIES(${wxWidgets_LIBRARIES})
-
-# ====================================================================
-# Link libraries
-LINK_LIBRARIES(GmatBase)
-
-# Find OpenGL
-FIND_PACKAGE(OpenGL)
-INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-LINK_LIBRARIES(${OPENGL_LIBRARIES})
 
 # Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
@@ -76,11 +69,6 @@ SET(GUI_DIRS
   subscriber
   view
   )
-
-# ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GUI_DIRS})
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 
 # ====================================================================
 # source files
@@ -266,6 +254,16 @@ SET(GUI_SRCS ${GUI_SRCS} ${GMAT_ICON_RC})
 
 # Create GmatGui as an executable
 ADD_EXECUTABLE(${TargetName} ${GUI_SRCS} ${GUI_HEADERS})
+
+# Add includes
+INCLUDE(${wxWidgets_USE_FILE})
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${GUI_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${OPENGL_INCLUDE_DIR})
+
+# Add libraries
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatBase)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${wxWidgets_LIBRARIES})
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${OPENGL_LIBRARIES})
 
 # The GUI name should be just "GMAT"
 SET_TARGET_PROPERTIES(${TargetName} PROPERTIES OUTPUT_NAME "GMAT")

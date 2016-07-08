@@ -24,19 +24,6 @@ ADD_DEFINITIONS("-DGEOMETRICMEAS_EXPORTS")
 SET(PLUGIN_DIRS factory include measurement plugin)
 
 # ====================================================================
-# extra include directories for header files
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/command")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/estimator")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/event")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/factory")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/hardware")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/include")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/measurement")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/measurementfile")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/plugin")
-INCLUDE_DIRECTORIES("../../../EstimationPlugin/src/base/trackingsystem")
-
-# ====================================================================
 # source files
 SET(PLUGIN_SRCS
     factory/MeasurementFactory.cpp
@@ -53,4 +40,4 @@ _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
 # Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} PUBLIC GmatEstimation)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatEstimation)
