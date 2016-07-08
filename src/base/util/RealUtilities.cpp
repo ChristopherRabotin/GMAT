@@ -663,6 +663,15 @@ Real GmatMathUtil::Randn(Real mean, Real stdev)
    return rn->Gaussian(mean, stdev);
 }
 
+//------------------------------------------------------------------------------
+// void SetSeed(UnsignedInt seed)
+//------------------------------------------------------------------------------
+void GmatMathUtil::SetSeed(UnsignedInt seed)
+{
+   RandomNumber* rn = RandomNumber::Instance();
+   rn->SetSeed(seed);
+}
+
 
 // Commented out. These are not used in anywhere. (LOJ: 2016.04.20)
 // static Integer Seed[2]= {30001,15001};

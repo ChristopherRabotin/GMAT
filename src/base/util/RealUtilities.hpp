@@ -107,6 +107,7 @@ namespace GmatMathUtil
 
    Real    GMAT_API Rand(Real lowerBound = 0.0, Real upperBound = 1.0);
    Real    GMAT_API Randn(Real mean = 0.0, Real stdev = 1.0);
+   void    GMAT_API SetSeed(UnsignedInt seed);
    
    // Commented out. These are not used in anywhere. (LOJ: 2016.04.20)
    // void    GMAT_API SetSeed(Integer initialSeed1, Integer initialSeed2); 

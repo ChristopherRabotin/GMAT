@@ -91,6 +91,7 @@ Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 Function::Function(const std::string &typeStr, const std::string &name) :
    GmatBase           (Gmat::FUNCTION, typeStr, name),
+   callDescription    (""),
    functionPath       (""),
    functionName       (""),
    objectStore        (NULL),
@@ -157,6 +158,7 @@ Function::~Function()
 //------------------------------------------------------------------------------
 Function::Function(const Function &f) :
    GmatBase           (f),
+   callDescription    (f.callDescription),
    functionPath       (f.functionPath),
    functionName       (f.functionName),
    inputNames         (f.inputNames),
@@ -203,6 +205,7 @@ Function& Function::operator=(const Function &f)
    
    GmatBase::operator=(f);
    
+   callDescription    = f.callDescription;
    functionPath       = f.functionPath;
    functionName       = f.functionName;
    objectStore        = NULL;
@@ -228,6 +231,13 @@ Function& Function::operator=(const Function &f)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// void SetCallDescription(const std::string &desc)
+//------------------------------------------------------------------------------
+void Function::SetCallDescription(const std::string &desc)
+{
+   callDescription = desc;
+}
 
 //------------------------------------------------------------------------------
 // virtual WrapperTypeArray GetOutputTypes(IntegerArray &rowCounts,
