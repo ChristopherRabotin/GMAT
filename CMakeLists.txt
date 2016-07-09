@@ -236,6 +236,8 @@ endif()
 
 # ====================================================================
 # Find Xerces
+
+# Initialize default GMAT dependency path for Xerces
 if(WIN32)
   SET(CMAKE_INCLUDE_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/src")
   SET(CMAKE_LIBRARY_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces//Build/Win64/VC12/Release")
@@ -247,12 +249,22 @@ else()
 endif()
 
 FIND_PACKAGE(XercesC)
+
+# Additional libraries needed to use Xerces on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
+    FIND_LIBRARY(CORESERVICES_LIBRARY CoreServices)
+    FIND_PACKAGE(CURL)
+  else()
+    FIND_PACKAGE(Threads)
+  endif()
+endif()
 # ====================================================================
 
 
 # ====================================================================
 # Common build options
-INCLUDE(CheckCXXCompilerFlag)
 
 if(WIN32)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W2")

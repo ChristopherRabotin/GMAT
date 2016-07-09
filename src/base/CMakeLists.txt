@@ -547,6 +547,13 @@ TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${CSPICE_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(${TargetName} PUBLIC optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE XercesC::XercesC)
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${CMAKE_DL_LIBS})
+if(UNIX)
+  if(APPLE)
+    TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${COREFOUNDATION_LIBRARY} ${CORESERVICES_LIBRARY} ${CURL_LIBRARIES})
+  else()
+    TARGET_LINK_LIBRARIES(${TargetName} PRIVATE Threads::Threads)
+  endif()
+endif()
 
 # Library name should start with "lib"
 # This is always true for Mac/Linux, but needs to be specified for Windows

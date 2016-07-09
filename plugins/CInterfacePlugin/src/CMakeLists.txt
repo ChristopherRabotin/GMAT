@@ -80,7 +80,7 @@ if(Matlab_FOUND)
     # Need -wait on Windows so matlab call doesn't immediately return
     SET(MSTART "${MSTART} -wait")
   endif()
-  SET(MSTART "${MSTART} -nosplash -nojvm -nodesktop -nodisplay -r")
+  SET(MSTART "${MSTART} -nosplash -nodesktop -nodisplay -r")
   SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
   SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
   SET(MCD "cd('${CMAKE_CURRENT_SOURCE_DIR}/../build/matlab');")

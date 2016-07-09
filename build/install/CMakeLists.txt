@@ -37,11 +37,11 @@ if(wxWidgets_FOUND)
       PATTERN "msw*" EXCLUDE
       )
   else()
-    # For Mac/Linux, wxlibs are in bin/libwx or Mac app bundle
+    # For Mac/Linux, wxlibs are in lib/ or Mac app bundle
     if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
       SET(WX_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
     else()
-      SET(WX_INSTALL_DIR bin/libwx)
+      SET(WX_INSTALL_DIR lib)
     endif()
 
     # Set wxlib type based on debug/release
@@ -70,8 +70,8 @@ if(wxWidgets_FOUND)
 
     # On Mac, change dylib install names to use RPATH
     if(APPLE)
-      # Create command for wxmac_change_install_names script
-      SET(CHNM "./wxmac_change_install_names.sh")
+      # Create command for mac_change_install_names script
+      SET(CHNM "./mac_change_install_names.sh")
       SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/${WX_INSTALL_DIR}\"")
       SET(ARG2 "\"libwx*.dylib\"")
       SET(ARG3 "\"${wxWidgets_LIBRARY_DIRS}\"")
@@ -99,64 +99,6 @@ if(wxWidgets_FOUND)
       # Finally create install command to change rpaths and install names
       SET(CHNM_COMMAND "${CHNM} ${ARG1} ${ARG2} ${ARG3} ${ARG4} ${ARGN}")
       INSTALL(CODE "MESSAGE(STATUS \"Changing wxWidgets library install names\")")
-      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CHNM_COMMAND} WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}\")")
-    endif()
-  endif()
-endif()
-
-# ====================================================================
-# Install XercesC libraries
-if(XercesC_FOUND)
-  if(WIN32)
-    INSTALL(FILES ${XercesC_LIBRARIES}
-      DESTINATION bin
-      USE_SOURCE_PERMISSIONS
-      )
-  else()
-    # For Mac/Linux, Xerces libs are in bin/libwx or Mac app bundle
-    if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
-      SET(XercesC_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
-    else()
-      SET(XercesC_INSTALL_DIR bin/libxerces)
-    endif()
-
-    GET_FILENAME_COMPONENT(XercesC_LIBRARY_DIR ${XercesC_LIBRARY_RELEASE} DIRECTORY)
-    INSTALL(DIRECTORY ${XercesC_LIBRARY_DIR}/
-      DESTINATION ${XercesC_INSTALL_DIR}
-      USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "libxerces*"
-      PATTERN "pkgconfig" EXCLUDE
-      )
-
-    # On Mac, change dylib install names to use RPATH
-    if(APPLE)
-      # Create command for wxmac_change_install_names script
-      SET(CHNM "./wxmac_change_install_names.sh")
-      SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/${XercesC_INSTALL_DIR}\"")
-      SET(ARG2 "\"libxerces-c-3*.dylib\"")
-      SET(ARG3 "\"${XercesC_LIBRARY_DIR}\"")
-      SET(ARG4 "\"@rpath\"")
-
-      # Collect list of all GMAT components that use wxWidgets
-      if(GMAT_MAC_APPBUNDLE_PATH)
-	SET(MAC_GMATDIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
-	SET(MAC_PLUGINDIR ${GMAT_MAC_APPBUNDLE_PATH}/plugins)
-      else()
-	SET(MAC_GMATDIR bin)
-	SET(MAC_PLUGINDIR plugins)
-      endif()
-
-      SET(ARGN "\"${CMAKE_INSTALL_PREFIX}/${MAC_GMATDIR}/libGmatBase*.dylib\"")
-
-      if(PLUGIN_ESTIMATION)
-	SET(ARGN "${ARGN} \"${CMAKE_INSTALL_PREFIX}/${MAC_PLUGINDIR}/libGmatEstimation*.dylib\"")
-      endif()
-
-      # Append full pathname of new components here using above pattern
-
-      # Finally create install command to change rpaths and install names
-      SET(CHNM_COMMAND "${CHNM} ${ARG1} ${ARG2} ${ARG3} ${ARG4} ${ARGN}")
-      INSTALL(CODE "MESSAGE(STATUS \"Changing Xerces library install names\")")
       INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CHNM_COMMAND} WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}\")")
     endif()
   endif()

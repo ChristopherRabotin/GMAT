@@ -41,7 +41,7 @@ then
 fi
 
 clear
-echo Setting up GMAT dependencies at $gmat_path
+echo Configuring GMAT dependencies at $gmat_path/depends
   
 # Detect Mac/Linux and number of processing cores (for parallel compile)
 if [ "$(uname)" = "Darwin" ]
@@ -172,6 +172,7 @@ function download_depends() {
 		curl http://archive.apache.org/dist/xerces/c/3/sources/xerces-c-$xerces_version.tar.gz > xerces.tar.gz
 		gzip -d xerces.tar.gz
 		tar xf xerces.tar --strip-components 1
+		rm xerces.tar
 	fi
 
 
@@ -253,10 +254,10 @@ function build_wxWidgets() {
 	then
 	  echo "wxWidgets $wx_version already configured"
 	else
-	  echo "Prepping wxWidgets to compile..."
 	  mkdir -p "$wx_build_path"
 	  cd "$wx_build_path"
 
+	  echo "Configuring wxWidgets $wx_version. This may take a while..."
 	  if [ $mac == true ]
 	  then
 	    # wxWidgets 3.0.2 has a compile error due to an incorrect
@@ -273,11 +274,9 @@ function build_wxWidgets() {
 	  fi
 
 	  # Compile, install, and clean wxWidgets
-	  echo "Compiling wxWidgets $wx_version. This could take a while..."
 	  make -j$ncores > "$logs_path/wxWidgets_build.log" 2>&1
 	  if [ $? -eq 0 ]
 	  then
-	    echo "Finishing wxWidgets build..."
 	    make install > "$logs_path/wxWidgets_install.log" 2>&1
 	    cd ..; rm -Rf "$wx_build_path"
 	  else
@@ -304,27 +303,40 @@ function build_xerces() {
     	fi
 
 	# Find a test file to check if xerces has already been installed
-	xerces_test_file=`ls $xerces_install_path/lib/libxerces-c-* 2> /dev/null | head -n 1`
+	xerces_test_file=$xerces_install_path/lib/libxerces-c.a
 
 	# Build Xerces if the test file doesn't already exist
 	if [ -f "$xerces_test_file" ]
 	then
 	  echo "Xerces $xerces_version already configured"
 	else
-	  echo "Prepping Xerces to compile..."
 	  mkdir -p "$xerces_build_path"
 	  cd "$xerces_build_path"
-	  ../configure --disable-static --enable-rpath CFLAGS=-O2 CXXFLAGS=-O2 --prefix="$xerces_install_path" --program-suffix="gmat" > "$logs_path/xerces_configure.log" 2>&1
 
-	  echo "Compiling Xerces $xerces_version. This may take a while..."
-	  make -j$ncores > "$logs_path/xerces_build.log" 2>&1
+	  echo "Configuring Xerces $xerces_version debug library. This may take a while..."
+	  COMMONFLAGS="-O0 -g -fPIC"
+	  ../configure --disable-shared CFLAGS="$COMMONFLAGS" CXXFLAGS="$COMMONFLAGS" --prefix="$xerces_install_path" > "$logs_path/xerces_configure_debug.log" 2>&1
+	  make -j$ncores > "$logs_path/xerces_build_debug.log" 2>&1
 	  if [ $? -eq 0 ]
 	  then
-	    echo "Finishing Xerces build..."
-	    make install > "$logs_path/xerces_install.log" 2>&1
+	    make install > "$logs_path/xerces_install_debug.log" 2>&1
+	    mv "$xerces_install_path/lib/libxerces-c.a" "$xerces_install_path/lib/libxerces-cd.a"
+	    make clean > /dev/null 2>&1
+	  else
+	    echo "Xerces debug build failed. Fix errors and try again."
+	    return
+	  fi
+
+	  echo "Configuring Xerces $xerces_version release library. This may take a while..."
+	  COMMONFLAGS="-O2 -fPIC"
+	  ../configure --disable-shared CFLAGS="$COMMONFLAGS" CXXFLAGS="$COMMONFLAGS" --prefix="$xerces_install_path" > "$logs_path/xerces_configure_release.log" 2>&1
+	  make -j$ncores > "$logs_path/xerces_build_release.log" 2>&1
+	  if [ $? -eq 0 ]
+	  then
+	    make install > "$logs_path/xerces_install_release.log" 2>&1
 	    cd ..; rm -Rf "$xerces_build_path"
 	  else
-	    echo "Xerces build failed. Fix errors and try again."
+	    echo "Xerces release build failed. Fix errors and try again."
 	    return
 	  fi
 
