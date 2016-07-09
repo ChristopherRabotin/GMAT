@@ -22,7 +22,6 @@ done
 # Change install names of libraries
 for i in ${libnames} ; do
   install_name_tool ${changes} -id ${4}/${i} ${1}/${i}
-  echo Changing ${1}/${i} to ${4}/${i}
 done
 
 # Change library names inside GMAT binaries
