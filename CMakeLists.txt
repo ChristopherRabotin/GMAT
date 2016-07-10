@@ -30,7 +30,7 @@ ENDIF()
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
-SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "GMAT version name")
+SET(GMAT_RELEASE_NAME "R2016a" CACHE STRING "GMAT version name")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
 # Enforce C++11
@@ -239,16 +239,16 @@ endif()
 
 # Initialize default GMAT dependency path for Xerces
 if(WIN32)
-  SET(CMAKE_INCLUDE_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/src")
-  SET(CMAKE_LIBRARY_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces//Build/Win64/VC12/Release")
-  SET(CMAKE_LIBRARY_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/xerces-c-3.1.4/Build/Win64/VC12/Debug")
+  SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/src")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/Win64/VC12/Static Release")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/Win64/VC12/Static Debug")
 elseif(APPLE)
   SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/cocoa-install")
 else()
   SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/linux-install")
 endif()
 
-FIND_PACKAGE(XercesC)
+FIND_PACKAGE(XercesC REQUIRED)
 
 # Additional libraries needed to use Xerces on Mac/Linux
 if(UNIX)

@@ -183,7 +183,8 @@ TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${F2C_DIR})
 # ====================================================================
 # Additional link libraries
 TARGET_LINK_LIBRARIES(${TargetName} PRIVATE XercesC::XercesC)
-if(NOT UNIX)
+if(WIN32)
+  TARGET_COMPILE_DEFINITIONS(${TargetName} PUBLIC -DXERCES_STATIC_LIBRARY)
   TARGET_LINK_LIBRARIES(${TargetName} PUBLIC Ws2_32)
 endif()
 

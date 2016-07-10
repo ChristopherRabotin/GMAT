@@ -553,6 +553,9 @@ if(UNIX)
   else()
     TARGET_LINK_LIBRARIES(${TargetName} PRIVATE Threads::Threads)
   endif()
+else()
+  # XERCES_STATIC_LIBRARY required on Windows
+  TARGET_COMPILE_DEFINITIONS(${TargetName} PUBLIC -DXERCES_STATIC_LIBRARY)
 endif()
 
 # Library name should start with "lib"

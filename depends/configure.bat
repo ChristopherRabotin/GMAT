@@ -75,12 +75,15 @@ goto end
 :main
 
 IF %use_64bit% EQU 1 (
-	echo ********** Setting up 64-bit dependencies **********
+	echo ********** Setting up GMAT 64-bit dependencies for VisualStudio %vs_version%.0 **********
 ) ELSE (
-	echo ********** Setting up 32-bit dependencies **********
+	echo ********** Setting up GMAT 32-bit dependencies for VisualStudio %vs_version%.0 **********
 )
 
-echo ********** Setting up CSpice for VisualStudio version %vs_version%.0 **********
+set logs_dir=%depends_dir%\logs
+IF NOT EXIST %logs_dir% (
+	mkdir %logs_dir%
+)
 
 :: Check if dependency libraries already exists
 :: Note that cspice_type is used in cspice-ftp.txt
@@ -108,7 +111,10 @@ IF "%vs_path%" == "" (
 endlocal & set vs_path=%vs_path%
 call "%vs_path%\..\..\VC\vcvarsall.bat" %vs_arch%
 
-:: Create directories and download cspice if it does not already exist.
+echo.
+echo ********** Configuring CSPICE **********
+
+:: Create directories and download CSPICE if it does not already exist
 IF NOT EXIST %cspice_path%\%cspice_dir% (
 	:: Create Directories
 	mkdir %cspice_path%
@@ -116,31 +122,40 @@ IF NOT EXIST %cspice_path%\%cspice_dir% (
 	:: Change to cspice directory
 	cd %cspice_path%
 	
-	:: Download and extract Spice, finally remove archive
+	:: Download and extract CSPICE
+	echo -- Downloading CSPICE
 	..\..\bin\winscp\WinSCP.com -script=..\..\bin\cspice\cspice-ftp.txt
-	..\..\bin\7za\7za.exe x cspice.zip
+	..\..\bin\7za\7za.exe x cspice.zip > nul
 	REN cspice %cspice_dir%
 	DEL cspice.zip
 
-	:: Compile debug version of cspice [GMT-5044]
-	:: The compile options are taken from CSPICE src/cspice/mkprodct.bat
+	:: Change back to depends directory
+	cd "%depends_dir%"
+)
+
+:: Compile CSPICE
+IF NOT EXIST %cspice_path%\%cspice_dir%\lib\cspiced.lib (
+	:: Compile debug CSPICE. See GMT-5044
+	echo -- Compiling debug CSPICE. This could take a while...
 	cd %cspice_dir%\src\cspice
-	cl /c /DEBUG /Z7 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c
-	link -lib /out:..\..\lib\cspiced.lib *.obj
+	cl /c /DEBUG /Z7 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c > %logs_dir%\cspice_build_debug.log 2>&1
+	link -lib /out:..\..\lib\cspiced.lib *.obj >> %logs_dir%\cspice_build_debug.log 2>&1
 	del *.obj
 
-	:: Compile release version of cspice [GMT-5044]
-	cl /c /O2 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c
-	link -lib /out:..\..\lib\cspice.lib *.obj
+	:: Compile release CSPICE. See GMT-5044
+	echo -- Compiling release CSPICE. This could take a while...
+	cl /c /O2 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c > %logs_dir%\cspice_build_release.log 2>&1
+	link -lib /out:..\..\lib\cspice.lib *.obj >> %logs_dir%\cspice_build_release.log 2>&1
 	del *.obj
         
 	:: Change back to depends directory
 	cd "%depends_dir%"
 ) ELSE (
-	echo CSpice already exists
+	echo -- CSPICE already configured
 )
 
-echo ********** Setting up wxWidgets for VisualStudio version %vs_version%.0 **********
+echo.
+echo ********** Configuring wxWidgets **********
 
 set wxWidgets_path=wxWidgets\wxMSW-3.0.2
 IF %use_64bit% EQU 1 (
@@ -179,10 +194,12 @@ IF NOT EXIST %wxWidgets_path%\lib\vc%wxwidgets_type%dll (
 
         cd "%depends_dir%"
 ) ELSE (
-	echo wxWidgets already exists
+	echo -- wxWidgets already configured
 )
 
+echo.
 echo Dependency Configuration Complete!
+echo.
 
 :: ***********************************
 :: End of script
