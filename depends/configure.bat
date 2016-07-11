@@ -222,9 +222,11 @@ echo ********** Configuring Xerces-C++ %xercesver% **********
 
 set xerces_path=xerces
 IF %use_64bit% EQU 1 (
-	set xerces_type=64bit
+	set xerces_type=64
+	set xplatform=x64
 ) ELSE (
-	set xerces_type=32bit
+	set xerces_type=32
+	set xplatform=Win32
 )
 
 :: Download Xerces if it doesn't exist
@@ -243,6 +245,30 @@ IF NOT EXIST %xerces_path% (
 )
 
 :: Compile Xerces
+IF NOT EXIST %xerces_path%\Build\Win%xerces_type% (
+	:: Compile debug Xerces
+	:: XercesLibOverride is needed because the Xerces Runtime Library cannot be directly changed with an msbuild flag
+	echo -- Compiling debug Xerces. This could take a while...
+	cd %xerces_path%\projects\Win32\VC%vs_version%\xerces-all\XercesLib
+	msbuild /m ^
+		/property:Configuration="Static Debug";Platform=%xplatform% ^
+		/property:TargetName=xerces-c_3D ^
+		/property:ForceImportBeforeCppTargets="%depends_dir%\bin\xerces\XercesLibOverride.prop" ^
+		XercesLib.vcxproj > %logs_dir%\xerces_build_debug.log 2>&1
+
+	:: Compile release Xerces
+	echo -- Compiling releaseXerces. This could take a while...
+	msbuild /m ^
+		/property:Configuration="Static Release";Platform=%xplatform% ^
+		/property:TargetName=xerces-c_3 ^
+		/property:ForceImportBeforeCppTargets="%depends_dir%\bin\xerces\XercesLibOverride.prop" ^
+		XercesLib.vcxproj > %logs_dir%\xerces_build_release.log 2>&1
+
+	:: Change back to depends directory
+	cd "%depends_dir%"
+) ELSE (
+	echo -- Xerces already configured
+)
 
 echo.
 echo Dependency Configuration Complete!
