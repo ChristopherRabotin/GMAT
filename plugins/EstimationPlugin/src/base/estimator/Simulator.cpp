@@ -2076,7 +2076,7 @@ void Simulator::ValidateMediaCorrection(const MeasurementData* measData)
       if (find(ionoWarningList.begin(), ionoWarningList.end(), ss1.str()) == ionoWarningList.end())
       {
          // generate warning message
-         MessageInterface::ShowMessage("Warning: When running simulator '%s', ionosphere correction (%lf m) for measurement %s at measurement time tag %.12lf A1Mjd is out side of accepetable range [0m , 20m].\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+         MessageInterface::ShowMessage("Warning: When running simulator '%s', ionosphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
 
          // add pass to the list
          ionoWarningList.push_back(ss1.str());
@@ -2098,7 +2098,7 @@ void Simulator::ValidateMediaCorrection(const MeasurementData* measData)
       if (find(tropoWarningList.begin(), tropoWarningList.end(), ss1.str()) == tropoWarningList.end())
       {
          // generate warning message
-         MessageInterface::ShowMessage("Warning: When running simulator '%s', troposphere correction (%lf m) for measurement %s at measurement time tag %.12lf A1Mjd is out side of accepetable range [0m , 60m].\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+         MessageInterface::ShowMessage("Warning: When running simulator '%s', troposphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
 
          // add pass to the list
          tropoWarningList.push_back(ss1.str());

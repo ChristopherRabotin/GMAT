@@ -412,6 +412,7 @@ void CallFunction::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
             ("CallFunction::SetGlobalObjectMap() setting function<%p>'%s' to FunctionManager\n",
              mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
          #endif
+         mFunction->SetCallDescription(GetGeneratingString(Gmat::NO_COMMENTS));
          fm.SetFunction(mFunction);
       }
    }

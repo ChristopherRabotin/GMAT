@@ -1358,6 +1358,13 @@ void BatchEstimator::CheckCompletion()
    convergenceReason = "";
    estimationStatus = TestForConvergence(convergenceReason);
    
+   // Reset best RMS as needed                           // fix bug GMT-5711
+   if (resetBestRMSFlag)                                 // fix bug GMT-5711
+   {                                                     // fix bug GMT-5711
+      if (estimationStatus == DIVERGING)                 // fix bug GMT-5711
+         resetBestResidualRMS = newResidualRMS;          // fix bug GMT-5711
+   }                                                     // fix bug GMT-5711
+
    #ifdef RUN_SINGLE_PASS
       converged = true;
    #endif
@@ -1463,6 +1470,9 @@ void BatchEstimator::CheckCompletion()
 
       WriteToTextFile();
       ReportProgress();
+      // After writing to GmatLog.txt file, bestResidualRMS is set to resetBestResdualRMS    // fix bug GMT-5711
+      if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                             // fix bug GMT-5711
+         bestResidualRMS = resetBestResidualRMS;                                             // fix bug GMT-5711
 
       numRemovedRecords["U"] = 0;
       numRemovedRecords["R"] = 0;
@@ -1636,8 +1646,13 @@ std::string BatchEstimator::GetProgressString()
          case CHECKINGRUN:
             progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration     : "
+            progress << "\n   BestRMS residuals                        : "
                      << bestResidualRMS;
+            if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                 // fix bug GMT-5711
+            {                                                                          // fix bug GMT-5711
+            progress << "\n   Reset value of BestRMS residuals         : "          // fix bug GMT-5711
+                        << resetBestResidualRMS;                                       // fix bug GMT-5711
+            }                                                                          // fix bug GMT-5711
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
          
@@ -1693,7 +1708,7 @@ std::string BatchEstimator::GetProgressString()
          case FINISHED:
             progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration     : "
+            progress << "\n   BestRMS residuals                        : "
                      << bestResidualRMS;
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
@@ -1780,10 +1795,10 @@ std::string BatchEstimator::GetProgressString()
             {
                progress << "\n   WeightedRMS residuals for previous iteration: "
                         << oldResidualRMS;
-               progress << "\n   WeightedRMS residuals for this iteration    : "
+               progress << "\n   WeightedRMS residuals                       : "
                         << newResidualRMS;
                progress << "\n   BestRMS residuals for this iteration        : "
-                     << bestResidualRMS << "\n\n";
+                        << bestResidualRMS << "\n\n";
             }
 
             finalCovariance = information.Inverse();
@@ -2240,6 +2255,111 @@ std::string BatchEstimator::CTime(const time_t* time)
 }
 
 
+std::string BatchEstimator::GetGMATBuildDate()
+{
+   std::istringstream s(__DATE__);
+   std::string smonth;
+   Integer day, month, year;
+   s >> smonth >> day >> year;
+   switch(smonth.at(0))
+   {
+   case 'J':
+      if (smonth == "Jun")
+         month = 6;
+      else if (smonth == "Jul")
+         month = 7;
+      else
+         month = 1;
+      break;
+   case 'F':
+      month = 2;
+      break;
+   case 'M':
+      if (smonth == "May")
+         month = 5;
+      else
+         month = 3;
+      break;
+   case 'A':
+      if (smonth == "Apr")
+         month = 4;
+      else
+         month = 8;
+      break;
+   case 'S':
+      month = 9;
+      break;
+   case 'O':
+      month = 10;
+      break;
+   case 'N':
+      month = 11;
+      break;
+   case 'D':
+      month = 12;
+      break;
+   }
+
+   std::string sday = GetDayOfWeek(1, 1, 0);     //GetDayOfWeek(day, month, year);
+
+   std::stringstream ss;
+   ss << sday << " " << smonth << " " << day << ", " << year << " " << __TIME__;
+   return ss.str();
+}
+
+std::string BatchEstimator::GetDayOfWeek(Integer day, Integer month, Integer year)
+{
+   Integer daysOfMonth[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+   // Specify number of days of February
+   if ((year % 400 == 0) || ((year % 4 == 0) && (year % 100 != 0)))
+      daysOfMonth[1] = 29;
+
+   // Calculate number of days from day, month, year to 01/01/0000
+   Integer y = year - 0;
+   Integer m = month - 1;
+   Integer d = day - 1;
+   Integer days = 365*y + y / 4 - y / 100 + y / 400;
+   for (Integer i = 0; i < m; ++i)
+      days += daysOfMonth[i];
+   days += d;
+
+   // Calculate weekday
+   Integer weekdayOffset = 1;
+   Integer weekday = (days - 1) % 7 - weekdayOffset;
+   if (weekday < 0)
+      weekday += 7;
+
+   std::string sweekday;
+   switch (weekday)
+   {
+   case 0:
+      sweekday = "Sunday";
+      break;
+   case 1:
+      sweekday = "Monday";
+      break;
+   case 2:
+      sweekday = "Tuesday";
+      break;
+   case 3:
+      sweekday = "Wednesday";
+      break;
+   case 4:
+      sweekday = "Thusday";
+      break;
+   case 5:
+      sweekday = "Friday";
+      break;
+   case 6:
+      sweekday = "Saturday";
+      break;
+   }
+   
+   return sweekday;
+}
+
+
 //----------------------------------------------------------------------------
 // std::string GetOperatingSystemName()
 //----------------------------------------------------------------------------
@@ -2433,7 +2553,8 @@ void BatchEstimator::WriteReportFileHeaderPart1()
    /// 1. Write header 1:
    time_t now = time(NULL);
    std::string runDate = CTime(&now);
-   std::string buildTime = GetFileCreateTime("GMAT.exe");
+   //std::string buildTime = GetFileCreateTime("GMAT.exe");
+   std::string buildTime = GetGMATBuildDate();
 
    textFile
       << "                                              *****  G E N E R A L  M I S S I O N  A N A L Y S I S  T O O L  *****\n"
