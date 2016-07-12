@@ -31,6 +31,7 @@
  */
 //------------------------------------------------------------------------------
 
+#include "matlabinterface_defs.hpp"
 #include "mat.h"
 #include <vector>
 #include "gmatdefs.hpp"
@@ -40,32 +41,27 @@
  * Container for real data to be written to .mat files
  */
 
-class RealMatData : public MatData
+class MATLAB_API RealMatData : public MatData
 {
-    private:
-        // name of the variable to write to the file
-        const char * variable;
+public:
+   RealMatData(const std::string &variable_name);
+   virtual ~RealMatData();
+   RealMatData(const RealMatData &rd);
+   RealMatData& operator=(const RealMatData &rd);
 
-    public:
-        RealMatData(const char * variable_name);
-        virtual ~RealMatData();
-        RealMatData(const RealMatData &rd);
-        RealMatData& operator=(const RealMatData &rd);
-        
-        virtual bool AddData(std::vector< RealArray> data);
-        virtual void WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct);
+   virtual bool AddData(Matrix data);
+   virtual void WriteData(MATFile *pmat, const std::string &obj_name,
+        mxArray *mat_struct);
+   virtual bool WriteData();
 
-    protected:
-        // The data array to be written
-        std::vector< RealArray> realData;
-        
-        // Row count for the data
-        int m_size;
-        
-        /// Column count for the data
-        int n_size;
-        
-        // The data
-        double *data_tmp;
-                
+protected:
+   /// The data array to be written
+   std::vector< RealArray> realData;
+   /// Row count for the data
+   int m_size;
+   /// Column count for the data
+   int n_size;
+
+   /// The data
+   double *data_tmp;
 };

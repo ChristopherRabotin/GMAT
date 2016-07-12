@@ -18,8 +18,8 @@
 // express or implied.   See the License for the specific language
 // governing permissions and limitations under the License.
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number NNG04CI63P
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS II
+// contract, Task Order 26
 //
 // Author: Michael A. Barrucco, Thinking Systems, Inc.
 // Created: 2016/6/24
@@ -30,6 +30,7 @@
  */
 //------------------------------------------------------------------------------
 
+#include "matlabinterface_defs.hpp"
 #include <stdio.h>
 #include "mat.h"
 #include <iostream>
@@ -39,17 +40,29 @@
 #ifndef MatData_hpp
 #define MatData_hpp
 
-typedef std::vector<std::vector<double> > Matrix;
-typedef std::vector<std::string> StringArray;
-typedef std::vector<StringArray> StringMatrix;
+#include "WriterData.hpp"
 
-class MatData  
+
+
+class MATLAB_API MatData : public WriterData
 {
-    public:
-        MatData();
-        virtual ~MatData();
-        MatData(const MatData &md);
-        virtual void WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct) = 0;
+public:
+   MatData(const std::string &variable_name);
+   virtual ~MatData();
+   MatData(const MatData &md);
+   MatData& operator=(const MatData &md);
+
+   virtual void WriteData(MATFile *pmat, const std::string &obj_name,
+         mxArray *mat_struct) = 0;
+
+protected:
+   // Buffered data so WriteData() can call to the parameterized version
+   /// MATLAB .mat file receiving the data
+   MATFile *pmat;
+   /// Name of the object being written (Q: Is this the same as the StringMatData name?)
+   std::string obj_name;
+   /// MATLAB data structure that contains the container receiving data
+   mxArray *mat_struct;
 };
 
 #endif

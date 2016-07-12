@@ -38,6 +38,9 @@
 #include "MatlabWorkspaceFactory.hpp"
 #include "CallMatlabFunctionFactory.hpp"
 #include "MatlabFunctionFactory.hpp"
+#include "MatWriterMaker.hpp"
+#include "DataWriterInterface.hpp"
+
 
 //#define __INCLUDE_MATLAB_WORKSPACE__
 
@@ -54,6 +57,10 @@ extern "C"
    //------------------------------------------------------------------------------
    Integer GetFactoryCount()
    {
+      // Register the MatWriter
+      DataWriterInterface::Instance()->RegisterWriterMaker(MatWriterMaker::Instance());
+
+
       #ifdef __INCLUDE_MATLAB_WORKSPACE__
       return 4;
       #else

@@ -34,7 +34,7 @@ ADD_DEFINITIONS("-DMATLAB_EXPORTS")
 
 # ====================================================================
 # list of directories containing source/header files
-SET(PLUGIN_DIRS command factory function include interface plugin subscriber)
+SET(PLUGIN_DIRS command factory function include interface matwriter plugin subscriber)
 if(UNIX)
   SET(PLUGIN_DIRS ${PLUGIN_DIRS} "../matlab/gmat_mex/src")
 endif()
@@ -61,6 +61,7 @@ SET(PLUGIN_SRCS
     plugin/GmatPluginFunctions.cpp
     subscriber/MatlabWorkspace.cpp
     matwriter/MatWriter.cpp
+    matwriter/MatWriterMaker.cpp
     matwriter/MatData.cpp
     matwriter/RealMatData.cpp
     matwriter/StringMatData.cpp

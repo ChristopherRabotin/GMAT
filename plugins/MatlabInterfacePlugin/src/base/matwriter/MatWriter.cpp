@@ -33,7 +33,12 @@
 //
 
 #include "MatWriter.hpp"
-#include <stdlib.h>
+#include "RealMatData.hpp"
+#include "StringMatData.hpp"
+
+#include "UtilityException.hpp"
+#include "MessageInterface.hpp"
+#include <sstream>
 
 
 //-------------------------------------------------------------------------------------
@@ -41,21 +46,20 @@
 //-------------------------------------------------------------------------------------
 /**
  * Constructs the MatWriter object (default constructor).
- *
  */
 //-------------------------------------------------------------------------------------
 MatWriter::MatWriter() :
-   mat_struct(NULL),
-   pmat(NULL)
+   DataWriter     (),
+   mat_struct     (NULL),
+   pmat           (NULL)
 {
 }
 
 //-------------------------------------------------------------------------------------
-// MatWriter()
+// ~MatWriter()
 //-------------------------------------------------------------------------------------
 /**
  * Destroys the mat_struct mxArray (destructor). 
- *
  */
 //-------------------------------------------------------------------------------------
 MatWriter::~MatWriter()
@@ -69,13 +73,13 @@ MatWriter::~MatWriter()
 /**
  * Constructs the MatWriter object (copy constructor)
  *
- * @param <mw> MatWriter object to copy
- *
+ * @param mw MatWriter object to copy
  */
 //-------------------------------------------------------------------------------------
 MatWriter::MatWriter(const MatWriter& mw) :
-    allData (mw.allData),
-    variable_names (mw.variable_names)
+   DataWriter     (mw),
+   mat_struct     (NULL),
+   pmat           (NULL)
 {
 }
 
@@ -91,17 +95,56 @@ MatWriter::MatWriter(const MatWriter& mw) :
 //-------------------------------------------------------------------------------------
 MatWriter& MatWriter::operator=(const MatWriter &mw)
 {
-    if (this == &mw)
-        return *this;
+    if (this != &mw)
+    {
+       DataWriter::operator=(mw);
 
-    allData = mw.allData;
-    variable_names = mw.variable_names;
+       allData = mw.allData;
+       variable_names = mw.variable_names;
+    }
 
     return *this;
 }
 
+//------------------------------------------------------------------------------
+// WriterData* GetContainer(const Gmat::ParameterType ofType,
+//       const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Method used to construct an empty data container compatible with the writer
+ *
+ * @param ofType The data type the container needs to support
+ * @param withName The name of the variable associated with the container
+ *
+ * @return A pointer to a newly created container.  The caller owns this
+ *         container until it is handed back to the writer via a call to
+ *         AddData.
+ */
+//------------------------------------------------------------------------------
+WriterData* MatWriter::GetContainer(const Gmat::ParameterType ofType,
+      const std::string &withName)
+{
+   WriterData* retval = NULL;
+
+   switch (ofType)
+   {
+   case Gmat::REAL_TYPE:
+      retval = new RealMatData(withName);
+      break;
+
+   case Gmat::STRING_TYPE:
+      retval = new StringMatData(withName);
+      break;
+
+   default:
+      break;
+   }
+
+   return retval;
+}
+
 //-------------------------------------------------------------------------------------
-// MatWriter::Initialize(const char *filename,  const char *mat_file_rev)
+// void Initialize(const char *filename,  const char *mat_file_rev)
 //-------------------------------------------------------------------------------------
 /**
  * Initializes the MatWriter object, opens a file handle to the .mat file
@@ -112,10 +155,13 @@ MatWriter& MatWriter::operator=(const MatWriter &mw)
  *
  */
 //-------------------------------------------------------------------------------------
-void MatWriter::Initialize(const char *filename,  const char *mat_file_rev)
+bool MatWriter::Initialize(const std::string &fname,  const std::string &mytype)
 {
-    // open file  
-    OpenFile(filename, mat_file_rev);
+   // Set up to open file, ands open it
+   filename = fname;
+   format = mytype;
+
+   OpenFile();
 }
 
 //-------------------------------------------------------------------------------------
@@ -131,125 +177,96 @@ void MatWriter::Initialize(const char *filename,  const char *mat_file_rev)
  * @return<pmat> File handle to .mat file
  */
 //-------------------------------------------------------------------------------------
-MATFile* MatWriter::OpenFile(const char *filename, const char *mat_file_rev)
+bool MatWriter::OpenFile()
 {
     // check mat_file_rev
-    if ( (strcmp(mat_file_rev,"w4")==0) || (strcmp(mat_file_rev,"w6")==0) || 
-         (strcmp(mat_file_rev,"w7")==0) || (strcmp(mat_file_rev,"w7.3")==0))
-    {
-         printf("Writing .mat file using version %s\n", mat_file_rev);
-    } 
-    else
-    {
-         printf(".mat version %s invalid defaulting to w6\n", mat_file_rev);
-         mat_file_rev = "w6";
-    } 
+   if ( (format != "w4") && (format != "w6") &&
+        (format != "w7") && (format != "w7.3") )
+   {
+      MessageInterface::ShowMessage("MATLAB Writer .mat version %s invalid; "
+            "defaulting to w6\n", format.c_str());
+      format = "w6";
+   }
 
-    // open file
-    pmat = matOpen(filename, mat_file_rev);
+   // open file
+   pmat = matOpen(filename.c_str(), format.c_str());
 
-    if (pmat == NULL)
-    { 
-      printf("Error creating file %s\n", filename);
-      printf("(Do you have write permission in this directory?)\n");
-    }
+   if (pmat == NULL)
+   {
+       std::stringstream msg;
+       msg << "Error creating file " << filename
+           << "\n(Check write permissions in the target directory)";
+       throw UtilityException(msg.str());
+   }
 
-    // return file handle to class
-    return pmat;
+   // return file handle to class
+   return (pmat != NULL);
 }
 
-//-------------------------------------------------------------------------------------
-// MatWriter::AddData(MatData * MatDataContainer)
-//-------------------------------------------------------------------------------------
-/**
- * Adds data to a vector of MatData objects in preparation for writing
- *
- * @param <MatDataContainer> MatData object (RealMatData or StringMatData) 
- */
-//-------------------------------------------------------------------------------------
-void MatWriter::AddData(MatData * MatDataContainer)
-{
-	allData.push_back(MatDataContainer);
-}
 
 //-------------------------------------------------------------------------------------
-// MatWriter::WriteData(const char *obj_name)
+// bool WriteData(const char *obj_name)
 //-------------------------------------------------------------------------------------
 /**
  * Writes data to .mat file, within the mat_struct structured array
  *
- * @param <obj_name> name of structured arry you want to write to
+ * @param obj_name name of structured array you want to write to
  *
  *
  * @return<exit code> Status code. Checks to see if mxArray associated with the object
  *                    requested to write to exists.
  */
 //-------------------------------------------------------------------------------------
-bool MatWriter::WriteData(const char *obj_name)
+bool MatWriter::WriteData(const std::string &obj_name)
 {
-     if (mat_struct == NULL)
-     {
-        printf("MAT Structure array not created. Did you forget to call SetMxArray?\n");
-        return (EXIT_FAILURE);
-     }
+   if (mat_struct == NULL)
+      throw UtilityException("Cannot write MATLAB data: MAT Structure array "
+              "not created");
 
-     for (unsigned int i = 0; i < allData.size(); ++i)
-     {
-         allData[i]->WriteData(pmat, obj_name, mat_struct);
+   for (unsigned int i = 0; i < allData.size(); ++i)
+       ((MatData*)(allData[i]))->WriteData(pmat, obj_name, mat_struct);
 
-     }
-
-     return (false);
+   return true;
 }
 
 //-------------------------------------------------------------------------------------
-// MatWriter::SetMxArray(std::vector<std::string> variable_list)
+// void SetMxArray(std::vector<std::string> variable_list)
 //-------------------------------------------------------------------------------------
 /**
  * Initializes the structured array that all the data will get written to.
  * data format will be mat_struct.variable 
  *
- * @param <variable_list> list of variable names to write to the structured array
- *
+ * @param variable_list list of variable names to write to the structured array
  */
 //-------------------------------------------------------------------------------------
 void MatWriter::SetMxArray(std::vector<std::string> variable_list)
 {
+   // get number of fields
+   int number_of_fields = variable_list.size();
 
-    // get number of fields
-    int number_of_fields = variable_list.size();
+   // convert to cstrings
+   const char *fields[number_of_fields];
+   for (int i = 0; i < number_of_fields; i++)
+      fields[i] = variable_list[i].c_str();
 
-    // convert to cstrings
-    const char *fields[number_of_fields];
-    for (int i = 0; i < number_of_fields; i++)
-    {
-         fields[i] = variable_list[i].c_str();
-    }
-    
-    // create structured array handle
-    mat_struct = mxCreateStructMatrix(1, 1, number_of_fields, fields);
-
+   // create structured array handle
+   mat_struct = mxCreateStructMatrix(1, 1, number_of_fields, fields);
 }
 
 //-------------------------------------------------------------------------------------
-// MatWriter::CloseFile()
+// bool CloseFile()
 //-------------------------------------------------------------------------------------
 /**
  * Close the stream to the .mat file 
  *
- * @return<exit code> Status code. Checks to see if closing was successful
+ * @return Status code. Checks to see if closing was successful
  */
 //-------------------------------------------------------------------------------------
 bool MatWriter::CloseFile()
 {
-    // close file
-    if (matClose(pmat) != 0)
-    {
-        printf("Error closing .mat file \n"); 
-        return (true);
-    }
-    else
-    {
-        return (false);
-    }
+   // close file
+   if (matClose(pmat) != 0)
+      throw UtilityException("MATLAB Writer: Error closing .mat file");
+
+   return true;
 }

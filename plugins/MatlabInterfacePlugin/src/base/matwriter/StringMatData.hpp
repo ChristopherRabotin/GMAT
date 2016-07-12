@@ -30,6 +30,8 @@
  *
  */
 //------------------------------------------------------------------------------
+
+#include "matlabinterface_defs.hpp"
 #include "mat.h"
 #include <string.h>
 #include <vector>
@@ -39,37 +41,28 @@
  * Container for string data to write to .mat files
  */
 
-class StringMatData : public MatData
+class MATLAB_API StringMatData : public MatData
 {
-    private:
-        // name of the variable to write to the file
-        const char * variable;
-
     public:
-        StringMatData(const char * variable_name);
+        StringMatData(const std::string &variable_name);
         virtual ~StringMatData();
         StringMatData(const StringMatData &sd);
         StringMatData& operator=(const StringMatData &sd);
 
-        virtual bool AddData(StringMatrix data);
-        virtual void WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct);
+        virtual bool AddData(const StringMatrix &data);
+        virtual void WriteData(MATFile *matfile, const std::string &objectName,
+              mxArray *mx_struct);
+        virtual bool WriteData();
 
     protected:
-        // The data array to be written
+        /// The data array to be written
         StringMatrix stringData;
-        
-        // entry count
+        /// entry count
         mwSize m_string;
-        
-        // Row count for the data
+        /// Row count for the data
         int m_size;
-        
         /// Column count for the data
         int n_size;
-
-        // The data
-        double *tmp_str;
-
-        // mxArray to string data
+        /// mxArray to string data
         mxArray *pa_string;
 };

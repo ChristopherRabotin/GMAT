@@ -30,7 +30,10 @@
  *
  */
 //------------------------------------------------------------------------------
+
 #include "StringMatData.hpp"
+#include "UtilityException.hpp"
+
 
 //-------------------------------------------------------------------------------------
 // StringMatData(const char * variable_name)
@@ -43,9 +46,14 @@
  *
  */
 //-------------------------------------------------------------------------------------
-StringMatData::StringMatData(const char * variable_name)
+StringMatData::StringMatData(const std::string &variable_name) :
+   MatData           (variable_name),
+   m_string          (0),
+   m_size            (0),
+   n_size            (0),
+   pa_string         (NULL)
 {
-    variable = variable_name;
+   dataType = Gmat::STRING_TYPE;
 }
 
 //-------------------------------------------------------------------------------------
@@ -70,68 +78,86 @@ StringMatData::~StringMatData()
  *
  */
 //-------------------------------------------------------------------------------------
-StringMatData::StringMatData(const StringMatData &sd)
+StringMatData::StringMatData(const StringMatData &sd) :
+   MatData           (sd),
+   m_string          (sd.m_string),
+   m_size            (sd.m_size),
+   n_size            (sd.n_size),
+   pa_string         (NULL)
 {
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // StringMatData& operator=(const StringMatData &sd)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Sets one string mat data object to match another
  *
  * @param <sd> The object that is copied
- *
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 StringMatData& StringMatData::operator=(const StringMatData &sd)
 {
-    if (this ==&sd)
-       return *this;
+   if (this !=&sd)
+   {
+      MatData::operator=(sd);
 
-    return *this;
+      m_string   = sd.m_string;
+      m_size     = sd.m_size;
+      n_size     = sd.n_size;
+      pa_string  = NULL;
+   }
+
+   return *this;
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // StringMatData::AddData(StringMatrix data))
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Sets up an array of input strings in a mxArray for writing.
  *
  * @params <data> string data to write to the .mat file
- *
  */
-//-------------------------------------------------------------------------------------
-bool StringMatData::AddData(StringMatrix data)
+//------------------------------------------------------------------------------
+bool StringMatData::AddData(const StringMatrix &data)
 {
-    // size of array
-    m_size = data.size();
-    n_size = data[0].size();
+   bool retval = false;
 
-    // init data
-    pa_string = mxCreateCellMatrix(m_size, n_size);
-    m_string = mxGetNumberOfDimensions(pa_string);
-    mwIndex *subs = (mwIndex*)mxCalloc(m_string,sizeof(mwIndex));
-    mwIndex index;
+   // size of array
+   m_size = data.size();
+   n_size = data[0].size();
 
-    for (int i=0; i<m_size; i++)
-    {
-        mxArray *tmp_str;
-        subs[0] = (mwIndex)i;
+   // init data
+   pa_string = mxCreateCellMatrix(m_size, n_size);
+   m_string = mxGetNumberOfDimensions(pa_string);
+   mwIndex *subs = (mwIndex*)mxCalloc(m_string,sizeof(mwIndex));
+   mwIndex index;
 
-        for (int j=0; j<n_size; j++)
-        {
-             tmp_str = mxCreateString(data[i][j].c_str());
-             subs[1]=(mwIndex)j;
-             index = mxCalcSingleSubscript(pa_string, m_size, subs);
-             mxSetCell(pa_string, index, tmp_str );
-        }
-    }
+   for (int i=0; i<m_size; i++)
+   {
+      mxArray *tmp_str;
+      subs[0] = (mwIndex)i;
+
+      for (int j=0; j<n_size; j++)
+      {
+         tmp_str = mxCreateString(data[i][j].c_str());
+         subs[1]=(mwIndex)j;
+         index = mxCalcSingleSubscript(pa_string, m_size, subs);
+         mxSetCell(pa_string, index, tmp_str );
+
+         retval = true;
+      }
+   }
+
+   return retval;
 }
 
-//-------------------------------------------------------------------------------------
-// StringMatDatia::WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct)
-//-------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// StringMatDatia::WriteData(MATFile *pmat, const char *obj_name,
+//       mxArray *mat_struct)
+//------------------------------------------------------------------------------
 /**
  * Writes string data to the open .mat file stream.
  *
@@ -141,10 +167,41 @@ bool StringMatData::AddData(StringMatrix data)
  *
  */
 //-------------------------------------------------------------------------------------
-void StringMatData::WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct)
+void StringMatData::WriteData(MATFile *matfile, const std::string &objectName,
+      mxArray *mx_struct)
 {
-    int data_field_number = mxGetFieldNumber(mat_struct, variable);
-    mxSetFieldByNumber(mat_struct, 0, data_field_number, pa_string);
-    matPutVariable(pmat, obj_name, mat_struct); 
+   pmat      = matfile;
+   obj_name  = objectName;
+   mat_struct = mx_struct;
 
+   int data_field_number = mxGetFieldNumber(mat_struct, varName.c_str());
+   mxSetFieldByNumber(mat_struct, 0, data_field_number, pa_string);
+   matPutVariable(pmat, obj_name.c_str(), mat_struct);
+}
+
+//------------------------------------------------------------------------------
+// bool StringMatData::WriteData()
+//------------------------------------------------------------------------------
+/**
+ * Override for the abstract method in the base class.  Currently just returns false.
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+bool StringMatData::WriteData()
+{
+   return false;
+//   if (pmat != NULL)
+//   {
+//      int data_field_number = mxGetFieldNumber(mat_struct, varName.c_str());
+//      mxSetFieldByNumber(mat_struct, 0, data_field_number, pa_string);
+//      matPutVariable(pmat, obj_name.c_str(), mat_struct);
+//   }
+//   else
+//      throw UtilityException("Attempting to write a MATLAB .mat file with no "
+//            "file handle.");
+//
+//   return true;
 }

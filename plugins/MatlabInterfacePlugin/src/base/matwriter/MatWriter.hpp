@@ -18,8 +18,8 @@
 // express or implied.   See the License for the specific language
 // governing permissions and limitations under the License.
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number NNG04CI63P
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS II
+// contract, Task Order 26
 //
 // Author: Michael A. Barrucco, Thinking Systems, Inc.
 // Created: 2016/6/24
@@ -34,6 +34,10 @@
 #ifndef MatWriter_hpp
 #define MatWriter_hpp
 
+#include "matlabinterface_defs.hpp"
+#include "DataWriter.hpp"
+#include "WriterData.hpp"
+
 #include <vector>
 #include "mat.h"
 #include "MatData.hpp"
@@ -43,35 +47,33 @@
  * All data containers to be written to .mat files are derived from this class
  */
 
-class MatWriter
+class MATLAB_API MatWriter : public DataWriter
 {
-    public: 
-        MatWriter();
-        virtual ~MatWriter();
-        MatWriter(const MatWriter& mw);
-        MatWriter& operator=(const MatWriter &mw);
+public:
+   MatWriter();
+   virtual ~MatWriter();
+   MatWriter(const MatWriter& mw);
+   MatWriter& operator=(const MatWriter &mw);
 
-        void Initialize(const char *filename, const char *mat_file_rev="w6");
-        MATFile* OpenFile(const char *filename, const char *mat_file_rev="w6");
-        bool CloseFile();
-        void AddData(MatData * MatDataContainer);
-        bool WriteData(const char *obj_name);
-        void SetMxArray(std::vector<std::string> variable_list);
+   virtual WriterData* GetContainer(const Gmat::ParameterType ofType,
+         const std::string &withName);
 
-    private:
-        // handle to .mat file
-        MATFile *pmat;
-        // vector of MatData objects (could be of StringMatData and RealMatData types)
-        std::vector<MatData*> allData;
+   virtual bool Initialize(const std::string &fname, const std::string &mytype = "w6");
+   virtual bool OpenFile();
+   virtual bool CloseFile();
+   virtual bool WriteData(const std::string &obj_name);
 
-    protected:
-        // vector of variable names to write to the .mat file
-        std::vector<std::string> variable_names;
-        // matlab data array type. mat_struct defines matlab structured array
-        // in which data gets written. Many structure arrays can be written to 
-        // a single file, by setting a new mat_struct array
-        mxArray *mat_struct;
+   void SetMxArray(std::vector<std::string> variable_list);
 
+private:
+   // handle to .mat file
+   MATFile *pmat;
+
+protected:
+   // matlab data array type. mat_struct defines matlab structured array
+   // in which data gets written. Many structure arrays can be written to
+   // a single file, by setting a new mat_struct array
+   mxArray *mat_struct;
 }; 
 
 #endif

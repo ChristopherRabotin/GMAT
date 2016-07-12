@@ -31,84 +31,82 @@
  */
 #include "RealMatData.hpp"
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // RealMatData(const char * variable_name)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Constructs the RealMatData object (default constructor).
  *
  * @param <variable_name> variable name of the data to be written to the .mat file structured
  *                        array
- *
  */
-//-------------------------------------------------------------------------------------
-RealMatData::RealMatData(const char * variable_name)
+//------------------------------------------------------------------------------
+RealMatData::RealMatData(const std::string &variable_name) :
+   MatData        (variable_name)
 {
-    variable = variable_name;
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // RealMatData()
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
- * Doesnt currently do anything(default destructor).
- *
+ * Doesn't currently do anything(default destructor).
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 RealMatData::~RealMatData()
 {
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // RealMatWriter(const RealMatData& sd)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Constructs the RealMatData object (copy constructor)
  *
  * @param <sd> RealMatData object to copy
- *
  */
-//-------------------------------------------------------------------------------------
-RealMatData::RealMatData(const RealMatData &rd)
+//------------------------------------------------------------------------------
+RealMatData::RealMatData(const RealMatData &rd) :
+   MatData        (rd)
 {
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // RealMatData& operator=(const RealMatData &rd)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Sets one string mat data object to match another
  *
  * @param <sd> The object that is copied
- *
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 RealMatData& RealMatData::operator=(const RealMatData &rd)
 {
-    if (this ==&rd)
-       return *this;
+    if (this != &rd)
+    {
+       MatData::operator=(rd);
+    }
 
     return *this;
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // RealMatData::AddData(std::vector< RealArray> data))
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Sets up an array of input reals for writing to an mxArray/.mat file.
  *
  * @params <data> string data to write to the .mat file
- *
  */
-//-------------------------------------------------------------------------------------
-bool RealMatData::AddData(std::vector< RealArray> data)
+//------------------------------------------------------------------------------
+bool RealMatData::AddData(Matrix data)
 {
     // get matrix size
     m_size = data.size();
     n_size = data[0].size();
 
     // set data
-    data_tmp = (double *)mxMalloc(m_size*n_size* sizeof(double) );
+    data_tmp = (double *)mxMalloc(m_size*n_size* sizeof(double));
 
     for (int i = 0; i < m_size; i++)
     {
@@ -121,23 +119,23 @@ bool RealMatData::AddData(std::vector< RealArray> data)
     return false;
 }
 
-//-------------------------------------------------------------------------------------
-// RealMatDatia::WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// void WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct)
+//------------------------------------------------------------------------------
 /**
  * Writes real data to the open .mat file stream.
  *
  * @params <pmat> file handle to .mat file
  * @params <obj_name> name of the structured array in which to write the data
  * @params <mat_struct> mxArray of structured array in which to write
- *
  */
-//-------------------------------------------------------------------------------------
-void RealMatData::WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_struct)
+//------------------------------------------------------------------------------
+void RealMatData::WriteData(MATFile *pmat, const std::string &obj_name,
+      mxArray *mat_struct)
 {
 
     // find place to write the data within the struct
-    int data_field_number = mxGetFieldNumber(mat_struct, variable);
+    int data_field_number = mxGetFieldNumber(mat_struct, varName.c_str());
 
     // create number matrix to house the data
     mxArray *pa1;
@@ -148,5 +146,34 @@ void RealMatData::WriteData(MATFile *pmat, const char *obj_name, mxArray *mat_st
     mxSetM(pa1, m_size);
     mxSetN(pa1, n_size);
     mxSetFieldByNumber(mat_struct, 0, data_field_number, pa1);
-    matPutVariable(pmat, obj_name, mat_struct); 
+    matPutVariable(pmat, obj_name.c_str(), mat_struct);
+}
+
+
+//------------------------------------------------------------------------------
+// bool WriteData()
+//------------------------------------------------------------------------------
+/**
+ * Writes real data to the open .mat file stream.
+ *
+ * @return false (currently does nothing)
+ */
+//-------------------------------------------------------------------------------------
+bool RealMatData::WriteData()
+{
+   return false;
+
+//    // find place to write the data within the struct
+//    int data_field_number = mxGetFieldNumber(mat_struct, variable);
+//
+//    // create number matrix to house the data
+//    mxArray *pa1;
+//    pa1 = mxCreateNumericMatrix(0, 0, mxDOUBLE_CLASS, mxREAL);
+//
+//    // write the data
+//    mxSetData(pa1, data_tmp);
+//    mxSetM(pa1, m_size);
+//    mxSetN(pa1, n_size);
+//    mxSetFieldByNumber(mat_struct, 0, data_field_number, pa1);
+//    matPutVariable(pmat, obj_name.c_str(), mat_struct);
 }
