@@ -189,7 +189,9 @@ if(WIN32)
 endif()
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux
-if(UNIX)
+# Disabled since static Xerces is being used. Enable in future if GMAT
+# switches to dynamic Xerces
+if(UNIX AND false)
   if(APPLE)
     if(GMAT_MAC_APPBUNDLE_PATH)
       SET(MAC_BASEPATH "../Frameworks/") # GmatBase and Xerces in Frameworks

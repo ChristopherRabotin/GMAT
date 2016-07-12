@@ -120,13 +120,13 @@ function download_depends() {
 		  echo "Downloading 32-bit CSPICE..."
 		  curl http://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_32bit/packages/cspice.tar.Z > cspice.tar.Z
 		  gzip -d cspice.tar.Z
-		  tar xf cspice.tar
+		  tar -xf cspice.tar
 		  mv cspice cspice32
 		else
 		  echo "Downloading 64-bit CSPICE..."
 		  curl http://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_64bit/packages/cspice.tar.Z > cspice.tar.Z
 		  gzip -d cspice.tar.Z
-		  tar xf cspice.tar
+		  tar -xf cspice.tar
 		  mv cspice cspice64
 		fi
 		rm cspice.tar # Cleanup
@@ -141,14 +141,11 @@ function download_depends() {
 		# Change to wxWidgets directory
 		cd "$wxWidgets_path"
 	
-		# Checkout wxWidgets source
-		wx_version_download=`echo $wx_version | sed 's/\./_/g'`
+		# Download wxWidgets source
 		echo "Downloading wxWidgets $wx_version..."
-		curl -Lk https://github.com/wxWidgets/wxWidgets/archive/v$wx_version.tar.gz > wxWidgets.tar.gz
-		gzip -d wxWidgets.tar.gz
-		mkdir -p wxWidgets-$wx_version
-		tar xf wxWidgets.tar -C wxWidgets-$wx_version --strip-components 1
-		rm wxWidgets.tar
+		curl -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v$wx_version/wxWidgets-$wx_version.tar.bz2 > wxWidgets.tar.bz2
+		tar -xf wxWidgets.tar.bz2
+		rm wxWidgets.tar.bz2
 
 		# Make sure wxWidgets was downloaded
 		if [ ! -d "wxWidgets-$wx_version" ]
@@ -171,7 +168,7 @@ function download_depends() {
 		echo "Downloading Xerces-C $xerces_version"
 		curl http://archive.apache.org/dist/xerces/c/3/sources/xerces-c-$xerces_version.tar.gz > xerces.tar.gz
 		gzip -d xerces.tar.gz
-		tar xf xerces.tar --strip-components 1
+		tar -xf xerces.tar --strip-components 1
 		rm xerces.tar
 	fi
 
@@ -312,6 +309,12 @@ function build_xerces() {
 	else
 	  mkdir -p "$xerces_build_path"
 	  cd "$xerces_build_path"
+
+	  # For users who compile GMAT on multiple platforms side-by-side.
+	  # Running Windows configure.bat causes Mac/Linux configure scripts
+	  # to have missing permissions.
+	  chmod u+x ../configure 
+	  chmod u+x ../config/*
 
 	  echo "Configuring Xerces $xerces_version debug library. This may take a while..."
 	  COMMONFLAGS="-O0 -g -fPIC"

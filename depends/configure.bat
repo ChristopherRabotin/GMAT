@@ -143,6 +143,7 @@ IF NOT EXIST %cspice_path%\%cspice_dir% (
 :: Compile CSPICE
 IF NOT EXIST %cspice_path%\%cspice_dir%\lib\cspiced.lib (
 	:: Compile debug CSPICE. See GMT-5044
+	echo.
 	echo -- Compiling debug CSPICE. This could take a while...
 	cd %cspice_path%\%cspice_dir%\src\cspice
 	cl /c /DEBUG /Z7 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c > %logs_dir%\cspice_build_debug.log 2>&1
@@ -150,6 +151,7 @@ IF NOT EXIST %cspice_path%\%cspice_dir%\lib\cspiced.lib (
 	del *.obj
 
 	:: Compile release CSPICE. See GMT-5044
+	echo.
 	echo -- Compiling release CSPICE. This could take a while...
 	cl /c /O2 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c > %logs_dir%\cspice_build_release.log 2>&1
 	link -lib /out:..\..\lib\cspice.lib *.obj >> %logs_dir%\cspice_build_release.log 2>&1
@@ -188,9 +190,11 @@ IF NOT EXIST %wxWidgets_path%\lib\vc%wxtype%dll (
 	:: Download wxWidgets headers and binaries
 	echo -- Downloading wxWidgets headers
 	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxhdr% > %wxhdr%
+
 	echo.
 	echo -- Downloading wxWidgets debug libraries
 	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxdev% > %wxdev%
+
 	echo.
 	echo -- Downloading wxWidgets release libraries
 	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxrel% > %wxrel%
@@ -248,6 +252,7 @@ IF NOT EXIST %xerces_path% (
 IF NOT EXIST %xerces_path%\Build\Win%xerces_type% (
 	:: Compile debug Xerces
 	:: XercesLibOverride is needed because the Xerces Runtime Library cannot be directly changed with an msbuild flag
+	echo.
 	echo -- Compiling debug Xerces. This could take a while...
 	cd %xerces_path%\projects\Win32\VC%vs_version%\xerces-all\XercesLib
 	msbuild /m ^
@@ -257,7 +262,8 @@ IF NOT EXIST %xerces_path%\Build\Win%xerces_type% (
 		XercesLib.vcxproj > %logs_dir%\xerces_build_debug.log 2>&1
 
 	:: Compile release Xerces
-	echo -- Compiling releaseXerces. This could take a while...
+	echo.
+	echo -- Compiling release Xerces. This could take a while...
 	msbuild /m ^
 		/property:Configuration="Static Release";Platform=%xplatform% ^
 		/property:TargetName=xerces-c_3 ^

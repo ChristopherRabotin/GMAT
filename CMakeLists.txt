@@ -75,9 +75,9 @@ if(APPLE)
   if(GMAT_GUI)
     if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
       (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
-      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd.app/Contents")
+      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd-${GMAT_RELEASE_NAME}_Beta.app/Contents")
     else()
-      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT_Beta.app/Contents")
+      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT-${GMAT_RELEASE_NAME}_Beta.app/Contents")
     endif()
   else()
     SET(GMAT_MAC_APPBUNDLE_PATH "")
@@ -196,7 +196,8 @@ endif()
 SET(Matlab_ROOT_DIR "" CACHE PATH "Path to user-specified MATLAB location. Leave empty to auto-find MATLAB.")
 SET(MATLAB_ADDITIONAL_VERSIONS
   # Additional Matlab versions should be included here
-  "R2015b=8.6"
+  "R2016a=9.0"
+  "R2016b=9.1"
   CACHE STRING "Additional searched MATLAB versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
   )
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
