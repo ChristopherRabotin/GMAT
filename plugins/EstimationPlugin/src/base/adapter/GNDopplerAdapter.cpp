@@ -121,10 +121,6 @@ GNDopplerAdapter::GNDopplerAdapter(const GNDopplerAdapter& da) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GNDopplerAdapter copy constructor   from <%p> to <%p>\n", &da, this);
 #endif
-
-   //// Specify multiplier for S-path and E-path
-   //multiplierS = 1.0;
-   //multiplierE = 1.0;
 }
 
 
@@ -1243,33 +1239,4 @@ void GNDopplerAdapter::SetCorrection(const std::string& correctionName,
    adapterS->SetCorrection(correctionName, correctionType);
    RangeAdapterKm::SetCorrection(correctionName, correctionType);
 }
-
-
-
-////------------------------------------------------------------------------------
-//// Real GetTurnAroundRatio(Integer freqBand)
-////------------------------------------------------------------------------------
-///**
-// * Retrieves turn around ratio
-// *
-// * @param freqBand   frequency band
-// *
-// * return   the value of trun around ratio associated with frequency band 
-// */
-////------------------------------------------------------------------------------
-//Real GNDopplerAdapter::GetTurnAroundRatio(Integer freqBand)
-//{
-//   switch (freqBand)
-//   {
-//      case 1:            // for S-band, turn around ratio is 240/221
-//         return 240.0/221.0;
-//      case 2:            // for X-band, turn around ratio is 880/749
-//         return 880.0/749.0;
-//   }
-//
-//   // Display an error message when frequency band is not specified 
-//   std::stringstream ss;
-//   ss << "Error: frequency band " << freqBand << " is not specified.\n";
-//   throw MeasurementException(ss.str());
-//}
 
