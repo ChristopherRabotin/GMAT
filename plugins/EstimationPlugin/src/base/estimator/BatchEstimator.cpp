@@ -2561,11 +2561,12 @@ void BatchEstimator::WriteReportFileHeaderPart1()
    std::string runDate = CTime(&now);
    //std::string buildTime = GetFileCreateTime("GMAT.exe");
    std::string buildTime = GetGMATBuildDate();
-
+   std::string version = GmatGlobal::Instance()->GetGmatVersion();
+   
    textFile
       << "                                              *****  G E N E R A L  M I S S I O N  A N A L Y S I S  T O O L  *****\n"
       << "\n"
-      << "                                                                          Release 2016B\n"
+      << "                                                                          Release " << version << "\n"
       << GmatStringUtil::GetAlignmentString("", 59) + "Build Date : " << buildTime << "\n"
       << "\n"
       << GmatStringUtil::GetAlignmentString("", 36) + "Hostname : " << GmatStringUtil::GetAlignmentString(GetHostName(), 36, GmatStringUtil::LEFT) << " OS / Arch : " << GetOperatingSystemName() << " " << GetOperatingSystemVersion() << "\n"
