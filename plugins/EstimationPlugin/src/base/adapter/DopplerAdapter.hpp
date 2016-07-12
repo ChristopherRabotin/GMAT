@@ -14,7 +14,7 @@
 // Author: Tuan Dang Nguyen, NASA/GSFC
 // Created: Sept 30, 2014
 /**
- * A measurement adapter for DSN Doppler
+ * A measurement adapter for DSN Doppler (unit: Hz)
  */
 //------------------------------------------------------------------------------
 
@@ -113,7 +113,7 @@ protected:
    /// Frequency band for E path in DSNDoppler
    Integer              freqBandE;
    /// Doppler count interval
-   Real                 dopplerCountInterval;
+   Real                 dopplerCountInterval;             // unit: second
    /// Turn around ratio
    Real                 turnaround;
    /// Multiplier for S-path and E-path
