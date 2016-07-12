@@ -34,9 +34,7 @@ SET(TargetName GmatGUI)
 
 # ====================================================================
 # SPICE specifics
-if(GMAT_USE_SPICE)
-  SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
-endif()
+SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
 
 # Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
@@ -291,7 +289,7 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES
   )
 
 # Specify where to install (make install or VS "INSTALL" project)
-if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+if(APPLE)
   SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/MacOS)
 else()
   SET(INSTALL_DIR bin)
@@ -299,7 +297,7 @@ endif()
 INSTALL(TARGETS ${TargetName} DESTINATION ${INSTALL_DIR})
 
 # Install Mac bundle files
-if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+if(APPLE)
   INSTALL(CODE "MESSAGE(STATUS \"Creating GMAT.app bundle\")")
 
   # Install Mac icon file
@@ -321,17 +319,12 @@ if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
     DESTINATION ${GMAT_MAC_APPBUNDLE_PATH}/MacOS
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
     )
-
 endif()
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux
 if(UNIX)
   if(APPLE)
-    if(GMAT_MAC_APPBUNDLE_PATH)
-      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
-    else()
-      SET(MAC_BASEPATH ";@loader_path/../lib/") # Separate base/wx dirs
-    endif()
+    SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
       "@loader_path/${MAC_BASEPATH}"
       )

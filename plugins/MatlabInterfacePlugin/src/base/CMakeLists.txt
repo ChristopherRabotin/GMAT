@@ -85,11 +85,7 @@ endif()
 # Set RPATH to find shared libraries in default locations on Mac/Linux
 if(UNIX)
   if(APPLE)
-    if(GMAT_MAC_APPBUNDLE_PATH)
-      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
-    else()
-      SET(MAC_BASEPATH ";@loader_path/../lib/") # Separate base/wx dirs
-    endif()
+    SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
       "@loader_path/${MAC_BASEPATH}"
       )

@@ -193,11 +193,7 @@ endif()
 # switches to dynamic Xerces
 if(UNIX AND false)
   if(APPLE)
-    if(GMAT_MAC_APPBUNDLE_PATH)
-      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and Xerces in Frameworks
-    else()
-      SET(MAC_BASEPATH ";@loader_path/libxerces/") # Separate base/xerces dirs
-    endif()
+    SET(MAC_BASEPATH "../Frameworks/") # GmatBase and Xerces in Frameworks
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
       "@loader_path/${MAC_BASEPATH}"
       )

@@ -21,16 +21,14 @@ ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DGMAT_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
-if(GMAT_USE_SPICE)
-  SET(SPICE_SRCS
-    "attitude/SpiceAttitude.cpp"
-    "util/SpiceAttitudeKernelReader.cpp"
-    "util/SpiceInterface.cpp"
-    "util/SpiceOrbitKernelReader.cpp"
-    "util/SpiceKernelReader.cpp"
-    "util/SpiceKernelWriter.cpp"
-    "util/SpiceOrbitKernelWriter.cpp")
-endif()
+SET(SPICE_SRCS
+  "attitude/SpiceAttitude.cpp"
+  "util/SpiceAttitudeKernelReader.cpp"
+  "util/SpiceInterface.cpp"
+  "util/SpiceOrbitKernelReader.cpp"
+  "util/SpiceKernelReader.cpp"
+  "util/SpiceKernelWriter.cpp"
+  "util/SpiceOrbitKernelWriter.cpp")
 
 # ====================================================================
 # F2C
@@ -586,7 +584,7 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES
 if(WIN32)
   INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION bin)
 else()
-  if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+  if(APPLE)
     SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
   else()
     SET(INSTALL_DIR bin)

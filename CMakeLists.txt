@@ -70,17 +70,12 @@ endif()
 
 # Set path to app bundle on Mac, relative to CMAKE_INSTALL_PREFIX
 # This may need to be a user-selectable cache variable in the future
-OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 if(APPLE)
-  if(GMAT_GUI)
-    if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
-      (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
-      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd-${GMAT_RELEASE_NAME}_Beta.app/Contents")
-    else()
-      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT-${GMAT_RELEASE_NAME}_Beta.app/Contents")
-    endif()
+  if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
+    (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
+    SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd-${GMAT_RELEASE_NAME}_Beta.app/Contents")
   else()
-    SET(GMAT_MAC_APPBUNDLE_PATH "")
+    SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT-${GMAT_RELEASE_NAME}_Beta.app/Contents")
   endif()
 endif()
 
@@ -114,9 +109,6 @@ endif()
 
 # Find wxWidgets
 FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
-
-# User option for SPICE
-OPTION(GMAT_USE_SPICE "Use CSPICE" ON)
 
 # Search for CSPICE even if it is not selected, because
 # the CSPICE libs contain the F2C implementation
@@ -167,10 +159,8 @@ else()
   MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
 endif()
 
-# Include SPICE directories if it is selected
-if(GMAT_USE_SPICE)
-  ADD_DEFINITIONS("-D__USE_SPICE__")
-endif()
+# Add SPICE preprocessor definition to all projects
+ADD_DEFINITIONS("-D__USE_SPICE__")
 
 # By default use the CSPICE version of F2C
 SET(F2C_DEPENDS_DIR ${CSPICE_INCLUDE_DIR})
