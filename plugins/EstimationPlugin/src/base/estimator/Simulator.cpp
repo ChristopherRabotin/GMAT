@@ -115,6 +115,9 @@ Simulator::Simulator(const std::string& name) :
    simulationStart = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(initialEpoch.c_str()));
    simulationEnd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(finalEpoch.c_str()));
    currentEpoch = nextSimulationEpoch = simulationStart;
+
+   // Turn off writting progress report for simulation    // fix bug GMT-5713 RunSimulator command creates an empty file
+   showProgress = false;                                  // fix bug GMT-5713 RunSimulator command creates an empty file
 }
 
 
