@@ -36,9 +36,6 @@
 #include "estimation_defs.hpp"
 #include "Factory.hpp"
 
-#ifdef DISABLE_UNNEEDED_GMAT_OBJECTS
-   #define DISABLE_MEASUREMENT_MODEL
-#endif
 
 class ESTIMATION_API MeasurementModelFactory : public Factory
 {

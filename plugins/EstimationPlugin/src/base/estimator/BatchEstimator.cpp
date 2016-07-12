@@ -476,6 +476,9 @@ bool BatchEstimator::SetStringParameter(const Integer id,
 {
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
+      if (value != "FromParticipants")
+         throw EstimatorException("Error: An invalid value (" + value + ") was set to " + GetName() + ".EstimationEpochFormat parameter. In current GMAT version, only 'FromParticipants' is a valid value.\n");
+
       bool retVal = false;
       StringArray sa = GetPropertyEnumStrings(id);
       for (UnsignedInt i=0; i < sa.size(); ++i)
@@ -512,6 +515,9 @@ bool BatchEstimator::SetStringParameter(const Integer id,
 
    if (id == ESTIMATION_EPOCH)
    {
+      if (value != "FromParticipants")
+         throw EstimatorException("Error: An invalid value (" + value + ") was set to " + GetName() + ".EstimationEpoch parameter. In current GMAT version, only 'FromParticipants' is a valid value.\n");
+
       if (value == "")
          throw EstimatorException("Error: No value was set to " + GetName() + ".EstimationEpoch parameter.\n");
 
@@ -2555,11 +2561,12 @@ void BatchEstimator::WriteReportFileHeaderPart1()
    std::string runDate = CTime(&now);
    //std::string buildTime = GetFileCreateTime("GMAT.exe");
    std::string buildTime = GetGMATBuildDate();
-
+   std::string version = GmatGlobal::Instance()->GetGmatVersion();
+   
    textFile
       << "                                              *****  G E N E R A L  M I S S I O N  A N A L Y S I S  T O O L  *****\n"
       << "\n"
-      << "                                                                          Release 2016B\n"
+      << "                                                                          Release " << version << "\n"
       << GmatStringUtil::GetAlignmentString("", 59) + "Build Date : " << buildTime << "\n"
       << "\n"
       << GmatStringUtil::GetAlignmentString("", 36) + "Hostname : " << GmatStringUtil::GetAlignmentString(GetHostName(), 36, GmatStringUtil::LEFT) << " OS / Arch : " << GetOperatingSystemName() << " " << GetOperatingSystemVersion() << "\n"
