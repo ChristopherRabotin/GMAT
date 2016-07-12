@@ -83,9 +83,6 @@ protected:
    /// Range modulo constant
    Real            rangeModulo;                             // unit: RU
 
-   ///// Table containing ramped frequency data for this measurement only
-   //std::vector<RampTableData> freqRampedTable;
-
    /// Parameter IDs for the DSNRangeAdapter
    enum
    {
