@@ -60,8 +60,6 @@ SET(PLUGIN_DIRS
   tdmReader
   trackingfile
   trackingsystem
-  ../../../MatlabInterfacePlugin/src/base/matwriter
-  /usr/local/MATLAB/R2016a/extern/include
   )
 
 # ====================================================================
