@@ -291,8 +291,6 @@ protected:
 
    StringArray*         DecomposePathString(const std::string &value);
    
-   //void                 ComputeMeasurementBias(const std::string biasName);                       // This code will be removed after complete ErrorModel
-   //void                 ComputeMeasurementNoiseSigma(const std::string noiseSigmaName);           // This code will be removed after complete ErrorModel
    void                 ComputeMeasurementBias(const std::string biasName, const std::string measType, Integer numTrip);
    void                 ComputeMeasurementNoiseSigma(const std::string noiseSigmaName, const std::string measType, Integer numTrip);
    void                 ComputeMeasurementErrorCovarianceMatrix();
