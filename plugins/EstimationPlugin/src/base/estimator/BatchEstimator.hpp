@@ -38,9 +38,8 @@
 #include "MeasurementManager.hpp"
 
 #include "OwnedPlot.hpp"
-#include "MatWriter.hpp"
-#include "RealMatData.hpp"
-#include "StringMatData.hpp"
+#include "DataWriter.hpp"
+#include "WriterData.hpp"
 
 /**
  * Implementation of a standard batch estimation state machine
@@ -139,8 +138,12 @@ protected:
    /// Flag used to indicate propagation to estimation epoch is executing
    bool                    advanceToEstimationEpoch;
 
-   // instantiate the MatWriter object to write data
-   MatWriter *matWriter;
+   /// The .mat DataWriter object used to write data for MATLAB
+   DataWriter              *matWriter;
+   /// Flag indicating is the .mat file should be written
+   bool                    writeMatFile;
+   /// .mat data file name
+   std::string             matFileName;
 
 //   /// Estimation status
 //   Integer                 estimationStatus;         // This variable is moved to Estimator class

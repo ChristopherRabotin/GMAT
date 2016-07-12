@@ -52,6 +52,8 @@
 #include "GravityField.hpp"
 #include "ErrorModel.hpp"
 
+#include "DataWriterInterface.hpp"
+
 #include <ctime>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -841,9 +843,13 @@ bool BatchEstimator::Initialize()
       retval    = true;
 
       // the mat writer
-      matWriter = new MatWriter;
-      std::string filename = instanceName + "matlab_file.mat";
-      matWriter->Initialize(filename.c_str(),"w5");
+      matWriter = DataWriterInterface::Instance()->GetDataWriter("MatWriter");
+      if (matWriter != NULL)
+      {
+         writeMatFile = true;
+         matFileName  = instanceName + "_matlab_file.mat"; // User setting to come
+         matWriter->Initialize(matFileName, "w5");
+      }
    }
 
    return retval;
