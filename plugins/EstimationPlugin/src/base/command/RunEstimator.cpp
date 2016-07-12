@@ -686,6 +686,7 @@ bool RunEstimator::Execute()
       MessageInterface::ShowMessage("\nEstimator state is %d\n", state);
    #endif
    
+   bool hasError = false;
    EstimatorException ex;
    try
    {
@@ -804,13 +805,15 @@ bool RunEstimator::Execute()
    } catch (EstimatorException ex1)
    {
       ex = ex1;
+      hasError = true;
       state = Solver::FINISHED;
    }
    
    if (state == Solver::FINISHED)
    {
       Finalize();
-      throw ex;
+      if (hasError)
+         throw ex;
    }
 
    #ifdef DEBUG_STATE
