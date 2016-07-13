@@ -97,7 +97,7 @@ public:
    /// Filter observed data
    virtual ObservationData* 
                         FilteringData(ObservationData* dataObject, Integer& rejectedReason);
-   virtual bool         ValidateInput();
+//   virtual bool         ValidateInput();
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES

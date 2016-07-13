@@ -1258,6 +1258,17 @@ MeasureModel* TrackingDataAdapter::GetMeasurementModel()
 }
 
 
+//------------------------------------------------------------------------------
+// StringArray GetParticipants(Integer forPathIndex)
+//------------------------------------------------------------------------------
+/**
+* Get a name list of participants for a signal path
+*
+* @param forPathIndex         Index of a given path
+* @return                     a name list of participants in a given signal path
+*
+*/
+//------------------------------------------------------------------------------
 StringArray TrackingDataAdapter::GetParticipants(Integer forPathIndex)
 {
    StringArray list = *(participantLists[0]);
@@ -1576,16 +1587,13 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
       //// Search for ErrorModel associated with measType, numTrip,  and spacecraft (It has to search in GroundStation::errorModelMap)
       // Search for ErrorModel associated with measType and spacecraft (It has to search in GroundStation::errorModelMap)
       std::map<std::string,ObjectArray> errmodelMap = ((GroundstationInterface*)gs)->GetErrorModelMap();
-      //MessageInterface::ShowMessage("errmodelMap = <%p>   size = %d\n", errmodelMap, errmodelMap.size()); 
       ErrorModel* errmodel = NULL;
       for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); mapIndex != errmodelMap.end(); ++mapIndex)
       {
-         //MessageInterface::ShowMessage("errormodelMap.first = <%s>\n", (*mapIndex).first.c_str());
          if (sc->GetName() == mapIndex->first)
          {
             for(UnsignedInt j = 0; j < mapIndex->second.size(); ++j)
             {
-               //if ((mapIndex->second.at(j)->GetStringParameter("Type") == measType)&&(mapIndex->second.at(j)->GetIntegerParameter("Trip") == numTrip))
                if (mapIndex->second.at(j)->GetStringParameter("Type") == measType)
                {
                   errmodel = (ErrorModel*) mapIndex->second.at(j);
@@ -1602,7 +1610,6 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
       if (errmodel == NULL)
       {
          std::stringstream ss;
-         //ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          throw MeasurementException(ss.str());
       }
@@ -1622,15 +1629,9 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
 
          // Get Bias from that error model
          if (j >= forObjects.size())
-         {
-            bias = errmodel->GetRealParameter(biasName);          // bias is a consider parameter
-            //MessageInterface::ShowMessage("TrackingDataAdapter::ComputeMeasurementBias(...): ErrorModel <%s,%p>   Bias = %lf   Bias is a solve-for\n", errmodel->GetFullName().c_str(), errmodel, bias);
-         }
+            bias = errmodel->GetRealParameter(biasName);              // bias is a consider parameter
          else
-         {
             bias = forObjects[j]->GetRealParameter(biasName);         // bias is a solve-for parameter
-            //MessageInterface::ShowMessage("TrackingDataAdapter::ComputeMeasurementBias(...): ErrorModel <%s,%p>   Bias = %lf   Bias is a solve-for\n", forObjects[j]->GetName().c_str(), forObjects[j], bias);
-         }
       }
       else
       {
@@ -1702,21 +1703,18 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
       UnsignedInt k;
       for (k = 0; k < errmodels.size(); ++k)
       {
-         //if ((errmodels[k]->GetStringParameter("Type") == measType)&&(errmodels[k]->GetIntegerParameter("Trip") == numTrip))
          if (errmodels[k]->GetStringParameter("Type") == measType)
             break;
       }
       if (k >= errmodels.size())
       {
          std::stringstream ss;
-         //ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          throw MeasurementException(ss.str());
       }
 
       // Get NoiseSigma from that error model
       noise = errmodels[k]->GetRealParameter(noiseSigmaName);
-      //MessageInterface::ShowMessage("TrackingDataAdapter::GetMeasurementBias(...): ErrorModel <%p>   noise = %lf\n", errmodels[k], noise);
 
       noiseSigma.push_back(noise);
    }// for i
@@ -1889,26 +1887,6 @@ Real TrackingDataAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer
 
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
    Real time_min = (*rampTB)[beginIndex].epoch;
-   //Real time_max = (*rampTB)[endIndex-1].epoch;
-
-   //if ((t1 < time_min)||(t1 > time_max))
-   //{
-   //   char s[200];
-   //   sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
-   //   std::string st(&s[0]);
-   //   err = 4;
-   //   throw MeasurementException(st);
-   //}
-
-   //
-   //if ((t0 < time_min)||(t0 > time_max))
-   //{
-   //   char s[200];
-   //   sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
-   //   std::string st(&s[0]);
-   //   err = 5;
-   //   throw MeasurementException(st);
-   //}
 
    // Verify t0 and t1 are not out of range of ramp table
    if (t1 < time_min)

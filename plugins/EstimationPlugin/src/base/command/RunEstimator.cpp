@@ -31,7 +31,7 @@
 
 
 #include "RunEstimator.hpp"
-
+#include "EstimatorException.hpp"
 #include "MessageInterface.hpp"
 #include "ODEModel.hpp"
 
@@ -407,7 +407,14 @@ bool RunEstimator::Initialize()
 }
 
 
-
+//--------------------------------------------------------------------------------
+// void LoadSolveForsToESM()
+//--------------------------------------------------------------------------------
+/**
+* This function is used to load all solve-for variables and store into 
+* EstimationStateManager object.
+*/
+//--------------------------------------------------------------------------------
 void RunEstimator::LoadSolveForsToESM()
 {
 #ifdef DEBUG_LOAD_SOLVEFORS
@@ -434,7 +441,6 @@ void RunEstimator::LoadSolveForsToESM()
 #endif
 
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -679,8 +685,13 @@ bool RunEstimator::Execute()
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("\nEstimator state is %d\n", state);
    #endif
-   switch (state)
+   
+   bool hasError = false;
+   EstimatorException ex;
+   try
    {
+      switch (state)
+      {
       case Solver::INITIALIZING:
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): INITIALIZING state\n");
@@ -727,7 +738,7 @@ bool RunEstimator::Execute()
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): ACCUMULATING state\n");
          #endif
-       Accumulate();
+         Accumulate();
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): ACCUMULATING state\n");
          #endif
@@ -774,21 +785,37 @@ bool RunEstimator::Execute()
       default:
          throw CommandException("Unknown state "
                " encountered in the RunEstimator command");
-   }
+      }
 
-   #ifdef DEBUG_STATE
-      MessageInterface::ShowMessage("*** Start AdvanceState ... RunEstimator:Execute()\n");
-   #endif
+      #ifdef DEBUG_STATE
+         MessageInterface::ShowMessage("*** Start AdvanceState ... RunEstimator:Execute()\n");
+      #endif
 
-   if (state != Solver::FINISHED)
-      state = theEstimator->AdvanceState();
-   else
-   {
+      //if (state != Solver::FINISHED)
+      //   state = theEstimator->AdvanceState();
+      //else
+      //{
+      //   // It has to run all work in AdvanceState() before Finalize()
+      //   state = theEstimator->AdvanceState();
+      //   Finalize();
+      //}
+   
       // It has to run all work in AdvanceState() before Finalize()
       state = theEstimator->AdvanceState();
-      Finalize();
+   } catch (EstimatorException ex1)
+   {
+      ex = ex1;
+      hasError = true;
+      state = Solver::FINISHED;
    }
    
+   if (state == Solver::FINISHED)
+   {
+      Finalize();
+      if (hasError)
+         throw ex;
+   }
+
    #ifdef DEBUG_STATE
       MessageInterface::ShowMessage("*** Exit RunEstimator:Execute()\n");
    #endif

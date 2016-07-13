@@ -67,6 +67,14 @@ GmatGlobal* GmatGlobal::Instance()
 }
 
 //------------------------------------------------------------------------------
+// std::string GetGmatVersion()
+//------------------------------------------------------------------------------
+std::string GmatGlobal::GetGmatVersion()
+{
+   return gmatVersion;
+}
+
+//------------------------------------------------------------------------------
 // Integer GetDataPrecision()
 //------------------------------------------------------------------------------
 Integer GmatGlobal::GetDataPrecision()
@@ -915,6 +923,10 @@ void GmatGlobal::RemoveHiddenCommand(const std::string &cmd)
 //------------------------------------------------------------------------------
 GmatGlobal::GmatGlobal()
 {
+   // Current GMAT version.
+   // @note: Make sure to switch it to the official release number for RC1
+   gmatVersion = "Nightly Build";
+   
    isBatchMode = false;
    isNitsClient = false;
    runInterrupted = false;
