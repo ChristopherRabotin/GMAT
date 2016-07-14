@@ -3812,7 +3812,7 @@ void BatchEstimator::WriteIterationHeader()
       << "\n"
       << "              Obs-Type            Obs/Computed Units   Residual Units                      Obs-Type            Obs/Computed Units   Residual Units\n"
       << "              Doppler_RangeRate   kilometers/second    kilometers/second                   Range_KM            kilometers           kilometers\n"
-      << "              Doppler_HZ          Hertz                Hertz                               Range_RU            Range Units          Range Units\n";
+      << "              Doppler             Hertz                Hertz                               DSNRange            Range Units          Range Units\n";
 
    textFile.flush();
 
