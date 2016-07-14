@@ -285,6 +285,7 @@ SET(BASE_SRCS
     function/FunctionManager.cpp
     function/GetEphemStates.cpp
     function/GetLastState.cpp
+    function/SetSeed.cpp
     hardware/ChemicalTank.cpp
     hardware/ChemicalThruster.cpp
     hardware/ElectricTank.cpp

@@ -139,8 +139,6 @@ ElementWrapper* ArrayWrapper::Clone() const
 //------------------------------------------------------------------------------
 /**
  * @return ArrayWrapper value converted to std::string.
- *
- * @exception <GmatBaseException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
 std::string ArrayWrapper::ToString()

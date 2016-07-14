@@ -37,9 +37,6 @@
 #include "Factory.hpp"
 #include "DataFile.hpp"
 
-#ifdef DISABLE_UNNEEDED_GMAT_OBJECTS
-   #define DISABLE_DATA_FILE
-#endif
 
 class ESTIMATION_API DataFileFactory : public Factory
 {

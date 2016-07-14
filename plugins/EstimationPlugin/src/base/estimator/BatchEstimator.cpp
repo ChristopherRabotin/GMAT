@@ -51,6 +51,7 @@
 #include "CalculationUtilities.hpp"
 #include "GravityField.hpp"
 #include "ErrorModel.hpp"
+#include "EstimatorException.hpp"
 
 #include <ctime>
 #include <sys/types.h>
@@ -476,6 +477,9 @@ bool BatchEstimator::SetStringParameter(const Integer id,
 {
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
+      if (value != "FromParticipants")
+         throw EstimatorException("Error: An invalid value (" + value + ") was set to " + GetName() + ".EstimationEpochFormat parameter. In current GMAT version, only 'FromParticipants' is a valid value.\n");
+
       bool retVal = false;
       StringArray sa = GetPropertyEnumStrings(id);
       for (UnsignedInt i=0; i < sa.size(); ++i)
@@ -512,6 +516,9 @@ bool BatchEstimator::SetStringParameter(const Integer id,
 
    if (id == ESTIMATION_EPOCH)
    {
+      if (value != "FromParticipants")
+         throw EstimatorException("Error: An invalid value (" + value + ") was set to " + GetName() + ".EstimationEpoch parameter. In current GMAT version, only 'FromParticipants' is a valid value.\n");
+
       if (value == "")
          throw EstimatorException("Error: No value was set to " + GetName() + ".EstimationEpoch parameter.\n");
 
@@ -842,13 +849,14 @@ Solver::SolverState BatchEstimator::AdvanceState()
 #ifdef DEBUG_STATE_MACHINE
    MessageInterface::ShowMessage("BatchEstimator::AdvanceState():  entered: currentState = %d\n", currentState);
 #endif
-
-   switch (currentState)
+   try
    {
+      switch (currentState)
+      {
       case INITIALIZING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "INITIALIZING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "INITIALIZING\n");
          #endif
          // ReportProgress();
          CompleteInitialization();
@@ -856,8 +864,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case PROPAGATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "PROPAGATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "PROPAGATING\n");
          #endif
          // ReportProgress();
          FindTimeStep();
@@ -865,8 +873,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case CALCULATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "CALCULATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "CALCULATING\n");
          #endif
          // ReportProgress();
          CalculateData();
@@ -874,8 +882,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case LOCATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "LOCATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "LOCATING\n");
          #endif
          // ReportProgress();
          ProcessEvent();
@@ -883,8 +891,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case ACCUMULATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "ACCUMULATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "ACCUMULATING\n");
          #endif
          // ReportProgress();
          Accumulate();
@@ -892,8 +900,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case ESTIMATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "ESTIMATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "ESTIMATING\n");
          #endif
          // ReportProgress();
          Estimate();
@@ -901,8 +909,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case CHECKINGRUN:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "CHECKINGRUN\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "CHECKINGRUN\n");
          #endif
          // ReportProgress();
          CheckCompletion();
@@ -910,8 +918,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case FINISHED:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "FINISHED\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "FINISHED\n");
          #endif
          RunComplete();
          // ReportProgress();
@@ -919,10 +927,16 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       default:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-               "Bad state for an estimator.\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "Bad state for an estimator.\n");
          #endif
          /* throw EstimatorException("Solver state not supported for the simulator")*/;
+      }
+   }
+   catch (EstimatorException ex)
+   {
+      currentState = FINISHED;
+      throw ex;
    }
 
 #ifdef DEBUG_STATE_MACHINE
@@ -1358,6 +1372,13 @@ void BatchEstimator::CheckCompletion()
    convergenceReason = "";
    estimationStatus = TestForConvergence(convergenceReason);
    
+   // Reset best RMS as needed                           // fix bug GMT-5711
+   if (resetBestRMSFlag)                                 // fix bug GMT-5711
+   {                                                     // fix bug GMT-5711
+      if (estimationStatus == DIVERGING)                 // fix bug GMT-5711
+         resetBestResidualRMS = newResidualRMS;          // fix bug GMT-5711
+   }                                                     // fix bug GMT-5711
+
    #ifdef RUN_SINGLE_PASS
       converged = true;
    #endif
@@ -1463,6 +1484,9 @@ void BatchEstimator::CheckCompletion()
 
       WriteToTextFile();
       ReportProgress();
+      // After writing to GmatLog.txt file, bestResidualRMS is set to resetBestResdualRMS    // fix bug GMT-5711
+      if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                             // fix bug GMT-5711
+         bestResidualRMS = resetBestResidualRMS;                                             // fix bug GMT-5711
 
       numRemovedRecords["U"] = 0;
       numRemovedRecords["R"] = 0;
@@ -1636,8 +1660,13 @@ std::string BatchEstimator::GetProgressString()
          case CHECKINGRUN:
             progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration     : "
+            progress << "\n   BestRMS residuals                        : "
                      << bestResidualRMS;
+            if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                 // fix bug GMT-5711
+            {                                                                          // fix bug GMT-5711
+            progress << "\n   Reset value of BestRMS residuals         : "          // fix bug GMT-5711
+                        << resetBestResidualRMS;                                       // fix bug GMT-5711
+            }                                                                          // fix bug GMT-5711
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
          
@@ -1693,7 +1722,7 @@ std::string BatchEstimator::GetProgressString()
          case FINISHED:
             progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration     : "
+            progress << "\n   BestRMS residuals                        : "
                      << bestResidualRMS;
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
@@ -1780,10 +1809,10 @@ std::string BatchEstimator::GetProgressString()
             {
                progress << "\n   WeightedRMS residuals for previous iteration: "
                         << oldResidualRMS;
-               progress << "\n   WeightedRMS residuals for this iteration    : "
+               progress << "\n   WeightedRMS residuals                       : "
                         << newResidualRMS;
                progress << "\n   BestRMS residuals for this iteration        : "
-                     << bestResidualRMS << "\n\n";
+                        << bestResidualRMS << "\n\n";
             }
 
             finalCovariance = information.Inverse();
@@ -2240,6 +2269,111 @@ std::string BatchEstimator::CTime(const time_t* time)
 }
 
 
+std::string BatchEstimator::GetGMATBuildDate()
+{
+   std::istringstream s(__DATE__);
+   std::string smonth;
+   Integer day, month, year;
+   s >> smonth >> day >> year;
+   switch(smonth.at(0))
+   {
+   case 'J':
+      if (smonth == "Jun")
+         month = 6;
+      else if (smonth == "Jul")
+         month = 7;
+      else
+         month = 1;
+      break;
+   case 'F':
+      month = 2;
+      break;
+   case 'M':
+      if (smonth == "May")
+         month = 5;
+      else
+         month = 3;
+      break;
+   case 'A':
+      if (smonth == "Apr")
+         month = 4;
+      else
+         month = 8;
+      break;
+   case 'S':
+      month = 9;
+      break;
+   case 'O':
+      month = 10;
+      break;
+   case 'N':
+      month = 11;
+      break;
+   case 'D':
+      month = 12;
+      break;
+   }
+
+   std::string sday = GetDayOfWeek(1, 1, 0);     //GetDayOfWeek(day, month, year);
+
+   std::stringstream ss;
+   ss << sday << " " << smonth << " " << day << ", " << year << " " << __TIME__;
+   return ss.str();
+}
+
+std::string BatchEstimator::GetDayOfWeek(Integer day, Integer month, Integer year)
+{
+   Integer daysOfMonth[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+   // Specify number of days of February
+   if ((year % 400 == 0) || ((year % 4 == 0) && (year % 100 != 0)))
+      daysOfMonth[1] = 29;
+
+   // Calculate number of days from day, month, year to 01/01/0000
+   Integer y = year - 0;
+   Integer m = month - 1;
+   Integer d = day - 1;
+   Integer days = 365*y + y / 4 - y / 100 + y / 400;
+   for (Integer i = 0; i < m; ++i)
+      days += daysOfMonth[i];
+   days += d;
+
+   // Calculate weekday
+   Integer weekdayOffset = 1;
+   Integer weekday = (days - 1) % 7 - weekdayOffset;
+   if (weekday < 0)
+      weekday += 7;
+
+   std::string sweekday;
+   switch (weekday)
+   {
+   case 0:
+      sweekday = "Sunday";
+      break;
+   case 1:
+      sweekday = "Monday";
+      break;
+   case 2:
+      sweekday = "Tuesday";
+      break;
+   case 3:
+      sweekday = "Wednesday";
+      break;
+   case 4:
+      sweekday = "Thusday";
+      break;
+   case 5:
+      sweekday = "Friday";
+      break;
+   case 6:
+      sweekday = "Saturday";
+      break;
+   }
+   
+   return sweekday;
+}
+
+
 //----------------------------------------------------------------------------
 // std::string GetOperatingSystemName()
 //----------------------------------------------------------------------------
@@ -2433,12 +2567,14 @@ void BatchEstimator::WriteReportFileHeaderPart1()
    /// 1. Write header 1:
    time_t now = time(NULL);
    std::string runDate = CTime(&now);
-   std::string buildTime = GetFileCreateTime("GMAT.exe");
-
+   //std::string buildTime = GetFileCreateTime("GMAT.exe");
+   std::string buildTime = GetGMATBuildDate();
+   std::string version = GmatGlobal::Instance()->GetGmatVersion();
+   
    textFile
       << "                                              *****  G E N E R A L  M I S S I O N  A N A L Y S I S  T O O L  *****\n"
       << "\n"
-      << "                                                                          Release 2016B\n"
+      << "                                                                          Release " << version << "\n"
       << GmatStringUtil::GetAlignmentString("", 59) + "Build Date : " << buildTime << "\n"
       << "\n"
       << GmatStringUtil::GetAlignmentString("", 36) + "Hostname : " << GmatStringUtil::GetAlignmentString(GetHostName(), 36, GmatStringUtil::LEFT) << " OS / Arch : " << GetOperatingSystemName() << " " << GetOperatingSystemVersion() << "\n"
@@ -3676,7 +3812,7 @@ void BatchEstimator::WriteIterationHeader()
       << "\n"
       << "              Obs-Type            Obs/Computed Units   Residual Units                      Obs-Type            Obs/Computed Units   Residual Units\n"
       << "              Doppler_RangeRate   kilometers/second    kilometers/second                   Range_KM            kilometers           kilometers\n"
-      << "              Doppler_HZ          Hertz                Hertz                               Range_RU            Range Units          Range Units\n";
+      << "              Doppler             Hertz                Hertz                               DSNRange            Range Units          Range Units\n";
 
    textFile.flush();
 

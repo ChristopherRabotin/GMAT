@@ -3893,6 +3893,7 @@ void MathParser::BuildAllFunctionList()
    builtinFuncList.push_back("diag");
    builtinFuncList.push_back("min");
    builtinFuncList.push_back("mod");
+   builtinFuncList.push_back("setSeed");
    builtinFuncList.push_back("sprintf");
    builtinFuncList.push_back("strcat");
    builtinFuncList.push_back("strcmp");
