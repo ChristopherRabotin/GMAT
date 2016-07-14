@@ -72,6 +72,9 @@ public:
    
    static GmatGlobal* Instance();
    
+   // GMAT version
+   std::string GetGmatVersion();
+   
    // Real to string conversion precison
    static const Integer DATA_PRECISION;
    static const Integer TIME_PRECISION;
@@ -257,6 +260,8 @@ private:
       std::string mPrefix; /// prefix to be used for vertical formatting
       bool mAppendEol ;    /// appends eol if true. Default is true
    };
+   
+   std::string gmatVersion;
    
    Setting defaultSetting;
    Setting currentSetting;

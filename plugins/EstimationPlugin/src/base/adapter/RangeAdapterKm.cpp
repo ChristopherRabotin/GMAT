@@ -355,17 +355,17 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       if (withMediaCorrection)
       {  
          Real correction = GetIonoCorrection();                                  // unit: km
-         if ((correction < 0.0) || (correction > 0.02))
+         if ((correction < 0.0) || (correction > 0.04))
          {
-            // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.02 km]
+            // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.04 km]
             cMeasurement.isIonoCorrectWarning = true;
             cMeasurement.ionoCorrectWarningValue = correction;                   // unit: km
          }
          
          correction = GetTropoCorrection();                                      // unit: km
-         if ((correction < 0.0) || (correction > 0.06))
+         if ((correction < 0.0) || (correction > 0.12))
          {
-            // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.06 km]
+            // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.12 km]
             cMeasurement.isTropoCorrectWarning = true;
             cMeasurement.tropoCorrectWarningValue = correction;                  // unit: km
          }
@@ -380,6 +380,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       cMeasurement.unfeasibleReason = "";
       cMeasurement.feasibilityValue = 90.0;
       
+      GmatEpoch transmitEpoch, receiveEpoch;                   // made changes by TUAN NGUYEN
       RealArray values;
       for (UnsignedInt i = 0; i < paths.size(); ++i)           // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
       {
@@ -434,16 +435,20 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
+               transmitEpoch = first->tPrecTime.GetMjd() - first->tDelay / GmatTimeConstants::SECS_PER_DAY;                     // made changes by TUAN NGUYEN
+               receiveEpoch  = current->rPrecTime.GetMjd() + current->rDelay / GmatTimeConstants::SECS_PER_DAY;                 // made changes by TUAN NGUYEN
                if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
                   if (current->next == NULL)
-                     cMeasurement.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
+                     //cMeasurement.epoch = current->rPrecTime.GetMjd() + current->rDelay / GmatTimeConstants::SECS_PER_DAY;   // made changes by TUAN NGUYEN
+                     cMeasurement.epoch = receiveEpoch;                                                                        // made changes by TUAN NGUYEN
                }
                else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  cMeasurement.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
+                  //cMeasurement.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;            // made changes by TUAN NGUYEN
+                  cMeasurement.epoch = transmitEpoch;                                                                          // made changes by TUAN NGUYEN
                }
             }
             
@@ -454,7 +459,13 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          
       }// for i loop
       
+
+      // Caluclate uplink frequency at received time and transmit time                                                        // made changes by TUAN NGUYEN
+      cMeasurement.uplinkFreq = calcData->GetUplinkFrequency(0, rampTB) * 1.0e6;                        // unit: Hz           // made changes by TUAN NGUYEN
+      cMeasurement.uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0,rampTB) * 1.0e6;   // unit: Hz           // made changes by TUAN NGUYEN
+      cMeasurement.uplinkBand = calcData->GetUplinkFrequencyBand(0, rampTB);                                                  // made changes by TUAN NGUYEN
       
+
       if (measurementType == "Range_KM")
       {
          // @todo: it needs to specify number of trips instead of using 2
@@ -524,6 +535,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          #ifdef DEBUG_RANGE_CALCULATION
             MessageInterface::ShowMessage("      . C-value with noise and bias : %.12lf km\n", cMeasurement.value[i]);
             MessageInterface::ShowMessage("      . Measurement epoch A1Mjd     : %.12lf\n", cMeasurement.epoch); 
+            MessageInterface::ShowMessage("      . Transmit frequency at receive epoch  : %.12le Hz\n", cMeasurement.uplinkFreqAtRecei); 
+            MessageInterface::ShowMessage("      . Transmit frequency at transmit epoch : %.12le Hz\n", cMeasurement.uplinkFreq); 
             MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
             MessageInterface::ShowMessage("      . Feasibility reason          : %s\n", cMeasurement.unfeasibleReason.c_str());
             MessageInterface::ShowMessage("      . Elevation angle             : %.12lf degree\n", cMeasurement.feasibilityValue);

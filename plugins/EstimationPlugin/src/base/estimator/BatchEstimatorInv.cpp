@@ -947,12 +947,12 @@ void BatchEstimatorInv::Estimate()
       bestResidualRMS = newResidualRMS;
    else
    {
-      // Reset best RMS as needed
-      if (resetBestRMSFlag)
-      {
-         if (estimationStatus == DIVERGING)
-            bestResidualRMS = oldResidualRMS;
-      }
+      //// Reset best RMS as needed                                     // fix bug GMT-5711
+      //if (resetBestRMSFlag)                                           // fix bug GMT-5711
+      //{                                                               // fix bug GMT-5711
+      //   if (estimationStatus == DIVERGING)                           // fix bug GMT-5711
+      //      bestResidualRMS = oldResidualRMS;                         // fix bug GMT-5711
+      //}                                                               // fix bug GMT-5711
 
       bestResidualRMS = GmatMathUtil::Min(bestResidualRMS, newResidualRMS);
    }
@@ -1247,7 +1247,7 @@ void BatchEstimatorInv::ValidateMediaCorrection(const MeasurementData* measData)
       if (find(ionoWarningList.begin(), ionoWarningList.end(), ss1.str()) == ionoWarningList.end())
       {
          // generate warning message
-         MessageInterface::ShowMessage("Warning: When running estimator '%s', ionosphere correction (%lf m) for measurement %s at measurement time tag %.12lf A1Mjd is out side of accepetable range [0m , 20m].\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+         MessageInterface::ShowMessage("Warning: When running estimator '%s', ionosphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
 
          // add pass to the list
          ionoWarningList.push_back(ss1.str());
@@ -1270,7 +1270,7 @@ void BatchEstimatorInv::ValidateMediaCorrection(const MeasurementData* measData)
       if (find(tropoWarningList.begin(), tropoWarningList.end(), ss1.str()) == tropoWarningList.end())
       {
          // generate warning message
-         MessageInterface::ShowMessage("Warning: When running estimator '%s', troposphere correction (%lf m) for measurement %s at measurement time tag %.12lf A1Mjd is out side of accepetable range [0m , 60m].\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+         MessageInterface::ShowMessage("Warning: When running estimator '%s', troposphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
 
          // add pass to the list
          tropoWarningList.push_back(ss1.str());

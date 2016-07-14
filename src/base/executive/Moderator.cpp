@@ -7632,8 +7632,10 @@ void Moderator::CreatePlanetaryCoeffFile()
    // here anyway since we are not removing the code to handle PLANETARY_1996
    std::string planFileName =
       theFileManager->GetFullPathname("PLANETARY_COEFF_FILE");
-   MessageInterface::ShowMessage("Setting planetary coeff. file to %s\n",
-                                 planFileName.c_str());
+   // WCS 2016.07.13 - remove this message since we are not currently using a 
+   // Planetary Coefficients file.
+//   MessageInterface::ShowMessage("Setting planetary coeff. file to %s\n",
+//                                 planFileName.c_str());
    
    theItrfFile = new ItrfCoefficientsFile(nutFileName, planFileName);
    theItrfFile->Initialize();
