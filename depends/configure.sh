@@ -69,7 +69,8 @@ if [ $mac == true ]
 then
   export DYLD_LIBRARY_PATH=/usr/lib:$DYLD_LIBRARY_PATH
 else
-  export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+  # Account for both Red Hat and Ubuntu
+  export LD_LIBRARY_PATH=/usr/lib64:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 fi
 
 # Variables for OS-specific flags
