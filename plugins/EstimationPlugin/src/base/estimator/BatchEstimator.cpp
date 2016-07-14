@@ -51,6 +51,7 @@
 #include "CalculationUtilities.hpp"
 #include "GravityField.hpp"
 #include "ErrorModel.hpp"
+#include "EstimatorException.hpp"
 
 #include <ctime>
 #include <sys/types.h>
@@ -848,13 +849,14 @@ Solver::SolverState BatchEstimator::AdvanceState()
 #ifdef DEBUG_STATE_MACHINE
    MessageInterface::ShowMessage("BatchEstimator::AdvanceState():  entered: currentState = %d\n", currentState);
 #endif
-
-   switch (currentState)
+   try
    {
+      switch (currentState)
+      {
       case INITIALIZING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "INITIALIZING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "INITIALIZING\n");
          #endif
          // ReportProgress();
          CompleteInitialization();
@@ -862,8 +864,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case PROPAGATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "PROPAGATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "PROPAGATING\n");
          #endif
          // ReportProgress();
          FindTimeStep();
@@ -871,8 +873,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case CALCULATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "CALCULATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "CALCULATING\n");
          #endif
          // ReportProgress();
          CalculateData();
@@ -880,8 +882,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case LOCATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "LOCATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "LOCATING\n");
          #endif
          // ReportProgress();
          ProcessEvent();
@@ -889,8 +891,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case ACCUMULATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "ACCUMULATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "ACCUMULATING\n");
          #endif
          // ReportProgress();
          Accumulate();
@@ -898,8 +900,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case ESTIMATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "ESTIMATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "ESTIMATING\n");
          #endif
          // ReportProgress();
          Estimate();
@@ -907,8 +909,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case CHECKINGRUN:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "CHECKINGRUN\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "CHECKINGRUN\n");
          #endif
          // ReportProgress();
          CheckCompletion();
@@ -916,8 +918,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case FINISHED:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "FINISHED\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "FINISHED\n");
          #endif
          RunComplete();
          // ReportProgress();
@@ -925,10 +927,16 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       default:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-               "Bad state for an estimator.\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "Bad state for an estimator.\n");
          #endif
          /* throw EstimatorException("Solver state not supported for the simulator")*/;
+      }
+   }
+   catch (EstimatorException ex)
+   {
+      currentState = FINISHED;
+      throw ex;
    }
 
 #ifdef DEBUG_STATE_MACHINE
