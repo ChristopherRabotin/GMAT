@@ -10,6 +10,9 @@
 #           -help: Print usage
 # Updates: Feb-Apr 2015: Ravi Mathur: Heavy updates for new CMake
 
+# Enable strict bash
+set -uo pipefail
+
 # Set defaults
 wx_build=true 
 wx_version=3.0.2
@@ -33,13 +36,6 @@ while getopts w:h opt; do
   esac
 done
 
-# Make sure curl exists
-if ! type curl > /dev/null
-then
-  echo "This script requires curl to download dependencies. Please install curl first."
-  exit
-fi
-
 clear
 echo Configuring GMAT dependencies at $gmat_path/depends
   
@@ -60,6 +56,26 @@ then
 else
   arch="x86"
 fi
+
+# Make sure curl exists
+if ! type curl > /dev/null
+then
+  echo "This script requires curl to download dependencies. Please install curl first."
+  exit
+fi
+
+# Make sure system libcurl is used (e.g. instead of Matlab's)
+if [ $mac == true ]
+then
+  export DYLD_LIBRARY_PATH=/usr/lib:$DYLD_LIBRARY_PATH
+else
+  export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+fi
+
+# Variables for OS-specific flags
+# These can be used as needed in the script
+OSXFLAGS=""
+LINUXFLAGS=""
 
 # ***********************************
 # Download Library Dependencies
@@ -254,7 +270,7 @@ function build_wxWidgets() {
 	  mkdir -p "$wx_build_path"
 	  cd "$wx_build_path"
 
-	  echo "Configuring wxWidgets $wx_version. This may take a while..."
+	  echo "Configuring wxWidgets $wx_version. This could take a while..."
 	  if [ $mac == true ]
 	  then
 	    # wxWidgets 3.0.2 has a compile error due to an incorrect
@@ -264,11 +280,11 @@ function build_wxWidgets() {
 	    if [ "$(version "$osx_ver")" -gt "$(version 10.10.0)" ] && [ "$(version "$wx_version")" -eq "$(version 3.0.2)" ]; then
 	      sed -i.bk 's/WebKit.h/WebKitLegacy.h/' "$wx_path/src/osx/webview_webkit.mm"
 	    fi
-	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=$osx_min_version > "$logs_path/wxWidgets_configure.log" 2>&1
-	  else
-	    # Configure wxWidgets build
-	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" > "$logs_path/wxWidgets_configure.log" 2>&1
+
+	    # wxWidgets needs these flags on OSX
+	    OSXFLAGS="--with-osx_cocoa --with-macosx-version-min=$osx_min_version"
 	  fi
+	  ../configure $OSXFLAGS --enable-unicode --with-opengl --prefix="$wx_install_path" > "$logs_path/wxWidgets_configure.log" 2>&1
 
 	  # Compile, install, and clean wxWidgets
 	  make -j$ncores > "$logs_path/wxWidgets_build.log" 2>&1
@@ -316,8 +332,14 @@ function build_xerces() {
 	  chmod u+x ../configure 
 	  chmod u+x ../config/*
 
-	  echo "Configuring Xerces $xerces_version debug library. This may take a while..."
-	  COMMONFLAGS="-O0 -g -fPIC"
+	  if [ $mac == true ]
+	  then
+	    # Xerces needs these flags on OSX
+	    OSXFLAGS="-mmacosx-version-min=$osx_min_version"
+	  fi
+
+	  echo "Configuring Xerces $xerces_version debug library. This could take a while..."
+	  COMMONFLAGS="-O0 -g -fPIC $OSXFLAGS"
 	  ../configure --disable-shared CFLAGS="$COMMONFLAGS" CXXFLAGS="$COMMONFLAGS" --prefix="$xerces_install_path" > "$logs_path/xerces_configure_debug.log" 2>&1
 	  make -j$ncores > "$logs_path/xerces_build_debug.log" 2>&1
 	  if [ $? -eq 0 ]
@@ -330,8 +352,8 @@ function build_xerces() {
 	    return
 	  fi
 
-	  echo "Configuring Xerces $xerces_version release library. This may take a while..."
-	  COMMONFLAGS="-O2 -fPIC"
+	  echo "Configuring Xerces $xerces_version release library. This could take a while..."
+	  COMMONFLAGS="-O2 -fPIC $OSXFLAGS"
 	  ../configure --disable-shared CFLAGS="$COMMONFLAGS" CXXFLAGS="$COMMONFLAGS" --prefix="$xerces_install_path" > "$logs_path/xerces_configure_release.log" 2>&1
 	  make -j$ncores > "$logs_path/xerces_build_release.log" 2>&1
 	  if [ $? -eq 0 ]
@@ -359,9 +381,8 @@ function build_cspice() {
 
 	if [ $mac == true ]
 	then
-	  export OSXVERSION="-mmacosx-version-min=$osx_min_version"
-	else 
-	  export OSXVERSION=""
+	  # CSPICE needs these flags on OSX
+	  export OSXFLAGS="-mmacosx-version-min=$osx_min_version"
 	fi
 
 	# Find a test file to check if cspice has already been installed
@@ -376,13 +397,13 @@ function build_cspice() {
 
 	  # Compile debug CSPICE with integer uiolen [GMT-5044]
 	  echo "Compiling CSPICE debug library. This could take a while..."
-	  export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXVERSION -g -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
+	  export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXFLAGS -g -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 	  ./mkprodct.csh > "$logs_path/cspice_build_debug.log" 2>&1
 	  mv ../../lib/cspice.a ../../lib/cspiced.a
 
 	  # Compile release CSPICE with integer uiolen [GMT-5044]
 	  echo "Compiling CSPICE release library. This could take a while..."
-	  export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXVERSION -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
+	  export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXFLAGS -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 	  ./mkprodct.csh > "$logs_path/cspice_build_release.log" 2>&1
 	fi
 }
