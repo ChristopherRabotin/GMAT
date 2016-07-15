@@ -79,6 +79,9 @@ if(APPLE)
   endif()
 endif()
 
+# ====================================================================
+# Find wxWidgets
+
 # Set default wxWidgets directory based on OS
 SET(wxWidgets_PARTIAL_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets")
 if(WIN32)
@@ -110,8 +113,8 @@ endif()
 # Find wxWidgets
 FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
 
-# Search for CSPICE even if it is not selected, because
-# the CSPICE libs contain the F2C implementation
+# ====================================================================
+# Find CSPICE
 
 # Set default CSPICE directory based on OS
 if(WIN32)
@@ -156,11 +159,14 @@ if(CSPICE_DIR)
     SET(CSPICE_LIB_DEBUG ${CSPICE_LIB})
   endif()
 else()
-  MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
+  MESSAGE(ERROR "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
 endif()
 
 # Add SPICE preprocessor definition to all projects
 ADD_DEFINITIONS("-D__USE_SPICE__")
+
+# ====================================================================
+# Find F2C
 
 # By default use the CSPICE version of F2C
 SET(F2C_DEPENDS_DIR ${CSPICE_INCLUDE_DIR})
@@ -182,6 +188,7 @@ else()
   MESSAGE(WARNING "F2C NOT FOUND. Set F2C_DIR to path to f2c.h and re-configure.")
 endif()
 
+# ====================================================================
 # Find Matlab
 SET(Matlab_ROOT_DIR "" CACHE PATH "Path to user-specified MATLAB location. Leave empty to auto-find MATLAB.")
 SET(MATLAB_ADDITIONAL_VERSIONS
@@ -196,33 +203,30 @@ if(NOT Matlab_FOUND)
   MESSAGE(WARNING "Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
 endif()
 
+# ====================================================================
 # Find Python
-# todo: Python 2.7; let the user set library name?
-MESSAGE(STATUS "Searching for Python")
-SET(PYTHON_DIR "${PROJECT_SOURCE_DIR}/depends/Python")
-SET(PYTHON_LIB_DIR "" CACHE PATH "Path to location of the Python library.")
-SET(PYTHON_INCLUDE_DIR "" CACHE PATH "Path to location of python.h")
-MESSAGE(STATUS "Please set the Python locations")
-# FIND_PACKAGE(PythonLibs)
 
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    SET(PYTHON_LIBRARY "python3.4m")
+# Unset Python variables to reset the search every time
+# This allows the user to set Python_ADDITIONAL_VERSIONS and specify
+# the Python version
+SET(PYTHON_VERSION_REQUEST "" CACHE STRING "Request specific Python version, or leave blank to use latest installed version.")
+SET(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_REQUEST})
+UNSET(PYTHON_LIBRARY CACHE)
+UNSET(PYTHON_INCLUDE_DIR CACHE)
+FIND_PACKAGE(PythonLibs)
+
+# Let users know where to download Python
+if(NOT PYTHONLIBS_FOUND)
+  if(WIN32)
+    SET(PYTHONURL "http://www.python.org/downloads/windows/")
   else()
-    SET(PYTHON_LIBRARY "python3.4m")
+    if(APPLE)
+      SET(PYTHONURL "http://www.python.org/downloads/mac-osx/")
+    else()
+      SET(PYTHONURL "the Linux package manager")
+    endif()
   endif()
-else()
-  SET(PYTHON_LIBRARY "python34.lib")
-endif()
-
-
-MESSAGE(STATUS "Python Library: " ${PYTHON_LIBRARY})
-
-if(PYTHON_LIB_DIR)
-  MESSAGE(STATUS "Found Python: " ${PYTHON_LIB_DIR})
-else()
-  MESSAGE(WARNING "Python NOT FOUND. Set PYTHON_LIB_DIR to your Python34.lib library path, and PYTHON_INCLUDE_DIR to the path to Python.h and re-configure.")
+  MESSAGE(STATUS "Python can be downloaded from ${PYTHONURL}")
 endif()
 
 # ====================================================================
