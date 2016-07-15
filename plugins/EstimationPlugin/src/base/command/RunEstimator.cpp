@@ -686,8 +686,6 @@ bool RunEstimator::Execute()
       MessageInterface::ShowMessage("\nEstimator state is %d\n", state);
    #endif
    
-   bool hasError = false;
-   EstimatorException ex;
    try
    {
       switch (state)
@@ -776,7 +774,6 @@ bool RunEstimator::Execute()
 //         Finalize();
          // Adding in for now.
          BuildCommandSummary(true);
-
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): FINISHED state\n");
          #endif
@@ -791,29 +788,18 @@ bool RunEstimator::Execute()
          MessageInterface::ShowMessage("*** Start AdvanceState ... RunEstimator:Execute()\n");
       #endif
 
-      //if (state != Solver::FINISHED)
-      //   state = theEstimator->AdvanceState();
-      //else
-      //{
-      //   // It has to run all work in AdvanceState() before Finalize()
-      //   state = theEstimator->AdvanceState();
-      //   Finalize();
-      //}
-   
-      // It has to run all work in AdvanceState() before Finalize()
-      state = theEstimator->AdvanceState();
+      if (state != Solver::FINISHED)
+         theEstimator->AdvanceState();
+      else
+      {
+         // It has to run all work in AdvanceState() before Finalize()
+         theEstimator->AdvanceState();
+         Finalize();
+      }
    } catch (EstimatorException ex1)
    {
-      ex = ex1;
-      hasError = true;
-      state = Solver::FINISHED;
-   }
-   
-   if (state == Solver::FINISHED)
-   {
       Finalize();
-      if (hasError)
-         throw ex;
+      throw ex1;
    }
 
    #ifdef DEBUG_STATE
