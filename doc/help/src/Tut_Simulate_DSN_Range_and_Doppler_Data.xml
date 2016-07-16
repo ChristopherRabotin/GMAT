@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="Tut_Simulate_DSN_Range_and_Doppler_Data"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Simulate DSN Range and Doppler Data</title>
+
+  <variablelist>
+    <varlistentry>
+      <term>Audience</term>
+
+      <listitem>
+        <para>Intermediate level</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Length</term>
+
+      <listitem>
+        <para>40 minutes</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Prerequisites</term>
+
+      <listitem>
+        <para>Basic Mission Design Tutorials</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term>Script File</term>
+
+      <listitem>
+        <para><filename>Simulate DSN Range and Doppler
+        Data.script</filename></para>
+
+        <para><filename>Simulate DSN Range and Doppler Data 3 weeks.script
+        </filename></para>
+
+        <para><filename> </filename></para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+
+  <section>
+    <title>Objective and Overview</title>
+
+    <note>
+      <para>GMAT currently only accommodates two way measurements and thus the
+      measurements being considered here are DSN two way range and DSN two way
+      Doppler. 	<!-- <math display='block' xmlns='http://www.w3.org/1998/Math/MathML'>
+ <mo>&#x2207;</mo>
+</math>  --></para>
+    </note>
+
+
+
+	
+	
+	
+    <para>In this tutorial, we will use GMAT to generate simulated DSN range
+    and Doppler measurement data for a sample spacecraft in orbit about the
+    Sun. The spacecraft in this tutorial is in an Earth “drift away” type
+    orbit about 1 AU away from the Sun and almost 300 million km away from the
+    Earth.</para>
+
+    <para>The basic steps of this tutorial are:</para>
+
+    <procedure>
+      <step>
+        <para>Create and configure the spacecraft, spacecraft transponder, and
+        related parameters</para>
+      </step>
+
+      <step>
+        <para>Create and configure the Ground Station and related
+        parameters</para>
+      </step>
+
+      <step>
+        <para>Define the types of measurements to be simulated</para>
+      </step>
+
+      <step>
+        <para>Create and configure Force model and propagator</para>
+      </step>
+
+      <step>
+        <para>Create and configure Simulator object</para>
+      </step>
+
+      <step>
+        <para>Run the mission and analyze the results</para>
+      </step>
+
+      <step>
+        <para>Create a realistic GMAT Measurement Data (GMD) file</para>
+      </step>
+    </procedure>
+
+    <para>Note that this tutorial, unlike most of the mission design
+    tutorials, will be entirely script based. This is because most of the
+    resources and commands related to navigation are not implemented in the
+    GUI and are only available via the script interface.</para>
+
+    <para>As you go through the tutorial below, it is recommended that you
+    paste the script segments into GMAT as you go along. After each paste into
+    GMAT, you should perform a syntax check by hitting the SAVE/SYNC button.
+    To avoid syntax errors, for Sections 1-5, don’t forget to add the
+    following command to the last line of the script segment you are
+    checking.</para>
+
+    <para>BeginMissionSequence</para>
+
+    <para>We note that in addition to the material presented here, you should
+    also look at the individual Help resources for all the objects and
+    commands we create and use here. For example, Spacecraft, Transponder,
+    Transmitter, GoundStation, ErrorModel, TrackingFileSet, RunSimulator, etc
+    all have their own Help pages.</para>
+  </section>
+
+  <section>
+    <title>Create and configure the spacecraft, spacecraft transponder, and
+    related parameters</title>
+
+    <para>For this tutorial, you’ll need GMAT open, with a new empty script
+    open. To create a new script, click <guibutton>New Script</guibutton>,
+    (<inlinemediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="8pt"
+                     fileref="files/images/icons/NewMission.png" width="1em"/>
+        </imageobject>
+      </inlinemediaobject>)</para>
+
+    <section>
+      <title>Create a satellite and set its epoch and Cartesian
+      coordinates</title>
+
+      <para>Since this is a Sun-orbiting spacecraft, we choose to represent
+      the orbit in a Sun-centered coordinate frame which we define using the
+      scripting below.</para>
+
+      <programlisting>%  Create the Sun-centered J2000 frame.
+Create CoordinateSystem SunMJ2000Eq;
+SunMJ2000Eq.Origin = Sun;
+SunMJ2000Eq.Axes   = MJ2000Eq;  %Earth mean equator axes</programlisting>
+
+      <para>Next, we create a new spacecraft, Sat, and set its epoch and
+      Cartesian coordinates.</para>
+
+      <programlisting>Create Spacecraft Sat;
+Sat.DateFormat       = UTCGregorian;
+Sat.CoordinateSystem = SunMJ2000Eq;
+Sat.DisplayStateType = Cartesian;
+Sat.Epoch            = 19 Aug 2015 00:00:00.000;
+Sat.X                = -126544968
+Sat.Y                =  61978514
+Sat.Z                =  24133221
+Sat.VX               = -13.789
+Sat.VY               = -24.673
+Sat.VZ               = -10.662
+
+Sat.Id               = 11111;</programlisting>
+
+      <para>Note that, in addition to setting Sat’s coordinates, we also
+      assigned it an ID number. This is the number that will be written to the
+      GMAT Measurement Data (GMD) file that we will discuss later.</para>
+    </section>
+
+    <section>
+      <title>Create a Transponder object and attach it to our
+      spacecraft</title>
+
+      <para>To simulate navigation measurements for a given spacecraft, GMAT
+      requires that a Transponder object, which receives the ground station
+      uplink signal and re-transmits it, typically, to a ground station, be
+      attached to the spacecraft. Below, we create the Transponder object and
+      attach it to our spacecraft.</para>
+
+      <programlisting>Create Antenna HGA;
+
+Create Transponder SatTransponder;
+SatTransponder.PrimaryAntenna	= HGA;
+SatTransponder.HardwareDelay	= 1e-06; %seconds
+SatTransponder.TurnAroundRatio	= '880/749';
+
+Sat.AddHardware					= {SatTransponder, HGA};</programlisting>
+
+      <para>Note that after we create the Transponder object, there are three
+      fields, PrimaryAntenna, HardwareDelay, and TurnAroundRatio that must be
+      set.</para>
+
+      <para>The PrimaryAntenna is the antenna that the spacecraft transponder,
+      SatTransponder, uses to receive and retransmit RF signals. In the
+      example above, we set this field to HGA which is an Antenna object we
+      have created. Currently the Antenna resource has no function but in a
+      future release, it may have a function. HardwareDelay,the transponder
+      signal delay in seconds, is set to one micro-second. We set
+      TurnAroundRatio, which is the ratio of the retransmitted to the input
+      signal, to '880/749.' See the FRC-21_RunSimulator Help and Appendix A
+      for a discussion on how GMAT uses this input field. As described in the
+      Help, if our DSN data does not use a ramp table, this turn around ratio
+      is used directly to calculate the Doppler measurements.</para>
+
+      <para>Note that in the last script command above, we attach our newly
+      created Transponder and its related Antenna object to our spacecraft,
+      Sat.</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Create and configure the Ground Station and related
+    parameters</title>
+
+    <para>The <guilabel>Target</guilabel> sequence we will create later needs
+    a <guilabel>DifferentialCorrector</guilabel> resource to operate, so let’s
+    create one now. We'll leave the settings at their defaults.</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, expand the
+        <guilabel>Solvers</guilabel> folder if it isn’t already.</para>
+      </step>
+
+      <step>
+        <para>Right-click the <guilabel>Boundary Value Solvers</guilabel>
+        folder, point to <guilabel>Add</guilabel>, and click
+        <guilabel>DifferentialCorrector</guilabel>. A new resource called
+        <guilabel>DC1</guilabel> will be created.</para>
+      </step>
+    </procedure>
+
+    <para>The <guilabel>Target</guilabel> sequence we will later create uses
+    the <guilabel>Vary</guilabel> command to adjust a user defined target
+    control variable in order to achieve the desired orbital goal of raising
+    apogee to <literal>12000</literal> km. We must first create this variable
+    which we will name <guilabel>BurnDuration</guilabel>.</para>
+
+    <procedure>
+      <step>
+        <para>In the <guilabel>Resources</guilabel> tree, right-click the
+        <guilabel>Variables/Arrays/Strings</guilabel> folder, point to
+        <guilabel>Add</guilabel>, and click <guilabel>Variable</guilabel>. A
+        new window will come up with two input fields, <guilabel>Variable
+        Name</guilabel> and <guilabel>Variable Value</guilabel>. For
+        <guilabel>Variable Name</guilabel>, input
+        <guilabel>BurnDuration</guilabel> and for <guilabel>Variable
+        Value</guilabel>, input <literal>0.</literal> Click the
+        <guibutton>=&gt;</guibutton> button to create the variable, then click
+        <guibutton>Close</guibutton>.</para>
+      </step>
+
+      <step>
+        <para>To verify that we have created this new variable correctly,
+        double-click <guilabel>BurnDuration</guilabel> to view its
+        properties.</para>
+      </step>
+    </procedure>
+  </section>
+
+  <section>
+    <title>Configure the Mission Sequence</title>
+
+    <para>Now we will configure a <guilabel>Target</guilabel> sequence to
+    solve for the finite burn duration required to raise apogee to
+    <literal>12000</literal> km. We’ll begin by creating the initial
+    <guilabel>Propagate</guilabel> command, then the
+    <guilabel>Target</guilabel> sequence itself.</para>
+
+    <section>
+      <title>Configure the Initial Propagate Command</title>
+
+      <procedure>
+        <step>
+          <para>Click on the <guilabel>Mission</guilabel> tab to show the
+          <guilabel>Mission</guilabel> tree.</para>
+        </step>
+
+        <step>
+          <para>Configure <guilabel>Propagate1</guilabel> to propagate to
+          <guilabel>DefaultSC.Earth.Periapsis</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Rename <guilabel>Propagate1</guilabel> to <guilabel>Prop To
+          Perigee</guilabel>.</para>
+        </step>
+      </procedure>
+    </section>
+
+    <section>
+      <title>Create the Target Sequence</title>
+
+      <para>Now create the commands necessary to perform the
+      <guilabel>Target</guilabel> sequence. illustrates the configuration of
+      the <guilabel>Mission</guilabel> tree after we have completed the steps
+      in this section. We’ll discuss the <guilabel>Target</guilabel> sequence
+      after it has been created.</para>
+
+      <para>To create the <guilabel>Target</guilabel> sequence:</para>
+
+      <procedure>
+        <step>
+          <para>In the <guilabel>Mission</guilabel> tree, right-click
+          <guilabel>Prop To Perigee</guilabel>, point to <guilabel>Insert
+          After</guilabel>, and click <guilabel>Target</guilabel>. This will
+          insert two separate commands: <guilabel>Target1</guilabel> and
+          <guilabel>EndTarget1</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Right-click <guilabel>Target1</guilabel> and click
+          <guilabel>Rename</guilabel>. Type <guilabel>Raise Apogee</guilabel>
+          and click <guilabel>OK</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Right-click <guilabel>Raise Apogee</guilabel>, point to
+          <guilabel>Append</guilabel>, and click <guilabel>Vary</guilabel>.
+          Rename the newly created command as <guilabel>Vary Burn
+          Duration</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Right-click <guilabel>Vary Burn Duration</guilabel>, point to
+          <guilabel>Insert After</guilabel>, and click
+          <guilabel>BeginFiniteBurn</guilabel>. Rename the newly created
+          command as <guilabel>Turn Thruster On</guilabel>.</para>
+        </step>
+
+        <step>
+          <para>Complete the <guilabel>Target</guilabel> sequence by inserting
+          the commands shown in .</para>
+        </step>
+      </procedure>
+    </section>
+
+    <section>
+      <title>Configure the Target Sequence</title>
+
+      <para>Now that the structure is created, we need to configure the
+      various parts of the <guilabel>Target</guilabel> sequence to do what we
+      want.</para>
+
+      <section>
+        <title>Configure the Raise Apogee Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click <guilabel>Raise Apogee</guilabel> to edit its
+            properties.</para>
+          </step>
+
+          <step>
+            <para>In the <guilabel>ExitMode</guilabel> list, click
+            <guilabel>SaveAndContinue</guilabel>. This instructs GMAT to save
+            the final solution of the targeting problem after you run
+            it.</para>
+          </step>
+
+          <step>
+            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
+          </step>
+        </procedure>
+      </section>
+
+      <section>
+        <title>Configure the Vary Burn Duration Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click <guilabel>Vary Burn Duration</guilabel> to edit
+            its properties. We want this command to adjust (or
+            “<guilabel>Vary</guilabel>”) the finite burn duration represented
+            by the previously created control variable,
+            <guilabel>BurnDuration</guilabel>. To accomplish this, click on
+            the <guilabel>Edit</guilabel> button to bring up the
+            <guilabel>ParameterSelectDialog</guilabel>. Use the
+            <guilabel>ObjectType</guilabel> menu to select the
+            <guilabel>Variable</guilabel> object type. The
+            <guilabel>ObjectList</guilabel> menu will then display a list of
+            user defined variables. Double-click on the variable,
+            <guilabel>BurnDuration</guilabel>, so that
+            <guilabel>BurnDuration</guilabel> appears in the
+            <guilabel>SelectedValues(s)</guilabel> menu. Click the
+            <guilabel>OK</guilabel> button to save the changes and return to
+            the <guilabel>Vary Burn Duration</guilabel> command menu.</para>
+          </step>
+
+          <step>
+            <para>In the <guilabel>Initial Value</guilabel> box, type
+            <literal>200</literal></para>
+          </step>
+
+          <step>
+            <para>In the <guilabel>Upper</guilabel> box, type
+            <literal>10000</literal></para>
+          </step>
+
+          <step>
+            <para>In the <guilabel>Max Step</guilabel> box, type
+            <literal>100</literal>.</para>
+          </step>
+
+          <step>
+            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
+          </step>
+        </procedure>
+      </section>
+
+      <section>
+        <title>Configure the Turn Thruster On Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click <guilabel>Turn Thruster On</guilabel> to edit
+            its properties. Notice that the command is already set to apply
+            <guilabel>FiniteBurn1</guilabel> to the
+            <guilabel>DefaultSC</guilabel> spacecraft, so we don’t need to
+            change anything here.</para>
+          </step>
+
+          <step>
+            <para>Click <guilabel>OK</guilabel>.</para>
+          </step>
+        </procedure>
+      </section>
+
+      <section>
+        <title>Configure the Prop BurnDuration Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click <guilabel>Prop BurnDuration</guilabel> to edit
+            its properties.</para>
+          </step>
+
+          <step>
+            <para>We will use the default <guilabel>Parameter</guilabel> value
+            of <guilabel>DefaultSC.ElapsedSecs</guilabel>.</para>
+          </step>
+
+          <step>
+            <para>Under <guilabel>Condition</guilabel>, replace the default
+            value with <guilabel>Variable</guilabel>,
+            <guilabel>BurnDuration</guilabel>.</para>
+          </step>
+
+          <step>
+            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
+          </step>
+        </procedure>
+      </section>
+
+      <section>
+        <title>Configure the Turn Thruster Off Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click <guilabel>Turn Thruster Off</guilabel> to edit
+            its properties. Notice that the command is already set to end
+            <guilabel>FiniteBurn1</guilabel> as applied to the
+            <guilabel>DefaultSC</guilabel> spacecraft, so we don’t need to
+            change anything here..</para>
+          </step>
+
+          <step>
+            <para>Click <guilabel>OK</guilabel>.</para>
+          </step>
+        </procedure>
+      </section>
+
+      <section>
+        <title>Configure the Prop To Apogee Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click <guilabel>Prop to Apogee</guilabel> to edit its
+            properties.</para>
+          </step>
+
+          <step>
+            <para>Under <guilabel>Parameter</guilabel>, replace
+            <guilabel>DefaultSC.ElapsedSecs</guilabel> with
+            <guilabel>DefaultSC.Earth.Apoapsis</guilabel>.</para>
+          </step>
+
+          <step>
+            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
+          </step>
+        </procedure>
+      </section>
+
+      <section>
+        <title>Configure the Achieve Apogee Radius = 12000 Command</title>
+
+        <procedure>
+          <step>
+            <para>Double-click <guilabel>Achieve Apogee Radius =
+            12000</guilabel> to edit its properties.</para>
+          </step>
+
+          <step>
+            <para>Notice that <guilabel>Goal</guilabel> is set to
+            <guilabel>DefaultSC.Earth.RMAG</guilabel>. This is what we need,
+            so we make no changes here.</para>
+          </step>
+
+          <step>
+            <para>In the <guilabel>Value</guilabel> box, type
+            <literal>12000</literal></para>
+          </step>
+
+          <step>
+            <para>Click <guilabel>OK</guilabel> to save these changes</para>
+          </step>
+        </procedure>
+      </section>
+    </section>
+  </section>
+
+  <section>
+    <title>Run the Mission</title>
+
+    <para>Before running the mission, click <guilabel>Save</guilabel> to save
+    the mission to a file of your choice. Now click <guilabel>Run</guilabel>.
+    As the mission runs, you will see GMAT solve the targeting problem. Each
+    iteration and perturbation is shown in
+    <guilabel>DefaultOrbitView</guilabel> window in light blue, and the final
+    solution is shown in red. After the mission completes, the 3D view should
+    appear as shown in the image shown below. You may want to run the mission
+    several times to see the targeting in progress.</para>
+
+    <section>
+      <title>Inspect Orbit View and Message Window</title>
+
+      <para>Inspect the 3D DefaultOrbitView window. Manipulate the window as
+      needed to view the orbit "face-on." Visually verify that apogee has
+      indeed been raised.</para>
+
+      <para>As shown below, we inspect the output message window to determine
+      the number of iterations it took the
+      <guilabel>DifferentialCorrector</guilabel> to converge and the final
+      value of the control variable, <guilabel>BurnDuration</guilabel>. Verify
+      that you obtained a similar value for
+      <guilabel>BurnDuration</guilabel>.</para>
+
+      <screen>*** Targeting Completed in 13 iterations
+
+      Final Variable values:
+
+      BurnDuration = 1213.19316329</screen>
+    </section>
+
+    <section>
+      <title>Explore the Command Summary Reports</title>
+
+      <para>All of the commands in the <guilabel>Mission</guilabel> tree have
+      associated <guilabel>Command Summary</guilabel> reports. As shown below,
+      we review these reports to help verify that our script performed as
+      expected.</para>
+
+      <procedure>
+        <step>
+          <para>In the <guilabel>Mission</guilabel> tree, select
+          <guilabel>Prop To Perigee</guilabel>, then right-click to open the
+          associated <guilabel>Command Summary</guilabel> which describes the
+          state of <guilabel>DefaultSC</guilabel> after the <guilabel>Prop To
+          Perigee</guilabel> command has been performed. We verify perigee has
+          indeed been achieved by finding the mean anomaly value of
+          <guilabel>DefaultSC</guilabel>. To do this, we look at the value of
+          <guilabel>MA</guilabel> under the Keplerian State. As expected, the
+          mean anomaly is zero.</para>
+        </step>
+
+        <step>
+          <para>View the <guilabel>Turn Thruster On</guilabel> command
+          summary. Note that, as expected, prior to the start of the maneuver,
+          the fuel mass is <literal>756</literal> kg.</para>
+        </step>
+
+        <step>
+          <para>View the <guilabel>Turn Thruster Off</guilabel> command
+          summary.</para>
+
+          <substeps>
+            <step>
+              <para>Note that the mean anomaly at the end of the maneuver is
+              <literal>25.13</literal> degrees. Thus, as the burn occurred,
+              the mean anomaly increased from <literal>0</literal> to
+              <literal>25.13</literal> degrees. By orbital theory, we know
+              that an apogee raising burn is best performed at perigee. Thus,
+              we may be able to achieve our orbital goal using less fuel if we
+              “center” the burn. For example, we could try starting our burn
+              at a mean anomaly of <literal>–(25.13/2)</literal> instead of
+              <literal>0</literal> degrees.</para>
+            </step>
+
+            <step>
+              <para>Note that, at the end of the maneuver, the fuel mass is
+              <literal>343.76990815648</literal> kg. Thus, this finite burn
+              used approximately <literal>756 – 343.8</literal> =
+              <literal>412.2</literal> kg of fuel.</para>
+            </step>
+          </substeps>
+        </step>
+
+        <step>
+          <para>View the <guilabel>Prop To Apogee</guilabel> command
+          summary.</para>
+
+          <substeps>
+            <step>
+              <para>We note that the mean anomaly is <literal>180</literal>
+              degrees which proves that we are indeed at apogee.</para>
+            </step>
+
+            <step>
+              <para>We note that the orbital radius (RMAG) is
+              <literal>11999.999998192</literal> km which proves that we have
+              achieved our desired <literal>12000</literal> km apogee radius
+              to within our desired tolerance of <literal>0.1</literal>
+              km.</para>
+            </step>
+          </substeps>
+        </step>
+      </procedure>
+    </section>
+  </section>
+</chapter>
