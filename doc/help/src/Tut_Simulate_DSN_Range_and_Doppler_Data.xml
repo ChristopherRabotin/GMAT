@@ -55,16 +55,11 @@
     <note>
       <para>GMAT currently only accommodates two way measurements and thus the
       measurements being considered here are DSN two way range and DSN two way
-      Doppler. 	<!-- <math display='block' xmlns='http://www.w3.org/1998/Math/MathML'>
+      Doppler. <!-- <math display='block' xmlns='http://www.w3.org/1998/Math/MathML'>
  <mo>&#x2207;</mo>
 </math>  --></para>
     </note>
 
-
-
-	
-	
-	
     <para>In this tutorial, we will use GMAT to generate simulated DSN range
     and Doppler measurement data for a sample spacecraft in orbit about the
     Sun. The spacecraft in this tutorial is in an Earth “drift away” type
@@ -219,419 +214,460 @@ Sat.AddHardware					= {SatTransponder, HGA};</programlisting>
     <title>Create and configure the Ground Station and related
     parameters</title>
 
-    <para>The <guilabel>Target</guilabel> sequence we will create later needs
-    a <guilabel>DifferentialCorrector</guilabel> resource to operate, so let’s
-    create one now. We'll leave the settings at their defaults.</para>
-
-    <procedure>
-      <step>
-        <para>In the <guilabel>Resources</guilabel> tree, expand the
-        <guilabel>Solvers</guilabel> folder if it isn’t already.</para>
-      </step>
-
-      <step>
-        <para>Right-click the <guilabel>Boundary Value Solvers</guilabel>
-        folder, point to <guilabel>Add</guilabel>, and click
-        <guilabel>DifferentialCorrector</guilabel>. A new resource called
-        <guilabel>DC1</guilabel> will be created.</para>
-      </step>
-    </procedure>
-
-    <para>The <guilabel>Target</guilabel> sequence we will later create uses
-    the <guilabel>Vary</guilabel> command to adjust a user defined target
-    control variable in order to achieve the desired orbital goal of raising
-    apogee to <literal>12000</literal> km. We must first create this variable
-    which we will name <guilabel>BurnDuration</guilabel>.</para>
-
-    <procedure>
-      <step>
-        <para>In the <guilabel>Resources</guilabel> tree, right-click the
-        <guilabel>Variables/Arrays/Strings</guilabel> folder, point to
-        <guilabel>Add</guilabel>, and click <guilabel>Variable</guilabel>. A
-        new window will come up with two input fields, <guilabel>Variable
-        Name</guilabel> and <guilabel>Variable Value</guilabel>. For
-        <guilabel>Variable Name</guilabel>, input
-        <guilabel>BurnDuration</guilabel> and for <guilabel>Variable
-        Value</guilabel>, input <literal>0.</literal> Click the
-        <guibutton>=&gt;</guibutton> button to create the variable, then click
-        <guibutton>Close</guibutton>.</para>
-      </step>
-
-      <step>
-        <para>To verify that we have created this new variable correctly,
-        double-click <guilabel>BurnDuration</guilabel> to view its
-        properties.</para>
-      </step>
-    </procedure>
-  </section>
-
-  <section>
-    <title>Configure the Mission Sequence</title>
-
-    <para>Now we will configure a <guilabel>Target</guilabel> sequence to
-    solve for the finite burn duration required to raise apogee to
-    <literal>12000</literal> km. We’ll begin by creating the initial
-    <guilabel>Propagate</guilabel> command, then the
-    <guilabel>Target</guilabel> sequence itself.</para>
-
     <section>
-      <title>Configure the Initial Propagate Command</title>
+      <title>Create Ground Station Transmitter, Receiver, and Antenna
+      objects</title>
 
-      <procedure>
-        <step>
-          <para>Click on the <guilabel>Mission</guilabel> tab to show the
-          <guilabel>Mission</guilabel> tree.</para>
-        </step>
+      <para>Before we create the GroundStation object itself, as shown below,
+      we first create the Transmitter, Receiver, and Antenna objects that must
+      be associated with any GroundStation.</para>
 
-        <step>
-          <para>Configure <guilabel>Propagate1</guilabel> to propagate to
-          <guilabel>DefaultSC.Earth.Periapsis</guilabel>.</para>
-        </step>
+      <programlisting>%  Ground Station electronics. 
+Create Transmitter DSNTransmitter;
+Create Receiver DSNReceiver;
+Create Antenna DSNAntenna;
 
-        <step>
-          <para>Rename <guilabel>Propagate1</guilabel> to <guilabel>Prop To
-          Perigee</guilabel>.</para>
-        </step>
-      </procedure>
+DSNTransmitter.PrimaryAntenna = DSNAntenna;
+DSNReceiver.PrimaryAntenna    = DSNAntenna;
+DSNTransmitter.Frequency      = 7200;   %MHz</programlisting>
+
+      <para>In the script segment above, we first created Transmitter,
+      Receiver, and Antenna objects. The GMAT script line
+      DSNTransmitter.PrimaryAntenna = DSNAntenna, sets the main antenna that
+      the Transmitter object will be using. Likewise, the
+      DSNReceiver.PrimaryAntenna = DSNAntenna script line sets the main
+      antenna that the Receiver object will be using. As previously mentioned,
+      the Antenna object currently has no function, but we include it here
+      both because GMAT requires it and for completeness since the Antenna
+      resource may have a function in a future GMAT release. Finally, we set
+      the transmitter frequency in the last GMAT script line above. See the
+      RunSimulator Help for a complete description of how this input frequency
+      is used. As described in the Help, since in this example we will not be
+      using a ramp table, this input frequency will be used to calculate the
+      simulated value of the range and Doppler observations. In addition, this
+      input frequency will also be output to the range data file created by
+      the RunSimulator command.</para>
     </section>
 
     <section>
-      <title>Create the Target Sequence</title>
+      <title>Create Ground Station</title>
 
-      <para>Now create the commands necessary to perform the
-      <guilabel>Target</guilabel> sequence. illustrates the configuration of
-      the <guilabel>Mission</guilabel> tree after we have completed the steps
-      in this section. We’ll discuss the <guilabel>Target</guilabel> sequence
-      after it has been created.</para>
+      <para>Below, we create and configure a GroundStation object.</para>
 
-      <para>To create the <guilabel>Target</guilabel> sequence:</para>
+      <programlisting>%   Create ground station and associated error models
+Create GroundStation CAN;
+CAN.CentralBody           = Earth;
+CAN.StateType             = Cartesian;
+CAN.HorizonReference      = Ellipsoid;
+CAN.Location1             = -4461.083514
+CAN.Location2             = 2682.281745
+CAN.Location3             = -3674.570392
 
-      <procedure>
-        <step>
-          <para>In the <guilabel>Mission</guilabel> tree, right-click
-          <guilabel>Prop To Perigee</guilabel>, point to <guilabel>Insert
-          After</guilabel>, and click <guilabel>Target</guilabel>. This will
-          insert two separate commands: <guilabel>Target1</guilabel> and
-          <guilabel>EndTarget1</guilabel>.</para>
-        </step>
+CAN.Id                    = 22222;
 
-        <step>
-          <para>Right-click <guilabel>Target1</guilabel> and click
-          <guilabel>Rename</guilabel>. Type <guilabel>Raise Apogee</guilabel>
-          and click <guilabel>OK</guilabel>.</para>
-        </step>
+CAN.MinimumElevationAngle = 7.0;
 
-        <step>
-          <para>Right-click <guilabel>Raise Apogee</guilabel>, point to
-          <guilabel>Append</guilabel>, and click <guilabel>Vary</guilabel>.
-          Rename the newly created command as <guilabel>Vary Burn
-          Duration</guilabel>.</para>
-        </step>
+CAN.IonosphereModel       = 'IRI2007';
+CAN.TroposphereModel      = 'HopfieldSaastamoinen';
 
-        <step>
-          <para>Right-click <guilabel>Vary Burn Duration</guilabel>, point to
-          <guilabel>Insert After</guilabel>, and click
-          <guilabel>BeginFiniteBurn</guilabel>. Rename the newly created
-          command as <guilabel>Turn Thruster On</guilabel>.</para>
-        </step>
+CAN.AddHardware           = {DSNTransmitter, DSNAntenna, ...
+                                DSNReceiver};</programlisting>
 
-        <step>
-          <para>Complete the <guilabel>Target</guilabel> sequence by inserting
-          the commands shown in .</para>
-        </step>
-      </procedure>
-    </section>
+      <para>We now create and configure the force model and propagator that
+      will be used for the simulation. For this deep space drift away orbit,
+      we naturally choose the Sun as our central body. Since we are far away
+      from all the planets, we use point mass gravity models and we include
+      the effects of the Sun, Earth, Moon, and most of the other planets. In
+      addition, we model Solar Radiation Pressure (SRP) affects and we include
+      the affect of general relativity on the dynamics. The script segment
+      accomplishing this is shown below.</para>
 
-    <section>
-      <title>Configure the Target Sequence</title>
-
-      <para>Now that the structure is created, we need to configure the
-      various parts of the <guilabel>Target</guilabel> sequence to do what we
-      want.</para>
-
-      <section>
-        <title>Configure the Raise Apogee Command</title>
-
-        <procedure>
-          <step>
-            <para>Double-click <guilabel>Raise Apogee</guilabel> to edit its
-            properties.</para>
-          </step>
-
-          <step>
-            <para>In the <guilabel>ExitMode</guilabel> list, click
-            <guilabel>SaveAndContinue</guilabel>. This instructs GMAT to save
-            the final solution of the targeting problem after you run
-            it.</para>
-          </step>
-
-          <step>
-            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
-          </step>
-        </procedure>
-      </section>
-
-      <section>
-        <title>Configure the Vary Burn Duration Command</title>
-
-        <procedure>
-          <step>
-            <para>Double-click <guilabel>Vary Burn Duration</guilabel> to edit
-            its properties. We want this command to adjust (or
-            “<guilabel>Vary</guilabel>”) the finite burn duration represented
-            by the previously created control variable,
-            <guilabel>BurnDuration</guilabel>. To accomplish this, click on
-            the <guilabel>Edit</guilabel> button to bring up the
-            <guilabel>ParameterSelectDialog</guilabel>. Use the
-            <guilabel>ObjectType</guilabel> menu to select the
-            <guilabel>Variable</guilabel> object type. The
-            <guilabel>ObjectList</guilabel> menu will then display a list of
-            user defined variables. Double-click on the variable,
-            <guilabel>BurnDuration</guilabel>, so that
-            <guilabel>BurnDuration</guilabel> appears in the
-            <guilabel>SelectedValues(s)</guilabel> menu. Click the
-            <guilabel>OK</guilabel> button to save the changes and return to
-            the <guilabel>Vary Burn Duration</guilabel> command menu.</para>
-          </step>
-
-          <step>
-            <para>In the <guilabel>Initial Value</guilabel> box, type
-            <literal>200</literal></para>
-          </step>
-
-          <step>
-            <para>In the <guilabel>Upper</guilabel> box, type
-            <literal>10000</literal></para>
-          </step>
-
-          <step>
-            <para>In the <guilabel>Max Step</guilabel> box, type
-            <literal>100</literal>.</para>
-          </step>
-
-          <step>
-            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
-          </step>
-        </procedure>
-      </section>
-
-      <section>
-        <title>Configure the Turn Thruster On Command</title>
-
-        <procedure>
-          <step>
-            <para>Double-click <guilabel>Turn Thruster On</guilabel> to edit
-            its properties. Notice that the command is already set to apply
-            <guilabel>FiniteBurn1</guilabel> to the
-            <guilabel>DefaultSC</guilabel> spacecraft, so we don’t need to
-            change anything here.</para>
-          </step>
-
-          <step>
-            <para>Click <guilabel>OK</guilabel>.</para>
-          </step>
-        </procedure>
-      </section>
-
-      <section>
-        <title>Configure the Prop BurnDuration Command</title>
-
-        <procedure>
-          <step>
-            <para>Double-click <guilabel>Prop BurnDuration</guilabel> to edit
-            its properties.</para>
-          </step>
-
-          <step>
-            <para>We will use the default <guilabel>Parameter</guilabel> value
-            of <guilabel>DefaultSC.ElapsedSecs</guilabel>.</para>
-          </step>
-
-          <step>
-            <para>Under <guilabel>Condition</guilabel>, replace the default
-            value with <guilabel>Variable</guilabel>,
-            <guilabel>BurnDuration</guilabel>.</para>
-          </step>
-
-          <step>
-            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
-          </step>
-        </procedure>
-      </section>
-
-      <section>
-        <title>Configure the Turn Thruster Off Command</title>
-
-        <procedure>
-          <step>
-            <para>Double-click <guilabel>Turn Thruster Off</guilabel> to edit
-            its properties. Notice that the command is already set to end
-            <guilabel>FiniteBurn1</guilabel> as applied to the
-            <guilabel>DefaultSC</guilabel> spacecraft, so we don’t need to
-            change anything here..</para>
-          </step>
-
-          <step>
-            <para>Click <guilabel>OK</guilabel>.</para>
-          </step>
-        </procedure>
-      </section>
-
-      <section>
-        <title>Configure the Prop To Apogee Command</title>
-
-        <procedure>
-          <step>
-            <para>Double-click <guilabel>Prop to Apogee</guilabel> to edit its
-            properties.</para>
-          </step>
-
-          <step>
-            <para>Under <guilabel>Parameter</guilabel>, replace
-            <guilabel>DefaultSC.ElapsedSecs</guilabel> with
-            <guilabel>DefaultSC.Earth.Apoapsis</guilabel>.</para>
-          </step>
-
-          <step>
-            <para>Click <guilabel>OK</guilabel> to save these changes.</para>
-          </step>
-        </procedure>
-      </section>
-
-      <section>
-        <title>Configure the Achieve Apogee Radius = 12000 Command</title>
-
-        <procedure>
-          <step>
-            <para>Double-click <guilabel>Achieve Apogee Radius =
-            12000</guilabel> to edit its properties.</para>
-          </step>
-
-          <step>
-            <para>Notice that <guilabel>Goal</guilabel> is set to
-            <guilabel>DefaultSC.Earth.RMAG</guilabel>. This is what we need,
-            so we make no changes here.</para>
-          </step>
-
-          <step>
-            <para>In the <guilabel>Value</guilabel> box, type
-            <literal>12000</literal></para>
-          </step>
-
-          <step>
-            <para>Click <guilabel>OK</guilabel> to save these changes</para>
-          </step>
-        </procedure>
-      </section>
+      <programlisting>Create ForceModel Fm;
+Create Propagator Prop;
+Fm.CentralBody            = Sun;
+Fm.PointMasses            = {Sun, Earth, Luna, Mars, Saturn, ...
+                             Uranus, Mercury, Venus, Jupiter};
+Fm.SRP                    = On;
+Fm.RelativisticCorrection = On;
+Prop.FM                   = Fm;</programlisting>
     </section>
   </section>
 
   <section>
-    <title>Run the Mission</title>
+    <title>Define the types of measurements to be simulated</title>
 
-    <para>Before running the mission, click <guilabel>Save</guilabel> to save
-    the mission to a file of your choice. Now click <guilabel>Run</guilabel>.
-    As the mission runs, you will see GMAT solve the targeting problem. Each
-    iteration and perturbation is shown in
-    <guilabel>DefaultOrbitView</guilabel> window in light blue, and the final
-    solution is shown in red. After the mission completes, the 3D view should
-    appear as shown in the image shown below. You may want to run the mission
-    several times to see the targeting in progress.</para>
+    <para>Now we will create and configure a TrackingFileSet resource. This
+    resource defines the type of data to be simulated, the ground stations
+    that will be used, and the file name of the output GMD file which will
+    contain the simulated data. In addition, the TrackingFileSet resource will
+    define needed simulation parameters for the various data types. </para>
 
-    <section>
-      <title>Inspect Orbit View and Message Window</title>
+    <programlisting>Create TrackingFileSet DSNsimData;
+DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN}, 'DSNRange'};   
+DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN}, 'Doppler'};                 
+DSNsimData.FileName = {'Sat_dsn_range_and_doppler_measurements.gmd'};
 
-      <para>Inspect the 3D DefaultOrbitView window. Manipulate the window as
-      needed to view the orbit "face-on." Visually verify that apogee has
-      indeed been raised.</para>
+DSNsimData.UseLightTime 			= true;
+DSNsimData.UseRelativityCorrection 	= true;
+DSNsimData.UseETminusTAI 			= true;
 
-      <para>As shown below, we inspect the output message window to determine
-      the number of iterations it took the
-      <guilabel>DifferentialCorrector</guilabel> to converge and the final
-      value of the control variable, <guilabel>BurnDuration</guilabel>. Verify
-      that you obtained a similar value for
-      <guilabel>BurnDuration</guilabel>.</para>
+DSNsimData.SimDopplerCountInterval 	= 10.0;
+DSNsimData.SimRangeModuloConstant 	= 3.3554432e+07;
+</programlisting>
 
-      <screen>*** Targeting Completed in 13 iterations
+    <para>The script lines above are broken into three sections. In the first
+    section, the resource name, DSNsimData, is declared, the data types are
+    defined, and the output file name is specified. AddTrackingConfig is the
+    field that is used to define the data types. The first AddTrackingConfig
+    line tells GMAT to simulate DSN range two way measurements for the
+    Canberra to Sat to Can measurement strand. The second AddTrackingConfig
+    line tells GMAT to simulate DSN Doppler two way measurements for the
+    Canberra to Sat to Can measurement strand. </para>
 
-      Final Variable values:
+    <para>The second section above sets some simulation parameters that apply
+    to both the range and Doppler measurements. We set UseLightTime to True in
+    order to generate realistic measurements where GMAT takes into account the
+    finite speed of light. The last two parameters in this section,
+    UseRelativityCorrection and UseETminusTAI, are set to True so that general
+    relativistic corrections, as described in Moyer [2000], are applied to the
+    light time equations.</para>
 
-      BurnDuration = 1213.19316329</screen>
-    </section>
+    <para>The third section above sets simulation parameters that apply to a
+    specific measurement type. SimDopplerCountInterval applies only to Doppler
+    measurements and SimRangeModuloConstant applies only to range
+    measurements. We note that the “Sim” in the field names is used to
+    indicate that these fields only are applicable when GMAT is in simulation
+    mode (i.e., when using the RunSimulator command) data and not when GMAT is
+    in estimation mode (i.e., when using the RunEstimator command).
+    SimDopplerCountInterval, the Doppler Count Interval, is set to 10 seconds
+    and SimRangeModuloConstant, the Maximum possible range value, is set to
+    33554432. See the RunSimulator Help and Appendix A for a description of
+    how these parameters are used to calculate the measurement values. </para>
+  </section>
 
-    <section>
-      <title>Explore the Command Summary Reports</title>
+  <section>
+    <title>Create and configure Force model and propagator</title>
 
-      <para>All of the commands in the <guilabel>Mission</guilabel> tree have
-      associated <guilabel>Command Summary</guilabel> reports. As shown below,
-      we review these reports to help verify that our script performed as
-      expected.</para>
+    <para>We now create and configure the force model and propagator that will
+    be used for the simulation. For this deep space drift away orbit, we
+    naturally choose the Sun as our central body. Since we are far away from
+    all the planets, we use point mass gravity models and we include the
+    effects of the Sun, Earth, Moon, and most of the other planets. In
+    addition, we model Solar Radiation Pressure (SRP) affects and we include
+    the affect of general relativity on the dynamics. The script segment
+    accomplishing this is shown below.</para>
 
-      <procedure>
-        <step>
-          <para>In the <guilabel>Mission</guilabel> tree, select
-          <guilabel>Prop To Perigee</guilabel>, then right-click to open the
-          associated <guilabel>Command Summary</guilabel> which describes the
-          state of <guilabel>DefaultSC</guilabel> after the <guilabel>Prop To
-          Perigee</guilabel> command has been performed. We verify perigee has
-          indeed been achieved by finding the mean anomaly value of
-          <guilabel>DefaultSC</guilabel>. To do this, we look at the value of
-          <guilabel>MA</guilabel> under the Keplerian State. As expected, the
-          mean anomaly is zero.</para>
-        </step>
+    <programlisting>Create ForceModel Fm;
+Create Propagator Prop;
+Fm.CentralBody            = Sun;
+Fm.PointMasses            = {Sun, Earth, Luna, Mars, Saturn, ...
+                             Uranus, Mercury, Venus, Jupiter};
+Fm.SRP                    = On;
+Fm.RelativisticCorrection = On;
+Prop.FM                   = Fm;</programlisting>
+  </section>
 
-        <step>
-          <para>View the <guilabel>Turn Thruster On</guilabel> command
-          summary. Note that, as expected, prior to the start of the maneuver,
-          the fuel mass is <literal>756</literal> kg.</para>
-        </step>
+  <section>
+    <title>Create and configure Simulator object</title>
 
-        <step>
-          <para>View the <guilabel>Turn Thruster Off</guilabel> command
-          summary.</para>
+    <para>As shown below, we create and configure the Simulator object used to
+    define our simulation.</para>
 
-          <substeps>
-            <step>
-              <para>Note that the mean anomaly at the end of the maneuver is
-              <literal>25.13</literal> degrees. Thus, as the burn occurred,
-              the mean anomaly increased from <literal>0</literal> to
-              <literal>25.13</literal> degrees. By orbital theory, we know
-              that an apogee raising burn is best performed at perigee. Thus,
-              we may be able to achieve our orbital goal using less fuel if we
-              “center” the burn. For example, we could try starting our burn
-              at a mean anomaly of <literal>–(25.13/2)</literal> instead of
-              <literal>0</literal> degrees.</para>
-            </step>
+    <programlisting>Create Simulator Sim;
+Sim.AddData             = {DSNsimData};
+Sim.EpochFormat    	  = UTCGregorian;
+Sim.InitialEpoch        = '19 Aug 2015 00:00:00.000';
+Sim.FinalEpoch          = '19 Aug 2015 00:12:00.000';
+Sim.MeasurementTimeStep = 600;
+Sim.Propagator          = Prop;
+Sim.AddNoise = Off;</programlisting>
 
-            <step>
-              <para>Note that, at the end of the maneuver, the fuel mass is
-              <literal>343.76990815648</literal> kg. Thus, this finite burn
-              used approximately <literal>756 – 343.8</literal> =
-              <literal>412.2</literal> kg of fuel.</para>
-            </step>
-          </substeps>
-        </step>
+    <para>In the first script line above, we create a Simulator object, Sim.
+    The next field set is AddData which is used to specify which
+    TrackingFileSet should be used. Recall that the TrackingFileSet specifies
+    the type of data to be simulated and the file name specifying where to
+    store the data. The TrackingFileSet, DSNsimData, that we created in
+    Section 3 specified that we wanted to simulate two way DSN range and
+    Doppler data that involved the Can GroundStation. </para>
 
-        <step>
-          <para>View the <guilabel>Prop To Apogee</guilabel> command
-          summary.</para>
+    <para>The next three script lines, which set the EpochFormat,
+    InitialEpoch, and FinalEpoch fields, specify the time period of the
+    simulation. Here, we choose a short 12 minute duration.</para>
 
-          <substeps>
-            <step>
-              <para>We note that the mean anomaly is <literal>180</literal>
-              degrees which proves that we are indeed at apogee.</para>
-            </step>
+    <para>The next script line sets the MeasurementTimeStep field which
+    specifies the requested time between measurements. We choose a value of 10
+    minutes. This means that our data file will contain a maximum of two range
+    measurements and two Doppler measurements. </para>
 
-            <step>
-              <para>We note that the orbital radius (RMAG) is
-              <literal>11999.999998192</literal> km which proves that we have
-              achieved our desired <literal>12000</literal> km apogee radius
-              to within our desired tolerance of <literal>0.1</literal>
-              km.</para>
-            </step>
-          </substeps>
-        </step>
-      </procedure>
-    </section>
+    <para>The next script line sets the Propagator field which specifies which
+    Propagator object should be used. We set this field to the Prop Propagator
+    object which we created in Section 4.</para>
+
+    <para>Finally, in the last line of the script segment, we set the AddNoise
+    field which specifies whether or not we want to add noise to our simulated
+    measurements. The noise that can be added is defined by the ErrorModel
+    objects that we created in Section 2. As discussed in Section 2 and
+    Appendix A, the noise added to the range measurements would be Gaussian
+    with a one sigma value of 10.63 Range Units and the noise added to the
+    Doppler measurements would be Gaussian with a one sigma value of 0.0282
+    Hz. For this simulation, we choose not to add noise. </para>
+  </section>
+
+  <section>
+    <title>Run the mission and analyze the results.</title>
+
+    <para>The script segment used to run the mission is shown below.</para>
+
+    <programlisting>BeginMissionSequence
+ 
+RunSimulator Sim</programlisting>
+
+    <para>The first script line, BeginMissionSequence, is a required command
+    which indicates that the “Command” section of the GMAT script has begun.
+    The second line of the script issues the RunSimulator command with the Sim
+    Simulator resource, defined in Section 5, as an argument. This tells GMAT
+    to perform the simulation specified by the Sim resource. </para>
+
+    <para>We have now completed all of our script segments. See the file,
+    Simulate DSN Range and Doppler Data.script, for a listing of the entire
+    script. We are now ready to run the script. Hit the SAVE/SYNC button.
+    Because we are only simulating a small amount of data, the script should
+    finish execution in about one second. </para>
+
+    <para>Let’s take a look at the output created. The file created,
+    'Sat_dsn_range_and_doppler_measurements.gmd,’ was specified in the
+    TrackingFileSet resource, DSNsimData, that we created in Section 2. The
+    default directory, if none is specified, is the GMAT ‘Output’ directory.
+    Let’s analyze the contents of this “GMAT Measurement Data” or GMD file as
+    shown below. </para>
+
+    <literallayout>   % GMAT Internal Measurement Data File
+
+   27253.500405092593  DSNRange  9004  22222  11111  26016945.24902344  2  7.200000000000000e+009  3.355443200000000e+007
+   27253.500405092593  Doppler   9006  22222  11111    2    10    -8459336323.89349840
+   27253.507349537038  DSNRange  9004  22222  11111  21728172.10375977  2  7.200000000000000e+009  3.355443200000000e+007
+   27253.507349537038  Doppler   9006  22222  11111    2    10    -8459335611.28409770</literallayout>
+
+    <para>The first line of the file is a comment line indicating that this is
+    a file containing measurement data stored in GMAT’s internal format. There
+    are 4 lines of data representing range data at two successive times and
+    Doppler data at two successive times. As we expected, we have no more than
+    4 total measurements. Refer to the TrackingFileSet Help for a description
+    of the range and Doppler GMD file format. </para>
+
+    <para>We now analyze the first line of data which represents a DSN two way
+    range measurement at the start of the simulation at '19 Aug 2015
+    00:00:00.000 UTCG’ which corresponds to the output TAI modified Julian Day
+    of 27253.500405092593 TAIMJD. </para>
+
+    <para>The second and third fields, DSNRange and 9004, are just internal
+    GMAT codes indicating the use of DSN range (Trk 2-34 type 7) data. </para>
+
+    <para>The 4th field, 22222, is the Downlink station ID. This is the ID we
+    gave the CAN GroundStation object that we created in Section 2. The 5th
+    field, 11111, is the spacecraft ID. This is the ID we gave the Sat
+    Spacecraft object that we created in Section 1. </para>
+
+    <para>The 6th field, 26016945.24902344, is the actual DSN range
+    observation value in RU. </para>
+
+    <para>The 7th field, 2, is an integer which represents the Uplink Band of
+    the uplink GroundStation, CAN. The designation, 2, represents X-band. See
+    the RunSimulator Help for a detailed discussion of how GMAT determines
+    what value should be written here. As described in the Help, since we are
+    not using a ramp table, GMAT determines the Uplink Band by looking at the
+    transmit frequency of the Transmitter object attached to the CAN ground
+    station. GMAT knows that the 7200 MHz value that we assigned to CAN’s
+    transmitter resource, DSNTransmitter, corresponds to an X-band frequency.
+    </para>
+
+    <para>The 8th field, 7.200000000000000e+009, is the transmit frequency of
+    CAN at the time of the measurement. Since we are not using a ramp table,
+    this value will be constant for all measurements and it is given by the
+    value of the frequency of the Transmitter object, DSNTransmitter, that we
+    attached to the CAN ground station. Recall the following script segment,
+    DSNTransmitter.Frequency = 7200; %MHz, from Section 2. </para>
+
+    <para>The 9th field, 3.355443200000000e+007, represents the integer range
+    modulo number that helps define the DSN range measurement. This is the
+    value that we set when we created and configured the TrackingFileSet
+    DSNsimData object in Section 3. Recall the following script command,
+    </para>
+
+    <literallayout>                 DSNsimData.SimRangeModuloConstant = 3.3554432e+07;</literallayout>
+
+    <para>This range modulo number is discussed in Appendix A and is defined
+    as M, the length of the ranging code in RU. </para>
+
+    <para>We now analyze the second line of data which represents a DSN two
+    way Doppler measurement at the start of the simulation at '19 Aug 2015
+    00:00:00.000 UTCG’ which corresponds to the output TAI modified Julian Day
+    of 27253.500405092593 TAIMJD. </para>
+
+    <para>The second and third fields, Doppler and 9006, are just internal
+    GMAT codes indicating the use of DSN Doppler (derived from two successive
+    Trk 2-34 type 17 Total Count Phase measurements) data. </para>
+
+    <para>The 4th field, 22222, is the Downlink station ID. This is the ID we
+    gave the CAN GroundStation object that we created in Section 2. The 5th
+    field, 11111, is the spacecraft ID. This is the ID we gave the Sat
+    Spacecraft object that we created in Section 1. </para>
+
+    <para>The 6th field, 2, is an integer which represents the Uplink Band of
+    the uplink GroundStation, CAN. As we mentioned when discussing the range
+    measurement, the designation, 2, represents X-band. </para>
+
+    <para>The 7th field, 10, is the Doppler Count Interval (DCI) used to help
+    define the Doppler measurement. This is the value that we set when we
+    created and configured the TrackingFileSet DSNsimData object in Section 3.
+    Recall the following script command, </para>
+
+    <literallayout>                DSNsimData.SimDopplerCountInterval = 10.0;</literallayout>
+
+    <para>The DCI is also discussed in Appendix A. </para>
+
+    <para>The 8th field, -7819057474.22393610, is the actual DSN Doppler
+    observation value in Hz. </para>
+
+    <para>The third line of data represents the second DSN two way range
+    measurement at '19 Aug 2015 00:10:00.000 UTCG’ which corresponds to the
+    output TAI modified Julian Day time of 27253.507349537038 TAIMJD. The
+    fourth line of data represents the second DSN two way Doppler measurement
+    at '19 Aug 2015 00:10:00.000 UTCG.’</para>
+  </section>
+
+  <section>
+    <title>Create a more realistic GMAT Measurement Data (GMD)</title>
+
+    <para>We have run a short simple simulation and generated a sample GMD
+    file. Our next goal is to generate a realistic GMD file that a different
+    script can read in and generate an orbit determination solution. To add
+    more realism, we will do the following:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Generate data from additional ground stations </para>
+      </listitem>
+    </itemizedlist>
+
+    <itemizedlist>
+      <listitem>
+        <para>Add the use of a ramp table</para>
+      </listitem>
+    </itemizedlist>
+
+    <itemizedlist>
+      <listitem>
+        <para>Perform a longer simulation</para>
+      </listitem>
+    </itemizedlist>
+
+    <itemizedlist>
+      <listitem>
+        <para>Add measurement noise</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>In order to generate measurement data from additional ground
+    stations, we must first create and configure additional GroundStation
+    objects. Below, we create and configure two new ground stations, GDS and
+    MAD.</para>
+
+    <programlisting>Create GroundStation GDS;  
+GDS.CentralBody = Earth;
+GDS.StateType = Cartesian;
+GDS.HorizonReference = Ellipsoid;
+GDS.Location1 = -2353.621251;
+GDS.Location2 = -4641.341542;
+GDS.Location3 = 3677.052370;
+GDS.Id = '33333';
+GDS.AddHardware = {DSNTransmitter, DSNAntenna, DSNReceiver};
+GDS.MinimumElevationAngle = 7.0;
+GDS.IonosphereModel       = 'IRI2007';
+GDS.TroposphereModel      = 'HopfieldSaastamoinen';
+
+Create GroundStation MAD;  
+MAD.CentralBody = Earth;
+MAD.StateType = Cartesian;
+MAD.HorizonReference = Ellipsoid;
+MAD.Location1 = 4849.519988;
+MAD.Location2 = -0360.641653;
+MAD.Location3 = 4114.504590;
+MAD.Id = '44444';
+MAD.AddHardware = {DSNTransmitter, DSNAntenna, DSNReceiver};
+MAD.MinimumElevationAngle = 7.0;
+MAD.IonosphereModel       = 'IRI2007';
+MAD.TroposphereModel      = 'HopfieldSaastamoinen';</programlisting>
+
+    <para>Now that we have defined two additional ground stations, we must
+    specify the measurement noise associated with these new ground stations.
+    This can be done using the previously created ErrorModel resources as
+    shown below. </para>
+
+    <programlisting>GDS.ErrorModels           = {DSNrange, DSNdoppler};
+MAD.ErrorModels           = {DSNrange, DSNdoppler};</programlisting>
+
+    <para>Next, we must add the corresponding two way range and Doppler
+    measurements associated with our new ground stations to our
+    TrackingFileSet object, DSNsimData, as shown below.</para>
+
+    <programlisting>DSNsimData.AddTrackingConfig = {{GDS, Sat, GDS}, 'DSNRange'};   
+DSNsimData.AddTrackingConfig = {{GDS, Sat, GDS}, 'Doppler'};
+
+DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'DSNRange'};   
+DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
+
+    <para>We now create our ramp table that many but not all missions use. A
+    ramp table is a table that allows GMAT to calculate the transmit frequency
+    of all the ground stations involved in our simulation. Recall that GMAT
+    needs to know the transmit frequency, as a function of time, in order to
+    calculate the value of the observations. The term “ramp” is used because
+    the transmit frequency increases linearly with time and a graph of
+    transmit frequency vs. time would typically show a ramp. A mission that
+    does not use a ramp table simply uses a constant transmit frequency for a
+    given ground station. </para>
+
+    <para>To modify our script to accommodate the use of a ramp table, we
+    modify our TrackingFileSet object, DSNsimData, as shown below.</para>
+
+    <programlisting>DSNsimData.RampTable = ...
+{'../output/Simulate DSN Range and Doppler Data 3 weeks.rmp'};</programlisting>
+
+    <para>We must now create a file with the name shown above in the GMAT
+    ‘output’ directory. Refer to the TrackingFileSet Help for a description of
+    the ramp table file format. In order for GMAT to determine the transmit
+    frequencies of all the ground stations, the ramp table must have at least
+    one row of data for every ground station providing measurement data. The
+    contents of our ramp table is shown below. </para>
+
+    <literallayout>          27252   22222   11111   2   1   7.2e09   0.2
+          27252   33333   11111   2   1   7.3e09   0.3
+          27252   44444   11111   2   1   7.4e09   0.4</literallayout>
+
+    <para>Each row of data above is called a ramp record. Let’s analyze the
+    first ramp record. The first field, 27252, is the TAIMJD date of the ramp
+    record. </para>
+
+    <para>The second field, is 22222, is the ground station ID of the
+    GroundStation object whose frequency is being specified. We note that the
+    ID 22222 corresponds to the CAN ground station. The third field, 11111, is
+    the ID of the spacecraft that the CAN ground station is transmitting to.
+    We recognize 11111 as the ID of the Sat spacecraft. </para>
+
+    <para>The 4th field, 2, is an integer representing the uplink band of the
+    transmission. The integer 2 represents X-band. The 5th field, 1, is an
+    integer describing the ramp type. The integer 1 represents the start of a
+    new ramp. </para>
+
+    <para>The 6th field, 7.2e9, is the transmission frequency in Hz, from CAN
+    to Sat at the time given by the first field. The 7th input is the ramp
+    rate in Hz/s. </para>
+
+    <para>We now describe how GMAT uses the ramp record to determine the
+    transmit frequency of CAN to Sat at a given time. We let TAIMJD be the
+    time associated with the ramp record. Then GMAT will calculate the value
+    of the transmit frequency at t= 27252.5 TAIMJD as shown below. </para>
+
+    <para/>
   </section>
 </chapter>
