@@ -48,6 +48,9 @@
 #include "Rvector3.hpp"
 #include "Rmatrix33.hpp"
 
+#include "GmatTime.hpp"
+
+
 // forward reference for SolarSystem
 class SolarSystem;
 
@@ -156,6 +159,11 @@ public:
    
    virtual const Rvector3 GetMJ2000Acceleration(const A1Mjd &atTime);
 
+   virtual const Rvector6 GetMJ2000PrecState(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000PrecPosition(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000PrecVelocity(const GmatTime &atTime);
+   virtual const Rvector3 GetMJ2000PrecAcceleration(const GmatTime &atTime);
+
    virtual void           RemoveSpiceKernelName(const std::string &kernelType,
                                                 const std::string &fileName);
 
@@ -172,6 +180,7 @@ public:
 
    virtual bool            IsParameterReadOnly(const Integer id) const;
    virtual bool            IsParameterReadOnly(const std::string &label) const;
+   virtual bool            IsSquareBracketAllowedInSetting(const Integer id) const;
    virtual bool            IsParameterCommandModeSettable(const Integer id) const;
    
    virtual Integer         GetIntegerParameter(const Integer id) const;

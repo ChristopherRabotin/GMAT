@@ -133,15 +133,18 @@ void RunScriptInterpreter(std::string script, int verbosity, bool batchmode)
 //
 //      moderatorInitialized = true;
 //   }
-   
+    
+   bool canRun;
    try
    {
-      if (!mod->InterpretScript(script))
+      canRun = mod->InterpretScript(script);
+      if (!canRun)
       {
          if (!batchmode)
          {
             std::cout << "\n***Could not read script.***\n\n";
             ShowHelp();
+            throw ConsoleAppException("Errors were found in the script named \"" + script + "\"\n");
          }
          else
             throw ConsoleAppException("Script file did not parse");
@@ -150,7 +153,8 @@ void RunScriptInterpreter(std::string script, int verbosity, bool batchmode)
    }
    catch (BaseException &oops)
    {
-      std::cout << "ERROR!!!!!! ---- " << oops.GetFullMessage();
+      // std::cout << "ERROR!!!!!! ---- " << oops.GetFullMessage();
+      MessageInterface::ShowMessage("ERROR!!!!!! ---- %s\n", oops.GetFullMessage().c_str());
    }
    // print out the sequence
    GmatCommand *top = mod->GetFirstCommand();
@@ -159,16 +163,19 @@ void RunScriptInterpreter(std::string script, int verbosity, bool batchmode)
       PrintUtility* pu = PrintUtility::Instance();
       pu->PrintEntireSequence(top);
    }
+
+   if (canRun)
+   {   
+      // And now run it
+      if (mod->RunMission() != 1)
+         throw ConsoleAppException("Moderator::RunMission failed");
    
-   // And now run it
-   if (mod->RunMission() != 1)
-      throw ConsoleAppException("Moderator::RunMission failed");
-   
-   // Success!
-   if (!batchmode)
-      std::cout << "\n\n*** GMAT Integration test "
-                << "(Console version) successful! ***"
-                << "\n\n";
+      // Success!
+      if (!batchmode)
+         std::cout << "\n\n*** GMAT Integration test "
+                   << "(Console version) successful! ***"
+                   << "\n\n";
+   }
 }
 
 

@@ -52,7 +52,11 @@ public:
 
    bool                 IsUsingLocalCoordSystem();
    bool                 HasFired() const;
+   virtual bool         IsFiring();
+   Real                 GetTotalMassFlowRate();
    Real*                GetDeltaVInertial();
+   Real*                GetTotalAcceleration();
+   Real*                GetTotalThrust();
    Real                 GetEpochAtLastFire();
    
    // Inherited (GmatBase) methods
@@ -144,10 +148,18 @@ protected:
    std::string          j2000BodyName;
    /// Name of the Spacecraft that gets maneuvered
    std::string          satName;
+   /// Total mass flow rate
+   Real                 totalMassFlowRate;
    /// Orientation vector for maneuver; includes magnitude for impulsive burns
    Real                 deltaV[3];
    /// Orientation vector for maneuver in inertial system
    Real                 deltaVInertial[3];
+   /// Total acceleration for finite burn
+   Real                 totalAccel[3];
+   /// Total thrust for finite burn
+   Real                 totalThrust[3];
+   /// Zero data to return when thruster is not firing
+   Real                 zeroData[3];
    /// Matrix of maneuver frame vectors
    Real                 frameBasis[3][3];
    /// String array that holds ref. object names
@@ -160,6 +172,8 @@ protected:
    bool                 isMJ2000EqAxes;
    /// Flag indicating if axes is SpacecrftBody
    bool                 isSpacecraftBodyAxes;
+   /// Flag indicatin whether or not the burn is firing
+   bool                 isFiring;
    /// flag indicating whether or not the burn has fired
    bool                 hasFired;
    /// epoch at the last fire

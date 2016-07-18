@@ -211,7 +211,7 @@ void BurnThrusterPanel::Create()
    
    // ThrustDirection1
    XUnitLabel = new wxStaticText(this, ID_TEXT, gmatwxT(""));
-   XLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"1"));
+   XLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection" GUI_ACCEL_KEY "1"));
    elem1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                       wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -221,7 +221,7 @@ void BurnThrusterPanel::Create()
    YUnitLabel =
       new wxStaticText(this, ID_TEXT, gmatwxT(""));
    YLabel =
-      new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"2"),
+      new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection" GUI_ACCEL_KEY "2"),
                         wxDefaultPosition,wxDefaultSize, 0);
    elem2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
@@ -230,7 +230,7 @@ void BurnThrusterPanel::Create()
    
    // ThrustDirection3
    ZUnitLabel = new wxStaticText(this, ID_TEXT, gmatwxT(""));
-   ZLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"3"));
+   ZLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection" GUI_ACCEL_KEY "3"));
    elem3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -243,7 +243,7 @@ void BurnThrusterPanel::Create()
    {
       // Thruster Duty Cycle
       dutyCycleLabel =
-         new wxStaticText(this, ID_TEXT, gmatwxT("Duty "GUI_ACCEL_KEY"Cycle"));
+         new wxStaticText(this, ID_TEXT, gmatwxT("Duty " GUI_ACCEL_KEY "Cycle"));
       dutyCycleTextCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -251,7 +251,7 @@ void BurnThrusterPanel::Create()
       
       // Thruster Scale Factor
       scaleFactorLabel =
-         new wxStaticText(this, ID_TEXT, gmatwxT("Thrust "GUI_ACCEL_KEY"Scale Factor"));
+         new wxStaticText(this, ID_TEXT, gmatwxT("Thrust " GUI_ACCEL_KEY "Scale Factor"));
       scaleFactorTextCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -360,11 +360,11 @@ void BurnThrusterPanel::Create()
    // Coefficients for Thruster only
    if (theObject->IsOfType(Gmat::THRUSTER))
    {
-//      cCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit "GUI_ACCEL_KEY"Thruster Coef."));
+//      cCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit " GUI_ACCEL_KEY "Thruster Coef."));
 //      cCoefButton->SetToolTip(pConfig->Read(_T("EditThrusterCoefficientHint")));
-//      kCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit "GUI_ACCEL_KEY"Impulse Coef."));
+//      kCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit " GUI_ACCEL_KEY "Impulse Coef."));
 //      kCoefButton->SetToolTip(pConfig->Read(_T("EditImpulseCoefficientHint")));
-      configButton = new wxButton(this, ID_BUTTON, gmatwxT(""GUI_ACCEL_KEY"Configure Polynomials"));
+      configButton = new wxButton(this, ID_BUTTON, gmatwxT("" GUI_ACCEL_KEY "Configure Polynomials"));
       configButton->SetToolTip(pConfig->Read(_T("ConfigPolynomialsHint")));
    }
    
@@ -424,7 +424,7 @@ void BurnThrusterPanel::Create()
       electricBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Thrust Config.");
       // Thrust Model
       thrustModelTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT("Thrust "GUI_ACCEL_KEY"Model"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Thrust " GUI_ACCEL_KEY "Model"),
                            wxDefaultPosition, wxDefaultSize, 0);
       StringArray thrustModels = theObject->GetPropertyEnumStrings("ThrustModel");
       Integer numModels = thrustModels.size();
@@ -440,10 +440,10 @@ void BurnThrusterPanel::Create()
 
       // Minimum and Maximum Usable Power
       minPowerTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT("Mi"GUI_ACCEL_KEY"nimum Usable Power"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Mi" GUI_ACCEL_KEY "nimum Usable Power"),
                            wxDefaultPosition, wxDefaultSize, 0);
       maxPowerTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT("Ma"GUI_ACCEL_KEY"ximum Usable Power"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Ma" GUI_ACCEL_KEY "ximum Usable Power"),
                            wxDefaultPosition, wxDefaultSize, 0);
       minPowerTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
@@ -459,13 +459,13 @@ void BurnThrusterPanel::Create()
 
       // Efficiency and ISP and Constant Thrust
       efficiencyTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Fixed Efficiency"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("" GUI_ACCEL_KEY "Fixed Efficiency"),
                            wxDefaultPosition, wxDefaultSize, 0);
       ispTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Isp"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("" GUI_ACCEL_KEY "Isp"),
                            wxDefaultPosition, wxDefaultSize, 0);
       constantThrustTxt =
-         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Constant Thrust"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("" GUI_ACCEL_KEY "Constant Thrust"),
                            wxDefaultPosition, wxDefaultSize, 0);
       efficiencyTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,

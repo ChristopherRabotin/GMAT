@@ -95,6 +95,10 @@ public:
                                 const std::string &oldName = "");
    virtual bool         SetName(const char *who,
                                 const std::string &oldName = "");
+
+   virtual const std::string  GetFullName();
+   virtual bool         SetFullName(const std::string name);
+
    virtual Integer      GetParameterCount() const;
 
    bool                 IsOfType(Gmat::ObjectType ofType) const;
@@ -233,6 +237,7 @@ public:
    virtual const StringArray&
                         GetPropertyEnumStrings(const std::string &label) const;
    virtual bool         CanAssignStringToObjectProperty(const Integer id) const;
+   virtual bool         IsSquareBracketAllowedInSetting(const Integer id) const;
    
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -483,6 +488,8 @@ public:
    virtual std::string     GetAssociateName(UnsignedInt val = 0);
 
    virtual Integer         GetEstimationParameterID(const std::string &param);
+   virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
    virtual Integer         SetEstimationParameter(const std::string &param);
    virtual bool            IsEstimationParameterValid(const Integer id);
    virtual Integer         GetEstimationParameterSize(const Integer id);
@@ -490,6 +497,7 @@ public:
 
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
+   virtual Integer         GetStmRowId(const Integer forRow);
 
    // Covariance handling code
    virtual Integer         HasParameterCovariances(Integer parameterId);
@@ -505,6 +513,18 @@ public:
    virtual bool IsParameterCommandModeSettable(const Integer id) const;
    void CopyParameter(const GmatBase& fromObject, const Integer forParameter);
 
+   /// Methods for script name and flag where object is created from
+   void SetScriptCreatedFrom(const std::string &script);
+   std::string GetScriptCreatedFrom();
+   void SetIsCreatedFromMainScript(bool flag);
+   bool IsCreatedFromMainScript();
+   
+   /// Functions use information from Moderator
+   ObjectMap               GetConfiguredObjectMap();
+   GmatBase*               GetConfiguredObject(const std::string &name);
+   const StringArray       GetListOfObjects(Gmat::ObjectType type);
+   const StringArray       GetListOfObjects(const std::string &typeName);
+
 protected:
    /// Parameter IDs
    enum
@@ -518,7 +538,6 @@ protected:
    /// GmatBase parameter labels
    static const std::string PARAMETER_LABEL[GmatBaseParamCount];
 
-
    /// count of the number of GmatBase objects currently instantiated
    static Integer      instanceCount;
 
@@ -528,6 +547,15 @@ protected:
    std::string         typeName;
    /// Name of the object -- empty if it is nameless
    std::string         instanceName;
+   
+   /// Full name of this object
+   std::string         instanceFullName;
+
+   /// Script file name where object is created from
+   std::string         scriptCreatedFrom;
+   /// Flag indicating object is created from the main script
+   bool                isCreatedFromMainScript;
+   
    /// Enumerated base type of the object
    Gmat::ObjectType    type;
    /// Number of owned objects that belong to this instance

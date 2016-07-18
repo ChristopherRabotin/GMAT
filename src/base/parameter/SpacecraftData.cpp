@@ -143,6 +143,12 @@ Real SpacecraftData::GetReal(Integer item)
       return GetOwnedObjectProperty(Gmat::THRUSTER, "ThrustScaleFactor");
    case GRAVITATIONAL_ACCEL:
       return GetOwnedObjectProperty(Gmat::THRUSTER, "GravitationalAccel");
+   case THRUST:
+      return GetOwnedObjectProperty(Gmat::THRUSTER, "ThrustMagnitude");
+   case ISP:
+      return GetOwnedObjectProperty(Gmat::THRUSTER, "Isp");
+   case MASS_FLOW_RATE:
+      return GetOwnedObjectProperty(Gmat::THRUSTER, "MassFlowRate");
       
    // for Spacecraft owned PowerSystem
    case TOTAL_POWER_AVAILABLE:
@@ -505,7 +511,17 @@ Real SpacecraftData::GetOwnedObjectProperty(Gmat::ObjectType objType,
    }
    else
    {
-      Real result = ownedObj->GetRealParameter(propName);
+      Real result;
+      // Since MassFlowRate, Thrust, and Isp are only calculated during thruster
+      // firing, call specific method
+      if (propName == "MassFlowRate")
+         result = ((Thruster*)ownedObj)->GetMassFlowRate();
+      else if (propName == "ThrustMagnitude")
+         result = ((Thruster*)ownedObj)->GetThrustMagnitude();
+      else if (propName == "Isp")
+          result = ((Thruster*)ownedObj)->GetIsp();
+      else
+         result = ownedObj->GetRealParameter(propName);
       
       #ifdef DEBUG_SC_OWNED_OBJ
       MessageInterface::ShowMessage

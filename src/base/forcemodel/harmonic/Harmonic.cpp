@@ -168,7 +168,7 @@ Real Harmonic::GetFactor() const
 }
 
 //------------------------------------------------------------------------------
-void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Integer& nn,
+void Harmonic::CalculateField1(const Real& jday,  const Real pos[3], const Integer& nn,
                               const Integer& mm, const bool& fillgradient,
                               Real  acc[3],      Rmatrix33& gradient) const
 {
@@ -270,18 +270,22 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
                Real H = m<=1 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
                // Correct for normalization
 
-               Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
-               Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
-               Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
-               if (m==0)
-               {
-                  VR02 /= sqrt(Real(2));
-                  VR12 /= sqrt(Real(2));
-                  VR22 /= sqrt(Real(2));
-               }
-               Real Avv02 = VR02 * A[n][m+2];
-               Real Avv12 = VR12 * A[n+1][m+2];
-               Real Avv22 = VR22 * A[n+2][m+2];
+               //Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+               //Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
+               //Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+               //if (m==0)
+               //{
+               //   VR02 /= sqrt(Real(2));
+               //   VR12 /= sqrt(Real(2));
+               //   VR22 /= sqrt(Real(2));
+               //}
+               //Real Avv02 = VR02 * A[n][m+2];
+               //Real Avv12 = VR12 * A[n+1][m+2];
+               //Real Avv22 = VR22 * A[n+2][m+2];
+               Real Avv02 = VR02[n][m] * A[n][m+2];
+               Real Avv12 = VR12[n][m] * A[n+1][m+2];
+               Real Avv22 = VR22[n][m] * A[n+2][m+2];
+
                //Real Vnm = V[n][m];
                //Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
                //Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
@@ -380,6 +384,41 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
    #endif
 }
 
+void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Integer& nn,
+                              const Integer& mm, const bool& fillgradient,
+                              Real  acc[3],      Rmatrix33& gradient) const
+{
+   // Calculate acceleration at location pos
+   CalculateField1(jday, pos, nn, mm, fillgradient, acc, gradient);
+
+   //if (fillgradient)
+   //{
+   //   Real delta = 1.0e-3;
+   //   Real newAcc[3];
+   //   Real posVec[3];
+
+   //   // Specify gradient by using finite difference
+   //   for(UnsignedInt col = 0; col < 3; ++col)
+   //   {
+   //      posVec[0] = pos[0]; posVec[1] = pos[1]; posVec[2] = pos[2];
+   //      posVec[col] += delta;
+
+   //      // Calculate acceleration at location pos + delta
+   //      CalculateField1(jday, posVec, nn, mm, fillgradient, newAcc, gradient);
+   //      for(UnsignedInt row = 0; row < 3; ++row)
+   //      {
+   //         gradient(row,col) = (newAcc[row] - acc[row])/ delta;
+   //      }
+   //   }
+   //}
+
+   //#ifdef DEBUG_GRADIENT
+   //   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+   //   MessageInterface::ShowMessage("gradientHarmonic = %s\n", gradient.ToString().c_str());
+   //#endif
+}
+
+
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
@@ -405,7 +444,7 @@ void Harmonic::Allocate()
    for (Integer n=0;  n<=NN+2;  ++n)
    {
       V[n][0] = sqrt(Real(2*(2*n+1)));   // Temporary, to make following loop work
-    for (Integer m=1;  m<=n+2 && m<=MM+2;  ++m)
+      for (Integer m=1;  m<=n+2 && m<=MM+2;  ++m)
       {
          V[n][m] = V[n][m-1] / sqrt(Real((n+m)*(n-m+1)));
       }
@@ -424,13 +463,23 @@ void Harmonic::Allocate()
       {
          //VR01[n][m] = V[n][m] / V[n][m+1];
          //VR11[n][m] = V[n][m] / V[n+1][m+1];
-		 VR01[n][m] = sqrt(Real((n-m)*(n+m+1)));
+		   VR01[n][m] = sqrt(Real((n-m)*(n+m+1)));
          VR11[n][m] = sqrt(Real((2*n+1)*(n+m+2)*(n+m+1))/Real((2*n+3)));
-		 if (m==0) 
-		 {
-			 VR01[n][m] /= sqrt(Real(2));
-			 VR11[n][m] /= sqrt(Real(2));
-		 }
+		   if (m==0) 
+		   {
+			   VR01[n][m] /= sqrt(Real(2));
+			   VR11[n][m] /= sqrt(Real(2));
+		   }
+
+         VR02[n][m] = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+         VR12[n][m] = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
+         VR22[n][m] = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+         if (m == 0)
+         {
+            VR02[n][m] /= sqrt(Real(2));
+            VR12[n][m] /= sqrt(Real(2));
+            VR22[n][m] /= sqrt(Real(2));
+         }
       }
 
 

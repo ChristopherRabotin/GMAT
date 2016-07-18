@@ -138,7 +138,7 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity);
+                         Integer quantity, Integer sizeOfType);
 
    // Made public so it can be called for the AtmosDensity parameter
    Real                 GetDensity(Real *state,
@@ -216,6 +216,20 @@ protected:
    /// ID used to set Schatten Weather File name
    Integer schattenWFileID;
 
+   /// Flag indicating if Cd is being estimated
+   bool estimatingCd;
+   /// ID for the CdEpsilon parameter
+   Integer cdEpsilonID;
+   /// Row/Column for the Cd entries in the A-matrix and STM
+   Integer cdEpsilonRow;
+   /// Current value(s) of Cd
+   std::vector<Real> cdEpsilon;
+   /// Initial value(s) of Cd
+   std::vector<Real> cdInitial;
+   /// Flag used to indicate that central differences are used for the A-matrix
+   bool useCentralDifferences;
+   /// Flag used to finite difference the velocity derivatives
+   bool finiteDifferenceDv;
 
    // Optional input parameters used by atmospheric models
    /// Type of input data -- "File" or "Constant"
@@ -261,7 +275,7 @@ protected:
 //   void                 GetDensity(Real *state, Real when = GmatTimeConstants::MJD_OF_J2000);
       
    Real                 CalculateAp(Real kp);
-   
+   Rvector3             Accelerate(Real *theState, GmatEpoch &theEpoch, Real prefactor);
    
    /// Parameter IDs
    enum

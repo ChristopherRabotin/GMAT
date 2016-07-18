@@ -209,8 +209,9 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
       ("GmatSavePanel::OnSave() entered, mSyncGui=%d, mFilename='%s'\n   tempFileName='%s', "
-       "scriptStatus=%d, guiStatus=%d\n", mSyncGui, mFilename.c_str(),
-       GmatAppData::Instance()->GetTempScriptName().c_str(), scriptStatus, guiStatus);
+       "scriptStatus=%d, guiStatus=%d, mIsScriptActive=%d\n", mSyncGui, mFilename.WX_TO_C_STRING,
+       GmatAppData::Instance()->GetTempScriptName().WX_TO_C_STRING, scriptStatus, guiStatus,
+       mIsScriptActive );
    #endif
    
    // If it is active script and both script and GUI is clean, there is nothing to save
@@ -233,7 +234,8 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
       {
          #ifdef DEBUG_SAVE
          MessageInterface::ShowMessage
-            ("GmatSavePanel::OnSave() leaving, user canceled SaveAs, mFilename='%s'\n", mFilename.c_str());
+            ("GmatSavePanel::OnSave() leaving, user canceled SaveAs, mFilename='%s'\n",
+             mFilename.WX_TO_C_STRING);
          #endif
          return;
       }
@@ -245,7 +247,9 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
       mSyncGui = false;
       #ifdef DEBUG_SAVE
       MessageInterface::ShowMessage
-         ("GmatSavePanel::OnSave() leaving, inactive script saved, mFilename='%s'\n", mFilename.c_str());
+         ("GmatSavePanel::OnSave() leaving, not synchronizing with GUI, %s script "
+          "saved,\n   mFilename='%s'\n", mIsScriptActive ? "active" : "inactive",
+          mFilename.WX_TO_C_STRING);
       #endif
       return;
    }
@@ -294,7 +298,7 @@ void GmatSavePanel::OnSave(wxCommandEvent &event)
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
       ("GmatSavePanel::OnSave() leaving, mFilename='%s', mSyncGui=%d\n",
-       mFilename.c_str(), mSyncGui);
+       mFilename.WX_TO_C_STRING, mSyncGui);
    #endif
 }
 
@@ -311,7 +315,7 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
       ("GmatSavePanel::OnSaveAs() entered, script = '%s', mIsScriptActive = %d\n",
-       mFilename.c_str(), mIsScriptActive);
+       mFilename.WX_TO_C_STRING, mIsScriptActive);
    #endif
    
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
@@ -351,7 +355,7 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
       ("GmatSavePanel::OnSaveAs() leaving, saveScript=%d, mSaveCanceled=%d, script = '%s'\n",
-       saveScript, mSaveCanceled, mFilename.c_str());
+       saveScript, mSaveCanceled, mFilename.WX_TO_C_STRING);
    #endif
 }
 
@@ -368,7 +372,7 @@ void GmatSavePanel::OnClosePanel(wxCommandEvent &event)
    #ifdef DEBUG_CLOSE_PANEL
    MessageInterface::ShowMessage
       ("GmatSavePanel::OnClosePanel() '%s' entered, mEditorModified=%d\n",
-       mFilename.c_str(), mEditorModified);
+       mFilename.WX_TO_C_STRING, mEditorModified);
    #endif
 
    // We don't want to show duplicate save message when GmatMdiChildFrame is closing,
@@ -416,7 +420,7 @@ void GmatSavePanel::UpdateScriptActiveStatus(bool isActive)
    #ifdef DEBUG_UPDATE_ACTIVE_STATUS
    MessageInterface::ShowMessage
       ("GmatSavePanel::UpdateScriptActiveStatus() entered, isActive=%d, "
-       "mFilename='%s'\n", isActive, mFilename.c_str());
+       "mFilename='%s'\n", isActive, mFilename.WX_TO_C_STRING);
    #endif
    
    mIsScriptActive = isActive;
@@ -660,7 +664,7 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
    #ifdef DEBUG_ACTIVE_SCRIPT
    MessageInterface::ShowMessage
       ("   mSyncGui=%d, saveScript=%d, mScriptFilename='%s'\n", mSyncGui, saveScript,
-       mScriptFilename.c_str());
+       mScriptFilename.WX_TO_C_STRING);
    #endif
    
    // No action is performed if user said no to sync GUI
@@ -672,7 +676,7 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
       {
          #ifdef DEBUG_SAVE
          MessageInterface::ShowMessage
-            ("GmatSavePanel::OnSave() leaving, user canceled SaveAs, mFilename='%s'\n", mFilename.c_str());
+            ("GmatSavePanel::OnSave() leaving, user canceled SaveAs, mFilename='%s'\n", mFilename.WX_TO_C_STRING);
          #endif
          return;
       }
@@ -751,8 +755,9 @@ void GmatSavePanel::SaveScript()
 {
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::SaveScript() entered\n   mFilename = '%s'\n",
-       mFilename.c_str());
+      ("GmatSavePanel::SaveScript() entered\n   mFilename='%s'\n",
+       mFilename.WX_TO_C_STRING);
+   MessageInterface::ShowMessage("   Calling SaveData()\n");
    #endif
    
    SaveData();
@@ -770,8 +775,8 @@ void GmatSavePanel::SaveScript()
    
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::SaveScript() leaving\n   mFilename = '%s'\n",
-       mFilename.c_str());
+      ("GmatSavePanel::SaveScript() leaving\n   mFilename='%s'\n",
+       mFilename.WX_TO_C_STRING);
    #endif
 }
 
@@ -783,8 +788,8 @@ void GmatSavePanel::SaveAndBuildScript(wxCommandEvent &event)
 {
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::SaveAndBuildScript() entered\n   mFilename = '%s'\n",
-       mFilename.c_str());
+      ("GmatSavePanel::SaveAndBuildScript() entered\n   mFilename='%s'\n",
+       mFilename.WX_TO_C_STRING);
    #endif
    
    SaveData();
@@ -803,8 +808,8 @@ void GmatSavePanel::SaveAndBuildScript(wxCommandEvent &event)
    
    #ifdef DEBUG_SAVE
    MessageInterface::ShowMessage
-      ("GmatSavePanel::SaveAndBuildScript() leaving\n   mFilename = '%s'\n",
-       mFilename.c_str());
+      ("GmatSavePanel::SaveAndBuildScript() leaving\n   mFilename='%s'\n",
+       mFilename.WX_TO_C_STRING);
    #endif
 }
 

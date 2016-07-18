@@ -33,18 +33,6 @@
     <ClInclude Include="..\..\src\base\include\EventLocatorDefs.hpp">
       <Filter>Header Files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\event\Antumbra.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\event\Eclipse.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\event\Penumbra.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\event\Umbra.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\factory\EventLocatorFactory.hpp">
       <Filter>Source Files\factory</Filter>
     </ClInclude>
@@ -57,15 +45,6 @@
     <ClInclude Include="..\..\src\base\locator\ContactLocator.hpp">
       <Filter>Source Files\locator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\event\Elevation.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\event\LineOfSight.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\event\Contact.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\event\ContactEvent.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
@@ -75,20 +54,11 @@
     <ClInclude Include="..\..\src\base\event\EclipseTotalEvent.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\event\ContactResult.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\base\event\Antumbra.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\event\Eclipse.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\event\Penumbra.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\event\Umbra.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\base\factory\EventLocatorFactory.cpp">
       <Filter>Source Files\factory</Filter>
     </ClCompile>
@@ -101,15 +71,6 @@
     <ClCompile Include="..\..\src\base\locator\ContactLocator.cpp">
       <Filter>Source Files\locator</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\base\event\Elevation.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\event\LineOfSight.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\event\Contact.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\base\event\ContactEvent.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
@@ -117,6 +78,9 @@
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\event\EclipseTotalEvent.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\ContactResult.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
   </ItemGroup>

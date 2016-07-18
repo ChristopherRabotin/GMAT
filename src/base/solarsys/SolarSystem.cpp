@@ -756,8 +756,6 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
    MessageInterface::ShowMessage("Copy constructor: ss.theCurrentPlanetarySource = '%s'\n", ss.theCurrentPlanetarySource.c_str());
    #endif
 
-//   Initialize();							// made changes by TUAN NGUYEN
-   
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now DONE with the Solar System copy constructor ...\n");
    #endif
@@ -839,8 +837,6 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    DeleteBodiesInUse(true);
    CloneBodiesInUse(ss, true);
    SetJ2000Body();
-
-//   Initialize();					// made changes by TUAN NGUYEN
 
    return *this;
 }
@@ -939,7 +935,7 @@ bool SolarSystem::Initialize()
    #endif
    #endif
 
-   // set source for bodies in use:													/ made change by TUAN NGUYEN
+   // set source for bodies in use:
    if (!bodiesInUse.empty())
    {
 		#ifdef DEBUG_SS_INIT
@@ -3386,7 +3382,9 @@ bool SolarSystem::SetStringParameter(const Integer id,
    if (id == LSK_FILE_NAME)
    {
       #ifdef __USE_SPICE__
-         return SetLSKFile(value);
+      // write message and ignore
+      WriteDeprecatedMessage(id);
+//         return SetLSKFile(value);
       #else
          return false;
       #endif
@@ -3498,6 +3496,8 @@ GmatBase* SolarSystem::GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
 bool SolarSystem::IsParameterReadOnly(const Integer id) const
 {
+   if (id == LSK_FILE_NAME)  // deprecated
+      return true;  
    // do not write out these items
    if ((id == BODIES_IN_USE) || (id == NUMBER_OF_BODIES))
       return true;
@@ -4214,5 +4214,36 @@ void SolarSystem::SetTextureMapFile(SpacePoint *sp, const std::string &bodyName)
       ("SolarSystem::SetTextureMapFile() leaving, bodyName = '%s', texture fileName = '%s'\n",
        bodyName.c_str(), fileName.c_str());
    #endif
+}
+
+//------------------------------------------------------------------------------
+// void WriteDeprecatedMessage(Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Writes deprecated field message per GMAT session
+ */
+//------------------------------------------------------------------------------
+void SolarSystem::WriteDeprecatedMessage(Integer id) const
+{
+   // Write only one message per session
+   static bool writeLSKMsg = true;
+   
+   switch (id)
+   {
+   case LSK_FILE_NAME:
+      if (writeLSKMsg)
+      { 
+         std::string errmsg = 
+         "*** the \"LSKFilename\" field on the SolarSystem is "
+         "deprecated; please set the LSK kernel name in the startup file "
+         "instead.\n";
+//         MessageInterface::ShowMessage(errmsg);
+         throw SolarSystemException(errmsg);
+         writeLSKMsg = false;
+      }
+      break;
+   default:
+      break;
+   }
 }
 

@@ -28,7 +28,7 @@
  *    FuelTank: FuelMass, Pressure, Temperature, RefTemperature, Volume,
  *              FuelDensity,
  *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
- *              K1-K16, ThrustDirections
+ *              K1-K16, ThrustDirections, ThrustMagnitude, Isp, MassFlowRate
  *    PowerSystem: TotalPowerAvailable, RequiredBusPower, ThrustPowerAvailable
  */
 //------------------------------------------------------------------------------
@@ -286,6 +286,70 @@ protected:
    Integer mThrustDirectionId;
    
 };
+
+
+class GMAT_API ThrustMagnitude : public HardwareReal
+{
+public:
+
+   ThrustMagnitude(const std::string &name = "", GmatBase *obj = NULL);
+   ThrustMagnitude(const ThrustMagnitude &copy);
+   ThrustMagnitude& operator=(const ThrustMagnitude &right);
+   virtual ~ThrustMagnitude();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+class GMAT_API Isp : public HardwareReal
+{
+public:
+
+   Isp(const std::string &name = "", GmatBase *obj = NULL);
+   Isp(const Isp &copy);
+   Isp& operator=(const Isp &right);
+   virtual ~Isp();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+class GMAT_API MassFlowRate : public HardwareReal
+{
+public:
+
+   MassFlowRate(const std::string &name = "", GmatBase *obj = NULL);
+   MassFlowRate(const MassFlowRate &copy);
+   MassFlowRate& operator=(const MassFlowRate &right);
+   virtual ~MassFlowRate();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
 
 class GMAT_API TotalPowerAvailable : public HardwareReal
 {

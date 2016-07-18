@@ -104,14 +104,20 @@ namespace GmatMathUtil
    Real    GMAT_API Log10(Real x);          // Base 10 Logarithm of x
    Real    GMAT_API Log(Real x, Real base); // Base <base> Logarithm of x
    Real    GMAT_API Log(Real x, Integer base);
+
+   Real    GMAT_API Rand(Real lowerBound = 0.0, Real upperBound = 1.0);
+   Real    GMAT_API Randn(Real mean = 0.0, Real stdev = 1.0);
+   void    GMAT_API SetSeed(UnsignedInt seed);
    
-   void    GMAT_API SetSeed(Integer initialSeed1, Integer initialSeed2); 
-   void    GMAT_API GetSeed(Integer& initialSeed1, Integer& initialSeed2);
-   //loj:void    GMAT_API SetSeedByClock();
-   Real    GMAT_API Number(Real lowerBound=0.0, Real upperBound=1.0); 
-   Real    GMAT_API GaussianNumber(Real mu= 0.0, Real sigma=1.0); 
-   Real    GMAT_API Ran();
-   void    GMAT_API SetRanKey(Real k=0.0); 
+   // Commented out. These are not used in anywhere. (LOJ: 2016.04.20)
+   // void    GMAT_API SetSeed(Integer initialSeed1, Integer initialSeed2); 
+   // void    GMAT_API GetSeed(Integer& initialSeed1, Integer& initialSeed2);
+   // //loj:void    GMAT_API SetSeedByClock();
+   // Real    GMAT_API Number(Real lowerBound=0.0, Real upperBound=1.0); 
+   // Real    GMAT_API GaussianNumber(Real mu= 0.0, Real sigma=1.0); 
+   // Real    GMAT_API Ran();
+   // void    GMAT_API SetRanKey(Real k=0.0);
+   
    //loj:Real    GMAT_API Cot(Real x);
    Real    GMAT_API Cbrt(Real x);
    Real    GMAT_API Sqrt(Real x);

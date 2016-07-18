@@ -271,11 +271,13 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //  NOTE: Measurement participant pointers must initialize before models.
    //        In the current code, that means spacecraft and ground stations, but
    //        the list might grow
-   //  3. Measurement Models
-   //  4. System Parameters
-   //  5. Parameters
-   //  6. Subscribers
-   //  7. Remaining Objects
+   //  3. Error Models
+   //  4. Data Filters
+   //  5. Measurement Models
+   //  6. System Parameters
+   //  7. Parameters
+   //  8. Subscribers
+   //  9. Remaining Objects
       
    // Coordinate Systems
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::COORDINATE_SYSTEM)
@@ -346,7 +348,43 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
          InitializeObjectsInTheMap(GOS, Gmat::GROUND_STATION);
       }
    }
-   
+
+   // ErrorModel
+   // Handle ErrorModel objects
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::ERROR_MODEL)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize ErrorModel in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::ERROR_MODEL);
+
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize ErrorModel in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::ERROR_MODEL);
+      }
+   }
+
+   // DataFilter
+   // Handle DataFilter objects
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::DATA_FILTER)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize DataFilter in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::DATA_FILTER);
+
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize DataFilter in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::DATA_FILTER);
+      }
+   }
+
    // MeasurementModel
    // Measurement Models must init before the Estimators/Simulator, so do next
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::MEASUREMENT_MODEL)

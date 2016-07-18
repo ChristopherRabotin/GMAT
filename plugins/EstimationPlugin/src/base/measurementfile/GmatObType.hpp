@@ -58,6 +58,12 @@ public:
    virtual bool      AddMeasurement(MeasurementData *md);
    virtual ObservationData *
                      ReadObservation();
+
+///// TBD: Determine if there is a more generic way to add these
+   /// GmatObType does not use ReadRampTableData() function
+   virtual RampTableData *	
+	   ReadRampTableData(){return NULL;};
+
    virtual bool      Close();
    virtual bool      Finalize();
 
@@ -70,6 +76,10 @@ private:
    Integer           dataPrecision;
    /// The most recently accessed observation data set
    ObservationData   currentObs;
+
+   bool ProcessSignals(const std::string str, Integer& participantSize,
+         Integer& dataSize);
+
 };
 
 #endif /* GMATOBTYPE_HPP_ */

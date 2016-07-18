@@ -45,6 +45,7 @@
 //#define DEBUG_FINITEBURN_OBJECT
 //#define DEBUG_FINITE_BURN_POWER
 //#define DEBUG_MASS_FLOW
+//#define DEBUG_IS_FIRING
 
 //---------------------------------
 // static data
@@ -222,7 +223,7 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
 {
    #ifdef DEBUG_FINITEBURN_FIRE
       MessageInterface::ShowMessage
-         ("FiniteBurn::Fire() this<%p>'%s' entered, epoch=%f, spacecraft=<%p>'%s'\n",
+         ("FiniteBurn::Fire() this<%p>'%s' entered, epoch=%.12f, spacecraft=<%p>'%s'\n",
           this, instanceName.c_str(), epoch, spacecraft,
           spacecraft ? spacecraft->GetName().c_str() : "NULL");
    #endif
@@ -236,6 +237,8 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
    // Accumulate the individual accelerations from the thrusters
    Real dm = 0.0, tMass, tOverM, *dir, norm;
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
+   totalAccel[0] = totalAccel[1] = totalAccel[2]  = 0.0;
+   totalThrust[0] = totalThrust[1] = totalThrust[2]  = 0.0;
    Thruster *current;
    
    tMass = spacecraft->GetRealParameter("TotalMass");
@@ -301,23 +304,53 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
       tOverM = current->thrust * current->thrustScaleFactor *
                current->dutyCycle / (tMass * norm * 1000.0);
       
+      // deltaV is really totalAcceleration (SPH)
       deltaV[0] += dir[0] * tOverM;
       deltaV[1] += dir[1] * tOverM;
       deltaV[2] += dir[2] * tOverM;
       
-      #ifdef DEBUG_FINITE_BURN
+      // Compute thrust magnitude
+      // Now appliedThrustMag is computed in the Thruster (LOJ: 2016.06.27)
+      // Real appliedThrustMag = current->thrust * current->thrustScaleFactor *
+      //    current->dutyCycle;
+      
+      // Add in thrust from this thruster for totalThrust
+      totalThrust[0] += dir[0] / norm * current->appliedThrustMag;
+      totalThrust[1] += dir[1] / norm * current->appliedThrustMag;
+      totalThrust[2] += dir[2] / norm * current->appliedThrustMag;
+      
+      #ifdef DEBUG_FINITEBURN_FIRE
          MessageInterface::ShowMessage("   Thruster %s = %s details:\n", 
             (*i).c_str(), current->GetName().c_str());
          MessageInterface::ShowMessage(
-            "   thrust   = %.15f\n"
-            "       dM   = %.15e\n      Mass  = %.15f\n"
-            "      TSF   = %.15f\n      |Acc| = %.15e\n      "
-            "Acc   = [%.15e   %.15e   %.15e]\n", current->thrust,
-            dm, tMass, current->thrustScaleFactor, tOverM,
-            deltaV[0], deltaV[1], deltaV[2]);
+            "          thrust = %.15f\n"
+            "appliedThrustMag = %.15f\n"
+            "              dM = %.15e\n            Mass = %.15f\n"
+            "             TSF = %.15f\n           |Acc| = %.15e\n"
+            "             Acc = [%.15e   %.15e   %.15e]\n", current->thrust,
+            current->appliedThrustMag, dm, tMass, current->thrustScaleFactor,
+            tOverM, deltaV[0], deltaV[1], deltaV[2]);
       #endif
    }
    
+   // deltaV is in inertial coordinate system, so copy it to deltaVInertial
+   deltaVInertial[0] = deltaV[0];
+   deltaVInertial[1] = deltaV[1];
+   deltaVInertial[2] = deltaV[2];
+   
+   // deltaV is really total acceleration so copy it to totalAccel
+   totalAccel[0] = deltaV[0];
+   totalAccel[1] = deltaV[1];
+   totalAccel[2] = deltaV[2];
+   
+   #ifdef DEBUG_FINITEBURN_FIRE
+   MessageInterface::ShowMessage
+      ("     totalThrust = [%.15e   %.15e   %.15e]\n"
+       "      totalAccel = [%.15e   %.15e   %.15e]\n",
+       totalThrust[0], totalThrust[1], totalThrust[2],
+       totalAccel[0], totalAccel[1], totalAccel[2]);
+   #endif
+
    // Build the acceleration
    burnData[0] = deltaV[0]*frameBasis[0][0] +
                  deltaV[1]*frameBasis[0][1] +
@@ -329,7 +362,10 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
                  deltaV[1]*frameBasis[2][1] +
                  deltaV[2]*frameBasis[2][2];
    burnData[3] = dm;
-   
+
+   // Save total mass flow rate
+   totalMassFlowRate = dm;
+      
    #ifdef DEBUG_FINITEBURN_FIRE
       MessageInterface::ShowMessage(
           "FiniteBurn::Fire() this<%p>'%s' returning\n"
@@ -342,6 +378,74 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool IsFiring()
+//------------------------------------------------------------------------------
+/**
+ * Checks if thruster used in the FiniteBurn is firing and return the status.
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::IsFiring()
+{
+   #ifdef DEBUG_IS_FIRING
+   MessageInterface::ShowMessage
+      ("FiniteBurn::IsFiring() <%p>'%s' entered, thrusterNames.size()=%d, "
+       "spacecraft=<%p>'%s'\n", this, GetName().c_str(), thrusterNames.size(),
+       spacecraft, spacecraft ? spacecraft->GetName().c_str() : "NULL");
+   #endif
+   
+   if (thrusterNames.empty() || spacecraft == NULL)
+   {
+      #ifdef DEBUG_IS_FIRING
+      MessageInterface::ShowMessage
+         ("FiniteBurn::IsFiring() <%p>'%s' returning false, no thrusters or "
+          "spacecaft specified\n", this, GetName().c_str(), isFiring);
+      #endif
+      return false;
+   }
+   
+   Thruster *current = NULL;
+   int firingCount = 0;
+   for (StringArray::iterator i = thrusterNames.begin(); i != thrusterNames.end(); ++i)
+   {
+      #ifdef DEBUG_IS_FIRING
+      MessageInterface::ShowMessage
+         ("   Accessing thruster '%s' from spacecraft <%p>'%s'\n", (*i).c_str(),
+          spacecraft, spacecraft->GetName().c_str());
+      #endif
+      
+      current = (Thruster *)spacecraft->GetRefObject(Gmat::THRUSTER, *i);
+      if (!current)
+         throw BurnException("FiniteBurn::Fire requires thruster named \"" +
+            (*i) + "\" on spacecraft " + spacecraft->GetName());
+      
+      // FiniteBurn class is friend of Thruster class, so we can access
+      // member data directly
+      if (current->thrusterFiring)
+      {
+         #ifdef DEBUG_IS_FIRING
+         MessageInterface::ShowMessage("   Thruster '%s' is firing\n", (*i).c_str());
+         #endif
+         firingCount++;
+      }
+      else
+      {
+         #ifdef DEBUG_IS_FIRING
+         MessageInterface::ShowMessage("   Thruster '%s' is not firing\n", (*i).c_str());
+         #endif
+      }
+   }
+   
+   isFiring = false;
+   if (firingCount > 0)
+      isFiring = true;
+   
+   #ifdef DEBUG_IS_FIRING
+   MessageInterface::ShowMessage
+      ("FiniteBurn::IsFiring() <%p>'%s' returning %d\n", this, GetName().c_str(), isFiring);
+   #endif
+   return isFiring;
+}
 
 //------------------------------------------------------------------------------
 //  std::string GetParameterText(const Integer id) const

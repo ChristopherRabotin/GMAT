@@ -34,10 +34,10 @@
 #include "Rmatrix.hpp"
 #include "Planet.hpp"
 #include "MessageInterface.hpp"
+#include "GmatGlobal.hpp"
 #include "GmatConstants.hpp"
 #include "RealUtilities.hpp"
 #include "SolarSystemException.hpp"
-#include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
 #include "StateConversionUtil.hpp"
 #include "AngleUtil.hpp"
@@ -48,6 +48,8 @@
 //#define DEBUG_PLANET_TWO_BODY
 //#define DEBUG_PLANET_NUTATION_INTERVAL
 //#define DEBUG_PLANET_CONSTRUCT
+//#define DEBUG_PLANET_SET_STRING
+//#define DEBUG_PLANET_INIT
 
 using namespace GmatMathUtil;
 
@@ -58,12 +60,14 @@ const std::string
 Planet::PARAMETER_TEXT[PlanetParamCount - CelestialBodyParamCount] =
 {
    "NutationUpdateInterval",
+   "EopFileName",
 };
 
 const Gmat::ParameterType
 Planet::PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount] =
 {
    Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 
@@ -83,7 +87,8 @@ Planet::PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount] =
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name) :
    CelestialBody     ("Planet",name),
-   nutationUpdateInterval    (60.0)
+   nutationUpdateInterval    (60.0),
+   eopFileName               ("")
 {   
    // @todo This constructor should call the other one, setting Sun as central body!!!
    #ifdef DEBUG_PLANET_CONSTRUCT
@@ -151,7 +156,8 @@ Planet::Planet(std::string name) :
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name, const std::string &cBody) :
    CelestialBody     ("Planet",name),
-   nutationUpdateInterval    (60.0)
+   nutationUpdateInterval    (60.0),
+   eopFileName               ("")
 {
 #ifdef DEBUG_PLANET_CONSTRUCT
    MessageInterface::ShowMessage("In Planet constructor for %s, with central body %s\n",
@@ -198,6 +204,7 @@ Planet::Planet(std::string name, const std::string &cBody) :
 Planet::Planet(const Planet &pl) :
    CelestialBody  (pl),
    nutationUpdateInterval         (pl.nutationUpdateInterval),
+   eopFileName                    (pl.eopFileName),
    default_nutationUpdateInterval (pl.default_nutationUpdateInterval)
 {
 }
@@ -222,6 +229,9 @@ Planet& Planet::operator=(const Planet &pl)
    CelestialBody::operator=(pl);
    nutationUpdateInterval          = pl.nutationUpdateInterval;
    default_nutationUpdateInterval  = pl.default_nutationUpdateInterval;
+   
+   eopFileName                     = pl.eopFileName;
+   
    return *this;
 }
 
@@ -234,6 +244,27 @@ Planet& Planet::operator=(const Planet &pl)
 //------------------------------------------------------------------------------
 Planet::~Planet()
 {
+}
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Initializes the CelestialBody class.
+ *
+ * @return  success flag
+ */
+//------------------------------------------------------------------------------
+bool Planet::Initialize()
+{
+   #ifdef DEBUG_PLANET_INIT
+   MessageInterface::ShowMessage
+      ("Planet::Initialize() this=<%p> %10s\n",
+       this, GetName().c_str());
+   #endif
+   if (eopFileName != "")
+      GmatGlobal::Instance()->GetEopFile()->ResetEopFile(eopFileName);
+   return CelestialBody::Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -625,6 +656,11 @@ bool Planet::IsParameterReadOnly(const Integer id) const
       if (instanceName == SolarSystem::EARTH_NAME) return false;
       else                                         return true;
    }
+   if (id == EOP_FILE_NAME)
+   {
+      if (instanceName == SolarSystem::EARTH_NAME) return false;
+      else                                         return true;
+   }
    return CelestialBody::IsParameterReadOnly(id);
 }
 
@@ -707,6 +743,72 @@ Real Planet::SetRealParameter(const std::string &label, const Real value)
    return SetRealParameter(GetParameterID(label), value);
 }
 
+//------------------------------------------------------------------------------
+//  std::string  GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  string value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string Planet::GetStringParameter(const Integer id) const
+{
+   #ifdef DEBUG_GET_STRING
+   MessageInterface::ShowMessage
+      ("Planet::GetStringParameter() '%s' entered, id = %d\n",
+       GetName().c_str(), id);
+   #endif
+   
+   if (id == EOP_FILE_NAME)         return eopFileName;
+   
+   return CelestialBody::GetStringParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool  SetStringParameter(const Integer id, const std::string value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> string value for the requested parameter.
+ *
+ * @exception <SolarSystemException> thrown if value is out of range
+ *
+ * @return  success flag.
+ *
+ */
+//------------------------------------------------------------------------------
+bool Planet::SetStringParameter(const Integer id,
+                                const std::string &value)
+{
+   #ifdef DEBUG_PLANET_SET_STRING
+   std::string idString = GetParameterText(id);
+   MessageInterface::ShowMessage
+      ("Planet::SetStringP:: id = %d (%s), value = %s\n",
+       id, idString.c_str(), value.c_str());
+   #endif
+
+   if (id == EOP_FILE_NAME)
+   {
+      if (instanceName == SolarSystem::EARTH_NAME)
+      {
+         eopFileName = value;
+         return true;
+      }
+   }
+   
+   return CelestialBody::SetStringParameter(id, value);
+}
+   
+
 //---------------------------------------------------------------------------
 //  bool IsParameterCloaked(const Integer id) const
 //---------------------------------------------------------------------------
@@ -752,6 +854,12 @@ bool Planet::IsParameterEqualToDefault(const Integer id) const
       if (default_nutationUpdateInterval == nutationUpdateInterval)     return true;
       else                                                              return false;
    }
+   if (id == EOP_FILE_NAME)
+   {
+      if (eopFileName == "")  return true;
+      else                   return false;
+   }
+
    return CelestialBody::IsParameterEqualToDefault(id);
 }
 

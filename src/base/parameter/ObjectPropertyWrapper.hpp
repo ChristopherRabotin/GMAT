@@ -65,6 +65,8 @@ public:
    
    virtual Real                EvaluateReal() const;
    virtual bool                SetReal(const Real toValue);
+   virtual const Rmatrix&      EvaluateArray() const;
+   virtual bool                SetArray(const Rmatrix &toValue); 
    virtual bool                SetRvector(const Rvector &toValue);
    virtual std::string         EvaluateString() const;
    virtual bool                SetString(const std::string &toValue); 

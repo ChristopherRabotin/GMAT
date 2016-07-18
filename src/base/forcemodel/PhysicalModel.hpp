@@ -120,6 +120,11 @@
 
 #include <math.h>
 
+
+
+class PropagationStateManager;
+
+
 /** 
  * Base class used to model the physical system
  * 
@@ -160,6 +165,8 @@ public:
    virtual void SetDimension(Integer);
    virtual void SetState(const Real * st);
    virtual void SetState(GmatState * st);
+
+   virtual CelestialBody* GetForceOrigin();
 
    Real GetErrorThreshold() const;
    bool SetErrorThreshold(const Real thold = 0.10);
@@ -208,7 +215,8 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity);
+                         Integer quantity, Integer sizeOfType);
+   virtual bool SetStmRowId(Integer rowNumber, Integer rowId);
    
 
    // Parameter accessor methods -- inherited from GmatBase
@@ -237,6 +245,13 @@ public:
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
                               const std::string &name, const Integer index);
 
+   virtual void        SetPropStateManager(PropagationStateManager *sm);
+
+   // Methods used for PM based Parameters
+   virtual bool        BuildModelState(GmatEpoch now, Real *state,
+                                       Real *j2kState, Integer dimension = 6);
+
+
 protected:
       
    /// pointer to the body for which this force is computed
@@ -250,6 +265,8 @@ protected:
    /// Flag that is set when SetState() or SetTime() is called
    bool stateChanged;
    
+   /// Prop State Manager
+   PropagationStateManager *psm;
    /// GMAT state that the physical model uses
    GmatState *theState;
    /// Array of data parameters containing the model data
@@ -286,6 +303,10 @@ protected:
    Integer                   stmStart;
    /// Number of STM matrices that need to be filled
    Integer                   stmCount;
+   /// Number of rows/columns in the STM
+   Integer                   stmRowCount;
+   /// Mapping for the STM entries
+   IntegerArray              stmRowId;
 
    /// Flag indicating that the orbital A-matrix should be filled
    bool                      fillAMatrix;
@@ -294,9 +315,9 @@ protected:
    /// Number of A-matrices that need to be filled
    Integer                   aMatrixCount;
 
-   // Methods used for PM based Parameters
-   virtual bool              BuildModelState(GmatEpoch now, Real *state,
-                                   Real *j2kState, Integer dimension = 6);
+   //// Methods used for PM based Parameters
+   //virtual bool              BuildModelState(GmatEpoch now, Real *state,
+   //                                Real *j2kState, Integer dimension = 6);
 
    /// Parameter IDs
    enum

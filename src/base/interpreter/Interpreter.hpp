@@ -200,6 +200,15 @@ protected:
    ScriptReadWriter  *theReadWriter;
    TextParser        theTextParser;
    
+   /// Name of the current script file being read (main or include file)
+   std::string  currentScriptBeingRead;
+   /// Fullpath file of the last include file detected
+   std::string lastIncludeFile;
+   /// Fullpath file of the last BeginMissionSequence detected
+   std::string lastFileHasBMS;
+   /// Flag indicating if resource or command created from include files
+   bool         isReadingIncludeFile;
+   
    bool         inCommandMode;
    bool         inRealCommandMode;
    bool         beginMissionSeqFound;
@@ -380,6 +389,7 @@ private:
    StringArray   functionList;
    StringArray   hardwareList;
    StringArray   measurementList;
+   StringArray   measurementModelList;
    StringArray   trackingSystemList;
    StringArray   obtypeList;
    StringArray   odeModelList;
@@ -393,7 +403,9 @@ private:
    StringArray   celestialBodyList;
    StringArray   eventLocatorList;
    StringArray   interfaceList;
-   
+   StringArray   errorModelList;
+   StringArray   dataFilterList;
+
    StringArray   matlabFunctionNames;
    
    static StringArray   allObjectTypeList;

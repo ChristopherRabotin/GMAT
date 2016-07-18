@@ -350,7 +350,10 @@ void FunctionManager::SetFunction(Function *theFunction)
    #endif
    currentFunction = theFunction;
    currentFunction->SetStringParameter("FunctionName", functionName);
-   if (currentFunction->IsOfType("GmatFunction"))
+   // Now BuiltinGmatFunction should be also allowed (LOJ: 2016.05.04)
+   //if (currentFunction->IsOfType("GmatFunction"))
+   if (currentFunction->IsOfType("GmatFunction") ||
+       currentFunction->IsOfType("BuiltinGmatFunction"))
    {
       fcs = currentFunction->GetFunctionControlSequence();
    }
@@ -1132,6 +1135,13 @@ Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
 //------------------------------------------------------------------------------
 // GmatBase* EvaluateObject(FunctionManager *callingFM)
 //------------------------------------------------------------------------------
+/**
+ * Returns reference object pointer so that object can be assigned in a math
+ * equation when GmatFunction returns an object. It used only allow GmatFunction
+ * returning numeric values in a math equation. For example,
+ * "sc = MyFunction(sc)" will work.
+ */
+//------------------------------------------------------------------------------
 GmatBase* FunctionManager::EvaluateObject(FunctionManager *callingFM)
 {
    if (currentFunction == NULL)
@@ -1314,6 +1324,11 @@ bool FunctionManager::ValidateFunctionArguments()
    // so number of inputs must match for now.
    if (passedIns.size() != inFormalNames.size())
    {
+      #ifdef DEBUG_FM_INIT
+      MessageInterface::ShowMessage
+         ("**** ERROR **** FM::ValidateFunctionArguments() throwing exception: "
+          "Number of inputs doesn't match\n");
+      #endif
       FunctionException ex;
       ex.SetDetails("The function '%s' expecting %d input argument(s), but called "
                     "with %d argument(s)", currentFunction->GetFunctionPathAndName().c_str(),
@@ -1327,6 +1342,11 @@ bool FunctionManager::ValidateFunctionArguments()
    // Let's just check for more than formal output for now.
    if (passedOuts.size() > outFormalNames.size())
    {
+      #ifdef DEBUG_FM_INIT
+      MessageInterface::ShowMessage
+         ("**** ERROR **** FM::ValidateFunctionArguments() throwing exception: "
+          "Number of outputs doesn't match\n");
+      #endif
       FunctionException ex;
       ex.SetDetails("The function '%s' expecting %d output argument(s), but called "
                     "with %d argument(s)", currentFunction->GetFunctionPathAndName().c_str(),

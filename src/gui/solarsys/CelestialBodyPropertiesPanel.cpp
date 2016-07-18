@@ -380,7 +380,7 @@ void CelestialBodyPropertiesPanel::Create()
    muUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("km^3/sec^2"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    // eq. radius
-   eqRadStaticText      = new wxStaticText(this, ID_TEXT, wxString("Equatorial "GUI_ACCEL_KEY"Radius"),
+   eqRadStaticText      = new wxStaticText(this, ID_TEXT, wxString("Equatorial " GUI_ACCEL_KEY "Radius"),
                           wxDefaultPosition, wxSize(-1,-1), 0);
    eqRadTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_EQRAD, wxT(""),
                           wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));

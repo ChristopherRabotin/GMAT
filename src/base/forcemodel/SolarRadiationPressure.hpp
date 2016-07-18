@@ -137,7 +137,7 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity);
+                         Integer quantity, Integer sizeOfType);
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -240,6 +240,11 @@ protected:
    Integer crID;
    Integer areaID;
 
+   bool estimatingCr;
+   Integer crEpsilonID;
+   Integer crEpsilonRow;
+   std::vector<Real> crEpsilon;
+   std::vector<Real> crInitial;
 
 //   void     FindShadowState(bool &lit, bool &dark, Real *state);
 //   Real     ShadowFunction(Real *state);

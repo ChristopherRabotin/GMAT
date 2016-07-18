@@ -26,7 +26,7 @@
  */
 //------------------------------------------------------------------------------
 #include "Sensor.hpp"
-#include "GmatBaseException.hpp"
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_SET_REAL_PARA
@@ -38,18 +38,18 @@
 /// Text strings used to script Sensor properties
 const std::string
 Sensor::PARAMETER_TEXT[SensorParamCount - HardwareParamCount] =
-   {
-      "SensorID",
-      "HardwareDelay",
-   };
+{
+   "SensorID",
+   "HardwareDelay",
+};
 
 /// Integer IDs associated with the RFHardware properties
 const Gmat::ParameterType
 Sensor::PARAMETER_TYPE[SensorParamCount - HardwareParamCount] =
-   {
-      Gmat::STRING_TYPE,
-      Gmat::REAL_TYPE,
-   };
+{
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+};
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -66,14 +66,14 @@ Sensor::PARAMETER_TYPE[SensorParamCount - HardwareParamCount] =
  */
 //-----------------------------------------------------------------------------
 Sensor::Sensor(const std::string &type, const std::string &name) :
-        Hardware       (Gmat::HARDWARE, type, name),
-        signal1        (NULL),
-        signal2        (NULL),
-        hardwareDelay1 (0.0),
-        hardwareDelay2 (0.0),
-        isTransmitted1 (false),
-        isTransmitted2 (false),
-        sensorID       ("")
+   Hardware       (Gmat::HARDWARE, type, name),
+   signal1        (NULL),
+   signal2        (NULL),
+   hardwareDelay1 (0.0),
+   hardwareDelay2 (0.0),
+   isTransmitted1 (false),
+   isTransmitted2 (false),
+   sensorID       ("")
 {
    objectTypes.push_back(Gmat::SENSOR);
    objectTypeNames.push_back("Sensor");
@@ -109,21 +109,21 @@ Sensor::Sensor(const Sensor & sensor) :
    isTransmitted2  (sensor.isTransmitted2),
    sensorID        ("")
 {
-	signal1 = NULL;
-	if (sensor.signal1 != NULL)
-	{
-		signal1 = new Signal();
-		signal1->SetEpoch(sensor.signal1->GetEpoch());
-		signal1->SetValue(sensor.signal1->GetValue());
-	}
+   signal1 = NULL;
+   if (sensor.signal1 != NULL)
+   {
+      signal1 = new Signal();
+      signal1->SetEpoch(sensor.signal1->GetEpoch());
+      signal1->SetValue(sensor.signal1->GetValue());
+   }
 
-	signal2 = NULL;
-	if (sensor.signal2 != NULL)
-	{
-		signal2 = new Signal();
-		signal2->SetEpoch(sensor.signal2->GetEpoch());
-		signal2->SetValue(sensor.signal2->GetValue());
-	}
+   signal2 = NULL;
+   if (sensor.signal2 != NULL)
+   {
+      signal2 = new Signal();
+      signal2->SetEpoch(sensor.signal2->GetEpoch());
+      signal2->SetValue(sensor.signal2->GetValue());
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -151,34 +151,34 @@ Sensor & Sensor::operator=(const Sensor & sensor)
 
       if (sensor.signal1 != NULL)
       {
-      	if (signal1 != NULL)
-      		*signal1 = *(sensor.signal1);
-      	else
-      		signal1 = new Signal(*(sensor.signal1));
+         if (signal1 != NULL)
+            *signal1 = *(sensor.signal1);
+         else
+            signal1 = new Signal(*(sensor.signal1));
       }
       else
       {
-      	if (signal1 != NULL)
-      	{
-      		delete signal1;
-      		signal1 = NULL;
-      	}
+         if (signal1 != NULL)
+         {
+            delete signal1;
+            signal1 = NULL;
+         }
       }
 
       if (sensor.signal2 != NULL)
       {
-      	if (signal2 != NULL)
-      		*signal2 = *(sensor.signal2);
-      	else
-      		signal2 = new Signal(*(sensor.signal2));
+         if (signal2 != NULL)
+            *signal2 = *(sensor.signal2);
+         else
+            signal2 = new Signal(*(sensor.signal2));
       }
       else
       {
-      	if (signal2 != NULL)
-      	{
-      		delete signal2;
-      		signal2 = NULL;
-      	}
+         if (signal2 != NULL)
+         {
+            delete signal2;
+            signal2 = NULL;
+         }
       }
 
       sensorID       = "";
@@ -205,7 +205,12 @@ Integer Sensor::GetParameterID(const std::string & str) const
    for (Integer i = HardwareParamCount; i < SensorParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - HardwareParamCount])
+      {
+         if (IsParameterReadOnly(i))
+            throw HardwareException("Error: '" + str + "' parameter was not defined in GMAT " + typeName + "'s syntax.\n");
+         
          return i;
+      }
    }
 
    return Hardware::GetParameterID(str);
@@ -287,10 +292,10 @@ Gmat::ParameterType Sensor::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Sensor::GetParameterUnit(const Integer id) const
 {
-	if (id == HARDWARE_DELAY)
-		return "s";					// Unit of hardware delay is (s) second
-	if (id == SENSOR_ID)
-		return "";					// Sensor ID has no unit
+   if (id == HARDWARE_DELAY)
+      return "s";               // Unit of hardware delay is (s) second
+   if (id == SENSOR_ID)
+      return "";                // Sensor ID has no unit
 
    return Hardware::GetParameterUnit(id);
 }
@@ -344,6 +349,9 @@ bool Sensor::IsParameterReadOnly(const Integer id) const
 {
    if ((id == DIRECTION_X) || (id == DIRECTION_Y) || (id == DIRECTION_Z))
       return true;
+
+   if ((id == HARDWARE_DELAY)||(id == SENSOR_ID))
+      return true; 
 
    return Hardware::IsParameterReadOnly(id);
 }
@@ -462,7 +470,7 @@ Real Sensor::GetRealParameter(const Integer id, const Integer index) const
             if(index == 1)
                return hardwareDelay2;
             else
-               throw new GmatBaseException("Index is out of bound\n");
+               throw HardwareException("Index is out of bound\n");
          }
       default:
          break;
@@ -503,7 +511,7 @@ Real Sensor::GetRealParameter(const Integer id) const
 Real Sensor::SetRealParameter(const Integer id, const Real value, const Integer index)
 {
    #ifdef DEBUG_SET_REAL_PARA
-	  MessageInterface::ShowMessage("Sensor::SetRealParameter(id = %d, value = %le, index = %d)\n",id, value, index);
+      MessageInterface::ShowMessage("Sensor::SetRealParameter(id = %d, value = %le, index = %d)\n",id, value, index);
    #endif
 
    switch (id)
@@ -511,16 +519,22 @@ Real Sensor::SetRealParameter(const Integer id, const Real value, const Integer 
       case HARDWARE_DELAY:
          if (index == 0)
          {
+            if (value < 0.0)
+               throw HardwareException("Error: A negative number was set to " + GetName() + ".HardwareDelay parameter.\n");
+
             hardwareDelay1 = value;
             return hardwareDelay1;
          }
          else if(index == 1)
          {
+            if (value < 0.0)
+               throw HardwareException("Error: A negative number was set to " + GetName() + ".HardwareDelay parameter.\n");
+
             hardwareDelay2 = value;
             return hardwareDelay2;
          }
          else
-            throw new GmatBaseException("Index is out of bound\n");
+            throw HardwareException("Index is out of bound\n");
 
       default:
          break;
@@ -657,19 +671,29 @@ Real Sensor::GetDelay(Integer whichOne)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetDelay(Real delay, Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * This function is used to set hardware delay.
+ *
+ * @return true if the delay is set successfully, false otherwise
+ */
+//------------------------------------------------------------------------------
 bool Sensor::SetDelay(Real delay, Integer whichOne)
 {
-	switch(whichOne)
-	{
-	case 0:
-		hardwareDelay1 = delay;
-		return true;
-	case 1:
-		hardwareDelay2 = delay;
-		return true;
-	default:
-		return false;
-	}
+   switch(whichOne)
+   {
+   case 0:
+      hardwareDelay1 = delay;
+      return true;
+   case 1:
+      hardwareDelay2 = delay;
+      return true;
+   default:
+      return false;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -679,8 +703,8 @@ bool Sensor::SetDelay(Real delay, Integer whichOne)
  * Verify a given signal is feasible or not.
  *
  * @param whichOne      The index specifying a given signal.
- *                                              for Transponder; 1 for input signal, 2 for output signal
- *                                              for Transmitter or Receiver; only one signal is used
+ *                      for Transponder; 1 for input signal, 2 for output signal
+ *                      for Transmitter or Receiver; only one signal is used
  *
  * @return      true if it is feasible, false otherwise.
  */
@@ -761,7 +785,7 @@ Signal* Sensor::GetSignal(Integer whichOne)
 /**
  * Set a signal for a given index.
  *
- * @param s                     The signal needed to set to
+ * @param s             The signal needed to set to
  * @param whichOne      The index specifying a given signal.
  *
  * @return      true if signal is set, false otherwise.

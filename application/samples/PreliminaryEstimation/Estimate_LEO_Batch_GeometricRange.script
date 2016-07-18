@@ -105,7 +105,7 @@ GMAT RangeMeasurement.Type = GeometricRange;
 GMAT RangeMeasurement.Participants = {Maui, ODSat};
 GMAT RangeMeasurement.Bias = [0];
 GMAT RangeMeasurement.NoiseSigma = [1e-05];
-GMAT RangeMeasurement.TimeConstant = 6000;
+% GMAT RangeMeasurement.TimeConstant = 6000;
 RangeMeasurement.Covariance.Bias = [1000000];
 
 %----------------------------------------
@@ -127,6 +127,7 @@ GMAT BatchEst.AbsoluteTol = 1e-05;
 GMAT BatchEst.RelativeTol = 1e-06;
 GMAT BatchEst.Propagator = ODProp;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
+GMAT BatchEst.OLSEInitialRMSSigma = 3e12;
 
 %----------------------------------------
 %---------- Plots and Reports

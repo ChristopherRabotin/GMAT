@@ -273,8 +273,8 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
    {
       #if DEBUG_REFDATA_OBJECT > 1
       MessageInterface::ShowMessage
-         ("   mRefObjList[%d].objType=%d, %s\n", i,
-               mRefObjList[i].objType, mRefObjList[i].objName.c_str());
+         ("   mRefObjList[%d].objType=%d, obj=<%p>, %s\n", i, mRefObjList[i].objType,
+          mRefObjList[i].obj, mRefObjList[i].objName.c_str());
       #endif
       
       if (mRefObjList[i].objType == type)
@@ -288,16 +288,34 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
          
          return mRefObjList[i].objName; 
       }
+      else
+      {
+         if (mRefObjList[i].obj != NULL && mRefObjList[i].obj->IsOfType(type))
+         {
+            //Notes: will return first object name.
+            #if DEBUG_REFDATA_OBJECT > 1
+            MessageInterface::ShowMessage
+               ("RefData::GetRefObjectName() type=%d returning: %s\n", type,
+                mRefObjList[i].objName.c_str());
+            #endif
+            
+            return mRefObjList[i].objName; 
+         }
+      }
    }
    
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
       ("RefData::GetRefObjectName() '%s', type=%d, throwing exception "
-       "INVALID_OBJECT_TYPE\n", mActualParamName.c_str(), type);
+       "Unknown Ref Object Type, ref. object of this type never set.\n",
+       mActualParamName.c_str(), type);
    #endif
    
-   //return "RefData::GetRefObjectName(): INVALID_OBJECT_TYPE";
-   throw ParameterException("RefData::GetRefObjectName(): INVALID_OBJECT_TYPE");
+   std::stringstream errmsg;
+   errmsg << "*** INTERNAL ERROR: RefData::GetRefObjectName(): The type " << type <<
+      " is unknown ref object type for " << mActualParamName << "' or " <<
+      "ref object never set to this Parameter in the Moderator.";
+   throw ParameterException(errmsg.str());
 }
 
 
@@ -568,7 +586,8 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
    // Check for allowed object types for rename
    if (type != Gmat::SPACECRAFT       && type != Gmat::COORDINATE_SYSTEM &&
        type != Gmat::CALCULATED_POINT && type != Gmat::BURN              &&
-       type != Gmat::IMPULSIVE_BURN   && type != Gmat::HARDWARE          &&
+       type != Gmat::IMPULSIVE_BURN   && type != Gmat::FINITE_BURN       &&
+       type != Gmat::HARDWARE         &&
        type != Gmat::THRUSTER         && type != Gmat::FUEL_TANK         &&
        type != Gmat::BARYCENTER       && type != Gmat::LIBRATION_POINT   &&
        type != Gmat::BODY_FIXED_POINT && type != Gmat::GROUND_STATION    &&
@@ -868,18 +887,32 @@ std::string RefData::FindFirstObjectName(const std::string &typeName) const
 //------------------------------------------------------------------------------
 std::string RefData::FindFirstObjectName(const Gmat::ObjectType type) const
 {
+   #if DEBUG_REFDATA_OBJECT > 1
+   MessageInterface::ShowMessage
+      ("RefData::FindFirstObjectName() entered, type=%d\n", type);
+   #endif
    for (int i=0; i<mNumRefObjects; i++)
    {
       #if DEBUG_REFDATA_OBJECT > 1
       MessageInterface::ShowMessage
-         ("RefData::FindFirstObjectName() mRefObjList[%d].objType=%d, objName=%s\n",
-          i, mRefObjList[i].objType, mRefObjList[i].objName.c_str());
+         ("   mRefObjList[%d].objType=%d, objName=%s\n", i, mRefObjList[i].objType,
+          mRefObjList[i].objName.c_str());
       #endif
       
       if (mRefObjList[i].objType == type)
+      {
+         #if DEBUG_REFDATA_OBJECT > 1
+         MessageInterface::ShowMessage
+            ("RefData::FindFirstObjectName() returnig '%s'\n", mRefObjList[i].objName.c_str());
+         #endif
          return mRefObjList[i].objName;
+      }
    }
    
+   #if DEBUG_REFDATA_OBJECT > 1
+   MessageInterface::ShowMessage
+      ("RefData::FindFirstObjectName() returnig '', no name of given type found\n");
+   #endif
    return "";
 }
 

@@ -78,6 +78,9 @@ Thruster::PARAMETER_TEXT[ThrusterParamCount - HardwareParamCount] =
    "Tank",
    "MixRatio",
    "GravitationalAccel",
+   "Thrust",
+   "Isp",
+   "MassFlowRate",
 };
 
 /// Types of the parameters used by thrusters.
@@ -94,6 +97,9 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
    Gmat::OBJECTARRAY_TYPE, // "Tank"
    Gmat::RVECTOR_TYPE,     // "MixRatio"
    Gmat::REAL_TYPE,        // "GravitationalAccel"
+   Gmat::REAL_TYPE,        // "Thrust"
+   Gmat::REAL_TYPE,        // "Isp"
+   Gmat::REAL_TYPE,        // "MassFlowRate"
 };
 
 
@@ -131,6 +137,7 @@ Thruster::Thruster(const std::string &typeStr, const std::string &nomme) :
    pressure             (1500.0),
    temperatureRatio     (1.0),
    thrust               (500.0),
+   appliedThrustMag     (0.0),
    impulse              (2150.0),
    mDot                 (0.0),
    decrementMass        (false),
@@ -231,6 +238,7 @@ Thruster::Thruster(const Thruster& th) :
    pressure             (th.pressure),
    temperatureRatio     (th.temperatureRatio),
    thrust               (th.thrust),
+   appliedThrustMag     (th.appliedThrustMag),
    impulse              (th.impulse),
    mDot                 (th.mDot),
    decrementMass        (th.decrementMass),
@@ -332,6 +340,7 @@ Thruster& Thruster::operator=(const Thruster& th)
    pressure            = th.pressure;
    temperatureRatio    = th.temperatureRatio;
    thrust              = th.thrust;
+   appliedThrustMag    = th.appliedThrustMag;
    impulse             = th.impulse;
    mDot                = th.mDot;
    
@@ -364,6 +373,44 @@ Thruster& Thruster::operator=(const Thruster& th)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// Real GetMassFlowRate()
+//------------------------------------------------------------------------------
+Real Thruster::GetMassFlowRate()
+{
+   Real mfr = 0.0;
+   if (thrusterFiring)
+      mfr = CalculateMassFlow();
+   return mfr;
+}
+
+//------------------------------------------------------------------------------
+// Real GetThrustMagnitude()
+//------------------------------------------------------------------------------
+Real Thruster::GetThrustMagnitude()
+{
+   Real thrustMag = 0.0;
+   if (thrusterFiring)
+   {
+      CalculateThrustAndIsp();
+      thrustMag = appliedThrustMag;
+   }
+   return thrustMag;
+}
+
+//------------------------------------------------------------------------------
+// Real GetIsp()
+//------------------------------------------------------------------------------
+Real Thruster::GetIsp()
+{
+   Real isp = 0.0;
+   if (thrusterFiring)
+   {
+      CalculateThrustAndIsp();
+      isp = impulse;
+   }
+   return isp;
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -496,6 +543,14 @@ bool Thruster::IsParameterReadOnly(const Integer id) const
       if (coordSystemName != "Local")
          return true;
    
+   if (id == THRUST || id == ISP || id == MASS_FLOW_RATE ||
+       id == APPLIED_THRUST_MAG)
+      return true;
+   
+   if (tankNames.size() == 0)
+      if (id == MIXRATIO)
+         return true;
+
    return Hardware::IsParameterReadOnly(id);
 }
 
@@ -551,7 +606,15 @@ Real Thruster::GetRealParameter(const Integer id) const
          return thrustScaleFactor;
       case GRAVITATIONAL_ACCELERATION:
          return gravityAccel;
-
+      case THRUST:
+         return thrust;
+      case APPLIED_THRUST_MAG:
+         return appliedThrustMag;
+      case ISP:
+         return impulse;
+      case MASS_FLOW_RATE:
+         return mDot;
+      
       default:
          break;   // Default just drops through
    }
@@ -709,7 +772,26 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value)
    case TANK:
       // if not the same name push back
       if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end())
+      {
          tankNames.push_back(value);
+
+         // Size mix ratio vector to match tank count, and fill missing entries
+         if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+         {
+            Rvector temp(mixRatio);
+            mixRatio.SetSize(tankNames.size());
+            if (temp.IsSized())
+            {
+               Integer max = (temp.GetSize() < mixRatio.GetSize() ?
+                  temp.GetSize() : mixRatio.GetSize());
+
+               for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+               {
+                  mixRatio[i] = (i < max ? temp[i] : 1.0);
+               }
+            }
+         }
+      }
 //      else
 //         throw HardwareException("The same tank cannot be listed twice for " +
 //                     instanceName + "; " + value + " has already been assigned "
@@ -763,17 +845,6 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
    {
    case TANK:
       {
-//         if (index > 0)
-//         {
-//            std::string errmsg;
-//            errmsg =  "The value of \"";
-//            errmsg += value;
-//            errmsg += "\" on Thruster \"";
-//            errmsg += instanceName;
-//            errmsg += "\" is not an allowed value.  GMAT does not currently "
-//                  "support more than one tank per thruster";
-//            throw HardwareException(errmsg);
-//         }
 
          if (index < (Integer)tankNames.size())
             tankNames[index] = value;
@@ -799,6 +870,27 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
             }
          }
          
+         // Size mix ratio vector to match tank count, and fill missing entries
+         if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+         {
+            #ifdef DEBUG_TANK_SETTINGS
+               MessageInterface::ShowMessage("Sizing Mix Ratio to %d\n",
+                     tankNames.size());
+            #endif
+            Rvector temp(mixRatio);
+            mixRatio.SetSize(tankNames.size());
+            if (temp.IsSized())
+            {
+               Integer max = (temp.GetSize() < mixRatio.GetSize() ?
+                              temp.GetSize() : mixRatio.GetSize());
+
+               for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+               {
+                  mixRatio[i] = (i < max ? temp[i] : 1.0);
+               }
+            }
+         }
+
          return true;
       }
    default:
@@ -1348,6 +1440,11 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //      else
       if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
       {
+         #ifdef DEBUG_THRUSTER_REF_OBJ
+         MessageInterface::ShowMessage
+            ("   ------ the tank pointer of name %s was NOT found in the array (of size %d)\n",
+                  name.c_str(), (Integer) tanks.size());
+         #endif
          // Replace old tank with new one. We don't want to delete the
          // old tank here since Spacecraft owns it (tank is not cloned in the
          // copy constructor)

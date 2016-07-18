@@ -717,11 +717,11 @@ Attitude* Factory::CreateAttitude(const std::string &ofType,
 
 
 //------------------------------------------------------------------------------
-// MeasurementModel *CreateMeasurementModel(const std::string & ofType,
+// MeasurementModelBase *CreateMeasurementModel(const std::string & ofType,
 //    const std::string & withName)
 //------------------------------------------------------------------------------
 /**
- * Creates a MeasurementModel object.
+ * Creates a MeasurementModel or TrackingFileSet object.
  *
  * Must be implemented by derived classes that create MeasurementModel objects -
  * in that case, it returns a new MeasurementModel object.  Otherwise, it
@@ -737,7 +737,7 @@ Attitude* Factory::CreateAttitude(const std::string &ofType,
  *                               objects of type MeasurementModel.
  */
 //------------------------------------------------------------------------------
-MeasurementModel* Factory::CreateMeasurementModel(const std::string & ofType,
+MeasurementModelBase* Factory::CreateMeasurementModel(const std::string & ofType,
                                          const std::string & withName)
 {
    throw FactoryException
@@ -772,6 +772,64 @@ CoreMeasurement* Factory::CreateMeasurement(const std::string & ofType,
 {
    throw FactoryException
    ("Factory::CreateMeasurement() must be implemented by a MeasurementFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// ErrorModel* CreateErrorModel(const std::string & ofType,
+//    const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a fundamental ErrorModel object.
+ *
+ * Must be implemented by derived classes that create ErrorModel objects -
+ * in that case, it returns a new ErrorModel object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type ErrorModel.
+ *
+ * @param <ofType>   specific type of ErrorModel object to create.
+ * @param <withName> name to give to the newly created ErrorModel object.
+ *
+ * @return pointer to a new ErrorModel object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type ErrorModel.
+ */
+//------------------------------------------------------------------------------
+ErrorModel* Factory::CreateErrorModel(const std::string & ofType,
+                                        const std::string & withName)
+{
+   throw FactoryException
+   ("Factory::CreateErrorModel() must be implemented by a ErrorModelFactory\n");
+}
+
+
+//------------------------------------------------------------------------------
+// DataFilter* CreateDataFilter(const std::string & ofType,
+//    const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a fundamental DataFilter object.
+ *
+ * Must be implemented by derived classes that create DataFilter objects -
+ * in that case, it returns a new DataFilter object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type DataFilter.
+ *
+ * @param <ofType>   specific type of DataFilter object to create.
+ * @param <withName> name to give to the newly created DataFilter object.
+ *
+ * @return pointer to a new DataFilter object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type DataFilter.
+ */
+//------------------------------------------------------------------------------
+DataFilter* Factory::CreateDataFilter(const std::string & ofType,
+                                        const std::string & withName)
+{
+   throw FactoryException
+   ("Factory::CreateDataFilter() must be implemented by a DataFilterFactory\n");
 }
 
 

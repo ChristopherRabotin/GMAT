@@ -38,6 +38,21 @@ if(GMAT_USE_SPICE)
 endif()
 
 # ====================================================================
+# Additional link libraries (xerces)
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
+  else()
+    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
+  endif()
+else()
+  set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
+endif()
+
+LINK_LIBRARIES(${XERCES_LIB})
+
+# ====================================================================
 # F2C
 MESSAGE("-- Use F2C version of MSISE.")
 SET(MSISE_SRCS "solarsys/msise90_sub.c")
@@ -91,6 +106,10 @@ ENDFOREACH(currdir)
 INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 
 # ====================================================================
+# extra include directory for header file (LOJ)
+INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
+
+# ====================================================================
 # source files
 SET(BASE_SRCS
     asset/AssetException.cpp
@@ -120,6 +139,7 @@ SET(BASE_SRCS
     command/BeginScript.cpp
     command/BranchCommand.cpp
     command/CallFunction.cpp
+    command/CallBuiltinGmatFunction.cpp
     command/CommandException.cpp
     command/FindEvents.cpp
     command/GmatCommand.cpp
@@ -219,10 +239,11 @@ SET(BASE_SRCS
     factory/FactoryException.cpp
     factory/FactoryManager.cpp
     factory/Factory.cpp
-    factory/ODEModelFactory.cpp
+    factory/FunctionFactory.cpp
     factory/HardwareFactory.cpp
     factory/InterfaceFactory.cpp
     factory/MathFactory.cpp
+    factory/ODEModelFactory.cpp
     factory/ParameterFactory.cpp
     factory/PhysicalModelFactory.cpp
     factory/PropagatorFactory.cpp
@@ -258,9 +279,13 @@ SET(BASE_SRCS
     foundation/SpacePoint.cpp
     foundation/StateManager.cpp
     foundation/TriggerManager.cpp
+    function/BuiltinGmatFunction.cpp
     function/Function.cpp
     function/FunctionException.cpp
     function/FunctionManager.cpp
+    function/GetEphemStates.cpp
+    function/GetLastState.cpp
+    function/SetSeed.cpp
     hardware/ChemicalTank.cpp
     hardware/ChemicalThruster.cpp
     hardware/ElectricTank.cpp
@@ -297,12 +322,18 @@ SET(BASE_SRCS
     math/Asinh.cpp
     math/Atan.cpp
     math/Atan2.cpp
+    math/BuiltinFunction.cpp
+    math/Ceil.cpp
     math/Cos.cpp
     math/Cosh.cpp
+    math/Cross3.cpp
     math/DegToRad.cpp
     math/Determinant.cpp
+    math/Diag.cpp
     math/Divide.cpp
     math/Exp.cpp
+    math/Fix.cpp
+    math/Floor.cpp
     math/FunctionRunner.cpp
     math/Log.cpp
     math/Log10.cpp
@@ -311,14 +342,25 @@ SET(BASE_SRCS
     math/MathException.cpp
     math/MathFunction.cpp
     math/MathNode.cpp
+    math/Min.cpp
+    math/Mod.cpp
     math/Multiply.cpp
     math/Negate.cpp
     math/Norm.cpp
+    math/NumericFunction.cpp
     math/Power.cpp
     math/RadToDeg.cpp
+    math/Rand.cpp
+    math/Randn.cpp
     math/Sin.cpp
     math/Sinh.cpp
+    math/Sprintf.cpp
     math/Sqrt.cpp
+    math/StringFunction.cpp
+    math/Strcat.cpp
+    math/Strcmp.cpp
+    math/Strfind.cpp
+    math/Strrep.cpp
     math/Subtract.cpp
     math/Tan.cpp
     math/Tanh.cpp
@@ -416,6 +458,7 @@ SET(BASE_SRCS
     solarsys/ExponentialAtmosphere.cpp
     solarsys/JacchiaRobertsAtmosphere.cpp
     solarsys/LibrationPoint.cpp
+    solarsys/MediaCorrectionInterface.cpp
     solarsys/Moon.cpp
     solarsys/Msise90Atmosphere.cpp
     solarsys/PlanetaryEphemException.cpp
@@ -484,14 +527,18 @@ SET(BASE_SRCS
     util/ElapsedTime.cpp
     util/EopFile.cpp
     util/FileManager.cpp
+    util/FileUpdaterSVN.cpp
     util/FileUtil.cpp
     util/GmatGlobal.cpp
+    util/GmatTime.cpp
     util/GregorianDate.cpp
+    util/IFileUpdater.cpp
     util/LeapSecsFileReader.cpp
     util/Linear.cpp
     util/MemoryTracker.cpp
     util/MessageInterface.cpp
     util/MessageReceiver.cpp
+    util/RandomNumber.cpp
     util/RealUtilities.cpp
     util/RgbColor.cpp
     util/Rmatrix33.cpp

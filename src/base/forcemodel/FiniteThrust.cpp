@@ -791,11 +791,11 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order,
             if (order == 1) 
             {
                // dr/dt = v
-                  deriv[i6]     = 
-                  deriv[1 + i6] = 
-                  deriv[2 + i6] = 
-                  deriv[3 + i6] = 
-                  deriv[4 + i6] = 
+               deriv[i6]     =
+               deriv[1 + i6] =
+               deriv[2 + i6] =
+               deriv[3 + i6] =
+               deriv[4 + i6] =
                deriv[5 + i6] = 0.0;
             } 
             else  
@@ -957,7 +957,7 @@ bool FiniteThrust::SupportsDerivative(Gmat::StateElementId id)
  */
 //------------------------------------------------------------------------------
 bool FiniteThrust::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity)
+                      Integer quantity, Integer sizeOfType)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("FiniteThrust setting start data for id = "
@@ -979,9 +979,18 @@ bool FiniteThrust::SetStart(Gmat::StateElementId id, Integer index,
 //         stmCount = quantity;
 //         stmIndex = index;
 //         fillSTM = true;
+//         stmRowCount = sqrt(sizeOfType);
 //         retval = true;
 //         break;
          
+//      case Gmat::ORBIT_A_MATRIX:
+//         stmCount = quantity;
+//         stmIndex = index;
+//         fillSTM = true;
+//         stmRowCount = sqrt(sizeOfType);
+//         retval = true;
+//         break;
+
       case Gmat::MASS_FLOW:
          // todo: add mass flow bits here
          satThrustCount = quantity;

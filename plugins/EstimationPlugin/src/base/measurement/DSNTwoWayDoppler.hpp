@@ -61,6 +61,8 @@ protected:
 
    virtual bool Evaluate(bool);
    virtual void SetHardwareDelays(bool loadEvents = true);
+
+   Real GetTurnAroundRatio(Integer freqBand);
 };
 
 #endif /* DSNTwoWayDoppler_hpp */

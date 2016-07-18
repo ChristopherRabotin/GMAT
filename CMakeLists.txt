@@ -21,9 +21,9 @@
 # Require CMake minimum version
 cmake_minimum_required(VERSION 2.8)
 
-# Support OSX 10.8+
+# Support OSX 10.8+ -> go to 10.10 as minimum
 IF(APPLE)
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8 CACHE STRING 
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.10 CACHE STRING
     "Minimum OSX version to target for deployment (at runtime). Set to empty string to target current MacOS version.")
 ENDIF()
 
@@ -47,7 +47,7 @@ endif()
 # Note that CMAKE_BUILD_TYPE is initialized to "" on the initial cmake-gui
 # run, so we check for that and set the default appropriately
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Release, Debug, RelWithDebInfo, or MinSizeRel" FORCE)
 endif()
 
 # Set default GMAT installation location
@@ -71,7 +71,7 @@ if(APPLE)
       (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
       SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd.app/Contents")
     else()
-      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT.app/Contents")
+      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT_Beta.app/Contents")
     endif()
   else()
     SET(GMAT_MAC_APPBUNDLE_PATH "")
@@ -225,6 +225,39 @@ if(PYTHON_LIB_DIR)
 else()
   MESSAGE(WARNING "Python NOT FOUND. Set PYTHON_LIB_DIR to your Python34.lib library path, and PYTHON_INCLUDE_DIR to the path to Python.h and re-configure.")
 endif()
+
+# ====================================================================
+# Added by LOJ for XERCES
+# Find Xerces
+MESSAGE(STATUS "Searching for Xerces")
+SET(XERCES_DIR "${PROJECT_SOURCE_DIR}/depends/Xerces")
+SET(XERCES_LIB_DIR "" CACHE PATH "Path to location of the Xerces library.")
+SET(XERCES_INCLUDE_DIR "" CACHE PATH "Path to location of xerces/src")
+MESSAGE(STATUS "Please set the Xerces locations")
+# FIND_PACKAGE(XercesLibs)
+
+# @todo: set correct lib for Mac/Linux
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    SET(XERCES_LIBRARY "xerces-c-3.1")
+  else()
+    SET(XERCES_LIBRARY "")
+  endif()
+else()
+  SET(XERCES_LIBRARY "xerces-c_3.lib")
+endif()
+
+
+MESSAGE(STATUS "Xerces Library: " ${XERCES_LIBRARY})
+
+if(XERCES_LIB_DIR)
+  MESSAGE(STATUS "Found Xerces: " ${XERCES_LIB_DIR})
+else()
+  MESSAGE(WARNING "Xerces NOT FOUND. Set XERCES_LIB_DIR to your Xerces34.lib library path, and XERCES_INCLUDE_DIR to the path to Xerces.h and re-configure.")
+endif()
+# ====================================================================
+
 
 # ====================================================================
 # Common build options

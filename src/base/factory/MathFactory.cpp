@@ -42,21 +42,35 @@
 #include "Atan.hpp"
 #include "Atan2.hpp"
 #include "Add.hpp"
+#include "Ceil.hpp"
 #include "Cos.hpp"
+#include "Cross3.hpp"
 #include "DegToRad.hpp"
 #include "Determinant.hpp"
+#include "Diag.hpp"
 #include "Divide.hpp"
 #include "Exp.hpp"
+#include "Fix.hpp"
+#include "Floor.hpp"
 #include "Inverse.hpp"
 #include "Log.hpp"
 #include "Log10.hpp"
+#include "Min.hpp"
+#include "Mod.hpp"
 #include "Multiply.hpp"
 #include "Negate.hpp"
 #include "Norm.hpp"
 #include "Power.hpp"
 #include "RadToDeg.hpp"
+#include "Rand.hpp"
+#include "Randn.hpp"
 #include "Sin.hpp"
+#include "Sprintf.hpp"
 #include "Sqrt.hpp"
+#include "Strcat.hpp"
+#include "Strcmp.hpp"
+#include "Strfind.hpp"
+#include "Strrep.hpp"
 #include "Subtract.hpp"
 #include "Tan.hpp"
 #include "Transpose.hpp"
@@ -117,25 +131,43 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
    else if (newType == "Abs")         // Abs(x)
       mathNode = new Abs(withName);
    
-   // Power, Log functions
-   else if (newType == "Power")       // power(x,y) or x^y
-      mathNode = new Power(withName);
+   // Real math functions
+   else if (newType == "Ceil")        // ceil(x)
+      mathNode = new Ceil(withName);
    else if (newType == "Exp")         // exp(x)
       mathNode = new Exp(withName);
+   else if (newType == "Floor")       // floor(x)
+      mathNode = new Floor(withName);
+   else if (newType == "Fix")         // fix(x)
+      mathNode = new Fix(withName);
    else if (newType == "Log")         // log(x)
       mathNode = new Log(withName);
    else if (newType == "Log10")       // log10(x)
       mathNode = new Log10(withName);
+   else if (newType == "Min")         // Min(a1, .., an)
+      mathNode = new Min(withName);
+   else if (newType == "Mod")         // mod(x)
+      mathNode = new Mod(withName);
+   else if (newType == "Power")       // power(x,y) or x^y
+      mathNode = new Power(withName);
    
-   // Matrix functions
-   else if (newType == "Transpose")   // transpose(m) or m'
-      mathNode = new Transpose(withName);
+   // Matrix, Vector functions
+   else if (newType == "Cross")       // cross(a, b)
+      mathNode = new Cross3(withName);
    else if (newType == "Det")         // det(m)
       mathNode = new Determinant(withName);
+   else if (newType == "Diag")        // diag([n1 n2 n3, ...])
+      mathNode = new Diag(withName);
    else if (newType == "Inv")         // inv(m)
       mathNode = new Inverse(withName);
    else if (newType == "Norm")        // norm(m)
       mathNode = new Norm(withName);
+   else if (newType == "Rand")        // rand(m)
+      mathNode = new Rand(withName);
+   else if (newType == "Randn")       // randn(m)
+      mathNode = new Randn(withName);
+   else if (newType == "Transpose")   // transpose(m) or m'
+      mathNode = new Transpose(withName);
    
    // Trigonometric functions
    else if (newType == "Sin")         // sin(x)
@@ -161,6 +193,18 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
    
    else if (newType == "FunctionRunner")
       mathNode = new FunctionRunner(withName);
+   
+   // String functions
+   else if (newType == "Sprintf")
+      mathNode = new Sprintf(withName);
+   else if (newType == "Strcat")
+      mathNode = new Strcat(withName);
+   else if (newType == "Strcmp")
+      mathNode = new Strcmp(withName);
+   else if (newType == "Strfind")
+      mathNode = new Strfind(withName);
+   else if (newType == "Strrep")
+      mathNode = new Strrep(withName);
    
    return mathNode;
 }
@@ -268,25 +312,34 @@ void MathFactory::BuildCreatables()
    creatables.push_back("MathElement");
    
    // Simple math operations
-   creatables.push_back("Negate");
    creatables.push_back("Add");
-   creatables.push_back("Subtract");
-   creatables.push_back("Multiply");
    creatables.push_back("Divide");
+   creatables.push_back("Multiply");
+   creatables.push_back("Negate");
+   creatables.push_back("Subtract");
    
-   // Math functions
-   creatables.push_back("Sqrt");
+   // Real math functions
    creatables.push_back("Abs");
-   creatables.push_back("Power");
+   creatables.push_back("Ceil");
    creatables.push_back("Exp");
+   creatables.push_back("Fix");
+   creatables.push_back("Floor");
    creatables.push_back("Log");
    creatables.push_back("Log10");
+   creatables.push_back("Min");
+   creatables.push_back("Mod");
+   creatables.push_back("Power");
+   creatables.push_back("Sqrt");
    
-   // Matrix functions
-   creatables.push_back("Transpose");
+   // Matrix and vector functions
+   creatables.push_back("Cross");
    creatables.push_back("Det");
+   creatables.push_back("Diag");
    creatables.push_back("Inv");
    creatables.push_back("Norm");
+   creatables.push_back("Rand");
+   creatables.push_back("Randn");
+   creatables.push_back("Transpose");
    
    // Trigonometric functions
    creatables.push_back("Sin");
@@ -302,6 +355,13 @@ void MathFactory::BuildCreatables()
    creatables.push_back("RadToDeg");
    creatables.push_back("Deg2Rad");  
    creatables.push_back("Rad2Deg");
+   
+   // String functions
+   creatables.push_back("Sprintf"); // For formatted string output using sprintf function
+   creatables.push_back("Strcat");  // For sring concatenation eg, strcat(a, b, 'string literal')
+   creatables.push_back("Strcmp");  // For sring comparison eg, strcmp(a, 'string literal')
+   creatables.push_back("Strfind"); // For sring find eg, strfind(a, 'string literal')
+   creatables.push_back("Strrep");  // For sring replacement eg, strrep(a, 'string literal')
    
    // GmatFunction
    creatables.push_back("FunctionRunner");  

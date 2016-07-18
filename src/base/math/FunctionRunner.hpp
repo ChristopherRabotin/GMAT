@@ -55,7 +55,6 @@ public:
    void                 SetFunctionInputs();
    const StringArray&   GetInputs();
    void                 AddInputNode(MathNode *node);
-   const MathNodeArray& GetInputNodes();
    
    // for Function output
    void                 AddFunctionOutput(const std::string &name);

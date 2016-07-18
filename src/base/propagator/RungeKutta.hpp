@@ -192,7 +192,7 @@ protected:
     bool SetupAccumulator();
     void ClearArrays();
     virtual Real EstimateError();
-    bool AdaptStep(Real maxerror);
+    virtual bool AdaptStep(Real maxerror);
 
     //------------------------------------------------------------------------------
     // virtual void SetCoefficients(void)

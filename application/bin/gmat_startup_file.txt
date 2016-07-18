@@ -33,41 +33,43 @@
 #-----------------------------------------------------------
 # Runtime options
 #-----------------------------------------------------------
-#MATLAB_MODE             = SINGLE
-#MATLAB_MODE             = SHARED
-#MATLAB_MODE             = NO_MATLAB
-#WRITE_GMAT_KEYWORD      = ON
+#MATLAB_MODE           = SINGLE
+#MATLAB_MODE           = SHARED
+#MATLAB_MODE           = NO_MATLAB
+#WRITE_GMAT_KEYWORD    = ON
 
 #-----------------------------------------------------------
 # Plugins
 #-----------------------------------------------------------
 # Default plugins
-PLUGIN                   = ../plugins/libDataInterface
-PLUGIN                   = ../plugins/libEphemPropagator
-PLUGIN                   = ../plugins/libEventLocator
-PLUGIN                   = ../plugins/libFormation
-PLUGIN                   = ../plugins/libGmatFunction
-PLUGIN                   = ../plugins/libNewParameters
-PLUGIN                   = ../plugins/libProductionPropagators
-PLUGIN                   = ../plugins/libPythonInterface
-PLUGIN                   = ../plugins/libStation
-PLUGIN                   = ../plugins/libMatlabInterface
-PLUGIN                   = ../plugins/libFminconOptimizer
+PLUGIN                  = ../plugins/libDataInterface
+PLUGIN                  = ../plugins/libEphemPropagator
+PLUGIN                  = ../plugins/libEventLocator
+PLUGIN                  = ../plugins/libFormation
+PLUGIN                  = ../plugins/libGmatFunction
+PLUGIN                  = ../plugins/libNewParameters
+PLUGIN                  = ../plugins/libProductionPropagators
+PLUGIN                  = ../plugins/libPythonInterface
+PLUGIN                  = ../plugins/libStation
+PLUGIN                  = ../plugins/libMatlabInterface
+PLUGIN                  = ../plugins/libFminconOptimizer
+PLUGIN                  = ../plugins/libProductionPropagators
+PLUGIN                  = ../plugins/libGmatEstimation
 
 # Alpha plugins (disabled by default)
-#PLUGIN                  = ./libCInterface
-#PLUGIN                  = ../plugins/libGmatEstimation
-#PLUGIN                  = ../plugins/libGeometricMeasurements
-#PLUGIN                  = ../plugins/libExtraPropagators
-#PLUGIN                  = ../plugins/libPolyhedronGravity
-#PLUGIN                  = ../plugins/libSaveCommand
+PLUGIN                  = ./libCInterface
+PLUGIN                  = ../plugins/libGeometricMeasurements
+PLUGIN                  = ../plugins/libExtraPropagators
+PLUGIN                  = ../plugins/libPolyhedronGravity
+PLUGIN                  = ../plugins/libSaveCommand
+PLUGIN                  = ../plugins/libThrustFile
 
 # Internal-only plugins
-PLUGIN                   = ../plugins/proprietary/libMarsGRAM
-PLUGIN                   = ../plugins/proprietary/libMsise86
-PLUGIN                   = ../plugins/proprietary/libNRLMsise00
-PLUGIN                   = ../plugins/proprietary/libSNOptimizer
-PLUGIN                   = ../plugins/proprietary/libVF13Optimizer
+PLUGIN                  = ../plugins/proprietary/libMarsGRAM
+PLUGIN                  = ../plugins/proprietary/libMsise86
+PLUGIN                  = ../plugins/proprietary/libNRLMsise00
+PLUGIN                  = ../plugins/proprietary/libSNOptimizer
+PLUGIN                  = ../plugins/proprietary/libVF13Optimizer
 
 #-----------------------------------------------------------
 # Directory/file paths
@@ -78,116 +80,119 @@ PLUGIN                   = ../plugins/proprietary/libVF13Optimizer
 # files, at runtime. If this occurs, set ROOT_PATH to the
 # absolute path to your top-level GMAT directory.
 
-ROOT_PATH                = ../
+ROOT_PATH              = ../
 
 #-----------------------------------------------------------
-OUTPUT_PATH              = ../output/
-LOG_FILE                 = OUTPUT_PATH/GmatLog.txt
-SCREENSHOT_FILE          = OUTPUT_PATH/GmatScreenShot
+OUTPUT_PATH            = ../output/
+LOG_FILE               = OUTPUT_PATH/GmatLog.txt
+SCREENSHOT_FILE        = OUTPUT_PATH/GmatScreenShot
 #-----------------------------------------------------------
-MEASUREMENT_PATH         = OUTPUT_PATH/
+MEASUREMENT_PATH       = OUTPUT_PATH/
 #-----------------------------------------------------------
-VEHICLE_EPHEM_PATH       = OUTPUT_PATH/
+VEHICLE_EPHEM_PATH     = OUTPUT_PATH/
 #-----------------------------------------------------------
-GMAT_FUNCTION_PATH       = ROOT_PATH/userfunctions/gmat
+GMAT_INCLUDE_PATH      = ROOT_PATH/userincludes/
 #-----------------------------------------------------------
-MATLAB_FUNCTION_PATH     = ROOT_PATH/matlab
-MATLAB_FUNCTION_PATH     = ROOT_PATH/userfunctions/matlab
+GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
 #-----------------------------------------------------------
-PYTHON_MODULE_PATH       = ROOT_PATH/userfunctions/python
+MATLAB_FUNCTION_PATH   = ROOT_PATH/matlab
+MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
 #-----------------------------------------------------------
-DATA_PATH                = ROOT_PATH/data/
+PYTHON_MODULE_PATH     = ROOT_PATH/userfunctions/python
+#-----------------------------------------------------------
+DATA_PATH              = ROOT_PATH/data/
+FILE_UPDATE_PATH       = ROOT_PATH/data/
 #-----------------------------------------------------------
 PLANETARY_EPHEM_SPK_PATH = DATA_PATH/planetary_ephem/spk/
-PLANETARY_SPK_FILE       = PLANETARY_EPHEM_SPK_PATH/DE421AllPlanets.bsp
+PLANETARY_SPK_FILE     = PLANETARY_EPHEM_SPK_PATH/DE421AllPlanets.bsp
 #-----------------------------------------------------------
-PLANETARY_EPHEM_DE_PATH  = DATA_PATH/planetary_ephem/de/
-DE405_FILE               = PLANETARY_EPHEM_DE_PATH/leDE1941.405
-DE421_FILE               = PLANETARY_EPHEM_DE_PATH/leDE1900.421
-DE424_FILE               = PLANETARY_EPHEM_DE_PATH/leDE18002100.424
+PLANETARY_EPHEM_DE_PATH = DATA_PATH/planetary_ephem/de/
+DE405_FILE             = PLANETARY_EPHEM_DE_PATH/leDE1941.405
+DE421_FILE             = PLANETARY_EPHEM_DE_PATH/leDE1900.421
+DE424_FILE             = PLANETARY_EPHEM_DE_PATH/leDE18002100.424
 #-----------------------------------------------------------
 VEHICLE_EPHEM_SPK_PATH   = DATA_PATH/vehicle/ephem/spk/
 VEHICLE_EPHEM_CCSDS_PATH = DATA_PATH/vehicle/ephem/ccsds/
 #-----------------------------------------------------------
-PLANETARY_COEFF_PATH     = DATA_PATH/planetary_coeff/
-EOP_FILE                 = PLANETARY_COEFF_PATH/eopc04_08.62-now
-NUTATION_COEFF_FILE      = PLANETARY_COEFF_PATH/NUTATION.DAT
-PLANETARY_PCK_FILE       = PLANETARY_COEFF_PATH/pck00010.tpc
+PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
+EOP_FILE               = PLANETARY_COEFF_PATH/eopc04_08.62-now
+NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
+PLANETARY_PCK_FILE     = PLANETARY_COEFF_PATH/SPICEPlanetaryConstantsKernel.tpc
 #-----------------------------------------------------------
-TIME_PATH                = DATA_PATH/time/
-LEAP_SECS_FILE           = TIME_PATH/tai-utc.dat
-LSK_FILE                 = TIME_PATH/naif0011.tls
+TIME_PATH              = DATA_PATH/time/
+LEAP_SECS_FILE         = TIME_PATH/tai-utc.dat
+LSK_FILE                 = TIME_PATH/SPICELeapSecondKernel.tls
 #-----------------------------------------------------------
-EARTH_POT_PATH           = DATA_PATH/gravity/earth/
-LUNA_POT_PATH            = DATA_PATH/gravity/luna/
-MARS_POT_PATH            = DATA_PATH/gravity/mars/
-VENUS_POT_PATH           = DATA_PATH/gravity/venus/
-OTHER_POT_PATH           = DATA_PATH/gravity/other/
+EARTH_POT_PATH         = DATA_PATH/gravity/earth/
+LUNA_POT_PATH          = DATA_PATH/gravity/luna/
+MARS_POT_PATH          = DATA_PATH/gravity/mars/
+VENUS_POT_PATH         = DATA_PATH/gravity/venus/
+OTHER_POT_PATH         = DATA_PATH/gravity/other/
 #-----------------------------------------------------------
-EGM96_FILE               = EARTH_POT_PATH/EGM96.cof
-JGM2_FILE                = EARTH_POT_PATH/JGM2.cof
-JGM3_FILE                = EARTH_POT_PATH/JGM3.cof
-MARS50C_FILE             = MARS_POT_PATH/Mars50c.cof
-MGNP180U_FILE            = VENUS_POT_PATH/MGNP180U.cof
-LP165P_FILE              = LUNA_POT_PATH/LP165P.cof
+EGM96_FILE             = EARTH_POT_PATH/EGM96.cof
+JGM2_FILE              = EARTH_POT_PATH/JGM2.cof
+JGM3_FILE              = EARTH_POT_PATH/JGM3.cof
+MARS50C_FILE           = MARS_POT_PATH/Mars50c.cof
+MGNP180U_FILE          = VENUS_POT_PATH/MGNP180U.cof
+LP165P_FILE            = LUNA_POT_PATH/LP165P.cof
 #-----------------------------------------------------------
-GUI_CONFIG_PATH          = DATA_PATH/gui_config/
-PERSONALIZATION_FILE     = GUI_CONFIG_PATH/MyGmat.ini
+GUI_CONFIG_PATH        = DATA_PATH/gui_config/
+PERSONALIZATION_FILE   = GUI_CONFIG_PATH/MyGmat.ini
 #-----------------------------------------------------------
-ICON_PATH                = DATA_PATH/graphics/icons/
-MAIN_ICON_FILE           = ICON_PATH/GMATWin32.ico
+ICON_PATH              = DATA_PATH/graphics/icons/
+MAIN_ICON_FILE         = ICON_PATH/GMATWin32.ico
 #-----------------------------------------------------------
-SPLASH_PATH              = DATA_PATH/graphics/splash/
-SPLASH_FILE              = SPLASH_PATH/GMATSplashScreen.png
+SPLASH_PATH            = DATA_PATH/graphics/splash/
+SPLASH_FILE            = SPLASH_PATH/GMATSplashScreen.png
 #-----------------------------------------------------------
-TEXTURE_PATH             = DATA_PATH/graphics/texture/
-SUN_TEXTURE_FILE         = TEXTURE_PATH/Sun.jpg
-MERCURY_TEXTURE_FILE     = TEXTURE_PATH/Mercury_JPLCaltech.jpg
-VENUS_TEXTURE_FILE       = TEXTURE_PATH/Venus_BjornJonsson.jpg
-EARTH_TEXTURE_FILE       = TEXTURE_PATH/ModifiedBlueMarble.jpg
-LUNA_TEXTURE_FILE        = TEXTURE_PATH/Moon_HermesCelestiaMotherlode.jpg
-MARS_TEXTURE_FILE        = TEXTURE_PATH/Mars_JPLCaltechUSGS.jpg
-JUPITER_TEXTURE_FILE     = TEXTURE_PATH/Jupiter_HermesCelestiaMotherlode.jpg
-SATURN_TEXTURE_FILE      = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
-URANUS_TEXTURE_FILE      = TEXTURE_PATH/Uranus_JPLCaltech.jpg
-NEPTUNE_TEXTURE_FILE     = TEXTURE_PATH/Neptune_BjornJonsson.jpg
-PLUTO_TEXTURE_FILE       = TEXTURE_PATH/Pluto_JPLCaltech.jpg
+TEXTURE_PATH           = DATA_PATH/graphics/texture/
+SUN_TEXTURE_FILE       = TEXTURE_PATH/Sun.jpg
+MERCURY_TEXTURE_FILE   = TEXTURE_PATH/Mercury_JPLCaltech.jpg
+VENUS_TEXTURE_FILE     = TEXTURE_PATH/Venus_BjornJonsson.jpg
+EARTH_TEXTURE_FILE     = TEXTURE_PATH/ModifiedBlueMarble.jpg
+LUNA_TEXTURE_FILE      = TEXTURE_PATH/Moon_HermesCelestiaMotherlode.jpg
+MARS_TEXTURE_FILE      = TEXTURE_PATH/Mars_JPLCaltechUSGS.jpg
+JUPITER_TEXTURE_FILE   = TEXTURE_PATH/Jupiter_HermesCelestiaMotherlode.jpg
+SATURN_TEXTURE_FILE    = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
+URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
+NEPTUNE_TEXTURE_FILE   = TEXTURE_PATH/Neptune_BjornJonsson.jpg
+PLUTO_TEXTURE_FILE     = TEXTURE_PATH/Pluto_JPLCaltech.jpg
 #-----------------------------------------------------------
-BODY_3D_MODEL_PATH       = DATA_PATH/graphics/models/
+BODY_3D_MODEL_PATH     = DATA_PATH/graphics/models/
 #-----------------------------------------------------------
-STAR_PATH                = DATA_PATH/graphics/stars/
-STAR_FILE                = STAR_PATH/inp_StarCatalog.txt
-CONSTELLATION_FILE       = STAR_PATH/inp_Constellation.txt
-BORDER_FILE              = STAR_PATH/inp_Border.txt
+STAR_PATH              = DATA_PATH/graphics/stars/
+STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
+CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
+BORDER_FILE            = STAR_PATH/inp_Border.txt
 #-----------------------------------------------------------
-VEHICLE_MODEL_PATH       = DATA_PATH/vehicle/models/
-SPACECRAFT_MODEL_FILE    = VEHICLE_MODEL_PATH/aura.3ds
+VEHICLE_MODEL_PATH     = DATA_PATH/vehicle/models/
+SPACECRAFT_MODEL_FILE  = VEHICLE_MODEL_PATH/aura.3ds
 #-----------------------------------------------------------
-SPAD_PATH                = DATA_PATH/vehicle/spad/
-SPAD_SRP_FILE            = SPAD_PATH/SphericalModel.spo
+SPAD_PATH              = DATA_PATH/vehicle/spad/
+SPAD_SRP_FILE          = SPAD_PATH/SphericalModel.spo
 #-----------------------------------------------------------
-ATMOSPHERE_PATH          = DATA_PATH/atmosphere/earth
-CSSI_FLUX_FILE           = ATMOSPHERE_PATH/CSSI_2004To2026.txt
-SCHATTEN_FILE            = ATMOSPHERE_PATH/SchattenPredict.txt
+ATMOSPHERE_PATH        = DATA_PATH/atmosphere/earth
+CSSI_FLUX_FILE         = ATMOSPHERE_PATH/SpaceWeather-All-v1.2.txt
+SCHATTEN_FILE          = ATMOSPHERE_PATH/SchattenPredict.txt
 #-----------------------------------------------------------
-HELP_FILE                = ROOT_PATH/docs/help/help.chm
+HELP_FILE              = ROOT_PATH/docs/help/help.chm
 #-----------------------------------------------------------
-ICRF_FILE                = DATA_PATH/icrf/ICRF_Table.txt
+ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 
 #-----------------------------------------------------------
 # Base location of MATLAB libraries (required only for OS X)
 #-----------------------------------------------------------
-MATLAB_APP_PATH          = /Applications/MATLAB_R2015b/MATLAB_R2015b.app    
+MATLAB_APP_PATH        = /Applications/MATLAB_R2015b/MATLAB_R2015b.app    
 
 #-----------------------------------------------------------
 # Debug options
 #-----------------------------------------------------------
-#RUN_MODE                = TESTING
-#RUN_MODE                = TESTING_NO_PLOTS
-#RUN_MODE                = EXIT_AFTER_RUN
-#DEBUG_MATLAB            = ON
-#DEBUG_PARAMETERS        = ON
-#DEBUG_FILE_PATH         = ON
-#HIDE_SAVEMISSION        = TRUE
-#PLOT_MODE               = TILE
+#RUN_MODE              = TESTING
+#RUN_MODE              = TESTING_NO_PLOTS
+#RUN_MODE              = EXIT_AFTER_RUN
+#DEBUG_MATLAB          = ON
+#DEBUG_PARAMETERS      = ON
+#DEBUG_FILE_PATH       = ON
+#HIDE_SAVEMISSION      = TRUE
+#PLOT_MODE             = TILE

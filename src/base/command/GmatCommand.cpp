@@ -148,6 +148,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    next                 (NULL),
    previous             (NULL),
    level                (-1),   // Not set
+   configObjectMap      (NULL),
    objectMap            (NULL),
    globalObjectMap      (NULL),
    solarSys             (NULL),
@@ -302,6 +303,7 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    next                 (NULL),
    previous             (NULL),
    level                (-1),   // Not set
+   configObjectMap      (c.configObjectMap),
    objectMap            (c.objectMap),
    globalObjectMap      (c.globalObjectMap),
    solarSys             (c.solarSys),
@@ -370,6 +372,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    objects             = c.objects;
    association         = c.association;
    
+   configObjectMap     = c.configObjectMap;
    objectMap           = c.objectMap;
    globalObjectMap     = c.globalObjectMap;
    solarSys            = c.solarSys;
@@ -459,6 +462,19 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &useName)
 {
    static std::string empty;
+
+   // Don't write unless object is created from the main script
+   if (!isCreatedFromMainScript)
+   {
+      generatingString = "";
+      #ifdef DEBUG_GENERATING_STRING
+      MessageInterface::ShowMessage
+         ("GmatCommand::GetGeneratingString() just returning blank, it is not "
+          "created from the main script\n");
+      #endif
+      return generatingString;
+   }
+   
    if (generatingString == "") {
       if (typeName == "NoOp")
          return generatingString;
@@ -469,7 +485,7 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    if (mode == Gmat::NO_COMMENTS)
    {
       InsertCommandName(generatingString);      
-	  return generatingString;
+      return generatingString;
    }
    
    
@@ -953,6 +969,21 @@ std::string GmatCommand::GetSummaryName()
    return summaryName;
 }
 
+
+//------------------------------------------------------------------------------
+//  void SetObjectMap(ObjectMap *objMap)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Interpre to set the local resource store used by the GmatCommand
+ * for InterpretAction()
+ * 
+ * @param map Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetConfiguredObjectMap(ObjectMap *map)
+{
+   configObjectMap = map;
+}
 
 //------------------------------------------------------------------------------
 //  void SetObjectMap(std::map<std::string, GmatBase *> *map)

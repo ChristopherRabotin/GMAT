@@ -36,11 +36,18 @@
 #include "A1Mjd.hpp"
 #include "Rvector6.hpp"
 #include <sstream>
+#include <limits>
+
+// We want to use std::numeric_limits<std::streamsize>::max()
+#ifdef _MSC_VER  // if Microsoft Visual C++
+#undef max
+#endif
 
 //#define DEBUG_STK_FILE
 //#define DEBUG_INITIALIZE
 //#define DEBUG_WRITE_DATA_SEGMENT
 //#define DEBUG_FINALIZE
+//#define DEBUG_INITIAL_FINAL
 
 //----------------------------
 // static data
@@ -133,6 +140,9 @@ void STKEphemerisFile::InitializeData()
    ephemTypeForWrite = "";
    stkTempFileName = "";
    numEphemPointsBegPos = 0;
+   
+   initialSecsFromEpoch = 0.0;
+   finalSecsFromEpoch   = 0.0;
 }
 
 //------------------------------------------------------------------------------
@@ -296,6 +306,278 @@ void STKEphemerisFile::CloseForWrite()
 {
    if (stkOutStream.is_open())
       stkOutStream.close();
+}
+
+//------------------------------------------------------------------------------
+// bool GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA1Mjd,
+//                              Rvector6 &initialState, Rvector6 &finalState)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves initial and final state from STK ephem file. Assumes ephem file
+ * is successfully opened via OpenForRead()
+ *
+ * @param initialA1Mjd  output initial epoch in a1mjd
+ * @param finalA1Mjd    output final epoch in a1mjd
+ * @param initialState  output initial cartesian state in MJ2000Eq
+ * @param finalState    output final cartesian state in MJ2000Eq
+ */
+//------------------------------------------------------------------------------
+bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA1Mjd,
+                                                Rvector6 &initialState, Rvector6 &finalState,
+                                                std::string &cbName, std::string &csName)
+{
+   #ifdef DEBUG_INITIAL_FINAL
+   MessageInterface::ShowMessage
+      ("STKEphemerisFile::GetInitialAndFinalState() entered\n");
+   #endif
+   
+   // Read headers
+   std::string line;
+   int headerCount = 0;
+   std::string numPointsKeyword = "NumberOfEphemerisPoints";
+   std::string epochKeyword = "ScenarioEpoch";
+   std::string centralBodyKeyword = "CentralBody";
+   std::string coordSysKeyword = "CoordinateSystem";
+   std::string timePosVelKeyword = "EphemerisTimePosVel";
+   std::string item;
+   std::string::size_type index1;
+   
+   while (!stkInStream.eof())
+   {
+      getline(stkInStream, line);
+      if (line.find(numPointsKeyword) != line.npos)
+      {
+         index1 = line.find(numPointsKeyword);
+         item = line.substr(index1 + numPointsKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s : %s\n", numPointsKeyword.c_str(), item.c_str());
+         #endif
+         headerCount++;
+      }
+      else if (line.find(epochKeyword) != line.npos)
+      {
+         index1 = line.find(epochKeyword);
+         item = line.substr(index1 + epochKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s : %s\n", epochKeyword.c_str(), item.c_str());
+         #endif
+         scenarioEpochUtcGreg = item;
+         // Convert epoch from UTCGregorian to A1Mjd
+         if (UTCGregorianToA1ModJulian(item, scenarioEpochA1Mjd))
+         {
+            #ifdef DEBUG_INITIAL_FINAL
+            MessageInterface::ShowMessage
+               ("         scenarioEpochA1Mjd : %.12f\n", scenarioEpochA1Mjd);
+            #endif
+            headerCount++;
+         }
+         else
+         {
+            MessageInterface::ShowMessage
+               ("*** ERROR *** Cannot convet ScenarioEpoch '%s' to A1ModJulian read "
+                "from ephemeris file '%s'\n", item.c_str(), stkFileNameForRead.c_str());
+            return false;
+            // UtilityException ue;
+            // ue.SetDetails("STKEphemerisFile::GetInitialAndFinalStates() Error converting "
+            //               "ScenarioEpoch: '%s' to A1ModJulian on input STK "
+            //               "ephemeris file '%s'.", stkFileNameForRead.c_str());
+            // throw ue;
+         }
+      }
+      else if (line.find(centralBodyKeyword) != line.npos)
+      {
+         index1 = line.find(centralBodyKeyword);
+         item = line.substr(index1 + centralBodyKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s : %s\n", centralBodyKeyword.c_str(), item.c_str());
+         #endif
+         centralBody = item;
+         cbName = item;
+         headerCount++;
+      }
+      else if (line.find(coordSysKeyword) != line.npos)
+      {
+         index1 = line.find(coordSysKeyword);
+         item = line.substr(index1 + coordSysKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s : %s\n", coordSysKeyword.c_str(), item.c_str());
+         #endif
+         coordinateSystem = item;
+         csName = item;
+         headerCount++;
+      }
+      else if (line.find(timePosVelKeyword) != line.npos)
+      {
+         index1 = line.find(timePosVelKeyword);
+         item = line.substr(index1 + timePosVelKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s : %s\n", timePosVelKeyword.c_str(), item.c_str());
+         #endif
+         headerCount++;
+         break;
+      }
+   }
+   
+   if (headerCount != 5)
+   {
+      MessageInterface::ShowMessage
+         ("*** ERROR *** Cannot read header info from '%s'\n",
+          stkFileNameForRead.c_str());
+      return false;
+   }
+   
+   // Read initial TimePosVel
+   bool firstStateFound = false;
+   StringArray items;
+   while (!stkInStream.eof())
+   {
+      // Use cross-platform GetLine
+      //GmatFileUtil::GetLine(&stkInStream, line);
+      getline(stkInStream, line);
+      if (line != "")
+      {
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage("   first line =\n   '%s'\n", line.c_str());
+         #endif
+         // Check if line has 7 items
+         items = GmatStringUtil::SeparateBy(line, " ");
+         if (items.size() != 7)
+         {
+            MessageInterface::ShowMessage
+               ("*** ERROR *** Did not find correct number of elements in the first data\n");
+            break;
+         }
+         else
+         {
+            if (GetEpochAndState(line, initialSecsFromEpoch, initialState))
+            {
+               firstStateFound = true;
+               #ifdef DEBUG_INITIAL_FINAL
+               MessageInterface::ShowMessage
+                  ("   initialSecsFromEpoch = %.12f\n   initialState = %s\n",
+                   initialSecsFromEpoch, initialState.ToString().c_str());
+               #endif
+            }
+            break;
+         }
+      }
+   }
+   
+   if (!firstStateFound)
+   {
+      MessageInterface::ShowMessage("*** ERROR *** There are no ephemeris data points\n");
+      return false;
+   }
+   
+   // Read final TimePosVel
+   // Last line should be 'END Ephemeris', how can I read last non-blank line before this?
+   // This may not be efficient for huge file
+   std::string lastLine;
+   bool badDataFound = false;
+   bool lastStateFound = false;
+   while (!stkInStream.eof())
+   {
+      getline(stkInStream, line);
+      if (line != "")
+      {
+         #ifdef DEBUG_INITIAL_FINAL_MORE
+         MessageInterface::ShowMessage("   line =\n   '%s'\n", line.c_str());
+         #endif
+         if (line.find("END Ephemeris") != line.npos)
+         {
+            #ifdef DEBUG_INITIAL_FINAL
+            MessageInterface::ShowMessage("   'END Ephemeris' found\n");
+            #endif
+            break;
+         }
+         else
+         {
+            // Check if line has 7 items
+            StringArray items = GmatStringUtil::SeparateBy(line, " ");
+            if (items.size() != 7)
+            {
+               // Has bad data points
+               badDataFound = true;
+               MessageInterface::ShowMessage
+                  ("*** ERROR *** Did not find correct number of elements in the data\n");
+               break;
+            }
+            else
+            {
+               lastLine = line;
+               lastStateFound = true;
+            }
+         }
+      }
+   }
+   
+   if (!badDataFound)
+   {
+      if (lastStateFound)
+      {
+         GetEpochAndState(lastLine, finalSecsFromEpoch, finalState);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   finalSecsFromEpoch = %.12f\n   finalState = %s\n", finalSecsFromEpoch,
+             finalState.ToString().c_str());
+         #endif
+      }
+      else
+      {
+         // If there is only one line, set initial to final
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage("There are only one ephemeris data point\n");
+         #endif
+         finalSecsFromEpoch = initialSecsFromEpoch;
+         finalState = initialState;
+         lastStateFound = true;
+      }
+   }
+   
+   // This code block looks more efficient, but how can I read backward so I can
+   // get good ephemeris data. There may be blank lines between data lines
+   #if 0
+   line = GetLastLine();
+   bool lastStateFound = false;
+   if (line != "")
+   {
+      #ifdef DEBUG_INITIAL_FINAL
+      MessageInterface::ShowMessage("   last line =\n   '%s'\n", line.c_str());
+      #endif
+      // Check if line has 7 items
+      StringArray items = GmatStringUtil::SeparateBy(line, " ");
+      if (items.size() != 7)
+      {
+         MessageInterface::ShowMessage
+            ("*** ERROR *** Did not find correct number of elements in the last data\n");
+      }
+      else
+      {
+         if (GetEpochAndState(line, finalSecsFromEpoch, finalState))
+            lastStateFound = true;
+      }
+   }
+   #endif
+   
+   // Convert initial and final epoch to A1ModJulian
+   initialA1Mjd = scenarioEpochA1Mjd + initialSecsFromEpoch/86400.0;
+   finalA1Mjd = scenarioEpochA1Mjd + finalSecsFromEpoch/86400.0;
+   
+   #ifdef DEBUG_INITIAL_FINAL
+   MessageInterface::ShowMessage
+      ("STKEphemerisFile::GetInitialAndFinalState() returning %d\n", lastStateFound);
+   #endif
+   return lastStateFound;
 }
 
 //------------------------------------------------------------------------------
@@ -572,6 +854,80 @@ bool STKEphemerisFile::WriteDataSegment(const EpochArray &epochArray,
 //----------------------------
 
 //------------------------------------------------------------------------------
+// bool GetEpochAndState(const std::string &line, Real &epoch, Rvector6 &state)
+//------------------------------------------------------------------------------
+bool STKEphemerisFile::GetEpochAndState(const std::string &line, Real &epoch, Rvector6 &state)
+{
+   #ifdef DEBUG_INITIAL_FINAL
+   MessageInterface::ShowMessage
+      ("STKEphemerisFile::GetEpochAndState() entered\n   line =\n   '%s'\n", line.c_str());
+   #endif
+   
+   // Parse line
+   bool retval = false;
+   StringArray items = GmatStringUtil::SeparateBy(line, " ", false, false, false);
+   if (items.size() == 7)
+   {
+      retval = true;
+      Real rval;
+      #ifdef DEBUG_INITIAL_FINAL
+      for (unsigned int i = 0; i < items.size(); i++)
+         MessageInterface::ShowMessage("   items[%d] = '%s'\n", i, items[i].c_str());
+      #endif
+      if (GmatStringUtil::ToReal(items[0], rval))
+         epoch = rval;
+      else
+      {
+         retval = false;
+         MessageInterface::ShowMessage("*** ERROR *** '%s' is not a valid real number\n", items[0].c_str());
+      }
+      for (unsigned int i = 1; i < items.size(); i++)
+      {
+         if (GmatStringUtil::ToReal(items[i], rval))
+            state[i-1] = rval;
+         else
+         {
+            retval = false;
+            MessageInterface::ShowMessage("*** ERROR *** '%s' is not a valid real number\n", items[i].c_str());
+         }
+      }
+   }
+   
+   #ifdef DEBUG_INITIAL_FINAL
+   MessageInterface::ShowMessage
+      ("STKEphemerisFile::GetEpochAndState() returing %d\n", retval);
+   #endif
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetLastLine()
+//------------------------------------------------------------------------------
+std::string STKEphemerisFile::GetLastLine()
+{
+   std::ifstream::pos_type pos = stkInStream.tellg();
+   std::ifstream::pos_type lastPos;
+   while (stkInStream >> std::ws && IgnoreLine(lastPos))
+      pos = lastPos;
+   
+   stkInStream.clear();
+   stkInStream.seekg(pos);
+   
+   std::string line;
+   std::getline(stkInStream, line);
+   return line;
+}
+
+//------------------------------------------------------------------------------
+// std::istream& IgnoreLine(std::ifstream::pos_type& pos)
+//------------------------------------------------------------------------------
+std::istream& STKEphemerisFile::IgnoreLine(std::ifstream::pos_type& pos)
+{
+   pos = stkInStream.tellg();
+   return stkInStream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
+//------------------------------------------------------------------------------
 // void WriteTimePosVel(const EpochArray &epochArray, const StateArray &stateArray)
 //------------------------------------------------------------------------------
 /**
@@ -753,11 +1109,11 @@ std::string STKEphemerisFile::A1ModJulianToUtcGregorian(Real epochInDays, Intege
    
    Real toMjd;
    std::string epochStr;
-   std::string outFormat = "UTCGregorian";
+   std::string fromType = "A1ModJulian";
+   std::string toType = "UTCGregorian";
    
    // Convert current epoch to specified format
-   TimeConverterUtil::Convert("A1ModJulian", epochInDays, "", outFormat,
-                              toMjd, epochStr, format);
+   TimeConverterUtil::Convert(fromType, epochInDays, "", toType, toMjd, epochStr, format);
    
    if (epochStr == "")
    {
@@ -769,4 +1125,39 @@ std::string STKEphemerisFile::A1ModJulianToUtcGregorian(Real epochInDays, Intege
    }
    
    return epochStr;
+}
+
+//------------------------------------------------------------------------------
+// bool UtcGregorianToA1ModJulian(const std::string &utcGreg, Real &a1Mjd)
+//------------------------------------------------------------------------------
+/**
+ * Converts epoch in UTCGregorian to A1ModJulian format. It uses UTCGregorian
+ * format of "01 Jan 2000 11:59:28.000."
+ *
+ * @param  utcGreg  Epoch in UTCGregorian
+ * @param  a1Mjd    output epoch in A1ModJulian
+ */
+//------------------------------------------------------------------------------
+bool STKEphemerisFile::UTCGregorianToA1ModJulian(const std::string &utcGreg, Real &a1Mjd)
+{
+   bool retval = true;
+   Real fromMjd = -999.999;
+   Real toMjd = -999.999;
+   std::string epochStr;
+   std::string fromType = "UTCGregorian";
+   std::string toType = "A1ModJulian";
+   
+   // Convert current epoch to specified format
+   TimeConverterUtil::Convert(fromType, fromMjd, utcGreg, toType, toMjd, epochStr, 1);
+   
+   if (epochStr == "")
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** EphemerisWriter::ToUtcGregorian() Cannot convert epoch %s "
+          "to A1ModJulian\n", utcGreg.c_str());
+      retval = false;
+   }
+   
+   a1Mjd = toMjd;
+   return retval;
 }

@@ -87,10 +87,16 @@ Solver* EstimatorFactory::CreateSolver(const std::string &ofType,
       return new Simulator(withName);
    if (ofType == "BatchEstimatorInv")
       return new BatchEstimatorInv(withName);
-   if (ofType == "BatchEstimatorSVD")
-      return new BatchEstimatorSVD(withName);
-   if (ofType == "ExtendedKalmanInv")
-      return new ExtendedKalmanInv(withName);
+
+   Integer runmode = GmatGlobal::Instance()->GetRunMode();
+   if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   {
+      if (ofType == "BatchEstimatorSVD")
+         return new BatchEstimatorSVD(withName);
+
+      if (ofType == "ExtendedKalmanInv")
+         return new ExtendedKalmanInv(withName);
+   }
 
    // Here's a list of other potential estimators:
    //if (ofType == "BatchLeastSquares")
@@ -138,8 +144,13 @@ EstimatorFactory::EstimatorFactory() :
    {
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
-      creatables.push_back("BatchEstimatorSVD");
-      creatables.push_back("ExtendedKalmanInv");
+
+      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      {
+         creatables.push_back("BatchEstimatorSVD");
+         creatables.push_back("ExtendedKalmanInv");
+      }
 
       //creatables.push_back("BatchLeastSquares");
       //creatables.push_back("SequentialLeastSquares");
@@ -192,8 +203,13 @@ EstimatorFactory::EstimatorFactory(const EstimatorFactory& fact) :
    {
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
-      creatables.push_back("BatchEstimatorSVD");
-      creatables.push_back("ExtendedKalmanInv");
+
+      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      {
+         creatables.push_back("BatchEstimatorSVD");
+         creatables.push_back("ExtendedKalmanInv");
+      }
 
       //creatables.push_back("BatchLeastSquares");
       //creatables.push_back("SequentialLeastSquares");
@@ -272,9 +288,12 @@ bool EstimatorFactory::DoesObjectTypeMatchSubtype(const std::string &theType,
          retval = true;
    }
 
-   if ((theType == "BatchEstimatorInv") ||
-//       (theType == "BatchEstimatorSVD") ||  // Not yet implemented; leave off menu
-       (theType == "ExtendedKalmanInv"))
+   if ((theType == "BatchEstimatorInv")
+//       ||(theType == "BatchEstimatorSVD")  // Not yet implemented; leave off menu
+#ifndef DISABLE_EXTENDED_KALMAN_INV
+       || (theType == "ExtendedKalmanInv")
+#endif
+       )
    {
       if (theSubtype == "Estimator")
          retval = true;

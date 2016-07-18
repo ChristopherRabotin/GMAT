@@ -197,6 +197,19 @@ ElementWrapper* ArrayElementWrapper::Clone() const
 
 
 //------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return ArrayElementWrapper value converted to std::string.
+ */
+//------------------------------------------------------------------------------
+std::string ArrayElementWrapper::ToString()
+{
+   Real rval = EvaluateReal();
+   return GmatStringUtil::ToString(rval);
+}
+
+//------------------------------------------------------------------------------
 //  Gmat::ParameterType GetDataType() const
 //------------------------------------------------------------------------------
 /**

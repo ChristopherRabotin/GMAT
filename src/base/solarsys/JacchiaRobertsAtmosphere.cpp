@@ -472,7 +472,7 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    #ifdef DEBUG_JR_DRAG
       MessageInterface::ShowMessage
          ("JacchiaRobertsAtmosphere::JacchiaRoberts(%15lf, [%15lf %15lf %15lf],"
-          "\n   [%15lf %15lf %15lf], %15lf, %s\n",
+          "\n   [%15lf %15lf %15lf], %15lf\n",
           height, space_craft[0], space_craft[1], space_craft[2],
           sun[0], sun[1], sun[2], a1_time);
    #endif

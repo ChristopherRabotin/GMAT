@@ -1487,7 +1487,7 @@ void BodyFixedPoint::UpdateBodyFixedLocation()
 
 bool BodyFixedPoint::WriteSPK(bool deleteFile)
 {
-   deleteSPK = deleteFile;
+   deleteSPK = deleteFile; // false is temporary - for testing only!!
 
    // Get the time (seconds since January 1, 1970), to make the temporary file name unique
    std::string now = GmatTimeUtil::FormatCurrentTime(4);
@@ -1582,7 +1582,7 @@ bool BodyFixedPoint::WriteSPK(bool deleteFile)
 //------------------------------------------------------------------------------
 bool BodyFixedPoint::WriteFK(bool deleteFile)
 {
-   deleteFK = deleteFile;
+   deleteFK = deleteFile; // false is temporary - for testing only!!
 
    // Get the time (seconds since January 1, 1970), to make the temporary file name unique
    std::string now = GmatTimeUtil::FormatCurrentTime(4);

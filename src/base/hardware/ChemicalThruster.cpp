@@ -42,6 +42,7 @@
 //#define DEBUG_CHEMICAL_THRUSTER_CONVERT
 //#define DEBUG_CHEMICAL_THRUSTER_CONVERT_ROTMAT
 //#define DEBUG_BURN_CONVERT_ROTMAT
+//#define DEBUG_THRUST_ISP
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -785,6 +786,12 @@ bool ChemicalThruster::Initialize()
 //---------------------------------------------------------------------------
 bool ChemicalThruster::CalculateThrustAndIsp()
 {
+   #ifdef DEBUG_THRUST_ISP
+   MessageInterface::ShowMessage
+      ("ChemicalThruster::CalculateThrustAndIsp() <%p>'%s' entered, thrusterFiring=%d, "
+       "constantExpressions=%d\n", this, instanceName.c_str(), thrusterFiring, constantExpressions);
+   #endif
+   
    if (!thrusterFiring)
    {
       thrust  = 0.0;
@@ -859,7 +866,18 @@ bool ChemicalThruster::CalculateThrustAndIsp()
       thrust  += cCoefficients[0] + cCoefficients[1] * pressure;
       impulse += kCoefficients[0] + kCoefficients[1] * pressure;
    }
-
+   
+   // Calculate applied thrust magnitude
+   // Value of appliedThrustMag will be returned when ThrustMagnitude Parameter
+   // gets evaluated
+   appliedThrustMag = thrustScaleFactor * dutyCycle * thrust;
+   
+   #ifdef DEBUG_THRUST_ISP
+   MessageInterface::ShowMessage
+      ("ChemicalThruster::CalculateThrustAndIsp() <%p>'%s' leaving, thrust=%.12f, "
+       "impulse=%.12f, appliedThrustMag=%.12f\n", this, instanceName.c_str(),
+       thrust, impulse, appliedThrustMag);
+   #endif
    return true;
 }
 
@@ -884,7 +902,8 @@ Real ChemicalThruster::CalculateMassFlow()
                instanceName.c_str());
       #endif
 
-      return 0.0;
+      mDot = 0.0;
+      //return 0.0;
    }
    else
    {
@@ -917,6 +936,8 @@ Real ChemicalThruster::CalculateMassFlow()
             thrust/impulse);
    #endif
 
-
-   return mDot * dutyCycle;
+   // Update mDot here so that MassFlowRate Parameter can retrieve this mDot
+   mDot = mDot * dutyCycle;
+   //return mDot * dutyCycle;
+   return mDot;
 }

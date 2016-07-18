@@ -28,7 +28,6 @@
 
 
 #include "MediaCorrection.hpp"
-#include "Moderator.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -40,12 +39,12 @@
 //------------------------------------------------------------------------------
 MediaCorrection::MediaCorrection(const std::string &typeStr,
 											const std::string &nomme) :
-	GmatBase		(Gmat::MEDIA_CORRECTION, typeStr, nomme)
+	MediaCorrectionInterface (typeStr, nomme),
+	solarSystem     (NULL)
 {
    objectTypes.push_back(Gmat::MEDIA_CORRECTION);
    objectTypeNames.push_back("MediaCorrection");
 
-   solarSystem  = Moderator::Instance()->GetSolarSystemInUse();
    modelName	= typeStr;
    model 		= 0;
 }
@@ -69,7 +68,8 @@ MediaCorrection::~MediaCorrection()
  */
 //------------------------------------------------------------------------------
 MediaCorrection::MediaCorrection(const MediaCorrection& mdc):
-		GmatBase  (mdc)
+//		GmatBase  (mdc)
+   MediaCorrectionInterface(mdc)
 {
 	model		= mdc.model;
 	modelName   = mdc.modelName;

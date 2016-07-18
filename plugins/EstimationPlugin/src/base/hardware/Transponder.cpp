@@ -27,7 +27,10 @@
 //------------------------------------------------------------------------------
 
 #include "Transponder.hpp"
-#include <stdlib.h>           // for atof
+#include "HardwareException.hpp"
+#include "MessageInterface.hpp"
+#include <stdlib.h>                // for atof
+
 //------------------------------------------------------------------------------
 // Static data
 //------------------------------------------------------------------------------
@@ -35,24 +38,24 @@
 /// Text strings used to script Receiver properties
 const std::string
 Transponder::PARAMETER_TEXT[TransponderParamCount - RFHardwareParamCount] =
-	{
-		"InputFrequencyModel",
-		"InputCenterFrequency",
-		"InputBandwidth",
-		"OutputFrequencyModel",
-		"TurnAroundRatio",
-	};
+{
+   "InputFrequencyModel",
+   "InputCenterFrequency",
+   "InputBandwidth",
+   "OutputFrequencyModel",
+   "TurnAroundRatio",
+};
 
 /// Integer IDs associated with the Receiver properties
 const Gmat::ParameterType
 Transponder::PARAMETER_TYPE[TransponderParamCount - RFHardwareParamCount] =
-	{
-		Gmat::STRING_TYPE,
-      Gmat::REAL_TYPE,
-      Gmat::REAL_TYPE,
-      Gmat::STRING_TYPE,
-      Gmat::STRING_TYPE,
-	};
+{
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+};
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -68,20 +71,21 @@ Transponder::PARAMETER_TYPE[TransponderParamCount - RFHardwareParamCount] =
  */
 //------------------------------------------------------------------------------
 Transponder::Transponder(const std::string &name):
-	RFHardware				("Transponder", name),
-	inputFrequencyModel	("CenterAndBandwidth"),
-	inputCenterFrequency	(0.0),
-	inputBandwidth			(0.0),
-	outputFrequencyModel	("TurnAroundRatio"),
-	turnAroundRatio		("240/221")
+   RFHardware             ("Transponder", name),
+   inputFrequencyModel    ("CenterAndBandwidth"),
+   inputCenterFrequency   (0.0),
+   inputBandwidth         (1.0e18),
+   outputFrequencyModel   ("TurnAroundRatio"),
+   turnAroundRatio        ("240/221")
 {
    objectTypeNames.push_back("Transponder");
    parameterCount = TransponderParamCount;
-	isTransmitted1 = false;
-	isTransmitted2 = true;
 
-	signal1 = new Signal();
-	signal2 = new Signal();
+   isTransmitted1 = false;
+   isTransmitted2 = true;
+
+   signal1 = new Signal();
+   signal2 = new Signal();
 }
 
 //------------------------------------------------------------------------------
@@ -93,10 +97,10 @@ Transponder::Transponder(const std::string &name):
 //------------------------------------------------------------------------------
 Transponder::~Transponder()
 {
-	if (signal1 != NULL)
-		delete signal1;
-	if (signal2 != NULL)
-		delete signal2;
+   if (signal1 != NULL)
+      delete signal1;
+   if (signal2 != NULL)
+      delete signal2;
 }
 
 //------------------------------------------------------------------------------
@@ -110,12 +114,12 @@ Transponder::~Transponder()
  */
 //------------------------------------------------------------------------------
 Transponder::Transponder(const Transponder& trans):
-   RFHardware				(trans),
-   inputFrequencyModel 	(trans.inputFrequencyModel),
-   inputCenterFrequency (trans.inputCenterFrequency),
-   inputBandwidth			(trans.inputBandwidth),
-   outputFrequencyModel	(trans.outputFrequencyModel),
-   turnAroundRatio		(trans.turnAroundRatio)
+   RFHardware            (trans),
+   inputFrequencyModel   (trans.inputFrequencyModel),
+   inputCenterFrequency  (trans.inputCenterFrequency),
+   inputBandwidth        (trans.inputBandwidth),
+   outputFrequencyModel  (trans.outputFrequencyModel),
+   turnAroundRatio       (trans.turnAroundRatio)
 {
 }
 
@@ -134,11 +138,11 @@ Transponder& Transponder::operator=(const Transponder& trans)
 {
    if (this != &trans)
    {
-   	inputFrequencyModel = trans.inputFrequencyModel;
-   	inputCenterFrequency = trans.inputCenterFrequency;
-   	inputBandwidth = trans.inputBandwidth;
-   	outputFrequencyModel = trans.outputFrequencyModel;
-   	turnAroundRatio = trans.turnAroundRatio;
+      inputFrequencyModel  = trans.inputFrequencyModel;
+      inputCenterFrequency = trans.inputCenterFrequency;
+      inputBandwidth       = trans.inputBandwidth;
+      outputFrequencyModel = trans.outputFrequencyModel;
+      turnAroundRatio      = trans.turnAroundRatio;
 
       RFHardware::operator=(trans);
    }
@@ -157,7 +161,7 @@ Transponder& Transponder::operator=(const Transponder& trans)
 //------------------------------------------------------------------------------
 GmatBase* Transponder::Clone() const
 {
-	return new Transponder(*this);
+   return new Transponder(*this);
 }
 
 
@@ -194,7 +198,12 @@ Integer Transponder::GetParameterID(const std::string & str) const
    for (Integer i = RFHardwareParamCount; i < TransponderParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - RFHardwareParamCount])
+      {
+         if (IsParameterReadOnly(i))
+            throw HardwareException("Error: '" + str + "' parameter was not defined in GMAT Transponder's syntax.\n");
+
          return i;
+      }
    }
 
    return RFHardware::GetParameterID(str);
@@ -274,22 +283,78 @@ Gmat::ParameterType Transponder::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Transponder::GetParameterUnit(const Integer id) const
 {
-	switch(id)
-	{
-		case INPUT_FREQUENCY_MODEL:
-		case TURN_AROUND_RATIO:
-		case OUTPUT_FREQUENCY_MODEL:
-			return "";						// They have no unit
+   switch(id)
+   {
+      case INPUT_FREQUENCY_MODEL:
+      case TURN_AROUND_RATIO:
+      case OUTPUT_FREQUENCY_MODEL:
+         return "";
 
-		case INPUT_CENTER_FREQUENCY:
-		case INPUT_BANDWIDTH:
-			return "MHz";					// They have MHz unit
+      case INPUT_CENTER_FREQUENCY:
+      case INPUT_BANDWIDTH:
+         return "MHz";               // They have MHz unit
 
-		default:
-			break;
-	}
+      default:
+         break;
+   }
 
    return RFHardware::GetParameterUnit(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Specifies whether a property is an expected user scripted parameter.
+ *
+ * This method is used when an object is serialized to determine if the
+ * corresponding property should be included in the serialization.  Typical use
+ * is when an object is written to the screen or to a file; objects identified
+ * as "read only" by a return value of true from this method are but places in
+ * the text shown on the screen or in the file.
+ *
+ * Users can script the "read only" parameters, but do so at their own risk.
+ *
+ * @param label The scriptable label of the property
+ *
+ * @return true if the property is read only, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Transponder::IsParameterReadOnly(const std::string& label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Specifies whether a property is an expected user scripted parameter.
+ *
+ * This method is used when an object is serialized to determine if the
+ * corresponding property should be included in the serialization.  Typical use
+ * is when an object is written to the screen or to a file; objects identified
+ * as "read only" by a return value of true from this method are not placed in
+ * the text shown on the screen or in the file.
+ *
+ * Users can script the "read only" parameters, but do so at their own risk.
+ *
+ * @param id The integer ID of the property
+ *
+ * @return true if the property is read only, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Transponder::IsParameterReadOnly(const Integer id) const
+{
+   if (id == HARDWARE_DELAY)
+      return false;
+
+   if ((id == INPUT_FREQUENCY_MODEL)||(id == INPUT_CENTER_FREQUENCY)||(id == INPUT_BANDWIDTH)||(id == OUTPUT_FREQUENCY_MODEL))
+      return true;
+
+   return RFHardware::IsParameterReadOnly(id);
 }
 
 
@@ -310,8 +375,10 @@ Real Transponder::GetRealParameter(const Integer id) const
    {
       case INPUT_CENTER_FREQUENCY:
          return inputCenterFrequency;
+
       case INPUT_BANDWIDTH:
-      	return inputBandwidth;
+         return inputBandwidth;
+
       default:
          break;
    }
@@ -336,16 +403,22 @@ Real Transponder::SetRealParameter(const Integer id, const Real value)
 {
    switch (id)
    {
-      case INPUT_CENTER_FREQUENCY:
-         if (value >= 0.0)
-            inputCenterFrequency = value;
-         return inputCenterFrequency;
-      case INPUT_BANDWIDTH:
-         if (value >= 0.0)
-            inputBandwidth = value;
-         return inputBandwidth;
-      default:
-         break;
+//      case INPUT_CENTER_FREQUENCY:
+//         if (value >= 0.0)
+//            inputCenterFrequency = value;
+//         return inputCenterFrequency;
+//      case INPUT_BANDWIDTH:
+//         if (value >= 0.0)
+//            inputBandwidth = value;
+//         return inputBandwidth;
+
+     case INPUT_CENTER_FREQUENCY:
+     case INPUT_BANDWIDTH:
+        MessageInterface::ShowMessage("Warning: the sscript to assign %lf to '%s.%s' parameter was skipped. In the current GMAT version, this parameter is not used.\n", value, GetName().c_str(), GetParameterText(id).c_str());
+        return 0.0;
+     
+     default:
+        break;
    }
 
    return RFHardware::SetRealParameter(id, value);
@@ -400,20 +473,20 @@ Real Transponder::SetRealParameter(const std::string & label, const Real value)
 //------------------------------------------------------------------------------
 std::string Transponder::GetStringParameter(const Integer id) const
 {
-	switch (id)
-	{
-		case INPUT_FREQUENCY_MODEL:
-			return inputFrequencyModel;
-		case OUTPUT_FREQUENCY_MODEL:
-			return outputFrequencyModel;
-		case TURN_AROUND_RATIO:
-			return turnAroundRatio;
+   switch (id)
+   {
+      case INPUT_FREQUENCY_MODEL:
+         return inputFrequencyModel;
+      case OUTPUT_FREQUENCY_MODEL:
+         return outputFrequencyModel;
+      case TURN_AROUND_RATIO:
+         return turnAroundRatio;
 
-		default:
-			break;
-	}
+      default:
+         break;
+   }
 
-	return RFHardware::GetStringParameter(id);
+   return RFHardware::GetStringParameter(id);
 }
 
 
@@ -430,25 +503,31 @@ std::string Transponder::GetStringParameter(const Integer id) const
  */
 //------------------------------------------------------------------------------
 bool Transponder::SetStringParameter(const Integer id,
-							const std::string &value)
+                     const std::string &value)
 {
-	switch (id)
-	{
-		case INPUT_FREQUENCY_MODEL:
-			inputFrequencyModel = value;
-			return true;
-		case OUTPUT_FREQUENCY_MODEL:
-			outputFrequencyModel = value;
-			return true;
-		case TURN_AROUND_RATIO:
-			turnAroundRatio = value;
-			return true;
+   switch (id)
+   {
+//      case INPUT_FREQUENCY_MODEL:
+//         inputFrequencyModel = value;
+//         return true;
+//      case OUTPUT_FREQUENCY_MODEL:
+//         outputFrequencyModel = value;
+//         return true;
 
-		default:
-			break;
-	}
+      case INPUT_FREQUENCY_MODEL:
+      case OUTPUT_FREQUENCY_MODEL:
+         MessageInterface::ShowMessage("Warning: the script to assign '%s' to '%s.%s' parameter was skipped. In the current GMAT version, this parameter is not used.\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
+         return true;
 
-	return RFHardware::SetStringParameter(id, value);
+      case TURN_AROUND_RATIO:
+         turnAroundRatio = value;
+         return true;
+
+      default:
+         break;
+   }
+
+   return RFHardware::SetStringParameter(id, value);
 }
 
 
@@ -465,7 +544,7 @@ bool Transponder::SetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 std::string Transponder::GetStringParameter(const std::string &label) const
 {
-	return GetStringParameter(GetParameterID(label));
+   return GetStringParameter(GetParameterID(label));
 }
 
 
@@ -482,9 +561,9 @@ std::string Transponder::GetStringParameter(const std::string &label) const
  */
 //------------------------------------------------------------------------------
 bool Transponder::SetStringParameter(const std::string &label,
-							const std::string &value)
+                     const std::string &value)
 {
-	return SetStringParameter(GetParameterID(label), value);
+   return SetStringParameter(GetParameterID(label), value);
 }
 
 
@@ -497,7 +576,7 @@ bool Transponder::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 bool Transponder::Initialize()
 {
-	return RFHardware::Initialize();
+   return RFHardware::Initialize();
 }
 
 
@@ -513,10 +592,10 @@ bool Transponder::Initialize()
 /*
 Real Transponder::GetOutPutFrequency()
 {
-	Real outputFreq = 0.0;
-	// Code to get output frequency:
+   Real outputFreq = 0.0;
+   // Code to get output frequency:
 
-	return outputFreq;
+   return outputFreq;
 }
 */
 
@@ -527,15 +606,15 @@ Real Transponder::GetOutPutFrequency()
 /**
  * Get the sensor delay for a given signal.
  *
- * @param whichOne 	The index specifying a given signal. 1 for input signal,
- * 						2 for output signal
+ * @param whichOne    The index specifying a given signal. 1 for input signal,
+ *                   2 for output signal
  *
  * @return the input or output frequency.
  */
 //------------------------------------------------------------------------------
 Real Transponder::GetDelay(Integer whichOne)
 {
-	return RFHardware::GetDelay(whichOne);
+   return RFHardware::GetDelay(whichOne);
 }
 
 
@@ -545,16 +624,16 @@ Real Transponder::GetDelay(Integer whichOne)
 /**
  * Set the sensor delay for a given signal.
  *
- * @param delay	   Hardware delay
- * @param whichOne 	The index specifying a given signal. 1 for input signal,
- * 						2 for output signal
+ * @param delay      Hardware delay
+ * @param whichOne   The index specifying a given signal. 1 for input signal,
+ *                   2 for output signal
  *
  * @return true if it is successfully set, false otherwise .
  */
 //------------------------------------------------------------------------------
 bool Transponder::SetDelay(Real delay, Integer whichOne)
 {
-	return RFHardware::SetDelay(delay, whichOne);
+   return RFHardware::SetDelay(delay, whichOne);
 }
 
 
@@ -564,25 +643,25 @@ bool Transponder::SetDelay(Real delay, Integer whichOne)
 /**
  * Verify a given signal is feasible or not.
  *
- * @param whichOne 	The index specifying a given signal. 1 for input signal,
- * 						2 for output signal
+ * @param whichOne   The index specifying a given signal. 1 for input signal,
+ *                   2 for output signal
  *
- * @return 	true if it is feasible, false otherwise.
+ * @return    true if it is feasible, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool Transponder::IsFeasible(Integer whichOne)
 {
-	// It need to check for frequencyModel:
+   // It need to check for frequencyModel:
 
-	Real high_freq = inputCenterFrequency + inputBandwidth/2;
-	Real low_freq = inputCenterFrequency - inputBandwidth/2;
+   Real high_freq = inputCenterFrequency + inputBandwidth/2;
+   Real low_freq = inputCenterFrequency - inputBandwidth/2;
 
-	// for Transponder, signal1 is received and signal2 is transmitted
-	Signal* s = GetSignal(0);			// Get signal1
-	if ((low_freq <= s->GetValue())&&(s->GetValue() <= high_freq))
-		return true;
-	else
-		return false;
+   // for Transponder, signal1 is received and signal2 is transmitted
+   Signal* s = GetSignal(0);         // Get signal1
+   if ((low_freq <= s->GetValue())&&(s->GetValue() <= high_freq))
+      return true;
+   else
+      return false;
 }
 
 
@@ -597,7 +676,7 @@ bool Transponder::IsFeasible(Integer whichOne)
 //------------------------------------------------------------------------------
 Integer Transponder::GetSignalCount()
 {
-	return 2;
+   return 2;
 }
 
 
@@ -607,23 +686,23 @@ Integer Transponder::GetSignalCount()
 /**
  * Verify a given signal having ability to transmit or not.
  *
- * @param whichOne 	The index specifying a given signal. 1 for input signal,
- * 						2 for output signal
+ * @param whichOne    The index specifying a given signal. 1 for input signal,
+ *                   2 for output signal
  *
  * @return true for ability to transmit, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool Transponder::IsTransmitted(Integer whichOne)
 {
-	switch(whichOne)
-	{
-	case 1:
-		return isTransmitted1;
-	case 2:
-		return isTransmitted2;
-	default:
-		throw new GmatBaseException("Index is out of bound\n");
-	}
+   switch(whichOne)
+   {
+   case 1:
+      return isTransmitted1;
+   case 2:
+      return isTransmitted2;
+   default:
+      throw HardwareException("Index is out of bound\n");
+   }
 }
 
 
@@ -633,15 +712,15 @@ bool Transponder::IsTransmitted(Integer whichOne)
 /**
  * Get a specified signal.
  *
- * @param whichOne 	The index specifying a given signal. 1 for input signal,
- * 						2 for output signal
+ * @param whichOne    The index specifying a given signal. 1 for input signal,
+ *                   2 for output signal
  *
- * @return 	a signal for a given index.
+ * @return    a signal for a given index.
  */
 //------------------------------------------------------------------------------
 Signal* Transponder::GetSignal(Integer whichOne)
 {
-	return RFHardware::GetSignal(whichOne);
+   return RFHardware::GetSignal(whichOne);
 }
 
 
@@ -651,27 +730,27 @@ Signal* Transponder::GetSignal(Integer whichOne)
 /**
  * Set a signal for a given index.
  *
- * @param s 			The signal needed to set to
- * @param whichOne 	The index specifying a given signal. 1 for input signal,
- * 						2 for output signal
+ * @param s          The signal needed to set to
+ * @param whichOne    The index specifying a given signal. 1 for input signal,
+ *                   2 for output signal
  *
- * @return 	true if signal is set, false otherwise.
+ * @return    true if signal is set, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool Transponder::SetSignal(Signal* s,Integer whichOne)
 {
-	bool retval = false;
-	if (RFHardware::SetSignal(s, whichOne))
-	{
-		if (whichOne == 0)
-		{
-			Real output_freq = GetTurnAroundRatio()*s->GetValue();
-			RFHardware::GetSignal(1)->SetValue(output_freq);
-		}
-		retval = true;
-	}
+   bool retval = false;
+   if (RFHardware::SetSignal(s, whichOne))
+   {
+      if (whichOne == 0)
+      {
+         Real output_freq = GetTurnAroundRatio()*s->GetValue();
+         RFHardware::GetSignal(1)->SetValue(output_freq);
+      }
+      retval = true;
+   }
 
-	return retval;
+   return retval;
 }
 
 
@@ -685,18 +764,18 @@ bool Transponder::SetSignal(Signal* s,Integer whichOne)
 //-------------------------------------------------------------------------
 Real Transponder::GetTurnAroundRatio()
 {
-	Real ratio;
-	Integer loc = turnAroundRatio.find('/');
-	if (loc >= 0)
-	{
-		Integer len = turnAroundRatio.length();
-		std::string num_s = turnAroundRatio.substr(0, loc);
-		std::string denom_s = turnAroundRatio.substr(loc+1, len-loc-1);
+   Real ratio;
+   size_t loc = turnAroundRatio.find('/');                       // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
+   if (loc >= 0)
+   {
+      Integer len = turnAroundRatio.length();
+      std::string num_s = turnAroundRatio.substr(0, loc);
+      std::string denom_s = turnAroundRatio.substr(loc+1, len-loc-1);
 
-		ratio = atof(num_s.c_str())/atof(denom_s.c_str());
-	}
-	else
-		ratio = atof(turnAroundRatio.c_str());
+      ratio = atof(num_s.c_str())/atof(denom_s.c_str());
+   }
+   else
+      ratio = atof(turnAroundRatio.c_str());
 
-	return ratio;
+   return ratio;
 }

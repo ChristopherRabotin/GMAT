@@ -94,6 +94,9 @@ public:
    virtual const Rvector3& GetVelocity(GmatBase* forParticipant);
    virtual EventData& GetEventData(GmatBase* forParticipant);
 
+   virtual void SetSolarSystem(SolarSystem* ss);
+   virtual void SetRelativityCorrection(bool useCorr);
+
 protected:
    /// The names of the participants active in the Event
    StringArray          participantNames;
@@ -117,18 +120,18 @@ protected:
    /// Maximum number of attempts that will be tried when locating this event
    Real                 maxAttempts;
    /// The current estimate of the epoch for the event
-   Real                 estimatedEpoch;
+   Real                 estimatedEpoch;					// unit: second
    /// An array of epoch that have been found for the event
    RealArray            foundEpochs;
    /// The current status of this event
    EventStatus          status;
 
    /// The epoch of the fixed elements in the event calculation
-   GmatEpoch            fixedEpoch;
+   GmatEpoch            fixedEpoch;						// unit: a1Mjd
    /// The time step to the epoch of the fixed elements
-   Real                 fixedTime;
+   Real                 fixedTime;						// unit: second
    /// The estimated time to the Event from the initial epoch
-   Real                 varTime;
+   Real                 varTime;						// unit: second
    /// The direction that the step needs to take
    Real                 stepDirection;
 
@@ -145,6 +148,10 @@ protected:
    /// Converter to convert different frames
    CoordinateConverter  converter;
 
+   /// Solar system which is used for calculating state in solar system barycenter inertial coordinate system
+   SolarSystem         *solarSystem;
+   /// Flags to indicate using relativity correction
+   bool                useRelativityCorrection;
 
    virtual void EvaluateNyquist();
    virtual void CalculateTimestepEstimate();

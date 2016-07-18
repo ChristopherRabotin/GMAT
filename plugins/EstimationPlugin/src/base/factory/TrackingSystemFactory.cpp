@@ -50,10 +50,14 @@ TrackingSystemFactory::TrackingSystemFactory() :
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTrackingSystem");
-      creatables.push_back("USNTrackingSystem");
-      creatables.push_back("OpticalTrackingSystem");
-      creatables.push_back("TDRSSTrackingSystem");
+      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      {
+         creatables.push_back("DSNTrackingSystem");
+         creatables.push_back("USNTrackingSystem");
+         creatables.push_back("OpticalTrackingSystem");
+         creatables.push_back("TDRSSTrackingSystem");
+      }
    }
 }
 
@@ -79,10 +83,14 @@ TrackingSystemFactory& TrackingSystemFactory::operator=(
 
       if (creatables.empty())
       {
-         creatables.push_back("DSNTrackingSystem");
-         creatables.push_back("USNTrackingSystem");
-         creatables.push_back("OpticalTrackingSystem");
-         creatables.push_back("TDRSSTrackingSystem");
+         Integer runmode = GmatGlobal::Instance()->GetRunMode();
+         if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+         {
+            creatables.push_back("DSNTrackingSystem");
+            creatables.push_back("USNTrackingSystem");
+            creatables.push_back("OpticalTrackingSystem");
+            creatables.push_back("TDRSSTrackingSystem");
+         }
       }
    }
 
@@ -104,10 +112,14 @@ TrackingSystemFactory::TrackingSystemFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTrackingSystem");
-      creatables.push_back("USNTrackingSystem");
-      creatables.push_back("OpticalTrackingSystem");
-      creatables.push_back("TDRSSTrackingSystem");
+      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      {
+         creatables.push_back("DSNTrackingSystem");
+         creatables.push_back("USNTrackingSystem");
+         creatables.push_back("OpticalTrackingSystem");
+         creatables.push_back("TDRSSTrackingSystem");
+      }
    }
 }
 
@@ -127,10 +139,14 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTrackingSystem");
-      creatables.push_back("USNTrackingSystem");
-      creatables.push_back("OpticalTrackingSystem");
-      creatables.push_back("TDRSSTrackingSystem");
+      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      {
+         creatables.push_back("DSNTrackingSystem");
+         creatables.push_back("USNTrackingSystem");
+         creatables.push_back("OpticalTrackingSystem");
+         creatables.push_back("TDRSSTrackingSystem");
+      }
    }
 }
 
@@ -154,14 +170,18 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
 TrackingSystem* TrackingSystemFactory::CreateTrackingSystem(
          const std::string &ofType, const std::string &withName)
 {
-   if (ofType == "DSNTrackingSystem")
-      return new DSNTrackingSystem(withName);
-   if (ofType == "USNTrackingSystem")
-      return new USNTrackingSystem(withName);
-   if (ofType == "OpticalTrackingSystem")
-      return new OpticalTrackingSystem(withName);
-   if (ofType == "TDRSSTrackingSystem")
-      return new TDRSSTrackingSystem(withName);
+   Integer runmode = GmatGlobal::Instance()->GetRunMode();
+   if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   {
+      if (ofType == "DSNTrackingSystem")
+         return new DSNTrackingSystem(withName);
+      if (ofType == "USNTrackingSystem")
+         return new USNTrackingSystem(withName);
+      if (ofType == "OpticalTrackingSystem")
+         return new OpticalTrackingSystem(withName);
+      if (ofType == "TDRSSTrackingSystem")
+         return new TDRSSTrackingSystem(withName);
+   }
 
    return Factory::CreateTrackingSystem(ofType, withName);
 }

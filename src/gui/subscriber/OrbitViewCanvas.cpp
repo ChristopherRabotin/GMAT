@@ -2703,7 +2703,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    glMultMatrixd(mCoordMatrix.GetDataVector());
 
    // Set isLit to true
-   scModel->Draw(true);
+   scModel->DrawAsSpacecraft(true);
       
    // Old code that may be worth saving
    // SetCurrent(*theContext);
@@ -2816,7 +2816,7 @@ void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxStri
    bodyModel->SetAttitude(true, EAng1Deg, EAng2Deg, EAng3Deg);
    
    // Set isLit to true
-   bodyModel->Draw(true);
+   bodyModel->DrawAsCelestialBody(true);
    
    #ifdef DEBUG_DRAW_3D_BODY
    MessageInterface::ShowMessage

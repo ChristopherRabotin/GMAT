@@ -990,23 +990,23 @@ void CoordPanel::Create()
    zComboBox->SetToolTip(pConfig->Read(_T("ZHint")));
 
    //wxTextCtrl
-   epochStaticText = new wxStaticText( this, ID_TEXT, "A1MJD "GUI_ACCEL_KEY"Epoch",
+   epochStaticText = new wxStaticText( this, ID_TEXT, "A1MJD " GUI_ACCEL_KEY "Epoch",
       wxDefaultPosition, wxDefaultSize, 0 );
    epochTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
    epochTextCtrl->SetToolTip(pConfig->Read(_T("EpochHint")));
 
-   alignXStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector"GUI_ACCEL_KEY"X",
+   alignXStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector" GUI_ACCEL_KEY "X",
       wxDefaultPosition, wxDefaultSize, 0 );
    alignXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   alignXTextCtrl->SetToolTip(pConfig->Read(_T("AlignXHint")));
-   alignYStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector"GUI_ACCEL_KEY"Y",
+   alignYStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector" GUI_ACCEL_KEY "Y",
       wxDefaultPosition, wxDefaultSize, 0 );
    alignYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   alignYTextCtrl->SetToolTip(pConfig->Read(_T("AlignYHint")));
-   alignZStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector"GUI_ACCEL_KEY"Z",
+   alignZStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector" GUI_ACCEL_KEY "Z",
       wxDefaultPosition, wxDefaultSize, 0 );
    alignZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
@@ -1023,32 +1023,32 @@ void CoordPanel::Create()
       theGuiManager->GetCoordSysComboBox(this, ID_COMBO, wxSize(120,-1));
       constraintCSComboBox->SetToolTip(pConfig->Read(_T("ConstraintCSHint")));  // TBD
 
-   constraintXStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector"GUI_ACCEL_KEY"X",
+   constraintXStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector" GUI_ACCEL_KEY "X",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintXTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintXHint")));
-   constraintYStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector"GUI_ACCEL_KEY"Y",
+   constraintYStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector" GUI_ACCEL_KEY "Y",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintYTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintYHint")));
-   constraintZStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector"GUI_ACCEL_KEY"Z",
+   constraintZStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector" GUI_ACCEL_KEY "Z",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintZTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintZHint")));
-   constraintRefXStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector"GUI_ACCEL_KEY"X",
+   constraintRefXStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector" GUI_ACCEL_KEY "X",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintRefXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintRefXTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintRefXHint")));
-   constraintRefYStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector"GUI_ACCEL_KEY"Y",
+   constraintRefYStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector" GUI_ACCEL_KEY "Y",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintRefYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintRefYTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintRefYHint")));
-   constraintRefZStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector"GUI_ACCEL_KEY"Z",
+   constraintRefZStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector" GUI_ACCEL_KEY "Z",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintRefZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );

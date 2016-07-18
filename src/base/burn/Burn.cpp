@@ -122,9 +122,11 @@ Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
    localAxesName        ("VNB"),
    j2000BodyName        ("Earth"),
    satName              (""),
+   totalMassFlowRate    (0),
    usingLocalCoordSys   (true),
    isMJ2000EqAxes       (false),
    isSpacecraftBodyAxes (false),
+   isFiring             (false),
    hasFired             (false),
    epochAtLastFire      (GmatTimeConstants::MJD_OF_J2000)
 {
@@ -135,11 +137,14 @@ Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
    
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
    deltaVInertial[0] = deltaVInertial[1] = deltaVInertial[2] = 0.0;
+   totalAccel[0] = totalAccel[1] = totalAccel[2] = 0.0;
+   totalThrust[0] = totalThrust[1] = totalThrust[2] = 0.0;
+   zeroData[0] = zeroData[1] = zeroData[2] = 0.0;
    
    frameBasis[0][0] = frameBasis[1][1] = frameBasis[2][2] = 1.0;
    frameBasis[0][1] = frameBasis[1][0] = frameBasis[2][0] =
    frameBasis[0][2] = frameBasis[1][2] = frameBasis[2][1] = 0.0;
-      
+   
    // Available local axes labels
    // Since it is static data, clear it first
    localAxesLabels.clear();
@@ -199,10 +204,12 @@ Burn::Burn(const Burn &b) :
    localAxesName        (b.localAxesName),
    j2000BodyName        (b.j2000BodyName),
    satName              (b.satName),
+   totalMassFlowRate    (b.totalMassFlowRate),
    vectorFormat         (b.vectorFormat),
    usingLocalCoordSys   (b.usingLocalCoordSys),
    isMJ2000EqAxes       (b.isMJ2000EqAxes),
    isSpacecraftBodyAxes (b.isSpacecraftBodyAxes),
+   isFiring             (false),
    hasFired             (false),
    epochAtLastFire      (b.epochAtLastFire)
 {
@@ -214,6 +221,10 @@ Burn::Burn(const Burn &b) :
    deltaVInertial[1] = 0.0;
    deltaVInertial[2] = 0.0;
    
+   totalAccel[0] = totalAccel[1] = totalAccel[2] = 0.0;
+   totalThrust[0] = totalThrust[1] = totalThrust[2] = 0.0;
+   zeroData[0] = zeroData[1] = zeroData[2] = 0.0;
+
    for (Integer i = 0; i < 3; i++)
       for (Integer j = 0; j < 3; j++)
          frameBasis[i][j]  = b.frameBasis[i][j];
@@ -256,10 +267,12 @@ Burn& Burn::operator=(const Burn &b)
    localAxesName        = b.localAxesName;
    j2000BodyName        = b.j2000BodyName;
    satName              = b.satName;
+   totalMassFlowRate    = b.totalMassFlowRate;
    vectorFormat         = b.vectorFormat;
    usingLocalCoordSys   = b.usingLocalCoordSys;
    isMJ2000EqAxes       = b.isMJ2000EqAxes;
    isSpacecraftBodyAxes = b.isSpacecraftBodyAxes;
+   isFiring             = b.isFiring;
    hasFired             = b.hasFired;
    epochAtLastFire      = b.epochAtLastFire;
    localAxesLabels      = b.localAxesLabels;
@@ -275,6 +288,10 @@ Burn& Burn::operator=(const Burn &b)
    deltaVInertial[1]    = 0.0;
    deltaVInertial[2]    = 0.0;
    
+   totalAccel[0] = totalAccel[1] = totalAccel[2] = 0.0;
+   totalThrust[0] = totalThrust[1] = totalThrust[2] = 0.0;
+   zeroData[0] = zeroData[1] = zeroData[2] = 0.0;
+
    for (Integer i = 0; i < 3; i++)
       for (Integer j = 0; j < 3; j++)
          frameBasis[i][j]  = b.frameBasis[i][j];
@@ -292,6 +309,14 @@ bool Burn::IsUsingLocalCoordSystem()
 }
 
 //------------------------------------------------------------------------------
+// bool IsFiring()
+//------------------------------------------------------------------------------
+bool Burn::IsFiring()
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
 // bool HasFired()
 //------------------------------------------------------------------------------
 bool Burn::HasFired() const
@@ -300,11 +325,44 @@ bool Burn::HasFired() const
 }
 
 //------------------------------------------------------------------------------
+// Real GetTotalMassFlowRate()
+//------------------------------------------------------------------------------
+Real Burn::GetTotalMassFlowRate()
+{
+   if (IsFiring())
+      return totalMassFlowRate;
+   else
+      return 0.0;
+}
+
+//------------------------------------------------------------------------------
 // Real* GetDeltaVInertial()
 //------------------------------------------------------------------------------
 Real* Burn::GetDeltaVInertial()
 {
    return deltaVInertial;
+}
+
+//------------------------------------------------------------------------------
+// Real* GetTotalAcceleration()
+//------------------------------------------------------------------------------
+Real* Burn::GetTotalAcceleration()
+{
+   if (!IsFiring())
+      return zeroData;
+   else
+      return totalAccel;
+}
+
+//------------------------------------------------------------------------------
+// Real* GetTotalThrust()
+//------------------------------------------------------------------------------
+Real* Burn::GetTotalThrust()
+{
+   if (!IsFiring())
+      return zeroData;
+   else
+      return totalThrust;
 }
 
 //------------------------------------------------------------------------------

@@ -168,6 +168,7 @@ public:
    void OnHelpTutorial(wxCommandEvent &event);
    void OnHelpForum(wxCommandEvent &event);
    void OnHelpIssue(wxCommandEvent &event);
+   void OnHelpUpdate(wxCommandEvent &event);
    void OnHelpFeedback(wxCommandEvent &event);
    void OnHyperLinkClick(wxHyperlinkEvent &event);
    
@@ -243,6 +244,7 @@ public:
    void RefreshActiveScript(const wxString &filename, bool reloadFile = true);
    std::string GetActiveScriptFileName();
    void UpdateGuiScriptSyncStatus(int guiStatus, int scriptStatus);
+   void UpdateAdvancedGuiMode(int status);
    
    virtual bool Show(bool show = true);
    

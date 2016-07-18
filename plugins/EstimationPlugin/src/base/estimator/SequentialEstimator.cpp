@@ -310,7 +310,14 @@ void SequentialEstimator::CompleteInitialization()
 
    // Now load up the observations
    measManager.PrepareForProcessing();
-   measManager.LoadObservations();
+//   measManager.LoadObservations();
+   UnsignedInt numRec = measManager.LoadObservations();
+   if (numRec == 0)
+     throw EstimatorException("No observation data is used for estimation\n");
+
+///// Make more generic?
+   measManager.LoadRampTables();
+
 
    // First measurement epoch is the epoch of the first measurement.  Duh.
    nextMeasurementEpoch = measManager.GetEpoch();
@@ -339,11 +346,11 @@ void SequentialEstimator::CompleteInitialization()
    if (showAllResiduals)
    {
       StringArray plotMeasurements;
-      for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
+      for (UnsignedInt i = 0; i < modelNames.size(); ++i)
       {
          plotMeasurements.clear();
-         plotMeasurements.push_back(measurementNames[i]);
-         std::string plotName = instanceName + "_" + measurementNames[i] +
+         plotMeasurements.push_back(modelNames[i]);
+         std::string plotName = instanceName + "_" + modelNames[i] +
                "_Residuals";
          BuildResidualPlot(plotName, plotMeasurements);
       }

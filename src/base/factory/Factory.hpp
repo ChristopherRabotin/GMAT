@@ -30,8 +30,8 @@
  */
 //------------------------------------------------------------------------------
 #ifndef Factory_hpp
-#define Factory_hpp
 
+#define Factory_hpp
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 
@@ -50,8 +50,8 @@ class CelestialBody;
 class SolarSystem;
 class Solver;
 class Subscriber;
-class EphemerisFile;
 class GmatCommand;
+class EphemerisFile;
 class AtmosphereModel;
 class Function;
 class Hardware;
@@ -64,8 +64,10 @@ class Event;
 class EventLocator;
 class Interface;
 
-class MeasurementModel;
+class MeasurementModelBase;
 class CoreMeasurement;
+class ErrorModel;
+class DataFilter;
 class DataFile;
 class ObType;
 class TrackingSystem;
@@ -130,10 +132,14 @@ public:
                                            const std::string &withName = "");
    virtual Attitude*        CreateAttitude(const std::string &ofType,
                                            const std::string &withName = "");
-   virtual MeasurementModel*
+   virtual MeasurementModelBase*
                             CreateMeasurementModel(const std::string &ofType,
                                            const std::string &withName = "");
    virtual CoreMeasurement* CreateMeasurement(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual ErrorModel*      CreateErrorModel(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual DataFilter*      CreateDataFilter(const std::string &ofType,
                                            const std::string &withName = "");
    virtual DataFile*        CreateDataFile(const std::string &ofType,
                                            const std::string &withName = "");

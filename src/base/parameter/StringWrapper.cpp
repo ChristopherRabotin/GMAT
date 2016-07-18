@@ -30,6 +30,7 @@
 
 #include "StringWrapper.hpp"
 #include "ParameterException.hpp"
+#include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -198,7 +199,10 @@ bool StringWrapper::SetReal(const Real toValue)
 //------------------------------------------------------------------------------
 std::string StringWrapper::EvaluateString() const
 {
-   return value;
+   // Remove single quotes before returning
+   std::string newValue = GmatStringUtil::RemoveEnclosingString(value, "'");
+   //return value;
+   return newValue;
 }
 
 

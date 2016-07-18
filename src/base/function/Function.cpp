@@ -91,6 +91,7 @@ Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 Function::Function(const std::string &typeStr, const std::string &name) :
    GmatBase           (Gmat::FUNCTION, typeStr, name),
+   callDescription    (""),
    functionPath       (""),
    functionName       (""),
    objectStore        (NULL),
@@ -157,12 +158,16 @@ Function::~Function()
 //------------------------------------------------------------------------------
 Function::Function(const Function &f) :
    GmatBase           (f),
+   callDescription    (f.callDescription),
    functionPath       (f.functionPath),
    functionName       (f.functionName),
    inputNames         (f.inputNames),
    outputNames        (f.outputNames),
-   //inputArgMap       (f.inputArgMap), // do I want to do this?
-   //outputArgMap      (f.outputArgMap), // do I want to do this?
+   inputArgMap        (f.inputArgMap), // do I want to do this?
+   outputArgMap       (f.outputArgMap), // do I want to do this?
+   outputWrapperTypes (f.outputWrapperTypes),
+   outputRowCounts    (f.outputRowCounts),
+   outputColCounts    (f.outputColCounts),
    objectStore        (NULL),
    globalObjectStore  (NULL),
    solarSys           (NULL),
@@ -200,6 +205,7 @@ Function& Function::operator=(const Function &f)
    
    GmatBase::operator=(f);
    
+   callDescription    = f.callDescription;
    functionPath       = f.functionPath;
    functionName       = f.functionName;
    objectStore        = NULL;
@@ -217,12 +223,21 @@ Function& Function::operator=(const Function &f)
    objectsInitialized = f.objectsInitialized;
    inputNames         = f.inputNames;
    outputNames        = f.outputNames;
-   //inputArgMap       = f.inputArgMap;   // do I want to do this?
-   //outputArgMap      = f.outputArgMap;  // do I want to do this?
-   
+   inputArgMap        = f.inputArgMap;   // do I want to do this?
+   outputArgMap       = f.outputArgMap;  // do I want to do this?
+   outputWrapperTypes = f.outputWrapperTypes;
+   outputRowCounts    = f.outputRowCounts;
+   outputColCounts    = f.outputColCounts;
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// void SetCallDescription(const std::string &desc)
+//------------------------------------------------------------------------------
+void Function::SetCallDescription(const std::string &desc)
+{
+   callDescription = desc;
+}
 
 //------------------------------------------------------------------------------
 // virtual WrapperTypeArray GetOutputTypes(IntegerArray &rowCounts,
@@ -673,12 +688,19 @@ bool Function::SetInputElementWrapper(const std::string &forName, ElementWrapper
 {
    #ifdef DEBUG_FUNCTION_IN_OUT
    MessageInterface::ShowMessage
-      ("Function::SetInputElementWrapper - for wrapper name \"%s\"\n", forName.c_str());
+      ("Function::SetInputElementWrapper() entered, wrapper name \"%s\"\n", forName.c_str());
    MessageInterface::ShowMessage
-      ("   wrapper=<%p>, wrapper type = %d\n", wrapper, wrapper->GetWrapperType());
+      ("   wrapper=<%p>, wrapper type = %d, inputArgMap.size()=%d\n", wrapper,
+       wrapper->GetWrapperType(), inputArgMap.size());
    #endif
+   
    if (inputArgMap.find(forName) == inputArgMap.end())
    {
+      #ifdef DEBUG_FUNCTION_IN_OUT
+      MessageInterface::ShowMessage
+         ("**** ERROR **** Function::SetInputElementWrapper() throwing exception: "
+          "Input name '%s' not found in inputArgMap\n", forName.c_str());
+      #endif
       std::string errMsg = "Unknown input argument \"" + forName;
       errMsg += "\" for function \"" + functionName + "\"";
       throw FunctionException(errMsg);
@@ -688,6 +710,11 @@ bool Function::SetInputElementWrapper(const std::string &forName, ElementWrapper
    
    //@note old inputWrappers are deleted in the FunctionManager::CreateFunctionArgWrappers()
    // before creates new wrappers for input arguments
+   
+   #ifdef DEBUG_FUNCTION_IN_OUT
+   MessageInterface::ShowMessage
+      ("Function::SetInputElementWrapper() leaving, wrapper name \"%s\"\n", forName.c_str());
+   #endif
    
    return true;
 }
@@ -719,9 +746,11 @@ ElementWrapper* Function::GetOutputArgument(Integer argNumber)
 ElementWrapper* Function::GetOutputArgument(const std::string &byName)
 {
    #ifdef DEBUG_FUNCTION_IN_OUT
-      MessageInterface::ShowMessage("Function::GetOutputArgument - asking for  \"%s\"\n",
-            byName.c_str());
+   MessageInterface::ShowMessage
+      ("Function::GetOutputArgument(%s) entered, outputArgMap.size()=%d\n",
+       byName.c_str(), outputArgMap.size());
    #endif
+   
    if (outputArgMap.find(byName) == outputArgMap.end())
    {
       std::string errMsg = "Function error: output \"" + byName;
@@ -735,7 +764,7 @@ ElementWrapper* Function::GetOutputArgument(const std::string &byName)
    #ifdef DEBUG_FUNCTION_IN_OUT
    MessageInterface::ShowMessage
       ("Function::GetOutputArgument(%s) returning <%p>, type=%d\n", byName.c_str(),
-       ew, ew->GetDataType());
+       ew, ew ? ew->GetDataType() : -999);
    #endif
    
    return ew;
@@ -1075,6 +1104,10 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
    {
    case FUNCTION_INPUT:
       {
+         #ifdef DEBUG_FUNCTION_SET
+         MessageInterface::ShowMessage("   Adding function input name '%s'\n", value.c_str());
+         #endif
+         
          // Ignore () as input, so that "function MyFunction()" will work as no input (LOJ: 2015.08.19)
          if (value == "()")
             return true;
@@ -1093,6 +1126,9 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
       }
    case FUNCTION_OUTPUT:
       {
+         #ifdef DEBUG_FUNCTION_SET
+         MessageInterface::ShowMessage("   Adding function output name '%s'\n", value.c_str());
+         #endif
          if (outputArgMap.find(value) == outputArgMap.end())
          {
             outputNames.push_back(value);

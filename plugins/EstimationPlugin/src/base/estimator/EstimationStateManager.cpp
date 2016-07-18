@@ -34,6 +34,7 @@
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
 #include "Spacecraft.hpp"
+#include "GroundstationInterface.hpp"
 #include <sstream>                  // for stringstream
 
 
@@ -43,8 +44,9 @@
 //#define DUMP_STATE
 //#define DEBUG_OBJECT_MAPPING
 //#define DEBUG_CLONING
+//#define DEBUG_COVARIANCE
 //#define DEBUG_INITIALIZATION
-//#define DEBUG_ESM_LOADING
+//#define DEBUG_STM_MAPPING
 
 //------------------------------------------------------------------------------
 // EstimationStateManager(Integer size)
@@ -189,10 +191,10 @@ const StringArray& EstimationStateManager::GetObjectList(std::string ofType)
       {
   	 		#ifdef DEBUG_INITIALIZATION
          	MessageInterface::ShowMessage("ESM processing %s\n",
-            	   solveForNames[i].c_str());
+            	   solveForObjectNames[i].c_str());
 			#endif
 
-         if (find(chunks.begin(), chunks.end(), solveForNames[i]) ==
+         if (find(chunks.begin(), chunks.end(), solveForObjectNames[i]) ==
                chunks.end())
             chunks.push_back(solveForObjectNames[i]);
       }
@@ -242,12 +244,11 @@ const StringArray& EstimationStateManager::GetObjectList(std::string ofType)
 bool EstimationStateManager::SetObject(GmatBase *obj)
 {
    #ifdef DEBUG_ESM_LOADING
-      MessageInterface::ShowMessage("+++Adding %s to the ESM\n",
-            obj->GetName().c_str());
+      MessageInterface::ShowMessage("+++Adding <%s,%p> to the ESM\n",
+            obj->GetFullName().c_str(), obj);
    #endif
 
    bool retval = false;
-   std::string objName = obj->GetName();
 
    // If measurement manager has one of these objects (by name), use that one
    GmatBase *clone = measMan->GetClone(obj);
@@ -255,63 +256,70 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
       obj = clone;
 
    // Be sure object is not already in the list
-   if (find(objects.begin(), objects.end(), obj) == objects.end())
+   if (find(objects.begin(), objects.end(), obj) == objects.end())   // It accepts clone objects in objects list
    {
       objects.push_back(obj);
       current = obj;
       StringArray *objectProps = new StringArray;
       elements[current] = objectProps;
 
-      if (obj->IsOfType(Gmat::FORMATION))
+      try
       {
-         Integer id = obj->GetParameterID("A1Epoch");
-         epochIDs.push_back(id);
-      }
-      else
-      {
-         #ifdef DEBUG_PARTICIPANTS
-            MessageInterface::ShowMessage("Getting Epoch parameter for a %s "
-                  "<%p> named %s\n", obj->GetTypeName().c_str(), obj,
-                  obj->GetName().c_str());
-         #endif
-         Integer id;
-         try
+         if (obj->IsOfType(Gmat::FORMATION))
          {
-            id = obj->GetParameterID("Epoch");
+            Integer id = obj->GetParameterID("A1Epoch");
+            epochIDs.push_back(id);
          }
-         catch (...)
+         else
          {
-            id = -1;
-         }
-         if (id != -1)
-         {
+            Integer id = obj->GetParameterID("Epoch");
             if (obj->GetParameterType(id) != Gmat::REAL_TYPE)
                id = obj->GetParameterID("A1Epoch");
+            epochIDs.push_back(id);
          }
-
-         epochIDs.push_back(id);
       }
-   }
-
-   #ifdef DEBUG_STATE_CONSTRUCTION
-      MessageInterface::ShowMessage("Object set; current points to %s\n",
-         current->GetName().c_str());
-   #endif
-
-   for (UnsignedInt i = 0; i < solveForObjectNames.size(); ++i)
-   {
-      // Set the object property
-      if (solveForObjectNames[i] == objName)
+      catch (BaseException&)
       {
-         solveForObjects[i] = obj;
+         // Epoch is not a valid parameter
+         epochIDs.push_back(-1);
+      }
+   
 
-         // Set the property ID
-         Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
-         solveForIDs[i] = id;
-         elements[obj]->push_back(solveForIDNames[i]);
-         retval = true;
+      #ifdef DEBUG_STATE_CONSTRUCTION
+         MessageInterface::ShowMessage("Object set; current points to <%s,%p>\n",
+            current->GetName().c_str(), current);
+      #endif
+
+      std::string objFullName = obj->GetFullName();      
+      for (UnsignedInt i = 0; i < solveForObjectNames.size(); ++i)
+      {
+         // Set the object property
+         if (solveForObjectNames[i] == objFullName)
+         {
+            solveForObjects[i] = obj;
+
+            // Set the property ID
+            Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
+            
+            // verify valid ID
+            if (id == -1)
+               throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");
+            if (obj->IsEstimationParameterValid(id) == false)
+               throw EstimatorException("Error: parameter " + obj->GetName() + "." + solveForIDNames[i] + " is not allowed to use as a solve-for variable in this GMAT version.\n");
+
+            // set the object property
+            solveForIDs[i] = id;
+            elements[obj]->push_back(solveForIDNames[i]);
+            retval = true;
+         }
       }
    }
+
+   #ifdef DEBUG_ESM_LOADING
+      MessageInterface::ShowMessage("   ESM now has %d objects, %d "
+            "solveForObjects, and %d solveFors\n", objects.size(), solveForObjects.size(),
+            solveForIDNames.size());
+   #endif
 
    return retval;
 }
@@ -373,7 +381,9 @@ void EstimationStateManager::RestoreObjects(ObjectArray *fromBuffer)
    if (fromBuffer == NULL)
    {
       restoreBuffer = &estimationObjectClones;
-      MessageInterface::ShowMessage("Using internal buffer\n");
+      #ifdef DEBUG_CLONING
+         MessageInterface::ShowMessage("Using internal buffer\n");
+      #endif
    }
 
    if (restoreBuffer->size() != objects.size())
@@ -397,7 +407,7 @@ void EstimationStateManager::RestoreObjects(ObjectArray *fromBuffer)
       else
          *(objects[i]) = *((*restoreBuffer)[i]);
       #ifdef DEBUG_CLONING
-         MessageInterface::ShowMessage("Object data:\n%s",
+         MessageInterface::ShowMessage("Object <%p,%s> data:\n%s", objects[i], objects[i]->GetName().c_str(),
                objects[i]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
       #endif
    }
@@ -449,10 +459,10 @@ bool EstimationStateManager::SetProperty(std::string prop)
    }
 
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Current SolveFor parameters:\n");
+      MessageInterface::ShowMessage("EstmationStateManager::SetProperty():  Current SolveFor parameters:\n");
    
 	   for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
-   		MessageInterface::ShowMessage("   %s\n", solveForNames[i].c_str());
+   		  MessageInterface::ShowMessage("  solve for name = '%s';  object name = '%s';   parameter = '%s'\n", solveForNames[i].c_str(), solveForObjectNames[i].c_str(), solveForIDNames[i].c_str());
    #endif 
 
    return retval;
@@ -513,14 +523,54 @@ bool EstimationStateManager::SetProperty(std::string prop, Integer loc)
       else
          throw EstimatorException("Cannot set the SolveFor parameter " + prop);
    }
+   else
+   {
+      // Display a message and do nothing
+      MessageInterface::ShowMessage("Solve-for '%s' was set twice to Estimation State Manager. Skip setting...\n", prop.c_str());
+      return true;
+   }
 
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Current SolveFor parameters:\n");
+      MessageInterface::ShowMessage("EstimationStateManager::SetProperty():    Current SolveFor parameters:\n");
       for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
-         MessageInterface::ShowMessage("   %s\n", solveForNames[i].c_str());
+	     MessageInterface::ShowMessage("  solve for name = '%s';  object name = '%s';   parameter = '%s'\n", solveForNames[i].c_str(), solveForObjectNames[i].c_str(), solveForIDNames[i].c_str());
    #endif
    
    return retval;
+}
+
+
+bool EstimationStateManager::IsPropertiesSetupCorrect()
+{
+   if (solveForNames.size() == 0)
+      throw EstimatorException("Error: No solvefor parameters are set to estimation.\n");
+
+   for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
+   {
+      if (solveForObjectNames[i] == "")
+         throw EstimatorException("Error: '" + solveForNames[i] +"' has an empty object name.\n");
+
+      if (i >= solveForObjects.size()) 
+         throw EstimatorException("Error: '" + solveForNames[i] +"' object which is specified in AddSolverFor was not defined in your script.\n");
+      else
+      {
+         if(solveForObjects[i] == NULL)
+            throw EstimatorException("Error: '" + solveForNames[i] +"' object which is specified in AddSolverFor was not defined in your script.\n");
+      }
+
+      if (solveForIDNames[i] == "")
+         throw EstimatorException("Error: '" + solveForNames[i] +"' has an empty parameter name.\n");
+
+      if (i >= solveForIDs.size()) 
+         throw EstimatorException("Error: '" + solveForNames[i] +"' parameter which is specified in AddSolverFor was not defined in your script.\n");
+      else
+      {
+         if(solveForIDs[i] == -1)  // Changed from NULL to clear warning
+            throw EstimatorException("Error: '" + solveForNames[i] +"' paramter which is specified in AddSolverFor was not defined in your script.\n");
+      }
+   }
+
+   return true;
 }
 
 
@@ -542,6 +592,87 @@ bool EstimationStateManager::SetProperty(std::string sf, GmatBase *obj)
 {
    bool retval = false;
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetProperty(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Sets a SolveFor parameter associated with a specific object. Assume that the 
+ * object obj has SolveFors paramter containing object's solve-for names. Example: 
+ * Sat.SolveFors = Cartesian. The solve-for parameter for this case is Sat.Cartisian
+ *
+ * @param obj The object that supplies solve-for parameter
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool EstimationStateManager::SetProperty(GmatBase *obj)
+{
+   StringArray solforNames = GetSolveForList(obj);
+   
+   if (solforNames.empty())
+      return false;
+
+   for (UnsignedInt i = 0; i < solforNames.size(); ++i)
+      SetProperty(solforNames[i]);
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray GetSolveForList(GmatBase* obj)
+//------------------------------------------------------------------------------
+/**
+* This function is used to create a list of solve-for properties for a given object
+*
+* @param obj        a pointer to the object 
+* return            a list of solve-for properties associated with the input object 
+*/
+//------------------------------------------------------------------------------
+StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
+{
+   StringArray solveforList;
+   
+   if (obj->IsOfType(Gmat::SPACECRAFT))
+   {
+      // 1. Load solve-for list from spacecraft
+      solveforList = obj->GetStringArrayParameter("SolveFors");
+   }
+   else if (obj->IsOfType(Gmat::GROUND_STATION))
+   {
+      // 2. Load solve-for list from ground station
+      // 2.1. Get a list of error models
+      std::map<std::string,ObjectArray> errorModelMap = ((GroundstationInterface*)obj)->GetErrorModelMap();
+      for (std::map<std::string,ObjectArray>::iterator mapIndex = errorModelMap.begin(); mapIndex != errorModelMap.end(); ++mapIndex)
+      {
+         ObjectArray errorModels = mapIndex->second;
+         for (UnsignedInt i = 0; i < errorModels.size(); ++i)
+         {
+            // 2.2. Get solve-for list from error models
+            StringArray sfList = errorModels[i]->GetStringArrayParameter("SolveFors");
+            for(UnsignedInt j = 0; j < sfList.size(); ++j)
+               solveforList.push_back(errorModels[i]->GetFullName() + "." + sfList[j]);
+         }
+      }
+   }
+
+   // 3. Add prefix
+   for (UnsignedInt i = 0; i < solveforList.size(); ++i)
+   {
+      if (!obj->IsOfType(Gmat::GROUND_STATION))
+         solveforList[i] = obj->GetName() + "." + solveforList[i]; 
+   }
+
+   #ifdef DEBUG_STATE_CONSTRUCTION
+      MessageInterface::ShowMessage("Solve for parameters:\n");
+      for (UnsignedInt i = 0; i < solveforList.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", solveforList[i].c_str());
+   #endif
+
+   return solveforList;
 }
 
 
@@ -651,6 +782,18 @@ bool EstimationStateManager::BuildState()
 
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage("Entered BuildState()\n");
+      MessageInterface::ShowMessage("   ESM now has %d objects, %d "
+            "solveForObjects, and %d solveFors\n", objects.size(), solveForObjects.size(),
+            solveForIDNames.size());
+
+      MessageInterface::ShowMessage("   There are %d elements:\n", elements.size());
+      for (std::map<GmatBase*, StringArray*>::iterator i = elements.begin();
+            i != elements.end(); ++i)
+      {
+         MessageInterface::ShowMessage("      %s, with %d components\n", i->first->GetName().c_str(), i->second->size());
+         for (UnsignedInt j = 0; j < i->second->size(); ++j)
+            MessageInterface::ShowMessage("         %s\n", i->second->at(j).c_str());
+      }
    #endif
 
    // Determine the size of the propagation state vector
@@ -660,8 +803,8 @@ bool EstimationStateManager::BuildState()
    {
       std::stringstream sizeVal;
       sizeVal << stateSize;
-      throw EstimatorException("Estimation state vector size is " +
-            sizeVal.str() + "; estimation is not possible.");
+      throw EstimatorException("No solve-for parameter is defined for estimator;"
+            " estimation is not possible.\n");
    }
 
    std::map<std::string,Integer> associateMap;
@@ -669,7 +812,7 @@ bool EstimationStateManager::BuildState()
    std::string name;
    for (Integer index = 0; index < stateSize; ++index)
    {
-      name = stateMap[index]->objectName;
+      name = stateMap[index]->objectFullName;
       if (associateMap.find(name) == associateMap.end())
          associateMap[name] = index;
    }
@@ -684,7 +827,7 @@ bool EstimationStateManager::BuildState()
 
    for (Integer index = 0; index < stateSize; ++index)
    {
-      name = stateMap[index]->objectName;
+      name = stateMap[index]->objectFullName;
       std::stringstream sel("");
       sel << stateMap[index]->subelement;
       state.SetElementProperties(index, stateMap[index]->elementID,
@@ -709,19 +852,28 @@ bool EstimationStateManager::BuildState()
       Covariance *cov = stateMap[i]->object->GetCovariance();
 
       #ifdef DEBUG_COVARIANCE
-         MessageInterface::ShowMessage("Found length = %d for id = %d\n", size, id);
+         MessageInterface::ShowMessage("Found length = %d for id = %d    object = <%p,%s>\n", size, id, stateMap[i]->object, stateMap[i]->object->GetName().c_str());
       #endif
 
       Rmatrix *subcov = cov->GetCovariance(id);
       if (subcov)
       {
          #ifdef DEBUG_COVARIANCE
-            MessageInterface::ShowMessage("Found %d by %d subcovariance\n",
+            MessageInterface::ShowMessage("Found %d by %d subcovariance: [\n",
                   subcov->GetNumRows(), subcov->GetNumColumns());
          #endif
          for (Integer j = 0; j < size; ++j)
             for (Integer k = 0; k < size; ++k)
-               covariance(i+j,i+k) = (*subcov)(j,k);
+               covariance(i + j, i + k) = (*subcov)(j, k);
+#ifdef DEBUG_COVARIANCE
+         for (Integer j = 0; j < size; ++j)
+         {
+            for (Integer k = 0; k < size; ++k)
+               MessageInterface::ShowMessage("%le   ", (*subcov)(j, k));
+            MessageInterface::ShowMessage("\n");
+         }
+         MessageInterface::ShowMessage("]\n");
+#endif
       }
       else
       {
@@ -774,7 +926,7 @@ bool EstimationStateManager::BuildState()
       MessageInterface::ShowMessage("State Transition Matrix = %s\n",
             stm.ToString().c_str());
       MessageInterface::ShowMessage("Covariance Matrix = %s\n",
-            covariance.ToString().c_str());
+            covariance.GetCovariance()->ToString().c_str());
    #endif
 
    return retval;
@@ -802,10 +954,10 @@ bool EstimationStateManager::MapVectorToObjects()
       #ifdef DEBUG_OBJECT_UPDATES
          std::stringstream msg("");
          msg << stateMap[index]->subelement;
-         std::string lbl = stateMap[index]->objectName + "." +
+         std::string lbl = stateMap[index]->objectFullName + "." + 
             stateMap[index]->elementName + "." + msg.str() + " = ";
-         MessageInterface::ShowMessage("   %d: %s%.12lf\n", index, lbl.c_str(),
-               state[index]);
+         MessageInterface::ShowMessage("   %d: %s%.12lf  for object <%s, %p>\n", index, lbl.c_str(),
+            state[index], stateMap[index]->object->GetFullName().c_str(), stateMap[index]->object);
       #endif
 
       switch (stateMap[index]->parameterType)
@@ -835,8 +987,17 @@ bool EstimationStateManager::MapVectorToObjects()
             MessageInterface::ShowMessage(
                   "%s not set; Element type not handled\n",label.c_str());
       }
+
    }
 
+   #ifdef DEBUG_CLONING
+   MessageInterface::ShowMessage("After map vector to object:\n");
+   for (Integer index = 0; index < objects.size(); ++index)
+   {
+      MessageInterface::ShowMessage("Object <%p,%s> data:\n%s", objects[index], objects[index]->GetName().c_str(),
+         objects[index]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
+   }
+   #endif
 
    GmatEpoch theEpoch = state.GetEpoch();
    for (UnsignedInt i = 0; i < objects.size(); ++i)
@@ -940,7 +1101,7 @@ bool EstimationStateManager::MapObjectsToVector()
       {
          std::stringstream msg("");
          msg << stateMap[index]->subelement;
-         std::string lbl = stateMap[index]->objectName + "." +
+         std::string lbl = stateMap[index]->objectFullName + "." + 
             stateMap[index]->elementName + "." + msg.str() + " = ";
          MessageInterface::ShowMessage("   %d: %s%.12lf\n", index, lbl.c_str(),
                state[index]);
@@ -1027,11 +1188,11 @@ bool EstimationStateManager::MapObjectsToSTM()
       if (stateMap[h]->subelement == 1)
       {
          elementId = stateMap[h]->parameterID;
-//         elementLength = stateMap[h]->length;
 
          bool hasDstm = obj->HasDynamicParameterSTM(elementId);
 
          #ifdef DEBUG_STM_MAPPING
+            Integer elementLength = stateMap[h]->length;
             MessageInterface::ShowMessage("Prepping for STM; element %s for "
                   "object %s has ID %d and length %d, and %s a dynamic STM "
                   "contribution\n", stateMap[h]->elementName.c_str(),
@@ -1166,9 +1327,9 @@ void EstimationStateManager::DecomposeParameter(std::string &param,
       Integer howMany)
 {
    chunks.clear();
-   UnsignedInt loc;
+   size_t loc;             // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
 
-   loc = param.find('.');
+   loc = param.find_last_of('.');
    chunks.push_back(param.substr(0,loc));
 
    // todo: handle the howMany parameter.  For now, always split into 2 chunks
@@ -1215,6 +1376,13 @@ Integer EstimationStateManager::SortVector()
       current  = i->first;
       elementList = i->second;
 
+      #ifdef DEBUG_OBJECT_MAPPING
+         MessageInterface::ShowMessage("Working with %s, %d elements:\n",
+               current->GetName().c_str(), elementList->size());
+         for (UnsignedInt m = 0; m < elementList->size(); ++m)
+            MessageInterface::ShowMessage("   %s\n", elementList->at(m).c_str());
+      #endif
+
       for (StringArray::iterator j = elementList->begin();
             j != elementList->end(); ++j)
       {
@@ -1237,7 +1405,7 @@ Integer EstimationStateManager::SortVector()
          {
             idList.push_back(id);
             owners.push_back(current);
-            property.push_back(*j);
+            property.push_back(current->GetParameterNameForEstimationParameter(*j));
 
             // Put this item in the ordering list
             oLoc = order.begin();
@@ -1271,12 +1439,13 @@ Integer EstimationStateManager::SortVector()
    {
       #ifdef DEBUG_STATE_CONSTRUCTION
          MessageInterface::ShowMessage("%d <- %d: %d %s.%s gives ", i, order[i],
-               idList[order[i]], owners[order[i]]->GetName().c_str(),
+               idList[order[i]], owners[order[i]]->GetFullName().c_str(), 
                property[order[i]].c_str());
       #endif
 
       newItem = new ListItem;
       newItem->objectName  = owners[order[i]]->GetName();
+      newItem->objectFullName = owners[order[i]]->GetFullName();
       newItem->elementName = property[order[i]];
       newItem->object      = owners[order[i]];
       newItem->elementID   = idList[order[i]];
@@ -1290,9 +1459,11 @@ Integer EstimationStateManager::SortVector()
          newItem->parameterID += val - 1;
 
       #ifdef DEBUG_STATE_CONSTRUCTION
-         MessageInterface::ShowMessage("[%s, %s, %d, %d, %d, %d]\n",
+         MessageInterface::ShowMessage("[%s, %s, %s, %s, %d, %d, %d, %d]\n",
                newItem->objectName.c_str(),
+               newItem->objectFullName.c_str(),
                newItem->elementName.c_str(),
+               newItem->associateName.c_str(),
                newItem->elementID,
                newItem->subelement,
                newItem->parameterID,
@@ -1336,8 +1507,8 @@ Integer EstimationStateManager::SortVector()
             stateSize);
       for (std::vector<ListItem*>::iterator i = stateMap.begin();
             i != stateMap.end(); ++i)
-         MessageInterface::ShowMessage("   %s %s %d %d of %d, id = %d\n",
-               (*i)->objectName.c_str(), (*i)->elementName.c_str(),
+         MessageInterface::ShowMessage("   objectName = %s   objectFullName = %s  elementName = %s   elementID = %d   subelement = %d of %d,   parameterID = %d\n",
+               (*i)->objectName.c_str(), (*i)->objectFullName.c_str(), (*i)->elementName.c_str(),
                (*i)->elementID, (*i)->subelement, (*i)->length,
                (*i)->parameterID);
    #endif

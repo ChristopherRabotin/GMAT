@@ -101,7 +101,8 @@ CallFunction::CallFunction(const std::string &type) :
    mFunctionName        (""),
    mFunctionPathAndName (""),
    isGmatFunction       (false),
-   isMatlabFunction     (false)
+   isMatlabFunction     (false),
+   isBuiltinGmatFunction(false)
 {
    mNumInputParams = 0;
    mNumOutputParams = 0;
@@ -141,6 +142,7 @@ CallFunction::CallFunction(const CallFunction& cf) :
    callcmds = NULL;           // Commands must be reinitialized
    isGmatFunction = cf.isGmatFunction;
    isMatlabFunction = cf.isMatlabFunction;
+   isBuiltinGmatFunction = cf.isBuiltinGmatFunction;
    
    mInputNames  = cf.mInputNames;
    mOutputNames = cf.mOutputNames;
@@ -171,10 +173,11 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
    callcmds = NULL;           // Commands must be reinitialized
    isGmatFunction = cf.isGmatFunction;
    isMatlabFunction = cf.isMatlabFunction;
+   isBuiltinGmatFunction = cf.isBuiltinGmatFunction;
    
    mInputNames  = cf.mInputNames;
    mOutputNames = cf.mOutputNames;
-   fm               = cf.fm;
+   fm           = cf.fm;
    
    return *this;
 }
@@ -399,14 +402,17 @@ void CallFunction::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
          ("   mFunction=<%p><%s>\n", mFunction, mFunction->GetName().c_str());
       #endif
       
-      // Set only GmatFunction to FunctionManager (loj: 2008.09.03)
-      if (mapObj->GetTypeName() == "GmatFunction")
+      // Set GmatFunction to FunctionManager (loj: 2008.09.03)
+      // Set BuiltinGmatFunction to FunctionManager (loj: 2016.05.04)
+      //if (mapObj->GetTypeName() == "GmatFunction")
+      if (mapObj->IsOfType("GmatFunction") || mapObj->IsOfType("BuiltinGmatFunction"))
       {
          #ifdef DEBUG_FUNCTION
          MessageInterface::ShowMessage
             ("CallFunction::SetGlobalObjectMap() setting function<%p>'%s' to FunctionManager\n",
              mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
          #endif
+         mFunction->SetCallDescription(GetGeneratingString(Gmat::NO_COMMENTS));
          fm.SetFunction(mFunction);
       }
    }
@@ -955,17 +961,32 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (name == mFunctionName)
       {
          mFunction = (Function *)obj;
-         mFunctionPathAndName = mFunction->GetFunctionPathAndName();
-         if (mFunction && mFunction->GetTypeName() == "GmatFunction")
+         if (mFunction)
          {
-            #ifdef DEBUG_FUNCTION
-            MessageInterface::ShowMessage
-               ("CallFunction::SetRefObject() setting function<%p>'%s' to FunctionManager\n",
-                mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
-            #endif
-            fm.SetFunction(mFunction);
-            isGmatFunction = true;
-            isMatlabFunction = false;
+            mFunctionPathAndName = mFunction->GetFunctionPathAndName();
+            if (mFunction->IsOfType("BuiltinGmatFunction"))
+            {
+               #ifdef DEBUG_CALL_FUNCTION_REF_OBJ
+               MessageInterface::ShowMessage
+                  ("CallFunction::SetRefObject(), '%s' is builtin GMAT function\n",
+                   mFunctionName.c_str());
+               #endif
+               isGmatFunction = false;
+               isMatlabFunction = false;
+               isBuiltinGmatFunction = true;
+            }
+            else if (mFunction->GetTypeName() == "GmatFunction")
+            {
+               #ifdef DEBUG_FUNCTION
+               MessageInterface::ShowMessage
+                  ("CallFunction::SetRefObject() setting function<%p>'%s' to FunctionManager\n",
+                   mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
+               #endif
+               fm.SetFunction(mFunction);
+               isGmatFunction = true;
+               isMatlabFunction = false;
+               isBuiltinGmatFunction = false;
+            }
          }
       }
       return true;
@@ -1033,22 +1054,26 @@ bool CallFunction::Initialize()
    
    isGmatFunction = false;
    isMatlabFunction = false;
+   isBuiltinGmatFunction = false;
    
    bool rv = true;  // Initialization return value
    if (!IsOfType("CallPythonFunction"))
    {
       if (mFunction == NULL)
          throw CommandException("CallFunction::Initialize() the function pointer is NULL");
-
-      if (mFunction->GetTypeName() == "GmatFunction")
+      
+      if (mFunction->IsOfType("BuiltinGmatFunction"))
+         isBuiltinGmatFunction = true;
+      else if (mFunction->GetTypeName() == "GmatFunction")
          isGmatFunction = true;
       else if (mFunction->GetTypeName() == "MatlabFunction")
          isMatlabFunction = true;
-
-      if (!isGmatFunction && !isMatlabFunction)
+      
+      if (!isGmatFunction && !isMatlabFunction && !isBuiltinGmatFunction)
          throw CommandException
-            ("CallFunction::Initialize() the function is neither GmatFunction nor MatlabFunction");
-
+            ("CallFunction::Initialize() the function is not a GmatFunction, "
+             "MatlabFunction, or BuiltinGmatFunction");
+      
       mFunctionPathAndName = mFunction->GetFunctionPathAndName();
       std::string fname = GmatFileUtil::ParseFileName(mFunctionPathAndName);
       if (fname == "")

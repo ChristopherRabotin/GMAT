@@ -135,8 +135,8 @@ Integrator::Integrator(const std::string &typeStr, const std::string &nomme)
       tolerance               (1.0e-11),
       fixedStep               (false),
       fixedStepsize           (300.0),
-      minimumStep             (0.001),                // 1 msec
-      maximumStep             (2700.0),               // 45 minutes
+      minimumStep             (0.001),				// 1 millisec
+      maximumStep             (2700.0),         // 45 minutes
       smallestTime            (1.0e-6),
       stepAttempts            (0),
       maxStepAttempts         (50),

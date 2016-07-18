@@ -158,7 +158,7 @@ bool LinearInterpolator::Interpolate(const Real ind, Real *results)
  * @return clone of the LinearInterpolator.
  */
 //------------------------------------------------------------------------------
-GmatBase* LinearInterpolator::Clone() const
+Interpolator* LinearInterpolator::Clone() const
 {
    return (new LinearInterpolator(*this));
 }

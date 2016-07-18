@@ -34,16 +34,20 @@
 
 #include "estimation_defs.hpp"
 #include "GmatBase.hpp"
+#include "MeasurementModelBase.hpp"
 #include "EstimationDefs.hpp"
 #include "MeasurementData.hpp"
 #include "CoreMeasurement.hpp"
 #include "Hardware.hpp"
+///// TBD: Do we want something more generic here?
+#include "ObservationData.hpp"
+#include "RampTableData.hpp"
 
 /**
  * Container class that wraps CoreMeasurement objects for use in estimation and
  * simulation
  */
-class ESTIMATION_API MeasurementModel : public GmatBase
+class ESTIMATION_API MeasurementModel : public MeasurementModelBase
 {
 public:
    MeasurementModel(const std::string &nomme = "");
@@ -65,6 +69,8 @@ public:
 
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
+
+   virtual bool         IsEstimationParameterValid(const Integer id);
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -92,6 +98,10 @@ public:
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value, const Integer row,
                                          const Integer col);
+
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id,
+                                         const std::string &value);
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -164,8 +174,13 @@ public:
    Integer              GetModelTypeID();
    void                 SetModelID(Integer newID);
 
+   virtual ObjectArray&     GetParticipants();
+
+///// TBD: Do we want something more generic here?
    virtual const MeasurementData&
-                        CalculateMeasurement(bool withEvents = false);
+                        CalculateMeasurement(bool withEvents = false,
+                           ObservationData* forObservation = NULL, std::vector<RampTableData>* rampTB = NULL, 
+                           bool withNoise = false);
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                                                         Integer id);
@@ -186,6 +201,9 @@ public:
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
 
+   virtual Real*        GetEstimationParameterValue(const Integer item);
+   virtual Integer      GetEstimationParameterSize(const Integer item);
+
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
 
@@ -193,6 +211,11 @@ public:
 protected:
    /// Name of the observation stream that supplied or receives data
    StringArray          observationStreamName;
+
+///// TBD: Do we want something more generic here?
+   /// Name of the frequency ramp table stream that supplied or receives data
+   StringArray          rampTableStreamName;
+
    /// List of participants used in the contained measurement
    StringArray          participantNames;
    /// Pointers to the participants
@@ -218,8 +241,6 @@ protected:
    Rvector  measurementBias;
    /// Noise sigma
    Rvector noiseSigma;
-   /// Time constant
-   Real timeConstant;
 
    /// Error covariance; the inherited Covariance is used for a priori data
    Covariance measErrorCovariance;
@@ -230,17 +251,31 @@ protected:
    /// Flag that is set if participants need to be passed in later
    bool measurementNeedsObjects;
 
+///// TBD: Do we want something more generic here?
+   /// Flag indicate whether Measurement model using relativity correction or not
+   bool useRelativityCorrection;
+
+   /// Flag indicate whether Measurement model using ET-TAI correction or not
+   bool useETminusTAICorrection;
+
+//   /// Residual maximum
+//   Real residualMax;
+
    /// Enumeration defining the MeasurementModel's scriptable parameters
    enum
    {
-       ObservationData = GmatBaseParamCount,
-       MeasurementType,
-       Participants,
-       Bias,
-       NoiseSigma,
-       TimeConstant,
-       Frequency,
-       MeasurementModelParamCount
+      ObsData = GmatBaseParamCount,
+      RampTables,
+      MeasurementType,
+      Participants,
+      Bias,
+      NoiseSigma,
+      Frequency,
+//      RangeModuloConstant,
+      RelativityCorrection,
+      ETminusTAICorrection,
+//      ResidualMaxLimit,
+      MeasurementModelParamCount
    };
 
    // Start with the parameter IDs and associates strings
