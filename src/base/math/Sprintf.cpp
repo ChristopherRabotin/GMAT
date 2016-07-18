@@ -178,6 +178,8 @@ std::string Sprintf::EvaluateString()
    StringArray resultArray;
    
    // Parse format specs
+   // @note: Valid formats in GMAT are: %a, %A, %e, %E, %f, %F, %g, %G.
+   //        %c, %d, %i, %o, %u, %x, and %X are not valid.
    //================================================================================
    // Format Specifier
    // A format specifier follows this prototype:
@@ -186,19 +188,22 @@ std::string Sprintf::EvaluateString()
    // specifier
    // %a      Hexadecimal floating point, lowercase
    // %A      Hexadecimal floating point, uppercase
-   // %c      Character
-   // %d/%i   Signed decimal integers
+   // %c      Character (NOT SUPPORTED in GMAT)
+   // %d/%i   Signed decimal integers (NOT SUPPORTED in GMAT)
    // %e      Scientific notation (lowercase e)
    // %E      Scientific notation (uppercase E)
    // %f      Decimal floating point (lowercase)
    // %F      Decimal floating point (uppercase)
    // %g      Uses %e or %f, whichever is shorter
    // %G      Uses %E or %F, whichever is shorter
-   // %o      Unsigned octal
+   // %o      Unsigned octal (NOT SUPPORTED in GMAT)
    // %s      String of characters
-   // %u      Unsigned decimal integers
-   // %x      Unsigned hexadecimal (lowercase letters)
-   // %X      Unsigned hexadecimal (uppercase letters)
+   // %p      Pointer address (NOT SUPPORTED in GMAT)
+   // %n      Nothing printed. The corresponding argument must be a pointer to a signed int.
+   //         The number of characters written so far is stored in the pointed location. (NOT SUPPORTED in GMAT)
+   // %u      Unsigned decimal integers (NOT SUPPORTED in GMAT)
+   // %x      Unsigned hexadecimal (lowercase letters) (NOT SUPPORTED in GMAT)
+   // %X      Unsigned hexadecimal (uppercase letters) (NOT SUPPORTED in GMAT)
    // %%      Prints a percent(%) sign)
    //
    // flags
@@ -249,7 +254,7 @@ std::string Sprintf::EvaluateString()
       
       // find specifier
       std::string code = formatSpecs[i];
-      std::string::size_type specPos = code.find_first_of("aAcdieEfFgGosuxX");
+      std::string::size_type specPos = code.find_first_of("aAcdieEfFgGnopsuxX");
       #ifdef DEBUG_EVALUATE
       MessageInterface::ShowMessage("   specPos = %u\n", specPos);
       #endif
@@ -270,8 +275,10 @@ std::string Sprintf::EvaluateString()
          MessageInterface::ShowMessage
             ("***** Invalid format specifier found in Sprintf::EvaluateString()\n");
          #endif
-         throw MathException("Error evaluating \"" + GetName() +
-                             "\"; Invalid format specifier found");
+         throw MathException
+            ("Error evaluating \"" + GetName() + "\"; Invalid format specifier found. "
+             "Allowed specs for Variable and Array element are: \"%a, %A, %e, %E, %f, %F, %g, %G\"; "
+             "and \"%s\" is only allowed spec for String");
       }
    }
    
@@ -285,7 +292,7 @@ std::string Sprintf::EvaluateString()
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage("   ========== Now going through each format spec and input\n");
    #endif
-      
+   
    int specIndex = -1;;
    for (unsigned int i = 1; i < inputArgWrappers.size(); i++)
    {
@@ -383,14 +390,14 @@ std::string Sprintf::EvaluateString()
             ("   It is a real, formatSpec = '%s', rval=%.15f\n", formatSpec.c_str(), rval);
          #endif
          
-         // Check for format spec, it cannot be '%s' or '%c' otherwise sprintf will crash,
-         // So throw an exception
-         if (formatSpec.find_last_of("sc") != std::string::npos)
+         // Check for invalid format spec for Real data
+         if (formatSpec.find_last_of("cdinopsuxX") != std::string::npos)
          {
             std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
             throw MathException
                ("Error evaluating \"" + GetName() + "\"; The data type \"" +
-                typeStr + "\" is not compatible with format spec in sprintf()");
+                typeStr + "\" is not compatible with format spec in sprintf(). "
+                "Allowed specs are: \"%a, %A, %e, %E, %f, %F, %g, %G\" ");
          }
          
          // Visual Studio implemented snprintf in VS 2015
@@ -421,7 +428,8 @@ std::string Sprintf::EvaluateString()
             std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
             throw MathException
                ("Error evaluating \"" + GetName() + "\"; The data type \"" +
-                typeStr + "\" is not compatible with format spec in sprintf()");
+                typeStr + "\" is not compatible with format spec in sprintf(). "
+                "Only allowed spec for String type is \"%s\"");
          }
          
          // Call sprintf()
