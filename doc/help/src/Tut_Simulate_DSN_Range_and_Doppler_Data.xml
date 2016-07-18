@@ -300,7 +300,7 @@ Prop.FM                   = Fm;</programlisting>
     resource defines the type of data to be simulated, the ground stations
     that will be used, and the file name of the output GMD file which will
     contain the simulated data. In addition, the TrackingFileSet resource will
-    define needed simulation parameters for the various data types. </para>
+    define needed simulation parameters for the various data types.</para>
 
     <programlisting>Create TrackingFileSet DSNsimData;
 DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN}, 'DSNRange'};   
@@ -312,8 +312,7 @@ DSNsimData.UseRelativityCorrection 	= true;
 DSNsimData.UseETminusTAI 			= true;
 
 DSNsimData.SimDopplerCountInterval 	= 10.0;
-DSNsimData.SimRangeModuloConstant 	= 3.3554432e+07;
-</programlisting>
+DSNsimData.SimRangeModuloConstant 	= 3.3554432e+07;</programlisting>
 
     <para>The script lines above are broken into three sections. In the first
     section, the resource name, DSNsimData, is declared, the data types are
@@ -322,7 +321,7 @@ DSNsimData.SimRangeModuloConstant 	= 3.3554432e+07;
     line tells GMAT to simulate DSN range two way measurements for the
     Canberra to Sat to Can measurement strand. The second AddTrackingConfig
     line tells GMAT to simulate DSN Doppler two way measurements for the
-    Canberra to Sat to Can measurement strand. </para>
+    Canberra to Sat to Can measurement strand.</para>
 
     <para>The second section above sets some simulation parameters that apply
     to both the range and Doppler measurements. We set UseLightTime to True in
@@ -342,7 +341,7 @@ DSNsimData.SimRangeModuloConstant 	= 3.3554432e+07;
     SimDopplerCountInterval, the Doppler Count Interval, is set to 10 seconds
     and SimRangeModuloConstant, the Maximum possible range value, is set to
     33554432. See the RunSimulator Help and Appendix A for a description of
-    how these parameters are used to calculate the measurement values. </para>
+    how these parameters are used to calculate the measurement values.</para>
   </section>
 
   <section>
@@ -375,12 +374,12 @@ Prop.FM                   = Fm;</programlisting>
 
     <programlisting>Create Simulator Sim;
 Sim.AddData             = {DSNsimData};
-Sim.EpochFormat    	  = UTCGregorian;
+Sim.EpochFormat         = UTCGregorian;
 Sim.InitialEpoch        = '19 Aug 2015 00:00:00.000';
 Sim.FinalEpoch          = '19 Aug 2015 00:12:00.000';
 Sim.MeasurementTimeStep = 600;
 Sim.Propagator          = Prop;
-Sim.AddNoise = Off;</programlisting>
+Sim.AddNoise            = Off;</programlisting>
 
     <para>In the first script line above, we create a Simulator object, Sim.
     The next field set is AddData which is used to specify which
@@ -388,7 +387,7 @@ Sim.AddNoise = Off;</programlisting>
     the type of data to be simulated and the file name specifying where to
     store the data. The TrackingFileSet, DSNsimData, that we created in
     Section 3 specified that we wanted to simulate two way DSN range and
-    Doppler data that involved the Can GroundStation. </para>
+    Doppler data that involved the Can GroundStation.</para>
 
     <para>The next three script lines, which set the EpochFormat,
     InitialEpoch, and FinalEpoch fields, specify the time period of the
@@ -397,7 +396,7 @@ Sim.AddNoise = Off;</programlisting>
     <para>The next script line sets the MeasurementTimeStep field which
     specifies the requested time between measurements. We choose a value of 10
     minutes. This means that our data file will contain a maximum of two range
-    measurements and two Doppler measurements. </para>
+    measurements and two Doppler measurements.</para>
 
     <para>The next script line sets the Propagator field which specifies which
     Propagator object should be used. We set this field to the Prop Propagator
@@ -410,7 +409,7 @@ Sim.AddNoise = Off;</programlisting>
     Appendix A, the noise added to the range measurements would be Gaussian
     with a one sigma value of 10.63 Range Units and the noise added to the
     Doppler measurements would be Gaussian with a one sigma value of 0.0282
-    Hz. For this simulation, we choose not to add noise. </para>
+    Hz. For this simulation, we choose not to add noise.</para>
   </section>
 
   <section>
@@ -426,20 +425,20 @@ RunSimulator Sim</programlisting>
     which indicates that the “Command” section of the GMAT script has begun.
     The second line of the script issues the RunSimulator command with the Sim
     Simulator resource, defined in Section 5, as an argument. This tells GMAT
-    to perform the simulation specified by the Sim resource. </para>
+    to perform the simulation specified by the Sim resource.</para>
 
     <para>We have now completed all of our script segments. See the file,
     Simulate DSN Range and Doppler Data.script, for a listing of the entire
     script. We are now ready to run the script. Hit the SAVE/SYNC button.
     Because we are only simulating a small amount of data, the script should
-    finish execution in about one second. </para>
+    finish execution in about one second.</para>
 
     <para>Let’s take a look at the output created. The file created,
     'Sat_dsn_range_and_doppler_measurements.gmd,’ was specified in the
     TrackingFileSet resource, DSNsimData, that we created in Section 2. The
     default directory, if none is specified, is the GMAT ‘Output’ directory.
     Let’s analyze the contents of this “GMAT Measurement Data” or GMD file as
-    shown below. </para>
+    shown below.</para>
 
     <literallayout>   % GMAT Internal Measurement Data File
 
@@ -453,23 +452,23 @@ RunSimulator Sim</programlisting>
     are 4 lines of data representing range data at two successive times and
     Doppler data at two successive times. As we expected, we have no more than
     4 total measurements. Refer to the TrackingFileSet Help for a description
-    of the range and Doppler GMD file format. </para>
+    of the range and Doppler GMD file format.</para>
 
     <para>We now analyze the first line of data which represents a DSN two way
     range measurement at the start of the simulation at '19 Aug 2015
     00:00:00.000 UTCG’ which corresponds to the output TAI modified Julian Day
-    of 27253.500405092593 TAIMJD. </para>
+    of 27253.500405092593 TAIMJD.</para>
 
     <para>The second and third fields, DSNRange and 9004, are just internal
-    GMAT codes indicating the use of DSN range (Trk 2-34 type 7) data. </para>
+    GMAT codes indicating the use of DSN range (Trk 2-34 type 7) data.</para>
 
     <para>The 4th field, 22222, is the Downlink station ID. This is the ID we
     gave the CAN GroundStation object that we created in Section 2. The 5th
     field, 11111, is the spacecraft ID. This is the ID we gave the Sat
-    Spacecraft object that we created in Section 1. </para>
+    Spacecraft object that we created in Section 1.</para>
 
     <para>The 6th field, 26016945.24902344, is the actual DSN range
-    observation value in RU. </para>
+    observation value in RU.</para>
 
     <para>The 7th field, 2, is an integer which represents the Uplink Band of
     the uplink GroundStation, CAN. The designation, 2, represents X-band. See
@@ -478,56 +477,56 @@ RunSimulator Sim</programlisting>
     not using a ramp table, GMAT determines the Uplink Band by looking at the
     transmit frequency of the Transmitter object attached to the CAN ground
     station. GMAT knows that the 7200 MHz value that we assigned to CAN’s
-    transmitter resource, DSNTransmitter, corresponds to an X-band frequency.
-    </para>
+    transmitter resource, DSNTransmitter, corresponds to an X-band
+    frequency.</para>
 
     <para>The 8th field, 7.200000000000000e+009, is the transmit frequency of
     CAN at the time of the measurement. Since we are not using a ramp table,
     this value will be constant for all measurements and it is given by the
     value of the frequency of the Transmitter object, DSNTransmitter, that we
     attached to the CAN ground station. Recall the following script segment,
-    DSNTransmitter.Frequency = 7200; %MHz, from Section 2. </para>
+    DSNTransmitter.Frequency = 7200; %MHz, from Section 2.</para>
 
     <para>The 9th field, 3.355443200000000e+007, represents the integer range
     modulo number that helps define the DSN range measurement. This is the
     value that we set when we created and configured the TrackingFileSet
-    DSNsimData object in Section 3. Recall the following script command,
-    </para>
+    DSNsimData object in Section 3. Recall the following script
+    command,</para>
 
     <literallayout>                 DSNsimData.SimRangeModuloConstant = 3.3554432e+07;</literallayout>
 
     <para>This range modulo number is discussed in Appendix A and is defined
-    as M, the length of the ranging code in RU. </para>
+    as M, the length of the ranging code in RU.</para>
 
     <para>We now analyze the second line of data which represents a DSN two
     way Doppler measurement at the start of the simulation at '19 Aug 2015
     00:00:00.000 UTCG’ which corresponds to the output TAI modified Julian Day
-    of 27253.500405092593 TAIMJD. </para>
+    of 27253.500405092593 TAIMJD.</para>
 
     <para>The second and third fields, Doppler and 9006, are just internal
     GMAT codes indicating the use of DSN Doppler (derived from two successive
-    Trk 2-34 type 17 Total Count Phase measurements) data. </para>
+    Trk 2-34 type 17 Total Count Phase measurements) data.</para>
 
     <para>The 4th field, 22222, is the Downlink station ID. This is the ID we
     gave the CAN GroundStation object that we created in Section 2. The 5th
     field, 11111, is the spacecraft ID. This is the ID we gave the Sat
-    Spacecraft object that we created in Section 1. </para>
+    Spacecraft object that we created in Section 1.</para>
 
     <para>The 6th field, 2, is an integer which represents the Uplink Band of
     the uplink GroundStation, CAN. As we mentioned when discussing the range
-    measurement, the designation, 2, represents X-band. </para>
+    measurement, the designation, 2, represents X-band.</para>
 
     <para>The 7th field, 10, is the Doppler Count Interval (DCI) used to help
     define the Doppler measurement. This is the value that we set when we
     created and configured the TrackingFileSet DSNsimData object in Section 3.
-    Recall the following script command, </para>
+    Recall the following script command,</para>
 
     <literallayout>                DSNsimData.SimDopplerCountInterval = 10.0;</literallayout>
 
-    <para>The DCI is also discussed in Appendix A. </para>
+    <para>The DCI is also discussed in Appendix A.</para>
 
     <para>The 8th field, -7819057474.22393610, is the actual DSN Doppler
-    observation value in Hz. </para>
+    observation value in Hz.</para>
 
     <para>The third line of data represents the second DSN two way range
     measurement at '19 Aug 2015 00:10:00.000 UTCG’ which corresponds to the
@@ -546,7 +545,7 @@ RunSimulator Sim</programlisting>
 
     <itemizedlist>
       <listitem>
-        <para>Generate data from additional ground stations </para>
+        <para>Generate data from additional ground stations</para>
       </listitem>
     </itemizedlist>
 
@@ -602,7 +601,7 @@ MAD.TroposphereModel      = 'HopfieldSaastamoinen';</programlisting>
     <para>Now that we have defined two additional ground stations, we must
     specify the measurement noise associated with these new ground stations.
     This can be done using the previously created ErrorModel resources as
-    shown below. </para>
+    shown below.</para>
 
     <programlisting>GDS.ErrorModels           = {DSNrange, DSNdoppler};
 MAD.ErrorModels           = {DSNrange, DSNdoppler};</programlisting>
@@ -625,7 +624,7 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
     the transmit frequency increases linearly with time and a graph of
     transmit frequency vs. time would typically show a ramp. A mission that
     does not use a ramp table simply uses a constant transmit frequency for a
-    given ground station. </para>
+    given ground station.</para>
 
     <para>To modify our script to accommodate the use of a ramp table, we
     modify our TrackingFileSet object, DSNsimData, as shown below.</para>
@@ -638,7 +637,7 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
     the ramp table file format. In order for GMAT to determine the transmit
     frequencies of all the ground stations, the ramp table must have at least
     one row of data for every ground station providing measurement data. The
-    contents of our ramp table is shown below. </para>
+    contents of our ramp table is shown below.</para>
 
     <literallayout>          27252   22222   11111   2   1   7.2e09   0.2
           27252   33333   11111   2   1   7.3e09   0.3
@@ -646,28 +645,257 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
 
     <para>Each row of data above is called a ramp record. Let’s analyze the
     first ramp record. The first field, 27252, is the TAIMJD date of the ramp
-    record. </para>
+    record.</para>
 
     <para>The second field, is 22222, is the ground station ID of the
     GroundStation object whose frequency is being specified. We note that the
     ID 22222 corresponds to the CAN ground station. The third field, 11111, is
     the ID of the spacecraft that the CAN ground station is transmitting to.
-    We recognize 11111 as the ID of the Sat spacecraft. </para>
+    We recognize 11111 as the ID of the Sat spacecraft.</para>
 
     <para>The 4th field, 2, is an integer representing the uplink band of the
     transmission. The integer 2 represents X-band. The 5th field, 1, is an
     integer describing the ramp type. The integer 1 represents the start of a
-    new ramp. </para>
+    new ramp.</para>
 
     <para>The 6th field, 7.2e9, is the transmission frequency in Hz, from CAN
     to Sat at the time given by the first field. The 7th input is the ramp
-    rate in Hz/s. </para>
+    rate in Hz/s.</para>
 
     <para>We now describe how GMAT uses the ramp record to determine the
     transmit frequency of CAN to Sat at a given time. We let TAIMJD be the
     time associated with the ramp record. Then GMAT will calculate the value
-    of the transmit frequency at t= 27252.5 TAIMJD as shown below. </para>
+    of the transmit frequency at t= 27252.5 TAIMJD as shown below.</para>
+<!-- 
+    <para><m:math>
+        <m:mrow>
+          <m:mi>f</m:mi>
+
+          <m:mo stretchy="false">(</m:mo>
+
+          <m:mi>t</m:mi>
+
+          <m:mo stretchy="false">)</m:mo>
+
+          <m:mo>=</m:mo>
+
+          <m:mi>f</m:mi>
+
+          <m:mo stretchy="false">(</m:mo>
+
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mi>o</m:mi>
+          </m:msub>
+
+          <m:mo stretchy="false">)</m:mo>
+
+          <m:mo>+</m:mo>
+
+          <m:mi>R</m:mi>
+
+          <m:mi>a</m:mi>
+
+          <m:mi>m</m:mi>
+
+          <m:mi>p</m:mi>
+
+          <m:mi>R</m:mi>
+
+          <m:mi>a</m:mi>
+
+          <m:mi>t</m:mi>
+
+          <m:mi>e</m:mi>
+
+          <m:mo>*</m:mo>
+
+          <m:mn>86400</m:mn>
+
+          <m:mo>*</m:mo>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:mi>t</m:mi>
+
+              <m:mo>−</m:mo>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mi>o</m:mi>
+              </m:msub>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+        </m:mrow>
+      </m:math></para>
+
+    <para>where</para>
+
+    <para><m:math display="block">
+        <m:mi>f</m:mi>
+
+        <m:mo stretchy="false">(</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mi>o</m:mi>
+        </m:msub>
+
+        <m:mo stretchy="false">)</m:mo>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Transmit Frequency at the start of the ramp record</m:mtext>
+      </m:math></para>
+
+    <para><m:math display="block">
+        <m:mi>f</m:mi>
+
+        <m:mo stretchy="false">(</m:mo>
+
+        <m:mi>t</m:mi>
+
+        <m:mo stretchy="false">)</m:mo>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Transmit Frequency at a later time, </m:mtext>
+
+        <m:mi>t</m:mi>
+
+        <m:mo>&gt;</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mi>o</m:mi>
+        </m:msub>
+      </m:math></para>
+
+    <para>Note that, in the typical case where there are numerous ramp
+    records, it is assumed that <m:math>
+        <m:mrow>
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mi>o</m:mi>
+          </m:msub>
+
+          <m:mo>&lt;</m:mo>
+
+          <m:mi>t</m:mi>
+        </m:mrow>
+      </m:math> is chosen as close to time t as possible. For our case above,
+    the transmit frequency from CAN to Sat at time t is</para>
+ -->
+   <!--  <para><m:math>
+        <m:mrow>
+          <m:mi>f</m:mi>
+
+          <m:mo stretchy="false">(</m:mo>
+
+          <m:mi>t</m:mi>
+
+          <m:mo stretchy="false">)</m:mo>
+
+          <m:mo>=</m:mo>
+
+          <m:mn>7.2</m:mn>
+
+          <m:mi>e</m:mi>
+
+          <m:mn>9</m:mn>
+
+          <m:mo>+</m:mo>
+
+          <m:mn>0.2</m:mn>
+
+          <m:mo>*</m:mo>
+
+          <m:mn>86400</m:mn>
+
+          <m:mo>*</m:mo>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:mn>27252.5</m:mn>
+
+              <m:mo>−</m:mo>
+
+              <m:mn>27252</m:mn>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>7200008640 Hz</m:mtext>
+        </m:mrow>
+      </m:math></para>
+
+     --><para>The second and third rows of the ramp table allow GMAT to calculate
+    the transmit frequency from GDS to Sat and MAD to Sat, respectively. We
+    now create a file, ‘Simulate DSN Range and Doppler Data Realistic
+    GMD.rmp,’ with the contents shown above and place it in GMAT’s ‘data’
+    folder. </para>
+
+    <para>We make one final comment about the use of a ramp table. We note
+    that when a ramp table is used, GMAT uses the various script inputs (e.g.,
+    SatTransponder.TurnAroundRatio and DSNTransmitter.Frequency) differently.
+    See the RunSimulator Help for details. </para>
+
+    <para>We only have two steps remaining in order to create a script that
+    generates more realistic measurement data. The first step is to increase
+    the simulation time from 10 minutes to the more realistic 3 weeks worth of
+    data that is typically needed to generate an orbit determination solution
+    for a spacecraft in this type of deep space orbit. The second step is to
+    turn on the measurement noise. These two steps are accomplished by making
+    the following changes to our TrackingFileSet object, DSNsimData.</para>
+
+    <programlisting>Sim.FinalEpoch          = '09 Sep 2015 00:00:00.000';
+Sim.AddNoise            = On;
+Sim.MeasurementTimeStep = 3600;</programlisting>
+
+    <para>Note that above, in addition to implementing the two needed steps,
+    we also changed the measurement time step from 600 seconds to 3600
+    seconds. This is not a realistic time step as many missions would use a
+    time step that might even be less than 600 seconds. We used this larger
+    time step for tutorial purposes only so that the script would not take too
+    long to run. </para>
+
+    <para>A complete script, containing all the changes we have made in
+    Section 7, is contained in the file, Simulate DSN Range and Doppler Data 3
+    weeks.script. Note that in this file, in addition to the changes above, we
+    have also changed the GMD output file name to Simulate DSN Range and
+    Doppler Data 3 weeks.gmd. </para>
+
+    <para>Now run the script which should take approximately 1-2 minutes since
+    we are generating much more data than previously. We will use the GMD file
+    we have created here as input to an estimation script we will build in the
+    next tutorial, Orbit Estimation using DSN Range and Doppler Data.</para>
+  </section>
+
+  <section>
+    <title>References</title>
 
     <para/>
+  </section>
+
+  <section>
+    <title>Appendix A – Determination of Measurement Noise Values</title>
+
+    <para>We now say a few words on how we determined the values for
+    NoiseSigma for the two ErrorModel resources we created. The computed value
+    of the DSN range measurement is given by (Moyer [2000]):</para>
   </section>
 </chapter>
