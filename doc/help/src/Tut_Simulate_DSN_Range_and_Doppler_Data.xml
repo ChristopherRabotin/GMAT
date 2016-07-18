@@ -22,7 +22,7 @@
       <term>Length</term>
 
       <listitem>
-        <para>40 minutes</para>
+        <para>60 minutes</para>
       </listitem>
     </varlistentry>
 
@@ -35,7 +35,7 @@
     </varlistentry>
 
     <varlistentry>
-      <term>Script File</term>
+      <term>Script Files</term>
 
       <listitem>
         <para><filename>Simulate DSN Range and Doppler
@@ -43,8 +43,6 @@
 
         <para><filename>Simulate DSN Range and Doppler Data 3 weeks.script
         </filename></para>
-
-        <para><filename> </filename></para>
       </listitem>
     </varlistentry>
   </variablelist>
@@ -55,9 +53,7 @@
     <note>
       <para>GMAT currently only accommodates two way measurements and thus the
       measurements being considered here are DSN two way range and DSN two way
-      Doppler. <!-- <math display='block' xmlns='http://www.w3.org/1998/Math/MathML'>
- <mo>&#x2207;</mo>
-</math>  --></para>
+      Doppler.</para>
     </note>
 
     <para>In this tutorial, we will use GMAT to generate simulated DSN range
@@ -182,11 +178,11 @@ Sat.Id               = 11111;</programlisting>
       <programlisting>Create Antenna HGA;
 
 Create Transponder SatTransponder;
-SatTransponder.PrimaryAntenna	= HGA;
-SatTransponder.HardwareDelay	= 1e-06; %seconds
-SatTransponder.TurnAroundRatio	= '880/749';
+SatTransponder.PrimaryAntenna      = HGA;
+SatTransponder.HardwareDelay       = 1e-06; %seconds
+SatTransponder.TurnAroundRatio     = '880/749';
 
-Sat.AddHardware					= {SatTransponder, HGA};</programlisting>
+Sat.AddHardware                    = {SatTransponder, HGA};</programlisting>
 
       <para>Note that after we create the Transponder object, there are three
       fields, PrimaryAntenna, HardwareDelay, and TurnAroundRatio that must be
@@ -227,9 +223,9 @@ Create Transmitter DSNTransmitter;
 Create Receiver DSNReceiver;
 Create Antenna DSNAntenna;
 
-DSNTransmitter.PrimaryAntenna = DSNAntenna;
-DSNReceiver.PrimaryAntenna    = DSNAntenna;
-DSNTransmitter.Frequency      = 7200;   %MHz</programlisting>
+DSNTransmitter.PrimaryAntenna     = DSNAntenna;
+DSNReceiver.PrimaryAntenna        = DSNAntenna;
+DSNTransmitter.Frequency          = 7200;   %MHz</programlisting>
 
       <para>In the script segment above, we first created Transmitter,
       Receiver, and Antenna objects. The GMAT script line
@@ -303,16 +299,17 @@ Prop.FM                   = Fm;</programlisting>
     define needed simulation parameters for the various data types.</para>
 
     <programlisting>Create TrackingFileSet DSNsimData;
-DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN}, 'DSNRange'};   
-DSNsimData.AddTrackingConfig = {{CAN, Sat, CAN}, 'Doppler'};                 
-DSNsimData.FileName = {'Sat_dsn_range_and_doppler_measurements.gmd'};
+DSNsimData.AddTrackingConfig             = {{CAN, Sat, CAN}, 'DSNRange'};   
+DSNsimData.AddTrackingConfig             = {{CAN, Sat, CAN}, 'Doppler'};                 
+DSNsimData.FileName                      = ...
+                         {'Sat_dsn_range_and_doppler_measurements.gmd'};
 
-DSNsimData.UseLightTime 			= true;
-DSNsimData.UseRelativityCorrection 	= true;
-DSNsimData.UseETminusTAI 			= true;
+DSNsimData.UseLightTime                  = true;
+DSNsimData.UseRelativityCorrection       = true;
+DSNsimData.UseETminusTAI                 = true;
 
-DSNsimData.SimDopplerCountInterval 	= 10.0;
-DSNsimData.SimRangeModuloConstant 	= 3.3554432e+07;</programlisting>
+DSNsimData.SimDopplerCountInterval       = 10.0;
+DSNsimData.SimRangeModuloConstant        = 3.3554432e+07;</programlisting>
 
     <para>The script lines above are broken into three sections. In the first
     section, the resource name, DSNsimData, is declared, the data types are
@@ -440,12 +437,11 @@ RunSimulator Sim</programlisting>
     Let’s analyze the contents of this “GMAT Measurement Data” or GMD file as
     shown below.</para>
 
-    <literallayout>   % GMAT Internal Measurement Data File
-
-   27253.500405092593  DSNRange  9004  22222  11111  26016945.24902344  2  7.200000000000000e+009  3.355443200000000e+007
-   27253.500405092593  Doppler   9006  22222  11111    2    10    -8459336323.89349840
-   27253.507349537038  DSNRange  9004  22222  11111  21728172.10375977  2  7.200000000000000e+009  3.355443200000000e+007
-   27253.507349537038  Doppler   9006  22222  11111    2    10    -8459335611.28409770</literallayout>
+    <programlisting>% GMAT Internal Measurement Data File
+27253.500405092593 DSNRange 9004 22222 11111 26016945.24902344 2 7.2e+009 3.3554432e+007
+27253.500405092593 Doppler  9006 22222 11111 2 10 -8459336323.89349840 
+27253.507349537038 DSNRange 9004 22222 11111 21728172.10375977 2 7.2e+009 3.3554432e+007 
+27253.507349537038 Doppler  9006 22222 11111 2 10 -8459335611.28409770</programlisting>
 
     <para>The first line of the file is a comment line indicating that this is
     a file containing measurement data stored in GMAT’s internal format. There
@@ -480,18 +476,17 @@ RunSimulator Sim</programlisting>
     transmitter resource, DSNTransmitter, corresponds to an X-band
     frequency.</para>
 
-    <para>The 8th field, 7.200000000000000e+009, is the transmit frequency of
-    CAN at the time of the measurement. Since we are not using a ramp table,
-    this value will be constant for all measurements and it is given by the
-    value of the frequency of the Transmitter object, DSNTransmitter, that we
-    attached to the CAN ground station. Recall the following script segment,
+    <para>The 8th field, 7.2e+009, is the transmit frequency of CAN at the
+    time of the measurement. Since we are not using a ramp table, this value
+    will be constant for all measurements and it is given by the value of the
+    frequency of the Transmitter object, DSNTransmitter, that we attached to
+    the CAN ground station. Recall the following script segment,
     DSNTransmitter.Frequency = 7200; %MHz, from Section 2.</para>
 
-    <para>The 9th field, 3.355443200000000e+007, represents the integer range
-    modulo number that helps define the DSN range measurement. This is the
-    value that we set when we created and configured the TrackingFileSet
-    DSNsimData object in Section 3. Recall the following script
-    command,</para>
+    <para>The 9th field, 3.3554432e+007, represents the integer range modulo
+    number that helps define the DSN range measurement. This is the value that
+    we set when we created and configured the TrackingFileSet DSNsimData
+    object in Section 3. Recall the following script command,</para>
 
     <literallayout>                 DSNsimData.SimRangeModuloConstant = 3.3554432e+07;</literallayout>
 
@@ -573,27 +568,27 @@ RunSimulator Sim</programlisting>
     MAD.</para>
 
     <programlisting>Create GroundStation GDS;  
-GDS.CentralBody = Earth;
-GDS.StateType = Cartesian;
-GDS.HorizonReference = Ellipsoid;
-GDS.Location1 = -2353.621251;
-GDS.Location2 = -4641.341542;
-GDS.Location3 = 3677.052370;
-GDS.Id = '33333';
-GDS.AddHardware = {DSNTransmitter, DSNAntenna, DSNReceiver};
+GDS.CentralBody           = Earth;
+GDS.StateType             = Cartesian;
+GDS.HorizonReference      = Ellipsoid;
+GDS.Location1             = -2353.621251;
+GDS.Location2             = -4641.341542;
+GDS.Location3             = 3677.052370;
+GDS.Id                    = '33333';
+GDS.AddHardware           = {DSNTransmitter, DSNAntenna, DSNReceiver};
 GDS.MinimumElevationAngle = 7.0;
 GDS.IonosphereModel       = 'IRI2007';
 GDS.TroposphereModel      = 'HopfieldSaastamoinen';
 
 Create GroundStation MAD;  
-MAD.CentralBody = Earth;
-MAD.StateType = Cartesian;
-MAD.HorizonReference = Ellipsoid;
-MAD.Location1 = 4849.519988;
-MAD.Location2 = -0360.641653;
-MAD.Location3 = 4114.504590;
-MAD.Id = '44444';
-MAD.AddHardware = {DSNTransmitter, DSNAntenna, DSNReceiver};
+MAD.CentralBody           = Earth;
+MAD.StateType             = Cartesian;
+MAD.HorizonReference      = Ellipsoid;
+MAD.Location1             = 4849.519988;
+MAD.Location2             = -0360.641653;
+MAD.Location3             = 4114.504590;
+MAD.Id                    = '44444';
+MAD.AddHardware           = {DSNTransmitter, DSNAntenna, DSNReceiver};
 MAD.MinimumElevationAngle = 7.0;
 MAD.IonosphereModel       = 'IRI2007';
 MAD.TroposphereModel      = 'HopfieldSaastamoinen';</programlisting>
@@ -666,8 +661,9 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
     transmit frequency of CAN to Sat at a given time. We let TAIMJD be the
     time associated with the ramp record. Then GMAT will calculate the value
     of the transmit frequency at t= 27252.5 TAIMJD as shown below.</para>
-<!-- 
-    <para><m:math>
+
+    <informalequation>
+      <m:math>
         <m:mrow>
           <m:mi>f</m:mi>
 
@@ -733,11 +729,13 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
             <m:mo>)</m:mo>
           </m:mrow>
         </m:mrow>
-      </m:math></para>
+      </m:math>
+    </informalequation>
 
     <para>where</para>
 
-    <para><m:math display="block">
+    <informalequation>
+      <m:math display="block">
         <m:mi>f</m:mi>
 
         <m:mo stretchy="false">(</m:mo>
@@ -753,9 +751,11 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
         <m:mo>=</m:mo>
 
         <m:mtext>Transmit Frequency at the start of the ramp record</m:mtext>
-      </m:math></para>
+      </m:math>
+    </informalequation>
 
-    <para><m:math display="block">
+    <informalequation>
+      <m:math display="block">
         <m:mi>f</m:mi>
 
         <m:mo stretchy="false">(</m:mo>
@@ -777,25 +777,29 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
 
           <m:mi>o</m:mi>
         </m:msub>
-      </m:math></para>
+      </m:math>
+    </informalequation>
 
     <para>Note that, in the typical case where there are numerous ramp
-    records, it is assumed that <m:math>
-        <m:mrow>
-          <m:msub>
+    records, it is assumed that <inlineequation>
+        <m:math>
+          <m:mrow>
+            <m:msub>
+              <m:mi>t</m:mi>
+
+              <m:mi>o</m:mi>
+            </m:msub>
+
+            <m:mo>&lt;</m:mo>
+
             <m:mi>t</m:mi>
+          </m:mrow>
+        </m:math>
+      </inlineequation> is chosen as close to time t as possible. For our case
+    above, the transmit frequency from CAN to Sat at time t is</para>
 
-            <m:mi>o</m:mi>
-          </m:msub>
-
-          <m:mo>&lt;</m:mo>
-
-          <m:mi>t</m:mi>
-        </m:mrow>
-      </m:math> is chosen as close to time t as possible. For our case above,
-    the transmit frequency from CAN to Sat at time t is</para>
- -->
-   <!--  <para><m:math>
+    <informalequation>
+      <m:math>
         <m:mrow>
           <m:mi>f</m:mi>
 
@@ -841,18 +845,19 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
 
           <m:mtext>7200008640 Hz</m:mtext>
         </m:mrow>
-      </m:math></para>
+      </m:math>
+    </informalequation>
 
-     --><para>The second and third rows of the ramp table allow GMAT to calculate
+    <para>The second and third rows of the ramp table allow GMAT to calculate
     the transmit frequency from GDS to Sat and MAD to Sat, respectively. We
     now create a file, ‘Simulate DSN Range and Doppler Data Realistic
     GMD.rmp,’ with the contents shown above and place it in GMAT’s ‘data’
-    folder. </para>
+    folder.</para>
 
     <para>We make one final comment about the use of a ramp table. We note
     that when a ramp table is used, GMAT uses the various script inputs (e.g.,
     SatTransponder.TurnAroundRatio and DSNTransmitter.Frequency) differently.
-    See the RunSimulator Help for details. </para>
+    See the RunSimulator Help for details.</para>
 
     <para>We only have two steps remaining in order to create a script that
     generates more realistic measurement data. The first step is to increase
@@ -871,13 +876,13 @@ Sim.MeasurementTimeStep = 3600;</programlisting>
     seconds. This is not a realistic time step as many missions would use a
     time step that might even be less than 600 seconds. We used this larger
     time step for tutorial purposes only so that the script would not take too
-    long to run. </para>
+    long to run.</para>
 
     <para>A complete script, containing all the changes we have made in
     Section 7, is contained in the file, Simulate DSN Range and Doppler Data 3
     weeks.script. Note that in this file, in addition to the changes above, we
     have also changed the GMD output file name to Simulate DSN Range and
-    Doppler Data 3 weeks.gmd. </para>
+    Doppler Data 3 weeks.gmd.</para>
 
     <para>Now run the script which should take approximately 1-2 minutes since
     we are generating much more data than previously. We will use the GMD file
@@ -888,7 +893,45 @@ Sim.MeasurementTimeStep = 3600;</programlisting>
   <section>
     <title>References</title>
 
-    <para/>
+    <informaltable colsep="0" frame="none" rowsep="0">
+      <tgroup cols="2">
+        <colspec colwidth="182*"/>
+
+        <colspec colwidth="818*"/>
+
+        <tbody>
+          <row>
+            <entry>Mesarch [2007]</entry>
+
+            <entry>M. Mesarch, M. Robertson, N. Ottenstein, A. Nicholson, M.
+            Nicholson, D. Ward, J. Cosgrove, D. German, S. Hendry, J. Shaw,
+            “Orbit Determination and Navigation of the SOlar TErrestrial
+            Relations Observatory (STEREO)”, 20th International Symposium on
+            Space Flight Dynamics, Annapolis, MD, September 24-28,
+            2007.</entry>
+          </row>
+
+          <row>
+            <entry>Moyer [2000]</entry>
+
+            <entry>Moyer, Theodore D., Formulation for Observed and Computed
+            Values of Deep Space Network Data Types for Navigation (JPL
+            Publication 00-7), Jet Propulsion Laboratory, California Institute
+            of Technology, October 2000.</entry>
+          </row>
+
+          <row>
+            <entry>Schanzle [1995]</entry>
+
+            <entry>Schanzle, A., Orbit Determination Error Analysis System
+            (ODEAS) Report on Error Sources and Nominal 3-Sigma Uncertainties
+            for Covariance Analysis Studies Using ODEAS (Update No. 2),
+            Computer Sciences Corporation (CSC) memo delivered as part of NASA
+            contract NAS-5-31500, May 31, 1995.</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </section>
 
   <section>
@@ -897,5 +940,445 @@ Sim.MeasurementTimeStep = 3600;</programlisting>
     <para>We now say a few words on how we determined the values for
     NoiseSigma for the two ErrorModel resources we created. The computed value
     of the DSN range measurement is given by (Moyer [2000]):</para>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mrow>
+          <m:mi>C</m:mi>
+
+          <m:mstyle displaystyle="true">
+            <m:mrow>
+              <m:munderover>
+                <m:mo>∫</m:mo>
+
+                <m:mrow>
+                  <m:mi>t</m:mi>
+
+                  <m:mn>1</m:mn>
+                </m:mrow>
+
+                <m:mrow>
+                  <m:mi>t</m:mi>
+
+                  <m:mn>3</m:mn>
+                </m:mrow>
+              </m:munderover>
+
+              <m:mrow>
+                <m:msub>
+                  <m:mi>f</m:mi>
+
+                  <m:mi>T</m:mi>
+                </m:msub>
+
+                <m:mo stretchy="false">(</m:mo>
+
+                <m:mi>t</m:mi>
+
+                <m:mo stretchy="false">)</m:mo>
+
+                <m:mi>d</m:mi>
+
+                <m:mi>t</m:mi>
+              </m:mrow>
+            </m:mrow>
+          </m:mstyle>
+
+          <m:mo>,</m:mo>
+
+          <m:mtext> mod M             (RU)</m:mtext>
+        </m:mrow>
+      </m:math>
+    </informalequation>
+
+    <para>where</para>
+
+    <informalequation>
+      <m:math display="block">
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mn>1</m:mn>
+        </m:msub>
+
+        <m:mo>,</m:mo>
+
+        <m:msub>
+          <m:mi>t</m:mi>
+
+          <m:mn>3</m:mn>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Transmission and Reception epoch, respectively</m:mtext>
+      </m:math>
+    </informalequation>
+
+    <informalequation>
+      <m:math display="block">
+        <m:msub>
+          <m:mi>f</m:mi>
+
+          <m:mi>T</m:mi>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>Ground Station transmit frequency</m:mtext>
+      </m:math>
+    </informalequation>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mi>C</m:mi>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>transmitter dependent constant (221/1498 for X-band and 1/2 for S-Band)</m:mtext>
+      </m:math>
+    </informalequation>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mtext>M </m:mtext>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext> length of the ranging code in RU</m:mtext>
+      </m:math>
+    </informalequation>
+
+    <para>We note that M as defined above is equal to SimRangeModuloConstant
+    which was discussed in Section 3.</para>
+
+    <para>By manipulation of the equation above, we can find a relationship
+    between RU and meters, as shown below.</para>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mrow>
+          <m:mi>C</m:mi>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mi>d</m:mi>
+
+              <m:mo stretchy="false">(</m:mo>
+
+              <m:mtext>in meters</m:mtext>
+
+              <m:mo stretchy="false">)</m:mo>
+            </m:mrow>
+
+            <m:mi>c</m:mi>
+          </m:mfrac>
+
+          <m:msub>
+            <m:mover accent="true">
+              <m:mi>f</m:mi>
+
+              <m:mo>¯</m:mo>
+            </m:mover>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext> d(in RU)</m:mtext>
+        </m:mrow>
+      </m:math>
+    </informalequation>
+
+    <para>where</para>
+
+    <informalequation>
+      <m:math display="block">
+        <m:msub>
+          <m:mover accent="true">
+            <m:mi>f</m:mi>
+
+            <m:mo>¯</m:mo>
+          </m:mover>
+
+          <m:mi>T</m:mi>
+        </m:msub>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext> </m:mtext>
+
+        <m:mfrac>
+          <m:mrow>
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>3</m:mn>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:mi>t</m:mi>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:mi>t</m:mi>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+          </m:mrow>
+
+          <m:mrow>
+            <m:mo stretchy="false">(</m:mo>
+
+            <m:mi>t</m:mi>
+
+            <m:mn>3</m:mn>
+
+            <m:mo>−</m:mo>
+
+            <m:mi>t</m:mi>
+
+            <m:mn>1</m:mn>
+
+            <m:mo stretchy="false">)</m:mo>
+          </m:mrow>
+        </m:mfrac>
+
+        <m:mo>=</m:mo>
+
+        <m:mtext>average transmit frequency (between transmit and receive),</m:mtext>
+      </m:math>
+    </informalequation>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mtext>c=speed of light in m/s</m:mtext>
+      </m:math>
+    </informalequation>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mtext>d= round trip distance</m:mtext>
+      </m:math>
+    </informalequation>
+
+    <para>If we assume the round trip distance is 1 meter, we have</para>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mrow>
+          <m:mtext>d(in RU)</m:mtext>
+
+          <m:mo>=</m:mo>
+
+          <m:mi>C</m:mi>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:msub>
+                <m:mover accent="true">
+                  <m:mi>f</m:mi>
+
+                  <m:mo>¯</m:mo>
+                </m:mover>
+
+                <m:mi>T</m:mi>
+              </m:msub>
+            </m:mrow>
+
+            <m:mi>c</m:mi>
+          </m:mfrac>
+        </m:mrow>
+      </m:math>
+    </informalequation>
+
+    <para>Recall that in Section 2, we set DSNTransmitter.Frequency = 7200;
+    This corresponds to an X-band frequency (so, C=221/1498) of 7200e6 Hz. For
+    the case where a ramp table is not used, we have a constant frequency,
+    <inlineequation>
+        <m:math display="inline">
+          <m:mrow>
+            <m:msub>
+              <m:mover accent="true">
+                <m:mi>f</m:mi>
+
+                <m:mo>¯</m:mo>
+              </m:mover>
+
+              <m:mi>T</m:mi>
+            </m:msub>
+
+            <m:mo>=</m:mo>
+
+            <m:msub>
+              <m:mi>f</m:mi>
+
+              <m:mi>T</m:mi>
+            </m:msub>
+          </m:mrow>
+        </m:math>
+      </inlineequation>, and thus</para>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mrow>
+          <m:mtext>d(in RU)= </m:mtext>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mn>221</m:mn>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mn>1498</m:mn>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mn>7200</m:mn>
+
+              <m:mi>e</m:mi>
+
+              <m:mn>6</m:mn>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mtext>299792458</m:mtext>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mtext>  = 3</m:mtext>
+
+          <m:mtext>.543172 RU</m:mtext>
+        </m:mrow>
+      </m:math>
+    </informalequation>
+
+    <para>For this example, for DSN range measurements, we want to use a 1
+    sigma noise bias of 3 meters (Schanzle [1995]). From the calculations
+    above, we determine that this corresponds to 3*3.543172 <inlineequation>
+        <m:math display="inline">
+          <m:mo>≈</m:mo>
+        </m:math>
+      </inlineequation> 10.63 RU.</para>
+
+    <para>We now turn our attention to the DSN Doppler measurement. The DSN
+    Doppler measurement that GMAT uses is actually a derived observation, O,
+    calculated using two successive Total Count Phase, <inlineequation>
+        <m:math display="inline">
+          <m:mi>ϕ</m:mi>
+        </m:math>
+      </inlineequation> , (type 17 Trk 2-34 record) measurements as shown
+    below.</para>
+
+    <informalequation>
+      <m:math display="block">
+        <m:mrow>
+          <m:mo> </m:mo>
+
+          <m:mtext> O </m:mtext>
+
+          <m:mo>≡</m:mo>
+
+          <m:mo>−</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mrow>
+                <m:mo>[</m:mo>
+
+                <m:mrow>
+                  <m:mi>ϕ</m:mi>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>3</m:mn>
+
+                      <m:mi>e</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mo>−</m:mo>
+
+                  <m:mi>ϕ</m:mi>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>3</m:mn>
+
+                      <m:mi>s</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo stretchy="false">)</m:mo>
+                </m:mrow>
+
+                <m:mo>]</m:mo>
+              </m:mrow>
+            </m:mrow>
+
+            <m:mrow>
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>e</m:mi>
+                </m:mrow>
+              </m:msub>
+
+              <m:mo>−</m:mo>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>s</m:mi>
+                </m:mrow>
+              </m:msub>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mtext>  (Hz)</m:mtext>
+        </m:mrow>
+      </m:math>
+    </informalequation>
   </section>
 </chapter>
