@@ -121,7 +121,7 @@ public:
 
 protected:
    /// Doppler count interval
-   Real                 dopplerCountInterval;
+   Real                 dopplerCountInterval;              // unit: second
 
    /// Service access list. It contains a list of all posible services which provide for the measurement
    /// This parameter is used for simulation only.

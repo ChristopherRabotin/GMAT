@@ -88,6 +88,9 @@
 // Should we sort the command list?
 #define __SORT_COMMAND_LIST__
 
+// If we are ready to handle GUI Navigation plugins, enable this
+//#define __ENABLE_NAV_GUI__
+
 // Should we enable multiple mission sequence?
 //#define__ENABLE_MULTIPLE_SEQUENCE__
 
@@ -226,6 +229,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mViewAll = true;
    mUsingViewLevel = true;
    mIsMissionTreeDocked = true;
+   mEnableShowScript = true;
    mWriteMissionSeq = false;
    mViewLevel = 10;
    
@@ -248,7 +252,13 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
       (cmds, "===> Here is the viewable command list", "   ");
    #endif
    for (unsigned int i = 0; i < cmds.size(); i++)
+   {
+      #ifndef __ENABLE_NAV_GUI__
+      if (cmds[i] == "RunSimulator" || cmds[i] == "RunEstimator")
+         continue;
+      #endif
       mCommandList.Add(cmds[i].c_str());
+   }
    
    // Build commands for view control since MissionTree show ControlFlow commands
    // and Vary, Achieve in sub nodes such as ControlLogic and Target node.
@@ -592,6 +602,13 @@ void MissionTree::SetViewCommands(const wxArrayString &viewCmds)
    UpdateMission(true, false, false);
 }
 
+//------------------------------------------------------------------------------
+// void EnableShowScript(bool flag)
+//------------------------------------------------------------------------------
+void MissionTree::EnableShowScript(bool flag)
+{
+   mEnableShowScript = flag;
+}
 
 //------------------------------------------------------------------------------
 // const wxArrayString& GetCommandList(bool forViewControl = false)
@@ -1069,6 +1086,14 @@ void MissionTree::UpdateCommand()
    
    while (cmd != NULL)
    {
+      #ifndef __ENABLE_NAV_GUI__
+      if (cmd->IsOfType("RunSimulator") || cmd->IsOfType("RunEstimator"))
+      {
+         cmd = cmd->GetNext();
+         continue;
+      }
+      #endif
+      
       node = BuildTreeItem(mMissionSeqSubId, cmd, 0, isLastItemHidden);
       
       if (isLastItemHidden)
@@ -1093,6 +1118,9 @@ void MissionTree::UpdateCommand()
    if (mWriteMissionSeq)
       ShowCommands("After Updating Command Sequence");
    
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   MessageInterface::ShowMessage("MissionTree::UpdateCommand() leaving\n");
+   #endif
 }
 
 
@@ -1311,7 +1339,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
       ("MissionTree::AppendCommand('%s') entered, type = \"%s\" and name = \"%s\"\n",
-       GetItemText(parent).c_str(),  cmd->GetTypeName().c_str(), 
+       GetItemText(parent).WX_TO_C_STRING,  cmd->GetTypeName().c_str(), 
        cmd->GetName().c_str());
    #endif
    
@@ -1328,7 +1356,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
       ("MissionTree::AppendCommand() cmdTypeName='%s', nodeName='%s'\n",
-       cmdTypeName.c_str(), nodeName.c_str());
+       cmdTypeName.WX_TO_C_STRING, nodeName.WX_TO_C_STRING);
    #endif
    // Compose node name
    // Changed node name of End and Else to append parent's name
@@ -1373,7 +1401,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
-      ("   After composing node name, nodeName='%s'\n", nodeName.c_str());
+      ("   After composing node name, nodeName='%s'\n", nodeName.WX_TO_C_STRING);
    #endif
    
    // If a command has no name, replace for GUI name
@@ -1396,7 +1424,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
-      ("   After replacing command name, nodeName='%s'\n", nodeName.c_str());
+      ("   After replacing command name, nodeName='%s'\n", nodeName.WX_TO_C_STRING);
    #endif
    
    node = AppendItem(parent, nodeName, icon, -1,
@@ -3077,6 +3105,11 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Check(MT_SHOW_DETAIL, mShowDetailedItem);
       menu.Append(MT_SHOW_MISSION_SEQUENCE, wxT("Show Mission Sequence"));
       menu.Append(MT_SHOW_SCRIPT, wxT("Show Script"));
+      
+      // We want to enable/disable these menu items depends on GUI savable/non-savable mode
+      menu.Enable(MT_SHOW_MISSION_SEQUENCE, mEnableShowScript);
+      menu.Enable(MT_SHOW_SCRIPT, mEnableShowScript);
+      
       menu.AppendSeparator();
       menu.Append(MT_MISSION_SUMMARY_ALL, wxT("Mission Summary - All"));
       menu.Append(MT_MISSION_SUMMARY_PHYSICS, wxT("Mission Summary - Physics"));

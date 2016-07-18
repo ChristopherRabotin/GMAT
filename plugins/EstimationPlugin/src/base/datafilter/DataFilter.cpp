@@ -27,6 +27,7 @@
 #include "MeasurementException.hpp"
 #include "DateUtil.hpp" 
 #include "StringUtil.hpp"
+#include "DataFile.hpp"
 #include <sstream>
 
 
@@ -362,6 +363,17 @@ std::string DataFilter::GetParameterTypeString(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* Specify either parameter read only or not
+*
+* @param id  The ID of the property
+*
+* @return    true if parameter read only, false otherwise
+*/
+//------------------------------------------------------------------------------
 bool DataFilter::IsParameterReadOnly(const Integer id) const
 {
    if (id == STRANDS)
@@ -371,6 +383,17 @@ bool DataFilter::IsParameterReadOnly(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+* Specify either parameter read only or not
+*
+* @param label  name of parameter
+*
+* @return       true if parameter read only, false otherwise
+*/
+//------------------------------------------------------------------------------
 bool DataFilter::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
@@ -1270,9 +1293,6 @@ ObjectArray & DataFilter::GetRefObjectArray(const Gmat::ObjectType type)
 }
 
 
-
-
-
 //------------------------------------------------------------------------------
 // Real ConvertToRealEpoch(const std::string &theEpoch,
 //                         const std::string &theFormat)
@@ -1303,6 +1323,16 @@ Real DataFilter::ConvertToRealEpoch(const std::string &theEpoch,
 }
 
 
+//-------------------------------------------------------------------------------
+// StringArray GetListOfMeasurementTypes()
+//-------------------------------------------------------------------------------
+/**
+* This function is used to get a name list of all measurement types (in new syntax)
+*
+* @return          a string array containing a name list of all measurement types 
+*                  defined in new syntax
+*/
+//-------------------------------------------------------------------------------
 StringArray DataFilter::GetListOfMeasurementTypes()
 {
    StringArray typeList;
@@ -1317,6 +1347,15 @@ StringArray DataFilter::GetListOfMeasurementTypes()
 }
 
 
+//-------------------------------------------------------------------------------
+// ObjectArray GetListOfSpacecrafts()
+//-------------------------------------------------------------------------------
+/**
+* This function is used to get a list of all spacecraft objects
+*
+* @return    an object array containing all spacecraft objects
+*/
+//-------------------------------------------------------------------------------
 ObjectArray DataFilter::GetListOfSpacecrafts()
 {
    StringArray nameList = GetListOfObjects(Gmat::SPACECRAFT);
@@ -1328,6 +1367,15 @@ ObjectArray DataFilter::GetListOfSpacecrafts()
 }
 
 
+//-------------------------------------------------------------------------------
+// ObjectArray GetListOfGroundStations()
+//-------------------------------------------------------------------------------
+/**
+* This function is used to get a list of all ground station objects
+*
+* @return    an object array containing all ground station objects
+*/
+//-------------------------------------------------------------------------------
 ObjectArray DataFilter::GetListOfGroundStations()
 {
    StringArray nameList = GetListOfObjects(Gmat::GROUND_STATION);
@@ -1340,7 +1388,15 @@ ObjectArray DataFilter::GetListOfGroundStations()
 }
 
 
-// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------------
+// ObjectArray DataFilter::GetListOfFiles()
+//-------------------------------------------------------------------------------
+/**
+* This function is used to get a list of all data files
+*
+* @return    an object array containing all DataFile objects
+*/
+//-------------------------------------------------------------------------------
 ObjectArray DataFilter::GetListOfFiles()
 {
    StringArray nameList = GetListOfObjects(Gmat::DATA_FILE);
@@ -1353,122 +1409,116 @@ ObjectArray DataFilter::GetListOfFiles()
 }
 
 
-//StringArray DataFilter::GetListOfValidEpochFormats()
+//bool DataFilter::ValidateInput()
 //{
-//   return TimeConverterUtil::GetListOfTimeSystemTypes();
+//   if (isChecked)
+//      return true;
+//
+//#ifdef DEBUG_FILTER
+//   MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()  enter\n", GetName().c_str(), this);
+//#endif
+//
+//   ObjectArray objectList, objectList1;
+//   StringArray nameList, nameList1;
+//   bool found;
+//
+//   bool retval = true;
+//   
+//   // 1. Verify observers:
+//   //MessageInterface::ShowMessage("Validate observers\n");
+//   objectList = GetListOfSpacecrafts();
+//   for (UnsignedInt i = 0; i < observerObjects.size(); ++i)
+//   {
+//      // validate observers[i]
+//      found = false;
+//      for (UnsignedInt j = 0; j < objectList.size(); ++j)
+//      {
+//         if (observerObjects[i]->GetName() == objectList[j]->GetName())
+//         {
+//            found = true;
+//            break;
+//         }
+//      }
+//
+//      if (!found)
+//      {
+//         //MessageInterface::ShowMessage("Data filter %s:\n%s\n", GetName().c_str(), this->GetGeneratingString().c_str());
+//         throw GmatBaseException("Error: observer '" + observerObjects[i]->GetName() + "' set to parameter " + GetName() + ".ObservedObjects was not defined in script\n"); 
+//      }
+//   }
+//
+//   // 2. Verify trackers:
+//   //MessageInterface::ShowMessage("Validate trackers\n");
+//   objectList1 = GetListOfGroundStations();
+//   for (UnsignedInt i = 0; i < trackerObjects.size(); ++i)
+//   {
+//      // validate of trackerObjects[i]
+//      found = false;
+//      for (UnsignedInt j = 0; j < objectList1.size(); ++j)
+//      {
+//         if (trackerObjects[i]->GetName() == objectList1[j]->GetName())
+//         {
+//            found = true;
+//            break;
+//         }
+//      }
+//
+//      if (!found)
+//         throw GmatBaseException("Error: tracker '" + trackerObjects[i]->GetName() + "' which is set to parameter " + GetName() + ".Trackers was not defined in script\n"); 
+//   }
+//
+//   // 3. Verify strands:
+//   //MessageInterface::ShowMessage("Validate strands\n");
+//   // 3.1. Get a list of all spacecrafts and ground stations
+//   for (UnsignedInt i = 0; i < objectList1.size(); ++i)
+//      objectList.push_back(objectList1[i]);
+//
+//   // 3.2. Verify all strands
+//   for (UnsignedInt i = 0; i < strands.size(); ++i)
+//   {
+//      // 3.2.1. Get a strand in strand list:
+//      std::string strand = strands[i];
+//      
+//      //3.2.2. Get a partcipant from the strand and verify it in valid participant list  
+//      size_t pos = strand.find_first_of('-');                      // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
+//      while (pos != std::string::npos)
+//      {
+//         // Get participant
+//         std::string participant = "";
+//         if (pos > 0)
+//            participant = strand.substr(0, pos);
+//
+//         // Verify particicpant
+//         found = false;
+//         for (UnsignedInt j = 0; j < objectList.size(); ++j)
+//         {
+//            if (participant == objectList[j]->GetName())
+//            {
+//               found = true;
+//               break;
+//            }
+//         }
+//         if (!found)
+//            throw GmatBaseException("Error: participant '" + participant + "' which is set to parameter " + GetName() + ".Strands was not defined in script\n"); 
+//
+//         // Reset value of strand
+//         strand.substr(pos+1);
+//         pos = strand.find_first_of('-');
+//      }
+//   }
+//
+//   // 6. Verify InitialEpoch:
+//
+//   // 7. Verify FinalEpoch:
+//
+//   isChecked = true;
+//
+//#ifdef DEBUG_FILTER
+//   MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()  exit\n", GetName().c_str(), this);
+//#endif
+//
+//   return retval;
 //}
-
-
-bool DataFilter::ValidateInput()
-{
-   if (isChecked)
-      return true;
-
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()  enter\n", GetName().c_str(), this);
-#endif
-
-   ObjectArray objectList, objectList1;
-   StringArray nameList, nameList1;
-   bool found;
-
-   bool retval = true;
-   
-   // 1. Verify observers:
-   //MessageInterface::ShowMessage("Validate observers\n");
-   objectList = GetListOfSpacecrafts();
-   for (UnsignedInt i = 0; i < observerObjects.size(); ++i)
-   {
-      // validate observers[i]
-      found = false;
-      for (UnsignedInt j = 0; j < objectList.size(); ++j)
-      {
-         if (observerObjects[i]->GetName() == objectList[j]->GetName())
-         {
-            found = true;
-            break;
-         }
-      }
-
-      if (!found)
-      {
-         //MessageInterface::ShowMessage("Data filter %s:\n%s\n", GetName().c_str(), this->GetGeneratingString().c_str());
-         throw GmatBaseException("Error: observer '" + observerObjects[i]->GetName() + "' set to parameter " + GetName() + ".ObservedObjects was not defined in script\n"); 
-      }
-   }
-
-   // 2. Verify trackers:
-   //MessageInterface::ShowMessage("Validate trackers\n");
-   objectList1 = GetListOfGroundStations();
-   for (UnsignedInt i = 0; i < trackerObjects.size(); ++i)
-   {
-      // validate of trackerObjects[i]
-      found = false;
-      for (UnsignedInt j = 0; j < objectList1.size(); ++j)
-      {
-         if (trackerObjects[i]->GetName() == objectList1[j]->GetName())
-         {
-            found = true;
-            break;
-         }
-      }
-
-      if (!found)
-         throw GmatBaseException("Error: tracker '" + trackerObjects[i]->GetName() + "' which is set to parameter " + GetName() + ".Trackers was not defined in script\n"); 
-   }
-
-   // 3. Verify strands:
-   //MessageInterface::ShowMessage("Validate strands\n");
-   // 3.1. Get a list of all spacecrafts and ground stations
-   for (UnsignedInt i = 0; i < objectList1.size(); ++i)
-      objectList.push_back(objectList1[i]);
-
-   // 3.2. Verify all strands
-   for (UnsignedInt i = 0; i < strands.size(); ++i)
-   {
-      // 3.2.1. Get a strand in strand list:
-      std::string strand = strands[i];
-      
-      //3.2.2. Get a partcipant from the strand and verify it in valid participant list  
-      size_t pos = strand.find_first_of('-');                      // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
-      while (pos != std::string::npos)
-      {
-         // Get participant
-         std::string participant = "";
-         if (pos > 0)
-            participant = strand.substr(0, pos);
-
-         // Verify particicpant
-         found = false;
-         for (UnsignedInt j = 0; j < objectList.size(); ++j)
-         {
-            if (participant == objectList[j]->GetName())
-            {
-               found = true;
-               break;
-            }
-         }
-         if (!found)
-            throw GmatBaseException("Error: participant '" + participant + "' which is set to parameter " + GetName() + ".Strands was not defined in script\n"); 
-
-         // Reset value of strand
-         strand.substr(pos+1);
-         pos = strand.find_first_of('-');
-      }
-   }
-
-   // 6. Verify InitialEpoch:
-
-   // 7. Verify FinalEpoch:
-
-   isChecked = true;
-
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()  exit\n", GetName().c_str(), this);
-#endif
-
-   return retval;
-}
 
 
 ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
@@ -1477,7 +1527,7 @@ ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer&
    return NULL;
 }
 
-#include "DataFile.hpp"
+
 bool DataFilter::HasFile(ObservationData* dataObject)
 {
    bool has = false;

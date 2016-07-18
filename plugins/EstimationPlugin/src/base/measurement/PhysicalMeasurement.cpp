@@ -1087,11 +1087,11 @@ Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
    }
 
    // specify frequency at time t:
-   Real t_start = (*rampTB)[interval_index].epoch;
-   Real f0 = (*rampTB)[interval_index].rampFrequency;
-   Real f_dot = (*rampTB)[interval_index].rampRate;
+   Real t_start = (*rampTB)[interval_index].epoch;                      // unit: second
+   Real f0 = (*rampTB)[interval_index].rampFrequency;                   // unit: Hz
+   Real f_dot = (*rampTB)[interval_index].rampRate;                     // unit: Hz/second
       
-   Real f = f0 + f_dot*(t - t_start);
+   Real f = f0 + f_dot*(t - t_start)*GmatTimeConstants::SECS_PER_DAY;   // unit: Hz                // made changes by TUAN NGUYEN
 
    return f;
 }

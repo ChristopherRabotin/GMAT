@@ -234,6 +234,12 @@ protected:
 private:
    bool                   isTheFirstMeasurement;                                    // fix bug GMT-4909
    bool                   isEpochFormatSet;
+
+   /// Media correction QA
+   StringArray            ionoWarningList;             // list contains all passes with ionosphere correction to be outside acceptable range [0m, 20m]
+   StringArray            tropoWarningList;            // list contains all passes with troposphere correction to be outside acceptable range [0m, 60m]                                                  // made changes by TUAN NGUYEN
+   void                   ValidateMediaCorrection(const MeasurementData* measData);
+
 };
 
 #endif /* Simulator_hpp */

@@ -156,9 +156,15 @@ Real Strfind::Evaluate()
    
    // If pattern found, set starting index to result
    if (patternPos != str.npos)
+   {
       result = Real(patternPos);
+      // Fix index to start from 1
+      result = result + 1;
+   }
    else
+   {
       result = -1;
+   }
    
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage

@@ -122,6 +122,7 @@ protected:
    Real                    newResidualRMS;
    /// The best RMS residual
    Real                    bestResidualRMS;
+   Real                    resetBestResidualRMS;                       // made changes by TUAN NGUYEN
    /// Predicted RMS residual
    Real predictedRMS;
    /// Number consecutive iterations diverging
@@ -273,6 +274,8 @@ private:
 
    std::string            GetFileCreateTime(std::string fileName);
    std::string            CTime(const time_t* time);
+   std::string            GetGMATBuildDate();
+   std::string            GetDayOfWeek(Integer day, Integer month, Integer year);
    std::string            GetOperatingSystemName();
    std::string            GetOperatingSystemVersion();
    std::string            GetHostName();

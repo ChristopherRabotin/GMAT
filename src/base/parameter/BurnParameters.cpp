@@ -26,7 +26,7 @@
 //
 /**
  * Implements Burn related Parameter classes.
- *   ImpBurnElements, TotalThrust
+ *   ImpBurnElements, TotalAcceleration, TotalThrust
  */
 //------------------------------------------------------------------------------
 
@@ -218,7 +218,7 @@ GmatBase* ImpBurnElements::Clone(void) const
 TotalMassFlowRate::TotalMassFlowRate(const std::string &type, const std::string &name,
                                  GmatBase *obj)
    : BurnReal(name, type, Gmat::FINITE_BURN, obj, "Finite Burn " + type,
-              "Km/s", GmatParam::COORD_SYS, true)
+              "Km/s", GmatParam::NO_DEP, true)
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
@@ -332,6 +332,159 @@ GmatBase* TotalMassFlowRate::Clone(void) const
 
 
 //==============================================================================
+//                              TotalAcceleration
+//==============================================================================
+/**
+ * Implements Finiteburn total thrust Parameters.
+ *    TotalAcceleration1, TotalAcceleration2, TotalAcceleration3
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// TotalAcceleration(const std::string &type, const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <type> type of the parameter
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+TotalAcceleration::TotalAcceleration(const std::string &type, const std::string &name,
+                                     GmatBase *obj)
+   : BurnReal(name, type, Gmat::FINITE_BURN, obj, "Finite Burn " + type,
+              "Km/s", GmatParam::NO_DEP, true)
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
+   
+   // Write deprecated message for each once per GMAT session
+   static bool writeDeprecatedMsg = true;
+   
+   if (type == "TotalAcceleration1")
+      mTotalAccelerationId = TOTAL_ACCEL1;
+   else if (type == "TotalAcceleration2")
+      mTotalAccelerationId = TOTAL_ACCEL2;
+   else if (type == "TotalAcceleration3")
+      mTotalAccelerationId = TOTAL_ACCEL3;
+   else
+      mTotalAccelerationId = -1;
+}
+
+
+//------------------------------------------------------------------------------
+// TotalAcceleration(const TotalAcceleration &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+TotalAcceleration::TotalAcceleration(const TotalAcceleration &copy)
+   : BurnReal(copy)
+{
+   mTotalAccelerationId = copy.mTotalAccelerationId;
+}
+
+
+//------------------------------------------------------------------------------
+// TotalAcceleration& operator=(const TotalAcceleration &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+TotalAcceleration& TotalAcceleration::operator=(const TotalAcceleration &right)
+{
+   if (this != &right)
+   {
+      BurnReal::operator=(right);
+      mTotalAccelerationId = right.mTotalAccelerationId;
+   }
+   
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~TotalAcceleration()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+TotalAcceleration::~TotalAcceleration()
+{
+}
+
+
+//-------------------------------------
+// methods inherited from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool TotalAcceleration::Evaluate()
+{
+   mRealValue = BurnData::GetReal(mTotalAccelerationId);
+
+   #ifdef DEBUG_BURN_EVAL
+   MessageInterface::ShowMessage
+      ("TotalAcceleration::Evaluate() mRealValue=%f\n", mRealValue);
+   #endif
+   
+   if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+void TotalAcceleration::SetReal(Real val)
+{
+   BurnData::SetReal(mTotalAccelerationId, val);
+   RealVar::SetReal(val);
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* TotalAcceleration::Clone(void) const
+{
+   return new TotalAcceleration(*this);
+}
+
+
+//==============================================================================
 //                              TotalThrust
 //==============================================================================
 /**
@@ -352,9 +505,9 @@ GmatBase* TotalMassFlowRate::Clone(void) const
  */
 //------------------------------------------------------------------------------
 TotalThrust::TotalThrust(const std::string &type, const std::string &name,
-                                 GmatBase *obj)
+                         GmatBase *obj)
    : BurnReal(name, type, Gmat::FINITE_BURN, obj, "Finite Burn " + type,
-              "Km/s", GmatParam::COORD_SYS, true)
+              "Km/s", GmatParam::NO_DEP, true)
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
@@ -364,11 +517,11 @@ TotalThrust::TotalThrust(const std::string &type, const std::string &name,
    static bool writeDeprecatedMsg = true;
    
    if (type == "TotalThrust1")
-      mTotalThrustId = ELEMENT1;
+      mTotalThrustId = TOTAL_THRUST1;
    else if (type == "TotalThrust2")
-      mTotalThrustId = ELEMENT2;
+      mTotalThrustId = TOTAL_THRUST2;
    else if (type == "TotalThrust3")
-      mTotalThrustId = ELEMENT3;
+      mTotalThrustId = TOTAL_THRUST3;
    else
       mTotalThrustId = -1;
 }

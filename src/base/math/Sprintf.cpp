@@ -141,7 +141,8 @@ std::string Sprintf::EvaluateString()
    
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
-      ("Sprintf::EvaluateString() <%p>'%s' entered\n", this, GetName().c_str());
+      ("Sprintf::EvaluateString() <%p>'%s' entered, inputArgWrappers.size()=%d\n",
+       this, GetName().c_str(), inputArgWrappers.size());
    #endif
 
    ValidateWrappers();
@@ -158,17 +159,19 @@ std::string Sprintf::EvaluateString()
    
    // Check for number of args matches format code
    int numPercentSign = GmatStringUtil::NumberOfOccurrences(format, '%');
+   int numAsterisks = GmatStringUtil::NumberOfOccurrences(format, '*');
    
    #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage("   numArgs = %d\n", numArgs);
    MessageInterface::ShowMessage("   numPercentSign = %d\n", numPercentSign);
+   MessageInterface::ShowMessage("   numAsterisks = %d\n", numAsterisks);
    #endif
    
-   if (numPercentSign != numArgs)
+   if ((numPercentSign + numAsterisks) != numArgs)
    {
       throw MathException
          ("Error evaluating \"" + GetName() +
-          "() function. Number of formatting spec and argment doesn't match.");
+          "\"; Number of formatting specs and arguments doesn't match.");
    }
    
    StringArray specArray;
@@ -181,6 +184,8 @@ std::string Sprintf::EvaluateString()
    // %[flags][width][.precision][length]specifier
    //
    // specifier
+   // %a      Hexadecimal floating point, lowercase
+   // %A      Hexadecimal floating point, uppercase
    // %c      Character
    // %d/%i   Signed decimal integers
    // %e      Scientific notation (lowercase e)
@@ -208,9 +213,18 @@ std::string Sprintf::EvaluateString()
    // 0       Left-pads the number with zeroes (0) instead of spaces when padding
    //         is specified
    //
+   // width
+   // (number) Minimum number of characters to be printed. If the value to be
+   //          printed is shorter than this number, the result is padded with blank spaces.
+   //          The value is not truncated even if the result is larger.
+   // *        The width is not specified in the format string, but as an additional
+   //          integer value argument preceding the argument that has to be formatted.
+   //
    // .precision
    // .number For a, A, e, E, f and F specifiers: this is the number of digits to be
    //         printed after the decimal point (by default, this is 6).
+   // .*      The precision is not specified in the format string, but as an additional
+   //         integer value argument preceding the argument that has to be formatted.
    //
    // length
    // (none)  double for fF, eE, gG
@@ -235,7 +249,7 @@ std::string Sprintf::EvaluateString()
       
       // find specifier
       std::string code = formatSpecs[i];
-      std::string::size_type specPos = code.find_first_of("cdieEfFgGosuxX");
+      std::string::size_type specPos = code.find_first_of("aAcdieEfFgGosuxX");
       #ifdef DEBUG_EVALUATE
       MessageInterface::ShowMessage("   specPos = %u\n", specPos);
       #endif
@@ -257,7 +271,7 @@ std::string Sprintf::EvaluateString()
             ("***** Invalid format specifier found in Sprintf::EvaluateString()\n");
          #endif
          throw MathException("Error evaluating \"" + GetName() +
-                             "() function. Invalid format specifier found");
+                             "\"; Invalid format specifier found");
       }
    }
    
@@ -267,28 +281,129 @@ std::string Sprintf::EvaluateString()
    std::string sval = "";
    Rmatrix rmat;
    Rvector rvec;
+   int retval = -1;
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage("   ========== Now going through each format spec and input\n");
+   #endif
+      
+   int specIndex = -1;;
    for (unsigned int i = 1; i < inputArgWrappers.size(); i++)
    {
+      specIndex++;
+      //std::string formatSpec = specArray[i-1];
+      std::string formatSpec = specArray[specIndex];
       ElementWrapper *wrapper = inputArgWrappers[i];
       #ifdef DEBUG_EVALUATE
       MessageInterface::ShowMessage
-         ("   wrapperDesc:%s, stringVal:%s\n", wrapper->GetDescription().c_str(),
-          wrapper->ToString().c_str());
+         ("   ===== formatSpec[%d]: '%s', wrapperDesc: '%s', stringVal: '%s'\n",
+          specIndex, formatSpec.c_str(),
+          wrapper ? wrapper->GetDescription().c_str() : "NULL",
+          wrapper ? wrapper->ToString().c_str() : "NULL");
       #endif
+      
+      if (wrapper == NULL)
+      {
+         throw MathException
+            ("Error evaluating \"" + GetName() + "\"; Encountered with unsupported "
+             "spec or unknown error in sprintf()");
+      }
+      
       Gmat::ParameterType dataType = wrapper->GetDataType();
+      int firstVal  = -99999;
+      int secondVal = -99999;
+      // Check if variable width or precision is used, for example '%*.*f'
+      int numStars = GmatStringUtil::NumberOfOccurrences(formatSpec, '*');
+      // First value is width
+      if (numStars > 1)
+      {
+         if (dataType != Gmat::REAL_TYPE)
+         {
+            std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
+            throw MathException
+               ("Error evaluating \"" + GetName() + "\"; The data type \"" +
+                typeStr + "\" is not compatible with format spec in sprintf(). "
+                "It requires integer value");
+         }
+         
+         firstVal = (int)(wrapper->EvaluateReal());
+         
+         // Get next value for '*'
+         i++;
+         wrapper = inputArgWrappers[i];
+         if (wrapper == NULL)
+         {
+            throw MathException
+               ("Error evaluating \"" + GetName() + "\"; Encountered with unsupported "
+                "spec or unknown error in sprintf()");
+         }
+         dataType = wrapper->GetDataType();
+      }
+      
+      // Second value is width or precision
+      if (numStars > 0)
+      {
+         if (dataType != Gmat::REAL_TYPE)
+         {
+            std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
+            throw MathException
+               ("Error evaluating \"" + GetName() + "\"; The data type \"" +
+                typeStr + "\" is not compatible with format spec in sprintf(). "
+                "It requires integer value");
+         }
+
+         if (numStars > 1)
+            secondVal = (int)(wrapper->EvaluateReal());
+         else
+            firstVal = (int)(wrapper->EvaluateReal());
+         
+         #ifdef DEBUG_EVALUATE
+         MessageInterface::ShowMessage
+            ("   firstVal = %d, secondVal = %d\n", firstVal, secondVal);
+         #endif
+         
+         // Get next value for % format
+         i++;
+         wrapper = inputArgWrappers[i];
+         if (wrapper == NULL)
+         {
+            throw MathException
+               ("Error evaluating \"" + GetName() + "\"; Encountered with unsupported "
+                "spec or unknown error in sprintf()");
+         }
+         dataType = wrapper->GetDataType();
+      }
+      
+      // Now format value
       switch (dataType)
       {
       case Gmat::REAL_TYPE:
          rval = wrapper->EvaluateReal();
          #ifdef DEBUG_EVALUATE
          MessageInterface::ShowMessage
-            ("   It is a real, specArray[%d] = '%s', rval=%f\n", i, specArray[i-1].c_str(), rval);
+            ("   It is a real, formatSpec = '%s', rval=%.15f\n", formatSpec.c_str(), rval);
          #endif
+         
+         // Check for format spec, it cannot be '%s' or '%c' otherwise sprintf will crash,
+         // So throw an exception
+         if (formatSpec.find_last_of("sc") != std::string::npos)
+         {
+            std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
+            throw MathException
+               ("Error evaluating \"" + GetName() + "\"; The data type \"" +
+                typeStr + "\" is not compatible with format spec in sprintf()");
+         }
+         
          // Visual Studio implemented snprintf in VS 2015
-         //snprintf(outBuffer, MAX_OUTPUT_LENGTH, specArray[i].c_str(), rval);
-         sprintf(outBuffer, specArray[i-1].c_str(), rval);
+         //snprintf(outBuffer, MAX_OUTPUT_LENGTH, formatSpec.c_str(), rval);
+         if (numStars == 2)
+            retval = sprintf(outBuffer, formatSpec.c_str(), firstVal, secondVal, rval);
+         else if (numStars == 1)
+            retval = sprintf(outBuffer, formatSpec.c_str(), firstVal, rval);
+         else
+            retval = sprintf(outBuffer, formatSpec.c_str(), rval);
+         
          #ifdef DEBUG_EVALUATE
-         MessageInterface::ShowMessage("   outBuffer = '%s'\n", outBuffer);
+         MessageInterface::ShowMessage("   retval=%d, outBuffer = '%s'\n", retval, outBuffer);
          #endif
          resultArray.push_back(outBuffer);
          break;
@@ -296,10 +411,27 @@ std::string Sprintf::EvaluateString()
          sval = wrapper->EvaluateString();
          #ifdef DEBUG_EVALUATE
          MessageInterface::ShowMessage
-            ("   It is a string, specArray[%d] = '%s', sval='%s'\n",
-             i, specArray[i-1].c_str(), sval.c_str());
+            ("   It is a string, formatSpec='%s', sval='%s', numStars=%d\n",
+             formatSpec.c_str(), sval.c_str());
          #endif
-         sprintf(outBuffer, specArray[i-1].c_str(), sval.c_str());
+         
+         // Check for format spec, it should be '%s' otherwise throw an exception
+         if (formatSpec.find_last_of("s") == std::string::npos)
+         {
+            std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
+            throw MathException
+               ("Error evaluating \"" + GetName() + "\"; The data type \"" +
+                typeStr + "\" is not compatible with format spec in sprintf()");
+         }
+         
+         // Call sprintf()
+         if (numStars == 2)
+            retval = sprintf(outBuffer, formatSpec.c_str(), firstVal, secondVal, sval.c_str());
+         else if (numStars == 1)
+            retval = sprintf(outBuffer, formatSpec.c_str(), firstVal, sval.c_str());
+         else
+            sprintf(outBuffer, formatSpec.c_str(), sval.c_str());
+         
          #ifdef DEBUG_EVALUATE
          MessageInterface::ShowMessage("   outBuffer = '%s'\n", outBuffer);
          #endif
@@ -313,16 +445,25 @@ std::string Sprintf::EvaluateString()
          #endif
          // Just add string value for now
          sval = wrapper->ToString();
-         if (GmatStringUtil::EndsWith(specArray[i-1], "s"))
+         if (GmatStringUtil::EndsWith(formatSpec, "s"))
          {
-            sprintf(outBuffer, specArray[i-1].c_str(), sval.c_str());
+            if (numStars == 2)
+               retval = sprintf(outBuffer, formatSpec.c_str(), firstVal, secondVal, sval.c_str());
+            else if (numStars == 1)
+               retval = sprintf(outBuffer, formatSpec.c_str(), firstVal, sval.c_str());
+            else
+               sprintf(outBuffer, formatSpec.c_str(), sval.c_str());
+            
+            #ifdef DEBUG_EVALUATE
+            MessageInterface::ShowMessage("   outBuffer = '%s'\n", outBuffer);
+            #endif
             resultArray.push_back(outBuffer);
          }
          else
          {
             std::string typeStr = GmatBase::PARAM_TYPE_STRING[dataType];
             throw MathException
-               ("Error evaluating \"" + GetName() + "() function. The data type \"" +
+               ("Error evaluating \"" + GetName() + "\"; The data type \"" +
                 typeStr + "\" is not compatible with format spec in sprintf()");
          }
       }
@@ -331,9 +472,9 @@ std::string Sprintf::EvaluateString()
    result = format;
    
    // Replace format spec with actual formatted output
-   for (unsigned int i = 1; i < inputArgWrappers.size(); i++)
+   for (unsigned int i = 0; i < specArray.size(); i++)
    {
-      result = GmatStringUtil::ReplaceFirst(result, specArray[i-1], resultArray[i-1]);
+      result = GmatStringUtil::ReplaceFirst(result, specArray[i], resultArray[i]);
       #ifdef DEBUG_EVALUATE
       MessageInterface::ShowMessage("   result = '%s'\n", result.c_str());
       #endif

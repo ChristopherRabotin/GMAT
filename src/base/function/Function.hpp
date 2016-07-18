@@ -50,6 +50,8 @@ public:
    virtual ~Function();
    Function(const Function &f);
    Function&            operator=(const Function &f);
+
+   virtual void         SetCallDescription(const std::string &desc);
    
    virtual WrapperTypeArray
                         GetOutputTypes(IntegerArray &rowCounts,
@@ -132,6 +134,8 @@ public:
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
+   /// Call description to be written out in error message
+   std::string          callDescription;
    /// Fully-qualified path for function script
    std::string          functionPath;
    /// Function name

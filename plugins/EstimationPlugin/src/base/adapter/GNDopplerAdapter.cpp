@@ -121,10 +121,6 @@ GNDopplerAdapter::GNDopplerAdapter(const GNDopplerAdapter& da) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GNDopplerAdapter copy constructor   from <%p> to <%p>\n", &da, this);
 #endif
-
-   //// Specify multiplier for S-path and E-path
-   //multiplierS = 1.0;
-   //multiplierE = 1.0;
 }
 
 
@@ -766,6 +762,21 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
    // measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km                                    // made changes by TUAN NGUYEN
    measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km   // made changes by TUAN NGUYEN
 
+
+   // Set value for isFeasible, feasibilityValue, and unfeasibleReason for measurement                              // made changes by TUAN NGUYEN
+   if ((measDataE.unfeasibleReason.at(0) == 'B') || (measDataS.unfeasibleReason.at(0) == 'B'))                      // made changes by TUAN NGUYEN
+   {                                                                                                                // made changes by TUAN NGUYEN
+      if (measDataE.unfeasibleReason.at(0) == 'B')                                                                  // made changes by TUAN NGUYEN
+         cMeasurement.unfeasibleReason = measDataE.unfeasibleReason + "E";                                          // made changes by TUAN NGUYEN
+      else                                                                                                          // made changes by TUAN NGUYEN
+      {                                                                                                             // made changes by TUAN NGUYEN
+         cMeasurement.unfeasibleReason = measDataS.unfeasibleReason + "S";                                          // made changes by TUAN NGUYEN
+         cMeasurement.isFeasible = false;                                                                           // made changes by TUAN NGUYEN
+         cMeasurement.feasibilityValue = measDataS.feasibilityValue;                                                // made changes by TUAN NGUYEN
+      }                                                                                                             // made changes by TUAN NGUYEN
+   }                                                                                                                // made changes by TUAN NGUYEN
+
+
    // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
    uplinkFreq        = adapterS->GetMeasurementModel()->GetUplinkFrequency(0, rampTB);
@@ -1228,33 +1239,4 @@ void GNDopplerAdapter::SetCorrection(const std::string& correctionName,
    adapterS->SetCorrection(correctionName, correctionType);
    RangeAdapterKm::SetCorrection(correctionName, correctionType);
 }
-
-
-
-////------------------------------------------------------------------------------
-//// Real GetTurnAroundRatio(Integer freqBand)
-////------------------------------------------------------------------------------
-///**
-// * Retrieves turn around ratio
-// *
-// * @param freqBand   frequency band
-// *
-// * return   the value of trun around ratio associated with frequency band 
-// */
-////------------------------------------------------------------------------------
-//Real GNDopplerAdapter::GetTurnAroundRatio(Integer freqBand)
-//{
-//   switch (freqBand)
-//   {
-//      case 1:            // for S-band, turn around ratio is 240/221
-//         return 240.0/221.0;
-//      case 2:            // for X-band, turn around ratio is 880/749
-//         return 880.0/749.0;
-//   }
-//
-//   // Display an error message when frequency band is not specified 
-//   std::stringstream ss;
-//   ss << "Error: frequency band " << freqBand << " is not specified.\n";
-//   throw MeasurementException(ss.str());
-//}
 

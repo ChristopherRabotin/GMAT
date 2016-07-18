@@ -33,7 +33,6 @@
 #include "DataFileFactory.hpp"
 #include "DataFile.hpp"
 
-
 //-----------------------------------------------------------------------------
 // DataFileFactory()
 //-----------------------------------------------------------------------------
@@ -46,9 +45,9 @@ DataFileFactory::DataFileFactory() :
 {
    if (creatables.empty())
    {
-#ifndef DISABLE_DATA_FILE
-      creatables.push_back("DataFile");
-#endif
+      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+         creatables.push_back("DataFile");
    }
 }
 
@@ -79,9 +78,9 @@ DataFileFactory::DataFileFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-#ifndef DISABLE_DATA_FILE
-      creatables.push_back("DataFile");
-#endif
+      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+         creatables.push_back("DataFile");
    }
 }
 
@@ -100,9 +99,9 @@ DataFileFactory::DataFileFactory(const DataFileFactory& fact) :
 {
    if (creatables.empty())
    {
-#ifndef DISABLE_DATA_FILE
-      creatables.push_back("DataFile");
-#endif
+      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+         creatables.push_back("DataFile");
    }
 }
 
@@ -126,9 +125,9 @@ DataFileFactory& DataFileFactory::operator= (const DataFileFactory& fact)
 
       if (creatables.empty())
       {
-#ifndef DISABLE_DATA_FILE
-         creatables.push_back("DataFile");
-#endif
+         Integer runmode = GmatGlobal::Instance()->GetRunMode();
+         if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+            creatables.push_back("DataFile");
       }
    }
 
@@ -154,10 +153,12 @@ DataFile* DataFileFactory::CreateDataFile(const std::string &ofType,
 {
    DataFile *retval = NULL;
 
-#ifndef DISABLE_DATA_FILE
-   if (ofType == "DataFile")
-      retval = new DataFile(withName);
-#endif
+   Integer runmode = GmatGlobal::Instance()->GetRunMode();
+   if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   {
+      if (ofType == "DataFile")
+         retval = new DataFile(withName);
+   }
 
    return retval;
 }
