@@ -1370,8 +1370,8 @@ void RunEstimator::Finalize()
    commandRunning  = false;
    propPrepared    = false;
 
-   overridePropInit = true;                   // made changes by TUAN NGUYEN
-   delayInitialization = true;                // made changes by TUAN NGUYEN
+   overridePropInit = true;
+   delayInitialization = true;
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::Finalize()\n");

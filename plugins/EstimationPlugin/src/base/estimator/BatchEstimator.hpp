@@ -120,7 +120,7 @@ protected:
    Real                    newResidualRMS;
    /// The best RMS residual
    Real                    bestResidualRMS;
-   Real                    resetBestResidualRMS;                       // made changes by TUAN NGUYEN
+   Real                    resetBestResidualRMS;
    /// Predicted RMS residual
    Real predictedRMS;
    /// Number consecutive iterations diverging

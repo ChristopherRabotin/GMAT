@@ -614,8 +614,8 @@ ObservationData* GmatObType::ReadObservation()
    if (currentObs.typeName == "DSNRange")
    {
       theLine >> currentObs.uplinkBand;
-//      theLine >> currentObs.uplinkFreq;                          // made changes by TUAN NGUYEN
-      theLine >> currentObs.uplinkFreqAtRecei;                     // made changes by TUAN NGUYEN
+//      theLine >> currentObs.uplinkFreq;
+      theLine >> currentObs.uplinkFreqAtRecei;
       theLine >> currentObs.rangeModulo;
       currentObs.unit = "RU";
    }

@@ -86,7 +86,7 @@ DataFilter::DataFilter(const std::string name) :
    //epochStart        (6116.0000003979367),
    //epochEnd          (58127.500000397937),
    isChecked         (false),
-   allDataFile       (false),                          // made changes by TUAN NGUYEN
+   allDataFile       (false),
    allObserver       (false),
    allTracker        (false),
    allDataType       (false),
@@ -142,7 +142,7 @@ DataFilter::~DataFilter()
 DataFilter::DataFilter(const DataFilter& saf) :
    GmatBase              (saf),
    fileNames             (saf.fileNames),
-   allDataFile           (saf.allDataFile),                           // made changes by TUAN NGUYEN
+   allDataFile           (saf.allDataFile),
    observers             (saf.observers),
    observerObjects       (saf.observerObjects),
    allObserver           (saf.allObserver),
@@ -190,7 +190,7 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
       GmatBase::operator=(saf);
 
       fileNames    = saf.fileNames;
-      allDataFile  = saf.allDataFile;                       // made changes by TUAN NGUYEN
+      allDataFile  = saf.allDataFile;
       observers    = saf.observers;
       observerObjects = saf.observerObjects;
       allObserver  = saf.allObserver;
