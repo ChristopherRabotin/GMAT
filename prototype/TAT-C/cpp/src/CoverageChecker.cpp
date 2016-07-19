@@ -33,6 +33,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_COV_CHECK
+//#define DEBUG_COV_CHECK_FOV
 
 //------------------------------------------------------------------------------
 // static data
@@ -72,6 +73,10 @@ CoverageChecker::CoverageChecker(PointGroup *ptGroup, Spacecraft *sat) :
       timeSeriesData.push_back(emptyIntArray);
 //      dateData.push_back(noDate); // want to accumulate these as we go along
       numEventsPerPoint.push_back(0);
+      
+      /// @TODO This should not be set here - we should store both
+      /// positions and unitized positions in the PointGroup and
+      /// then access those arrays when needed <<<<<<<<<<<<<<
       Rvector3 *ptPos  = pointGroup->GetPointPositionVector(ii);
       Rvector3 *posUnit = new Rvector3(ptPos->GetUnitVector());
 //#ifdef DEBUG_COV_CHECK
@@ -248,16 +253,32 @@ IntegerArray CoverageChecker::CheckPointCoverage()
             MessageInterface::ShowMessage(" --- In CheckPointCoverage, sensorFOV set to %12.10f\n",
                                           sensorFOV);
             MessageInterface::ShowMessage(" --- In CheckPointCoverage, bodyFixedState = %s\n",
-                                          bodyFixedState.ToString().c_str());
+                                          bodyFixedState.ToString(12).c_str());
          #endif
 //         Rvector3 rangeVec   = bodyFixedState - (*pointGroup->GetPointPositionVector(pointIdx));
-         Rvector3 rangeVec   = bodyFixedState - (*pointArray.at(pointIdx));
+         Rvector3 rangeVec   = bodyFixedState - (*pointArray.at(pointIdx)* 6378.1363);
          Real     rangeMag   = rangeVec.GetMagnitude();
          Real     bfMag      = bodyFixedState.GetMagnitude();
          
-         Real     cosineOffNadirAngle = (rangeVec * bodyFixedState)/rangeMag/bfMag;
+         Rvector3 bfsUnit = bodyFixedState.GetUnitVector();
+         Rvector3 rangeUnit = rangeVec.GetUnitVector();
+         
+         Real     cosineOffNadirAngle = rangeUnit * bfsUnit;
+//         Real     cosineOffNadirAngle = ((rangeVec * bodyFixedState)/rangeMag)/bfMag;
          
          Real     offNadirAngle = GmatMathUtil::ACos(cosineOffNadirAngle);
+#ifdef DEBUG_COV_CHECK_FOV
+         MessageInterface::ShowMessage(" --- In CheckPointCoverage, pointArray = %s\n",
+                                       (pointArray.at(pointIdx))->ToString(12).c_str());
+         MessageInterface::ShowMessage(" --- In CheckPointCoverage, bodyFixedState = %s\n",
+                                       bodyFixedState.ToString(12).c_str());
+         MessageInterface::ShowMessage(" --- In CheckPointCoverage, rangeVec = %s\n",
+                                       rangeVec.ToString(12).c_str());
+         MessageInterface::ShowMessage(" --- In CheckPointCoverage, offNadirAngle =  %12.10f\n",
+                                       offNadirAngle);
+         MessageInterface::ShowMessage(" --- In CheckPointCoverage, fov           =  %12.10f\n",
+                                       sensorFOV);
+#endif
          if (offNadirAngle < sensorFOV)
          {
             result.push_back(pointIdx);   // covCount'th entry
@@ -315,9 +336,9 @@ void CoverageChecker::CheckGridFeasibility(const Rvector3& bodyFixedState,
    for (Integer ii = 0; ii < pointArray.size(); ii++)
    {
       #ifdef DEBUG_COV_CHECK
-         Rvector3 *p = pointArray.at(ii);
-         MessageInterface::ShowMessage(" --- In CheckGridFeasibility, p (%d) = %s\n",
-                                          ii, p->ToString(12).c_str());
+//         Rvector3 *p = pointArray.at(ii);
+//         MessageInterface::ShowMessage(" --- In CheckGridFeasibility, p (%d) = %s\n",
+//                                          ii, p->ToString(12).c_str());
       #endif
       Rvector3 ptPos = *(pointArray.at(ii));
       #ifdef DEBUG_COV_CHECK
