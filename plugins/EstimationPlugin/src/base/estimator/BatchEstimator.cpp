@@ -4900,7 +4900,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
    {
       // 1. Write state summary header
       textFile3 << "\n";
-      textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": STATE INFORMATION  **************************************************************\n";
+      //textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": STATE INFORMATION  **************************************************************\n";
+      textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken+1, 3) << ": STATE INFORMATION  **************************************************************\n";
       textFile3 << "\n";
 
 
@@ -5226,7 +5227,8 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
    {
       // 1. Write header:
       textFile4 << "\n";
-      textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
+      //textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
+      textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken+1, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
       textFile4 << "\n";
 
       // 2. Write covariance and correlation matrxies in Cartesian coordiante system:

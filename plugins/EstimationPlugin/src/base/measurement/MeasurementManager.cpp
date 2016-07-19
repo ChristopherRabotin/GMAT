@@ -1261,7 +1261,8 @@ UnsignedInt MeasurementManager::LoadObservations()
    MessageInterface::ShowMessage("Number of thrown records due to:\n");
    for(std::map<std::string,Integer>::iterator i = totalCount.begin(); i != totalCount.end(); ++i)
    {
-      if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
+      //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode != GmatGlobal::TESTING)
       {
          if (i->first.substr(0, 3) == "Old")
             continue;

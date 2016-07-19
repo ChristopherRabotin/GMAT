@@ -60,7 +60,8 @@ MeasurementModelBase* MeasurementModelFactory::CreateMeasurementModel(
       const std::string & ofType, const std::string & withName)
 {
    Integer runmode = GmatGlobal::Instance()->GetRunMode();
-   if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   if (runmode == GmatGlobal::TESTING)
    {
       if (ofType == "MeasurementModel")
          return new MeasurementModel(withName);
@@ -87,7 +88,8 @@ MeasurementModelFactory::MeasurementModelFactory() :
    if (creatables.empty())
    {
       Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
          creatables.push_back("MeasurementModel");
 
       creatables.push_back("TrackingFileSet");
@@ -122,7 +124,8 @@ MeasurementModelFactory::MeasurementModelFactory(StringArray createList) :
    if (creatables.empty())
    {
       Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
          creatables.push_back("MeasurementModel");
 
       creatables.push_back("TrackingFileSet");
@@ -146,7 +149,8 @@ MeasurementModelFactory::MeasurementModelFactory(const MeasurementModelFactory &
    if (creatables.empty())
    {
       Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
          creatables.push_back("MeasurementModel");
 
       creatables.push_back("TrackingFileSet");
@@ -173,7 +177,8 @@ MeasurementModelFactory&
    if (creatables.empty())
    {
       Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
          creatables.push_back("MeasurementModel");
 
       creatables.push_back("TrackingFileSet");
