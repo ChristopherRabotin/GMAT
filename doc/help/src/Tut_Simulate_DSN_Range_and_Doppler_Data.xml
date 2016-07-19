@@ -260,7 +260,7 @@ DSNTransmitter.Frequency          = 7200;   %MHz</programlisting>
       include it here both because GMAT requires it and for completeness since
       the <guilabel>Antenna</guilabel> resource may have a function in a
       future GMAT release. Finally, we set the transmitter frequency in the
-      last GMAT script line above. See the <guilabel>RunSimulato</guilabel>r
+      last GMAT script line above. See the <guilabel>RunSimulator</guilabel>
       Help for a complete description of how this input frequency is used. As
       described in the Help, since in this example we will not be using a ramp
       table, this input frequency will be used to calculate the simulated
