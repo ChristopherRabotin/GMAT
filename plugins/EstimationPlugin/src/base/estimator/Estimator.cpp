@@ -833,7 +833,8 @@ bool Estimator::SetStringParameter(const Integer id,
    if (id == ReportStyle)
    {
       Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
+      //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode != GmatGlobal::TESTING)
       {
          Integer i = NORMAL_STYLE;
          if (value == STYLE_TEXT[i - NORMAL_STYLE])
