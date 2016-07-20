@@ -1021,7 +1021,8 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
          return true;
       }
-      return false;      // <-- throw here; It was supposed to be hardware, but isn't.
+      else
+         return false;      // <-- throw here; It was supposed to be hardware, but isn't.
       break;
 
    case Gmat::ERROR_MODEL:   // work for error model
@@ -1032,9 +1033,16 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             // Don't add if it's already there
             if (errorModels[i]->GetName() == obj->GetName())
             {
-               throw GmatBaseException("Error: Groundstation '" + GetName() + "' has 2 ErrorModel objects (" +
-                  errorModels[i]->GetName() + " and " + obj->GetName() + ") having the same name.\n");
-               return false;
+               try
+               {
+                  throw GmatBaseException("Error: ErrorModel object " +
+                     errorModels[i]->GetName() + " was added multiple times to " + GetName() + ".ErrorModels parameter.\n");
+               }
+               catch (GmatBaseException &ex)
+               {
+                  ex.SetFatal(true);
+                  throw ex;
+               }
             }
 
             // Don't add if it has type (trip and strand) the same as the one in the list
@@ -1042,8 +1050,8 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             {
                try
                {
-                  throw GmatBaseException("Error: Groundstation '" + GetName() + "' has 2 ErrorModel objects (" +
-                     errorModels[i]->GetName() + " and " + obj->GetName() + ") with Type parameter having the same value.\n");
+                  throw GmatBaseException("Error: ErrorModel objects " +
+                     errorModels[i]->GetName() + " and " + obj->GetName() + " set to " + GetName() + ".ErrorModels parameter have the same measurement type.\n");
                }
                catch (GmatBaseException &ex)
                {
