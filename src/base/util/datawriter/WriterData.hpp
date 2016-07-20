@@ -53,6 +53,9 @@ public:
    virtual bool AddData(StringMatrix data);
    virtual bool AddData(Matrix data);
 
+   virtual std::string GetName();
+   virtual Gmat::ParameterType GetType();
+
    virtual bool WriteData() = 0;
 
 protected:

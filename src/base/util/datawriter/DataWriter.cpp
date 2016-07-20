@@ -30,16 +30,40 @@
 
 #include "DataWriter.hpp"
 
+
+//------------------------------------------------------------------------------
+// DataWriter() :
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+//------------------------------------------------------------------------------
 DataWriter::DataWriter() :
    filename    (""),
    format      ("")
 {
 }
 
+//------------------------------------------------------------------------------
+// ~DataWriter()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 DataWriter::~DataWriter()
 {
 }
 
+//------------------------------------------------------------------------------
+// DataWriter(const DataWriter& dw) :
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param dw The DataWriter providing settings for this new one
+ */
+//------------------------------------------------------------------------------
 DataWriter::DataWriter(const DataWriter& dw) :
    allData           (dw.allData),
    variable_names    (dw.variable_names),
@@ -48,6 +72,17 @@ DataWriter::DataWriter(const DataWriter& dw) :
 {
 }
 
+//------------------------------------------------------------------------------
+// DataWriter& operator=(const DataWriter& dw)
+//------------------------------------------------------------------------------
+/**
+ * Assignment Operator
+ *
+ * @param dw The writer setting values here
+ *
+ * @return This DataWriter, configured like dw
+ */
+//------------------------------------------------------------------------------
 DataWriter& DataWriter::operator=(const DataWriter& dw)
 {
    if (this != &dw)
@@ -61,6 +96,18 @@ DataWriter& DataWriter::operator=(const DataWriter& dw)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// bool DataWriter::Initialize(const std::string &fname, const std::string &rev)
+//------------------------------------------------------------------------------
+/**
+ * Prepares the data structures for use
+ *
+ * @param fname Name of the output file
+ * @param rev Extra information, if needed, to open the file
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
 bool DataWriter::Initialize(const std::string &fname, const std::string &rev)
 {
    bool retval = true;
@@ -71,11 +118,29 @@ bool DataWriter::Initialize(const std::string &fname, const std::string &rev)
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool OpenFile()
+//------------------------------------------------------------------------------
+/**
+ * Opens the data file for writing
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool DataWriter::OpenFile()
 {
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool CloseFile()
+//------------------------------------------------------------------------------
+/**
+ * Closes the data file after writing
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
 bool DataWriter::CloseFile()
 {
    return false;
@@ -99,7 +164,19 @@ bool DataWriter::AddData(WriterData * newDataContainer)
    return retval;
 }
 
-bool DataWriter::WriteData(const std::string &obj_name)
+
+//------------------------------------------------------------------------------
+// bool DataWriter::DescribeData (const StringArray &variableList)
+//------------------------------------------------------------------------------
+/**
+ * Method used to prepare teh writer, if needed, for incoming data
+ *
+ * @param variableList The names of the incoming data
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool DataWriter::DescribeData (const StringArray &variableList)
 {
-   return false;
+   return true;
 }

@@ -69,3 +69,13 @@ bool WriterData::AddData(Matrix data)
 {
    return false;
 }
+
+std::string WriterData::GetName()
+{
+   return varName;
+}
+
+Gmat::ParameterType WriterData::GetType()
+{
+   return dataType;
+}

@@ -145,6 +145,12 @@ protected:
    bool                    writeMatFile;
    /// .mat data file name
    std::string             matFileName;
+   /// Data container used during accumulation
+   RealArray               epochs;
+   RealArray               observation;
+   RealArray               calculation;
+   RealArray               obsMinusCalc;
+
 
 //   /// Estimation status
 //   Integer                 estimationStatus;         // This variable is moved to Estimator class
@@ -176,7 +182,7 @@ protected:
    RealArray    sumResidualSquare;       // sum of all (O-C)^2 of accepted records
    RealArray    sumWeightResidualSquare; // sum of all [W*(O-C)]^2 of accepted records
 
-   // Statisrics information for sigma edited records
+   // Statistics information for sigma edited records
    IntegerArray sumSERecords;               // total all sigma edited records
    RealArray    sumSEResidual;              // sum of all O-C of all sigma edited records
    RealArray    sumSEResidualSquare;        // sum of all (O-C)^2 of  all sigma edited records
@@ -198,6 +204,7 @@ protected:
       USE_INITIAL_COVARIANCE,
       INVERSION_ALGORITHM,
       MAX_CONSECUTIVE_DIVERGENCES,
+      MATLAB_OUTPUT_FILENAME,
       BatchEstimatorParamCount,
    };
 

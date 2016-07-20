@@ -60,14 +60,14 @@ public:
 
    virtual bool Initialize(const std::string &fname, const std::string &mytype = "w6");
    virtual bool OpenFile();
-   virtual bool CloseFile();
    virtual bool WriteData(const std::string &obj_name);
-
-   void SetMxArray(std::vector<std::string> variable_list);
+   virtual bool CloseFile();
+   virtual bool DescribeData (const StringArray &variableList);
 
 private:
    // handle to .mat file
    MATFile *pmat;
+   void SetMxArray(const StringArray &variable_list);
 
 protected:
    // matlab data array type. mat_struct defines matlab structured array

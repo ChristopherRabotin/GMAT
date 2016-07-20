@@ -230,34 +230,10 @@ bool MatWriter::WriteData(const std::string &obj_name)
 }
 
 //-------------------------------------------------------------------------------------
-// void SetMxArray(std::vector<std::string> variable_list)
-//-------------------------------------------------------------------------------------
-/**
- * Initializes the structured array that all the data will get written to.
- * data format will be mat_struct.variable 
- *
- * @param variable_list list of variable names to write to the structured array
- */
-//-------------------------------------------------------------------------------------
-void MatWriter::SetMxArray(std::vector<std::string> variable_list)
-{
-   // get number of fields
-   int number_of_fields = variable_list.size();
-
-   // convert to cstrings
-   const char *fields[number_of_fields];
-   for (int i = 0; i < number_of_fields; i++)
-      fields[i] = variable_list[i].c_str();
-
-   // create structured array handle
-   mat_struct = mxCreateStructMatrix(1, 1, number_of_fields, fields);
-}
-
-//-------------------------------------------------------------------------------------
 // bool CloseFile()
 //-------------------------------------------------------------------------------------
 /**
- * Close the stream to the .mat file 
+ * Close the stream to the .mat file
  *
  * @return Status code. Checks to see if closing was successful
  */
@@ -269,4 +245,47 @@ bool MatWriter::CloseFile()
       throw UtilityException("MATLAB Writer: Error closing .mat file");
 
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool DescribeData (const StringArray &variableList)
+//------------------------------------------------------------------------------
+/**
+ * Initialization routine used to decribe the incoming data
+ *
+ * @param variableList The names of the incoming data containers
+ *
+ * @return true
+ */
+//------------------------------------------------------------------------------
+bool MatWriter::DescribeData(const StringArray &variableList)
+{
+   SetMxArray(variableList);
+   return true;
+}
+
+
+//-------------------------------------------------------------------------------------
+// void SetMxArray(std::vector<std::string> variable_list)
+//-------------------------------------------------------------------------------------
+/**
+ * Initializes the structured array that all the data will get written to.
+ * data format will be mat_struct.variable 
+ *
+ * @param variable_list list of variable names to write to the structured array
+ */
+//-------------------------------------------------------------------------------------
+void MatWriter::SetMxArray(const StringArray &variable_list)
+{
+   // get number of fields
+   int number_of_fields = variable_list.size();
+
+   // convert to cstrings
+   const char *fields[number_of_fields];
+   for (int i = 0; i < number_of_fields; i++)
+      fields[i] = variable_list[i].c_str();
+
+   // create structured array handle
+   mat_struct = mxCreateStructMatrix(1, 1, number_of_fields, fields);
 }

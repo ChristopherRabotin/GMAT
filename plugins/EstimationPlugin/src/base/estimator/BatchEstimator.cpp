@@ -52,6 +52,7 @@
 #include "GravityField.hpp"
 #include "ErrorModel.hpp"
 #include "EstimatorException.hpp"
+#include "FileManager.hpp"
 
 #include "DataWriterInterface.hpp"
 
@@ -113,6 +114,7 @@ BatchEstimator::PARAMETER_TEXT[] =
    "UseInitialCovariance",
    "InversionAlgorithm",
    "MaxConsecutiveDivergences",
+   "MatlabFile",
    // todo Add useApriori here
 };
 
@@ -125,6 +127,7 @@ BatchEstimator::PARAMETER_TYPE[] =
    Gmat::BOOLEAN_TYPE,         // "UseInitialCovariance"
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::FILENAME_TYPE,        // MATLAB_OUTPUT_FILENAME
 };
 
 
@@ -152,7 +155,9 @@ BatchEstimator::BatchEstimator(const std::string &type,
    chooseRMSP                 (true),
    maxConsDivergences         (3),
    inversionType              ("Internal"),
-   matWriter                  (NULL)
+   matWriter                  (NULL),
+   writeMatFile               (""),
+   matFileName                ("")
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -171,13 +176,8 @@ BatchEstimator::~BatchEstimator()
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
       delete outerLoopBuffer[i];
    outerLoopBuffer.clear();
-
-
   if (matWriter != NULL)
-  {
      delete matWriter;
-  }
-
 }
 
 
@@ -203,7 +203,9 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    chooseRMSP                 (est.chooseRMSP),
    maxConsDivergences         (est.maxConsDivergences),
    inversionType              (est.inversionType),
-   matWriter                  (NULL)
+   matWriter                  (NULL),
+   writeMatFile               (est.writeMatFile),
+   matFileName                (est.matFileName)
 {
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
@@ -252,11 +254,11 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       inversionType = est.inversionType;
 
       if (matWriter != NULL)
-      {
          delete matWriter;
-      }
       matWriter = NULL;
 
+      writeMatFile = est.writeMatFile;
+      matFileName  = est.matFileName;
    }
 
    return *this;
@@ -475,6 +477,9 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
       return inversionType;
    }
 
+   if (id == MATLAB_OUTPUT_FILENAME)
+      return matFileName;
+
    return Estimator::GetStringParameter(id);
 }
 
@@ -494,6 +499,9 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
 bool BatchEstimator::SetStringParameter(const Integer id,
          const std::string &value)
 {
+   MessageInterface::ShowMessage("BatchEstimator::SetStringParameter(%d, %s)\n",
+         id, value.c_str());
+
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
       if (value != "FromParticipants")
@@ -559,6 +567,14 @@ bool BatchEstimator::SetStringParameter(const Integer id,
             throw EstimatorException("Error: Cannot set value '" + value + " to " + GetName() + ".EstimationEpoch parameter due to its invalid time format.\n");
       }
 
+      return true;
+   }
+
+   if (id == MATLAB_OUTPUT_FILENAME)
+   {
+      matFileName = value;
+      if (matFileName.find(".mat") == std::string::npos)
+         matFileName += ".mat";
       return true;
    }
 
@@ -846,16 +862,35 @@ bool BatchEstimator::Initialize()
 
    if (Estimator::Initialize())
    {
-      //estimationStatus = UNKNOWN;          // This code is moved to Estimator::Initialize()      
       retval    = true;
 
-      // the mat writer
-      matWriter = DataWriterInterface::Instance()->GetDataWriter("MatWriter");
-      if (matWriter != NULL)
+      if (matFileName != "")
       {
-         writeMatFile = true;
-         matFileName  = instanceName + "_matlab_file.mat"; // User setting to come
-         matWriter->Initialize(matFileName, "w5");
+         // the mat writer
+         matWriter = DataWriterInterface::Instance()->GetDataWriter("MatWriter");
+         if (matWriter != NULL)
+         {
+            writeMatFile = true;
+            // Add default path is there is no path data in matFileName
+            if ((matFileName.find("/") == std::string::npos) &&
+                  (matFileName.find("\\") == std::string::npos))
+            {
+               FileManager *fileman = FileManager::Instance();
+               std::string path = fileman->GetPathname(FileManager::OUTPUT_PATH);
+               matFileName = path + matFileName;
+            }
+
+            MessageInterface::ShowMessage("MATLAB file will be written to "
+                  "%s\n", matFileName.c_str());
+
+            matWriter->Initialize(matFileName, "w5");
+
+            // Move later in the process
+            epochs.clear();
+            observation.clear();
+            calculation.clear();
+            obsMinusCalc.clear();
+         }
       }
    }
 
@@ -932,6 +967,60 @@ Solver::SolverState BatchEstimator::AdvanceState()
             "ESTIMATING\n");
          #endif
          // ReportProgress();
+
+         // Write .mat data
+         if (matWriter != NULL)
+         {
+            // Set the top level label
+            std::stringstream name;
+            name << "Iteration" << iterationsTaken;
+
+            // Package the data list
+            StringArray dataDesc;
+            dataDesc.push_back("Epoch");
+            dataDesc.push_back("Observation");
+            dataDesc.push_back("Calculation");
+            dataDesc.push_back("ObsMinusCalc");
+            matWriter->DescribeData(dataDesc);
+
+            // Set up the data containers
+            WriterData *epochData = matWriter->GetContainer(Gmat::REAL_TYPE, "Epoch");
+            matWriter->AddData(epochData);
+            WriterData *obsData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
+            matWriter->AddData(obsData);
+            WriterData *calcData = matWriter->GetContainer(Gmat::REAL_TYPE, "Calculation");
+            matWriter->AddData(calcData);
+            WriterData *omcData = matWriter->GetContainer(Gmat::REAL_TYPE, "ObsMinusCalc");
+            matWriter->AddData(omcData);
+
+            // Package the data
+            std::vector<RealArray> vecData;
+            vecData.push_back(epochs);
+            epochData->AddData(vecData);
+
+            vecData.clear();
+            vecData.push_back(observation);
+            obsData->AddData(vecData);
+
+            vecData.clear();
+            vecData.push_back(calculation);
+            calcData->AddData(vecData);
+
+            vecData.clear();
+            vecData.push_back(obsMinusCalc);
+            omcData->AddData(vecData);
+
+            // Write it
+            matWriter->WriteData(name.str());
+
+            // Clean up for the next pass
+            epochs.clear();
+            observation.clear();
+            calculation.clear();
+            obsMinusCalc.clear();
+
+         }
+
          Estimate();
          break;
 
@@ -1613,7 +1702,8 @@ void BatchEstimator::RunComplete()
    sumSEResidualSquare.clear();
    sumSEWeightResidualSquare.clear();
 
-   matWriter->CloseFile();
+   if (matWriter != NULL)
+      matWriter->CloseFile();
 }
 
 

@@ -277,6 +277,8 @@ void BatchEstimatorInv::Accumulate()
    }
    sLine << s;
 
+   if (writeMatFile && (matWriter != NULL))
+      epochs.push_back(currentObs->epoch);
 
    std::string ss;
    if (textFileMode == "Normal")
@@ -488,7 +490,7 @@ void BatchEstimatorInv::Accumulate()
                sLine << "\n";
             }
             
-            if (writeMatFile)
+            if (writeMatFile && (matWriter != NULL))
             {
                // write data to .mat file
                WriterData *realData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
@@ -502,7 +504,7 @@ void BatchEstimatorInv::Accumulate()
                convert << "Iteration" << iterationsTaken;
                object_name = convert.str();
 
-               matWriter->WriteData(object_name);
+//               matWriter->WriteData(object_name);
             }
 
             // Reset value for removed reason for all reuseable data records
@@ -806,6 +808,13 @@ void BatchEstimatorInv::Accumulate()
                   MessageInterface::ShowMessage(" %.12lf ", residuals[i]);
                MessageInterface::ShowMessage("]\n");
             #endif
+
+            if (writeMatFile && (matWriter != NULL))
+            {
+               observation.push_back(currentObs->value[0]);
+               calculation.push_back(calculatedMeas->value[0]);
+               obsMinusCalc.push_back(ocDiff);
+            }
 
          } // end of if (measManager.GetObsDataObject()->inUsed)
 

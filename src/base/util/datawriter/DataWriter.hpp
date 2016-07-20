@@ -67,9 +67,11 @@ public:
 
    virtual bool Initialize(const std::string &name, const std::string &rev);
    virtual bool OpenFile();
+   virtual bool WriteData(const std::string &obj_name) = 0;
    virtual bool CloseFile();
    virtual bool AddData(WriterData * MatDataContainer);
-   virtual bool WriteData(const std::string &obj_name);
+//   virtual WriterData *GetDataContainer(const std::string &dataName);
+   virtual bool DescribeData (const StringArray &variableList);
 
 protected:
    /// vector of variable names to write to the .mat file
