@@ -970,57 +970,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
          // Write .mat data
          if (matWriter != NULL)
-         {
-            // Set the top level label
-            std::stringstream name;
-            name << "Iteration" << iterationsTaken;
-
-            // Package the data list
-            StringArray dataDesc;
-            dataDesc.push_back("Epoch");
-            dataDesc.push_back("Observation");
-            dataDesc.push_back("Calculation");
-            dataDesc.push_back("ObsMinusCalc");
-            matWriter->DescribeData(dataDesc);
-
-            // Set up the data containers
-            WriterData *epochData = matWriter->GetContainer(Gmat::REAL_TYPE, "Epoch");
-            matWriter->AddData(epochData);
-            WriterData *obsData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
-            matWriter->AddData(obsData);
-            WriterData *calcData = matWriter->GetContainer(Gmat::REAL_TYPE, "Calculation");
-            matWriter->AddData(calcData);
-            WriterData *omcData = matWriter->GetContainer(Gmat::REAL_TYPE, "ObsMinusCalc");
-            matWriter->AddData(omcData);
-
-            // Package the data
-            std::vector<RealArray> vecData;
-            vecData.push_back(epochs);
-            epochData->AddData(vecData);
-
-            vecData.clear();
-            vecData.push_back(observation);
-            obsData->AddData(vecData);
-
-            vecData.clear();
-            vecData.push_back(calculation);
-            calcData->AddData(vecData);
-
-            vecData.clear();
-            vecData.push_back(obsMinusCalc);
-            omcData->AddData(vecData);
-
-            // Write it
-            matWriter->WriteData(name.str());
-
-            // Clean up for the next pass
-            epochs.clear();
-            observation.clear();
-            calculation.clear();
-            obsMinusCalc.clear();
-
-         }
-
+            if (!WriteMatData())
+               throw EstimatorException("Error writing .mat data file");
          Estimate();
          break;
 
@@ -6158,4 +6109,57 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
    }
 
    return retval;
+}
+
+
+bool BatchEstimator::WriteMatData()
+{
+   // Set the top level label
+   std::stringstream name;
+   name << "Iteration" << iterationsTaken;
+
+   // Package the data list
+   StringArray dataDesc;
+   dataDesc.push_back("Epoch");
+   dataDesc.push_back("Observation");
+   dataDesc.push_back("Calculation");
+   dataDesc.push_back("ObsMinusCalc");
+   matWriter->DescribeData(dataDesc);
+
+   // Set up the data containers
+   WriterData *epochData = matWriter->GetContainer(Gmat::REAL_TYPE, "Epoch");
+   matWriter->AddData(epochData);
+   WriterData *obsData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
+   matWriter->AddData(obsData);
+   WriterData *calcData = matWriter->GetContainer(Gmat::REAL_TYPE, "Calculation");
+   matWriter->AddData(calcData);
+   WriterData *omcData = matWriter->GetContainer(Gmat::REAL_TYPE, "ObsMinusCalc");
+   matWriter->AddData(omcData);
+
+   // Package the data
+   std::vector<RealArray> vecData;
+   vecData.push_back(epochs);
+   epochData->AddData(vecData);
+
+   vecData.clear();
+   vecData.push_back(observation);
+   obsData->AddData(vecData);
+
+   vecData.clear();
+   vecData.push_back(calculation);
+   calcData->AddData(vecData);
+
+   vecData.clear();
+   vecData.push_back(obsMinusCalc);
+   omcData->AddData(vecData);
+
+   // Write it
+   matWriter->WriteData(name.str());
+
+   // Clean up for the next pass
+   epochs.clear();
+   observation.clear();
+   calculation.clear();
+   obsMinusCalc.clear();
+
 }

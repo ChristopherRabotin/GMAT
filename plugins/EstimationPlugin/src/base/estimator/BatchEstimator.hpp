@@ -40,6 +40,7 @@
 #include "OwnedPlot.hpp"
 #include "DataWriter.hpp"
 #include "WriterData.hpp"
+#include "DataBucket.hpp"
 
 /**
  * Implementation of a standard batch estimation state machine
@@ -146,6 +147,7 @@ protected:
    /// .mat data file name
    std::string             matFileName;
    /// Data container used during accumulation
+   DataBucket              matData;
    RealArray               epochs;
    RealArray               observation;
    RealArray               calculation;
@@ -241,6 +243,8 @@ protected:
    Integer CholeskyInvert(Real *SUM1, Integer array_size);
 
    virtual bool            DataFilter();
+
+   bool                    WriteMatData();
 
 private:
 
