@@ -148,10 +148,14 @@ protected:
    std::string             matFileName;
    /// Data container used during accumulation
    DataBucket              matData;
-   RealArray               epochs;
-   RealArray               observation;
-   RealArray               calculation;
-   RealArray               obsMinusCalc;
+   Integer                 matEpochIndex;
+   Integer                 matObsIndex;
+   Integer                 matCalcIndex;
+   Integer                 matOmcIndex;
+//   RealArray               epochs;
+//   RealArray               observation;
+//   RealArray               calculation;
+//   RealArray               obsMinusCalc;
 
 
 //   /// Estimation status

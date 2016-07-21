@@ -164,6 +164,9 @@ void BatchEstimatorInv::Accumulate()
    const MeasurementData *calculatedMeas;
    std::vector<RealArray> stateDeriv;
 
+   // .mat file indices
+   Integer matIndex;
+
    for (UnsignedInt i = 0; i < hTilde.size(); ++i)
       hTilde[i].clear();
    hTilde.clear();
@@ -278,7 +281,21 @@ void BatchEstimatorInv::Accumulate()
    sLine << s;
 
    if (writeMatFile && (matWriter != NULL))
-      epochs.push_back(currentObs->epoch);
+   {
+      if (matEpochIndex == -1)
+      {
+         matEpochIndex = matData.AddRealContainer("Epoch");
+         matObsIndex   = matData.AddRealContainer("Observed");
+         matCalcIndex  = matData.AddRealContainer("Calculated");
+         matOmcIndex   = matData.AddRealContainer("ObsMinusCalc");;
+      }
+
+      matIndex = matData.AddPoint();
+
+      matData.elementStatus[matIndex] = 0.0;
+      matData.realValues[matEpochIndex][matIndex] = currentObs->epoch;
+      matData.realValues[matObsIndex][matIndex]   = currentObs->value[0];
+   }
 
    std::string ss;
    if (textFileMode == "Normal")
@@ -811,9 +828,9 @@ void BatchEstimatorInv::Accumulate()
 
             if (writeMatFile && (matWriter != NULL))
             {
-               observation.push_back(currentObs->value[0]);
-               calculation.push_back(calculatedMeas->value[0]);
-               obsMinusCalc.push_back(ocDiff);
+               matData.elementStatus[matIndex] = 1.0;
+               matData.realValues[matCalcIndex][matIndex] = calculatedMeas->value[0];
+               matData.realValues[matOmcIndex][matIndex]  = ocDiff;
             }
 
          } // end of if (measManager.GetObsDataObject()->inUsed)

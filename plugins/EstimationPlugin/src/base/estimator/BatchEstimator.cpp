@@ -156,6 +156,10 @@ BatchEstimator::BatchEstimator(const std::string &type,
    maxConsDivergences         (3),
    inversionType              ("Internal"),
    matWriter                  (NULL),
+   matEpochIndex              (-1),
+   matObsIndex                (-1),
+   matCalcIndex               (-1),
+   matOmcIndex                (-1),
    writeMatFile               (""),
    matFileName                ("")
 {
@@ -204,6 +208,10 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    maxConsDivergences         (est.maxConsDivergences),
    inversionType              (est.inversionType),
    matWriter                  (NULL),
+   matEpochIndex              (-1),
+   matObsIndex                (-1),
+   matCalcIndex               (-1),
+   matOmcIndex                (-1),
    writeMatFile               (est.writeMatFile),
    matFileName                (est.matFileName)
 {
@@ -256,6 +264,10 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       if (matWriter != NULL)
          delete matWriter;
       matWriter = NULL;
+      matEpochIndex = -1;
+      matObsIndex   = -1;
+      matCalcIndex  = -1;
+      matOmcIndex   = -1;
 
       writeMatFile = est.writeMatFile;
       matFileName  = est.matFileName;
@@ -886,10 +898,7 @@ bool BatchEstimator::Initialize()
             matWriter->Initialize(matFileName, "w5");
 
             // Move later in the process
-            epochs.clear();
-            observation.clear();
-            calculation.clear();
-            obsMinusCalc.clear();
+            matData.Clear();
          }
       }
    }
@@ -6112,54 +6121,66 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
 }
 
 
+//------------------------------------------------------------------------------
+// bool WriteMatData()
+//------------------------------------------------------------------------------
+/**
+ * Method used to write the MATLAB .mat file
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
 bool BatchEstimator::WriteMatData()
 {
+   bool retval = true;
+
    // Set the top level label
    std::stringstream name;
    name << "Iteration" << iterationsTaken;
 
-   // Package the data list
    StringArray dataDesc;
-   dataDesc.push_back("Epoch");
-   dataDesc.push_back("Observation");
-   dataDesc.push_back("Calculation");
-   dataDesc.push_back("ObsMinusCalc");
-   matWriter->DescribeData(dataDesc);
 
-   // Set up the data containers
-   WriterData *epochData = matWriter->GetContainer(Gmat::REAL_TYPE, "Epoch");
-   matWriter->AddData(epochData);
-   WriterData *obsData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
-   matWriter->AddData(obsData);
-   WriterData *calcData = matWriter->GetContainer(Gmat::REAL_TYPE, "Calculation");
-   matWriter->AddData(calcData);
-   WriterData *omcData = matWriter->GetContainer(Gmat::REAL_TYPE, "ObsMinusCalc");
-   matWriter->AddData(omcData);
+   // Package the data lists
+   std::vector<WriterData*> containers;
 
-   // Package the data
-   std::vector<RealArray> vecData;
-   vecData.push_back(epochs);
-   epochData->AddData(vecData);
+   // matData.elementStatus
+   dataDesc.push_back("Status");
+   WriterData* writerData = matWriter->GetContainer(Gmat::REAL_TYPE, "Status");
+   std::vector<RealArray> statData;
+   statData.push_back(matData.elementStatus);
+   writerData->AddData(statData);
+   containers.push_back(writerData);
 
-   vecData.clear();
-   vecData.push_back(observation);
-   obsData->AddData(vecData);
+   // The Real data containers
+   for (UnsignedInt i = 0; i < matData.realNames.size(); ++i)
+   {
+      dataDesc.push_back(matData.realNames[i]);
+      writerData = matWriter->GetContainer(Gmat::REAL_TYPE, matData.realNames[i]);
+      std::vector<RealArray> vecData;
+      vecData.push_back(matData.realValues[i]);
+      writerData->AddData(vecData);
+      containers.push_back(writerData);
+   }
 
-   vecData.clear();
-   vecData.push_back(calculation);
-   calcData->AddData(vecData);
-
-   vecData.clear();
-   vecData.push_back(obsMinusCalc);
-   omcData->AddData(vecData);
+   for (UnsignedInt i = 0; i < matData.stringNames.size(); ++i)
+   {
+      dataDesc.push_back(matData.stringNames[i]);
+      writerData = matWriter->GetContainer(Gmat::STRING_TYPE, matData.stringNames[i]);
+      std::vector<StringArray> vecData;
+      vecData.push_back(matData.stringValues[i]);
+      writerData->AddData(vecData);
+      containers.push_back(writerData);
+   }
 
    // Write it
+   matWriter->DescribeData(dataDesc);
+   for (UnsignedInt i = 0; i < containers.size(); ++i)
+      matWriter->AddData(containers[i]);
+
    matWriter->WriteData(name.str());
 
    // Clean up for the next pass
-   epochs.clear();
-   observation.clear();
-   calculation.clear();
-   obsMinusCalc.clear();
+   matData.Clear();
 
+   return retval;
 }
