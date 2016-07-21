@@ -60,12 +60,12 @@ WriterData& WriterData::operator=(const WriterData &md)
    return *this;
 }
 
-bool WriterData::AddData(StringMatrix data)
+bool WriterData::AddData(const StringMatrix &data)
 {
    return false;
 }
 
-bool WriterData::AddData(Matrix data)
+bool WriterData::AddData(const Matrix &data)
 {
    return false;
 }

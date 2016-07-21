@@ -287,7 +287,9 @@ void BatchEstimatorInv::Accumulate()
          matEpochIndex = matData.AddRealContainer("Epoch");
          matObsIndex   = matData.AddRealContainer("Observed");
          matCalcIndex  = matData.AddRealContainer("Calculated");
-         matOmcIndex   = matData.AddRealContainer("ObsMinusCalc");;
+         matOmcIndex   = matData.AddRealContainer("ObsMinusCalc");
+         matPartIndex  = matData.AddStringContainer("Participants");
+         matTypeIndex  = matData.AddStringContainer("Type");
       }
 
       matIndex = matData.AddPoint();
@@ -295,6 +297,14 @@ void BatchEstimatorInv::Accumulate()
       matData.elementStatus[matIndex] = 0.0;
       matData.realValues[matEpochIndex][matIndex] = currentObs->epoch;
       matData.realValues[matObsIndex][matIndex]   = currentObs->value[0];
+
+      std::string parties;
+      for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
+         parties = parties + currentObs->participantIDs[n] + (((n + 1) ==
+               currentObs->participantIDs.size()) ? "" : ",");
+
+      matData.stringValues[matPartIndex][matIndex] = parties;
+      matData.stringValues[matTypeIndex][matIndex] = currentObs->typeName;
    }
 
    std::string ss;

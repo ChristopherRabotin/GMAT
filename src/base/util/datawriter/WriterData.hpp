@@ -50,8 +50,8 @@ public:
    WriterData(const WriterData &md);
    WriterData& operator=(const WriterData &md);
 
-   virtual bool AddData(StringMatrix data);
-   virtual bool AddData(Matrix data);
+   virtual bool AddData(const StringMatrix &data);
+   virtual bool AddData(const Matrix &data);
 
    virtual std::string GetName();
    virtual Gmat::ParameterType GetType();

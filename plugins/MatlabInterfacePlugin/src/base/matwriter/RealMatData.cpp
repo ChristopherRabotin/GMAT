@@ -29,7 +29,10 @@
  * that the MathWorks mat writer understands
  *
  */
+
 #include "RealMatData.hpp"
+#include "MessageInterface.hpp"
+
 
 //------------------------------------------------------------------------------
 // RealMatData(const char * variable_name)
@@ -99,7 +102,7 @@ RealMatData& RealMatData::operator=(const RealMatData &rd)
  * @params <data> string data to write to the .mat file
  */
 //------------------------------------------------------------------------------
-bool RealMatData::AddData(Matrix data)
+bool RealMatData::AddData(const Matrix &data)
 {
     // get matrix size
     m_size = data.size();

@@ -34,6 +34,8 @@
 #include "StringMatData.hpp"
 #include "UtilityException.hpp"
 
+#include "MessageInterface.hpp"
+
 
 //-------------------------------------------------------------------------------------
 // StringMatData(const char * variable_name)
@@ -124,6 +126,11 @@ bool StringMatData::AddData(const StringMatrix &data)
 {
    bool retval = false;
 
+   #ifdef DEBUG_ADD_DATA
+      MessageInterface::ShowMessage("Adding string data; matrix is %d "
+            "arrays big\n", data.size());
+   #endif
+
    // size of array
    m_size = data.size();
    n_size = data[0].size();
@@ -141,10 +148,18 @@ bool StringMatData::AddData(const StringMatrix &data)
 
       for (int j=0; j<n_size; j++)
       {
+         #ifdef DEBUG_ADD_DATA
+            MessageInterface::ShowMessage("[%d][%d] = \"%s\"\n", i, j,
+                  data[i][j].c_str());
+         #endif
+
          tmp_str = mxCreateString(data[i][j].c_str());
          subs[1]=(mwIndex)j;
          index = mxCalcSingleSubscript(pa_string, m_size, subs);
-         mxSetCell(pa_string, index, tmp_str );
+
+         // Mike:  Please figure this piece out -- using "index," things kept
+         // writing to the first cell rather than moving from cell to cell
+         mxSetCell(pa_string, (mwIndex)j/*index*/, tmp_str );
 
          retval = true;
       }
@@ -183,7 +198,7 @@ void StringMatData::WriteData(MATFile *matfile, const std::string &objectName,
 // bool StringMatData::WriteData()
 //------------------------------------------------------------------------------
 /**
- * Override for the abstract method in the base class.  Currently just returns false.
+ * Override for abstract method in the base class.  Currently just returns false.
  *
  * @param
  *

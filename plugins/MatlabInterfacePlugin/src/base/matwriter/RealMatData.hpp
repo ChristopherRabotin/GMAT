@@ -49,7 +49,7 @@ public:
    RealMatData(const RealMatData &rd);
    RealMatData& operator=(const RealMatData &rd);
 
-   virtual bool AddData(Matrix data);
+   virtual bool AddData(const Matrix &data);
    virtual void WriteData(MATFile *pmat, const std::string &obj_name,
         mxArray *mat_struct);
    virtual bool WriteData();

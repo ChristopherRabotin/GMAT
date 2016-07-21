@@ -156,12 +156,14 @@ BatchEstimator::BatchEstimator(const std::string &type,
    maxConsDivergences         (3),
    inversionType              ("Internal"),
    matWriter                  (NULL),
+   writeMatFile               (false),
+   matFileName                (""),
+   matPartIndex               (-1),
+   matTypeIndex               (-1),
    matEpochIndex              (-1),
    matObsIndex                (-1),
    matCalcIndex               (-1),
-   matOmcIndex                (-1),
-   writeMatFile               (""),
-   matFileName                ("")
+   matOmcIndex                (-1)
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -208,12 +210,14 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    maxConsDivergences         (est.maxConsDivergences),
    inversionType              (est.inversionType),
    matWriter                  (NULL),
+   writeMatFile               (est.writeMatFile),
+   matFileName                (est.matFileName),
+   matPartIndex               (-1),
+   matTypeIndex               (-1),
    matEpochIndex              (-1),
    matObsIndex                (-1),
    matCalcIndex               (-1),
-   matOmcIndex                (-1),
-   writeMatFile               (est.writeMatFile),
-   matFileName                (est.matFileName)
+   matOmcIndex                (-1)
 {
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
@@ -264,6 +268,8 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       if (matWriter != NULL)
          delete matWriter;
       matWriter = NULL;
+      matPartIndex  = -1;
+      matTypeIndex  = -1;
       matEpochIndex = -1;
       matObsIndex   = -1;
       matCalcIndex  = -1;
@@ -6166,9 +6172,27 @@ bool BatchEstimator::WriteMatData()
    {
       dataDesc.push_back(matData.stringNames[i]);
       writerData = matWriter->GetContainer(Gmat::STRING_TYPE, matData.stringNames[i]);
-      std::vector<StringArray> vecData;
-      vecData.push_back(matData.stringValues[i]);
-      writerData->AddData(vecData);
+      std::vector<StringArray> strData;
+
+      #ifdef DEBUG_MAT_WRITER
+         MessageInterface::ShowMessage("%s has %d strings\n",
+               matData.stringNames[i].c_str(), matData.stringValues[i].size());
+         MessageInterface::ShowMessage("   %d:  %s\n", 0,
+               matData.stringValues[i][0].c_str());
+      #endif
+
+      strData.push_back(matData.stringValues[i]);
+
+      #ifdef DEBUG_MAT_WRITER
+         MessageInterface::ShowMessage("   vecData has %d entries\n",
+               vecData.size());
+         MessageInterface::ShowMessage("   vecData[0] has %d entries\n",
+               vecData[0].size());
+         MessageInterface::ShowMessage("      %d:  %s\n", 0,
+               vecData[0][0].c_str());
+      #endif
+
+      writerData->AddData(strData);
       containers.push_back(writerData);
    }
 
