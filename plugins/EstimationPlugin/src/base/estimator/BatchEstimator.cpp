@@ -933,10 +933,10 @@ Solver::SolverState BatchEstimator::AdvanceState()
          /* throw EstimatorException("Solver state not supported for the simulator")*/;
       }
    }
-   catch (EstimatorException ex)
+   catch (...) //(EstimatorException ex)
    {
       currentState = FINISHED;
-      throw ex;
+      throw; // ex;
    }
 
 #ifdef DEBUG_STATE_MACHINE

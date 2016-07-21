@@ -796,10 +796,10 @@ bool RunEstimator::Execute()
          theEstimator->AdvanceState();
          Finalize();
       }
-   } catch (EstimatorException ex1)
+   } catch (...)//(EstimatorException ex1)
    {
       Finalize();
-      throw ex1;
+      throw; // ex1;
    }
 
    #ifdef DEBUG_STATE
