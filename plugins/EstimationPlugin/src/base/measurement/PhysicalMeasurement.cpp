@@ -1012,33 +1012,19 @@ Integer PhysicalMeasurement::GetUplinkBandFromRampTable(Real t)
    Integer err = 0;
    BeginEndIndexesOfRampTable(beginIndex, endIndex, err);
 
-   //if (t <= (*rampTB)[0].epoch)
-   //   return (*rampTB)[0].uplinkBand;
-   //else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-   //   return (*rampTB)[(*rampTB).size()-1].uplinkBand;
    if (t <= (*rampTB)[beginIndex].epoch)
       return (*rampTB)[beginIndex].uplinkBand;
    else if (t >= (*rampTB)[endIndex-1].epoch)
       return (*rampTB)[endIndex-1].uplinkBand;
 
    // search for interval which contains time t:
-   //Real upBand = 0;
-   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   //{
-   //   if (t < (*rampTB)[i].epoch)
-   //   {
-   //      upBand = (*rampTB)[i-1].uplinkBand;
-   //      break;
-   //   }
-   //}
    Integer upBand = 0;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t < (*rampTB)[i].epoch)
-      {
-         upBand = (*rampTB)[i-1].uplinkBand;
+      if (t >= (*rampTB)[i].epoch)
+         upBand = (*rampTB)[i].uplinkBand;
+      else
          break;
-      }
    }
 
    return upBand;
@@ -1063,13 +1049,12 @@ Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
    //   return (*rampTB)[endIndex-1].rampFrequency;
 
    UnsignedInt interval_index = beginIndex;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t < (*rampTB)[i].epoch)
-      {
-         interval_index = i-1;
+      if (t >= (*rampTB)[i].epoch)
+         interval_index = i;
+      else
          break;
-      }
    }
 
    // specify frequency at time t:
@@ -1285,23 +1270,13 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    MessageInterface::ShowMessage(" elapse time   = %.15lf s\n", delta_t);
 #endif
    // search for end interval:
-   //UnsignedInt end_interval = 0;
-   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   //{
-   //   if (t1 < (*rampTB)[i].epoch)
-   //   {
-   //      end_interval = i-1;      
-   //      break;
-   //   }
-   //}
    UnsignedInt end_interval = beginIndex;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t1 < (*rampTB)[i].epoch)
-      {
-         end_interval = i-1;      
+      if (t1 >= (*rampTB)[i].epoch)
+         end_interval = i;
+      else
          break;
-      }
    }
 
 
