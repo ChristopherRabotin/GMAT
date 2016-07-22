@@ -36,6 +36,8 @@
 #include "StringUtil.hpp"      // for GmatStringUtil::
 #include "TimeTypes.hpp"       // for GmatTimeUtil::FormatCurrentTime()
 #include "FileManager.hpp"     // for GetGmatIncludePath()
+#include "FileUtil.hpp"        // for IsPathAbsolute()
+#include "GmatGlobal.hpp"      // for SetIncludeFoundInScriptResource()
 
 #include <sstream>             // For stringstream, used to check for non-ASCII chars
 #include <algorithm>           // for find()
@@ -99,6 +101,9 @@ ScriptInterpreter* ScriptInterpreter::Instance()
 ScriptInterpreter::ScriptInterpreter() :
    Interpreter()
 {
+   #ifdef DEBUG_INSTANCE
+   MessageInterface::ShowMessage("ScriptInterpreter::ScriptInterpreter() <%p> entered\n", this);
+   #endif
    logicalBlockCount = 0;
    functionDefined = false;
    ignoreRest = false;
@@ -115,6 +120,7 @@ ScriptInterpreter::ScriptInterpreter() :
    inRealCommandMode = false;
    firstTimeCommandBlock = true;
    firstTimeCommandMode = true;
+   includeFoundInResource = false;
    
    // Initialize the section delimiter comment
    sectionDelimiterString.clear();
@@ -124,6 +130,9 @@ ScriptInterpreter::ScriptInterpreter() :
    sectionDelimiterString.push_back("\n%----------------------------------------\n");
    
    Initialize();
+   #ifdef DEBUG_INSTANCE
+   MessageInterface::ShowMessage("ScriptInterpreter::ScriptInterpreter() <%p> leaving\n", this);
+   #endif
 }
 
 
@@ -163,6 +172,11 @@ bool ScriptInterpreter::Interpret()
    inRealCommandMode = false;
    firstTimeCommandBlock = true;
    firstTimeCommandMode = true;
+   #if DBGLVL_SCRIPT_READING
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::Interpret() <%p> Setting includeFoundInResource to false\n", this);
+   #endif
+   includeFoundInResource = false;
    beginMissionSeqFound = false;
    userParameterLines.clear();
    
@@ -1089,8 +1103,8 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader,bool rein
 {
    #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
-      ("\nScriptInterpreter::ReadScript() entered, inCmd=<%p>, skipHeader=%d\n",
-       inCmd, skipHeader);
+      ("\nScriptInterpreter::ReadScript() <%p> entered, inCmd=<%p>, skipHeader=%d\n",
+       this, inCmd, skipHeader);
    MessageInterface::ShowMessage
       ("   currentScriptBeingRead='%s'\n", currentScriptBeingRead.c_str());
    #endif
@@ -1185,8 +1199,19 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader,bool rein
          {
             #ifdef DBGLVL_SCRIPT_READING
             MessageInterface::ShowMessage("   => currentBlockType is INCLUDE_BLOCK\n");
+            MessageInterface::ShowMessage("   inCommandMode = %d\n", inCommandMode);
             MessageInterface::ShowMessage("   Calling theTextParser.ChunkLine()\n");
             #endif
+            if (!inCommandMode)
+            {
+               #if DBGLVL_SCRIPT_READING
+               MessageInterface::ShowMessage
+                  ("   Setting includeFoundInResource to true and to GmatGlobal\n");
+               #endif
+               includeFoundInResource = true;
+               GmatGlobal::Instance()->SetIncludeFoundInScriptResource(true);
+            }
+            
             StringArray chunks = theTextParser.ChunkLine();
             #ifdef DBGLVL_SCRIPT_READING
             MessageInterface::ShowMessage("   Calling ParseIncludeBlock() for syntax check\n");
@@ -1655,6 +1680,13 @@ std::string ScriptInterpreter::GetMainScriptFileName()
    return mainScriptFilename;
 }
 
+//------------------------------------------------------------------------------
+// bool IncludeFoundInResource()
+//------------------------------------------------------------------------------
+bool ScriptInterpreter::IncludeFoundInResource()
+{
+   return includeFoundInResource;
+}
 
 //------------------------------------------------------------------------------
 // bool WriteScript()
@@ -2902,9 +2934,13 @@ bool ScriptInterpreter::ParseIncludeBlock(const StringArray &chunks)
    #endif
    if (incPath == "")
    {
-      // Throw an exception for non-existent include file
-      throw InterpreterException("The include file \"" + incFile +
-            "\" does not exist");
+      // If incFile is not absolute path, throw an exception
+      if (!GmatFileUtil::IsPathAbsolute(incFile))
+      {
+         // Throw an exception for non-existent include file
+         throw InterpreterException("The include file \"" + incFile +
+                                    "\" does not exist");
+      }
    }
    
    lastIncludeFile = incPath + incFile;

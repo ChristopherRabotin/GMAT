@@ -409,6 +409,11 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
                // so that [out] = GmatFunc(x) + 1 can be parsed (see GMT-3325).
                // Check if [] has only one output
                StringArray parts = SeparateBy(str, "=");
+               #if DEBUG_TP_EVAL_BLOCK > 1
+               for (unsigned int i = 0; i < parts.size(); i++)
+                  MessageInterface::ShowMessage
+                     ("   parts[%d] = '%s'\n", i, parts[i].c_str());
+               #endif
                if (parts.size() == 2)
                {
                   std::string lhs = parts[0];
@@ -429,6 +434,18 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
                         theBlockType = Gmat::ASSIGNMENT_BLOCK;
                         isFunctionCall = false;
                      }
+                  }
+               }
+               else
+               {
+                  #if DEBUG_TP_EVAL_BLOCK > 1
+                  MessageInterface::ShowMessage
+                     ("   No equal sign (=) found, so check for function call\n");
+                  #endif
+                  if (parts.size() == 1 && GmatStringUtil::IsValidFunctionCall(parts[0]))
+                  {
+                     theBlockType = Gmat::COMMAND_BLOCK;
+                     isFunctionCall = true;
                   }
                }
             }

@@ -28,3 +28,4 @@ CheckRepo.TestEntry
 /temp/
 /WinBuild/
 /RemoteSystemsTempFiles/
+/CMakefile

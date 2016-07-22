@@ -228,6 +228,7 @@ protected:
    bool mNeedVelocity;
    bool mNeedAttitude;
    bool mNeedEcliptic;
+   bool mIgnoreTimeSequence;
    
    // Drawing option
    bool mDrawWireFrame;

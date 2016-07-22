@@ -28,7 +28,7 @@
  *    FuelTank: FuelMass, Pressure, Temperature, RefTemperature, Volume,
  *              FuelDensity,
  *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
- *              K1-K16, ThrustDirections, Thrust, Isp, MassFlowRate
+ *              K1-K16, ThrustDirections, ThrustMagnitude, Isp, MassFlowRate
  *    PowerSystem: TotalPowerAvailable, RequiredBusPower, ThrustPowerAvailable
  */
 //------------------------------------------------------------------------------
@@ -288,14 +288,14 @@ protected:
 };
 
 
-class GMAT_API Thrust : public HardwareReal
+class GMAT_API ThrustMagnitude : public HardwareReal
 {
 public:
 
-   Thrust(const std::string &name = "", GmatBase *obj = NULL);
-   Thrust(const Thrust &copy);
-   Thrust& operator=(const Thrust &right);
-   virtual ~Thrust();
+   ThrustMagnitude(const std::string &name = "", GmatBase *obj = NULL);
+   ThrustMagnitude(const ThrustMagnitude &copy);
+   ThrustMagnitude& operator=(const ThrustMagnitude &right);
+   virtual ~ThrustMagnitude();
    
    // methods inherited from Parameter
    virtual bool Evaluate();

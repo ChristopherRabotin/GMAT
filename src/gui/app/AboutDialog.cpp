@@ -36,6 +36,7 @@
 #include "FileManager.hpp"
 #include "ViewTextDialog.hpp"
 #include "FileUtil.hpp"            // for GmatFileUtil::DoesFileExist()
+#include "GmatGlobal.hpp"          // for GetGmatVersion()
 #include <wx/hyperlink.h>
 #include <wx/statline.h>
 #include <wx/gdicmn.h>
@@ -92,7 +93,6 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    #ifdef DEBUG_ICONFILE
    MessageInterface::ShowMessage("   About iconFile='%s'\n", iconFile.c_str());
    #endif
-   //if (fm->DoesFileExist(iconFile))
    if (iconFile != "")
    {
       //bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_JPEG);
@@ -140,7 +140,8 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    gmatText->SetOwnForegroundColour(gmatColor);
    
    // Release number
-   wxString releaseNumber = "Version: 2015a";
+   std::string version = GmatGlobal::Instance()->GetGmatVersion();
+   wxString releaseNumber = STD_TO_WX_STRING(version);
    wxStaticText *releaseText = new wxStaticText(this, -1, releaseNumber);
    
    // Build date
@@ -155,7 +156,8 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    #endif
    
    // Set font
-   font1.SetWeight(wxFONTWEIGHT_LIGHT);
+   //font1.SetWeight(wxFONTWEIGHT_LIGHT);
+   font1.SetWeight(wxFONTWEIGHT_NORMAL);
    releaseText->SetFont(font1);
    buildText->SetFont(font1);
    

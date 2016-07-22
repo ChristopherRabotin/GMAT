@@ -1140,7 +1140,6 @@ UnsignedInt MeasurementManager::LoadObservations()
    std::vector<UnsignedInt> count;                     // count[i] is number of all accepted records associated with file specified by streamList[i] after applying statistic filters
    std::vector<ObservationData*> dataBuffer;           // dataBuffer[i] contains the current data record read from streamList[i]  
    ObservationData* odPointer;
-   //MessageInterface::ShowMessage("Hi there 1: streamList.size() = %d\n", streamList.size());
 
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
@@ -1154,11 +1153,10 @@ UnsignedInt MeasurementManager::LoadObservations()
 
       count.push_back(0);
    }
-   //MessageInterface::ShowMessage("Hi there 2\n");
+   
    ObservationData od;
    while (true)
    {
-      //MessageInterface::ShowMessage("Hi there 3.1\n");
       // 1. get a data record in data buffer with smallest value of epoch
       UnsignedInt minIndex = dataBuffer.size();     // point to the outside of data buffer
       for (UnsignedInt i = 0; i < dataBuffer.size(); ++i)
@@ -1174,17 +1172,17 @@ UnsignedInt MeasurementManager::LoadObservations()
                minIndex = i;
          }
       }
-      //MessageInterface::ShowMessage("Hi there 3.2\n");
+      
       // 2. if dada buffer contains all NULL data record (that means all streams at EOF), then exit while loop
       if (minIndex == dataBuffer.size())
          break;
-      //MessageInterface::ShowMessage("Hi there 3.3\n");
+      
       // 3. Filter the data record do it for all filters
       Integer rejectedReason = 0;
       ObservationData* obsData = dataBuffer[minIndex];
       // This observation data is belong to data file: streamList[minIndex]. Therefore, it needs to use filters defined in that data file object
       ObservationData* selectedData = streamList[minIndex]->FilteringData(obsData, rejectedReason);
-      //MessageInterface::ShowMessage("Hi there 3.4\n");
+      
       // 4. if it passes all filters then add it to observations
       if (selectedData != NULL)
       {
@@ -1208,7 +1206,7 @@ UnsignedInt MeasurementManager::LoadObservations()
          else if (find(trackingConfigsMap[minIndex].begin(), trackingConfigsMap[minIndex].end(), ss.str()) == trackingConfigsMap[minIndex].end())
             trackingConfigsMap[minIndex].push_back(ss.str());
       }
-      //MessageInterface::ShowMessage("Hi there 3.5\n");
+      
       // 5. count throw recods based on rejectedReason
       switch (rejectedReason)
       {
@@ -1248,7 +1246,7 @@ UnsignedInt MeasurementManager::LoadObservations()
                }
             }
       }
-      //MessageInterface::ShowMessage("Hi there 3.6\n");
+      
       // 6. Read data record from streamList[minIndex] to fill data buffer if the stream is not EOF
       if (dataBuffer[minIndex] != NULL)
       {
@@ -1256,22 +1254,19 @@ UnsignedInt MeasurementManager::LoadObservations()
          if (dataBuffer[minIndex] != NULL)
             numRec[minIndex] = numRec[minIndex] + 1;        // count up number of read records if it really has one record read from file
       }
-      //MessageInterface::ShowMessage("Hi there 3.7\n");
    }
 
    // 7. Display all statistic of data records
+   Integer runmode = GmatGlobal::Instance()->GetRunMode();
    MessageInterface::ShowMessage("Number of thrown records due to:\n");
-   //MessageInterface::ShowMessage("      .Invalid measurement value       : %d\n", filter3Num);
-   //MessageInterface::ShowMessage("      .Record duplication or time order: %d\n", filter4Num);
-   //MessageInterface::ShowMessage("      .Trackers selection              : %d\n", filter5Num);
-   //MessageInterface::ShowMessage("      .Data thinning                   : %d\n", filter1Num);
-   //MessageInterface::ShowMessage("      .Time span                       : %d\n", filter2Num);
-   //MessageInterface::ShowMessage("      .Observers selection             : %d\n", filter6Num);
-   //MessageInterface::ShowMessage("      .Data types selection            : %d\n", filter7Num);
-   //MessageInterface::ShowMessage("      .Data files selection            : %d\n", filter8Num);
-   //MessageInterface::ShowMessage("      .Tracking configuration selection: %d\n", filter9Num);
    for(std::map<std::string,Integer>::iterator i = totalCount.begin(); i != totalCount.end(); ++i)
    {
+      //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode != GmatGlobal::TESTING)
+      {
+         if (i->first.substr(0, 3) == "Old")
+            continue;
+      }
       MessageInterface::ShowMessage("     .%s : %d\n", i->first.c_str(), i->second); 
    }
 
@@ -1291,13 +1286,13 @@ UnsignedInt MeasurementManager::LoadObservations()
    for(UnsignedInt i = 0; i < trackingConfigsMap.size(); ++i)
    {
       MessageInterface::ShowMessage("List of tracking configurations (present in participant ID) for load records from data file '%s':\n", streamList[i]->GetName().c_str());
-      if (trackingConfigsMap[i].size() == 0)                                                    // made changes by TUAN NGUYEN
-         MessageInterface::ShowMessage("   None\n");                                            // made changes by TUAN NGUYEN
-      else                                                                                      // made changes by TUAN NGUYEN
-      {                                                                                         // made changes by TUAN NGUYEN
+      if (trackingConfigsMap[i].size() == 0)
+         MessageInterface::ShowMessage("   None\n");
+      else
+      {
          for (UnsignedInt j = 0; j < trackingConfigsMap[i].size(); ++j)
             MessageInterface::ShowMessage("   Config %d: {%s}\n", j, trackingConfigsMap[i].at(j).c_str());
-      }                                                                                         // made changes by TUAN NGUYEN
+      }
    }
    MessageInterface::ShowMessage("\n");
 
@@ -2573,42 +2568,31 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             rt = &(rampTables[sr[0]]);
        
          if (withEvents)
-         {  
-            #ifdef DEBUG_CALCULATE_MEASUREMENTS
-               MessageInterface::ShowMessage(" Simulation: measurement with events\n");
-            #endif
-            //if (measurements[j].isFeasible)                                                        // made changes by TUAN NGUYEN
-            //{                                                                                      // made changes by TUAN NGUYEN
-               measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);
-               if (measurements[j].unfeasibleReason == "R")
-               {
-                  Real a1Time = measurements[j].epoch;
-                  Real taiTime;
-                  std::string tais;
-                  TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-                  char s[1000];
-                  sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", models[j]->GetName().c_str(), taiTime);
-                  throw MeasurementException(s); 
-               }
-            //}                                                                                       // made changes by TUAN NGUYEN
+         {
+#ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage(" Simulation: measurement with events\n");
+#endif
+            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);
          }
          else
          {
-            #ifdef DEBUG_CALCULATE_MEASUREMENTS
-               MessageInterface::ShowMessage(" Simulation: measurement without events\n");
-            #endif
-            // without event, no noise is added due to check feasibility
+#ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage(" Simulation: measurement without events\n");
+#endif
+            // when running without event, no noise is added due to check feasibility
             measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
-            if (measurements[j].unfeasibleReason == "R")
-            {
+         }
+
+         // Throw an error message if ramp table is missed when it needs
+         if (measurements[j].unfeasibleReason == "R")
+         {
                Real a1Time = measurements[j].epoch;
                Real taiTime;
                std::string tais;
                TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
                char s[1000];
-               sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[j]->GetName().c_str(), taiTime);
-               throw MeasurementException(s);
-            }
+               sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", models[j]->GetName().c_str(), taiTime);
+               throw MeasurementException(s); 
          }
 
          if (measurements[j].isFeasible)
@@ -2637,62 +2621,40 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          if (sr.size() > 0)
             rt = &(rampTables[sr[0]]);
 
-         #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage("******** Ramp table names size = %d\n", sr.size());
-            if (sr.size() > 0)
-            {
-               MessageInterface::ShowMessage("******** Ramp table [%s] = <%p>\n", sr[0].c_str(), rt);
-               for(int ii=0; ii < rt->size(); ++ii)
-                  MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
-            }
-         #endif
          
          // Set AddNoise to measuement apdater
          adapters[i]->SetBooleanParameter("AddNoise", addNoise);
-         #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage("******** Finish setting noise\n");
-         #endif
 
-         // Run CalculateMeasurement() function 
-         if (withEvents)
-         {  
-            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+
+         // Run CalculateMeasurement() function          
+         //if (withEvents)
+         //{  
+         //   #ifdef DEBUG_CALCULATE_MEASUREMENTS
+         //      MessageInterface::ShowMessage(" Simulation: measurement adapter %s with events\n", adapters[i]->GetName().c_str());
+         //   #endif
+         //   measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         //   if (measurements[i].unfeasibleReason == "R")
+         //      throw MeasurementException(adapters[i]->GetErrorMessage());
+         //}
+         //else
+         //{
+         //   #ifdef DEBUG_CALCULATE_MEASUREMENTS
+         //      MessageInterface::ShowMessage(" Simulation: measurement adapter %s without events\n", adapters[i]->GetName().c_str());
+         //   #endif
+         //   measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         //   if (measurements[i].unfeasibleReason == "R")
+         //      throw MeasurementException(adapters[i]->GetErrorMessage());
+         //}
+
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            if (withEvents)
                MessageInterface::ShowMessage(" Simulation: measurement adapter %s with events\n", adapters[i]->GetName().c_str());
-            #endif
-            //if (measurements[i].isFeasible)                                                         // made changes by TUAN NGUYEN
-            //{                                                                                       // made changes by TUAN NGUYEN
-               measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-               if (measurements[i].unfeasibleReason == "R")
-               {
-               //   Real a1Time = measurements[i].epoch;
-               //   Real taiTime;
-               //   std::string tais;
-               //   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-               //   char s[1000];
-               //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramp table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
-               //   throw MeasurementException(s); 
-                  throw MeasurementException(adapters[i]->GetErrorMessage());
-               }
-            //}                                                                                       // made changes by TUAN NGUYEN
-         }
-         else
-         {
-            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            else
                MessageInterface::ShowMessage(" Simulation: measurement adapter %s without events\n", adapters[i]->GetName().c_str());
-            #endif
-            measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-            if (measurements[i].unfeasibleReason == "R")
-            {
-            //   Real a1Time = measurements[i].epoch;
-            //   Real taiTime;
-            //   std::string tais;
-            //   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-            //   char s[1000];
-            //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramp table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
-            //   throw MeasurementException(s);
-               throw MeasurementException(adapters[i]->GetErrorMessage());
-            }
-         }
+         #endif
+         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         if (measurements[i].unfeasibleReason == "R")
+            throw MeasurementException(adapters[i]->GetErrorMessage());
 
          if (measurements[i].isFeasible)
          {

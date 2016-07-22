@@ -108,19 +108,15 @@ protected:
 
    /// These functions are used to compute midia correction
    virtual bool   MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL);
-   virtual bool   MediaCorrectionCalculation1(std::vector<RampTableData>* rampTB = NULL);
+//   virtual bool   MediaCorrectionCalculation1(std::vector<RampTableData>* rampTB = NULL);
    RealArray      TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
    RealArray      IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2);
-   RealArray      MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2, Real minElevationAngle);         // made changes by TUAN NGUYEN
+   RealArray      MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2, Real minElevationAngle);
 
    /// This function is used to calculate total hardware delay
    virtual bool   HardwareDelayCalculation();
 
 private:
-   /// Warning message count for media correction QA check
-   static Integer tropoWarningCount;
-   static Integer ionoWarningCount;
-
    /// ramp table and the beginning index and the ending index
    std::vector<RampTableData>* rampTable;
    UnsignedInt beginIndex;

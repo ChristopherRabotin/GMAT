@@ -565,17 +565,18 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
          }
       }
    }
-   else                                               // made changes by TUAN NGUYEN
-   {                                                  // made changes by TUAN NGUYEN
-      if (!HasFile(dataObject))                       // made changes by TUAN NGUYEN
-      {                                               // made changes by TUAN NGUYEN
-#ifdef DEBUG_FILTER
+   else
+   {
+      if (!HasFile(dataObject))
+      {
+         #ifdef DEBUG_FILTER
          MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit6.1 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
-#endif
-         rejectedReason = 8;                          // made changes by TUAN NGUYEN
-         return NULL;                                 // made changes by TUAN NGUYEN
-      }                                               // made changes by TUAN NGUYEN
-   }                                                  // made changes by TUAN NGUYEN
+         #endif
+
+         rejectedReason = 8;
+         return NULL;
+      }
+   }
 
    // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
    if (!HasObserver(dataObject))

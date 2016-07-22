@@ -3146,8 +3146,20 @@ std::string FileManager::GetGmatPath(GmatPathType type,
    }
    else if (type == GMAT_INCLUDE)
    {
-      if (name.find(".script") == name.npos)
-         name1 = name1 + ".script";
+      // GMAT include file can be any extension
+      name1 = name;
+      
+      // If include name contains absolute path, just return the blank path
+      if (GmatFileUtil::IsPathAbsolute(name1))
+      {
+         std::string blankPath;
+         #ifdef DEBUG_GMAT_PATH
+         MessageInterface::ShowMessage
+            ("FileManager::GetGmatPath(%s) returning '%s'\n", name.c_str(),
+             path.c_str());
+         #endif
+         return blankPath;
+      }
    }
    else
    {

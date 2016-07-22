@@ -31,6 +31,7 @@
 #include "RFHardware.hpp"
 #include "HardwareException.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 
 //------------------------------------------------------------------------------
 // Static data
@@ -280,6 +281,9 @@ bool RFHardware::SetStringParameter(const Integer id, const std::string &value)
    case PRIMARY_ANTENNA:
       if (value == "")
          throw HardwareException("Error: Name of primary antenna set to " + GetName() + "is an empty string.\n");
+
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw HardwareException("Error: '" + value + "' set to " + GetName() + ".PrimaryAntenna parameter is an invalid name.\n");
 
       primaryAntennaName = value;
       return true;

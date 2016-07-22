@@ -45,9 +45,7 @@
  */
 //------------------------------------------------------------------------------
 RangeAdapterKm::RangeAdapterKm(const std::string& name) :
-   TrackingDataAdapter      ("RangeKm", name),
-   ionoCorrection           (0.0),                  // made changes by TUAN NGUYEN
-   tropoCorrection          (0.0)                   // made changes by TUAN NGUYEN
+   TrackingDataAdapter      ("RangeKm", name)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("RangeAdapterKm default constructor <%p>\n", this);
@@ -81,9 +79,7 @@ RangeAdapterKm::~RangeAdapterKm()
  */
 //------------------------------------------------------------------------------
 RangeAdapterKm::RangeAdapterKm(const RangeAdapterKm& rak) :
-   TrackingDataAdapter      (rak),
-   ionoCorrection           (0.0),           // made changes by TUAN NGUYEN
-   tropoCorrection          (0.0)            // made changes by TUAN NGUYEN
+   TrackingDataAdapter      (rak)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("RangeAdapterKm copy constructor   from <%p> to <%p>\n", &rak, this);
@@ -112,8 +108,6 @@ RangeAdapterKm& RangeAdapterKm::operator=(const RangeAdapterKm& rak)
    if (this != &rak)
    {
       TrackingDataAdapter::operator=(rak);
-      ionoCorrection  = 0.0;                 // made changes by TUAN NGUYEN
-      tropoCorrection = 0.0;                 // made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -352,6 +346,31 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
    // Fire the measurement model to build the collection of signal data
    if (calcData->CalculateMeasurement(withLighttime, withMediaCorrection, forObservation, rampTB))
    {
+      // QA Media correction:
+      cMeasurement.isIonoCorrectWarning = false;
+      cMeasurement.ionoCorrectWarningValue = 0.0;
+      cMeasurement.isTropoCorrectWarning = false;
+      cMeasurement.tropoCorrectWarningValue = 0.0;
+
+      if (withMediaCorrection)
+      {  
+         Real correction = GetIonoCorrection();                                  // unit: km
+         if ((correction < 0.0) || (correction > 0.04))
+         {
+            // Set a warning to measurement data when ionosphere correction is outside of range [0 km , 0.04 km]
+            cMeasurement.isIonoCorrectWarning = true;
+            cMeasurement.ionoCorrectWarningValue = correction;                   // unit: km
+         }
+         
+         correction = GetTropoCorrection();                                      // unit: km
+         if ((correction < 0.0) || (correction > 0.12))
+         {
+            // Set a warning to measurement data when troposphere correction is outside of range [0 km , 0.12 km]
+            cMeasurement.isTropoCorrectWarning = true;
+            cMeasurement.tropoCorrectWarningValue = correction;                  // unit: km
+         }
+      }
+
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
       Real        unfeasibilityValue;
@@ -361,6 +380,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       cMeasurement.unfeasibleReason = "";
       cMeasurement.feasibilityValue = 90.0;
       
+      GmatEpoch transmitEpoch, receiveEpoch;
       RealArray values;
       for (UnsignedInt i = 0; i < paths.size(); ++i)           // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
       {
@@ -415,16 +435,18 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
+               transmitEpoch = first->tPrecTime.GetMjd() - first->tDelay / GmatTimeConstants::SECS_PER_DAY;
+               receiveEpoch  = current->rPrecTime.GetMjd() + current->rDelay / GmatTimeConstants::SECS_PER_DAY;
                if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
                   if (current->next == NULL)
-                     cMeasurement.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
+                     cMeasurement.epoch = receiveEpoch;
                }
                else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  cMeasurement.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
+                  cMeasurement.epoch = transmitEpoch;
                }
             }
             
@@ -435,7 +457,13 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          
       }// for i loop
       
+
+      // Caluclate uplink frequency at received time and transmit time
+      cMeasurement.uplinkFreq = calcData->GetUplinkFrequency(0, rampTB) * 1.0e6;                        // unit: Hz
+      cMeasurement.uplinkFreqAtRecei = calcData->GetUplinkFrequencyAtReceivedEpoch(0,rampTB) * 1.0e6;   // unit: Hz
+      cMeasurement.uplinkBand = calcData->GetUplinkFrequencyBand(0, rampTB);
       
+
       if (measurementType == "Range_KM")
       {
          // @todo: it needs to specify number of trips instead of using 2
@@ -505,6 +533,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          #ifdef DEBUG_RANGE_CALCULATION
             MessageInterface::ShowMessage("      . C-value with noise and bias : %.12lf km\n", cMeasurement.value[i]);
             MessageInterface::ShowMessage("      . Measurement epoch A1Mjd     : %.12lf\n", cMeasurement.epoch); 
+            MessageInterface::ShowMessage("      . Transmit frequency at receive epoch  : %.12le Hz\n", cMeasurement.uplinkFreqAtRecei); 
+            MessageInterface::ShowMessage("      . Transmit frequency at transmit epoch : %.12le Hz\n", cMeasurement.uplinkFreq); 
             MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
             MessageInterface::ShowMessage("      . Feasibility reason          : %s\n", cMeasurement.unfeasibleReason.c_str());
             MessageInterface::ShowMessage("      . Elevation angle             : %.12lf degree\n", cMeasurement.feasibilityValue);
@@ -560,6 +590,74 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 }
 
 
+//-------------------------------------------------------------------------------------
+// Real GetIonoCorrection()
+//-------------------------------------------------------------------------------------
+/**
+* This function is used to get ionosphere correction (unit: km)
+*
+* @return     ionosphere correction of a measurment in km
+*/
+//-------------------------------------------------------------------------------------
+Real RangeAdapterKm::GetIonoCorrection()
+{
+   Real correction = 0.0;
+
+   std::vector<SignalBase*> paths = calcData->GetSignalPaths();
+   SignalBase *currentleg = paths[0]; // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
+   SignalData *current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
+
+   while (currentleg != NULL)
+   {
+      // accumulate all range corrections for signal path ith
+      for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+      {
+         if ((current->useCorrection[j]) && (current->correctionIDs[j] == "Ionosphere"))
+            correction += current->corrections[j];
+      }// for j loop
+
+      currentleg = currentleg->GetNext();
+      current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
+   }
+   
+   return correction;
+}
+
+
+//-------------------------------------------------------------------------------------
+// Real GetTropoCorrection()
+//-------------------------------------------------------------------------------------
+/**
+* This function is used to get troposphere correction (unit: km)
+*
+* @return     troposphere correction of a measurment in km
+*/
+//-------------------------------------------------------------------------------------
+Real RangeAdapterKm::GetTropoCorrection()
+{
+   Real correction = 0.0;
+
+   std::vector<SignalBase*> paths = calcData->GetSignalPaths();
+   SignalBase *currentleg = paths[0]; // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
+   SignalData *current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
+
+   while (currentleg != NULL)
+   {
+      // accumulate all range corrections for signal path ith
+      for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+      {
+         if ((current->useCorrection[j]) && (current->correctionIDs[j] == "Troposphere"))
+            correction += current->corrections[j];
+      }// for j loop
+
+      currentleg = currentleg->GetNext();
+      current = ((currentleg == NULL) ? NULL : (currentleg->GetSignalDataObject()));
+   }
+
+   return correction;
+}
+
+
 //------------------------------------------------------------------------------
 // bool ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathIndex, 
 //        Real uplinkFrequency, std::vector<RampTableData>* rampTB)
@@ -589,26 +687,22 @@ bool RangeAdapterKm::ReCalculateFrequencyAndMediaCorrection(UnsignedInt pathInde
    SignalBase *currentleg = paths[pathIndex];
    SignalData *current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
    
-   ionoCorrection = 0.0;                                              // made changes by TUAN NGUYEN
-   tropoCorrection = 0.0;                                             // made changes by TUAN NGUYEN
+   Real correction = 0.0;
    while (currentleg != NULL)
    {
       for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
       {
          if (current->useCorrection[j])
          {
-            if (current->correctionIDs[j] == "Troposphere")           // made changes by TUAN NGUYEN
-               tropoCorrection += current->corrections[j];            // made changes by TUAN NGUYEN
-
-            if (current->correctionIDs[j] == "Ionosphere")            // made changes by TUAN NGUYEN
-               ionoCorrection += current->corrections[j];             // made changes by TUAN NGUYEN
+            if ((current->correctionIDs[j] == "Troposphere") || (current->correctionIDs[j] == "Ionosphere"))
+               correction += current->corrections[j];
          }
       }
       currentleg = currentleg->GetNext();
       current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
    }
    
-   cMeasurement.value[pathIndex] += (ionoCorrection + tropoCorrection); // made changes by TUAN NGUYEN
+   cMeasurement.value[pathIndex] += correction;
    
    retval = true;
 

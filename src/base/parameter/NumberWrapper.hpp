@@ -51,7 +51,8 @@ public:
    // destructor
    virtual ~NumberWrapper();
    
-   virtual ElementWrapper*    Clone() const;
+   virtual ElementWrapper*     Clone() const;
+   virtual std::string         ToString();
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual Real            EvaluateReal() const;  

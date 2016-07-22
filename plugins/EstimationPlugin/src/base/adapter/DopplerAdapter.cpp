@@ -714,7 +714,7 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
    rangeOnly = true;
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
    measDataE = cMeasurement;
-   measDataE.value[0] = (measDataE.value[0] - 2 * GetIonoCorrection());                    // made changes by TUAN NGUYEN
+   measDataE.value[0] = (measDataE.value[0] - 2 * GetIonoCorrection());
    
    addNoise = addNoiseOption;
    addBias = addBiasOption;
@@ -755,7 +755,21 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
 
    measDataS = adapterS->GetMeasurement();
    //measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km
-   measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km   // made changes by TUAN NGUYEN
+   measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km
+
+   // Set value for isFeasible, feasibilityValue, and unfeasibleReason for measurement
+   if ((measDataE.unfeasibleReason.at(0) == 'B') || (measDataS.unfeasibleReason.at(0) == 'B'))
+   {
+      if (measDataE.unfeasibleReason.at(0) == 'B')
+         cMeasurement.unfeasibleReason = cMeasurement.unfeasibleReason + "E";
+      else
+      {
+         cMeasurement.unfeasibleReason = measDataS.unfeasibleReason + "E";
+         cMeasurement.isFeasible = false;
+         cMeasurement.feasibilityValue = measDataS.feasibilityValue;
+      }
+   }
+
 
    // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 

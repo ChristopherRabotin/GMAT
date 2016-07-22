@@ -603,7 +603,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
  */
 //---------------------------------------------------------------------------
 RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, 
-                                Real epoch1, Real epoch2, Real minElevationAngle)                     // made changes by TUAN NGUYEN
+                                Real epoch1, Real epoch2, Real minElevationAngle)
 {
    #ifdef DEBUG_MEDIA_CORRECTION
       MessageInterface::ShowMessage("start PhysicalMeasurement::CalculateMediaCorrection()\n");
@@ -617,8 +617,8 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
    Real elevationAngle = asin((R_o_j2k*(rangeVector.GetUnitVector())).GetElement(2));       // unit: radian
    // MessageInterface::ShowMessage("CalculateMediaCorrection():   elevationAngle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
 
-//   if (elevationAngle > 0.0)                                                        // made changes by TUAN NGUYEN
-   if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)             // made changes by TUAN NGUYEN
+//   if (elevationAngle > 0.0)
+   if (elevationAngle > minElevationAngle*GmatMathConstants::RAD_PER_DEG)
    {
       // 2. Run Troposphere correction:
       // MessageInterface::ShowMessage("Calculate Troposphere correction\n");
@@ -1057,25 +1057,11 @@ Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
    BeginEndIndexesOfRampTable(beginIndex, endIndex, err);
 
 
-   //if (t <= (*rampTB)[0].epoch)
-   //   return (*rampTB)[0].rampFrequency;
-   //else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-   //   return (*rampTB)[(*rampTB).size()-1].rampFrequency;
    if (t <= (*rampTB)[beginIndex].epoch)
       return (*rampTB)[beginIndex].rampFrequency;
-   else if (t >= (*rampTB)[endIndex-1].epoch)
-      return (*rampTB)[endIndex-1].rampFrequency;
+   //else if (t >= (*rampTB)[endIndex-1].epoch)
+   //   return (*rampTB)[endIndex-1].rampFrequency;
 
-   // search for interval which contains time t:
-   //UnsignedInt interval_index = 0;
-   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   //{
-   //   if (t < (*rampTB)[i].epoch)
-   //   {
-   //      interval_index = i-1;      
-   //      break;
-   //   }
-   //}
    UnsignedInt interval_index = beginIndex;
    for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
@@ -1087,11 +1073,11 @@ Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
    }
 
    // specify frequency at time t:
-   Real t_start = (*rampTB)[interval_index].epoch;
-   Real f0 = (*rampTB)[interval_index].rampFrequency;
-   Real f_dot = (*rampTB)[interval_index].rampRate;
+   Real t_start = (*rampTB)[interval_index].epoch;                      // unit: second
+   Real f0 = (*rampTB)[interval_index].rampFrequency;                   // unit: Hz
+   Real f_dot = (*rampTB)[interval_index].rampRate;                     // unit: Hz/second
       
-   Real f = f0 + f_dot*(t - t_start);
+   Real f = f0 + f_dot*(t - t_start)*GmatTimeConstants::SECS_PER_DAY;   // unit: Hz
 
    return f;
 }

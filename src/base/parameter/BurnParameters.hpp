@@ -26,7 +26,7 @@
 //
 /**
  * Declares Burn related parameter classes.
- *   BurnElements
+ *   BurnElements, TotalMassFlowRate, TotalAcceleration1/2/3, TotalThrust1/2/3
  */
 //------------------------------------------------------------------------------
 #ifndef BurnParameters_hpp
@@ -97,6 +97,38 @@ public:
    
 protected:
    
+};
+
+
+//==============================================================================
+//                               TotalAcceleration
+//==============================================================================
+/**
+ * Declares Burn related Parameter classes.
+ *    TotalAcceleration
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API TotalAcceleration : public BurnReal
+{
+public:
+
+   TotalAcceleration(const std::string &type = "",
+                     const std::string &name = "",
+                     GmatBase *obj = NULL);
+   TotalAcceleration(const TotalAcceleration &copy);
+   TotalAcceleration& operator=(const TotalAcceleration &right);
+   virtual ~TotalAcceleration();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+   Integer mTotalAccelerationId;
 };
 
 

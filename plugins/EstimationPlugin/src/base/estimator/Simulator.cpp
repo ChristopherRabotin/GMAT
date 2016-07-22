@@ -115,6 +115,9 @@ Simulator::Simulator(const std::string& name) :
    simulationStart = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(initialEpoch.c_str()));
    simulationEnd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(finalEpoch.c_str()));
    currentEpoch = nextSimulationEpoch = simulationStart;
+
+   // Turn off writting progress report for simulation    // fix bug GMT-5713 RunSimulator command creates an empty file
+   showProgress = false;                                  // fix bug GMT-5713 RunSimulator command creates an empty file
 }
 
 
@@ -1625,6 +1628,9 @@ void Simulator::CompleteInitialization()
    // tell the measManager to complete its initialization
    bool measOK = measManager.Initialize();
 
+   // Prepare for processing
+   measManager.PrepareForProcessing(true);
+
    // Get time range of EOP file
    EopFile* eop = GmatGlobal::Instance()->GetEopFile();
    if (eop != NULL)
@@ -1821,9 +1827,21 @@ void Simulator::SimulateData()
    // Tell the measurement manager to add noise and write the measurements
 //   if (measManager.CalculateMeasurements(true, true, addNoise) == true)
 //   {
+
+      // Validate media correction for all measurements before writing them to .gmd file
+      const MeasurementData* measData = NULL;
+      for (Integer i = 0; (measData = measManager.GetMeasurement(i)) != NULL; ++i)
+      {
+         // Validate media correction for the measurement 
+         ValidateMediaCorrection(measData);
+      }
+
       // Write measurements to data file
       if (measManager.WriteMeasurements() == false)
-         throw SolverException("Measurement writing failed");
+      {
+         throw SolverException("Measurement writing failed.\n");
+      }
+
 //   }
    
    // Prep for the next measurement simulation
@@ -1851,6 +1869,10 @@ void Simulator::RunComplete()
    WriteToTextFile();
    // tell the MeasurementManager to close files and finalize
    measManager.Finalize();
+
+   // clear media correction warning lists
+   ionoWarningList.clear();
+   tropoWarningList.clear();
 }
 
 
@@ -2038,3 +2060,52 @@ void Simulator::SetResultValue(Integer eventState, Real val,
    if (eventState == SEEKING)
       locatingEvent = true;
 }
+
+
+void Simulator::ValidateMediaCorrection(const MeasurementData* measData)
+{
+   if (measData->isIonoCorrectWarning)
+   {
+      // Get measurement pass:
+      std::stringstream ss1;
+      ss1 << "{{";
+      for (Integer i = 0; i < measData->participantIDs.size(); ++i)
+      {
+         ss1 << measData->participantIDs[i] << (((i + 1) < measData->participantIDs.size()) ? "," : "");
+      }
+      ss1 << "}," << measData->typeName << "}";
+
+      // if the pass is not in warning list, then display warning message
+      if (find(ionoWarningList.begin(), ionoWarningList.end(), ss1.str()) == ionoWarningList.end())
+      {
+         // generate warning message
+         MessageInterface::ShowMessage("Warning: When running simulator '%s', ionosphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+
+         // add pass to the list
+         ionoWarningList.push_back(ss1.str());
+      }
+   }
+
+   if (measData->isTropoCorrectWarning)
+   {
+      // Get measurement path:
+      std::stringstream ss1;
+      ss1 << "{{";
+      for (Integer i = 0; i < measData->participantIDs.size(); ++i)
+      {
+         ss1 << measData->participantIDs[i] << (((i + 1) < measData->participantIDs.size()) ? "," : "");
+      }
+      ss1 << "}," << measData->typeName << "}";
+
+      // if the pass is not in warning list, then display warning message
+      if (find(tropoWarningList.begin(), tropoWarningList.end(), ss1.str()) == tropoWarningList.end())
+      {
+         // generate warning message
+         MessageInterface::ShowMessage("Warning: When running simulator '%s', troposphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+
+         // add pass to the list
+         tropoWarningList.push_back(ss1.str());
+      }
+   }
+}
+

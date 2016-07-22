@@ -320,8 +320,8 @@ void BatchEstimatorInv::Accumulate()
          sprintf(&s[0], "%21.6lf", currentObs->value[0]);
          sLine << s << " ";
          sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";
-         sLine << GmatStringUtil::GetAlignmentString("N/A", 6);
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 20, GmatStringUtil::RIGHT) << " ";
+         sLine << GmatStringUtil::GetAlignmentString("N/A", 6, GmatStringUtil::RIGHT);
          sLine << "\n";
       }
       else
@@ -358,6 +358,9 @@ void BatchEstimatorInv::Accumulate()
       int count = measManager.Calculate(modelsToAccess[0], true);
       calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
       
+      // verify media correction to be in acceptable range. It is [0m, 60m] for troposphere correction and [0m, 20m] for ionosphere correction
+      ValidateMediaCorrection(calculatedMeas);
+
       if (count == 0)
       {
          std::string ss = measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
@@ -375,7 +378,7 @@ void BatchEstimatorInv::Accumulate()
             sprintf(&s[0], "%21.6lf", currentObs->value[0]);
             sLine << s << " ";
             sLine << GmatStringUtil::GetAlignmentString("N/A", 21, GmatStringUtil::RIGHT) << " ";
-            sLine << GmatStringUtil::GetAlignmentString("N/A", 18, GmatStringUtil::RIGHT) << " ";
+            sLine << GmatStringUtil::GetAlignmentString("N/A", 20, GmatStringUtil::RIGHT) << " ";
             
             // write elevation angle
             sprintf(&s[0], "%6.2lf", calculatedMeas->feasibilityValue);
@@ -454,7 +457,7 @@ void BatchEstimatorInv::Accumulate()
                sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                // Write O-value, C-value, and O-C
-               sprintf(&s[0], "%21.6lf %21.6lf %18.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
+               sprintf(&s[0], "%21.6lf %21.6lf %20.6lf ", currentObs->value[0], calculatedMeas->value[0], ocDiff);
                sLine << s << " ";
 
                // write elevation angle
@@ -680,7 +683,7 @@ void BatchEstimatorInv::Accumulate()
                      sLine << GmatStringUtil::GetAlignmentString(ss, 4, GmatStringUtil::LEFT) + " ";
 
                   // Write to report file O-value, C-value, O-C, 
-                  sprintf(&s[0], "%21.6lf %21.6lf %18.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
+                  sprintf(&s[0], "%21.6lf %21.6lf %20.6lf", currentObs->value[k], calculatedMeas->value[k], ocDiff);
                   sLine << s << " ";
 
                   // Write to report file elevation angle:
@@ -897,6 +900,17 @@ void BatchEstimatorInv::Estimate()
       try
       {
          Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+         //MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         //for (Integer row = 0; row < Pdx0_inv.GetNumRows(); ++row)
+         //{
+         //   for (Integer col = 0; col < Pdx0_inv.GetNumColumns(); ++col)
+         //      MessageInterface::ShowMessage("%le   ", Pdx0_inv.GetElement(row, col));
+         //   if (row < Pdx0_inv.GetNumRows() - 1)
+         //      MessageInterface::ShowMessage("\n");
+         //}
+         //MessageInterface::ShowMessage("]\n");
+
       }
       catch (...)
       {
@@ -933,12 +947,12 @@ void BatchEstimatorInv::Estimate()
       bestResidualRMS = newResidualRMS;
    else
    {
-      // Reset best RMS as needed
-      if (resetBestRMSFlag)
-      {
-         if (estimationStatus == DIVERGING)
-            bestResidualRMS = oldResidualRMS;
-      }
+      //// Reset best RMS as needed                                     // fix bug GMT-5711
+      //if (resetBestRMSFlag)                                           // fix bug GMT-5711
+      //{                                                               // fix bug GMT-5711
+      //   if (estimationStatus == DIVERGING)                           // fix bug GMT-5711
+      //      bestResidualRMS = oldResidualRMS;                         // fix bug GMT-5711
+      //}                                                               // fix bug GMT-5711
 
       bestResidualRMS = GmatMathUtil::Min(bestResidualRMS, newResidualRMS);
    }
@@ -1213,3 +1227,54 @@ Real BatchEstimatorInv::ObservationDataCorrection(Real cValue, Real oValue, Real
 
    return (oValue + N*moduloConstant);
 }
+
+
+// made changes by TUAN NGUYEN
+void BatchEstimatorInv::ValidateMediaCorrection(const MeasurementData* measData)
+{
+   if (measData->isIonoCorrectWarning)
+   {
+      // Get measurement pass:
+      std::stringstream ss1;
+      ss1 << "{{";
+      for (Integer i = 0; i < measData->participantIDs.size(); ++i)
+      {
+         ss1 << measData->participantIDs[i] << (((i + 1) < measData->participantIDs.size()) ? "," : "");
+      }
+      ss1 << "}," << measData->typeName << "}";
+
+      // if the pass is not in warning list, then display warning message
+      if (find(ionoWarningList.begin(), ionoWarningList.end(), ss1.str()) == ionoWarningList.end())
+      {
+         // generate warning message
+         MessageInterface::ShowMessage("Warning: When running estimator '%s', ionosphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+
+         // add pass to the list
+         ionoWarningList.push_back(ss1.str());
+      }
+
+   }
+
+   if (measData->isTropoCorrectWarning)
+   {
+      // Get measurement path:
+      std::stringstream ss1;
+      ss1 << "{{";
+      for (Integer i = 0; i < measData->participantIDs.size(); ++i)
+      {
+         ss1 << measData->participantIDs[i] << (((i + 1) < measData->participantIDs.size()) ? "," : "");
+      }
+      ss1 << "}," << measData->typeName << "}";
+
+      // if the pass is not in warning list, then display warning message
+      if (find(tropoWarningList.begin(), tropoWarningList.end(), ss1.str()) == tropoWarningList.end())
+      {
+         // generate warning message
+         MessageInterface::ShowMessage("Warning: When running estimator '%s', troposphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+
+         // add pass to the list
+         tropoWarningList.push_back(ss1.str());
+      }
+   }
+}
+

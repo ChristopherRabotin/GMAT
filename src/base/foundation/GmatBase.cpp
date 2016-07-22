@@ -3766,6 +3766,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       std::string tname = typeName;
       if (tname == "PropSetup")
          tname = "Propagator";
+      else if (tname == "DataFilter")
+         tname = objectTypeNames[objectTypeNames.size() - 1];
 
       if (mode == Gmat::EPHEM_HEADER)
       {

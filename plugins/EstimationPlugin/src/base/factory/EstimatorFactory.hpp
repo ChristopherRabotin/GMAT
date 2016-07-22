@@ -36,12 +36,6 @@
 #include "estimation_defs.hpp"
 #include "Factory.hpp"
 
-#define DISABLE_UNNEEDED_GMAT_OBJECTS
-#ifdef DISABLE_UNNEEDED_GMAT_OBJECTS
-   #define DISABLE_BATCH_ESTIMATOR_SVD
-   #define DISABLE_EXTENDED_KALMAN_INV
-#endif
-
 
 // Forward References for the supported Estimators
 class BatchLeastSquares;

@@ -54,7 +54,11 @@ public:
    virtual ~Thruster();
    Thruster(const Thruster& th);
    Thruster&            operator=(const Thruster& th);
-
+   
+   Real                 GetMassFlowRate();
+   Real                 GetThrustMagnitude();
+   Real                 GetIsp();
+   
    // Parameter access methods - overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
@@ -175,6 +179,8 @@ protected:
    Real                       temperatureRatio;
    /// Most recently calculated thrust
    Real                       thrust;
+   /// Most recently calculated applied thrust magnitude
+   Real                       appliedThrustMag;
    /// Most recently calculated specific impulse
    Real                       impulse;
    /// Most recently calculated mass flow rate
@@ -222,6 +228,7 @@ protected:
       MIXRATIO,
       GRAVITATIONAL_ACCELERATION,
       THRUST,
+      APPLIED_THRUST_MAG,
       ISP,
       MASS_FLOW_RATE,
       ThrusterParamCount
