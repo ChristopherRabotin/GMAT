@@ -933,10 +933,10 @@ Solver::SolverState BatchEstimator::AdvanceState()
          /* throw EstimatorException("Solver state not supported for the simulator")*/;
       }
    }
-   catch (EstimatorException ex)
+   catch (...) //(EstimatorException ex)
    {
       currentState = FINISHED;
-      throw ex;
+      throw; // ex;
    }
 
 #ifdef DEBUG_STATE_MACHINE
@@ -1512,9 +1512,9 @@ void BatchEstimator::CheckCompletion()
       sumSEResidualSquare.clear();
       sumSEWeightResidualSquare.clear();
 
-      // Clear all media correct warning lists                          // made changes by TUAN NGUYEN
-      ionoWarningList.clear();                                          // made changes by TUAN NGUYEN
-      tropoWarningList.clear();                                         // made changes by TUAN NGUYEN
+      // Clear all media correct warning lists
+      ionoWarningList.clear();
+      tropoWarningList.clear();
 
       if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
          currentState = CALCULATING;
@@ -4900,7 +4900,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
    {
       // 1. Write state summary header
       textFile3 << "\n";
-      textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": STATE INFORMATION  **************************************************************\n";
+      //textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": STATE INFORMATION  **************************************************************\n";
+      textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken+1, 3) << ": STATE INFORMATION  **************************************************************\n";
       textFile3 << "\n";
 
 
@@ -5226,7 +5227,8 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
    {
       // 1. Write header:
       textFile4 << "\n";
-      textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
+      //textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
+      textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken+1, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
       textFile4 << "\n";
 
       // 2. Write covariance and correlation matrxies in Cartesian coordiante system:

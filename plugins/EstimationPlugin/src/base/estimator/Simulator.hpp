@@ -237,7 +237,7 @@ private:
 
    /// Media correction QA
    StringArray            ionoWarningList;             // list contains all passes with ionosphere correction to be outside acceptable range [0m, 20m]
-   StringArray            tropoWarningList;            // list contains all passes with troposphere correction to be outside acceptable range [0m, 60m]                                                  // made changes by TUAN NGUYEN
+   StringArray            tropoWarningList;            // list contains all passes with troposphere correction to be outside acceptable range [0m, 60m]
    void                   ValidateMediaCorrection(const MeasurementData* measData);
 
 };

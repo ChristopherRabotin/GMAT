@@ -135,7 +135,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // DryMass
       Gmat::ENUMERATION_TYPE, // DateFormat
       Gmat::STRING_TYPE,      // EstimationStateType
-      Gmat::RMATRIX_TYPE,     // OrbitErrorCovariance        // made changes by TUAN NGUYEN
+      Gmat::RMATRIX_TYPE,     // OrbitErrorCovariance
       Gmat::REAL_TYPE,        // Cd
       Gmat::REAL_TYPE,        // Cr
       Gmat::REAL_TYPE,        // CdSigma
@@ -202,8 +202,8 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "CoordinateSystem",
       "DryMass",
       "DateFormat",
-      "EstimationStateType",                      // made changes by TUAN NGUYEN
-      "OrbitErrorCovariance",                     // made changes by TUAN NGUYEN
+      "EstimationStateType",
+      "OrbitErrorCovariance",
       "Cd",
       "Cr",
       "CdSigma",
@@ -369,8 +369,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    srpArea              (1.0),
    reflectCoeff         (1.8),
    reflectCoeffSigma    (1.0e70),                 // set a large number to parameter's covariance
-   estimationStateType  ("Cartesian"),            // made changes by TUAN NGUYEN
-   orbitErrorCovariance(6,6),                     // 6x6 matrix             //   made changes by TUAN NGUYEN
+   estimationStateType  ("Cartesian"),
+   orbitErrorCovariance (6,6),                    // 6x6 matrix
    epochSystem          ("TAI"),
    epochFormat          ("ModJulian"),
    epochType            ("TAIModJulian"),  // Should be A1ModJulian?
@@ -545,17 +545,17 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
 
    // Set default value to covariance matrix
    covariance.AddCovarianceElement("CartesianState", this);  // locationStart = 0
-   covariance.AddCovarianceElement("Cd_Epsilon", this);      // locationStart = 6    // made changes by TUAN NGUYEN
-   covariance.AddCovarianceElement("Cr_Epsilon", this);      // locationStart = 7    // made changes by TUAN NGUYEN
+   covariance.AddCovarianceElement("Cd_Epsilon", this);      // locationStart = 6
+   covariance.AddCovarianceElement("Cr_Epsilon", this);      // locationStart = 7
 
-   for (Integer i = 0; i < 6; ++i)                                                   // made changes by TUAN NGUYEN
-      orbitErrorCovariance(i,i) = 1.0e70;                                            // made changes by TUAN NGUYEN
+   for (Integer i = 0; i < 6; ++i)
+      orbitErrorCovariance(i,i) = 1.0e70;
 
-   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                          // made changes by TUAN NGUYEN
-   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                                // made changes by TUAN NGUYEN
+   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;
+   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;
    Rvector value(8, 1.0e70, 1.0e70, 1.0e70, 1.0e70, 1.0e70, 1.0e70,
-      Cd_EpsilonSigma*Cd_EpsilonSigma, Cr_EpsilonSigma*Cr_EpsilonSigma);             // made changes by TUAN NGUYEN
-   covariance.ConstructRHS(value, 0);                                                // made changes by TUAN NGUYEN
+      Cd_EpsilonSigma*Cd_EpsilonSigma, Cr_EpsilonSigma*Cr_EpsilonSigma);
+   covariance.ConstructRHS(value, 0);
    
    // Load default model file
    // Find file name and full path (LOJ: 2014.06.17)
@@ -643,8 +643,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    srpArea              (a.srpArea),
    reflectCoeff         (a.reflectCoeff),
    reflectCoeffSigma    (a.reflectCoeffSigma),
-   estimationStateType  (a.estimationStateType),            // made changes by TUAN NGUYEN
-   orbitErrorCovariance (a.orbitErrorCovariance),           // made changes by TUAN NGUYEN
+   estimationStateType  (a.estimationStateType),
+   orbitErrorCovariance (a.orbitErrorCovariance),
    epochSystem(a.epochSystem),
    epochFormat          (a.epochFormat),
    epochType            (a.epochType),
@@ -744,19 +744,19 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    BuildStateElementLabelsAndUnits();
 
 
-   // Set value to covariance matrix                                                // made changes by TUAN NGUYEN
-   // Set state covariance                                                          // made changes by TUAN NGUYEN
-   Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");  // made changes by TUAN NGUYEN
-   covariance.ConstructRHS(orbitErrorCovariance, locationStart);                    // made changes by TUAN NGUYEN
+   // Set value to covariance matrix
+   // Set state covariance
+   Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");
+   covariance.ConstructRHS(orbitErrorCovariance, locationStart);
 
-   // Set Cd covariance                                                             // made changes by TUAN NGUYEN
-   locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");              // made changes by TUAN NGUYEN
-   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                               // made changes by TUAN NGUYEN
-   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;    // made changes by TUAN NGUYEN
-   // Set Cr covariance                                                             // made changes by TUAN NGUYEN
-   locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");      // made changes by TUAN NGUYEN
-   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                         // made changes by TUAN NGUYEN
-   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;    // made changes by TUAN NGUYEN
+   // Set Cd covariance
+   locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
+   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;
+   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;
+   // Set Cr covariance
+   locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
+   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;
+   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;
 
 
    #ifdef DEBUG_SPACECRAFT
@@ -944,22 +944,22 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    constrainCr        = a.constrainCr;
 
 
-   estimationStateType      = a.estimationStateType;                                // made changes by TUAN NGUYEN
-   orbitErrorCovariance     = a.orbitErrorCovariance;                               // made changes by TUAN NGUYEN
+   estimationStateType      = a.estimationStateType;
+   orbitErrorCovariance     = a.orbitErrorCovariance;
 
-   // Set value to covariance matrix                                                // made changes by TUAN NGUYEN
-   // Set state covariance                                                          // made changes by TUAN NGUYEN
-   Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");  // made changes by TUAN NGUYEN
-   covariance.ConstructRHS(orbitErrorCovariance, locationStart);                    // made changes by TUAN NGUYEN
+   // Set value to covariance matrix
+   // Set state covariance
+   Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");
+   covariance.ConstructRHS(orbitErrorCovariance, locationStart);
 
-   // Set Cd covariance                                                             // made changes by TUAN NGUYEN
-   locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");              // made changes by TUAN NGUYEN
-   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                               // made changes by TUAN NGUYEN
-   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;    // made changes by TUAN NGUYEN
-   // Set Cr covariance                                                             // made changes by TUAN NGUYEN
-   locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");      // made changes by TUAN NGUYEN
-   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                         // made changes by TUAN NGUYEN
-   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;    // made changes by TUAN NGUYEN
+   // Set Cd covariance
+   locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
+   Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;
+   covariance(locationStart, locationStart) = Cd_EpsilonSigma * Cd_EpsilonSigma;
+   // Set Cr covariance
+   locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
+   Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;
+   covariance(locationStart, locationStart) = Cr_EpsilonSigma * Cr_EpsilonSigma;
 
 
    #ifdef DEBUG_SPACECRAFT
@@ -2118,7 +2118,7 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
    {
       case Gmat::COORDINATE_SYSTEM:
          return coordinateSystem;
-         break;                                           // made changes by TUAN NGUYEN
+         break;
 
       case Gmat::ATTITUDE:
          #ifdef DEBUG_SC_ATTITUDE
@@ -2126,7 +2126,7 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          "In SC::GetRefObject - returning Attitude pointer <%p>\n", attitude);
          #endif
          return attitude;
-         break;                                           // made changes by TUAN NGUYEN
+         break;
 
       case Gmat::HARDWARE:
           for (ObjectArray::iterator i = hardwareList.begin();
@@ -3197,9 +3197,9 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          throw SpaceObjectException("Error: a nonpositive number was set to CrSigma. A valid value has to be a positive number.\n");
       
       coeffDragSigma = value;
-      Real CdEpsilonSigma = coeffDragSigma / coeffDrag;                            // made changes by TUAN NGUYEN
-      Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");  // made changes by TUAN NGUYEN
-      covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;  // made changes by TUAN NGUYEN
+      Real CdEpsilonSigma = coeffDragSigma / coeffDrag;
+      Integer locationStart = covariance.GetSubMatrixLocationStart("Cd_Epsilon");
+      covariance(locationStart, locationStart) = CdEpsilonSigma * CdEpsilonSigma;
 
       return coeffDragSigma; 
    }
@@ -3209,9 +3209,9 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
          throw SpaceObjectException("Error: a nonpositive number was set to CdSigma. A valid value has to be a positive number.\n");
 
       reflectCoeffSigma = value;
-      Real CrEpsilonSigma = reflectCoeffSigma / reflectCoeff;                      // made changes by TUAN NGUYEN
-      Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");  // made changes by TUAN NGUYEN
-      covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;  // made changes by TUAN NGUYEN
+      Real CrEpsilonSigma = reflectCoeffSigma / reflectCoeff;
+      Integer locationStart = covariance.GetSubMatrixLocationStart("Cr_Epsilon");
+      covariance(locationStart, locationStart) = CrEpsilonSigma * CrEpsilonSigma;
 
       return reflectCoeffSigma;
    }
@@ -3790,8 +3790,8 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     if (id == COORD_SYS_ID)
        return coordSysName;
 
-    if (id == ESTIMATION_STATE_TYPE_ID)                     // made changes by TUAN NGUYEN
-       return estimationStateType;                          // made changes by TUAN NGUYEN
+    if (id == ESTIMATION_STATE_TYPE_ID)
+       return estimationStateType;
 
     if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
        return stateElementUnits[id - ELEMENT1UNIT_ID];
@@ -3871,7 +3871,7 @@ std::string Spacecraft::GetStringParameter(const Integer id,
             else
                return "";
          }
-         break;                                          // made changes by TUAN NGUYEN
+         break;
 
       case SOLVEFORS:
          {
@@ -3880,14 +3880,14 @@ std::string Spacecraft::GetStringParameter(const Integer id,
             else
                return "";
          }
-         break;                                          // made changes by TUAN NGUYEN
+         break;
 
       case STMELEMENTS:
          if ((index >= 0) && (index < (Integer)stmElementNames.size()))
             return stmElementNames[index];
          else
             return "";
-         break;                                          // made changes by TUAN NGUYEN
+         break;
 
       default:
          break;
@@ -4324,14 +4324,14 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
              modelFile.c_str(), GetName().c_str());
       }
    }
-   else if (id == ESTIMATION_STATE_TYPE_ID)                   // made changes by TUAN NGUYEN
-   {                                                          // made changes by TUAN NGUYEN
+   else if (id == ESTIMATION_STATE_TYPE_ID)
+   {
       if ((value != "Cartesian") && (value != "Keplerian"))
-         throw GmatBaseException("Error: Estimation state type '" + value + "' was not implemented in current GMAT version.\n");   // made changes by TUAN NGUYEN
-      estimationStateType = value;                            // made changes by TUAN NGUYEN
-   }                                                          // made changes by TUAN NGUYEN
-   else                                                       // made changes by TUAN NGUYEN
-      return SpaceObject::SetStringParameter(id, value);      // made changes by TUAN NGUYEN
+         throw GmatBaseException("Error: Estimation state type '" + value + "' was not implemented in current GMAT version.\n");
+      estimationStateType = value;
+   }
+   else
+      return SpaceObject::SetStringParameter(id, value);
 
 
    #ifdef DEBUG_SC_SET_STRING
@@ -4439,7 +4439,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
-      break;                                           // made changes by TUAN NGUYEN
+      break;
 
    case SOLVEFORS:
       {
@@ -4452,7 +4452,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
-      break;                                           // made changes by TUAN NGUYEN
+      break;
 
    case STMELEMENTS:
       if (index < stmElementNames.size())
@@ -4461,7 +4461,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
          if (find(stmElementNames.begin(), stmElementNames.end(), value) == stmElementNames.end())
             stmElementNames.push_back(value);
       return true;
-      break;                                          // made changes by TUAN NGUYEN
+      break;
 
    case FUEL_TANK_ID:
       {
@@ -4474,7 +4474,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
-      break;                                          // made changes by TUAN NGUYEN
+      break;
 
    case THRUSTER_ID:
       {
@@ -4488,7 +4488,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
-      break;                                         // made changes by TUAN NGUYEN
+      break;
 
    default:
       return SpaceObject::SetStringParameter(id, value, index);
@@ -4548,8 +4548,8 @@ const Rmatrix& Spacecraft::GetRmatrixParameter(const Integer id) const
 //   if (id == ORBIT_COVARIANCE)
 //      return covariance;
 
-   if (id == ORBIT_ERROR_COVARIANCE_ID)                         // made changes by TUAN NGUYEN
-      return orbitErrorCovariance;                              // made changes by TUAN NGUYEN
+   if (id == ORBIT_ERROR_COVARIANCE_ID)
+      return orbitErrorCovariance;
 
    return SpaceObject::GetRmatrixParameter(id);
 }
@@ -4606,25 +4606,25 @@ const Rmatrix& Spacecraft::SetRmatrixParameter(const Integer id,
 //      return covariance;
 //   }
 
-   if (id == ORBIT_ERROR_COVARIANCE_ID)                                             // made changes by TUAN NGUYEN
-   {                                                                                // made changes by TUAN NGUYEN
-      if (value.GetNumRows() != value.GetNumColumns())                                                                                        // made changes by TUAN NGUYEN
-         throw SpaceObjectException("Error: matrix set to " + GetName() + ".OrbitErrorCovariance parameter is not a square matrix.\n");       // made changes by TUAN NGUYEN
+   if (id == ORBIT_ERROR_COVARIANCE_ID)
+   {
+      if (value.GetNumRows() != value.GetNumColumns())
+         throw SpaceObjectException("Error: matrix set to " + GetName() + ".OrbitErrorCovariance parameter is not a square matrix.\n");
       if (value.GetNumRows() != 6)
-         throw SpaceObjectException("Error: matrix set to " + GetName() + ".OrbitErrorCovariance parameter does not have size of 6x6.\n");    // made changes by TUAN NGUYEN
+         throw SpaceObjectException("Error: matrix set to " + GetName() + ".OrbitErrorCovariance parameter does not have size of 6x6.\n");
 
-      orbitErrorCovariance = value;                                                        // made changes by TUAN NGUYEN
-      if (isInitialized)                                                                   // made changes by TUAN NGUYEN
-      {                                                                                    // made changes by TUAN NGUYEN
+      orbitErrorCovariance = value;
+      if (isInitialized)
+      {
          // When it is not initialized, this setting will be done in Initialize() function
-         Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");   // made changes by TUAN NGUYEN
-         for (Integer row = 0; row < value.GetNumRows(); ++row)                            // made changes by TUAN NGUYEN
-            for (Integer col = 0; col < value.GetNumColumns(); ++col)                      // made changes by TUAN NGUYEN
-               covariance(locationStart + row, locationStart + col) = value(row, col);     // made changes by TUAN NGUYEN
-      }                                                                                    // made changes by TUAN NGUYEN
+         Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");
+         for (Integer row = 0; row < value.GetNumRows(); ++row)
+            for (Integer col = 0; col < value.GetNumColumns(); ++col)
+               covariance(locationStart + row, locationStart + col) = value(row, col);
+      }
       
-      return orbitErrorCovariance;                                                         // made changes by TUAN NGUYEN
-   }                                                                                       // made changes by TUAN NGUYEN
+      return orbitErrorCovariance;
+   }
 
    return SpaceObject::SetRmatrixParameter(id, value);
 }
@@ -4668,16 +4668,16 @@ Real Spacecraft::GetRealParameter(const Integer id, const Integer row,
    if (id == FULL_A_MATRIX)
       return fullAMatrix(row, col);
 
-   if (id == ORBIT_ERROR_COVARIANCE_ID)                                                                                         // made changes by TUAN NGUYEN
-   {                                                                                                                            // made changes by TUAN NGUYEN
+   if (id == ORBIT_ERROR_COVARIANCE_ID)
+   {
 
-      if ((row < 0) || (row >= orbitErrorCovariance.GetNumRows()))                                                              // made changes by TUAN NGUYEN
-         throw SpaceObjectException("GetRealParameter: row requested for orbitErrorCovariance is out - of - range\n");          // made changes by TUAN NGUYEN
-      if ((col < 0) || (col >= orbitErrorCovariance.GetNumColumns()))                                                           // made changes by TUAN NGUYEN
-         throw SpaceObjectException("GetRealParameter: column requested for orbitErrorCovariance is out - of - range\n");       // made changes by TUAN NGUYEN
+      if ((row < 0) || (row >= orbitErrorCovariance.GetNumRows()))
+         throw SpaceObjectException("GetRealParameter: row requested for orbitErrorCovariance is out - of - range\n");
+      if ((col < 0) || (col >= orbitErrorCovariance.GetNumColumns()))
+         throw SpaceObjectException("GetRealParameter: column requested for orbitErrorCovariance is out - of - range\n");
 
-      return orbitErrorCovariance(row, col);                                                                                    // made changes by TUAN NGUYEN
-   }                                                                                                                            // made changes by TUAN NGUYEN
+      return orbitErrorCovariance(row, col);
+   }
 
    return SpaceObject::GetRealParameter(id, row, col);
 }
@@ -4771,11 +4771,11 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
       if ((col < 0) || (col >= orbitErrorCovariance.GetNumColumns()))
          throw SpaceObjectException("SetRealParameter: column requested for orbitErrorCovariance is out-of-range\n");
 
-      Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");    // made changes by TUAN NGUYEN
-      orbitErrorCovariance(row, col) = value;                                            // made changes by TUAN NGUYEN
+      Integer locationStart = covariance.GetSubMatrixLocationStart("CartesianState");
+      orbitErrorCovariance(row, col) = value;
 
-      if (isInitialized)                                                                 // made changes by TUAN NGUYEN
-         covariance(locationStart + row, locationStart + col) = value;                   // made changes by TUAN NGUYEN
+      if (isInitialized)
+         covariance(locationStart + row, locationStart + col) = value;
 
       return orbitErrorCovariance(row, col);
    }
@@ -5409,20 +5409,6 @@ bool Spacecraft::Initialize()
 //         ephemMgr->SetSolarSystem(solarSystem);
 //         ephemMgr->Initialize();
 //      }
-
-
-      //// Set value to covariance matrix                                         // made changes by TUAN NGUYEN
-      //// Set state covariance                                                   // made changes by TUAN NGUYEN
-      //covariance.ConstructRHS(orbitErrorCovariance, 0);                         // made changes by TUAN NGUYEN
-
-      //// Set Cr covariance                                                      // made changes by TUAN NGUYEN
-      //Integer start = orbitErrorCovariance.GetNumRows();                        // made changes by TUAN NGUYEN
-      //Real Cd_EpsilonSigma = coeffDragSigma / coeffDrag;                        // made changes by TUAN NGUYEN
-      //covariance(start, start) = Cd_EpsilonSigma * Cd_EpsilonSigma;             // made changes by TUAN NGUYEN
-      //// Set Cd covariance                                                      // made changes by TUAN NGUYEN
-      //++start;                                                                  // made changes by TUAN NGUYEN
-      //Real Cr_EpsilonSigma = reflectCoeffSigma / reflectCoeff;                  // made changes by TUAN NGUYEN
-      //covariance(start, start) = Cr_EpsilonSigma * Cr_EpsilonSigma;             // made changes by TUAN NGUYEN
 
 
       isInitialized = true;
@@ -7931,28 +7917,34 @@ Integer Spacecraft::GetStmRowId(const Integer forRow)
 //-------------------------------------------------------------------------
 Integer Spacecraft::HasParameterCovariances(Integer parameterId)
 {
-   // Dimension of spacraft's Cartesian state has to be 6.          // made changes by TUAN NGUYEN
-   // If dimension is set to fullSTMRowCount, it will get wrong     // made changes by TUAN NGUYEN
-   // when fullSTMRowCount accidently has a value different from 6. // made changes by TUAN NGUYEN
+   // Dimension of spacraft's Cartesian state has to be 6.
+   // If dimension is set to fullSTMRowCount, it will get wrong
+   // when fullSTMRowCount accidently has a value different from 6.
    if (parameterId == CARTESIAN_X)
-//      return fullSTMRowCount;                                     // made changes by TUAN NGUYEN                
-      return 6;                                                     // made changes by TUAN NGUYEN
+//      return fullSTMRowCount;
+      return 6;
 
-   // if (parameterId == CR_ID)                                        // made changes by TUAN NGUYEN
-   if (parameterId == CR_EPSILON)                                      // made changes by TUAN NGUYEN
-      return 1;                                                        // made changes by TUAN NGUYEN
+   if (parameterId == CR_EPSILON)
+      return 1;
 
-   //if (parameterId == CD_ID)                                        // made changes by TUAN NGUYEN
-   if (parameterId == CD_EPSILON)                                     // made changes by TUAN NGUYEN
-      return 1;                                                       // made changes by TUAN NGUYEN
+   if (parameterId == CD_EPSILON)
+      return 1;
 
    return SpaceObject::HasParameterCovariances(parameterId);
 }
 
 
-// made changes by TUAN NGUYEN
 //------------------------------------------------------------------------------
 // Rmatrix* GetParameterCovariances(Integer parameterId)
+//------------------------------------------------------------------------------
+/**
+* Get convariance of a give Spacecraft's parameter
+*
+* @param paramId     The Id of a spacecraft's parameter
+*
+* @return            Covariance matrix of the parameter specified by the 
+*                    parameter Id
+*/
 //------------------------------------------------------------------------------
 Rmatrix* Spacecraft::GetParameterCovariances(Integer parameterId)
 {

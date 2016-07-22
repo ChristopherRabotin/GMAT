@@ -227,7 +227,7 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       withLighttime      = ma.withLighttime;
 
       uplinkFreq         = ma.uplinkFreq;
-      uplinkFreqAtRecei  = ma.uplinkFreqAtRecei;        // made changes by TUAN NGUYEN
+      uplinkFreqAtRecei  = ma.uplinkFreqAtRecei;
       freqBand           = ma.freqBand;
       obsData            = ma.obsData;
       addNoise           = ma.addNoise;

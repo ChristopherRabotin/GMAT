@@ -714,7 +714,7 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
    rangeOnly = true;
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
    measDataE = cMeasurement;
-   measDataE.value[0] = (measDataE.value[0] - 2 * GetIonoCorrection());                    // made changes by TUAN NGUYEN
+   measDataE.value[0] = (measDataE.value[0] - 2 * GetIonoCorrection());
    
    addNoise = addNoiseOption;
    addBias = addBiasOption;
@@ -755,20 +755,20 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
 
    measDataS = adapterS->GetMeasurement();
    //measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km
-   measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km   // made changes by TUAN NGUYEN
+   measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km
 
-   // Set value for isFeasible, feasibilityValue, and unfeasibleReason for measurement                              // made changes by TUAN NGUYEN
-   if ((measDataE.unfeasibleReason.at(0) == 'B') || (measDataS.unfeasibleReason.at(0) == 'B'))                      // made changes by TUAN NGUYEN
-   {                                                                                                                // made changes by TUAN NGUYEN
-      if (measDataE.unfeasibleReason.at(0) == 'B')                                                                  // made changes by TUAN NGUYEN
-         cMeasurement.unfeasibleReason = cMeasurement.unfeasibleReason + "E";                                       // made changes by TUAN NGUYEN
-      else                                                                                                          // made changes by TUAN NGUYEN
-      {                                                                                                             // made changes by TUAN NGUYEN
-         cMeasurement.unfeasibleReason = measDataS.unfeasibleReason + "E";                                          // made changes by TUAN NGUYEN
-         cMeasurement.isFeasible = false;                                                                           // made changes by TUAN NGUYEN
-         cMeasurement.feasibilityValue = measDataS.feasibilityValue;                                                // made changes by TUAN NGUYEN
-      }                                                                                                             // made changes by TUAN NGUYEN
-   }                                                                                                                // made changes by TUAN NGUYEN
+   // Set value for isFeasible, feasibilityValue, and unfeasibleReason for measurement
+   if ((measDataE.unfeasibleReason.at(0) == 'B') || (measDataS.unfeasibleReason.at(0) == 'B'))
+   {
+      if (measDataE.unfeasibleReason.at(0) == 'B')
+         cMeasurement.unfeasibleReason = cMeasurement.unfeasibleReason + "E";
+      else
+      {
+         cMeasurement.unfeasibleReason = measDataS.unfeasibleReason + "E";
+         cMeasurement.isFeasible = false;
+         cMeasurement.feasibilityValue = measDataS.feasibilityValue;
+      }
+   }
 
 
    // 3.2. Specify uplink frequency and band for Start path

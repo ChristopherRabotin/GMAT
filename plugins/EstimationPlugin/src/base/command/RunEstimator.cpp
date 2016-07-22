@@ -796,10 +796,10 @@ bool RunEstimator::Execute()
          theEstimator->AdvanceState();
          Finalize();
       }
-   } catch (EstimatorException ex1)
+   } catch (...)//(EstimatorException ex1)
    {
       Finalize();
-      throw ex1;
+      throw; // ex1;
    }
 
    #ifdef DEBUG_STATE
@@ -1370,8 +1370,8 @@ void RunEstimator::Finalize()
    commandRunning  = false;
    propPrepared    = false;
 
-   overridePropInit = true;                   // made changes by TUAN NGUYEN
-   delayInitialization = true;                // made changes by TUAN NGUYEN
+   overridePropInit = true;
+   delayInitialization = true;
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::Finalize()\n");

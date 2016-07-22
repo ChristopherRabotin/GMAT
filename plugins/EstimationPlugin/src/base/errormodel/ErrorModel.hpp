@@ -91,8 +91,8 @@ public:
    virtual Integer      GetEstimationParameterSize(const Integer id);
    virtual Real*        GetEstimationParameterValue(const Integer id);
 
-   virtual Integer      HasParameterCovariances(Integer parameterId);          // made changes by TUAN NGUYEN
-   virtual Rmatrix*     GetParameterCovariances(Integer parameterId);          // made changes by TUAN NGUYEN
+   virtual Integer      HasParameterCovariances(Integer parameterId);
+   virtual Rmatrix*     GetParameterCovariances(Integer parameterId);
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES

@@ -89,8 +89,8 @@ ErrorModel::ErrorModel(const std::string name) :
 
    parameterCount = ErrorModelParamCount;
 
-   covariance.AddCovarianceElement("Bias", this);            // made changes by TUAN NGUYEN
-   covariance(0, 0) = biasSigma*biasSigma;                   // made changes by TUAN NGUYEN
+   covariance.AddCovarianceElement("Bias", this);
+   covariance(0, 0) = biasSigma*biasSigma;
 }
 
 
@@ -130,8 +130,8 @@ ErrorModel::ErrorModel(const ErrorModel& em) :
 	MessageInterface::ShowMessage("ErrorModel copy constructor from <%s,%p>  to  <%s,%p>\n", em.GetName().c_str(), &em, GetName().c_str(), this);
 #endif
 
-   Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");        // made changes by TUAN NGUYEN
-   covariance(locationStart, locationStart) = biasSigma*biasSigma;              // made changes by TUAN NGUYEN
+   Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");
+   covariance(locationStart, locationStart) = biasSigma*biasSigma;
 
 }
 
@@ -166,8 +166,8 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
       biasSigma           = em.biasSigma;
       solveforNames       = em.solveforNames;
 
-      Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");        // made changes by TUAN NGUYEN
-      covariance(locationStart, locationStart) = biasSigma * biasSigma;            // made changes by TUAN NGUYEN
+      Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");
+      covariance(locationStart, locationStart) = biasSigma * biasSigma;
 
    }
 
@@ -746,8 +746,8 @@ Real ErrorModel::SetRealParameter(const Integer id, const Real value)
          throw GmatBaseException("Error: value set to " + GetName() + ".BiasSigma is a nonpositive number. It has to be a positive number.\n");
 
       biasSigma = value;
-      Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");        // made changes by TUAN NGUYEN
-      covariance(locationStart, locationStart) = biasSigma * biasSigma;            // made changes by TUAN NGUYEN
+      Integer locationStart = covariance.GetSubMatrixLocationStart("Bias");
+      covariance(locationStart, locationStart) = biasSigma * biasSigma;
 
       return biasSigma;
    }
@@ -906,7 +906,6 @@ StringArray ErrorModel::GetAllAvailableTypes()
 }
 
 
-// made changes by TUAN NGUYEN
 //-------------------------------------------------------------------------
 // Integer Spacecraft::HasParameterCovariances(Integer parameterId)
 //-------------------------------------------------------------------------
@@ -928,10 +927,17 @@ Integer ErrorModel::HasParameterCovariances(Integer parameterId)
 }
 
 
-// made changes by TUAN NGUYEN
 //------------------------------------------------------------------------------
 // Rmatrix* GetParameterCovariances(Integer parameterId)
 //------------------------------------------------------------------------------
+/**
+* Get covariance matrix for a given parameter.
+*
+* @param parameterId      ID of a parameter
+* @return                 a pointer to covariance matrix associated with the parameter
+*                         return NULL when the parameter has no covariance
+*/
+//-------------------------------------------------------------------------
 Rmatrix* ErrorModel::GetParameterCovariances(Integer parameterId)
 {
    if (isInitialized)

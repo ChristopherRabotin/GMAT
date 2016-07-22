@@ -130,9 +130,9 @@ void Covariance::AddCovarianceElement(const std::string &name,
       {
          if (name == elementNames[i])
          {
-            // if (elementOwners[i] == owner)                                          // made changes by TUAN NGUYEN
-            // It needs to compare 2 objects by name in order to avoid cloned object   // made changes by TUAN NGUYEN
-            if (elementOwners[i]->GetName() == owner->GetName())                       // made changes by TUAN NGUYEN
+            // if (elementOwners[i] == owner)
+            // It needs to compare 2 objects by name in order to avoid cloned object
+            if (elementOwners[i]->GetName() == owner->GetName())
             {
                index = i;
                break;
@@ -148,8 +148,8 @@ void Covariance::AddCovarianceElement(const std::string &name,
          elementOwners.push_back(owner);
          dimension += covSize;
 
-         // It needs to set dimension for Rmatrix before using it   // made changes by TUAN NGUYEN
-         theCovariance.SetSize(dimension, dimension, true);         // made changes by TUAN NGUYEN
+         // It needs to set dimension for Rmatrix before using it
+         theCovariance.SetSize(dimension, dimension, true);
       }
    }
    else
@@ -281,19 +281,49 @@ void Covariance::SetDimension(Integer size)
 }
 
 
+//---------------------------------------------------------------------------
+// Integer GetDimension()
+//---------------------------------------------------------------------------
+/**
+* Get dimension of covariance matrix
+*
+* @return     Dimension of covariance matrix
+*/
+//---------------------------------------------------------------------------
 Integer Covariance::GetDimension()
 {
    return dimension;
 }
 
 
+//---------------------------------------------------------------------------
+// Rmatrix* GetCovariance()
+//---------------------------------------------------------------------------
+/**
+* Get covariance matrix
+*
+* @return     Covariance matrix
+*/
+//---------------------------------------------------------------------------
 Rmatrix *Covariance::GetCovariance()
 {
    return &theCovariance;
 }
 
 
-// made changes by TUAN NGUYEN
+//----------------------------------------------------------------------------
+// Integer GetSubMatrixLocationStart(Integer forParameterID)
+//----------------------------------------------------------------------------
+/**
+* Get the start index of a submatrix which is covariance of a given parameter.
+*
+* @param forParameterID    the ID of the parameter which needs to specified
+*                          the start index of submatrix
+*
+* @return                  The start index of a submatrix to be covariance of 
+*                          the given parameter
+*/
+//----------------------------------------------------------------------------
 Integer Covariance::GetSubMatrixLocationStart(Integer forParameterID)
 {
    Integer locationStart = 0;
@@ -308,7 +338,19 @@ Integer Covariance::GetSubMatrixLocationStart(Integer forParameterID)
 }
 
 
-// made changes by TUAN NGUYEN
+//----------------------------------------------------------------------------
+// Integer GetSubMatrixLocationStart(const std::string paramName)
+//----------------------------------------------------------------------------
+/**
+* Get the start index of a submatrix which is covariance of a given parameter.
+*
+* @param paramName    name of the parameter which needs to specified
+*                     the start index of submatrix
+*
+* @return             The start index of a submatrix to be covariance of the 
+*                     given parameter
+*/
+//----------------------------------------------------------------------------
 Integer  Covariance::GetSubMatrixLocationStart(const std::string paramName)
 {
    Integer index = 0;
@@ -325,6 +367,19 @@ Integer  Covariance::GetSubMatrixLocationStart(const std::string paramName)
    return locationStart;
 }
 
+
+//----------------------------------------------------------------------------
+// Rmatrix* GetCovariance(Integer forParameterID)
+//----------------------------------------------------------------------------
+/**
+* Get covariance matrix associated with a given parameter.
+*
+* @param forParameterID    the ID of the parameter which needs to specified
+*                          covariance matrix
+*
+* @return                  the covariance matrix for the parameter
+*/
+//----------------------------------------------------------------------------
 Rmatrix *Covariance::GetCovariance(Integer forParameterID)
 {
    // Find the covariance elements that match up with the input ID
