@@ -40,6 +40,7 @@
 #include "RadToDeg.hpp"
 #include "Array.hpp"
 #include "Rmatrix.hpp"
+#include "Sprintf.hpp"
 #include "TestOutput.hpp"
 
 using namespace std;
@@ -820,6 +821,54 @@ int RunTest(TestOutput &out)
    return 0;
 }
 
+//------------------------------------------------------------------------------
+//int RunSprintfTest(TestOutput &out)
+//------------------------------------------------------------------------------
+int RunSprintfTest(TestOutput &out)
+{
+   int n;
+   double vars[3];
+   vars[0] = -1713.27528417579;
+   vars[1] = -1.29183883411;
+   vars[2] = -1151.0;
+   
+   out.Put("==> test: vars[0] = -1713.27528417579, vars[1] = -1.29183883411, vars[2] = -1151.0\n");
+   n = sprintf(outBuffer, "%s", " d specifier ");
+   out.Put("==> test: %s\n", outBuffer);
+   n = sprintf(outBuffer, "%d %d %d", vars[0], vars[1], vars[2]);
+   out.Put("==> test: %s\n", outBuffer);
+   n = sprintf(outBuffer, "%s", " x specifier ");
+   out.Put("==> test: %s\n", outBuffer);
+   n = sprintf(outBuffer, "%x %x %x", vars[0], vars[1], vars[2]);
+   out.Put("==> test: %s\n", outBuffer);
+   n = sprintf(outBuffer, "%s", " A specifier ");
+   out.Put("==> test: %s\n", outBuffer);
+   n = sprintf(outBuffer, "%A %A %A", vars[0], vars[1], vars[2]);
+   out.Put("==> test: %s\n", outBuffer);
+   
+   out.Put("==========\n");
+   for (int i = 0; i < 3; i++)
+   {
+      n = sprintf(outBuffer, "%d", vars[i]);
+      out.Put("%s\n", outBuffer);
+   }
+   
+   out.Put("==========\n");
+   for (int i = 0; i < 3; i++)
+   {
+      n = sprintf(outBuffer, "%x", vars[i]);
+      out.Put("%s\n", outBuffer);
+   }
+
+   out.Put("==========\n");
+   for (int i = 0; i < 3; i++)
+   {
+      n = sprintf(outBuffer, "%A", vars[i]);
+      out.Put("%s\n", outBuffer);
+   }
+   out.Put("==========\n");
+}
+
 
 //------------------------------------------------------------------------------
 // int main(int argc, char *argv[])
@@ -831,6 +880,8 @@ int main(int argc, char *argv[])
    try
    {
       RunTest(out);
+      // Need to complete this test
+      //RunSprintfTest(out);
       out.Put("\nSuccessfully ran unit testing of Math Functions!!");
    }
    catch (BaseException &e)
@@ -847,24 +898,3 @@ int main(int argc, char *argv[])
    cin.get();
 }
 
-
-////------------------------------------------------------------------------------
-//// int main(int argc, char *argv[])
-////------------------------------------------------------------------------------
-//int main(int argc, char *argv[])
-//{
-//   cout.setf(ios::fixed);
-//   cout.precision(18);
-//
-//   cout << "=-=-=-=-=-=-= TEST math functions ....." << endl;
-//
-////   ACos *cs;
-//   std::string testStr = "0.0";
-//   ACos *cs = new ACos(testStr);
-////   cout << "cs.Evaluate() " << cs.Evaluate() << endl;
-//   cout << "cos(0.0) " << endl;
-////   cout << cs.Evaluate() << endl;
-//
-//   cout << "=-=-=-=-=-=-= END TEST math functions ....." << endl;
-//
-//}

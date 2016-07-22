@@ -1,0 +1,189 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2015-09-09 11:06:38
+
+
+%----------------------------------------
+%---------- User-Modified Default Celestial Bodies
+%----------------------------------------
+
+GMAT Earth.NutationUpdateInterval = 0;
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft satWithConstants;
+GMAT satWithConstants.DateFormat = UTCGregorian;
+GMAT satWithConstants.Epoch = '15 Jun 2016 12:00:00.000';
+GMAT satWithConstants.CoordinateSystem = EarthMJ2000Eq;
+GMAT satWithConstants.DisplayStateType = Cartesian;
+GMAT satWithConstants.X = 6728.137;
+GMAT satWithConstants.Y = 0;
+GMAT satWithConstants.Z = 0;
+GMAT satWithConstants.VX = 0;
+GMAT satWithConstants.VY = 4.78097433374032;
+GMAT satWithConstants.VZ = 6.0320883756781;
+GMAT satWithConstants.DryMass = 2000;
+GMAT satWithConstants.Cd = 2.1;
+GMAT satWithConstants.Cr = 1.8;
+GMAT satWithConstants.DragArea = 40;
+GMAT satWithConstants.SRPArea = 35;
+GMAT satWithConstants.NAIFId = -10001001;
+GMAT satWithConstants.NAIFIdReferenceFrame = -9001001;
+GMAT satWithConstants.OrbitColor = Red;
+GMAT satWithConstants.TargetColor = Teal;
+GMAT satWithConstants.Id = 'SatId';
+GMAT satWithConstants.Attitude = CoordinateSystemFixed;
+GMAT satWithConstants.SPADSRPScaleFactor = 1;
+GMAT satWithConstants.ModelFile = 'aura.3ds';
+GMAT satWithConstants.ModelOffsetX = 0;
+GMAT satWithConstants.ModelOffsetY = 0;
+GMAT satWithConstants.ModelOffsetZ = 0;
+GMAT satWithConstants.ModelRotationX = 0;
+GMAT satWithConstants.ModelRotationY = 0;
+GMAT satWithConstants.ModelRotationZ = 0;
+GMAT satWithConstants.ModelScale = 1;
+GMAT satWithConstants.AttitudeDisplayStateType = 'Quaternion';
+GMAT satWithConstants.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT satWithConstants.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT satWithConstants.EulerAngleSequence = '321';
+
+Create Spacecraft satWithFile ;
+GMAT satWithFile.DateFormat = UTCGregorian;
+GMAT satWithFile.Epoch = '15 Jun 2016 12:00:00.000';
+GMAT satWithFile.CoordinateSystem = EarthMJ2000Eq;
+GMAT satWithFile.DisplayStateType = Cartesian;
+GMAT satWithFile.X = 6728.137;
+GMAT satWithFile.Y = 0;
+GMAT satWithFile.Z = 0;
+GMAT satWithFile.VX = 0;
+GMAT satWithFile.VY = 4.78097433374032;
+GMAT satWithFile.VZ = 6.0320883756781;
+GMAT satWithFile.DryMass = 2000;
+GMAT satWithFile.Cd = 2.1;
+GMAT satWithFile.Cr = 1.8;
+GMAT satWithFile.DragArea = 40;
+GMAT satWithFile.SRPArea = 35;
+GMAT satWithFile.NAIFId = -10001001;
+GMAT satWithFile.NAIFIdReferenceFrame = -9001001;
+GMAT satWithFile.OrbitColor = Red;
+GMAT satWithFile.TargetColor = Teal;
+GMAT satWithFile.Id = 'SatId';
+GMAT satWithFile.Attitude = CoordinateSystemFixed;
+GMAT satWithFile.SPADSRPScaleFactor = 1;
+GMAT satWithFile.ModelFile = 'aura.3ds';
+GMAT satWithFile.ModelOffsetX = 0;
+GMAT satWithFile.ModelOffsetY = 0;
+GMAT satWithFile.ModelOffsetZ = 0;
+GMAT satWithFile.ModelRotationX = 0;
+GMAT satWithFile.ModelRotationY = 0;
+GMAT satWithFile.ModelRotationZ = 0;
+GMAT satWithFile.ModelScale = 1;
+GMAT satWithFile.AttitudeDisplayStateType = 'Quaternion';
+GMAT satWithFile.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT satWithFile.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT satWithFile.EulerAngleSequence = '321';
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel FluxWithFile;
+GMAT FluxWithFile.CentralBody = Earth;
+GMAT FluxWithFile.PrimaryBodies = {Earth};
+GMAT FluxWithFile.SRP = Off;
+GMAT FluxWithFile.RelativisticCorrection = Off;
+GMAT FluxWithFile.ErrorControl = RSSStep;
+GMAT FluxWithFile.GravityField.Earth.Degree = 0;
+GMAT FluxWithFile.GravityField.Earth.Order = 0;
+GMAT FluxWithFile.GravityField.Earth.PotentialFile = '../data/gravity/earth/JGM2.cof';
+GMAT FluxWithFile.GravityField.Earth.EarthTideModel = 'None';
+GMAT FluxWithFile.Drag.AtmosphereModel =  NRLMSISE00;
+GMAT FluxWithFile.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT FluxWithFile.Drag.PredictedWeatherSource = 'SchattenFile';
+GMAT FluxWithFile.Drag.SchattenFile = '../data/atmosphere/SchattenPredict_ShortForEdgeTests.txt';
+GMAT FluxWithFile.Drag.SchattenErrorModel = 'Nominal';
+GMAT FluxWithFile.Drag.SchattenTimingModel = 'NominalCycle';
+
+Create ForceModel FluxWithConstants;
+GMAT FluxWithConstants.CentralBody = Earth;
+GMAT FluxWithConstants.PrimaryBodies = {Earth};
+GMAT FluxWithConstants.SRP = Off;
+GMAT FluxWithConstants.RelativisticCorrection = Off;
+GMAT FluxWithConstants.ErrorControl = RSSStep;
+GMAT FluxWithConstants.GravityField.Earth.Degree = 0;
+GMAT FluxWithConstants.GravityField.Earth.Order = 0;
+GMAT FluxWithConstants.GravityField.Earth.PotentialFile = '../data/gravity/earth/JGM2.cof';
+GMAT FluxWithConstants.GravityField.Earth.EarthTideModel = 'None';
+GMAT FluxWithConstants.Drag.AtmosphereModel =  NRLMSISE00;
+GMAT FluxWithConstants.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT FluxWithConstants.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT FluxWithConstants.Drag.F107 = 94;
+GMAT FluxWithConstants.Drag.F107A = 94;
+GMAT FluxWithConstants.Drag.MagneticIndex = 2.33;  % file has ap = 9 which corresponds to kp = 2.33
+
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator PD78_WithFile;
+GMAT PD78_WithFile.FM = FluxWithFile;
+GMAT PD78_WithFile.Type = PrinceDormand78;
+GMAT PD78_WithFile.InitialStepSize = 60;
+GMAT PD78_WithFile.Accuracy = 1e-011;
+GMAT PD78_WithFile.MinStep = 0;
+GMAT PD78_WithFile.MaxStep = 6000;
+GMAT PD78_WithFile.MaxStepAttempts = 50;
+GMAT PD78_WithFile.StopIfAccuracyIsViolated = true;
+
+Create Propagator PD78_WithConstants;
+GMAT PD78_WithConstants.FM = FluxWithConstants;
+GMAT PD78_WithConstants.Type = PrinceDormand78;
+GMAT PD78_WithConstants.InitialStepSize = 60;
+GMAT PD78_WithConstants.Accuracy = 1e-011;
+GMAT PD78_WithConstants.MinStep = 0;
+GMAT PD78_WithConstants.MaxStep = 6000;
+GMAT PD78_WithConstants.MaxStepAttempts = 50;
+GMAT PD78_WithConstants.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile SPC_Report;
+GMAT SPC_Report.SolverIterations = Current;
+GMAT SPC_Report.UpperLeft = [ 0.1582352941176471 0.3288508557457213 ];
+GMAT SPC_Report.Size = [ 0.5988235294117648 0.7970660146699267 ];
+GMAT SPC_Report.RelativeZOrder = 225;
+GMAT SPC_Report.Maximized = false;
+GMAT SPC_Report.Filename = 'Schatten_Wierd.report';
+GMAT SPC_Report.Precision = 16;
+GMAT SPC_Report.WriteHeaders = false;
+GMAT SPC_Report.LeftJustify = On;
+GMAT SPC_Report.ZeroFill = Off;
+GMAT SPC_Report.FixedWidth = true;
+GMAT SPC_Report.Delimiter = ' ';
+GMAT SPC_Report.ColumnWidth = 23;
+GMAT SPC_Report.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable OutputStepSize i;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+%-----------Begin Propagation and Report Generation--------
+% Propagate based on preset propagation parameters
+% and current stop conditions.
+BeginMissionSequence;
+
+% Propagate 
+Propagate PD78_WithConstants(satWithConstants) {satWithConstants.ElapsedSecs = 86400};
+Report SPC_Report satWithConstants.A1ModJulian satWithConstants.X satWithConstants.Y satWithConstants.Z satWithConstants.VX satWithConstants.VY satWithConstants.VZ;
+% 
+Propagate PD78_WithFile(satWithFile) {satWithFile.ElapsedSecs = 86400};
+Report SPC_Report satWithFile.A1ModJulian satWithFile.X satWithFile.Y satWithFile.Z satWithFile.VX satWithFile.VY satWithFile.VZ;

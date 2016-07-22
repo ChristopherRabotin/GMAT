@@ -1,0 +1,1 @@
+To install, copy the 3ds file to your "models" folder, and the .bmp and .jpg textures to your "textures>medres" folder. Ensure you have the Helios Solar probe xyz installed too!

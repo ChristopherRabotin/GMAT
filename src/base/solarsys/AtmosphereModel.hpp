@@ -145,7 +145,7 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
 
    SolarFluxReader*     GetFluxReader();
-   SolarFluxReader::FluxData GetFluxData(GmatEpoch epoch);
+   SolarFluxReader::FluxData GetFluxData(GmatEpoch epoch = -1.0);
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS

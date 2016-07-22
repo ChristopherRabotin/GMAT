@@ -1086,11 +1086,11 @@ ObservationData* DataFile::ReadObservation()
    {
       theObs = theDatastream->ReadObservation();
       
-      // Set file index to be the pointer to DataFile object           // made changes by TUAN NGUYEN
-      if (theObs != NULL)                                              // made changes by TUAN NGUYEN
-      {                                                                // made changes by TUAN NGUYEN
-         theObs->fileIndex = this;                                     // made changes by TUAN NGUYEN
-      }                                                                // made changes by TUAN NGUYEN
+      // Set file index to be the pointer to DataFile object
+      if (theObs != NULL)
+      {
+         theObs->fileIndex = this;
+      }
 
       #ifdef DEBUG_OBSERVATION_DATA
          if (theObs)

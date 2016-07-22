@@ -67,7 +67,7 @@
 //#define DEBUG_DRAWING_MODE
 //#define DEBUG_OBJECT 2
 //#define DEBUG_DATA_BUFFERRING 1
-//#define DEBUG_UPDATE 1
+//#define DEBUG_UPDATE 2
 //#define DEBUG_UPDATE_OBJECT 1
 //#define DEBUG_UPDATE_VIEW 1
 //#define DEBUG_DRAW 1
@@ -190,6 +190,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mNeedVelocity = false;
    mNeedAttitude = false;
    mNeedEcliptic = false;
+   mIgnoreTimeSequence = false;
    
    // drawing options
    mDrawWireFrame = false;
@@ -847,6 +848,12 @@ void ViewCanvas::TakeAction(const std::string &action)
       // We don't want to connect to new point so set it to false
       mIsDrawing[mLastIndex] = false;
    }
+   else if (action == "IgnoreTimeSequence")
+   {
+      // This is indicates not to check for time in order
+      // This will allow showing unsynchronized propagation
+      mIgnoreTimeSequence = true;
+   }
    
    #ifdef DEBUG_TAKE_ACTION
    MessageInterface::ShowMessage
@@ -926,8 +933,8 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    MessageInterface::ShowMessage
       ("===========================================================================\n");
    MessageInterface::ShowMessage
-      ("ViewCanvas::UpdatePlot() plot=%s, time=%f, mNumData=%d, mScCount=%d, "
-       "solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n", GetName().c_str(),
+      ("ViewCanvas::UpdatePlot() plot='%s', time=%f, mNumData=%d, mScCount=%d, "
+       "solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n", GetName().WX_TO_C_STRING,
        time, mNumData, mScCount, solving, solverOption, drawing, inFunction);
    ColorMap::const_iterator iter = orbitColorMap.begin();
    #endif
