@@ -1,11 +1,6 @@
 /GMAT.exe
 /gmatConsole
-/libCInterface.dll
-/libCInterface.exp
-/libCInterface.lib
-/libGmatBase.dll
-/libGmatBase.exp
-/libGmatBase.lib
+/GmatConsole
 /lib/
 /*.sh*
 /GmatTester
@@ -13,7 +8,11 @@
 /lib
 inputs*.txt
 *-R201*
-/GmatConsole
-*.R2015a
+*.R201*
 *.pyc
 /DLLs/
+*.dylib
+*.so*
+*.dll
+*.exp
+*.lib

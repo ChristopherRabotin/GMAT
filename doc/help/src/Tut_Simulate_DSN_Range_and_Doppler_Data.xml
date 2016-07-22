@@ -2445,6 +2445,7 @@ Sim.MeasurementTimeStep = 3600;</programlisting>
           </m:mrow>
         </m:math>
       </inlineequation>. For this tutorial, we use a 1 sigma noise value of 1
-    mm/s (Schanzle [1995]) which corresponds to this value of 0.0282.</para>
+    mm/s (Schanzle [1995]) which corresponds to this value of 0.0282
+    Hz.</para>
   </section>
 </chapter>

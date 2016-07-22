@@ -22,28 +22,19 @@ if(NOT wxWidgets_FOUND)
   RETURN()
 endif()
 
+# Find OpenGL
+FIND_PACKAGE(OpenGL)
+if(NOT OPENGL_FOUND)
+  MESSAGE(WARMING "Skipping GUI: OpenGL missing")
+  RETURN()
+endif()
+
 # ====================================================================
 SET(TargetName GmatGUI)
 
 # ====================================================================
 # SPICE specifics
-if(GMAT_USE_SPICE)
-  SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
-endif()
-
-# ====================================================================
-# wxWidgets specifics
-INCLUDE(${wxWidgets_USE_FILE})
-LINK_LIBRARIES(${wxWidgets_LIBRARIES})
-
-# ====================================================================
-# Link libraries
-LINK_LIBRARIES(GmatBase)
-
-# Find OpenGL
-FIND_PACKAGE(OpenGL)
-INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-LINK_LIBRARIES(${OPENGL_LIBRARIES})
+SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
 
 # Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
@@ -76,11 +67,6 @@ SET(GUI_DIRS
   subscriber
   view
   )
-
-# ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GUI_DIRS})
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 
 # ====================================================================
 # source files
@@ -267,6 +253,16 @@ SET(GUI_SRCS ${GUI_SRCS} ${GMAT_ICON_RC})
 # Create GmatGui as an executable
 ADD_EXECUTABLE(${TargetName} ${GUI_SRCS} ${GUI_HEADERS})
 
+# Add includes
+INCLUDE(${wxWidgets_USE_FILE})
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${GUI_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${OPENGL_INCLUDE_DIR})
+
+# Add libraries
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE GmatBase)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${wxWidgets_LIBRARIES})
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${OPENGL_LIBRARIES})
+
 # The GUI name should be just "GMAT"
 SET_TARGET_PROPERTIES(${TargetName} PROPERTIES OUTPUT_NAME "GMAT")
 
@@ -293,7 +289,7 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES
   )
 
 # Specify where to install (make install or VS "INSTALL" project)
-if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+if(APPLE)
   SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/MacOS)
 else()
   SET(INSTALL_DIR bin)
@@ -301,7 +297,7 @@ endif()
 INSTALL(TARGETS ${TargetName} DESTINATION ${INSTALL_DIR})
 
 # Install Mac bundle files
-if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+if(APPLE)
   INSTALL(CODE "MESSAGE(STATUS \"Creating GMAT.app bundle\")")
 
   # Install Mac icon file
@@ -323,23 +319,18 @@ if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
     DESTINATION ${GMAT_MAC_APPBUNDLE_PATH}/MacOS
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
     )
-
 endif()
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux
 if(UNIX)
   if(APPLE)
-    if(GMAT_MAC_APPBUNDLE_PATH)
-      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
-    else()
-      SET(MAC_BASEPATH ";@loader_path/libwx/") # Separate base/wx dirs
-    endif()
+    SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
       "@loader_path/${MAC_BASEPATH}"
       )
   else()
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
-      "\$ORIGIN/;\$ORIGIN/libwx/"
+      "\$ORIGIN/;\$ORIGIN/../lib/"
       )
   endif()
 endif()
