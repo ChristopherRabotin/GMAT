@@ -563,6 +563,7 @@ SET(BASE_SRCS
     util/SunSync.cpp
     util/RepeatSunSync.cpp
     util/RepeatGroundTrack.cpp
+    util/datawriter/DataBucket.cpp
     util/datawriter/DataWriter.cpp
     util/datawriter/DataWriterInterface.cpp
     util/datawriter/DataWriterMaker.cpp
