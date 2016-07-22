@@ -16,7 +16,7 @@ MESSAGE("GMAT PythonInterface Plugin setup " ${VERSION})
 
 # ====================================================================
 # Major error checks
-if(NOT PYTHON_LIB_DIR)
+if(NOT PYTHONLIBS_FOUND)
   MESSAGE(WARNING "Skipping PythonInterface: Python missing")
   RETURN()
 endif()
@@ -29,10 +29,6 @@ ADD_DEFINITIONS("-DPYTHON_EXPORTS")
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command factory function include interface plugin)
-
-# ====================================================================
-# extra include directory for header file
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIR})
 
 # ====================================================================
 # source files
@@ -49,18 +45,9 @@ SET(PLUGIN_SRCS
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
+# Additional includes
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${PYTHON_INCLUDE_DIRS})
+
+# ====================================================================
 # Additional link libraries
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    FIND_LIBRARY(PYTHON_LIB ${PYTHON_LIBRARY} ${PYTHON_LIB_DIR})
-  else()
-    FIND_LIBRARY(PYTHON_LIB ${PYTHON_LIBRARY} ${PYTHON_LIB_DIR})
-  endif()
-else()
-  set(PYTHON_LIB ${PYTHON_LIB_DIR}/${PYTHON_LIBRARY}) 
-endif()
-
-TARGET_LINK_LIBRARIES(${TargetName} ${PYTHON_LIB})
-
-MESSAGE(STATUS "Python Library: " ${PYTHON_LIB})
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${PYTHON_LIBRARIES})

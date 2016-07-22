@@ -40,15 +40,6 @@ if(UNIX)
 endif()
 
 # ====================================================================
-# extra include directories for header files
-INCLUDE_DIRECTORIES(${Matlab_INCLUDE_DIRS})
-if(UNIX)
-  INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/include")
-  INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/app")
-  INCLUDE(${wxWidgets_USE_FILE})
-endif()
-
-# ====================================================================
 # source files
 SET(PLUGIN_SRCS
     command/CallMatlabFunction.cpp
@@ -74,26 +65,33 @@ endif()
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
-# Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} ${Matlab_LIBRARIES})
+# Includes
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${Matlab_INCLUDE_DIRS})
 if(UNIX)
-  TARGET_LINK_LIBRARIES(${TargetName} ${wxWidgets_LIBRARIES})
+  TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/gui/include"
+    "${PROJECT_SOURCE_DIR}/src/gui/app"
+    )
+  INCLUDE(${wxWidgets_USE_FILE})
+endif()
+
+# ====================================================================
+# Additional link libraries
+TARGET_LINK_LIBRARIES(${TargetName} PUBLIC ${Matlab_LIBRARIES})
+if(UNIX)
+  TARGET_LINK_LIBRARIES(${TargetName} PUBLIC ${wxWidgets_LIBRARIES})
 endif()
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux
 if(UNIX)
   if(APPLE)
-    if(GMAT_MAC_APPBUNDLE_PATH)
-      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
-    else()
-      SET(MAC_BASEPATH ";@loader_path/libwx/") # Separate base/wx dirs
-    endif()
+    SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
       "@loader_path/${MAC_BASEPATH}"
       )
   else()
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
-      "\$ORIGIN/;\$ORIGIN/libwx/"
+      "\$ORIGIN/;\$ORIGIN/../lib/"
       )
   endif()
 endif()

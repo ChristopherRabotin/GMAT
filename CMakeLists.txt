@@ -19,7 +19,8 @@
 #
 
 # Require CMake minimum version
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5.2)
+CMAKE_POLICY(VERSION 3.5.2)
 
 # Support OSX 10.8+ -> go to 10.10 as minimum
 IF(APPLE)
@@ -29,8 +30,13 @@ ENDIF()
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
-SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "GMAT version name")
+SET(GMAT_RELEASE_NAME "R2016a" CACHE STRING "GMAT version name")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
+
+# Enforce C++11
+SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
 
 # Path to custom Find****.cmake files
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
@@ -64,19 +70,17 @@ endif()
 
 # Set path to app bundle on Mac, relative to CMAKE_INSTALL_PREFIX
 # This may need to be a user-selectable cache variable in the future
-OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 if(APPLE)
-  if(GMAT_GUI)
-    if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
-      (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
-      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd.app/Contents")
-    else()
-      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT_Beta.app/Contents")
-    endif()
+  if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
+    (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
+    SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd-${GMAT_RELEASE_NAME}_Beta.app/Contents")
   else()
-    SET(GMAT_MAC_APPBUNDLE_PATH "")
+    SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT-${GMAT_RELEASE_NAME}_Beta.app/Contents")
   endif()
 endif()
+
+# ====================================================================
+# Find wxWidgets
 
 # Set default wxWidgets directory based on OS
 SET(wxWidgets_PARTIAL_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets")
@@ -109,15 +113,8 @@ endif()
 # Find wxWidgets
 FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
 
-# User option for SPICE
-OPTION(GMAT_USE_SPICE "Use CSPICE" ON)
-if(GMAT_USE_SPICE)
-  ADD_DEFINITIONS("-D__USE_SPICE__")
-  INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-endif()
-
-# Search for CSPICE even if it is not selected, because
-# the CSPICE libs contain the F2C implementation
+# ====================================================================
+# Find CSPICE
 
 # Set default CSPICE directory based on OS
 if(WIN32)
@@ -157,15 +154,22 @@ if(CSPICE_DIR)
   endif()
   SET(CSPICE_LIB "${CSPICE_DIR}/lib/cspice.${CSPICE_EXT}")
   SET(CSPICE_LIB_DEBUG "${CSPICE_DIR}/lib/cspiced.${CSPICE_EXT}")
+  SET(CSPICE_INCLUDE_DIR "${CSPICE_DIR}/include")
   if(NOT EXISTS ${CSPICE_LIB_DEBUG})
     SET(CSPICE_LIB_DEBUG ${CSPICE_LIB})
   endif()
 else()
-  MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
+  MESSAGE(ERROR "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
 endif()
 
+# Add SPICE preprocessor definition to all projects
+ADD_DEFINITIONS("-D__USE_SPICE__")
+
+# ====================================================================
+# Find F2C
+
 # By default use the CSPICE version of F2C
-SET(F2C_DEPENDS_DIR "${CSPICE_DIR}/include")
+SET(F2C_DEPENDS_DIR ${CSPICE_INCLUDE_DIR})
 
 # Search for F2C folder in default paths
 # User can change this via CMake GUI or command line
@@ -184,11 +188,13 @@ else()
   MESSAGE(WARNING "F2C NOT FOUND. Set F2C_DIR to path to f2c.h and re-configure.")
 endif()
 
+# ====================================================================
 # Find Matlab
 SET(Matlab_ROOT_DIR "" CACHE PATH "Path to user-specified MATLAB location. Leave empty to auto-find MATLAB.")
 SET(MATLAB_ADDITIONAL_VERSIONS
   # Additional Matlab versions should be included here
-  "R2015b=8.6"
+  "R2016a=9.0"
+  "R2016b=9.1"
   CACHE STRING "Additional searched MATLAB versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
   )
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
@@ -197,71 +203,63 @@ if(NOT Matlab_FOUND)
   MESSAGE(WARNING "Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
 endif()
 
+# ====================================================================
 # Find Python
-# todo: Python 2.7; let the user set library name?
-MESSAGE(STATUS "Searching for Python")
-SET(PYTHON_DIR "${PROJECT_SOURCE_DIR}/depends/Python")
-SET(PYTHON_LIB_DIR "" CACHE PATH "Path to location of the Python library.")
-SET(PYTHON_INCLUDE_DIR "" CACHE PATH "Path to location of python.h")
-MESSAGE(STATUS "Please set the Python locations")
-# FIND_PACKAGE(PythonLibs)
 
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    SET(PYTHON_LIBRARY "python3.4m")
+# Unset Python variables to reset the search every time
+# This allows the user to set Python_ADDITIONAL_VERSIONS and specify
+# the Python version
+SET(PYTHON_VERSION_REQUEST "" CACHE STRING "Request specific Python version, or leave blank to use latest installed version.")
+SET(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_REQUEST})
+UNSET(PYTHON_LIBRARY CACHE)
+UNSET(PYTHON_INCLUDE_DIR CACHE)
+FIND_PACKAGE(PythonLibs)
+
+# Let users know where to download Python
+if(NOT PYTHONLIBS_FOUND)
+  if(WIN32)
+    SET(PYTHONURL "http://www.python.org/downloads/windows/")
   else()
-    SET(PYTHON_LIBRARY "python3.4m")
+    if(APPLE)
+      SET(PYTHONURL "http://www.python.org/downloads/mac-osx/")
+    else()
+      SET(PYTHONURL "the Linux package manager")
+    endif()
   endif()
-else()
-  SET(PYTHON_LIBRARY "python34.lib")
-endif()
-
-
-MESSAGE(STATUS "Python Library: " ${PYTHON_LIBRARY})
-
-if(PYTHON_LIB_DIR)
-  MESSAGE(STATUS "Found Python: " ${PYTHON_LIB_DIR})
-else()
-  MESSAGE(WARNING "Python NOT FOUND. Set PYTHON_LIB_DIR to your Python34.lib library path, and PYTHON_INCLUDE_DIR to the path to Python.h and re-configure.")
+  MESSAGE(STATUS "Python can be downloaded from ${PYTHONURL}")
 endif()
 
 # ====================================================================
-# Added by LOJ for XERCES
 # Find Xerces
-MESSAGE(STATUS "Searching for Xerces")
-SET(XERCES_DIR "${PROJECT_SOURCE_DIR}/depends/Xerces")
-SET(XERCES_LIB_DIR "" CACHE PATH "Path to location of the Xerces library.")
-SET(XERCES_INCLUDE_DIR "" CACHE PATH "Path to location of xerces/src")
-MESSAGE(STATUS "Please set the Xerces locations")
-# FIND_PACKAGE(XercesLibs)
 
-# @todo: set correct lib for Mac/Linux
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    SET(XERCES_LIBRARY "xerces-c-3.1")
-  else()
-    SET(XERCES_LIBRARY "")
-  endif()
+# Initialize default GMAT dependency path for Xerces
+if(WIN32)
+  SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/src")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/Win64/VC12/Static Release")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/Win64/VC12/Static Debug")
+elseif(APPLE)
+  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/cocoa-install")
 else()
-  SET(XERCES_LIBRARY "xerces-c_3.lib")
+  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/linux-install")
 endif()
 
+FIND_PACKAGE(XercesC REQUIRED)
 
-MESSAGE(STATUS "Xerces Library: " ${XERCES_LIBRARY})
-
-if(XERCES_LIB_DIR)
-  MESSAGE(STATUS "Found Xerces: " ${XERCES_LIB_DIR})
-else()
-  MESSAGE(WARNING "Xerces NOT FOUND. Set XERCES_LIB_DIR to your Xerces34.lib library path, and XERCES_INCLUDE_DIR to the path to Xerces.h and re-configure.")
+# Additional libraries needed to use Xerces on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
+    FIND_LIBRARY(CORESERVICES_LIBRARY CoreServices)
+    FIND_PACKAGE(CURL)
+  else()
+    FIND_PACKAGE(Threads)
+  endif()
 endif()
 # ====================================================================
 
 
 # ====================================================================
 # Common build options
-INCLUDE(CheckCXXCompilerFlag)
 
 if(WIN32)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W2")
@@ -299,13 +297,6 @@ ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 # Mark debug libraries with a "d" suffix
 SET(CMAKE_DEBUG_POSTFIX "d")
 
-# Linker Flags
-if(UNIX)
-  if(NOT APPLE)
-    LINK_LIBRARIES("dl")	
-  endif()
-endif()
-
 # Warning suppression definitions
 # Note that warning C4430 presents as an error in the MatlabInterface plugin
 if(WIN32)
@@ -328,7 +319,8 @@ if(UNIX)
     # GMAT GUI has many instances of text like "XX"GUI_ACCEL_KEY"YY"
     # This is incompatible with the C++11 standard, and should be fixed
     # For now, disable this compile error (-Wreserved-user-defined-literal)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-user-defined-literal")
+    # [UPDATE] Removed since this no longer seems to create build errors.
+    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-user-defined-literal")
   endif()
 endif()
 
@@ -346,10 +338,6 @@ if(UNIX)
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--enable-new-dtags")
   endif()
 endif()
-
-# Declare global var for GmatBase header directories
-# This will be defined in the GmatBase CMakeLists.txt file
-SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
 
 # ====================================================================
 # Define macro that sets the output directory for build products,
