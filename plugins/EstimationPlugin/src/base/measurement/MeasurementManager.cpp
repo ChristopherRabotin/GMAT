@@ -1257,7 +1257,7 @@ UnsignedInt MeasurementManager::LoadObservations()
    }
 
    // 7. Display all statistic of data records
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
    MessageInterface::ShowMessage("Number of thrown records due to:\n");
    for(std::map<std::string,Integer>::iterator i = totalCount.begin(); i != totalCount.end(); ++i)
    {

@@ -856,7 +856,7 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
 
    // Get all known measurement types
    StringArray knownTypes;                                                                     // GMT-5701
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();                                     // GMT-5701
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                     // GMT-5701
    //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))        // GMT-5701
    if (runmode != GmatGlobal::TESTING)                                                         // GMT-5701
    {                                                                                           // GMT-5701
@@ -1048,7 +1048,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
       // Get all known measurement types
       StringArray knownTypes;                                                                     // GMT-5701
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();                                     // GMT-5701
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                     // GMT-5701
       //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))        // GMT-5701
       if (runmode != GmatGlobal::TESTING)                                                         // GMT-5701
       {                                                                                           // GMT-5701
@@ -2577,7 +2577,7 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
       return true;
 
    // Validate measurement type in typesList                                                                      // GMT-5701
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();                                                        // GMT-5701
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                                        // GMT-5701
    //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))                           // GMT-5701
    if (runmode != GmatGlobal::TESTING)                                                                            // GMT-5701
    {                                                                                                              // GMT-5701

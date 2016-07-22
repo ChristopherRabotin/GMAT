@@ -45,7 +45,7 @@ DataFileFactory::DataFileFactory() :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
          creatables.push_back("DataFile");
@@ -79,7 +79,7 @@ DataFileFactory::DataFileFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
          creatables.push_back("DataFile");
@@ -101,7 +101,7 @@ DataFileFactory::DataFileFactory(const DataFileFactory& fact) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
          creatables.push_back("DataFile");
@@ -128,7 +128,7 @@ DataFileFactory& DataFileFactory::operator= (const DataFileFactory& fact)
 
       if (creatables.empty())
       {
-         Integer runmode = GmatGlobal::Instance()->GetRunMode();
+         Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
          //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
          if (runmode == GmatGlobal::TESTING)
             creatables.push_back("DataFile");
@@ -157,7 +157,7 @@ DataFile* DataFileFactory::CreateDataFile(const std::string &ofType,
 {
    DataFile *retval = NULL;
 
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
    //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
    if (runmode == GmatGlobal::TESTING)
    {
