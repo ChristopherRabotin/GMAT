@@ -2263,15 +2263,15 @@ Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData
 
    // search for interval which contains time t:
    UnsignedInt interval_index = beginIndex;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t < (*rampTB)[i].epoch)
-	   {
-         interval_index = i-1;      
-		   break;
-	   }
+      if (t >= (*rampTB)[i].epoch)
+         interval_index = i;
+      else
+         break;
    }
    
+
    // specify frequency at time t:
    Real t_start = (*rampTB)[interval_index].epoch;
    Real f0 = (*rampTB)[interval_index].rampFrequency;                    // unit: Hz
@@ -2316,13 +2316,12 @@ Integer PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTa
 
    // search for interval which contains time t:
    Integer upBand = 0;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t < (*rampTB)[i].epoch)
-      {
-         upBand = (*rampTB)[i-1].uplinkBand;
+      if (t >= (*rampTB)[i].epoch)
+         upBand = (*rampTB)[i].uplinkBand;
+      else
          break;
-      }
    }
 
    return upBand;
