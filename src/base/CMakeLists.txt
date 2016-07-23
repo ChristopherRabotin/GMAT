@@ -550,7 +550,7 @@ if(UNIX)
   if(APPLE)
     TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${COREFOUNDATION_LIBRARY} ${CORESERVICES_LIBRARY} ${CURL_LIBRARIES})
   else()
-    TARGET_LINK_LIBRARIES(${TargetName} PRIVATE Threads::Threads)
+    TARGET_LINK_LIBRARIES(${TargetName} PRIVATE Threads::Threads icuuc)
   endif()
 else()
   # XERCES_STATIC_LIBRARY required on Windows
