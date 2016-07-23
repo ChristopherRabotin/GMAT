@@ -67,10 +67,10 @@ fi
 # Make sure system libcurl is used (e.g. instead of Matlab's)
 if [ $mac == true ]
 then
-  export DYLD_LIBRARY_PATH=/usr/lib:$DYLD_LIBRARY_PATH
+  export DYLD_LIBRARY_PATH=/usr/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}
 else
   # Account for both Red Hat and Ubuntu
-  export LD_LIBRARY_PATH=/usr/lib64:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+  export LD_LIBRARY_PATH=/usr/lib64:/usr/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 fi
 
 # Variables for OS-specific flags
@@ -338,10 +338,11 @@ function build_xerces() {
 	    # Xerces needs these flags on OSX
 	    OSXFLAGS="-mmacosx-version-min=$osx_min_version"
 	  fi
+          COMMONXERCESFLAGS="--disable-shared --disable-netaccessor-curl --disable-transcoder-icu --disable-msgloader-icu"
 
 	  echo "Configuring Xerces $xerces_version debug library. This could take a while..."
-	  COMMONFLAGS="-O0 -g -fPIC $OSXFLAGS"
-	  ../configure --disable-shared CFLAGS="$COMMONFLAGS" CXXFLAGS="$COMMONFLAGS" --prefix="$xerces_install_path" > "$logs_path/xerces_configure_debug.log" 2>&1
+	  COMMONCFLAGS="-O0 -g -fPIC $OSXFLAGS"
+	  ../configure $COMMONXERCESFLAGS CFLAGS="$COMMONCFLAGS" CXXFLAGS="$COMMONCFLAGS" --prefix="$xerces_install_path" > "$logs_path/xerces_configure_debug.log" 2>&1
 	  make -j$ncores > "$logs_path/xerces_build_debug.log" 2>&1
 	  if [ $? -eq 0 ]
 	  then
@@ -354,8 +355,8 @@ function build_xerces() {
 	  fi
 
 	  echo "Configuring Xerces $xerces_version release library. This could take a while..."
-	  COMMONFLAGS="-O2 -fPIC $OSXFLAGS"
-	  ../configure --disable-shared CFLAGS="$COMMONFLAGS" CXXFLAGS="$COMMONFLAGS" --prefix="$xerces_install_path" > "$logs_path/xerces_configure_release.log" 2>&1
+	  COMMONCFLAGS="-O2 -fPIC $OSXFLAGS"
+	  ../configure $COMMONXERCESFLAGS CFLAGS="$COMMONCFLAGS" CXXFLAGS="$COMMONCFLAGS" --prefix="$xerces_install_path" > "$logs_path/xerces_configure_release.log" 2>&1
 	  make -j$ncores > "$logs_path/xerces_build_release.log" 2>&1
 	  if [ $? -eq 0 ]
 	  then
@@ -400,12 +401,23 @@ function build_cspice() {
 	  echo "Compiling CSPICE debug library. This could take a while..."
 	  export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXFLAGS -g -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 	  ./mkprodct.csh > "$logs_path/cspice_build_debug.log" 2>&1
-	  mv ../../lib/cspice.a ../../lib/cspiced.a
+	  if [ $? -eq 0 ]
+	  then
+	    mv ../../lib/cspice.a ../../lib/cspiced.a
+          else
+	    echo "CSPICE debug build failed. Fix errors and try again."
+	    return
+	  fi
 
 	  # Compile release CSPICE with integer uiolen [GMT-5044]
 	  echo "Compiling CSPICE release library. This could take a while..."
 	  export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi $OSXFLAGS -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 	  ./mkprodct.csh > "$logs_path/cspice_build_release.log" 2>&1
+	  if [ $? -ne 0 ]
+	  then
+	    echo "CSPICE release build failed. Fix errors and try again."
+	    return
+	  fi
 	fi
 }
 
