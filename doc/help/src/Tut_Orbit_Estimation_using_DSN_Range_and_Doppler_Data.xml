@@ -104,8 +104,8 @@
     (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="11 pt"
-                     fileref="../files/images/icons/Save_Sync.png"
-                     scalefit="1" valign="bottom"/>
+                     fileref="files/images/icons/Save_Sync.png" scalefit="1"
+                     valign="bottom"/>
         </imageobject>
       </inlinemediaobject>). To avoid syntax errors, where needed, don’t
     forget to add the following command, as needed, to the last line of the
@@ -578,7 +578,7 @@ bat.MaximumIterations          = 10
 bat.MaxConsecutiveDivergences  = 3;
 bat.Propagator                 = Prop;
 bat.ShowAllResiduals           = On;
-bat.OLSEInitialRMSSigma        = 10000;
+bat.OLSEInitialRMSSigma        = 10000;f
 bat.OLSEMultiplicativeConstant = 3;
 bat.OLSEAdditiveConstant       = 0;
 bat.EstimationEpochFormat      = 'FromParticipants'; 
@@ -685,7 +685,7 @@ RunEstimator bat</programlisting>
     ready to run the script. Hit the Save,Sync,Run button, (<inlinemediaobject>
         <imageobject>
           <imagedata contentdepth="10 pt"
-                     fileref="../files/images/icons/Save_Sync_Run.png"
+                     fileref="files/images/icons/Save_Sync_Run.png"
                      valign="bottom"/>
         </imageobject>
       </inlinemediaobject>). Given the amount of data we are processing, our
