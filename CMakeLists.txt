@@ -19,8 +19,8 @@
 #
 
 # Require CMake minimum version
-cmake_minimum_required(VERSION 3.5.2)
-CMAKE_POLICY(VERSION 3.5.2)
+cmake_minimum_required(VERSION 3.5)
+CMAKE_POLICY(VERSION 3.5)
 
 # Support OSX 10.8+ -> go to 10.10 as minimum
 IF(APPLE)
