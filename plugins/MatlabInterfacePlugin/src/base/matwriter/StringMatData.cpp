@@ -144,7 +144,6 @@ bool StringMatData::AddData(const StringMatrix &data)
    for (int i=0; i<m_size; i++)
    {
       mxArray *tmp_str;
-      subs[0] = (mwIndex)i;
 
       for (int j=0; j<n_size; j++)
       {
@@ -154,12 +153,9 @@ bool StringMatData::AddData(const StringMatrix &data)
          #endif
 
          tmp_str = mxCreateString(data[i][j].c_str());
-         subs[1]=(mwIndex)j;
+         subs[1]=(mwIndex)(i+j*m_size);
          index = mxCalcSingleSubscript(pa_string, m_size, subs);
-
-         // Mike:  Please figure this piece out -- using "index," things kept
-         // writing to the first cell rather than moving from cell to cell
-         mxSetCell(pa_string, (mwIndex)j/*index*/, tmp_str );
+         mxSetCell(pa_string, subs[1], tmp_str );
 
          retval = true;
       }
