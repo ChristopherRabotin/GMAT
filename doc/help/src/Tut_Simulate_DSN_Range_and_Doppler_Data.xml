@@ -107,8 +107,8 @@
     (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="11 pt"
-                     fileref="../files/images/icons/Save_Sync.png"
-                     scalefit="1" valign="bottom"/>
+                     fileref="files/images/icons/Save_Sync.png" scalefit="1"
+                     valign="bottom"/>
         </imageobject>
       </inlinemediaobject>). To avoid syntax errors, where needed, don’t
     forget to add the following command to the last line of the script segment
@@ -135,7 +135,7 @@
     (<inlinemediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="11pt"
-                     fileref="../files/images/icons/NewScript.png"
+                     fileref="files/images/icons/NewScript.png"
                      valign="bottom" width="1em"/>
         </imageobject>
       </inlinemediaobject>)</para>
@@ -488,7 +488,7 @@ RunSimulator Sim</programlisting>
     Save,Sync,Run button, (<inlinemediaobject>
         <imageobject>
           <imagedata contentdepth="10 pt"
-                     fileref="../files/images/icons/Save_Sync_Run.png"
+                     fileref="files/images/icons/Save_Sync_Run.png"
                      valign="bottom"/>
         </imageobject>
       </inlinemediaobject>). Because we are only simulating a small amount of
