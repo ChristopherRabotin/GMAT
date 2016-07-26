@@ -158,12 +158,19 @@ BatchEstimator::BatchEstimator(const std::string &type,
    matWriter                  (NULL),
    writeMatFile               (false),
    matFileName                (""),
+   matIterationIndex          (-1),
    matPartIndex               (-1),
    matTypeIndex               (-1),
    matEpochIndex              (-1),
    matObsIndex                (-1),
    matCalcIndex               (-1),
-   matOmcIndex                (-1)
+   matOmcIndex                (-1),
+   matElevationIndex          (-1),
+   matGregorianIndex          (-1),
+   matObsEditFlagIndex        (-1),
+   matFrequencyIndex          (-1),
+   matFreqBandIndex           (-1),
+   matDoppCountIndex          (-1)
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -212,12 +219,19 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    matWriter                  (NULL),
    writeMatFile               (est.writeMatFile),
    matFileName                (est.matFileName),
+   matIterationIndex          (-1),
    matPartIndex               (-1),
    matTypeIndex               (-1),
    matEpochIndex              (-1),
    matObsIndex                (-1),
    matCalcIndex               (-1),
-   matOmcIndex                (-1)
+   matOmcIndex                (-1),
+   matElevationIndex          (-1),
+   matGregorianIndex          (-1),
+   matObsEditFlagIndex        (-1),
+   matFrequencyIndex          (-1),
+   matFreqBandIndex           (-1),
+   matDoppCountIndex          (-1)
 {
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
@@ -267,13 +281,22 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
 
       if (matWriter != NULL)
          delete matWriter;
-      matWriter = NULL;
-      matPartIndex  = -1;
-      matTypeIndex  = -1;
-      matEpochIndex = -1;
-      matObsIndex   = -1;
-      matCalcIndex  = -1;
-      matOmcIndex   = -1;
+      matWriter           = NULL;
+      matIterationIndex   = -1;
+      matPartIndex        = -1;
+      matTypeIndex        = -1;
+      matEpochIndex       = -1;
+      matObsIndex         = -1;
+      matCalcIndex        = -1;
+      matOmcIndex         = -1;
+      matGregorianIndex   = -1;
+      matObsEditFlagIndex = -1;
+      matElevationIndex   = -1;
+      matGregorianIndex   = -1;
+      matObsEditFlagIndex = -1;
+      matFrequencyIndex   = -1;
+      matFreqBandIndex    = -1;
+      matDoppCountIndex   = -1;
 
       writeMatFile = est.writeMatFile;
       matFileName  = est.matFileName;

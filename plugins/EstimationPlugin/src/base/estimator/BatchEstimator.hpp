@@ -148,11 +148,15 @@ protected:
    std::string             matFileName;
    /// Data container used during accumulation
    DataBucket              matData;
+
+   // Indexing for the .mat data elements
+   /// Iteration number index
+   Integer                 matIterationIndex;
    /// Index of the participants list in the .mat data
    Integer                 matPartIndex;
    /// Index of the participants list in the .mat data
    Integer                 matTypeIndex;
-   /// Index of the epoch data in the .mat data
+   /// Index of the TAI Mod Julian epoch data in the .mat data
    Integer                 matEpochIndex;
    /// Index of the observation data list in the .mat data
    Integer                 matObsIndex;
@@ -160,7 +164,17 @@ protected:
    Integer                 matCalcIndex;
    /// Index of the O-C data in the .mat data
    Integer                 matOmcIndex;
+   /// Index of the elevation for the obs
+   Integer                 matElevationIndex;
+   /// TAI Gregorian epoch index
+   Integer                 matGregorianIndex;
+   ///  Observation edit flag index
+   Integer                 matObsEditFlagIndex;
 
+   // Extra entries
+   Integer                 matFrequencyIndex;
+   Integer                 matFreqBandIndex;
+   Integer                 matDoppCountIndex;
 
 //   /// Estimation status
 //   Integer                 estimationStatus;         // This variable is moved to Estimator class

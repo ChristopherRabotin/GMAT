@@ -161,7 +161,7 @@ void BatchEstimatorInv::Accumulate()
 #endif
 
    // Measurements are possible!
-   const MeasurementData *calculatedMeas;
+   const MeasurementData *calculatedMeas = NULL;
    std::vector<RealArray> stateDeriv;
 
    // .mat file indices
@@ -282,20 +282,34 @@ void BatchEstimatorInv::Accumulate()
 
    if (writeMatFile && (matWriter != NULL))
    {
+      std::string gregEpoch;
+      Real taiEpoch;
+      TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch, "", "TAIModJulian", taiEpoch, gregEpoch, 1);
+      TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch, "", "UTCGregorian", temp, gregEpoch, 1);
+
       if (matEpochIndex == -1)
       {
-         matEpochIndex = matData.AddRealContainer("Epoch");
-         matObsIndex   = matData.AddRealContainer("Observed");
-         matCalcIndex  = matData.AddRealContainer("Calculated");
-         matOmcIndex   = matData.AddRealContainer("ObsMinusCalc");
-         matPartIndex  = matData.AddStringContainer("Participants");
-         matTypeIndex  = matData.AddStringContainer("Type");
+         matIterationIndex   = matData.AddRealContainer("IterationNumber");
+         matEpochIndex       = matData.AddRealContainer("Epoch");
+         matObsIndex         = matData.AddRealContainer("Observed");
+         matCalcIndex        = matData.AddRealContainer("Calculated");
+         matOmcIndex         = matData.AddRealContainer("ObsMinusCalc");
+         matElevationIndex   = matData.AddRealContainer("Elevation");
+         matPartIndex        = matData.AddStringContainer("Participants");
+         matTypeIndex        = matData.AddStringContainer("Type");
+         matGregorianIndex   = matData.AddStringContainer("UTCGregorian");
+         matObsEditFlagIndex = matData.AddStringContainer("ObsEditFlag");
+
+         matFrequencyIndex   = matData.AddRealContainer("Frequency");
+         matFreqBandIndex    = matData.AddRealContainer("FrequencyBand");
+         matDoppCountIndex   = matData.AddRealContainer("DopplerCountInterval");
       }
 
       matIndex = matData.AddPoint();
 
       matData.elementStatus[matIndex] = 0.0;
-      matData.realValues[matEpochIndex][matIndex] = currentObs->epoch;
+      matData.realValues[matIterationIndex][matIndex] = iterationsTaken;
+      matData.realValues[matEpochIndex][matIndex] = taiEpoch;
       matData.realValues[matObsIndex][matIndex]   = currentObs->value[0];
 
       std::string parties;
@@ -305,6 +319,7 @@ void BatchEstimatorInv::Accumulate()
 
       matData.stringValues[matPartIndex][matIndex] = parties;
       matData.stringValues[matTypeIndex][matIndex] = currentObs->typeName;
+      matData.stringValues[matGregorianIndex][matIndex] = gregEpoch;
    }
 
    std::string ss;
@@ -466,7 +481,7 @@ void BatchEstimatorInv::Accumulate()
          
          if (measManager.GetObsDataObject()->inUsed == false)
          {
-            // Specify reamoved reason and count number of removed records
+            // Specify removed reason and count number of removed records
             std::string ss = measManager.GetObsDataObject()->removedReason;         //currentObs->removedReason;
             if (ss.substr(0,1) == "B")
                numRemovedRecords["B"]++;
@@ -517,22 +532,22 @@ void BatchEstimatorInv::Accumulate()
                sLine << "\n";
             }
             
-            if (writeMatFile && (matWriter != NULL))
-            {
-               // write data to .mat file
-               WriterData *realData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
-               matWriter->AddData(realData);
-               std::vector<RealArray> current_obs;
-               current_obs.push_back(currentObs->value);
-               realData->AddData(current_obs);
-
-               std::string object_name;
-               std::stringstream convert;
-               convert << "Iteration" << iterationsTaken;
-               object_name = convert.str();
-
-//               matWriter->WriteData(object_name);
-            }
+//            if (writeMatFile && (matWriter != NULL))
+//            {
+//               // write data to .mat file
+//               WriterData *realData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
+//               matWriter->AddData(realData);
+//               std::vector<RealArray> current_obs;
+//               current_obs.push_back(currentObs->value);
+//               realData->AddData(current_obs);
+//
+//               std::string object_name;
+//               std::stringstream convert;
+//               convert << "Iteration" << iterationsTaken;
+//               object_name = convert.str();
+//
+// //               matWriter->WriteData(object_name);
+//            }
 
             // Reset value for removed reason for all reuseable data records
             if (isReUsed)
@@ -849,6 +864,25 @@ void BatchEstimatorInv::Accumulate()
 
    }  // end of if (modelsToAccess.size() == 0)
 
+   if (writeMatFile && (matWriter != NULL))
+   {
+      matData.stringValues[matObsEditFlagIndex][matIndex] = currentObs->removedReason;
+      if (calculatedMeas)
+         matData.realValues[matElevationIndex][matIndex] = calculatedMeas->feasibilityValue;
+
+      if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
+      {
+         matData.realValues[matFreqBandIndex][matIndex] = currentObs->uplinkBand;
+         matData.realValues[matFrequencyIndex][matIndex] = currentObs->uplinkFreqAtRecei;
+      }
+      else if ((currentObs->typeName == "DSNTwoWayDoppler") ||
+               (currentObs->typeName == "Doppler") ||
+               (currentObs->typeName == "Doppler_RangeRate"))
+      {
+         matData.realValues[matFreqBandIndex][matIndex] = currentObs->uplinkBand;
+         matData.realValues[matDoppCountIndex][matIndex] = currentObs->dopplerCountInterval;
+      }
+   }
    
    linesBuff = sLine.str();
    WriteToTextFile(currentState);
