@@ -114,6 +114,63 @@
           </row>
 
           <row>
+            <entry><guilabel>Propagator</guilabel></entry>
+
+            <entry><para>Specifies propagator object used for batch
+            estimation</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>valid propagator object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>None</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>RelativeTol</guilabel></entry>
 
             <entry><para>Relative Weighted RMS convergence criteria tolerance
@@ -180,8 +237,10 @@
     <refsection>
       <title>Behavior of Convergence Criteria</title>
 
-      <para>GMAT has three input fields, RelativeTol, AbsoluteTol,
-      MaximumIterations, and MaxConsecutiveDivergences that are used to
+      <para>GMAT has three input fields, <guilabel>RelativeTol</guilabel>,
+      <guilabel>AbsoluteTol</guilabel>,
+      <guilabel>MaximumIterations</guilabel>, and
+      <guilabel>MaxConsecutiveDivergences</guilabel> that are used to
       determine if the estimator has converged after each new iteration.
       Associated with these input fields are the two convergence tests shown
       below: </para>
@@ -204,139 +263,62 @@
       <para>RMSP = predicted Weighted RMS of next iteration</para>
 
       <para>Batch estimation is considered to have converged when either or
-      both of the above criteria is met within MaximumIterations iterations or
-      less.</para>
+      both of the above criteria is met within
+      <guilabel>MaximumIterations</guilabel> iterations or less.</para>
 
       <para>Batch estimation is considered to have diverged when number of
       consecutive diverging iterations is equal to or greater than
-      MaxConsecutiveDivergences or the number of iterations exceeds
-      MaximumIterations. </para>
+      <guilabel>MaxConsecutiveDivergences</guilabel> or the number of
+      iterations exceeds <guilabel>MaximumIterations</guilabel>. </para>
     </refsection>
 
     <refsection>
       <title>Behavior of Outer Loop Sigma Editing (OLSE)</title>
 
-      <para>GMAT has three input fields, OLSEMultiplicativeConstant,
-      OLSEAdditiveConstant, and OLSEInitialRMSSigma, that are used to 'edit'
-      (i.e., reject or throw away) bad measurement data. There are plans to
-      have both an inner loop and and outer loop iteration editing procedure.
-      Currently, only the outer loop iteration editing procedure is
-      implemented. This editing procedure is done on a per iteration basis.
-      Data that is edited is not used to calculate the state vector estimate
-      for the current iteration but the data is available as a candidate
-      measurement for subsequent iterations. On the first outer loop
-      iteration, data is edited if</para>
+      <para>GMAT has three input fields,
+      <guilabel>OLSEMultiplicativeConstant</guilabel>,
+      <guilabel>OLSEAdditiveConstant</guilabel>, and
+      <guilabel>OLSEInitialRMSSigma</guilabel>, that are used to 'edit' (i.e.,
+      reject or throw away) bad measurement data. There are plans to have both
+      an inner loop and and outer loop iteration editing procedure. Currently,
+      only the outer loop iteration editing procedure is implemented. This
+      editing procedure is done on a per iteration basis. Data that is edited
+      is not used to calculate the state vector estimate for the current
+      iteration but the data is available as a candidate measurement for
+      subsequent iterations. On the first outer loop iteration, data is edited
+      if</para>
 
-      <programlisting><code>Create ImpulsiveBurn DefaultIB
-DefaultIB.Element1 = -3
-DefaultIB.Element2 = 7
-DefaultIB.Element3 = -2</code>    </programlisting>
+      <para> |Weighted Measurement Residual| &gt;
+      <guilabel>OLSEInitialRMSSigma</guilabel> </para>
 
-      <para>For this current version of GMAT, you may also use the field names
-      <guilabel>V</guilabel>, <guilabel>N</guilabel>, and
-      <guilabel>B</guilabel> in place of <guilabel>Element1</guilabel>,
-      <guilabel>Element2</guilabel>, and <guilabel>Element3</guilabel>,
-      respectively. The commands below are equivalent to the commands
-      above.</para>
+      <para>where the Weighted Measurement Residual for a given measurement is
+      given by</para>
 
-      <programlisting><code>Create ImpulsiveBurn DefaultIB
-DefaultIB.V = -3
-DefaultIB.N = 7
-DefaultIB.B = -2</code></programlisting>
+      <para>(O-C)/<guilabel>NoiseSigma</guilabel></para>
 
-      <para>It is important to note that the <guilabel>V</guilabel>,
-      <guilabel>N</guilabel>, <guilabel>B</guilabel> field names do not
-      necessarily correspond to some Velocity, Normal, Binormal coordinate
-      system. The coordinate system of any <guilabel>ImpulsiveBurn</guilabel>
-      is always specified by the <guilabel>CoordinateSystem</guilabel>,
-      <guilabel>Origin</guilabel>, and <guilabel>Axes</guilabel> fields.
-      Because of the confusion that the <guilabel>V</guilabel>,
-      <guilabel>N</guilabel>, <guilabel>B</guilabel> field names can cause,
-      their use will not be allowed in future versions of GMAT. If you use the
-      <guilabel>V</guilabel>, <guilabel>N</guilabel>, <guilabel>B</guilabel>
-      field names in this version of GMAT, you will receive a warning to this
-      affect.</para>
+      <para>where <guilabel>NoiseSigm</guilabel>a is the input noise (one
+      sigma) for the measurement type associated with the given measurement.
+      On subsequent outer loop iterations, data is edited if</para>
+
+      <para>|Weighted Measurement Residual| &gt; OLSEMultiplicativeConstant *
+      WRMSP + OLSEAdditiveConstant</para>
+
+      <para>where WRMSP is the predicted weighted RMS calculated at the end of
+      the previous iteration.</para>
     </refsection>
 
     <refsection>
-      <title>Backwards-propagated Impulsive maneuvers defined using the
-      spacecraft velocity</title>
+      <title>Propagator Settings</title>
 
-      <para>Examples of axes defined using the spacecraft velocity are the
-      <guilabel>VNB</guilabel> and <guilabel>LVLH</guilabel> axes discussed
-      above as well as some user-defined axes. The behavior when applying an
-      impulsive maneuver using these types of axes during a
-      backwards-propagation is subtle and requires some explanation. In the
-      examples that follow, we will focus our discussion on a
-      <guilabel>VNB</guilabel> maneuver.</para>
-
-      <para>As will be shown in the script samples below, an impulsive
-      maneuver is applied during a backwards propagation using the ‘BackProp’
-      keyword. The maneuver components that you specify for a backwards
-      propagation are used to calculate the components of the maneuver
-      actually applied. Refer to the script sample below where a
-      backwards-propagated impulsive maneuver is followed by the same maneuver
-      using a normal formal propagation. The impulsive maneuver is defined so
-      that the velocity of the spacecraft is unchanged after the script is
-      run.</para>
-
-      <programlisting>Create Spacecraft Sat;
-Create ImpulsiveBurn myImpulsiveBurn;
-GMAT myImpulsiveBurn.CoordinateSystem = Local;
-GMAT myImpulsiveBurn.Origin = Earth;
-GMAT myImpulsiveBurn.Axes = VNB;
-myImpulsiveBurn.Element1 = 3.1
-myImpulsiveBurn.Element2 = -0.1
-myImpulsiveBurn.Element3 = 0.2
-
-BeginMissionSequence
-Maneuver BackProp myImpulsiveBurn(Sat);
-Maneuver myImpulsiveBurn(Sat);</programlisting>
-
-      <para>To calculate the actual maneuver components applied, GMAT,
-      internally, uses an iterative calculation method. This iteration method
-      works best for maneuver magnitudes that are not an appreciable fraction
-      of the overall spacecraft velocity. In addition, for
-      <guilabel>VNB</guilabel> maneuvers, the iteration method works best for
-      maneuvers where the ‘<guilabel>N</guilabel>’ and
-      ‘<guilabel>B</guilabel>’ component magnitudes are relatively small as
-      compared to the '<guilabel>V</guilabel>' component magnitude. If the
-      GMAT internal iterative method fails to converge, a warning message will
-      be generated. Currently, there is not an easy way for the user to report
-      out the actual applied back-propagated maneuver components. (The
-      maneuver report outputs the user supplied <guilabel>VNB</guilabel>
-      coordinates). After the back-propagated maneuver has been applied,
-      however, we do know what the components of the maneuver are. If the
-      <guilabel>VNB</guilabel> maneuver has user-supplied components, (Vx, Vy,
-      Vz), then after the back-propagated maneuver has been applied, the
-      <guilabel>VNB</guilabel> components of the maneuver are (-Vx, -Vy,
-      -Vz).</para>
-
-      <para>Consider the script sample below where the
-      ‘<guilabel>N</guilabel>’ and ‘<guilabel>B</guilabel>’ components of the
-      maneuver are zero and the ‘<guilabel>V</guilabel>’ component is +5 km/s.
-      If the spacecraft velocity is (7,0,0) km/s in J2000 inertial
-      coordinates, then after the backwards-propagated impulsive maneuver, the
-      velocity of the spacecraft will be (2,0,0) km/s.</para>
-
-      <programlisting><code>Create Spacecraft Sat;
-Create ImpulsiveBurn myImpulsiveBurn;
-GMAT myImpulsiveBurn.CoordinateSystem = Local;
-GMAT myImpulsiveBurn.Origin = Earth;
-GMAT myImpulsiveBurn.Axes = VNB;
-
-myImpulsiveBurn.Element1 = 5
-myImpulsiveBurn.Element2 = 0.0
-myImpulsiveBurn.Element3 = 0.0
-
-BeginMissionSequence
-Maneuver BackProp myImpulsiveBurn(Sat);</code></programlisting>
-
-      <para>Finally, we note that when mass change is modeled for a
-      backwards-propagated impulsive maneuver, mass is added to the tank. This
-      is done so there is no change in mass when a backwards-propagated
-      impulsive maneuver is followed by the same maneuver using a normal
-      forward propagation.</para>
+      <para>The <guilabel>BatchEstimatorInv</guilabel> resource has a
+      <guilabel>Propagator</guilabel> field containing the name of the
+      <guilabel>Propagator</guilabel> resource that will be used during the
+      estimation process. It is recommended that if the
+      <guilabel>ForceModel</guilabel> resource associated with your propagator
+      is using relative step control, i.e., <code>ErrorControl =
+      RSSStep</code>, then the minimum step size,
+      <guilabel>MinStep</guilabel>, of your propagator should be set to 0.
+      </para>
     </refsection>
 
     <refsection>
@@ -358,39 +340,19 @@ Maneuver BackProp myImpulsiveBurn(Sat);</code></programlisting>
 
           <tbody>
             <row>
-              <entry><guilabel>Spacecraft resource</guilabel></entry>
+              <entry><guilabel>TrackingFileSet resource</guilabel></entry>
 
-              <entry><para> Must be created in order to apply any
-              <guilabel>ImpulsiveBurn</guilabel></para></entry>
+              <entry><para> Must be created in order to tell the
+              <guilabel>BatchEstimatorInv</guilabel> resource which data will
+              be processed</para></entry>
             </row>
 
             <row>
-              <entry><guilabel>ChemicalTank resource</guilabel></entry>
+              <entry><guilabel>RunEstimator command</guilabel></entry>
 
-              <entry><para> If you want to model mass depletion for an
-              <guilabel>ImpulsiveBurn</guilabel>, attach a
-              <guilabel>ChemicalTank</guilabel> to the maneuvered
-              <guilabel>Spacecraft</guilabel> as a source of fuel mass.
-              </para></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>Maneuver command</guilabel></entry>
-
-              <entry><para> Must use the <guilabel>Maneuver</guilabel> command
-              to apply an <guilabel>ImpulsiveBurn</guilabel> to a
-              <guilabel>Spacecraft</guilabel>. </para></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>Vary command</guilabel></entry>
-
-              <entry><para> If you want to allow the<guilabel>
-              ImpulsiveBurn</guilabel> components to vary in order to achieve
-              some goal, then the <guilabel>Vary</guilabel> command, as part
-              of a <guilabel>Targe</guilabel>t or
-              <guilabel>Optimize</guilabel> command sequence, must be used.
-              </para></entry>
+              <entry><para> Must use the <guilabel>RunEstimator</guilabel>
+              command to actually process the data defined by the
+              <guilabel>BatchEstimatorInv</guilabel> resource</para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -402,43 +364,29 @@ Maneuver BackProp myImpulsiveBurn(Sat);</code></programlisting>
     <title>Examples</title>
 
     <informalexample>
-      <para>Create a default <guilabel>ChemicalTank</guilabel> and an
-      <guilabel>ImpulsiveBurn</guilabel> that allows for fuel depletion,
-      assign the <guilabel>ImpulsiveBurn</guilabel> the default
-      <guilabel>ChemicalTank</guilabel>, attach the
-      <guilabel>ChemicalTank</guilabel> to a <guilabel>Spacecraft</guilabel>,
-      and apply the <guilabel>ImpulsiveBurn</guilabel> to the
-      <guilabel>Spacecraft</guilabel>.</para>
+      <para>Below is an example of a configured batch estimator instance. In
+      this example, <guilabel>estData</guilabel> is an instance of a
+      <guilabel>TrackingFileSet</guilabel> and <guilabel>ODProp</guilabel> is
+      an instance of <guilabel>Propagator</guilabel>.</para>
 
-      <programlisting>%  Create the ChemicalTank Resource
-Create ChemicalTank FuelTank1
-FuelTank1.AllowNegativeFuelMass = false
-FuelTank1.FuelMass = 756
-FuelTank1.Pressure = 1500
-FuelTank1.Temperature = 20
-FuelTank1.RefTemperature = 20
-FuelTank1.Volume = 0.75
-FuelTank1.FuelDensity = 1260
-FuelTank1.PressureModel = PressureRegulated
+      <programlisting>Create BatchEstimatorInv bat;
 
-Create ImpulsiveBurn DefaultIB
-DefaultIB.CoordinateSystem = Local
-DefaultIB.Origin = Earth
-DefaultIB.Axes = VNB
-DefaultIB.Element1 = 0.001
-DefaultIB.Element2 = 0
-DefaultIB.Element3 = 0
-DefaultIB.DecrementMass = true
-DefaultIB.Tank = {FuelTank1}
-DefaultIB.Isp = 300
-DefaultIB.GravitationalAccel = 9.810000000000001
-
-%  Add the the ChemicalTank to a Spacecraft
-Create Spacecraft DefaultSC
-DefaultSC.Tanks = {FuelTank1}
-
-BeginMissionSequence
-Maneuver DefaultIB(DefaultSC) </programlisting>
+bat.ShowProgress               = true;
+bat.Measurements               = {estData} 
+bat.AbsoluteTol                = 0.000001;
+bat.RelativeTol                = 0.001;
+bat.MaximumIterations          = 10;
+bat.MaxConsecutiveDivergences  = 3;
+bat.Propagator                 = ODProp;
+bat.ShowAllResiduals           = On;
+bat.OLSEInitialRMSSigma        = 3000;
+bat.OLSEMultiplicativeConstant = 3;
+bat.OLSEAdditiveConstant       = 0;
+bat.InversionAlgorithm         = 'Internal';
+bat.EstimationEpochFormat      = 'FromParticipants';
+bat.EstimationEpoch            = 'FromParticipants'; 
+bat.ReportStyle                = 'Normal';
+bat.ReportFile                 = 'BatchEstimator_Report.txt';</programlisting>
     </informalexample>
   </refsection>
 </refentry>
