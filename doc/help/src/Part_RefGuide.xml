@@ -48,7 +48,8 @@
     <reference xml:id="Resources">
       <title>Resources</title>
       <xi:include href="Resource_Array.xml" />
-      <xi:include href="Resource_Barycenter.xml" />
+      <xi:include href="Resource_Barycenter.xml" />    
+      <xi:include href="Resource_BatchEstimatorInv.xml" /> 	  
       <xi:include href="Resource_CelestialBody.xml" />
       <xi:include href="Resource_CoordinateSystem.xml" />
 	  <xi:include href="Resource_ContactLocator.xml" />
