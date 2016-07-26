@@ -200,7 +200,12 @@ SET(MATLAB_ADDITIONAL_VERSIONS
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 
 if(NOT Matlab_FOUND)
-  MESSAGE(WARNING "Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
+  IF(GMAT_64_BIT)
+    SET(MATLAB_BIT 64-bit)
+  ELSE()
+    SET(MATLAB_BIT 32-bit)
+  ENDIF()
+  MESSAGE(WARNING "${MATLAB_BIT} Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
 endif()
 
 # ====================================================================
@@ -219,8 +224,7 @@ if(NOT PYTHONLIBS_FOUND)
       SET(PYTHONURL "the Linux package manager")
     endif()
   endif()
-  MESSAGE(STATUS "Please set PYTHON_LIBRARY and PYTHON_INCLUDE_DIR (advanced variables) if you have a custom Python installation.")
-  MESSAGE(STATUS "Python can be downloaded from ${PYTHONURL}.")
+  MESSAGE(WARNING "Python NOT FOUND. Please set PYTHON_LIBRARY (advanced variable) to the full path of pythonXX.lib. Python can be downloaded from ${PYTHONURL}.")
 endif()
 
 # ====================================================================
