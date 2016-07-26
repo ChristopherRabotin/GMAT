@@ -103,7 +103,7 @@
     GMAT, you should perform a syntax check by hitting the Save, Sync button
     (<inlinemediaobject>
         <imageobject>
-          <imagedata align="center" contentdepth="11 pt"
+          <imagedata align="center" contentdepth="11"
                      fileref="files/images/icons/Save_Sync.png" scalefit="1"
                      valign="bottom"/>
         </imageobject>
@@ -131,8 +131,8 @@
     open. To create a new script, click <guibutton>New Script</guibutton>,
     (<inlinemediaobject>
         <imageobject>
-          <imagedata align="center" contentdepth="11pt"
-                     fileref="../files/images/icons/NewScript.png"
+          <imagedata align="center" contentdepth="11"
+                     fileref="files/images/icons/NewScript.png"
                      valign="bottom" width="1em"/>
         </imageobject>
       </inlinemediaobject>)</para>
@@ -684,7 +684,7 @@ RunEstimator bat</programlisting>
     Data.script</filename>, for a listing of the entire script. We are now
     ready to run the script. Hit the Save,Sync,Run button, (<inlinemediaobject>
         <imageobject>
-          <imagedata contentdepth="10 pt"
+          <imagedata contentdepth="10"
                      fileref="files/images/icons/Save_Sync_Run.png"
                      valign="bottom"/>
         </imageobject>
