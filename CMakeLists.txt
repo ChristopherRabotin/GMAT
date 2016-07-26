@@ -205,14 +205,7 @@ endif()
 
 # ====================================================================
 # Find Python
-
-# Unset Python variables to reset the search every time
-# This allows the user to set Python_ADDITIONAL_VERSIONS and specify
-# the Python version
-SET(PYTHON_VERSION_REQUEST "" CACHE STRING "Request specific Python version, or leave blank to use latest installed version.")
-SET(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_REQUEST})
-UNSET(PYTHON_LIBRARY CACHE)
-UNSET(PYTHON_INCLUDE_DIR CACHE)
+# User can set PYTHON_LIBRARY and PYTHON_INCLUDE_DIR if they have a custom installation
 FIND_PACKAGE(PythonLibs)
 
 # Let users know where to download Python
@@ -226,7 +219,8 @@ if(NOT PYTHONLIBS_FOUND)
       SET(PYTHONURL "the Linux package manager")
     endif()
   endif()
-  MESSAGE(STATUS "Python can be downloaded from ${PYTHONURL}")
+  MESSAGE(STATUS "Please set PYTHON_LIBRARY and PYTHON_INCLUDE_DIR (advanced variables) if you have a custom Python installation.")
+  MESSAGE(STATUS "Python can be downloaded from ${PYTHONURL}.")
 endif()
 
 # ====================================================================
