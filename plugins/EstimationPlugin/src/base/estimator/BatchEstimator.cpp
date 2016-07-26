@@ -52,6 +52,9 @@
 #include "GravityField.hpp"
 #include "ErrorModel.hpp"
 #include "EstimatorException.hpp"
+#include "FileManager.hpp"
+
+#include "DataWriterInterface.hpp"
 
 #include <ctime>
 #include <sys/types.h>
@@ -111,6 +114,7 @@ BatchEstimator::PARAMETER_TEXT[] =
    "UseInitialCovariance",
    "InversionAlgorithm",
    "MaxConsecutiveDivergences",
+   "MatlabFile",
    // todo Add useApriori here
 };
 
@@ -123,6 +127,7 @@ BatchEstimator::PARAMETER_TYPE[] =
    Gmat::BOOLEAN_TYPE,         // "UseInitialCovariance"
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::FILENAME_TYPE,        // MATLAB_OUTPUT_FILENAME
 };
 
 
@@ -149,7 +154,16 @@ BatchEstimator::BatchEstimator(const std::string &type,
 //   estimationStatus           (UNKNOWN),
    chooseRMSP                 (true),
    maxConsDivergences         (3),
-   inversionType              ("Internal")
+   inversionType              ("Internal"),
+   matWriter                  (NULL),
+   writeMatFile               (false),
+   matFileName                (""),
+   matPartIndex               (-1),
+   matTypeIndex               (-1),
+   matEpochIndex              (-1),
+   matObsIndex                (-1),
+   matCalcIndex               (-1),
+   matOmcIndex                (-1)
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -168,6 +182,8 @@ BatchEstimator::~BatchEstimator()
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
       delete outerLoopBuffer[i];
    outerLoopBuffer.clear();
+  if (matWriter != NULL)
+     delete matWriter;
 }
 
 
@@ -192,12 +208,22 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
 //   estimationStatus           (UNKNOWN),
    chooseRMSP                 (est.chooseRMSP),
    maxConsDivergences         (est.maxConsDivergences),
-   inversionType              (est.inversionType)
+   inversionType              (est.inversionType),
+   matWriter                  (NULL),
+   writeMatFile               (est.writeMatFile),
+   matFileName                (est.matFileName),
+   matPartIndex               (-1),
+   matTypeIndex               (-1),
+   matEpochIndex              (-1),
+   matObsIndex                (-1),
+   matCalcIndex               (-1),
+   matOmcIndex                (-1)
 {
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
       delete outerLoopBuffer[i];
    outerLoopBuffer.clear();
+   
 }
 
 
@@ -238,6 +264,19 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       outerLoopBuffer.clear();
 
       inversionType = est.inversionType;
+
+      if (matWriter != NULL)
+         delete matWriter;
+      matWriter = NULL;
+      matPartIndex  = -1;
+      matTypeIndex  = -1;
+      matEpochIndex = -1;
+      matObsIndex   = -1;
+      matCalcIndex  = -1;
+      matOmcIndex   = -1;
+
+      writeMatFile = est.writeMatFile;
+      matFileName  = est.matFileName;
    }
 
    return *this;
@@ -456,6 +495,9 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
       return inversionType;
    }
 
+   if (id == MATLAB_OUTPUT_FILENAME)
+      return matFileName;
+
    return Estimator::GetStringParameter(id);
 }
 
@@ -475,6 +517,9 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
 bool BatchEstimator::SetStringParameter(const Integer id,
          const std::string &value)
 {
+   MessageInterface::ShowMessage("BatchEstimator::SetStringParameter(%d, %s)\n",
+         id, value.c_str());
+
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
       if (value != "FromParticipants")
@@ -540,6 +585,14 @@ bool BatchEstimator::SetStringParameter(const Integer id,
             throw EstimatorException("Error: Cannot set value '" + value + " to " + GetName() + ".EstimationEpoch parameter due to its invalid time format.\n");
       }
 
+      return true;
+   }
+
+   if (id == MATLAB_OUTPUT_FILENAME)
+   {
+      matFileName = value;
+      if (matFileName.find(".mat") == std::string::npos)
+         matFileName += ".mat";
       return true;
    }
 
@@ -827,8 +880,33 @@ bool BatchEstimator::Initialize()
 
    if (Estimator::Initialize())
    {
-      //estimationStatus = UNKNOWN;          // This code is moved to Estimator::Initialize()      
       retval    = true;
+
+      if (matFileName != "")
+      {
+         // the mat writer
+         matWriter = DataWriterInterface::Instance()->GetDataWriter("MatWriter");
+         if (matWriter != NULL)
+         {
+            writeMatFile = true;
+            // Add default path is there is no path data in matFileName
+            if ((matFileName.find("/") == std::string::npos) &&
+                  (matFileName.find("\\") == std::string::npos))
+            {
+               FileManager *fileman = FileManager::Instance();
+               std::string path = fileman->GetPathname(FileManager::OUTPUT_PATH);
+               matFileName = path + matFileName;
+            }
+
+            MessageInterface::ShowMessage("MATLAB file will be written to "
+                  "%s\n", matFileName.c_str());
+
+            matWriter->Initialize(matFileName, "w5");
+
+            // Move later in the process
+            matData.Clear();
+         }
+      }
    }
 
    return retval;
@@ -904,6 +982,11 @@ Solver::SolverState BatchEstimator::AdvanceState()
             "ESTIMATING\n");
          #endif
          // ReportProgress();
+
+         // Write .mat data
+         if (matWriter != NULL)
+            if (!WriteMatData())
+               throw EstimatorException("Error writing .mat data file");
          Estimate();
          break;
 
@@ -1585,6 +1668,8 @@ void BatchEstimator::RunComplete()
    sumSEResidualSquare.clear();
    sumSEWeightResidualSquare.clear();
 
+   if (matWriter != NULL)
+      matWriter->CloseFile();
 }
 
 
@@ -6039,6 +6124,89 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
       }
       retval = 0;
    }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool WriteMatData()
+//------------------------------------------------------------------------------
+/**
+ * Method used to write the MATLAB .mat file
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool BatchEstimator::WriteMatData()
+{
+   bool retval = true;
+
+   // Set the top level label
+   std::stringstream name;
+   name << "Iteration" << iterationsTaken;
+
+   StringArray dataDesc;
+
+   // Package the data lists
+   std::vector<WriterData*> containers;
+
+   // matData.elementStatus
+   dataDesc.push_back("Status");
+   WriterData* writerData = matWriter->GetContainer(Gmat::REAL_TYPE, "Status");
+   std::vector<RealArray> statData;
+   statData.push_back(matData.elementStatus);
+   writerData->AddData(statData);
+   containers.push_back(writerData);
+
+   // The Real data containers
+   for (UnsignedInt i = 0; i < matData.realNames.size(); ++i)
+   {
+      dataDesc.push_back(matData.realNames[i]);
+      writerData = matWriter->GetContainer(Gmat::REAL_TYPE, matData.realNames[i]);
+      std::vector<RealArray> vecData;
+      vecData.push_back(matData.realValues[i]);
+      writerData->AddData(vecData);
+      containers.push_back(writerData);
+   }
+
+   for (UnsignedInt i = 0; i < matData.stringNames.size(); ++i)
+   {
+      dataDesc.push_back(matData.stringNames[i]);
+      writerData = matWriter->GetContainer(Gmat::STRING_TYPE, matData.stringNames[i]);
+      std::vector<StringArray> strData;
+
+      #ifdef DEBUG_MAT_WRITER
+         MessageInterface::ShowMessage("%s has %d strings\n",
+               matData.stringNames[i].c_str(), matData.stringValues[i].size());
+         MessageInterface::ShowMessage("   %d:  %s\n", 0,
+               matData.stringValues[i][0].c_str());
+      #endif
+
+      strData.push_back(matData.stringValues[i]);
+
+      #ifdef DEBUG_MAT_WRITER
+         MessageInterface::ShowMessage("   vecData has %d entries\n",
+               vecData.size());
+         MessageInterface::ShowMessage("   vecData[0] has %d entries\n",
+               vecData[0].size());
+         MessageInterface::ShowMessage("      %d:  %s\n", 0,
+               vecData[0][0].c_str());
+      #endif
+
+      writerData->AddData(strData);
+      containers.push_back(writerData);
+   }
+
+   // Write it
+   matWriter->DescribeData(dataDesc);
+   for (UnsignedInt i = 0; i < containers.size(); ++i)
+      matWriter->AddData(containers[i]);
+
+   matWriter->WriteData(name.str());
+
+   // Clean up for the next pass
+   matData.Clear();
 
    return retval;
 }

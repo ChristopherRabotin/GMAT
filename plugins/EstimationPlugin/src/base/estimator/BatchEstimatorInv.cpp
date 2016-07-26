@@ -34,7 +34,7 @@
 #include "EstimatorException.hpp"
 #include <sstream>
 #include "StringUtil.hpp"
-
+#include "DataWriter.hpp"
 
 //#define DEBUG_ACCUMULATION
 //#define DEBUG_ACCUMULATION_RESULTS
@@ -164,6 +164,9 @@ void BatchEstimatorInv::Accumulate()
    const MeasurementData *calculatedMeas;
    std::vector<RealArray> stateDeriv;
 
+   // .mat file indices
+   Integer matIndex;
+
    for (UnsignedInt i = 0; i < hTilde.size(); ++i)
       hTilde[i].clear();
    hTilde.clear();
@@ -277,6 +280,32 @@ void BatchEstimatorInv::Accumulate()
    }
    sLine << s;
 
+   if (writeMatFile && (matWriter != NULL))
+   {
+      if (matEpochIndex == -1)
+      {
+         matEpochIndex = matData.AddRealContainer("Epoch");
+         matObsIndex   = matData.AddRealContainer("Observed");
+         matCalcIndex  = matData.AddRealContainer("Calculated");
+         matOmcIndex   = matData.AddRealContainer("ObsMinusCalc");
+         matPartIndex  = matData.AddStringContainer("Participants");
+         matTypeIndex  = matData.AddStringContainer("Type");
+      }
+
+      matIndex = matData.AddPoint();
+
+      matData.elementStatus[matIndex] = 0.0;
+      matData.realValues[matEpochIndex][matIndex] = currentObs->epoch;
+      matData.realValues[matObsIndex][matIndex]   = currentObs->value[0];
+
+      std::string parties;
+      for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
+         parties = parties + currentObs->participantIDs[n] + (((n + 1) ==
+               currentObs->participantIDs.size()) ? "" : ",");
+
+      matData.stringValues[matPartIndex][matIndex] = parties;
+      matData.stringValues[matTypeIndex][matIndex] = currentObs->typeName;
+   }
 
    std::string ss;
    if (textFileMode == "Normal")
@@ -487,7 +516,23 @@ void BatchEstimatorInv::Accumulate()
                sLine << s;
                sLine << "\n";
             }
+            
+            if (writeMatFile && (matWriter != NULL))
+            {
+               // write data to .mat file
+               WriterData *realData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
+               matWriter->AddData(realData);
+               std::vector<RealArray> current_obs;
+               current_obs.push_back(currentObs->value);
+               realData->AddData(current_obs);
 
+               std::string object_name;
+               std::stringstream convert;
+               convert << "Iteration" << iterationsTaken;
+               object_name = convert.str();
+
+//               matWriter->WriteData(object_name);
+            }
 
             // Reset value for removed reason for all reuseable data records
             if (isReUsed)
@@ -790,6 +835,13 @@ void BatchEstimatorInv::Accumulate()
                   MessageInterface::ShowMessage(" %.12lf ", residuals[i]);
                MessageInterface::ShowMessage("]\n");
             #endif
+
+            if (writeMatFile && (matWriter != NULL))
+            {
+               matData.elementStatus[matIndex] = 1.0;
+               matData.realValues[matCalcIndex][matIndex] = calculatedMeas->value[0];
+               matData.realValues[matOmcIndex][matIndex]  = ocDiff;
+            }
 
          } // end of if (measManager.GetObsDataObject()->inUsed)
 

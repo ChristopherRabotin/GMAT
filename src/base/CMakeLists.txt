@@ -66,6 +66,7 @@ SET(BASE_DIRS
   stopcond
   subscriber
   util
+  util/datawriter
   )
 
 # ====================================================================
@@ -521,6 +522,11 @@ SET(BASE_SRCS
     util/SunSync.cpp
     util/RepeatSunSync.cpp
     util/RepeatGroundTrack.cpp
+    util/datawriter/DataBucket.cpp
+    util/datawriter/DataWriter.cpp
+    util/datawriter/DataWriterInterface.cpp
+    util/datawriter/DataWriterMaker.cpp
+    util/datawriter/WriterData.cpp
     solarsys/SimpleExponentialAtmosphere.cpp
     solarsys/SpecialCelestialPoint.cpp
     ${MSISE_SRCS}
