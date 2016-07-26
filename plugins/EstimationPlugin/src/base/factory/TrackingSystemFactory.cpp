@@ -50,7 +50,7 @@ TrackingSystemFactory::TrackingSystemFactory() :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
       {
@@ -84,7 +84,7 @@ TrackingSystemFactory& TrackingSystemFactory::operator=(
 
       if (creatables.empty())
       {
-         Integer runmode = GmatGlobal::Instance()->GetRunMode();
+         Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
          //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
          if (runmode == GmatGlobal::TESTING)
          {
@@ -114,7 +114,7 @@ TrackingSystemFactory::TrackingSystemFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
       {
@@ -142,7 +142,7 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
       {
@@ -174,7 +174,7 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
 TrackingSystem* TrackingSystemFactory::CreateTrackingSystem(
          const std::string &ofType, const std::string &withName)
 {
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
    //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
    if (runmode == GmatGlobal::TESTING)
    {

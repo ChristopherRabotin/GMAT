@@ -59,7 +59,7 @@
 CoreMeasurement *MeasurementFactory::CreateMeasurement(
       const std::string & ofType, const std::string & withName)
 {
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
    //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
    if (runmode == GmatGlobal::TESTING)
    {
@@ -91,7 +91,7 @@ MeasurementFactory::MeasurementFactory() :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
       {
@@ -135,7 +135,7 @@ MeasurementFactory& MeasurementFactory::operator=(
    if (creatables.empty())
 
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
       {
@@ -165,7 +165,7 @@ MeasurementFactory::MeasurementFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
       {
@@ -194,7 +194,7 @@ MeasurementFactory::MeasurementFactory(const MeasurementFactory& fact) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
       if (runmode == GmatGlobal::TESTING)
       {

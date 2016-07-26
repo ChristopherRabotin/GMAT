@@ -205,14 +205,7 @@ endif()
 
 # ====================================================================
 # Find Python
-
-# Unset Python variables to reset the search every time
-# This allows the user to set Python_ADDITIONAL_VERSIONS and specify
-# the Python version
-SET(PYTHON_VERSION_REQUEST "" CACHE STRING "Request specific Python version, or leave blank to use latest installed version.")
-SET(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_REQUEST})
-UNSET(PYTHON_LIBRARY CACHE)
-UNSET(PYTHON_INCLUDE_DIR CACHE)
+# User can set PYTHON_LIBRARY and PYTHON_INCLUDE_DIR if they have a custom installation
 FIND_PACKAGE(PythonLibs)
 
 # Let users know where to download Python
@@ -226,7 +219,8 @@ if(NOT PYTHONLIBS_FOUND)
       SET(PYTHONURL "the Linux package manager")
     endif()
   endif()
-  MESSAGE(STATUS "Python can be downloaded from ${PYTHONURL}")
+  MESSAGE(STATUS "Please set PYTHON_LIBRARY and PYTHON_INCLUDE_DIR (advanced variables) if you have a custom Python installation.")
+  MESSAGE(STATUS "Python can be downloaded from ${PYTHONURL}.")
 endif()
 
 # ====================================================================
@@ -234,9 +228,29 @@ endif()
 
 # Initialize default GMAT dependency path for Xerces
 if(WIN32)
+  IF(GMAT_64_BIT)
+    SET(Xerces_ARCH Win64)
+  ELSE()
+    SET(Xerces_ARCH Win32)
+  ENDIF()
+  IF(MSVC80)
+    SET(Xerces_OUTDIR VC8)
+  ELSEIF(MSVC90)
+    SET(Xerces_OUTDIR VC9)
+  ELSEIF(MSVC10)
+    SET(Xerces_OUTDIR VC10)
+  ELSEIF(MSVC11)
+    SET(Xerces_OUTDIR VC11)
+  ELSEIF(MSVC12)
+    SET(Xerces_OUTDIR VC12)
+  ELSEIF(MSVC14)
+    SET(Xerces_OUTDIR VC14)
+  ELSE()
+    MESSAGE(WARNING "Unrecognized Visual Studio version ${MSVC_VERSION}. Xerces may not be found.")
+  ENDIF()
   SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/src")
-  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/Win64/VC12/Static Release")
-  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/Win64/VC12/Static Debug")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/${Xerces_ARCH}/${Xerces_OUTDIR}/Static Release")
+  SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/Build/${Xerces_ARCH}/${Xerces_OUTDIR}/Static Debug")
 elseif(APPLE)
   SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${PROJECT_SOURCE_DIR}/depends/xerces/cocoa-install")
 else()
@@ -250,7 +264,6 @@ if(UNIX)
   if(APPLE)
     FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
     FIND_LIBRARY(CORESERVICES_LIBRARY CoreServices)
-    FIND_PACKAGE(CURL)
   else()
     FIND_PACKAGE(Threads)
   endif()

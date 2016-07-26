@@ -832,7 +832,7 @@ bool Estimator::SetStringParameter(const Integer id,
 
    if (id == ReportStyle)
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
       //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
       if (runmode != GmatGlobal::TESTING)
       {
@@ -846,7 +846,7 @@ bool Estimator::SetStringParameter(const Integer id,
          throw SolverException(
             "The value of \"" + value + "\" for field \"Report Style\""
             " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [Normal].");
+            "The allowed values are: [Normal].\n");
       }
    }
 

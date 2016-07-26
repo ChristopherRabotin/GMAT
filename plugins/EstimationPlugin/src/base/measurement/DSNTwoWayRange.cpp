@@ -1715,29 +1715,18 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
       char s[200];
       sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
       std::string st(&s[0]);
-      //MessageInterface::ShowMessage("%s", st.c_str());
       err = 5;
       throw MeasurementException(st);
    }
 
    // search for end interval:
-   //UnsignedInt end_interval = 0;
-   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   //{
-   //   if (t1 < (*rampTB)[i].epoch)
-   //   {
-   //      end_interval = i-1;      
-   //      break;
-   //   }
-   //}
    UnsignedInt end_interval = beginIndex;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t1 < (*rampTB)[i].epoch)
-      {
-         end_interval = i-1;      
+      if (t1 >= (*rampTB)[i].epoch)
+         end_interval = i;
+      else
          break;
-      }
    }
 
    // search for end interval:

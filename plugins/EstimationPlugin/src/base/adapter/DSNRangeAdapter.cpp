@@ -875,13 +875,12 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
 
    // Search for end interval:
    UnsignedInt end_interval = beginIndex;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t1 < (*rampTB)[i].epoch)
-      {
-         end_interval = i-1;      
+      if (t1 >= (*rampTB)[i].epoch)
+         end_interval = i;
+      else
          break;
-      }
    }
 
    // Integration of the frequency from t0 to t1:
