@@ -29,7 +29,9 @@
  * write .mat output files (string or numerical data) 
  */
 //------------------------------------------------------------------------------
+
 #include "MatData.hpp"
+
 
 //------------------------------------------------------------------------------
 // MatData()
@@ -78,7 +80,7 @@ MatData::MatData(const MatData &md) :
 // MatData& operator=(const MatData &md)
 //------------------------------------------------------------------------------
 /**
- * Assignmetn operator
+ * Assignment operator
  *
  * @param md The MatData object copied here
  *

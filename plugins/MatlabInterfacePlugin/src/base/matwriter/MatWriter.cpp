@@ -41,13 +41,13 @@
 #include <sstream>
 
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // MatWriter()
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Constructs the MatWriter object (default constructor).
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 MatWriter::MatWriter() :
    DataWriter     (),
    mat_struct     (NULL),
@@ -55,27 +55,29 @@ MatWriter::MatWriter() :
 {
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // ~MatWriter()
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Destroys the mat_struct mxArray (destructor). 
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 MatWriter::~MatWriter()
 {
-    mxDestroyArray(mat_struct);
+   // It looks like MATLAB manages the array; leaving this in case we need it
+   // if (mat_struct != NULL)
+   //    mxDestroyArray(mat_struct);
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // MatWriter(const MatWriter& mw)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Constructs the MatWriter object (copy constructor)
  *
  * @param mw MatWriter object to copy
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 MatWriter::MatWriter(const MatWriter& mw) :
    DataWriter     (mw),
    mat_struct     (NULL),
@@ -83,16 +85,16 @@ MatWriter::MatWriter(const MatWriter& mw) :
 {
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // MatWriter& operator=(const MatWriter &mw)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Sets one MatWriter object to match another
  *
  * @param <mw> The object that is copied
  *
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 MatWriter& MatWriter::operator=(const MatWriter &mw)
 {
     if (this != &mw)
@@ -143,9 +145,9 @@ WriterData* MatWriter::GetContainer(const Gmat::ParameterType ofType,
    return retval;
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // void Initialize(const char *filename,  const char *mat_file_rev)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Initializes the MatWriter object, opens a file handle to the .mat file
  *
@@ -154,7 +156,7 @@ WriterData* MatWriter::GetContainer(const Gmat::ParameterType ofType,
  *                       Defaults to version 6 
  *
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool MatWriter::Initialize(const std::string &fname,  const std::string &mytype)
 {
    // Set up to open file, ands open it
@@ -164,19 +166,19 @@ bool MatWriter::Initialize(const std::string &fname,  const std::string &mytype)
    OpenFile();
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // MatWriter::OpenFile(const char *filename,  const char *mat_file_rev)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Opens a file handle to the .mat file
  *
- * @param <filename> string name of the file you wish to open
- * @param <mat_file_rev> optional input arg for the type of .mat file to write. 
- *                       Defaults to version 6 
+ * @param filename     string name of the file you wish to open
+ * @param mat_file_rev optional input arg for the type of .mat file to write. 
+ *                     Defaults to version 6.
  *
- * @return<pmat> File handle to .mat file
+ * @return File handle to .mat file
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool MatWriter::OpenFile()
 {
     // check mat_file_rev
@@ -203,20 +205,18 @@ bool MatWriter::OpenFile()
    return (pmat != NULL);
 }
 
-
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // bool WriteData(const char *obj_name)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Writes data to .mat file, within the mat_struct structured array
  *
  * @param obj_name name of structured array you want to write to
  *
- *
- * @return<exit code> Status code. Checks to see if mxArray associated with the object
- *                    requested to write to exists.
+ * @return Status code. Checks to see if mxArray associated with the 
+ *         object requested to write to exists.
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool MatWriter::WriteData(const std::string &obj_name)
 {
    if (mat_struct == NULL)
@@ -229,15 +229,15 @@ bool MatWriter::WriteData(const std::string &obj_name)
    return true;
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // bool CloseFile()
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Close the stream to the .mat file
  *
  * @return Status code. Checks to see if closing was successful
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool MatWriter::CloseFile()
 {
    // close file
@@ -246,7 +246,6 @@ bool MatWriter::CloseFile()
 
    return true;
 }
-
 
 //------------------------------------------------------------------------------
 // bool DescribeData (const StringArray &variableList)
@@ -265,17 +264,16 @@ bool MatWriter::DescribeData(const StringArray &variableList)
    return true;
 }
 
-
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // void SetMxArray(std::vector<std::string> variable_list)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Initializes the structured array that all the data will get written to.
  * data format will be mat_struct.variable 
  *
  * @param variable_list list of variable names to write to the structured array
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void MatWriter::SetMxArray(const StringArray &variable_list)
 {
    // get number of fields

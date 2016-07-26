@@ -22,14 +22,16 @@
 // number NNG04CI63P
 //
 // Author: Michael A. Barrucco, Thinking Systems, Inc.
-// Created: 2016/6/24
+// Created: 2016/06/24
 //
 /**
- * Defines the real data class used to define a container to hold strings in a way 
- * that the MathWorks mat writer understands
- *
+ * Defines the real data class used to define a container to hold strings in a 
+ * way that the MathWorks mat writer understands
  */
 //------------------------------------------------------------------------------
+
+#ifndef RealMatData_hpp
+#define RealMatData_hpp
 
 #include "matlabinterface_defs.hpp"
 #include "mat.h"
@@ -40,7 +42,6 @@
 /*
  * Container for real data to be written to .mat files
  */
-
 class MATLAB_API RealMatData : public MatData
 {
 public:
@@ -65,3 +66,5 @@ protected:
    /// The data
    double *data_tmp;
 };
+
+#endif

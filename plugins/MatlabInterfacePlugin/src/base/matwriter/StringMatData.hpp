@@ -25,11 +25,13 @@
 // Created: 2016/6/24
 //
 /**
- * Defines the string data class used to define a container to hold strings in a way 
- * that the MathWorks mat writer understands
- *
+ * Defines the string data class used to define a container to hold strings in
+ * a way that the MathWorks mat writer understands.
  */
 //------------------------------------------------------------------------------
+
+#ifndef StringMatData_hpp
+#define StringMatData_hpp
 
 #include "matlabinterface_defs.hpp"
 #include "mat.h"
@@ -40,29 +42,30 @@
 /**
  * Container for string data to write to .mat files
  */
-
 class MATLAB_API StringMatData : public MatData
 {
-    public:
-        StringMatData(const std::string &variable_name);
-        virtual ~StringMatData();
-        StringMatData(const StringMatData &sd);
-        StringMatData& operator=(const StringMatData &sd);
+public:
+   StringMatData(const std::string &variable_name);
+   virtual ~StringMatData();
+   StringMatData(const StringMatData &sd);
+   StringMatData& operator=(const StringMatData &sd);
 
-        virtual bool AddData(const StringMatrix &data);
-        virtual void WriteData(MATFile *matfile, const std::string &objectName,
-              mxArray *mx_struct);
-        virtual bool WriteData();
+   virtual bool AddData(const StringMatrix &data);
+   virtual void WriteData(MATFile *matfile, const std::string &objectName,
+                          mxArray *mx_struct);
+   virtual bool WriteData();
 
-    protected:
-        /// The data array to be written
-        StringMatrix stringData;
-        /// entry count
-        mwSize m_string;
-        /// Row count for the data
-        int m_size;
-        /// Column count for the data
-        int n_size;
-        /// mxArray to string data
-        mxArray *pa_string;
+protected:
+   /// The data array to be written
+   StringMatrix stringData;
+   /// entry count
+   mwSize m_string;
+   /// Row count for the data
+   int m_size;
+   /// Column count for the data
+   int n_size;
+   /// mxArray to string data
+   mxArray *pa_string;
 };
+
+#endif

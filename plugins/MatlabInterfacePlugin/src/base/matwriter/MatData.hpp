@@ -30,6 +30,10 @@
  */
 //------------------------------------------------------------------------------
 
+#ifndef MatData_hpp
+#define MatData_hpp
+
+
 #include "matlabinterface_defs.hpp"
 #include <stdio.h>
 #include "mat.h"
@@ -37,13 +41,11 @@
 #include <string.h>
 #include <vector>
 
-#ifndef MatData_hpp
-#define MatData_hpp
-
 #include "WriterData.hpp"
 
-
-
+/**
+ * MATLAB base data structure, used when writing .mat files.
+ */
 class MATLAB_API MatData : public WriterData
 {
 public:
@@ -59,7 +61,7 @@ protected:
    // Buffered data so WriteData() can call to the parameterized version
    /// MATLAB .mat file receiving the data
    MATFile *pmat;
-   /// Name of the object being written (Q: Is this the same as the StringMatData name?)
+   /// Name of the object being written
    std::string obj_name;
    /// MATLAB data structure that contains the container receiving data
    mxArray *mat_struct;

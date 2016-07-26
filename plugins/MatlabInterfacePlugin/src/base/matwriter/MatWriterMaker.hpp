@@ -24,7 +24,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Jul 12, 2016
 /**
- * 
+ * Interface used to make MatWriters
  */
 //------------------------------------------------------------------------------
 
@@ -34,6 +34,13 @@
 #include "matlabinterface_defs.hpp"
 #include "DataWriterMaker.hpp"
 
+/**
+ * The WriterMaker used to make MatWriters
+ *
+ * The MatWriterMaker is the factory used to make MarWriters.  While following 
+ * the factory design pattern, the DataWriter objects are not scriptable 
+ * entities, so they are not derived from the GMAT Factory base class.
+ */
 class MATLAB_API MatWriterMaker : public DataWriterMaker
 {
 public:

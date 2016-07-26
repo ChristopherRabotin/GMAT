@@ -24,15 +24,26 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Jul 12, 2016
 /**
- * 
+ * Interface used to make MatWriters
  */
 //------------------------------------------------------------------------------
 
 #include "MatWriterMaker.hpp"
 #include "MatWriter.hpp"
 
+/// Initialize the singleton
 MatWriterMaker* MatWriterMaker::instance = NULL;
 
+
+//------------------------------------------------------------------------------
+// MatWriterMaker* Instance()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the MatWriterMaker singleton
+ * 
+ * @return The singleton
+ */
+//------------------------------------------------------------------------------
 MatWriterMaker* MatWriterMaker::Instance()
 {
    if (instance == NULL)
@@ -42,21 +53,50 @@ MatWriterMaker* MatWriterMaker::Instance()
 }
 
 
+//------------------------------------------------------------------------------
+// DataWriter* CreateDataWriter()
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a new MatWriter DataWriter.
+ *
+ * @return A new MatWriter.
+ */
+//------------------------------------------------------------------------------
 DataWriter* MatWriterMaker::CreateDataWriter()
 {
    return new MatWriter();
 }
 
+//------------------------------------------------------------------------------
+// std::string GetType()
+//------------------------------------------------------------------------------
+/**
+ * Method used to identify the type of DataWriter supported by this maker
+ */
+//------------------------------------------------------------------------------
 std::string MatWriterMaker::GetType()
 {
    return "MatWriter";
 }
 
+//------------------------------------------------------------------------------
+// MatWriterMaker()
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+//------------------------------------------------------------------------------
 MatWriterMaker::MatWriterMaker()
 {
 }
 
+//------------------------------------------------------------------------------
+// ~MatWriterMaker()
+//------------------------------------------------------------------------------
+/**
+ *  Destructor
+ */
+//------------------------------------------------------------------------------
 MatWriterMaker::~MatWriterMaker()
 {
 }
-

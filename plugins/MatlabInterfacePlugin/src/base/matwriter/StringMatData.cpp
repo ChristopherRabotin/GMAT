@@ -25,29 +25,26 @@
 // Created: 2016/6/24
 //
 /**
- * Defines the string data class used to define a container to hold strings in a way 
- * that the MathWorks mat writer understands
- *
+ * Defines the string data class used to define a container to hold strings in a 
+ * way that the MathWorks mat writer understands
  */
 //------------------------------------------------------------------------------
 
 #include "StringMatData.hpp"
 #include "UtilityException.hpp"
-
 #include "MessageInterface.hpp"
 
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // StringMatData(const char * variable_name)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Constructs the StringMatData object (default constructor).
  *
- * @param <variable_name> variable name of the data to be written to the .mat file structured
- *                        array
- *
+ * @param variable_name Variable name of the data to be written to the .mat 
+ *                      file structured array
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 StringMatData::StringMatData(const std::string &variable_name) :
    MatData           (variable_name),
    m_string          (0),
@@ -58,28 +55,27 @@ StringMatData::StringMatData(const std::string &variable_name) :
    dataType = Gmat::STRING_TYPE;
 }
 
-//-------------------------------------------------------------------------------------
-// StringMatData()
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// ~StringMatData()
+//------------------------------------------------------------------------------
 /**
- * Doesnt currently do anything(default destructor).
- *
+ * Destructor
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 StringMatData::~StringMatData()
 {
 }
 
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // StringMatWriter(const StringMatData& sd)
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
- * Constructs the StringMatData object (copy constructor)
+ * Constructs a StringMatData object (copy constructor)
  *
- * @param <sd> StringMatData object to copy
+ * @param sd StringMatData object to copy
  *
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 StringMatData::StringMatData(const StringMatData &sd) :
    MatData           (sd),
    m_string          (sd.m_string),
@@ -95,7 +91,9 @@ StringMatData::StringMatData(const StringMatData &sd) :
 /**
  * Sets one string mat data object to match another
  *
- * @param <sd> The object that is copied
+ * @param sd The object that is copied
+ *
+ * @return This object, configured to match sd
  */
 //------------------------------------------------------------------------------
 StringMatData& StringMatData::operator=(const StringMatData &sd)
@@ -114,12 +112,14 @@ StringMatData& StringMatData::operator=(const StringMatData &sd)
 }
 
 //------------------------------------------------------------------------------
-// StringMatData::AddData(StringMatrix data))
+// bool AddData(StringMatrix data))
 //------------------------------------------------------------------------------
 /**
  * Sets up an array of input strings in a mxArray for writing.
  *
- * @params <data> string data to write to the .mat file
+ * @params data String data to write to the .mat file
+ *
+ * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
 bool StringMatData::AddData(const StringMatrix &data)
@@ -166,18 +166,18 @@ bool StringMatData::AddData(const StringMatrix &data)
 
 
 //------------------------------------------------------------------------------
-// StringMatDatia::WriteData(MATFile *pmat, const char *obj_name,
+// void StringMatDatia::WriteData(MATFile *pmat, const char *obj_name,
 //       mxArray *mat_struct)
 //------------------------------------------------------------------------------
 /**
  * Writes string data to the open .mat file stream.
  *
- * @params <pmat> file handle to .mat file
- * @params <obj_name> name of the structured array in which to write the data
- * @params <mat_struct> mxArray of structured array in which to write
+ * @params pmat       File handle to .mat file
+ * @params obj_name   Name of the structured array in which to write the data
+ * @params mat_struct mxArray of structured array in which to write
  *
  */
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void StringMatData::WriteData(MATFile *matfile, const std::string &objectName,
       mxArray *mx_struct)
 {
@@ -194,25 +194,12 @@ void StringMatData::WriteData(MATFile *matfile, const std::string &objectName,
 // bool StringMatData::WriteData()
 //------------------------------------------------------------------------------
 /**
- * Override for abstract method in the base class.  Currently just returns false.
+ * Override for abstract method in the base class. Currently just returns false.
  *
- * @param
- *
- * @return
+ * @return false always.  MatWriters don't use this base class version.
  */
 //------------------------------------------------------------------------------
 bool StringMatData::WriteData()
 {
    return false;
-//   if (pmat != NULL)
-//   {
-//      int data_field_number = mxGetFieldNumber(mat_struct, varName.c_str());
-//      mxSetFieldByNumber(mat_struct, 0, data_field_number, pa_string);
-//      matPutVariable(pmat, obj_name.c_str(), mat_struct);
-//   }
-//   else
-//      throw UtilityException("Attempting to write a MATLAB .mat file with no "
-//            "file handle.");
-//
-//   return true;
 }

@@ -44,9 +44,8 @@
 
 
 /*
- * All data containers to be written to .mat files are derived from this class
+ * The DataWriter used to write .mat files.
  */
-
 class MATLAB_API MatWriter : public DataWriter
 {
 public:
@@ -65,15 +64,15 @@ public:
    virtual bool DescribeData (const StringArray &variableList);
 
 private:
-   // handle to .mat file
+   /// handle to .mat file
    MATFile *pmat;
+   /** MATLAB data array type. mat_struct defines a MATLAB structured array
+    *  in which data gets written. Many structure arrays can be written to
+    *  a single file, by setting a new mat_struct array. */
+   mxArray *mat_struct;
+   
    void SetMxArray(const StringArray &variable_list);
 
-protected:
-   // matlab data array type. mat_struct defines matlab structured array
-   // in which data gets written. Many structure arrays can be written to
-   // a single file, by setting a new mat_struct array
-   mxArray *mat_struct;
 }; 
 
 #endif
