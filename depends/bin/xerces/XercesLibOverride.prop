@@ -22,4 +22,16 @@ To use this file, use the msbuild option /property:ForceImportBeforeCppTargets="
   </ClCompile>
 </ItemDefinitionGroup>
 
+<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static Debug|Win32'">
+  <ClCompile>
+    <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+  </ClCompile>
+</ItemDefinitionGroup>
+
+<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Static Release|Win32'">
+  <ClCompile>
+    <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+  </ClCompile>
+</ItemDefinitionGroup>
+
 </Project>
