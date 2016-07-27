@@ -42,7 +42,7 @@
 /**
  * Interface singleton used to manage data writers
  */
-class DataWriterInterface
+class GMAT_API DataWriterInterface
 {
 public:
    static DataWriterInterface* Instance();

@@ -42,7 +42,7 @@ typedef std::vector<StringArray> StringMatrix;
 /**
  * Base class for the data structures used by DataWriters
  */
-class WriterData
+class GMAT_API WriterData
 {
 public:
    WriterData(const std::string &variable_name);

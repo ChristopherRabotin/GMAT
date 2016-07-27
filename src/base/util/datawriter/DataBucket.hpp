@@ -39,7 +39,7 @@
  *
  * All members here are public to facilitate fast access
  */
-class DataBucket
+class GMAT_API DataBucket
 {
 public:
    DataBucket();
