@@ -75,6 +75,21 @@ std::string GmatGlobal::GetGmatVersion()
 }
 
 //------------------------------------------------------------------------------
+// bool IsGmatCompiledIn64Bit()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsGmatCompiledIn64Bit()
+{
+   bool building64bit = true;
+   #ifdef _MSC_VER  // if Microsoft Visual C++
+   #ifndef USE_64_BIT_LONGS
+   building64bit = false;
+   #endif
+   #endif
+   
+   return building64bit;
+}
+
+//------------------------------------------------------------------------------
 // Integer GetDataPrecision()
 //------------------------------------------------------------------------------
 Integer GmatGlobal::GetDataPrecision()
