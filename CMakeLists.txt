@@ -209,8 +209,14 @@ if(NOT Matlab_FOUND)
 else()
   # Find libmat, which is not currently found by CMake's FindMatlab module
   GET_FILENAME_COMPONENT(Matlab_LIB_DIR ${Matlab_MEX_LIBRARY} DIRECTORY)
+  IF(WIN32)
+    # Needed since Matlab prepends "lib" to library names on Windows
+    SET(Matlab_MAT_NAME libmat) 
+  ELSE()
+    SET(Matlab_MAT_NAME mat)
+  ENDIF()
   FIND_LIBRARY(Matlab_MAT_LIBRARY
-    mat
+    ${Matlab_MAT_NAME}
     PATHS ${Matlab_LIB_DIR}
     NO_DEFAULT_PATH
     )
