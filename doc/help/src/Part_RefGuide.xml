@@ -73,6 +73,7 @@
       <xi:include href="Resource_OrbitView.xml" />
       <xi:include href="Resource_Propagator.xml" />
       <xi:include href="Resource_ReportFile.xml" />
+	  <xi:include href="Resource_Simulator.xml" />
 	  <xi:include href="Resource_SNOPTOptimizer.xml" />
 	  <xi:include href="Resource_SolarPowerSystem.xml" />
       <xi:include href="Resource_SolarSystem.xml" />
