@@ -73,6 +73,7 @@
       <xi:include href="Resource_OrbitView.xml" />
       <xi:include href="Resource_Propagator.xml" />
       <xi:include href="Resource_ReportFile.xml" />
+	  <xi:include href="Resource_Simulator.xml" />
 	  <xi:include href="Resource_SNOPTOptimizer.xml" />
 	  <xi:include href="Resource_SolarPowerSystem.xml" />
       <xi:include href="Resource_SolarSystem.xml" />
@@ -114,7 +115,9 @@
       <xi:include href="Command_PenUpPenDown.xml" />
       <xi:include href="Command_Propagate.xml" />
       <xi:include href="Command_Report.xml" />
-      <xi:include href="Command_Set.xml" />
+	  <xi:include href="Command_RunEstimator.xml" />
+	  <xi:include href="Command_RunSimulator.xml" />
+	  <xi:include href="Command_Set.xml" />
       <xi:include href="Command_Stop.xml" />
       <xi:include href="Command_Target.xml" />
       <xi:include href="Command_Toggle.xml" />

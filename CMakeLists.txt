@@ -200,7 +200,31 @@ SET(MATLAB_ADDITIONAL_VERSIONS
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 
 if(NOT Matlab_FOUND)
-  MESSAGE(WARNING "Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
+  IF(GMAT_64_BIT)
+    SET(MATLAB_BIT 64-bit)
+  ELSE()
+    SET(MATLAB_BIT 32-bit)
+  ENDIF()
+  MESSAGE(WARNING "${MATLAB_BIT} Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
+else()
+  # Find libmat, which is not currently found by CMake's FindMatlab module
+  GET_FILENAME_COMPONENT(Matlab_LIB_DIR ${Matlab_MEX_LIBRARY} DIRECTORY)
+  IF(WIN32)
+    # Needed since Matlab prepends "lib" to library names on Windows
+    SET(Matlab_MAT_NAME libmat) 
+  ELSE()
+    SET(Matlab_MAT_NAME mat)
+  ENDIF()
+  FIND_LIBRARY(Matlab_MAT_LIBRARY
+    ${Matlab_MAT_NAME}
+    PATHS ${Matlab_LIB_DIR}
+    NO_DEFAULT_PATH
+    )
+  if(Matlab_MAT_LIBRARY)
+    SET(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_MAT_LIBRARY})
+  else()
+    MESSAGE(WARNING "libmat NOT FOUND. Please contact GMAT support with this error.")
+  endif()
 endif()
 
 # ====================================================================
@@ -219,8 +243,7 @@ if(NOT PYTHONLIBS_FOUND)
       SET(PYTHONURL "the Linux package manager")
     endif()
   endif()
-  MESSAGE(STATUS "Please set PYTHON_LIBRARY and PYTHON_INCLUDE_DIR (advanced variables) if you have a custom Python installation.")
-  MESSAGE(STATUS "Python can be downloaded from ${PYTHONURL}.")
+  MESSAGE(WARNING "Python NOT FOUND. Please set PYTHON_LIBRARY (advanced variable) to the full path of pythonXX.lib. Python can be downloaded from ${PYTHONURL}.")
 endif()
 
 # ====================================================================

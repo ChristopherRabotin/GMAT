@@ -1500,7 +1500,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          // Next handle the velocity submatrix
          if (finiteDifferenceDv)
          {
-            pert = 1e-6;
+            pert = 1.0e-6;
             for (UnsignedInt j = 0; j < 3; ++j)
             {
                val = state[i*6 + j+3];
@@ -1581,7 +1581,9 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          }
 
          #ifdef DUMP_DERIVATIVE
-            MessageInterface::ShowMessage("A-matrix:\n");
+            MessageInterface::ShowMessage("Drag Force A-matrix at epoch %.12lf for state "
+                  "[%lf %lf %lf %.12lf %.12lf %.12lf]:\n",now, state[0],
+                  state[1], state[2], state[3], state[4], state[5]);
             for (Integer m = 0; m < stmRowCount; ++m)
             {
                MessageInterface::ShowMessage("      ");
