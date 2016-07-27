@@ -164,6 +164,8 @@ bool MatWriter::Initialize(const std::string &fname,  const std::string &mytype)
    format = mytype;
 
    OpenFile();
+
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -280,10 +282,14 @@ void MatWriter::SetMxArray(const StringArray &variable_list)
    int number_of_fields = variable_list.size();
 
    // convert to cstrings
-   const char *fields[number_of_fields];
+   const char **fields;
+   fields = new const char*[number_of_fields];
+
    for (int i = 0; i < number_of_fields; i++)
       fields[i] = variable_list[i].c_str();
 
    // create structured array handle
    mat_struct = mxCreateStructMatrix(1, 1, number_of_fields, fields);
+
+   delete [] fields;
 }
