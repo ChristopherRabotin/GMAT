@@ -85,7 +85,9 @@
       <xi:include href="Resource_SpacecraftOrbitState.xml"/>
       <xi:include href="Resource_SpacecraftVisualizationProperties.xml" />
       <xi:include href="Resource_String.xml" />
-      <xi:include href="Resource_Thruster.xml" />
+      <xi:include href="Resource_Transmitter.xml" />   
+	  <xi:include href="Resource_Transponder.xml" />   
+      <xi:include href="Resource_Thruster.xml" /> 
       <xi:include href="Resource_Variable.xml" />
       <xi:include href="Resource_VF13ad.xml" />
       <xi:include href="Resource_XYPlot.xml" />
