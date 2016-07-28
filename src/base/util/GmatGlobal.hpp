@@ -74,6 +74,7 @@ public:
    
    // GMAT version
    std::string GetGmatVersion();
+   bool IsGmatCompiledIn64Bit();
    
    // Real to string conversion precison
    static const Integer DATA_PRECISION;

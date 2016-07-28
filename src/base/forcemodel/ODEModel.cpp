@@ -2876,6 +2876,17 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
          MessageInterface::ShowMessage("]^T\n");
       #endif
 
+      #ifdef SHOW_AMATRIX
+         MessageInterface::ShowMessage("ODE Model A matrix:\n");
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            MessageInterface::ShowMessage("%3d   [", j);
+            for (Integer k = 0; k < stmRowCount; ++k)
+               MessageInterface::ShowMessage(" %15le ", aTilde[j*stmRows + k]);
+            MessageInterface::ShowMessage("]\n");
+         }
+      #endif
+
       if (fillSTM)
       {
          // Convert A to Phi dot for STM pieces
