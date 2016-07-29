@@ -5337,6 +5337,8 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       menu->Append(POPUP_ADD_FUELTANK_ELECTRIC, wxT("Electric Tank"));
       menu->Append(POPUP_ADD_THRUSTER_CHEMICAL, wxT("Chemical Thruster"));
       menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("Electric Thruster"));
+      menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("NuclearPowerSystem"));
+      menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("SolarPowerSystem"));
       listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::HARDWARE);
 
       #ifdef __ENABLE_NAV_GUI__
@@ -5347,7 +5349,8 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
          // Drop the ones that are already there for now
          std::string hardwareType = (*i);
          if ((hardwareType.find("Thruster") == hardwareType.npos) &&
-            (hardwareType.find("Tank") == hardwareType.npos))
+             (hardwareType.find("Tank") == hardwareType.npos) &&
+             (hardwareType.find("PowerSystem") == hardwareType.npos))
          {
             #ifdef DEBUG_POPUP_MENU
             MessageInterface::ShowMessage

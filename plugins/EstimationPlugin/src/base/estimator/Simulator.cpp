@@ -1628,8 +1628,8 @@ void Simulator::CompleteInitialization()
    // tell the measManager to complete its initialization
    bool measOK = measManager.Initialize();
 
-   // Prepare for processing                                              // made changes by TUAN NGUYEN
-   measManager.PrepareForProcessing(true);                                // made changes by TUAN NGUYEN
+   // Prepare for processing
+   measManager.PrepareForProcessing(true);
 
    // Get time range of EOP file
    EopFile* eop = GmatGlobal::Instance()->GetEopFile();

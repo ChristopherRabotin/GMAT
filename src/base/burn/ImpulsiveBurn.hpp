@@ -37,7 +37,9 @@
 #include "Burn.hpp"
 #include "FuelTank.hpp"
 
-#define COEFFICIENT_COUNT 16
+
+// Not used anywhere, so commented out
+//#define COEFFICIENT_COUNT 16
 
 class GMAT_API ImpulsiveBurn : public Burn
 {

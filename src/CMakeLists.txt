@@ -35,12 +35,10 @@ SET(SrcTargets ${SrcTargets} ${tmp})
 
 # ====================================================================
 # GUI binary
-if (GMAT_GUI)
-  SET(SRCDIR "gui")
-  ADD_SUBDIRECTORY(${SRCDIR})
-  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
-  SET(SrcTargets ${SrcTargets} ${tmp})
-endif()
+SET(SRCDIR "gui")
+ADD_SUBDIRECTORY(${SRCDIR})
+GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
+SET(SrcTargets ${SrcTargets} ${tmp})
 
 # ====================================================================
 # Bulk changes to the src targets can be made here, using the

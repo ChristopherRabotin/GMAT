@@ -45,7 +45,7 @@
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData() :
-   fileIndex         (NULL),                               // made changes by TUAN NGUYEN
+   fileIndex         (NULL),
    inUsed            (true),
    removedReason     ("N"),
    typeName          (""),
@@ -58,7 +58,7 @@ ObservationData::ObservationData() :
    unit              ("km"),
    uplinkBand        (0),
    uplinkFreq        (0.0),
-   uplinkFreqAtRecei (0.0),                                // made changes by TUAN NGUYEN
+   uplinkFreqAtRecei (0.0),
    rangeModulo       (1.0),
    dopplerCountInterval   (1.0e-10),
    tdrsServiceID     ("SA1"),
@@ -94,7 +94,7 @@ ObservationData::~ObservationData()
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData(const ObservationData& od):
-   fileIndex               (od.fileIndex),                          // made changes by TUAN NGUYEN
+   fileIndex               (od.fileIndex),
    inUsed                  (od.inUsed),
    removedReason           (od.removedReason),
    typeName                (od.typeName),
@@ -117,7 +117,7 @@ ObservationData::ObservationData(const ObservationData& od):
 //   dataFormat              (od.dataFormat),
    uplinkBand              (od.uplinkBand),
    uplinkFreq              (od.uplinkFreq),
-   uplinkFreqAtRecei       (od.uplinkFreqAtRecei),                // made changes by TUAN NGUYEN
+   uplinkFreqAtRecei       (od.uplinkFreqAtRecei),
    rangeModulo             (od.rangeModulo),
    dopplerCountInterval	   (od.dopplerCountInterval),
    tdrsServiceID           (od.tdrsServiceID),
@@ -145,7 +145,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 {
    if (&od != this)
    {
-      fileIndex               = od.fileIndex;                        // made changes by TUAN NGUYEN
+      fileIndex               = od.fileIndex;
       inUsed                  = od.inUsed;
       removedReason           = od.removedReason;
       typeName                = od.typeName;
@@ -168,7 +168,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       dataFormat              = od.dataFormat;
       uplinkBand              = od.uplinkBand;
       uplinkFreq              = od.uplinkFreq;
-      uplinkFreqAtRecei       = od.uplinkFreqAtRecei;                // made changes by TUAN NGUYEN
+      uplinkFreqAtRecei       = od.uplinkFreqAtRecei;
       rangeModulo             = od.rangeModulo;
       dopplerCountInterval    = od.dopplerCountInterval;
       tdrsServiceID           = od.tdrsServiceID;
@@ -191,7 +191,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 //-----------------------------------------------------------------------------
 void ObservationData::Clear()
 {
-   fileIndex               = NULL;                                 // made changes by TUAN NGUYEN
+   fileIndex               = NULL;
    inUsed                  = true;
    removedReason           = "N";
    typeName                = "";
@@ -209,7 +209,7 @@ void ObservationData::Clear()
 ///// TBD: Determine if there is a more generic way to add these
    uplinkBand              = 0;
    uplinkFreq              = 0.0;
-   uplinkFreqAtRecei       = 0.0;                      // made changes by TUAN NGUYEN
+   uplinkFreqAtRecei       = 0.0;
    rangeModulo             = 1.0;
    dopplerCountInterval    = 1.0e-10;
    tdrsServiceID           = "SA1";

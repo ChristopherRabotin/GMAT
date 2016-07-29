@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="RunEstimator"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>RunEstimator</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>RunEstimator</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>RunEstimator</refname>
+
+    <refpurpose>Ingests navigation measurements and generates an estimated
+    state vector</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <title>Script Syntax</title>
+
+    <synopsis>RunEstimator BatchEstimatorInvInstanceName </synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>The RunEstimator generates ingests navigation measurements and
+    generates an estimated state vector according to the specifications of the
+    input BatchEstimator resource. </para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="BatchEstimatorInv"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>How GMAT generates “Computed (C)” DSN data</title>
+
+      <para>As part of the estimation process, GMAT must calculated the
+      so-called observation residual, “O-C,” where “C” is the “Computed”
+      measurement. As discussed in the RunSimulator help, GMAT calculates the
+      DSN range “C” measurement as</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mrow>
+            <m:mi>C</m:mi>
+
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>3</m:mn>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:mi>t</m:mi>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:mi>t</m:mi>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+
+            <m:mo>,</m:mo>
+
+            <m:mtext> mod M             (RU)</m:mtext>
+          </m:mrow>
+        </m:math>
+      </informalequation>
+
+      <para>where</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mn>1</m:mn>
+          </m:msub>
+
+          <m:mo>,</m:mo>
+
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mn>3</m:mn>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Transmission and Reception epoch, respectively</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>f</m:mi>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Ground Station transmit frequency</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mi>C</m:mi>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>transmitter dependent constant (221/1498 for X-band and 1/2 for S-Band)</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mtext>M </m:mtext>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext> length of the ranging code in RU</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <para>and GMAT calculates the DSN Doppler measurement as </para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mrow>
+            <m:mi>C</m:mi>
+
+            <m:mo>=</m:mo>
+
+            <m:mo>−</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>M</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mrow>
+                  <m:mo>(</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo>−</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mrow/>
+
+                      <m:mi>s</m:mi>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mrow/>
+
+                      <m:mi>e</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+
+            <m:mtext>  =</m:mtext>
+
+            <m:mo>−</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>M</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+
+                <m:mrow>
+                  <m:mo>(</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>1</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo>−</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>1</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mi>D</m:mi>
+
+                <m:mi>C</m:mi>
+
+                <m:mi>I</m:mi>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:msub>
+              <m:mover accent="true">
+                <m:mi>f</m:mi>
+
+                <m:mo>¯</m:mo>
+              </m:mover>
+
+              <m:mi>T</m:mi>
+            </m:msub>
+
+            <m:mtext>    (Hz)</m:mtext>
+          </m:mrow>
+        </m:math>
+      </informalequation>
+
+      <para>where</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mi>s</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>,</m:mo>
+
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mi>e</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>start and end of transmission interval</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>f</m:mi>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>transmit frequency</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>M</m:mi>
+
+            <m:mn>2</m:mn>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Transponder turn around ratio (typically, 240/221 for S-band and 880/749 for X-band)</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mtext>DCI = </m:mtext>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>e</m:mi>
+                </m:mrow>
+              </m:msub>
+
+              <m:mo>−</m:mo>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>s</m:mi>
+                </m:mrow>
+              </m:msub>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext> Doppler Count Interval</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mover accent="true">
+              <m:mi>f</m:mi>
+
+              <m:mo>¯</m:mo>
+            </m:mover>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>≡</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mstyle displaystyle="true">
+                <m:mrow>
+                  <m:munderover>
+                    <m:mo>∫</m:mo>
+
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>t</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mrow/>
+
+                        <m:mi>s</m:mi>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>t</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mrow/>
+
+                        <m:mi>e</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:munderover>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>f</m:mi>
+
+                      <m:mi>T</m:mi>
+                    </m:msub>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+
+                    <m:mi>d</m:mi>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mrow>
+                </m:mrow>
+              </m:mstyle>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mrow>
+                <m:mo>(</m:mo>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>1</m:mn>
+
+                      <m:mi>e</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo>−</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>1</m:mn>
+
+                      <m:mi>s</m:mi>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+
+                <m:mo>)</m:mo>
+              </m:mrow>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mtext> </m:mtext>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>average transmit frequency </m:mtext>
+        </m:math>
+      </informalequation>
+    </refsection>
+
+    <refsection>
+      <title>Relation to Target/EndTarget Command Sequence</title>
+
+      <para>There are some functional similarities between the
+      <guilabel>Target/EndTarge</guilabel>t and
+      <guilabel>Optimize/EndOptimize</guilabel> command sequences. In both
+      cases, we define Control Variables and Constraints. For both
+      <guilabel>Target</guilabel> and <guilabel>Optimize</guilabel> sequences,
+      we use the <guilabel>Vary</guilabel> command to define the Control
+      Variables. For the <guilabel>Target</guilabel> sequence, we use the
+      <guilabel>Achieve</guilabel> command to define the constraints whereas,
+      for an <guilabel>Optimize</guilabel> sequence, we use the
+      <guilabel>NonlinearConstraint</guilabel> command. The big difference
+      between the <guilabel>Target</guilabel> and
+      <guilabel>Optimize</guilabel> sequences is that the
+      <guilabel>Optimize</guilabel> sequence allows for the minimization of an
+      Objective function through the use of the <guilabel>Minimize</guilabel>
+      command.</para>
+    </refsection>
+
+    <refsection>
+      <title>Command Interactions</title>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="2">
+          <colspec colnum="1" colwidth="1.0*"/>
+
+          <colspec colnum="2" colwidth="3*"/>
+
+          <tbody>
+            <row>
+              <entry><guilabel>Vary command</guilabel></entry>
+
+              <entry><para> Every <guilabel>Optimize</guilabel> sequence must
+              contain at least one <guilabel>Vary
+              </guilabel>command.<guilabel> Vary</guilabel> commands are used
+              to define the control variables associated with an
+              <guilabel>Optimize</guilabel> sequence. </para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>NonlinearConstraint command</guilabel></entry>
+
+              <entry><para> <guilabel>NonlinearConstraint</guilabel> commands
+              are used to define the constraints associated with an
+              <guilabel>Optimize</guilabel> sequence. Note that multiple
+              <guilabel>NonlinearConstraint</guilabel> commands are allowed
+              within an <guilabel>Optimize</guilabel> sequence.
+              </para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Minimize command</guilabel></entry>
+
+              <entry><para> A <guilabel>Minimize</guilabel> command is used
+              within an <guilabel>Optimize</guilabel> sequence to define the
+              Objective function that will be minimized. Note that an
+              <guilabel>Optimize</guilabel> sequence is allowed to contain, at
+              most, one <guilabel>Minimize</guilabel> command. (An
+              <guilabel>Optimize</guilabel> sequence is not required to
+              contain a <guilabel>Minimize</guilabel> command) </para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>Run batch estimator. </para>
+
+      <programlisting><code>Create BatchEstimatorInv myBatchEstimator
+
+BeginMissionSequence
+RunEstimator myBatchEstimator</code></programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

@@ -142,6 +142,11 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    // Release number
    std::string version = GmatGlobal::Instance()->GetGmatVersion();
    wxString releaseNumber = STD_TO_WX_STRING(version);
+   bool is64bit = GmatGlobal::Instance()->IsGmatCompiledIn64Bit();
+   wxString gmatCompiledBitSize = " (64-bit)";
+   if (!is64bit)
+      gmatCompiledBitSize = " (32-bit)";
+   releaseNumber = releaseNumber + gmatCompiledBitSize;
    wxStaticText *releaseText = new wxStaticText(this, -1, releaseNumber);
    
    // Build date

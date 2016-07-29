@@ -50,8 +50,9 @@ TrackingSystemFactory::TrackingSystemFactory() :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("DSNTrackingSystem");
          creatables.push_back("USNTrackingSystem");
@@ -83,8 +84,9 @@ TrackingSystemFactory& TrackingSystemFactory::operator=(
 
       if (creatables.empty())
       {
-         Integer runmode = GmatGlobal::Instance()->GetRunMode();
-         if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+         Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+         //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+         if (runmode == GmatGlobal::TESTING)
          {
             creatables.push_back("DSNTrackingSystem");
             creatables.push_back("USNTrackingSystem");
@@ -112,8 +114,9 @@ TrackingSystemFactory::TrackingSystemFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("DSNTrackingSystem");
          creatables.push_back("USNTrackingSystem");
@@ -139,8 +142,9 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("DSNTrackingSystem");
          creatables.push_back("USNTrackingSystem");
@@ -170,8 +174,9 @@ TrackingSystemFactory::TrackingSystemFactory(const TrackingSystemFactory & tsf):
 TrackingSystem* TrackingSystemFactory::CreateTrackingSystem(
          const std::string &ofType, const std::string &withName)
 {
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();
-   if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   if (runmode == GmatGlobal::TESTING)
    {
       if (ofType == "DSNTrackingSystem")
          return new DSNTrackingSystem(withName);

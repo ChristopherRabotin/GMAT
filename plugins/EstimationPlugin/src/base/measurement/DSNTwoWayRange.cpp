@@ -1294,7 +1294,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #endif
 
       // r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system for uplink leg
-      RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T, t2R, minAngle);                // made changes by TUAN NGUYEN
+      RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T, t2R, minAngle);
 
       Real uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
       Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
@@ -1367,7 +1367,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
       #endif
       // r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system for downlink leg
-      RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R, t2T, minAngle);              // made changes by TUAN NGUYEN
+      RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R, t2T, minAngle);
 
       Real downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
       Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
@@ -1715,29 +1715,18 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
       char s[200];
       sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
       std::string st(&s[0]);
-      //MessageInterface::ShowMessage("%s", st.c_str());
       err = 5;
       throw MeasurementException(st);
    }
 
    // search for end interval:
-   //UnsignedInt end_interval = 0;
-   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   //{
-   //   if (t1 < (*rampTB)[i].epoch)
-   //   {
-   //      end_interval = i-1;      
-   //      break;
-   //   }
-   //}
    UnsignedInt end_interval = beginIndex;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t1 < (*rampTB)[i].epoch)
-      {
-         end_interval = i-1;      
+      if (t1 >= (*rampTB)[i].epoch)
+         end_interval = i;
+      else
          break;
-      }
    }
 
    // search for end interval:

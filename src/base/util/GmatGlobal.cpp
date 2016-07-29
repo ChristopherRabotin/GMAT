@@ -75,6 +75,21 @@ std::string GmatGlobal::GetGmatVersion()
 }
 
 //------------------------------------------------------------------------------
+// bool IsGmatCompiledIn64Bit()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsGmatCompiledIn64Bit()
+{
+   bool building64bit = true;
+   #ifdef _MSC_VER  // if Microsoft Visual C++
+   #ifndef USE_64_BIT_LONGS
+   building64bit = false;
+   #endif
+   #endif
+   
+   return building64bit;
+}
+
+//------------------------------------------------------------------------------
 // Integer GetDataPrecision()
 //------------------------------------------------------------------------------
 Integer GmatGlobal::GetDataPrecision()
@@ -299,6 +314,12 @@ Integer GmatGlobal::GetRunMode()
 void GmatGlobal::SetRunMode(Integer mode)
 {
    runMode = mode;
+
+   // It is a temporary fix in order to run gression test with runmode = TESTING. 
+   // It needs to improve in the next GMAT release       // made changes by TUAN NGUYEN
+   if (runMode == GmatGlobal::TESTING)                   // made changes by TUAN NGUYEN
+      isTesting = true;                                  // made changes by TUAN NGUYEN
+
    if (runMode == EXIT_AFTER_RUN)
       isBatchMode = true;
 }
@@ -927,6 +948,9 @@ GmatGlobal::GmatGlobal()
    // @note: Make sure to switch it to the official release number for RC1
    gmatVersion = "Nightly Build";
    
+   isTesting = false;                      // It is a temporary fix in order to run gression test with runmode = TESTING. 
+                                           // It needs to improve in the next GMAT release       // made changes by TUAN NGUYEN
+
    isBatchMode = false;
    isNitsClient = false;
    runInterrupted = false;

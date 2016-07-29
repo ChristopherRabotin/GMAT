@@ -2,4 +2,6 @@
 /f2c/
 /pcre/
 /wxWidgets/
+/xerces/
+/logs/
 *.bak

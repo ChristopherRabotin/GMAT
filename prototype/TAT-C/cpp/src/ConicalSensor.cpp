@@ -107,7 +107,7 @@ ConicalSensor::~ConicalSensor()
 //---------------------------------------------------------------------------
 void ConicalSensor::SetFieldOfView(Real fov)
 {
-   fieldOfView =fov;
+   fieldOfView = fov;
 }
 
 //------------------------------------------------------------------------------

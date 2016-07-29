@@ -829,6 +829,27 @@ bool Estimator::SetStringParameter(const Integer id,
       return SetStringParameter(id, measName, measurementNames.size());
    }
 
+
+   if (id == ReportStyle)
+   {
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode != GmatGlobal::TESTING)
+      {
+         Integer i = NORMAL_STYLE;
+         if (value == STYLE_TEXT[i - NORMAL_STYLE])
+         {
+            textFileMode = value;
+            progressStyle = i;
+            return true;
+         }
+         throw SolverException(
+            "The value of \"" + value + "\" for field \"Report Style\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [Normal].\n");
+      }
+   }
+
    return Solver::SetStringParameter(id, value);
 }
 

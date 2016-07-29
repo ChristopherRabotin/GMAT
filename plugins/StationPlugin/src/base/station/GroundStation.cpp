@@ -1021,31 +1021,54 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
          return true;
       }
-      return false;      // <-- throw here; It was supposed to be hardware, but isn't.
+      else
+         return false;      // <-- throw here; It was supposed to be hardware, but isn't.
       break;
 
    case Gmat::ERROR_MODEL:   // work for error model
       if (obj->GetType() == Gmat::ERROR_MODEL)
       {
-         // Don't add if it's already there
-         bool errormodelRegistered = false;
          for (UnsignedInt i=0; i < errorModels.size(); ++i)
          {
+            // Don't add if it's already there
             if (errorModels[i]->GetName() == obj->GetName())
             {
-               errormodelRegistered = true;
-               break;
+               try
+               {
+                  throw GmatBaseException("Error: ErrorModel object " +
+                     errorModels[i]->GetName() + " was added multiple times to " + GetName() + ".ErrorModels parameter.\n");
+               }
+               catch (GmatBaseException &ex)
+               {
+                  ex.SetFatal(true);
+                  throw ex;
+               }
+            }
+
+            // Don't add if it has type (trip and strand) the same as the one in the list
+            if (errorModels[i]->GetStringParameter("Type") == obj->GetStringParameter("Type"))
+            {
+               try
+               {
+                  throw GmatBaseException("Error: ErrorModel objects " +
+                     errorModels[i]->GetName() + " and " + obj->GetName() + " set to " + GetName() + ".ErrorModels parameter have the same measurement type.\n");
+               }
+               catch (GmatBaseException &ex)
+               {
+                  ex.SetFatal(true);
+                  throw ex;
+               }
             }
          }
-         if (!errormodelRegistered)
-         {
-            GmatBase* refObj = obj->Clone();       // a error model needs to be cloned
-            refObj->SetFullName(GetName() + "." + refObj->GetName()); // It needs to have full name. ex: "CAN.ErrorModel1"  
-            errorModels.push_back(refObj);   
-         }
+
+         GmatBase* refObj = obj->Clone();       // a error model needs to be cloned
+         refObj->SetFullName(GetName() + "." + refObj->GetName()); // It needs to have full name. ex: "CAN.ErrorModel1"  
+         errorModels.push_back(refObj);   
+
          return true;
       }
-      return false;      // <-- throw here; It was supposed to be error model, but isn't.
+      else
+         return false;      // <-- throw here; It was supposed to be error model, but isn't.
       break;
    }
 
@@ -1393,33 +1416,6 @@ Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez)
    // Get topocentric range and rangerate
    Rvector3 rho_sez = state_sez.GetR();
    Rvector3 rhodot_sez = state_sez.GetV();
-
-   //// Compute satellite elevation
-   //Real rho_sez_mag = rho_sez.GetMagnitude();
-   //az_el_visible[0] = GmatMathUtil::ATan2(rho_sez[2],rho_sez_mag) *
-   //      GmatMathConstants::DEG_PER_RAD;
-
-   //// c=cos s=sin compute azimuth, protect against 90 deg elevation
-   //Real c_rho =  rho_sez[1]/sqrt(GmatMathUtil::Pow(rho_sez[0],2) +
-   //      GmatMathUtil::Pow(rho_sez[1],2));
-   //Real s_rho = -rho_sez[0]/sqrt(GmatMathUtil::Pow(rho_sez[0],2) +
-   //      GmatMathUtil::Pow(rho_sez[1],2));
-   //Real c_rhodot =  rhodot_sez[1]/sqrt(GmatMathUtil::Pow(rhodot_sez[0],2) +
-   //      GmatMathUtil::Pow(rhodot_sez[1],2));
-   //Real s_rhodot = -rhodot_sez[0]/sqrt(GmatMathUtil::Pow(rhodot_sez[0],2) +
-   //      GmatMathUtil::Pow(rhodot_sez[1],2));
-
-   //// Compute azimuth
-   //if (az_el_visible[0] != 90)
-   //{
-   //   az_el_visible[1] = GmatMathUtil::ATan2(s_rho,c_rho) *
-   //         GmatMathConstants::DEG_PER_RAD;
-   //}
-   //else if (az_el_visible[0] == 90)
-   //{
-   //   az_el_visible[1] = GmatMathUtil::ATan2(s_rhodot,c_rhodot)*
-   //       GmatMathConstants::DEG_PER_RAD;
-   //}
 
    Rvector3 rho_sez_unit = rho_sez.GetUnitVector();
    Rvector3 rhodot_sez_unit = rhodot_sez.GetUnitVector();

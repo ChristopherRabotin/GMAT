@@ -47,8 +47,10 @@
     </partintro>
     <reference xml:id="Resources">
       <title>Resources</title>
+      <xi:include href="Resource_Antenna.xml" />
       <xi:include href="Resource_Array.xml" />
-      <xi:include href="Resource_Barycenter.xml" />
+      <xi:include href="Resource_Barycenter.xml" />    
+      <xi:include href="Resource_BatchEstimatorInv.xml" /> 	  
       <xi:include href="Resource_CelestialBody.xml" />
       <xi:include href="Resource_CoordinateSystem.xml" />
 	  <xi:include href="Resource_ContactLocator.xml" />
@@ -57,6 +59,7 @@
 	  <xi:include href="Resource_ElectricThruster.xml" />
 	  <xi:include href="Resource_EclipseLocator.xml" />
       <xi:include href="Resource_EphemerisFile.xml" />
+	  <xi:include href="Resource_ErrorModel.xml" />
       <xi:include href="Resource_FileInterface.xml" />
       <xi:include href="Resource_FiniteBurn.xml" />
       <xi:include href="Resource_FminconOptimizer.xml"/>
@@ -71,7 +74,9 @@
 	  <xi:include href="Resource_NuclearPowerSystem.xml" />
       <xi:include href="Resource_OrbitView.xml" />
       <xi:include href="Resource_Propagator.xml" />
+	  <xi:include href="Resource_Receiver.xml" />	  
       <xi:include href="Resource_ReportFile.xml" />
+	  <xi:include href="Resource_Simulator.xml" />
 	  <xi:include href="Resource_SNOPTOptimizer.xml" />
 	  <xi:include href="Resource_SolarPowerSystem.xml" />
       <xi:include href="Resource_SolarSystem.xml" />
@@ -82,8 +87,13 @@
       <xi:include href="Resource_SpacecraftHardware.xml" />
       <xi:include href="Resource_SpacecraftOrbitState.xml"/>
       <xi:include href="Resource_SpacecraftVisualizationProperties.xml" />
+	  <xi:include href="Resource_StatisticsAcceptFilter.xml" />
+	  <xi:include href="Resource_StatisticsRejectFilter.xml" />
       <xi:include href="Resource_String.xml" />
-      <xi:include href="Resource_Thruster.xml" />
+      <xi:include href="Resource_TrackingFileSet.xml" />
+      <xi:include href="Resource_Transmitter.xml" />   
+	  <xi:include href="Resource_Transponder.xml" />   
+      <xi:include href="Resource_Thruster.xml" /> 
       <xi:include href="Resource_Variable.xml" />
       <xi:include href="Resource_VF13ad.xml" />
       <xi:include href="Resource_XYPlot.xml" />
@@ -113,7 +123,9 @@
       <xi:include href="Command_PenUpPenDown.xml" />
       <xi:include href="Command_Propagate.xml" />
       <xi:include href="Command_Report.xml" />
-      <xi:include href="Command_Set.xml" />
+	  <xi:include href="Command_RunEstimator.xml" />
+	  <xi:include href="Command_RunSimulator.xml" />
+	  <xi:include href="Command_Set.xml" />
       <xi:include href="Command_Stop.xml" />
       <xi:include href="Command_Target.xml" />
       <xi:include href="Command_Toggle.xml" />

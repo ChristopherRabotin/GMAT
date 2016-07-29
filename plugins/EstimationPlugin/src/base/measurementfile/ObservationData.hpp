@@ -66,8 +66,8 @@ public:
 
 // Explicitly public so that this class acts like a struct
 public:
-   /// File index: contain a pointer to DataFile. This field is needed for data filter based on data file          // made changes by TUAN NGUYEN
-   DataFile*         fileIndex;                                                                                    // made changes by TUAN NGUYEN
+   /// File index: contain a pointer to DataFile. This field is needed for data filter based on data file
+   DataFile*         fileIndex;
 
    /// Flag to specify this data record is in use or not
    bool              inUsed;
@@ -124,8 +124,8 @@ public:
    Integer           uplinkBand;
    /// Uplink frequency at transmit epoch
    Real              uplinkFreq;                        // unit: Hz
-   /// Uplink frequency at receive epoch. For ramped frequency model, this frequency is different from uplinkFreq       // made changes by TUAN NGUYEN
-   Real              uplinkFreqAtRecei;                 // unit: Hz                                                     // made changes by TUAN NGUYEN
+   /// Uplink frequency at receive epoch. For ramped frequency model, this frequency is different from uplinkFreq
+   Real              uplinkFreqAtRecei;                 // unit: Hz
    /// Range modulo
    Real              rangeModulo;
 

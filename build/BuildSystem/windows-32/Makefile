@@ -1,4 +1,4 @@
-GMAT_HOME = C:/Users/builduser/Documents
+GMAT_HOME = C:/Users/gsfc580gmatbuild/Documents
 GMAT_DIR = $(GMAT_HOME)/GmatDevelopment
 GMAT_SRC_BASE_DIR = $(GMAT_DIR)/src/base
 GMAT_SRC_GUI_DIR = $(GMAT_DIR)/src/gui
@@ -30,7 +30,7 @@ LATEST_DOCS_BUILD_DIR = $(NETWORK_DIR)/Builds/DevDocs
 # compiles the latest build
 all: 
 	cd $(GMAT_BUILD_DIR); \
-	cmake --build . --config Release -- //m //fl ;
+	cmake . > cmakegenerate.log 2>&1 && cmake --build . --config Release -- //m //fl ;
 #	msbuild.exe GMAT.sln //p:Configuration=Release //m //t:Rebuild //fl ;
 
 # cleans up the compiled source code and docs files
@@ -38,9 +38,9 @@ clean:
 	cd $(GMAT_BUILD_DIR); \
 	cmake --build . --target clean --config Release -- //fl ;
 #	msbuild.exe GMAT.sln //p:Configuration=Release //m //fl //target:Clean;
-	cd $(GMAT_BIN_DIR) && rm -rf *.dll
-	cd $(GMAT_PLUGIN_BIN_DIR) && rm -rf *.dll
-	rm -f $(GMAT_PROPRIETARY_BIN_DIR)/*.dll
+#	cd $(GMAT_BIN_DIR) && rm -rf *.dll
+#	cd $(GMAT_PLUGIN_BIN_DIR) && rm -rf *.dll
+#	rm -f $(GMAT_PROPRIETARY_BIN_DIR)/*.dll
 	cd $(GMAT_HELP_BUILD_DIR) && $(MAKE) clean
 
 # checks out the repositories
@@ -63,7 +63,7 @@ dist:
 	cp libGmatBase.dll $(DAILY_EXE_DEST_DIR); \
 	cp libCInterface.dll $(DAILY_EXE_DEST_DIR); 
 	cd $(GMAT_MATLAB_CINTF_DIR); \
-	cp interfacewrapper.m $(DAILY_MATLAB_CINTF_DEST_DIR); 
+#	cp interfacewrapper.m $(DAILY_MATLAB_CINTF_DEST_DIR); 
 	cd $(GMAT_PLUGIN_BIN_DIR); \
 	cp *.dll $(DAILY_PLUGINS_DEST_DIR);
 	cd $(GMAT_PROPRIETARY_BIN_DIR); \
@@ -80,6 +80,7 @@ dist:
 	cd $(GMAT_BUILD_DIR); \
 	cmake --build . --target INSTALL --config Release -- //fl ;
 #	msbuild.exe GMAT.sln //p:Configuration=Release //fl //target:INSTALL;
+	cp -a $(DAILY_HELP_DEST_DIR) $(LATEST_BUILD_DIR)/docs
 
 dist-devdocs:
 	rm -rf $(LATEST_DOCS_BUILD_DIR)
@@ -92,8 +93,9 @@ check:
 
 # makes the user docs
 userdocs:
-	cd  $(GMAT_HELP_BUILD_DIR) && $(MAKE) help
-
+#	cd  $(GMAT_HELP_BUILD_DIR) && $(MAKE) help
+	cd  $(GMAT_HELP_BUILD_DIR) && $(MAKE) help JAVA=C:/Java/jre7/bin/java.exe
+	
 # makes the dev docs
 devdocs:
 	cd $(GMAT_SRC_BASE_DIR); doxygen;

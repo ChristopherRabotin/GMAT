@@ -389,7 +389,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       rangeModulo = obsData->rangeModulo;                                                                         // unit: RU
    
    // 2. Compute range in km
-   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);             // it needs to include ramp table in calculation  // made changes by TUAN NGUYEN
+   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);             // it needs to include ramp table in calculation
    
    // 3. Convert range from km to RU and store in cMeasurement:
    for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
@@ -875,13 +875,12 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
 
    // Search for end interval:
    UnsignedInt end_interval = beginIndex;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t1 < (*rampTB)[i].epoch)
-      {
-         end_interval = i-1;      
+      if (t1 >= (*rampTB)[i].epoch)
+         end_interval = i;
+      else
          break;
-      }
    }
 
    // Integration of the frequency from t0 to t1:

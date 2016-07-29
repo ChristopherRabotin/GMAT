@@ -855,9 +855,19 @@ bool TrackingFileSet::ParseTrackingConfig(std::string value, Integer& configInde
    bool retval = true;
 
    // Get all known measurement types
-   TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
-   StringArray knownTypes = mn->GetKnownTypes();
-
+   StringArray knownTypes;                                                                     // GMT-5701
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                     // GMT-5701
+   //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))        // GMT-5701
+   if (runmode != GmatGlobal::TESTING)                                                         // GMT-5701
+   {                                                                                           // GMT-5701
+      knownTypes.push_back("DSNRange");                                                        // GMT-5701
+      knownTypes.push_back("Doppler");                                                         // GMT-5701
+   }                                                                                           // GMT-5701
+   else                                                                                        // GMT-5701
+   {                                                                                           // GMT-5701
+      TFSMagicNumbers *mn = TFSMagicNumbers::Instance();                                       // GMT-5701
+      knownTypes = mn->GetKnownTypes();                                                        // GMT-5701
+   }                                                                                           // GMT-5701
 
    // Remove opened and closed curly brackets at the begin and end of string
    std::string value1 = GmatStringUtil::Trim(value.substr(1, value.size() - 2));
@@ -1037,13 +1047,22 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
 
       // Get all known measurement types
-      TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
-      StringArray knownTypes = mn->GetKnownTypes();
+      StringArray knownTypes;                                                                     // GMT-5701
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                     // GMT-5701
+      //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))        // GMT-5701
+      if (runmode != GmatGlobal::TESTING)                                                         // GMT-5701
+      {                                                                                           // GMT-5701
+         knownTypes.push_back("DSNRange");                                                        // GMT-5701
+         knownTypes.push_back("Doppler");                                                         // GMT-5701
+      }                                                                                           // GMT-5701
+      else                                                                                        // GMT-5701
+      {                                                                                           // GMT-5701
+         TFSMagicNumbers *mn = TFSMagicNumbers::Instance();                                       // GMT-5701
+         knownTypes = mn->GetKnownTypes();                                                        // GMT-5701
+      }                                                                                           // GMT-5701
 
 
       // Create a new tracking config
-//      static Integer openBracketCount;
-//      static bool start;
       if (index == 0)                    // it starts a tracking configuration when index = 0
       {
          // reset open bracket count and new strand flag
@@ -1067,10 +1086,6 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          // case2: {{part1,..., partn}, datatype1,...,datatypem}
          if (openBracketCount != 0)
             throw MeasurementException("Error:: Syntax error when GMAT sets value to " + GetName() + ".AddTrackingConfig parameter.\n");
-
-         //StringArray trackList;
-         //trackingConfigs[defIndex].strands.push_back(trackList);
-         //Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
 
          return ParseTrackingConfig(value, defIndex, start);
       }
@@ -2560,6 +2575,19 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
 {
    if (strandsList.empty())
       return true;
+
+   // Validate measurement type in typesList                                                                      // GMT-5701
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();                                                        // GMT-5701
+   //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))                           // GMT-5701
+   if (runmode != GmatGlobal::TESTING)                                                                            // GMT-5701
+   {                                                                                                              // GMT-5701
+      for (Integer i = 0; i < typesList.size(); ++i)                                                              // GMT-5701
+      {                                                                                                           // GMT-5701
+         if ((typesList[i] != "DSNRange") && (typesList[i] != "Doppler"))                                         // GMT-5701
+            throw MeasurementException("Error: Observation's data type '" + typesList[i] +                        // GMT-5701
+            "' is not allowed in the current GMAT version. It only allows 'DSNRange' and 'Doppler' observation.\n");         // GMT-5701
+      }                                                                                                           // GMT-5701
+   }                                                                                                              // GMT-5701
 
    // Generate a list of tracking configs
    MessageInterface::ShowMessage("Total of %d tracking configurations are generated for tracking file set %s:\n", strandsList.size(), GetName().c_str());

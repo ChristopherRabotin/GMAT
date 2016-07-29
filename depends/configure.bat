@@ -1,33 +1,37 @@
-:: Author: 		Jfisher
-:: Project:		Gmat
-:: Title:		configure.bat
-:: Purpose:		This script allows developers to quickly and easily 
-::			configure the gmat development environment on windows.
-:: Updates: Feb-Apr 2015: Ravi Mathur: Heavy updates for new CMake
-:: Use:
-::   This script can be used via standard double-click or in the Windows
-::   command prompt. Command prompt usage is:
-::    depends.bat [-vsversion (9|10|11|12)] [-x86 | -x64]
-::    -vsversion (9|10|11|[12]) : Visual Studio version (default 12)
-::    -x86 | -x64 : Build 32 (x86) or 64 (x64) bit CSPICE (default x64)
-::   Note that VisualStudio versions are:
-::    12 = VS2013
-::    11 = VS2012
-::    10 = VS2010
-::     9 = VS2008
+REM Author: 		Jfisher
+REM Project:		Gmat
+REM Title:		configure.bat
+REM Purpose:		This script allows developers to quickly and easily 
+REM 			configure the GMAT software dependencies on Windows.
+REM Updates: Feb-Apr 2015: Ravi Mathur: Heavy updates for new CMake
+REM              Jul 2016: Ravi Mathur: Updates for Xerces and Python
+REM Use:
+REM   This script can be used via standard double-click or in the Windows
+REM   command prompt. Command prompt usage is:
+REM    depends.bat [-vsversion (9|10|11|12)] [-x86 | -x64]
+REM    -vsversion (9|10|11|[12]|14) : Visual Studio version (default 12)
+REM    -x86 | -x64 : Build 32 (x86) or 64 (x64) bit dependencies (default x64)
+REM   Note that VisualStudio versions are:
+REM    14 = VS2015 (not yet supported by wxWidgets)
+REM    12 = VS2013
+REM    11 = VS2012
+REM    10 = VS2010
+REM     9 = VS2008
 
-:: Turn off output and clear the screen
+REM Turn off output and clear the screen
 @echo off
 cls
 
-:: Set default variables
+REM Set default variables
 set vs_version=12
 set use_64bit=1
 set depends_dir=%cd%
+set run_curl=%depends_dir%\bin\curl\curl.exe
+set run_7za=%depends_dir%\bin\7za\7za.exe
 
-:: ***********************************
-:: Input System
-:: ***********************************
+REM ***********************************
+REM Input System
+REM ***********************************
 :initial
 if "%1"=="-vsversion" goto vsversion
 if "%1"=="-x64" goto vs64
@@ -66,6 +70,7 @@ if "%user_vs%"=="2008" (set vs_version=9)
 if "%user_vs%"=="2010" (set vs_version=10)
 if "%user_vs%"=="2012" (set vs_version=11)
 if "%user_vs%"=="2013" (set vs_version=12)
+if "%user_vs%"=="2015" (set vs_version=14)
 goto main
 
 :error
@@ -75,27 +80,22 @@ goto end
 :main
 
 IF %use_64bit% EQU 1 (
-	echo ********** Setting up 64-bit dependencies **********
+	echo ********** Setting up GMAT 64-bit dependencies for VisualStudio %vs_version%.0 **********
 ) ELSE (
-	echo ********** Setting up 32-bit dependencies **********
+	echo ********** Setting up GMAT 32-bit dependencies for VisualStudio %vs_version%.0 **********
 )
 
-echo ********** Setting up CSpice for VisualStudio version %vs_version%.0 **********
+set logs_dir=%depends_dir%\logs
+IF NOT EXIST %logs_dir% (
+	mkdir %logs_dir%
+)
 
-:: Check if dependency libraries already exists
-:: Note that cspice_type is used in cspice-ftp.txt
-set cspice_path=cspice\windows
+REM Add Visual Studio tools to command line path
 IF %use_64bit% EQU 1 (
-	set cspice_dir=cspice64
-	set cspice_type=64bit
 	set vs_arch=x86_amd64
 ) ELSE (
-	set cspice_dir=cspice32
-	set cspice_type=32bit
 	set vs_arch=x86
 )
-
-:: Add Visual Studio tools to command line path
 set vs_envvar=vs%vs_version%0comntools
 setlocal enabledelayedexpansion
 for /F %%a in ("%vs_envvar%") do set vs_path=!%%a!
@@ -108,83 +108,178 @@ IF "%vs_path%" == "" (
 endlocal & set vs_path=%vs_path%
 call "%vs_path%\..\..\VC\vcvarsall.bat" %vs_arch%
 
-:: Create directories and download cspice if it does not already exist.
+echo.
+echo ********** Configuring CSPICE **********
+
+set cspice_path=cspice\windows
+IF %use_64bit% EQU 1 (
+	set cspice_dir=cspice64
+	set cspice_type=64bit
+) ELSE (
+	set cspice_dir=cspice32
+	set cspice_type=32bit
+)
+
+REM Create directories and download CSPICE if it does not already exist
 IF NOT EXIST %cspice_path%\%cspice_dir% (
-	:: Create Directories
+	REM Create Directories
 	mkdir %cspice_path%
 	
-	:: Change to cspice directory
+	REM Change to cspice directory
 	cd %cspice_path%
 	
-	:: Download and extract Spice, finally remove archive
-	..\..\bin\winscp\WinSCP.com -script=..\..\bin\cspice\cspice-ftp.txt
-	..\..\bin\7za\7za.exe x cspice.zip
+	REM Download and extract CSPICE
+	echo -- Downloading CSPICE
+	"%run_curl%" http://naif.jpl.nasa.gov/pub/naif/toolkit/C/PC_Windows_VisualC_%cspice_type%/packages/cspice.zip > cspice.zip
+	
+	"%run_7za%" x cspice.zip > nul
 	REN cspice %cspice_dir%
 	DEL cspice.zip
 
-	:: Compile debug version of cspice [GMT-5044]
-	:: The compile options are taken from CSPICE src/cspice/mkprodct.bat
-	cd %cspice_dir%\src\cspice
-	cl /c /DEBUG /Z7 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c
-	link -lib /out:..\..\lib\cspiced.lib *.obj
+	REM Change back to depends directory
+	cd "%depends_dir%"
+)
+
+REM Compile CSPICE
+IF NOT EXIST %cspice_path%\%cspice_dir%\lib\cspiced.lib (
+	REM Compile debug CSPICE. See GMT-5044
+	echo.
+	echo -- Compiling debug CSPICE. This could take a while...
+	cd %cspice_path%\%cspice_dir%\src\cspice
+	cl /c /DEBUG /Z7 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c > %logs_dir%\cspice_build_debug.log 2>&1
+	link -lib /out:..\..\lib\cspiced.lib *.obj >> %logs_dir%\cspice_build_debug.log 2>&1
 	del *.obj
 
-	:: Compile release version of cspice [GMT-5044]
-	cl /c /O2 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c
-	link -lib /out:..\..\lib\cspice.lib *.obj
+	REM Compile release CSPICE. See GMT-5044
+	echo.
+	echo -- Compiling release CSPICE. This could take a while...
+	cl /c /O2 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c > %logs_dir%\cspice_build_release.log 2>&1
+	link -lib /out:..\..\lib\cspice.lib *.obj >> %logs_dir%\cspice_build_release.log 2>&1
 	del *.obj
         
-	:: Change back to depends directory
+	REM Change back to depends directory
 	cd "%depends_dir%"
 ) ELSE (
-	echo CSpice already exists
+	echo -- CSPICE already configured
 )
 
-echo ********** Setting up wxWidgets for VisualStudio version %vs_version%.0 **********
+set wxver=3.0.2
+echo.
+echo ********** Configuring wxWidgets %wxver% **********
 
-set wxWidgets_path=wxWidgets\wxMSW-3.0.2
 IF %use_64bit% EQU 1 (
-	set wxwidgets_type=_x64_
+	set wxtype=_x64_
 ) ELSE (
-	set wxwidgets_type=_
+	set wxtype=_
 )
+set wxhdr=wxWidgets-%wxver%_headers.7z
+set wxdev=wxMSW-%wxver%_vc%vs_version%0%wxtype%%Dev.7z
+set wxrel=wxMSW-%wxver%_vc%vs_version%0%wxtype%%ReleaseDLL.7z
+set wxWidgets_path=wxWidgets\wxMSW-%wxver%
 
-:: Create directories and download wxWidgets if it does not already exist.
-:: Note that vs_version and wxwidgets_type are used in wx-ftp.txt
-IF NOT EXIST %wxWidgets_path%\lib\vc%wxwidgets_type%dll (
-
-	:: Create Directories
+REM Create directories and download wxWidgets if it does not already exist.
+IF NOT EXIST %wxWidgets_path%\lib\vc%wxtype%dll (
+	REM Create Directories
 	mkdir %wxWidgets_path%
 	
-	:: Change to wxWidgets directory
+	REM Change to wxWidgets directory
 	cd %wxWidgets_path%
 	
-	:: Download wxWidgets
-        ..\..\bin\winscp\WinSCP.com -script=..\..\bin\wx\wx-ftp.txt
+	REM Download wxWidgets headers and binaries
+	echo -- Downloading wxWidgets headers
+	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxhdr% > %wxhdr%
 
-	:: Extract wxWidgets
+	echo.
+	echo -- Downloading wxWidgets debug libraries
+	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxdev% > %wxdev%
+
+	echo.
+	echo -- Downloading wxWidgets release libraries
+	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxrel% > %wxrel%
+
+	REM Extract wxWidgets
 	IF NOT EXIST include (
-		..\..\bin\7za\7za.exe x wxWidgets-3.0.2_headers.7z
+		%run_7za% x %wxhdr% > nul
 	)
-	..\..\bin\7za\7za.exe x wxMSW-3.0.2_vc%vs_version%0%wxwidgets_type%Dev.7z
-	..\..\bin\7za\7za.exe x wxMSW-3.0.2_vc%vs_version%0%wxwidgets_type%ReleaseDLL.7z
+	%run_7za% x %wxdev% > nul
+	%run_7za% x %wxrel% > nul
 
-	DEL wxWidgets-3.0.2_headers.7z 
-	DEL wxMSW-3.0.2_vc%vs_version%0%wxwidgets_type%ReleaseDLL.7z
-	DEL wxMSW-3.0.2_vc%vs_version%0%wxwidgets_type%Dev.7z
+	DEL %wxhdr%
+	DEL %wxdev%
+	DEL %wxrel%
 
-	:: Change dll folder name
+	REM Change dll folder name
 	cd lib
-	REN vc%vs_version%0%wxwidgets_type%dll vc%wxwidgets_type%dll
+	REN vc%vs_version%0%wxtype%dll vc%wxtype%dll
 
+	REM Change back to depends directory
         cd "%depends_dir%"
 ) ELSE (
-	echo wxWidgets already exists
+	echo -- wxWidgets already configured
 )
 
-echo Dependency Configuration Complete!
+set xercesver=3.1.4
+echo.
+echo ********** Configuring Xerces-C++ %xercesver% **********
 
-:: ***********************************
-:: End of script
-:: ***********************************
+set xerces_path=xerces
+IF %use_64bit% EQU 1 (
+	set xerces_outdir=%xerces_path%\Build\Win64
+	set xerces_arch=x64
+) ELSE (
+	set xerces_outdir=%xerces_path%\Build\Win32
+	set xerces_arch=Win32
+)
+
+REM Download Xerces if it doesn't exist
+IF NOT EXIST %xerces_path% (
+	REM Download and extract Xerces
+	echo -- Downloading Xerces
+	"%run_curl%" http://archive.apache.org/dist/xerces/c/3/sources/xerces-c-%xercesver%.tar.gz > xerces.tar.gz
+	"%run_7za%" x xerces.tar.gz > nul
+	"%run_7za%" x xerces.tar > nul
+	DEL xerces.tar.gz
+	DEL xerces.tar
+	REN xerces-c-%xercesver% %xerces_path%
+
+	REM Change back to depends directory
+	cd "%depends_dir%"
+)
+
+REM Compile Xerces
+IF NOT EXIST %xerces_outdir% (
+	REM Compile debug Xerces
+	REM XercesLibOverride is needed because the Xerces Runtime Library cannot be directly changed with an msbuild flag
+	echo.
+	echo -- Compiling debug Xerces. This could take a while...
+	cd %xerces_path%\projects\Win32\VC%vs_version%\xerces-all\XercesLib
+	msbuild /m ^
+		/property:Configuration="Static Debug";Platform=%xerces_arch% ^
+		/property:TargetName=xerces-c_3D ^
+		/property:ForceImportBeforeCppTargets="%depends_dir%\bin\xerces\XercesLibOverride.prop" ^
+		XercesLib.vcxproj > %logs_dir%\xerces_build_debug.log 2>&1
+
+	REM Compile release Xerces
+	echo.
+	echo -- Compiling release Xerces. This could take a while...
+	msbuild /m ^
+		/property:Configuration="Static Release";Platform=%xerces_arch% ^
+		/property:TargetName=xerces-c_3 ^
+		/property:ForceImportBeforeCppTargets="%depends_dir%\bin\xerces\XercesLibOverride.prop" ^
+		XercesLib.vcxproj > %logs_dir%\xerces_build_release.log 2>&1
+
+	REM Change back to depends directory
+	cd "%depends_dir%"
+) ELSE (
+	echo -- Xerces already configured
+)
+
+echo.
+echo Dependency Configuration Complete!
+echo.
+
+REM ***********************************
+REM End of script
+REM ***********************************
 :end
+pause

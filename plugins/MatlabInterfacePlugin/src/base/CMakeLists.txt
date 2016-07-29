@@ -34,18 +34,9 @@ ADD_DEFINITIONS("-DMATLAB_EXPORTS")
 
 # ====================================================================
 # list of directories containing source/header files
-SET(PLUGIN_DIRS command factory function include interface plugin subscriber)
+SET(PLUGIN_DIRS command factory function include interface matwriter plugin subscriber)
 if(UNIX)
   SET(PLUGIN_DIRS ${PLUGIN_DIRS} "../matlab/gmat_mex/src")
-endif()
-
-# ====================================================================
-# extra include directories for header files
-INCLUDE_DIRECTORIES(${Matlab_INCLUDE_DIRS})
-if(UNIX)
-  INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/include")
-  INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/app")
-  INCLUDE(${wxWidgets_USE_FILE})
 endif()
 
 # ====================================================================
@@ -60,7 +51,12 @@ SET(PLUGIN_SRCS
     interface/MatlabInterface.cpp
     plugin/GmatPluginFunctions.cpp
     subscriber/MatlabWorkspace.cpp
-)
+    matwriter/MatWriter.cpp
+    matwriter/MatWriterMaker.cpp
+    matwriter/MatData.cpp
+    matwriter/RealMatData.cpp
+    matwriter/StringMatData.cpp
+    )
 if(UNIX)
   SET(PLUGIN_SRCS
     ${PLUGIN_SRCS}
@@ -74,26 +70,33 @@ endif()
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
-# Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} ${Matlab_LIBRARIES})
+# Includes
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${Matlab_INCLUDE_DIRS})
 if(UNIX)
-  TARGET_LINK_LIBRARIES(${TargetName} ${wxWidgets_LIBRARIES})
+  TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE
+    "${PROJECT_SOURCE_DIR}/src/gui/include"
+    "${PROJECT_SOURCE_DIR}/src/gui/app"
+    )
+  INCLUDE(${wxWidgets_USE_FILE})
+endif()
+
+# ====================================================================
+# Additional link libraries
+TARGET_LINK_LIBRARIES(${TargetName} PUBLIC ${Matlab_LIBRARIES})
+if(UNIX)
+  TARGET_LINK_LIBRARIES(${TargetName} PUBLIC ${wxWidgets_LIBRARIES})
 endif()
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux
 if(UNIX)
   if(APPLE)
-    if(GMAT_MAC_APPBUNDLE_PATH)
-      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
-    else()
-      SET(MAC_BASEPATH ";@loader_path/libwx/") # Separate base/wx dirs
-    endif()
+    SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
       "@loader_path/${MAC_BASEPATH}"
       )
   else()
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
-      "\$ORIGIN/;\$ORIGIN/libwx/"
+      "\$ORIGIN/;\$ORIGIN/../lib/"
       )
   endif()
 endif()

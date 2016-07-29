@@ -59,8 +59,9 @@
 CoreMeasurement *MeasurementFactory::CreateMeasurement(
       const std::string & ofType, const std::string & withName)
 {
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();
-   if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   if (runmode == GmatGlobal::TESTING)
    {
       if (ofType == "DSNTwoWayRange")
          return new DSNTwoWayRange(withName);
@@ -90,8 +91,9 @@ MeasurementFactory::MeasurementFactory() :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("DSNTwoWayRange");
          creatables.push_back("DSNTwoWayDoppler");
@@ -133,8 +135,9 @@ MeasurementFactory& MeasurementFactory::operator=(
    if (creatables.empty())
 
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("DSNTwoWayRange");
          creatables.push_back("DSNTwoWayDoppler");
@@ -162,8 +165,9 @@ MeasurementFactory::MeasurementFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("DSNTwoWayRange");
          creatables.push_back("DSNTwoWayDoppler");
@@ -190,8 +194,9 @@ MeasurementFactory::MeasurementFactory(const MeasurementFactory& fact) :
 {
    if (creatables.empty())
    {
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("DSNTwoWayRange");
          creatables.push_back("DSNTwoWayDoppler");

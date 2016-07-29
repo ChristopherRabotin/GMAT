@@ -88,8 +88,9 @@ Solver* EstimatorFactory::CreateSolver(const std::string &ofType,
    if (ofType == "BatchEstimatorInv")
       return new BatchEstimatorInv(withName);
 
-   Integer runmode = GmatGlobal::Instance()->GetRunMode();
-   if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   if (runmode == GmatGlobal::TESTING)
    {
       if (ofType == "BatchEstimatorSVD")
          return new BatchEstimatorSVD(withName);
@@ -145,8 +146,9 @@ EstimatorFactory::EstimatorFactory() :
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
 
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("BatchEstimatorSVD");
          creatables.push_back("ExtendedKalmanInv");
@@ -204,8 +206,9 @@ EstimatorFactory::EstimatorFactory(const EstimatorFactory& fact) :
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
 
-      Integer runmode = GmatGlobal::Instance()->GetRunMode();
-      if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
       {
          creatables.push_back("BatchEstimatorSVD");
          creatables.push_back("ExtendedKalmanInv");

@@ -149,18 +149,6 @@ public:
    
 protected:
    
-   // methods inherited from the Subscriber
-   /*
-   virtual void         HandleOrbitColorChanged(GmatBase *originator,
-                                                const std::string &newColor,
-                                                const std::string &objName,
-                                                const std::string &desc);
-   virtual void         HandleTargetColorChanged(GmatBase *originator,
-                                                 const std::string &newColor,
-                                                 const std::string &objName,
-                                                 const std::string &desc);
-   */
-   
    CoordinateSystem *mViewCoordSystem;
    
    std::string mOldName;
@@ -188,7 +176,7 @@ protected:
    Integer mNumPointsToRedraw;
    Integer mNumData;
    Integer mNumCollected;
-   bool    mDrawingStatusChanged;
+   Integer mDataAbsentWarningCount;
    
    // arrays for holding distributed data
    RealArray mScXArray;
@@ -197,6 +185,16 @@ protected:
    RealArray mScVxArray;
    RealArray mScVyArray;
    RealArray mScVzArray;
+   
+   // arrays for holding previous distributed data
+   BooleanArray mScPrevDataPresent;
+   RealArray mScPrevEpoch;
+   RealArray mScPrevX;
+   RealArray mScPrevY;
+   RealArray mScPrevZ;
+   RealArray mScPrevVx;
+   RealArray mScPrevVy;
+   RealArray mScPrevVz;
    
    // arrays for holding solver current data
    std::vector<StringArray> mCurrScArray;
@@ -227,8 +225,13 @@ protected:
    
    /// Buffers published spacecraft orbit data
    void                 BufferZeroData(Integer scIndex);
+   void                 BufferPreviousData(Integer scIndex);
    virtual Integer      BufferOrbitData(const Real *dat, Integer len);
-
+   
+   /// Handle absent spacecraft when data is published
+   void                 HandleAbsentData(const std::string &scName,
+                                         Integer scIndex, Real currEpoch);
+   
    /// Returns object string list
    virtual std::string  GetObjectStringList() const;
    
