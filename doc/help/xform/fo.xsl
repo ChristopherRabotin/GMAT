@@ -544,4 +544,17 @@
         <xsl:apply-templates mode="titlepage.mode"/>
     </xsl:template>
 
+
+<!-- Optional ability to set font size within programlisting which uses monospace verbatim -->
+	<xsl:attribute-set name="monospace.verbatim.properties">
+  <xsl:attribute name="font-size">
+    <xsl:choose>
+      <xsl:when test="processing-instruction('db-font-size')"><xsl:value-of
+           select="processing-instruction('db-font-size')"/></xsl:when>
+      <xsl:otherwise>inherit</xsl:otherwise>
+    </xsl:choose>
+  </xsl:attribute>
+</xsl:attribute-set>
+
+	
 </xsl:stylesheet>
