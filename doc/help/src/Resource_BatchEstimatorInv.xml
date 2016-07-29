@@ -35,7 +35,8 @@
     a specific epoch and the performance index is a weighted sum of the square
     of the measurement residuals.</para>
 
-    <para>See Also <xref linkend="GroundStation"/></para>
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="TrackingFileSet"/>, <xref linkend="RunEstimator"/></para>
   </refsection>
 
   <refsection>
@@ -172,7 +173,7 @@
           <row>
             <entry><guilabel>EstimationEpochFormat</guilabel></entry>
 
-            <entry><para>xx</para> <variablelist>
+            <entry><para>Epoch format</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
