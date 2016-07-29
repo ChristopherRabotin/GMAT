@@ -545,7 +545,8 @@
     </xsl:template>
 
 
-<!-- Optional ability to set font size within programlisting which uses monospace verbatim -->
+<!-- Optional ability to set font size within programlisting which uses monospace verbatim 
+copied from:  http://www.sagehill.net/docbookxsl/FittingText.html   -->
 	<xsl:attribute-set name="monospace.verbatim.properties">
   <xsl:attribute name="font-size">
     <xsl:choose>
