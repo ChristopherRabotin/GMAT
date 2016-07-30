@@ -721,8 +721,16 @@
 
               <entry><itemizedlist>
                   <listitem>
-                    <para>fT=Transmitter.frequency (This frequency will be
-                    written to the the GMD file)</para>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Transmitter.frequency (This frequency
+                    will be written to the the GMD file)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -753,8 +761,16 @@
 
               <entry><itemizedlist>
                   <listitem>
-                    <para>fT=Ramp Table frequency (This frequency will be
-                    written to the GMD file)</para>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Ramp Table frequency (This frequency
+                    will be written to the GMD file)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -780,7 +796,15 @@
 
               <entry><itemizedlist>
                   <listitem>
-                    <para>fT=Transmitter.frequency</para>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Transmitter.frequency</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -812,7 +836,15 @@
 
               <entry><itemizedlist>
                   <listitem>
-                    <para>fT=Transmitter.frequency</para>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Transmitter.frequency</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
