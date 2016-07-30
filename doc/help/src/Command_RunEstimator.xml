@@ -29,15 +29,16 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>RunEstimator BatchEstimatorInvInstanceName </synopsis>
+    <synopsis>RunEstimator BatchEstimatorInv_InstanceName </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The RunEstimator generates ingests navigation measurements and
-    generates an estimated state vector according to the specifications of the
-    input BatchEstimator resource. </para>
+    <para>The <guilabel>RunEstimator</guilabel> generates ingests navigation
+    measurements and generates an estimated state vector according to the
+    specifications of the input <guilabel>BatchEstimatorInv</guilabel>
+    resource.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="BatchEstimatorInv"/></para>
@@ -51,8 +52,8 @@
 
       <para>As part of the estimation process, GMAT must calculated the
       so-called observation residual, “O-C,” where “C” is the “Computed”
-      measurement. As discussed in the RunSimulator help, GMAT calculates the
-      DSN range “C” measurement as</para>
+      measurement. As discussed in the <guilabel>RunSimulator</guilabel> help,
+      GMAT calculates the DSN range “C” measurement as</para>
 
       <informalequation>
         <m:math display="block">
@@ -162,7 +163,7 @@
         </m:math>
       </informalequation>
 
-      <para>and GMAT calculates the DSN Doppler measurement as </para>
+      <para>and GMAT calculates the DSN Doppler measurement as</para>
 
       <informalequation>
         <m:math display="block">
@@ -563,73 +564,151 @@
           <m:mtext>average transmit frequency </m:mtext>
         </m:math>
       </informalequation>
-    </refsection>
 
-    <refsection>
-      <title>Relation to Target/EndTarget Command Sequence</title>
+      <para>The value of C and M2 used to calculate the computed range or
+      Doppler measurement depends upon the data type and whether the data
+      being ingested is ramped or non-ramped according to the table below. The
+      value of the transmit frequency used to calculate the computed
+      measurement depends upon whether or not the data being ingested is
+      ramped or non-ramped.</para>
 
-      <para>There are some functional similarities between the
-      <guilabel>Target/EndTarge</guilabel>t and
-      <guilabel>Optimize/EndOptimize</guilabel> command sequences. In both
-      cases, we define Control Variables and Constraints. For both
-      <guilabel>Target</guilabel> and <guilabel>Optimize</guilabel> sequences,
-      we use the <guilabel>Vary</guilabel> command to define the Control
-      Variables. For the <guilabel>Target</guilabel> sequence, we use the
-      <guilabel>Achieve</guilabel> command to define the constraints whereas,
-      for an <guilabel>Optimize</guilabel> sequence, we use the
-      <guilabel>NonlinearConstraint</guilabel> command. The big difference
-      between the <guilabel>Target</guilabel> and
-      <guilabel>Optimize</guilabel> sequences is that the
-      <guilabel>Optimize</guilabel> sequence allows for the minimization of an
-      Objective function through the use of the <guilabel>Minimize</guilabel>
-      command.</para>
-    </refsection>
+      <informaltable>
+        <tgroup cols="3">
+          <colspec align="center" colwidth="241*"/>
 
-    <refsection>
-      <title>Command Interactions</title>
+          <colspec colwidth="426*"/>
 
-      <informaltable colsep="0" frame="topbot">
-        <tgroup cols="2">
-          <colspec colnum="1" colwidth="1.0*"/>
+          <colspec colwidth="333*"/>
 
-          <colspec colnum="2" colwidth="3*"/>
+          <thead>
+            <row>
+              <entry align="center">Data Type</entry>
+
+              <entry align="center">Value of C (Range) or M2 (Doppler) used to
+              calculate “Computed” measurement</entry>
+
+              <entry align="center">Value of transmit frequency used to
+              calculate “Computed” measurement</entry>
+            </row>
+          </thead>
 
           <tbody>
             <row>
-              <entry><guilabel>Vary command</guilabel></entry>
+              <entry><emphasis role="bold">Estimate Range without ramp
+              table</emphasis></entry>
 
-              <entry><para> Every <guilabel>Optimize</guilabel> sequence must
-              contain at least one <guilabel>Vary
-              </guilabel>command.<guilabel> Vary</guilabel> commands are used
-              to define the control variables associated with an
-              <guilabel>Optimize</guilabel> sequence. </para></entry>
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band in input Range
+                    measurement file. C=½ for S-band and 221/1498 for
+                    X-band.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Use frequency in input GMD file </para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Ground Station transmit frequency set via
+                    Transmitter.Frequency is not used </para>
+                  </listitem>
+                </itemizedlist></entry>
             </row>
 
             <row>
-              <entry><guilabel>NonlinearConstraint command</guilabel></entry>
+              <entry><emphasis role="bold">Estimate Range with ramp
+              table</emphasis></entry>
 
-              <entry><para> <guilabel>NonlinearConstraint</guilabel> commands
-              are used to define the constraints associated with an
-              <guilabel>Optimize</guilabel> sequence. Note that multiple
-              <guilabel>NonlinearConstraint</guilabel> commands are allowed
-              within an <guilabel>Optimize</guilabel> sequence.
-              </para></entry>
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band in input ramp table. C=½
+                    for S-band and 221/1498 for X-band. </para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Uplink Band in input Range measurement file
+                    has no effect. </para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Use frequency in ramp table </para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Frequency in input GMD file is not used</para>
+                  </listitem>
+
+                  <listitem>
+                    <para> Ground Station transmit frequency set via
+                    Transmitter.Frequency is not used </para>
+                  </listitem>
+                </itemizedlist></entry>
             </row>
 
             <row>
-              <entry><guilabel>Minimize command</guilabel></entry>
+              <entry><emphasis role="bold">Estimate Doppler without ramp
+              table</emphasis></entry>
 
-              <entry><para> A <guilabel>Minimize</guilabel> command is used
-              within an <guilabel>Optimize</guilabel> sequence to define the
-              Objective function that will be minimized. Note that an
-              <guilabel>Optimize</guilabel> sequence is allowed to contain, at
-              most, one <guilabel>Minimize</guilabel> command. (An
-              <guilabel>Optimize</guilabel> sequence is not required to
-              contain a <guilabel>Minimize</guilabel> command) </para></entry>
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>M2=Transponder.TurnAroundRatio </para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Uplink Band in input Range measurement file
+                    has no effect. </para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Use Ground Station transmit frequency set via
+                    Transmitter.Frequency</para>
+                  </listitem>
+                </itemizedlist></entry>
+            </row>
+
+            <row>
+              <entry><emphasis role="bold">Estimate Doppler with ramp
+              table</emphasis></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band in input ramp table.
+                    M2=240/221 for S-band and 880/749 for X band. </para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Uplink Bank in input Doppler measurement
+                    file has no effect. </para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Use frequency in ramp table </para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Ground Station transmit frequency set via
+                    Transmitter.Frequency is not used </para>
+                  </listitem>
+                </itemizedlist></entry>
             </row>
           </tbody>
         </tgroup>
       </informaltable>
+
+      <para>There is one clarification to the table above. If media
+      corrections are modeled, the frequency set on the Transmitter object,
+      Transmitter.Frequency, and the turn around ratio set on the Transponder
+      object, Transponder.TurnAroundRatio, will be used to calculate the,
+      typically small, media corrections needed to determine the computed, C,
+      value of the range and Doppler measurements.</para>
     </refsection>
   </refsection>
 
@@ -637,7 +716,7 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>Run batch estimator. </para>
+      <para>Run batch estimator.</para>
 
       <programlisting><code>Create BatchEstimatorInv myBatchEstimator
 
