@@ -809,13 +809,13 @@ Number of records used for estimation: 1348</programlisting>As previously
       <guilabel>BatchEstimatorInv</guilabel> Help. As described in the Help,
       for the initial iteration, data is edited if</para>
 
-      <para>|Weighted Measurement Residual| &gt;
+      <para>        |Weighted Measurement Residual| &gt;
       <guilabel>OLSEInitialRMSSigma</guilabel></para>
 
       <para>where the Weighted Measurement Residual for a given measurement is
       given by</para>
 
-      <para>(O-C)/<guilabel>NoiseSigma</guilabel></para>
+      <para>        (O-C)/<guilabel>NoiseSigma</guilabel></para>
 
       <para>and where <guilabel>NoiseSigma</guilabel> are inputs that we set
       when we created the various <guilabel>ErrorModel</guilabel>
@@ -896,13 +896,13 @@ Number of records used for estimation: 1346</programlisting>
       of Outer Loop Sigma Editing (OLSE)” section in the
       <guilabel>BatchEstimatorInv</guilabel> Help,” data is edited if</para>
 
-      <para>|Weighted Measurement Residual| &gt; OLSEMultiplicativeConstant *
-      WRMSP + OLSEAdditiveConstant</para>
+      <para>        |Weighted Measurement Residual| &gt;
+      OLSEMultiplicativeConstant * WRMSP + OLSEAdditiveConstant</para>
 
       <para>where</para>
 
-      <para>WRMSP is the predicted weighted RMS calculated at the end of the
-      previous iteration.</para>
+      <para>        WRMSP is the predicted weighted RMS calculated at the end
+      of the previous iteration.</para>
 
       <para>In the <xref
       linkend="DSN_Estimation_Create_and_configure_BatchEstimatorInv_object"
@@ -911,7 +911,7 @@ Number of records used for estimation: 1346</programlisting>
       <guilabel>OLSEAdditiveConstant</guilabel> = 0 and thus the equation
       above becomes</para>
 
-      <para>|Weighted Measurement Residual| &gt; 3 * WRMSP</para>
+      <para>        |Weighted Measurement Residual| &gt; 3 * WRMSP</para>
 
       <para>It is a good sign that only 2 of 1348, or 0.15 % of the data is
       edited out. If too much data is edited out, even if you have a good
@@ -994,7 +994,7 @@ Final Correlation Matrix:
 ********************************************************
 </programlisting>
 
-<programlisting>
+      <programlisting>
 Mission run completed.
 ===&gt; Total Run Time: 85.739000 seconds
 
@@ -1404,7 +1404,9 @@ Final Estimated State:
    Sat.SunMJ2000Eq.VX = -13.7889997238
    Sat.SunMJ2000Eq.VY = -24.673000621
    Sat.SunMJ2000Eq.VZ = -10.6619988668
-</programlisting><programlisting width="80"><?db-font-size 50% ?>Final Covariance Matrix:
+</programlisting>
+
+    <programlisting width="80"><?db-font-size 50% ?>Final Covariance Matrix:
 
         6.566855211518e+000        1.044634165793e+001        3.112863356104e+000       -2.345908150453e-006        5.035500518048e-007        1.602400702334e-006
         1.044634082751e+001        2.043155461343e+001       -4.258301029878e+000       -3.704075903144e-006        2.022938490903e-007        3.971535902921e-006
