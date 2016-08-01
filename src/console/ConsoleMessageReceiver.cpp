@@ -270,6 +270,19 @@ void ConsoleMessageReceiver::SetLogEnable(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// bool GetLogEnable()
+//------------------------------------------------------------------------------
+/**
+* returns if logging is on or off.
+*
+*/
+//------------------------------------------------------------------------------
+bool ConsoleMessageReceiver::GetLogEnable()
+{
+   return logEnabled;
+}
+
+//------------------------------------------------------------------------------
 // void SetLogPath(const std::string &pathname, bool append = false)
 //------------------------------------------------------------------------------
 /*
@@ -401,6 +414,8 @@ void ConsoleMessageReceiver::LogMessage(const std::string &msg)
 {
    std::cout << msg;
    
+   if (!logEnabled) return;
+
    if (logEnabled)
    {
       if (logFile == NULL)
@@ -439,6 +454,8 @@ void ConsoleMessageReceiver::LogMessage(const std::string &msg)
 //------------------------------------------------------------------------------
 void ConsoleMessageReceiver::LogMessage(const char *msg, ...)
 {
+   if (!logEnabled) return;
+
    short    ret;
    short    size;
    va_list  marker;

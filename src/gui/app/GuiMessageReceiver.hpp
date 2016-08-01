@@ -63,6 +63,7 @@ public:
    
    virtual std::string GetLogFileName();
 
+   virtual bool GetLogEnable();
    virtual void SetLogEnable(bool flag);
    virtual void SetLogPath(const std::string &pathname, bool append = false);
    virtual void SetLogFile(const std::string &filename);

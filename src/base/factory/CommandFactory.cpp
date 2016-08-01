@@ -69,9 +69,9 @@
 #include "PenUp.hpp"          // for PenUp command
 #include "PenDown.hpp"        // for PenDown command
 #include "MarkPoint.hpp"      // for MarkPoint command
-//#include "Global.hpp"         // for Global command
+//#include "Global.hpp"       // for Global command
 #include "Create.hpp"         // for Create command
-#include "Display.hpp"        // for Display command
+#include "Write.hpp"          // for Write command
 
 //******************************************************************************
 // ElseIf does not work yet. (2008.08.29)
@@ -188,8 +188,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
 //        return new Global;
     else if (ofType == "Create")
         return new Create;
-    else if (ofType == "Display")
-        return new Display;
+    else if (ofType == "Write")
+        return new Write;
    // add more here .......
    else 
    {
@@ -224,7 +224,7 @@ CommandFactory::CommandFactory() :
 //      creatables.push_back("CallGmatFunction");
       creatables.push_back("ClearPlot");
       creatables.push_back("Create");
-      creatables.push_back("Display");
+      creatables.push_back("Write");
       creatables.push_back("Else");
 #ifdef __INCLUDE_ELSEIF__
       creatables.push_back("ElseIf");
@@ -280,7 +280,7 @@ CommandFactory::CommandFactory() :
       unviewables.push_back("Create");
 
       // Commented out. If this breaks lots of GUI testing uncomment this
-      //unviewables.push_back("Display");
+      //unviewables.push_back("Write");
       
       // CallFunction is parent command of CallGmatFunction and CallMatlabFunction
       unviewables.push_back("CallFunction");

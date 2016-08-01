@@ -272,37 +272,37 @@ void OrbitViewPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    mDataCollectFreqTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(40, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    mUpdatePlotFreqTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(40, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
+   mEnableStarsCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Enable Stars"), wxDefaultPosition, wxDefaultSize, 0);
+   mEnableConstellationsCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Enable Constellations"), wxDefaultPosition, wxDefaultSize, 0);
+   //mEnableConstellationsCheckBox->Disable();
+
    mStarCountStaticText =
       new wxStaticText(this, -1, wxT("Number of stars "), 
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mStarCountTextCtrl = 
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("7000"), wxDefaultPosition, wxSize(50, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("7000"), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    //mStarCountTextCtrl->Disable();
-   
-   mEnableStarsCheckBox = 
-      new wxCheckBox(this, CHECKBOX, wxT("Enable Stars"), wxDefaultPosition, wxSize(100, -1), 0);
-   mEnableConstellationsCheckBox = 
-      new wxCheckBox(this, CHECKBOX, wxT("Enable Constellations"), wxDefaultPosition, wxSize(160, -1), 0);
-   //mEnableConstellationsCheckBox->Disable();
    
    wxBoxSizer *colFreqSizer = new wxBoxSizer(wxHORIZONTAL);
    colFreqSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   colFreqSizer->Add(mDataCollectFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   colFreqSizer->Add(mDataCollectFreqTextCtrl, 1, wxALIGN_LEFT|wxALL, bsize);
    colFreqSizer->Add(dataCollectFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxBoxSizer *updFreqSizer = new wxBoxSizer(wxHORIZONTAL);
    updFreqSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   updFreqSizer->Add(mUpdatePlotFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   updFreqSizer->Add(mUpdatePlotFreqTextCtrl, 1, wxALIGN_LEFT|wxALL, bsize);
    updFreqSizer->Add(updatePlotFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
 
    wxBoxSizer *starOptionSizer = new wxBoxSizer(wxHORIZONTAL);
    starOptionSizer->Add(mStarCountStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   starOptionSizer->Add(mStarCountTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   starOptionSizer->Add(mStarCountTextCtrl, 1, wxALIGN_LEFT|wxALL, bsize);
    
    wxBoxSizer *plotOptionSizer = new wxBoxSizer(wxVERTICAL);   
    plotOptionSizer->Add(colFreqSizer, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -314,12 +314,12 @@ void OrbitViewPanel::Create()
    wxStaticText *numPointsToRedrawLabel1 =
       new wxStaticText(this, -1, gmatwxT("Number of points to redraw\n"
                                          "(Enter 0 to redraw whole plot)"),
-                       wxDefaultPosition, wxSize(-1, -1), 0);
+                       wxDefaultPosition, wxDefaultSize, 0);
    mNumPointsToRedrawTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(30, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    wxBoxSizer *numPointsSizer = new wxBoxSizer(wxHORIZONTAL);
-   numPointsSizer->Add(numPointsToRedrawLabel1, 0, wxALIGN_LEFT|wxALL, 0);
+   numPointsSizer->Add(numPointsToRedrawLabel1, 1, wxALIGN_LEFT|wxALL, 0);
    numPointsSizer->Add(mNumPointsToRedrawTextCtrl, 0, wxALIGN_LEFT|wxALL, 0);
    
    plotOptionSizer->Add(numPointsSizer, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -342,16 +342,6 @@ void OrbitViewPanel::Create()
       new GmatStaticBoxSizer(wxVERTICAL, this, "Plot Option");
    
    plotOptionStaticSizer->Add(plotOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   //-----------------------------------------------------------------
-   // View option
-   //-----------------------------------------------------------------
-   mUseInitialViewCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Use Initial View Def."),
-                     wxDefaultPosition, wxSize(-1, -1), bsize);
-   
-   wxBoxSizer *viewOptionSizer = new wxBoxSizer(wxVERTICAL);
-   viewOptionSizer->Add(mUseInitialViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    #ifdef __ENABLE_GL_PERSPECTIVE__
    
@@ -376,10 +366,6 @@ void OrbitViewPanel::Create()
    fovSizer->Add(mFixedFovTextCtrl, 0, wxALIGN_LEFT|wxALL, 0);
    viewOptionSizer->Add(fovSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    #endif
-   
-   GmatStaticBoxSizer *viewOptionStaticSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "View Option");
-   viewOptionStaticSizer->Add(viewOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //-----------------------------------------------------------------
    // Drawing option
@@ -441,7 +427,7 @@ void OrbitViewPanel::Create()
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1), emptyList, wxCB_READONLY);
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize, emptyList, wxCB_READONLY);
    
    // Get Solver Iteration option list from the Subscriber
    const std::string *solverIterList = Subscriber::GetSolverIterOptionList();
@@ -452,6 +438,21 @@ void OrbitViewPanel::Create()
    solverIterOptionSizer->Add(solverIterLabel, 0, wxALIGN_CENTER|wxALL, bsize);
    solverIterOptionSizer->Add(mSolverIterComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
+   //-----------------------------------------------------------------
+   // View option
+   //-----------------------------------------------------------------
+   mUseInitialViewCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Use Initial View Def."),
+      wxDefaultPosition, wxSize(-1, -1), bsize);
+
+   wxBoxSizer *viewOptionSizer = new wxBoxSizer(wxVERTICAL);
+   viewOptionSizer->Add(mUseInitialViewCheckBox, 0, wxALIGN_LEFT | wxALL, bsize);
+
+   GmatStaticBoxSizer *viewOptionStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "View Option");
+   viewOptionStaticSizer->Add(viewOptionSizer, 0, wxALIGN_LEFT | wxALL, bsize);
+
+
    wxBoxSizer *drawOptionSizer = new wxBoxSizer(wxVERTICAL);
    drawOptionSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -475,18 +476,20 @@ void OrbitViewPanel::Create()
    drawOptionStaticSizer->Add(drawOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //-----------------------------------------------------------------
-   // Available spcecrafts and objects
+   // Available spacecrafts and objects
    //-----------------------------------------------------------------
+   wxSize fontSize = GetFont().GetPixelSize();
+   int lbHeight = 10 * fontSize.GetHeight();
    wxStaticText *scAvailableLabel =
       new wxStaticText(this, -1, wxT("Spacecraft"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mSpacecraftListBox = theGuiManager->
-      GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), &mExcludedScList);
+      GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150, lbHeight), &mExcludedScList);
    wxStaticText *coAvailableLabel =
       new wxStaticText(this, -1, wxT("Celestial Object"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mCelesPointListBox = theGuiManager->
-      GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150,65), &mExcludedCelesPointList);
+      GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150, lbHeight), &mExcludedCelesPointList);
    
    wxBoxSizer *availObjSizer = new wxBoxSizer(wxVERTICAL);
    availObjSizer->Add(scAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -519,10 +522,10 @@ void OrbitViewPanel::Create()
       new wxStaticText(this, -1, wxT("Selected Celestial Object"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mSelectedScListBox =
-      new wxListBox(this, SC_SEL_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
+      new wxListBox(this, SC_SEL_LISTBOX, wxDefaultPosition, wxSize(150, lbHeight), //0,
                     emptyList, wxLB_SINGLE);
    mSelectedObjListBox =
-      new wxListBox(this, OBJ_SEL_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
+      new wxListBox(this, OBJ_SEL_LISTBOX, wxDefaultPosition, wxSize(150, lbHeight), //0,
                     emptyList, wxLB_SINGLE);
    
    wxBoxSizer *mObjSelectedSizer = new wxBoxSizer(wxVERTICAL);
@@ -573,82 +576,63 @@ void OrbitViewPanel::Create()
       new GmatStaticBoxSizer(wxVERTICAL, this, "View Object");
    viewObjectStaticSizer->Add(mObjectSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   //-----------------------------------------------------------------
-   // View point reference
-   //-----------------------------------------------------------------
-   mViewPointRef1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   mViewPointRef2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   mViewPointRef3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   mViewPointRefStaticText = new wxStaticText(this, -1, wxT("km"),
-     wxDefaultPosition, wxSize(-1,-1), 0);
-   
-   mViewPointRefSizer = new wxBoxSizer(wxHORIZONTAL);
-   mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRefStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   //-----------------------------------------------------------------
-   // View point vector
-   //-----------------------------------------------------------------
-   mViewPointVec1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   mViewPointVec2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   mViewPointVec3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   
-   mViewPointVecStaticText = new wxStaticText(this, -1, wxT("km"),
-     wxDefaultPosition, wxSize(-1,-1), 0);
-   
-   mViewPointVectorSizer = new wxBoxSizer(wxHORIZONTAL);
-   mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVecStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   //-----------------------------------------------------------------
-   // View direction
-   //-----------------------------------------------------------------
-   mViewDirVectorSizer = new wxBoxSizer(wxHORIZONTAL);
-   
-   mViewDir1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   mViewDir2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   mViewDir3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT("-1"), wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   mViewDirStaticText = new wxStaticText(this, -1, wxT("km"),
-     wxDefaultPosition, wxSize(-1,-1), 0);
-
-   mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDirStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
    wxStaticText *coordSysLabel =
       new wxStaticText(this, -1, wxT("Coordinate System"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mCoordSysComboBox =
-      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxDefaultSize);
    
    wxStaticText *viewPointRefLabel =
       new wxStaticText(this, -1, wxT("View Point Reference"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mViewPointRefComboBox =
-      theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
+      theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxDefaultSize, true);
    
+   //-----------------------------------------------------------------
+   // View point reference
+   //-----------------------------------------------------------------
+   mViewPointRef1TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mViewPointRef2TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mViewPointRef3TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mViewPointRefStaticText = new wxStaticText(this, -1, wxT("km"),
+      wxDefaultPosition, wxSize(-1, -1), 0);
+
+   mViewPointRefSizer = new wxBoxSizer(wxHORIZONTAL);
+   mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRefStaticText, 0, wxALIGN_LEFT | wxALL, bsize);
+
    wxStaticText *viewPointVectorLabel =
       new wxStaticText(this, -1, wxT("View Point Vector"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mViewPointVectorComboBox =
-      theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
+      theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxDefaultSize, true);
    
    //-----------------------------------------------------------------
-   // Add to view definitin sizer
+   // View point vector
+   //-----------------------------------------------------------------
+   mViewPointVec1TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mViewPointVec2TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mViewPointVec3TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+   mViewPointVecStaticText = new wxStaticText(this, -1, wxT("km"),
+      wxDefaultPosition, wxSize(-1, -1), 0);
+
+   mViewPointVectorSizer = new wxBoxSizer(wxHORIZONTAL);
+   mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVecStaticText, 0, wxALIGN_LEFT | wxALL, bsize);
+
+   //-----------------------------------------------------------------
+   // Add to view definition sizer
    //-----------------------------------------------------------------
    mViewDefSizer = new wxFlexGridSizer(3, 0, 0);
    mViewDefSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
@@ -667,7 +651,7 @@ void OrbitViewPanel::Create()
       new wxStaticText(this, -1, wxT("View Scale Factor"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mViewScaleFactorTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    mViewDefSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    mViewDefSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -678,9 +662,28 @@ void OrbitViewPanel::Create()
       new wxStaticText(this, -1, wxT("View Direction"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mViewDirectionComboBox =
-      theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
+      theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxDefaultSize, true);
    
-   mViewDefSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   //-----------------------------------------------------------------
+   // View direction
+   //-----------------------------------------------------------------
+   mViewDirVectorSizer = new wxBoxSizer(wxHORIZONTAL);
+
+   mViewDir1TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mViewDir2TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mViewDir3TextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("-1"), wxDefaultPosition, wxSize(80, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mViewDirStaticText = new wxStaticText(this, -1, wxT("km"),
+      wxDefaultPosition, wxSize(-1, -1), 0);
+
+   mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT | wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDirStaticText, 0, wxALIGN_LEFT | wxALL, bsize);
+
+   mViewDefSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT | wxALL, bsize);
    mViewDefSizer->Add(mViewDirectionComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    mViewDefSizer->Add(mViewDirVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
@@ -693,15 +696,15 @@ void OrbitViewPanel::Create()
    //-----------------------------------------------------------------
    wxStaticText *upCsLabel =
       new wxStaticText(this, -1, wxT("Coordinate System"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
+            wxDefaultPosition, wxDefaultSize, 0);
    mViewUpCsComboBox =
-      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxDefaultSize);
    wxStaticText *upAxisLabel =
       new wxStaticText(this, -1, wxT("Axis"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
+            wxDefaultPosition, wxDefaultSize, 0);
    mViewUpAxisComboBox =
       new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
-                     wxSize(50,-1),6, axisArray, wxCB_READONLY);
+                     wxSize(60,-1),6, axisArray, wxCB_READONLY);
    
    wxBoxSizer *viewUpSizer = new wxBoxSizer(wxHORIZONTAL);
    viewUpSizer->Add(upCsLabel, 0, wxALIGN_CENTER|wxALL, bsize);

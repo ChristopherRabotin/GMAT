@@ -971,12 +971,12 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
    else
       nomme = instanceName;
    
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) || (mode == Gmat::NO_COMMENTS))
    {
       std::string tname = typeName;
 
       // Add comment line (loj: 03/27/07)
-      if (GetCommentLine() != "")
+      if ((mode != Gmat::NO_COMMENTS) && (GetCommentLine() != ""))
          data << GetCommentLine();
       
       data << "Create " << tname << " " << nomme 

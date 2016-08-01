@@ -131,11 +131,12 @@ void FiniteBurnSetupPanel::Create()
          mExcludedThrusterList.Add(thrusterNames[i].c_str());
 
       // Thruster list boxes
+      wxSize fontSize = GetFont().GetPixelSize();
       availableThrusterListBox =
          theGuiManager->GetThrusterListBox(this, ID_LISTBOX, wxSize(150,200),
                                            &mExcludedThrusterList);
       availableThrusterListBox->SetToolTip(pConfig->Read(_T("AvailableThrustersHint")));
-      availableSizer->Add(availableThrusterListBox, 0, wxALIGN_CENTRE|wxALL, 5);
+      availableSizer->Add(availableThrusterListBox, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, 5);
 
       wxArrayString selectedList;
       for (Integer i = 0; i < count; i++)
@@ -144,7 +145,7 @@ void FiniteBurnSetupPanel::Create()
          new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150,200), //0,
                selectedList, wxLB_SINGLE);
       selectedThrusterListBox->SetToolTip(pConfig->Read(_T("SelectedThrustersHint")));
-      selectedSizer->Add(selectedThrusterListBox, 0, wxALIGN_CENTRE|wxALL, 5);
+      selectedSizer->Add(selectedThrusterListBox, 1, wxALIGN_CENTRE|wxEXPAND|wxALL, 5);
 
 
       // wxButton
@@ -170,10 +171,10 @@ void FiniteBurnSetupPanel::Create()
       buttonSizer->Add(removeAllButton, 0, wxALIGN_CENTRE|wxALL, 5);
 
       // Put all the sizers together
-      thrusterSelectionSizer->Add(availableSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+      thrusterSelectionSizer->Add(availableSizer, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, 5);
       thrusterSelectionSizer->Add(buttonSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-      thrusterSelectionSizer->Add(selectedSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-      theMiddleSizer->Add(thrusterSelectionSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+      thrusterSelectionSizer->Add(selectedSizer, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, 5);
+      theMiddleSizer->Add(thrusterSelectionSizer, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, 5);
    }
    else
    {
