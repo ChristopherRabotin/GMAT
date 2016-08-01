@@ -30,6 +30,7 @@ SET(TargetName GmatEstimation)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
+ADD_DEFINITIONS("-DUNABLE_UNFINISHED_FEATURES")
 
 # ====================================================================
 # list of directories containing source/header files
