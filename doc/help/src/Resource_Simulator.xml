@@ -29,30 +29,28 @@
   <refsection>
     <title>Description</title>
 
-    <para>A <guilabel>Simulator</guilabel> configures the generation of
-    simulated tracking data measurements. These measurements can then be used
-    by a <guilabel>BatchEstimatorInv</guilabel> resource as part of an
-    estimation run.</para>
+    <para>A Simulator configures the generation of simulated tracking data
+    measurements. These measurements can then be used by a BatchEstimatorInv
+    in an estimation run. </para>
 
-    <para>The <guilabel>Simulator</guilabel> object requires specification of
-    one or more instances of <guilabel>TrackingFileSet</guilabel> which
-    identify the specific tracking data observation strands, data types,
-    desired measurement corrections, and the output tracking data file name.
-    Simulated data will be written in the GMAT ASCII GMD tracking data
-    format.The user must additionally specify a time span for the simulation
-    run and a time interval between simulated observations. Simulated
-    observations are only generated when a tracking strand meets the
+    <para>The Simulator object requires specification of one or more instances
+    of TrackingFileSet which identify the specific tracking data observation
+    strands, data types, desired measurement corrections, and the output
+    tracking data file name. Simulated data will be written in the GMAT ASCII
+    GMD tracking data format.The user must additionally specify a time span
+    for the simulation run and a time interval between simulated observations.
+    Simulated observations are only generated when a tracking strand meets the
     visibility constraints of all objects in the strand (for example, the
     observation must be above the ground station minimum elevation mask). The
-    user additionally must configure and specify an instance of a
-    <guilabel>Propagator</guilabel> for the simulator. Finally, the user can
-    choose to add random Gaussian noise to the generated measurements or to
-    generate measurements without noise. If the Simulator.AddNoise option is
-    set to On, the noise and bias parameters specified on each strand’s
-    <guilabel>GroundStation.ErrorModel</guilabel> are used.</para>
+    user additionally must configure and specify an instance of a Propagator
+    for the simulator. Finally, the user can choose to add random Gaussian
+    noise to the generated measurements or to generate measurements without
+    noise. If the Simulator.AddNoise option is set to On, the noise and bias
+    parameters specified on each strand’s GroundStation.ErrorModel are
+    used.</para>
 
-    <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="TrackingFileSet"/>, <xref linkend="RunEstimator"/></para>
+    <para>TrackingFileSet, GroundStation, ErrorModel See Also <xref
+    linkend="GroundStation"/></para>
   </refsection>
 
   <refsection>
@@ -82,7 +80,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para><guilabel>TrackingFileSet</guilabel> object</para>
+                    <para>TrackingFileSet object</para>
                   </listitem>
                 </varlistentry>
 
@@ -90,8 +88,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any valid <guilabel>TrackingFileSet</guilabel>
-                    object</para>
+                    <para>Any Valid TrackingFileSet object</para>
                   </listitem>
                 </varlistentry>
 
@@ -251,9 +248,8 @@
             <entry><guilabel>InitialEpoch</guilabel></entry>
 
             <entry><para>The initial (start) epoch of the data simulation
-            span. In the GMAT script, the <guilabel>EpochFormat</guilabel>
-            field needs to be set before this field is set. </para>
-            <variablelist>
+            span. In the GMAT script, the EpochFormat field needs to be set
+            before this field is set. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -312,8 +308,8 @@
             <entry><guilabel>FinalEpoch</guilabel></entry>
 
             <entry><para>The final (ending) epoch of the data simulation span.
-            In the GMAT script, the <guilabel>EpochFormat</guilabel> field
-            needs to be set before this field is set. </para> <variablelist>
+            In the GMAT script, the EpochFormat field needs to be set before
+            this field is set. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -428,8 +424,8 @@
           <row>
             <entry><guilabel>Propagator</guilabel></entry>
 
-            <entry><para>Name of <guilabel>Propagator</guilabel> object used
-            for calculation</para> <variablelist>
+            <entry><para>Name of Propagator object used for calculation</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -510,17 +506,16 @@
             <row>
               <entry><guilabel>TrackingFileSet resource</guilabel></entry>
 
-              <entry><para> Must be created in order to tell the
-              <guilabel>Simulator</guilabel> resource which data will be
-              simulated</para></entry>
+              <entry><para> Must be created in order to tell the Simulator
+              resource which data will be simulated</para></entry>
             </row>
 
             <row>
               <entry><guilabel>RunSimulator command</guilabel></entry>
 
               <entry><para> Must use the <guilabel>RunSimulator</guilabel>
-              command to actually create the data defined by the
-              <guilabel>Simulator</guilabel> resource</para></entry>
+              command to actually create the data defined by the Simulator
+              resource</para></entry>
             </row>
           </tbody>
         </tgroup>
@@ -533,11 +528,9 @@
 
     <informalexample>
       <para>The example below illustrates using the simulator to generate DSN
-      range measurements. This example assumes that the
-      <guilabel>SimSat</guilabel> <guilabel>Spacecraft</guilabel>,
-      <guilabel>GDS</guilabel> <guilabel>GroundStation</guilabel>, and
-      <guilabel>prop</guilabel> <guilabel>Propagator</guilabel> are configured
-      elsewhere in the script.</para>
+      range measurements. This example assumes that the SimSat Spacecraft, GDS
+      GroundStation, and prop Propagator are configured elsewhere in the
+      script.</para>
 
       <programlisting>%   Configure the Simulator object. This assumes that prop is an existing
 %   instance of a Propagator and simData is an existing instance of a 

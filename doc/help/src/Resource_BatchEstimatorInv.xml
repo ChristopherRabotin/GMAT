@@ -35,8 +35,7 @@
     a specific epoch and the performance index is a weighted sum of the square
     of the measurement residuals.</para>
 
-    <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="TrackingFileSet"/>, <xref linkend="RunEstimator"/></para>
+    <para>See Also <xref linkend="GroundStation"/></para>
   </refsection>
 
   <refsection>
@@ -117,16 +116,12 @@
           <row>
             <entry><guilabel>EstimationEpoch</guilabel></entry>
 
-            <entry><para>Estimation Epoch. This is the epoch associated with
-            the "solve-fors." For release R2016A, this epoch comes from the
-            participants defined in the <guilabel>Measurements</guilabel>
-            field. In later releases, additional options will be allowed.
-            </para> <variablelist>
+            <entry><para>xx</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>xx</para>
                   </listitem>
                 </varlistentry>
 
@@ -134,7 +129,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>'FromParticipants'</para>
+                    <para>xx</para>
                   </listitem>
                 </varlistentry>
 
@@ -151,7 +146,7 @@
 
                   <listitem>
                     <para>
-                      <guilabel>'FromParticipants'</guilabel>
+                      <guilabel>empty list</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -177,18 +172,12 @@
           <row>
             <entry><guilabel>EstimationEpochFormat</guilabel></entry>
 
-            <entry><para>Estimation Epoch format. This is the desired input
-            format for the <guilabel>EstimationEpoch</guilabel> field. For
-            release R2016A, the only allowed value is 'FromParticipants' which
-            means that the <guilabel>EstimationEpoch</guilabel> comes from the
-            participants defined in the <guilabel>Measurements</guilabel>
-            field. In later releases, additional options will be allowed.
-            </para> <variablelist>
+            <entry><para>xx</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>xx</para>
                   </listitem>
                 </varlistentry>
 
@@ -196,7 +185,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>'FromParticipants'</para>
+                    <para>xx</para>
                   </listitem>
                 </varlistentry>
 
@@ -213,64 +202,7 @@
 
                   <listitem>
                     <para>
-                      <guilabel>'FromParticipants'</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>InverseAlgorithm</guilabel></entry>
-
-            <entry><para>Algorithm used to invert the normal equations</para>
-            <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>String</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Internal, Cholesky, Schur</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>Internal</guilabel>
+                      <guilabel>empty list</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -296,14 +228,12 @@
           <row>
             <entry><guilabel>MatlabFile</guilabel></entry>
 
-            <entry><para>File name for the output MATLAB file. A value of
-            <code>None</code> means that no MATLAB file will be output.
-            </para> <variablelist>
+            <entry><para>xx</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>xx</para>
                   </listitem>
                 </varlistentry>
 
@@ -311,7 +241,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any valid file name.</para>
+                    <para>xx</para>
                   </listitem>
                 </varlistentry>
 
@@ -328,7 +258,7 @@
 
                   <listitem>
                     <para>
-                      <guilabel>None</guilabel>
+                      <guilabel>empty list</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -444,64 +374,6 @@
                   <listitem>
                     <para>
                       <guilabel>15</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>Measurements</guilabel></entry>
-
-            <entry><para>Specifies a list of measurements used for batch
-            estimation</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>ObjectArray</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>valid <guilabel>TrackingFileSet</guilabel>
-                    object</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>empty list</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -887,7 +759,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Normal</para>
+                    <para>Normal, Concise, Verbose, Debug</para>
                   </listitem>
                 </varlistentry>
 
@@ -1100,14 +972,13 @@
           <row>
             <entry><guilabel>UseInitialCovariance</guilabel></entry>
 
-            <entry><para>If set true, <emphasis>a priori</emphasis> error
-            covariance term is added to the estimation cost function.</para>
-            <variablelist>
+            <entry><para>If set true, a-priori error covariance term is added
+            to the estimation cost function.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>true/false</para>
+                    <para>xx</para>
                   </listitem>
                 </varlistentry>
 
@@ -1115,7 +986,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>true or false</para>
+                    <para>xx</para>
                   </listitem>
                 </varlistentry>
 
@@ -1132,7 +1003,7 @@
 
                   <listitem>
                     <para>
-                      <guilabel>false</guilabel>
+                      <guilabel>empty list</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -1176,19 +1047,19 @@
       <para><emphasis role="bold">Absolute Weighted RMS convergence criteria
       </emphasis></para>
 
-      <para>        Weighted RMScurrent ≤ AbsoluteTol</para>
+      <para>Weighted RMScurrent ≤ AbsoluteTol</para>
 
       <para><emphasis role="bold">Relative Weighted Root Mean Square (RMS)
       convergence criteria</emphasis></para>
 
-      <para>        |RMSP – RMSB|/ RMSB ≤ RelativeTol</para>
+      <para>|RMSP – RMSB|/ RMSB ≤ RelativeTol</para>
 
       <para>where</para>
 
-      <para>        RMSB = smallest Weighted RMS achieved during the current
-      and previous iterations</para>
+      <para>RMSB = smallest Weighted RMS achieved during the current and
+      previous iterations</para>
 
-      <para>        RMSP = predicted Weighted RMS of next iteration</para>
+      <para>RMSP = predicted Weighted RMS of next iteration</para>
 
       <para>Batch estimation is considered to have converged when either or
       both of the above criteria is met within
@@ -1216,21 +1087,20 @@
       subsequent iterations. On the first outer loop iteration, data is edited
       if</para>
 
-      <para>        |Weighted Measurement Residual| &gt;
+      <para>|Weighted Measurement Residual| &gt;
       <guilabel>OLSEInitialRMSSigma</guilabel></para>
 
-      <para>where the Weighted Measurement Residual for a single given
-      measurement is given by</para>
+      <para>where the Weighted Measurement Residual for a given measurement is
+      given by</para>
 
-      <para>        (O-C)/<guilabel>NoiseSigma</guilabel></para>
+      <para>(O-C)/<guilabel>NoiseSigma</guilabel></para>
 
-      <para>and where <guilabel>NoiseSigma</guilabel> is the input noise (one
+      <para>where <guilabel>NoiseSigm</guilabel>a is the input noise (one
       sigma) for the measurement type associated with the given measurement.
       On subsequent outer loop iterations, data is edited if</para>
 
-      <para>        |Weighted Measurement Residual| &gt;
-      <guilabel>OLSEMultiplicativeConstant</guilabel> * WRMSP +
-      <guilabel>OLSEAdditiveConstan</guilabel>t</para>
+      <para>|Weighted Measurement Residual| &gt; OLSEMultiplicativeConstant *
+      WRMSP + OLSEAdditiveConstant</para>
 
       <para>where WRMSP is the predicted weighted RMS calculated at the end of
       the previous iteration.</para>

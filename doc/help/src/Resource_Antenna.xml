@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Antenna" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="Antenna"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -21,75 +22,406 @@
   <refnamediv>
     <refname>Antenna</refname>
 
-    <refpurpose>Transmits or receives an RF signal.</refpurpose>
+    <refpurpose>used to specify measurement noise for simulation and
+    estimation, and to apply or estimate measurement biases.</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>A number of GMAT resources, <guilabel>GroundStation</guilabel>,
-    <guilabel>Transponder</guilabel>, <guilabel>Receiver</guilabel>, and
-    <guilabel>Transmitter</guilabel>, use an <guilabel>Antenna</guilabel>
-    resource to transmit and receive RF signals.</para>
+    <para>An ErrorModel is assigned on the ErrorModels field of an instance of
+    GroundStation to model biases and noise, and optionally to estimate biases
+    on each measurement type provided by the ground station. An ErrorModel
+    must be specified for each data type employed by each tracking station,
+    but a single instance of ErrorModel may be used by multiple ground
+    stations.</para>
 
-    <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="GroundStation"/>, <xref linkend="Transponder"/>, <xref
-    linkend="Receiver"/>, <xref linkend="Transmitter"/></para>
+    <para>The ErrorModel is used by both the simulator and the estimator. For
+    a data simulation run, the ErrorModel specifies the measurement type and
+    noise employed when generating the simulated measurement. A bias may
+    optionally be applied to the simulated observations.</para>
+
+    <para>For an estimation run, the ErrorModel specifies the observation
+    type, presumed observation noise, and an optional bias to be applied to
+    the observation. An observation bias may also be estimated by adding the
+    keyword Bias to the ErrorModel.SolveFors list. If the SolveFors list is
+    empty, no bias will be estimated. The SolveFors list is ignored by the
+    simulator. TODO: Fix SEE.. </para>
+
+    <para>TrackingFileSet, GroundStation, ErrorModel See Also <xref
+    linkend="GroundStation"/></para>
   </refsection>
 
   <refsection>
     <title>Fields</title>
 
-    <para>There are no fields for the <guilabel>Antenna</guilabel> resource.
-    </para>
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="1.0*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>Bias</guilabel></entry>
+
+            <entry><para>The constant bias associated with the measurement.
+            For simulations, this bias is added to the measurement. As shown
+            below, the units used depend upon measurement type,
+            <guilabel>ErrorModel.Type</guilabel>. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any Real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0.0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Range_RU: RU, Doppler_HZ: Hz</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>BiasSigma</guilabel></entry>
+
+            <entry><para>Standard deviation of bias</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>1e+70</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>NoiseSigma</guilabel></entry>
+
+            <entry><para>One sigma value of Gaussian noise. For simulations,
+            if Sim.AddNoise= true, this noise is added to the measurements.
+            For estimation, this value is used to as part of the batch
+            processing algorithms. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>TAIModJulian</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>SolveFors</guilabel></entry>
+
+            <entry><para>List of fields to be solved for</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>StringArray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Bias</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>{}</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Type</guilabel></entry>
+
+            <entry><para>Measurement data type. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Range_RU, Doppler_HZ</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>Range_RU</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Measurement Type Names</title>
+
+      <para>Currently the measurement type names used to identify observation
+      types in GMD data files and on the TrackingFileSet.AddTrackingConfig
+      object field are not the same as those used to build measurement error
+      models for those types. Use the following table as a guide.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <thead>
+            <row>
+              <entry align="center">GMD File and
+              TrackingFileSet.AddTrackingConfig Measurement Type Name</entry>
+
+              <entry align="center">ErrorModel Measurement Type Name</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>DSNRange</entry>
+
+              <entry>Range_RU </entry>
+            </row>
+
+            <row>
+              <entry>Doppler </entry>
+
+              <entry>Doppler_HZ </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
   </refsection>
 
   <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>This example shows how the <guilabel>Antenna</guilabel> resource
-      is used. </para>
+      <para>This example shows how to create an ErrorModel for ground network
+      range observations and illustrates estimation of a range bias
+      parameter.</para>
 
-      <programlisting width="90">Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
-
-Create Transponder SatTransponder;
-SatTransponder.PrimaryAntenna   = SatTranponderAntenna
-
-Create Spacecraft Sat
-Sat.AddHardware                 = {SatTransponder, SatTranponderAntenna};
-
-Create Transmitter DSNTransmitter
-DSNTransmitter.PrimaryAntenna   = DSNTransmitterAntenna
-
-Create Receiver DSNReceiver
-DSNReceiver.PrimaryAntenna      = DSNReceiverAntenna;
-
-Create GroundStation DSN;
-DSN.AddHardware                 = ...
- {DSNTransmitter, DSNReceiver, DSNTransmitterAntenna, DSNReceiverAntenna};</programlisting>
-
-      <para>Since the <guilabel>Antenna</guilabel> resource currently has no
-      fields and thus has no function, for this GMAT release, we only needed
-      to create one <guilabel>Antenna</guilabel> resource. Thus, the example
-      above simplifies as shown below. </para>
-
-      <programlisting>Create Antenna GenericAntenna;
-
-Create Transponder SatTransponder;
-SatTransponder.PrimaryAntenna     = GenericAntenna
-
-Create Spacecraft Sat
-Sat.AddHardware                   = {SatTransponder, GenericAntenna};
-
-Create Transmitter DSNTransmitter
-DSNTransmitter.PrimaryAntenna     = GenericAntenna
-Create Receiver DSNReceiver
-DSNReceiver.PrimaryAntenna        = GenericAntenna;
-
-Create GroundStation DSN;
-DSN.AddHardware                   = ...
-                       {DSNTransmitter, DSNReceiver, GenericAntenna};</programlisting>
+      <programlisting>%   Create an ErrorModel
+ 
+Create ErrorModel Range_ErrorModel;
+  
+Range_ErrorModel.Type       = 'Range_RU';
+Range_ErrorModel.NoiseSigma = 11;
+Range_ErrorModel.Bias       = 0.0;
+Range_ErrorModel.SolveFors  = {Bias};
+ 
+%   Assign it to a ground station
+ 
+Create GroundStation USPS;
+ 
+USPS.ErrorModels = {Range_ErrorModel};</programlisting>
     </informalexample>
   </refsection>
 </refentry>
