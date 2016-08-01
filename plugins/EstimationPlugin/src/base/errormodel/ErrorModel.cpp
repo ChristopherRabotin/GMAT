@@ -72,11 +72,11 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 //------------------------------------------------------------------------------
 ErrorModel::ErrorModel(const std::string name) :
    GmatBase          (Gmat::ERROR_MODEL, "ErrorModel", name),
-   measurementType   ("Range_KM"),
-//   measurementTrip   (2),
-//   strand            (""),
-   noiseSigma        (0.01),                  // 0.01 measurement unit (km, RU, Km/s, or Hz)
-//   noiseModel        ("NoiseConstant"), 
+   measurementType   ("Range_RU"),
+// measurementTrip   (2),
+// strand            (""),
+   noiseSigma        (103.0),                 // (0.01),                  // 0.01 measurement unit (km, RU, Km/s, or Hz)
+// noiseModel        ("NoiseConstant"), 
    bias              (0.0),                   // 0.0 measurement unit (km, RU, Km/s, or Hz)
    biasSigma         (1.0e70)                 // 0.0 measurement unit (km, RU, Km/s, or Hz)
 {
