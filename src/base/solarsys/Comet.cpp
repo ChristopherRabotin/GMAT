@@ -73,6 +73,21 @@ Comet::Comet(std::string name) :
    bodyNumber          = -1;
    referenceBodyNumber = -1;
    
+//   // defaults for now ...
+//   Rmatrix s(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   Rmatrix c(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   sij = s;
+//   cij = c;
 
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();

@@ -110,6 +110,22 @@ Planet::Planet(std::string name) :
    else if (name == SolarSystem::NEPTUNE_NAME)
       rotationSrc      = Gmat::IAU_2002;
 
+//   // defaults for now ...
+//   Rmatrix s(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   Rmatrix c(5,5,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0,
+//         0.0, 0.0,             0.0,             0.0,             0.0);
+//   sij = s;
+//   cij = c;
+
 
    if (name == SolarSystem::EARTH_NAME)
    {
