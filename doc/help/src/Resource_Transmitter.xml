@@ -33,11 +33,9 @@
     transmit the RF signal to both user spacecraft and to navigation
     spacecraft such as TDRS. A <guilabel>Transmitter</guilabel> is assigned on
     the <guilabel>AddHardware</guilabel> list of an instance of a
-    <guilabel>GroundStation</guilabel>. See Also: Ground Station,
-    RunSimulator, RunEstimator, and Receiver.</para>
+    <guilabel>GroundStation</guilabel>. </para>
 
-    <para>TrackingFileSet, GroundStation, ErrorModel See Also <xref
-    linkend="GroundStation"/></para>
+    <para>See Also <xref linkend="GroundStation"/>. </para>
   </refsection>
 
   <refsection>
@@ -188,12 +186,12 @@
       <guilabel>GroundStation</guilabel> resource. Media corrections to DSN
       range and Doppler measurements, with this ground station as the
       receiving ground station, will be calculated based upon the transmitter
-      frequency. TO DO: check on this. Not true if have ramp table. </para>
+      frequency. TO DO: check on this. Not true if have ramp table.</para>
 
       <para>Independent of media corrections, as discussed in the
       <guilabel>RunSimulator</guilabel> Help, for the case where a ramp table
       is not used, the transmit frequency is used directly to calculate the
-      DSN range and Doppler measurements. </para>
+      DSN range and Doppler measurements.</para>
     </refsection>
   </refsection>
 
@@ -201,16 +199,17 @@
     <title>Examples</title>
 
     <informalexample>
-      <programlisting>% Create and configure a Transmitter object
-% We assume that DS46 is an existing instance of GroundStation.
+      <para>Create and configure a <guilabel>Transmitter</guilabel>
+      object</para>
 
-Create Antenna Antenna1;
+      <programlisting>Create Antenna DSNAntenna;
 Create Transmitter Transmitter1;
 
-Transmitter1.PrimaryAntenna = Antenna1;
-Transmitter1.Frequency = 7186.603393011; 
+Transmitter1.PrimaryAntenna = DSNAntenna;
+Transmitter1.Frequency = 7186.3; 
 
-DS46.AddHardware = {Transmitter1};
+Create GroundStation DSN
+DSN.AddHardware = {Transmitter1};
 
 BeginMissionSequence;</programlisting>
     </informalexample>
