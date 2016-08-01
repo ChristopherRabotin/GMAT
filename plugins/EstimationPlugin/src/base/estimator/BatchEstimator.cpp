@@ -145,7 +145,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
       const std::string &name) :
    Estimator                  (type, name),
    estEpochFormat             ("FromParticipants"),
-   estEpoch                   (""),
+   estEpoch                   ("FromParticipants"),
    oldResidualRMS             (0.0),
    newResidualRMS             (1.0e12),
    useApriori                 (false),                  // second term of Equation Eq8-184 in GTDS MathSpec is not used   
