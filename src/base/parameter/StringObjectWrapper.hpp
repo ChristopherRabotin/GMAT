@@ -57,6 +57,7 @@ public:
    virtual Gmat::ParameterType GetDataType() const;
    
    virtual const StringArray& GetRefObjectNames();
+   virtual GmatBase*          GetRefObject(const std::string &name = "");
    virtual bool               SetRefObject(GmatBase *obj);
    virtual Real               EvaluateReal() const;
    virtual bool               SetReal(const Real toValue);

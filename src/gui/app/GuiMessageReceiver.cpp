@@ -466,6 +466,8 @@ std::string GuiMessageReceiver::GetLogFileName()
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::LogMessage(const std::string &msg)
 {
+   if (!logEnabled) return;
+
    std::cout << msg;
    
    if (logEnabled)
@@ -509,6 +511,8 @@ void GuiMessageReceiver::LogMessage(const std::string &msg)
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::LogMessage(const char *msg, ...)
 {
+   if (!logEnabled) return;
+
    short    ret;
    short    size;
    va_list  marker;
@@ -556,13 +560,27 @@ void GuiMessageReceiver::LogMessage(const char *msg, ...)
 /**
  * Turns logging on or off.
  * 
- * @param flag The new loggign state -- true enables logging, and false disables 
+ * @param flag The new logging state -- true enables logging, and false disables 
  *             it.  The logging state is idempotent.
  */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::SetLogEnable(bool flag)
 {
    logEnabled = flag;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetLogEnable()
+//------------------------------------------------------------------------------
+/**
+* returns if logging is on or off.
+*
+*/
+//------------------------------------------------------------------------------
+bool GuiMessageReceiver::GetLogEnable()
+{
+   return logEnabled;
 }
 
 

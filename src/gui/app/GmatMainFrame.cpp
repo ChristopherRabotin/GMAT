@@ -609,16 +609,17 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    int osNum = osMajor * 10 + osMinor;
 
    // Flag to use "delete child" rather than child.Destroy()
-   useChildDelete = true;
+   useChildDelete = false;
 
-   if (osDescription.Find("Windows") == wxNOT_FOUND)
-      useChildDelete = false;
-   else if (osDescription.Find("Windows 7") == wxNOT_FOUND &&
-      osDescription.Find("Server") == wxNOT_FOUND)
-   {
-      if (osNum > 61)
-         useChildDelete = false;
-   }
+   // commenting out code because Win 64-bit GMAT blows up using delete too
+   //if (osDescription.Find("Windows") == wxNOT_FOUND)
+   //   useChildDelete = false;
+   //else if (osDescription.Find("Windows 7") == wxNOT_FOUND &&
+   //   osDescription.Find("Server") == wxNOT_FOUND)
+   //{
+   //   if (osNum > 61)
+   //      useChildDelete = false;
+   //}
 
 #ifdef DEBUG_OS_DETECTION
    MessageInterface::ShowMessage("OS info: %d.%d ==> %d gives id %d; %sWin 8 or higher\n", 

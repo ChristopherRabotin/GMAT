@@ -8,7 +8,7 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
-    <primary>RunEstimator</primary>
+    <primary>RunSimulator</primary>
   </indexterm>
 
   <refmeta>
@@ -20,39 +20,110 @@
   </refmeta>
 
   <refnamediv>
-    <refname>RunEstimator</refname>
+    <refname>RunSimulator</refname>
 
-    <refpurpose>Ingests navigation measurements and generates an estimated
-    state vector</refpurpose>
+    <refpurpose>Generates simulated navigation measurements</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis>RunSimulator SimulatorInstanceName </synopsis>
+    <synopsis>RunSimulator Simulator_InstanceName </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>The RunEstimator generates ingests navigation measurements and
-    generates an estimated state vector according to the specifications of the
-    input BatchEstimator resource. </para>
+    <para>The <guilabel>RunSimulator</guilabel> command generates the
+    simulated measurements specified in the user-provided
+    <guilabel>Simulator</guilabel> resource. An output file, with name
+    specified in the <guilabel>Simulator</guilabel> resource is
+    created.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="BatchEstimatorInv"/></para>
+    linkend="Simulator"/></para>
   </refsection>
 
   <refsection>
     <title>Remarks</title>
 
     <refsection>
-      <title>How GMAT generates “Computed (C)” DSN data</title>
+      <title>Content of the Output File for DSN data</title>
 
-      <para>As part of the estimation process, GMAT must calculated the
-      so-called observation residual, “O-C,” where “C” is the “Computed”
-      measurement. As discussed in the RunSimulator help, GMAT calculates the
-      DSN range “C” measurement as</para>
+      <para>After the <guilabel>RunSimulator</guilabel> command has finished
+      execution, one or more output files, as defined in the specified
+      <guilabel>Simulator</guilabel> object, will be created. Each row of data
+      in an output file contains information about one specific measurement at
+      a given time. The format for a given row of data is described fully in
+      the <guilabel>TrackingFileSet</guilabel> resource help.</para>
+
+      <para>Currently, GMAT supports two DSN data types, DSN Trk 2-34 type 7
+      (sequential range) and DSN Trk 2-34 type 17 (Total count phase). As
+      shown in the <guilabel>TrackingFileSet</guilabel> resource help, for a
+      type 7 measurement, a row of data has the following GMAT internal file
+      format.</para>
+
+      <programlisting><?db-font-size 50% ?>TAIMJD  DSNTwoWayRange 7050 [Downlink Station ID][S/C ID] [Range Observable (RU)][Uplink Band] [Uplink Freq (Hz)] [Range Modulo (RU)]</programlisting>
+
+      <para>where [Uplink Band] species the frequency band of the transmitting
+      station as shown in the table below.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <colspec colwidth="226*"/>
+
+          <colspec colwidth="774*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Uplink Band Value</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>0</entry>
+
+              <entry>Unknown or not applicable</entry>
+            </row>
+
+            <row>
+              <entry>1</entry>
+
+              <entry>S-band</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>X-band</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Ka-band</entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Ku-band</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>L-band</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>and where the [Range Observable (RU)], is calculated according
+      to</para>
 
       <informalequation>
         <m:math display="block">
@@ -162,7 +233,15 @@
         </m:math>
       </informalequation>
 
-      <para>and GMAT calculates the DSN Doppler measurement as </para>
+      <para>As shown in the <guilabel>TrackingFileSet</guilabel> resource
+      help, for a DSN Track 2-34 type 17 measurement, a row of data has the
+      following GMAT internal file format.</para>
+
+      <programlisting><?db-font-size 50% ?># TAIMJD_t3e DSNTwoWayDoppler 7051 [Downlink Station ID] [S/C ID] [Uplink Band] DopplerCountInterval_seconds DopplerMeas_Hz</programlisting>
+
+      <para>where [Uplink Band] has been previously described and where
+      DopplerMeas_Hz, the Doppler measurement, is calculated according
+      to</para>
 
       <informalequation>
         <m:math display="block">
@@ -563,73 +642,224 @@
           <m:mtext>average transmit frequency </m:mtext>
         </m:math>
       </informalequation>
-    </refsection>
 
-    <refsection>
-      <title>Relation to Target/EndTarget Command Sequence</title>
+      <para>Note that (t3e - t3s) is known as the Doppler Count Interval and
+      is an input field, <guilabel>SimDopplerCountInterval</guilabel>, for the
+      <guilabel>TrackingFileSet</guilabel> resource.</para>
 
-      <para>There are some functional similarities between the
-      <guilabel>Target/EndTarge</guilabel>t and
-      <guilabel>Optimize/EndOptimize</guilabel> command sequences. In both
-      cases, we define Control Variables and Constraints. For both
-      <guilabel>Target</guilabel> and <guilabel>Optimize</guilabel> sequences,
-      we use the <guilabel>Vary</guilabel> command to define the Control
-      Variables. For the <guilabel>Target</guilabel> sequence, we use the
-      <guilabel>Achieve</guilabel> command to define the constraints whereas,
-      for an <guilabel>Optimize</guilabel> sequence, we use the
-      <guilabel>NonlinearConstraint</guilabel> command. The big difference
-      between the <guilabel>Target</guilabel> and
-      <guilabel>Optimize</guilabel> sequences is that the
-      <guilabel>Optimize</guilabel> sequence allows for the minimization of an
-      Objective function through the use of the <guilabel>Minimize</guilabel>
-      command.</para>
-    </refsection>
+      <para>When you simulate DSN range or Doppler, you can choose whether or
+      not the frequency from the transmitting <guilabel>Ground
+      Station</guilabel> is Non-ramped or Ramped. If you wish to model ramped
+      data, you must supply an input ramp table. The format of the input ramp
+      table is discussed in the <guilabel>TrackingFileSet</guilabel> resource
+      help.</para>
 
-    <refsection>
-      <title>Command Interactions</title>
+      <para>The table below shows how the values of C, M2, and UplinkBand, as
+      reflected in the output files, are calculated. The second column shows
+      how the Uplink Band, which is included in the output file for both range
+      and Doppler measurements, is calculated. For S-band, a “1” is output and
+      for X-band, a “2” is output.</para>
 
-      <informaltable colsep="0" frame="topbot">
-        <tgroup cols="2">
-          <colspec colnum="1" colwidth="1.0*"/>
+      <para>The output file contains the observable value which is calculated
+      using the equations shown above. For the range observation, GMAT needs
+      to know the value C and for the Doppler observation, GMAT needs to know
+      the value of M2. The third column shows how the value of C or M2 is
+      calculated. To calculate the observation value, GMAT also needs to know
+      the transmit frequency. The fourth column shows how the transmit
+      frequency is determined.</para>
 
-          <colspec colnum="2" colwidth="3*"/>
+      <informaltable pgwide="1">
+        <tgroup cols="4">
+          <colspec align="center" colwidth="108*"/>
+
+          <colspec colwidth="262*"/>
+
+          <colspec colwidth="331*"/>
+
+          <colspec colwidth="299*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Measurement Type</entry>
+
+              <entry align="center">Value of C (Range) or M2 (Doppler) used to
+              calculate “Computed” measurement</entry>
+
+              <entry align="center">Value of transmit frequency used to
+              calculate “Computed” measurement</entry>
+
+              <entry align="center">Transmit freq used to calculate
+              Observation</entry>
+            </row>
+          </thead>
 
           <tbody>
             <row>
-              <entry><guilabel>Vary command</guilabel></entry>
+              <entry><emphasis role="bold">Simulate Range without ramp
+              table</emphasis></entry>
 
-              <entry><para> Every <guilabel>Optimize</guilabel> sequence must
-              contain at least one <guilabel>Vary
-              </guilabel>command.<guilabel> Vary</guilabel> commands are used
-              to define the control variables associated with an
-              <guilabel>Optimize</guilabel> sequence. </para></entry>
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon transmitter frequency set by user on
+                    the Transmitter.Frequency" field. If freq is in
+                    [2000-4000] MHz, then Uplink Band is S-band. If freq is in
+                    [7000-8000] MHz, then Uplink Band is X-band.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band result shown in previous
+                    column. C=½ for S-band and 221/1498 for X-band.</para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Transponder.TurnAroundRatio has no effect
+                    on C</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Transmitter.frequency (This frequency
+                    will be written to the the GMD file)</para>
+                  </listitem>
+                </itemizedlist></entry>
             </row>
 
             <row>
-              <entry><guilabel>NonlinearConstraint command</guilabel></entry>
+              <entry><emphasis role="bold">Simulate Range with ramp
+              table</emphasis></entry>
 
-              <entry><para> <guilabel>NonlinearConstraint</guilabel> commands
-              are used to define the constraints associated with an
-              <guilabel>Optimize</guilabel> sequence. Note that multiple
-              <guilabel>NonlinearConstraint</guilabel> commands are allowed
-              within an <guilabel>Optimize</guilabel> sequence.
-              </para></entry>
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Uplink Band in ramp table takes precedence over both
+                    transmitter frequency set by user and transmit frequency
+                    in ramp table.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band result shown in previous
+                    column. C=½ for S-band and 221/1498 for X-band.</para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Transponder.TurnAroundRatio has no effect
+                    on C</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Ramp Table frequency (This frequency
+                    will be written to the GMD file)</para>
+                  </listitem>
+                </itemizedlist></entry>
             </row>
 
             <row>
-              <entry><guilabel>Minimize command</guilabel></entry>
+              <entry><emphasis role="bold">Simulate Doppler without ramp
+              table</emphasis></entry>
 
-              <entry><para> A <guilabel>Minimize</guilabel> command is used
-              within an <guilabel>Optimize</guilabel> sequence to define the
-              Objective function that will be minimized. Note that an
-              <guilabel>Optimize</guilabel> sequence is allowed to contain, at
-              most, one <guilabel>Minimize</guilabel> command. (An
-              <guilabel>Optimize</guilabel> sequence is not required to
-              contain a <guilabel>Minimize</guilabel> command) </para></entry>
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon transmitter frequency set by user on
+                    the Transmitter.Frequency" field. If freq is in
+                    [2000-4000] MHz, then Uplink Band is S-band. If freq is in
+                    [7000-8000] MHz, then Uplink Band is X-band.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>M2 = Transponder.TurnAroundRatio</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Transmitter.frequency</para>
+                  </listitem>
+                </itemizedlist></entry>
+            </row>
+
+            <row>
+              <entry><emphasis role="bold">Simulate Doppler with ramp
+              table</emphasis></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Uplink Band in ramp table takes precedence over both
+                    transmitter frequency set by user and transmit frequency
+                    in ramp table.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band result shown in previous
+                    column. M2=240/221 for S-band and 880/749 for X
+                    band.</para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Transponder.TurnAroundRatio has no effect
+                    on M2</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Transmitter.frequency</para>
+                  </listitem>
+                </itemizedlist></entry>
             </row>
           </tbody>
         </tgroup>
       </informaltable>
+
+      <para>There is one clarification to the table above. If media
+      corrections are modeled, the frequency set on the
+      <guilabel>Transmitter</guilabel> object,
+      <guilabel>Transmitter.Frequency</guilabel>, and the turn around ratio
+      set on the <guilabel>Transponder</guilabel> object,
+      <guilabel>Transponder.TurnAroundRatio</guilabel>, will be used to
+      calculate the, typically small, media corrections needed to determine
+      the value of the simulated range and Doppler measurements.</para>
     </refsection>
   </refsection>
 
@@ -637,12 +867,14 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>Run batch estimator. </para>
+      <para>Run simulation.</para>
 
-      <programlisting><code>Create BatchEstimatorInv myBatchEstimator
+      <programlisting><code>%Perform a simulation
 
-BeginMissionSequence
-RunEstimator myBatchEstimator</code></programlisting>
+Create Simulator mySim
+
+BeginMissionSequence 
+RunSimulator mySim</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

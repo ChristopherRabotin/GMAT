@@ -1285,7 +1285,7 @@ std::string Parameter::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Parameter::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DESCRIPTION) || (id == UNIT) || (id == DEP_OBJECT) ||
+   if ((id == OBJECT) || (id == DESCRIPTION) || (id == UNIT) || (id == DEP_OBJECT) ||
        (id == COLOR) || (id == EXPRESSION) || id == INITIAL_VALUE)
       return true;
    

@@ -2422,7 +2422,7 @@ std::string BatchEstimator::GetGMATBuildDate()
       break;
    }
 
-   std::string sday = GetDayOfWeek(1, 1, 0);     //GetDayOfWeek(day, month, year);
+   std::string sday = GetDayOfWeek(day, month, year);
 
    std::stringstream ss;
    ss << sday << " " << smonth << " " << day << ", " << year << " " << __TIME__;
@@ -2431,26 +2431,28 @@ std::string BatchEstimator::GetGMATBuildDate()
 
 std::string BatchEstimator::GetDayOfWeek(Integer day, Integer month, Integer year)
 {
+
    Integer daysOfMonth[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
    // Specify number of days of February
    if ((year % 400 == 0) || ((year % 4 == 0) && (year % 100 != 0)))
       daysOfMonth[1] = 29;
 
-   // Calculate number of days from day, month, year to 01/01/0000
-   Integer y = year - 0;
+   // Calculate number of days from day, month, year to 01/01/0001
+   Integer y = year - 1;
    Integer m = month - 1;
    Integer d = day - 1;
-   Integer days = 365*y + y / 4 - y / 100 + y / 400;
+   Integer days = 365*y + (int)(y / 4) - (int)(y / 100) + (int)(y / 400);   // total number of days from 01/01/y  to 01/01/0001
    for (Integer i = 0; i < m; ++i)
-      days += daysOfMonth[i];
-   days += d;
-
+      days += daysOfMonth[i];                          // total number of days from m/01/y   to 01/01/0001
+   days += d;                                          // total number of days from m/d/y    to 01/01/0001
+   
    // Calculate weekday
    Integer weekdayOffset = 1;
-   Integer weekday = (days - 1) % 7 - weekdayOffset;
-   if (weekday < 0)
-      weekday += 7;
+   Integer weekday = days % 7 + weekdayOffset;
+
+   if (weekday > 6)
+      weekday -= 7;
 
    std::string sweekday;
    switch (weekday)

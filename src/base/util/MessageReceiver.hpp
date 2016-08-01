@@ -67,6 +67,7 @@ public:
    virtual void PopupMessage(Gmat::MessageType msgType, const char *msg, ...) = 0;
    
    virtual std::string GetLogFileName() = 0;
+   virtual bool GetLogEnable() = 0;
    virtual void SetLogEnable(bool flag) = 0;
    virtual void SetLogPath(const std::string &pathname, bool append = false) = 0;
    virtual void SetLogFile(const std::string &filename) = 0;

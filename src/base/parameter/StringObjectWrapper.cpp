@@ -176,6 +176,19 @@ Gmat::ParameterType StringObjectWrapper::GetDataType() const
    return Gmat::STRING_TYPE;
 }
 
+//---------------------------------------------------------------------------
+// GmatBase* GetRefObject(const std::string &name = "")
+//---------------------------------------------------------------------------
+/*
+* @see ElementWrapper
+*/
+//---------------------------------------------------------------------------
+GmatBase* StringObjectWrapper::GetRefObject(const std::string &name)
+{
+   return stringVar;
+}
+
+
 //------------------------------------------------------------------------------
 //  const StringArray&  GetRefObjectNames() 
 //------------------------------------------------------------------------------
