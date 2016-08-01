@@ -170,7 +170,8 @@ public:
 
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
-   virtual Real                 GetFirstStateTime();   virtual const Rvector6&      GetState(A1Mjd atTime);
+   virtual Real                 GetFirstStateTime();
+   virtual const Rvector6&      GetState(A1Mjd atTime);
    virtual const Rvector6&      GetState(Real atTime); 
    virtual void                 GetState(const A1Mjd &atTime, Real *outState);
    
@@ -194,8 +195,6 @@ public:
 
    virtual Real                 GetHourAngle(A1Mjd atTime); 
    
-//   virtual const Rmatrix&       GetHarmonicCoefficientsSij();
-//   virtual const Rmatrix&       GetHarmonicCoefficientsCij();
    virtual Integer              GetDegree();
    virtual Integer              GetOrder();
    virtual std::string          GetAtmosphereModelType();
@@ -234,8 +233,6 @@ public:
    virtual bool           SetValidModelList(Gmat::ModelType m, const StringArray &toList);
    virtual bool           SetOrder(Integer toOrder);
    virtual bool           SetDegree(Integer toDegree);
-//   virtual bool           SetHarmonicCoefficientsSij(const Rmatrix &coeffSij);
-//   virtual bool           SetHarmonicCoefficientsCij(const Rmatrix &coeffCij);
 
    
    virtual bool           SetAtmosphereModelType(std::string toAtmModelType);
@@ -340,12 +337,6 @@ public:
 
    // need methods to get/set stateTime (a1MJD type)?
 
-   //virtual const Rmatrix&       GetCoefDriftS();
-   //virtual const Rmatrix&       GetCoefDriftC();
-   //virtual bool           SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
-   //                                             Real bodyPolarRad, Real bodyMu,
-   //                                             Integer coeffSize, Rmatrix& bodySij,
-   //                                             Rmatrix& bodyCij);
    
    // local constants
    static const Integer BUFSIZE               = 256;
@@ -513,10 +504,6 @@ protected:
    Integer                order;    
    /// degree of the gravity model
    Integer                degree;  
-//   /// spherical harmonic coefficients (Sij) for the body
-//   Rmatrix                sij;
-//   /// spherical harmonic coefficients (Cij) for the body
-//   Rmatrix                cij;
    /// date format for the twoBody method epoch
    std::string            twoBodyFormat;
    /// state type for twoBody inputs
@@ -592,16 +579,7 @@ protected:
    
    /// has message about possible needed SPKs been written
    bool                   msgWritten;
-   /// date and time of start of source file
-   //A1Mjd                  sourceStart;      // currently unused
-   /// date and time of end of source file
-   //A1Mjd                  sourceEnd;        // currently unused
-   //Integer                coefficientSize;      // n   // same as degree, order above?
-   //Rmatrix                Cbar, Sbar;
-   //Rmatrix                dCbar, dSbar; // from original GravityField
-   //Integer                defaultCoefSize;
-   //Rmatrix                defaultSij;
-   //Rmatrix                defaultCij;
+
    
    // initialize the body
    void             InitializeBody(std::string withBodyType = "Planet");
