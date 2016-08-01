@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                            Display
+//                            Write
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -25,27 +25,28 @@
 // Created: 2016.01.22
 //
 /**
- *  Class definition for the Display command.
+ *  Class definition for the Write command.
  */
 //------------------------------------------------------------------------------
  
-#ifndef Display_hpp
-#define Display_hpp
+#ifndef Write_hpp
+#define Write_hpp
 
 #include "GmatCommand.hpp"
 #include "Parameter.hpp"
+#include "ReportFile.hpp"
 #include "ElementWrapper.hpp"
 
 /**
- * The Display command is used to write data to a GUI Message Window.
+ * The Write command is used to write data to a GUI Message Window.
  */
-class GMAT_API Display : public GmatCommand
+class GMAT_API Write : public GmatCommand
 {
 public:
-   Display();
-   virtual ~Display();
-   Display(const Display &dispCmd);
-   Display& operator=(const Display &dispCmd);
+   Write();
+   virtual ~Write();
+   Write(const Write &dispCmd);
+   Write& operator=(const Write &dispCmd);
    
    // Inherited from GmatCommand
    virtual bool         InterpretAction();
@@ -111,22 +112,45 @@ protected:
    Integer                    numElements;
    /// ElementWraper pointers of parameters
    std::vector<ElementWrapper*> elementWrappers;
-   
+   /// write to message window is optional, defaults to true
+   bool                       messageWindowOn;
+   /// write to log file is optional, defaults to false
+   bool                       logFileOn;
+   /// ReportFile is optional and does not have a default
+   std::string                reportFile;
+   /// The ReportFile subscriber that receives the data
+   ReportFile                 *reporter;
+   bool                       hasExecuted;
+   bool                       needsHeaders;
+
+   /// Parsing function for options
+   void CheckForOptions(std::string &opts);
    bool AddElements(const std::string &paramName, Integer index);
    void DeleteElements();
-   
+   void ExecuteReport();
+   void WriteHeaders(std::stringstream &datastream, Integer colWidth);
+
+   enum OutputStyle
+   {
+      CONCISE,
+      VERBOSE,
+      SCRIPTABLE
+   };
+   /// write output style as concise, verbose, or scriptable
+   OutputStyle                outputStyle;
+
    enum
    {
       ADD = GmatCommandParamCount,
-      DisplayParamCount  /// Count of the parameters for this class
+      WriteParamCount  /// Count of the parameters for this class
    };
    
 private:
 
    static const std::string
-      PARAMETER_TEXT[DisplayParamCount - GmatCommandParamCount];
+      PARAMETER_TEXT[WriteParamCount - GmatCommandParamCount];
    static const Gmat::ParameterType
-      PARAMETER_TYPE[DisplayParamCount - GmatCommandParamCount];
+      PARAMETER_TYPE[WriteParamCount - GmatCommandParamCount];
 };
 
-#endif      // Display_hpp
+#endif      // Write_hpp

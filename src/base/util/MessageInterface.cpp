@@ -334,6 +334,22 @@ void MessageInterface::SetLogEnable(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// bool GetLogEnable()
+//------------------------------------------------------------------------------
+/**
+* Is logging on or off.
+*
+*/
+//------------------------------------------------------------------------------
+bool MessageInterface::GetLogEnable()
+{
+   if (theMessageReceiver != NULL)
+      return theMessageReceiver->GetLogEnable();
+   else
+      return false;
+}
+
+//------------------------------------------------------------------------------
 // void SetLogPath(const char *pathname, bool append = false)
 //------------------------------------------------------------------------------
 /*

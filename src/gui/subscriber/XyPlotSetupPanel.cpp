@@ -290,12 +290,12 @@ void XyPlotSetupPanel::Create()
    //------------------------------------------------------
    showPlotCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show " GUI_ACCEL_KEY "Plot"),
-                     wxDefaultPosition, wxSize(100, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    showPlotCheckBox->SetToolTip(pConfig->Read(_T("ShowPlotHint")));
    
    showGridCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show " GUI_ACCEL_KEY "Grid"),
-                     wxDefaultPosition, wxSize(100, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    showGridCheckBox->SetToolTip(pConfig->Read(_T("ShowGridHint")));
    
    //----- Solver Iteration ComboBox
@@ -304,7 +304,7 @@ void XyPlotSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1),
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize,
                      emptyList, wxCB_READONLY);
    mSolverIterComboBox->SetToolTip(pConfig->Read(_T("SolverIterationsHint")));
    
@@ -343,7 +343,7 @@ void XyPlotSetupPanel::Create()
    GmatStaticBoxSizer *xSelectedBoxSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Selected X");
    
-   xSelectedBoxSizer->Add(mXSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   xSelectedBoxSizer->Add(mXSelectedListBox, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    xSelectedBoxSizer->Add(mViewXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
@@ -361,24 +361,24 @@ void XyPlotSetupPanel::Create()
    GmatStaticBoxSizer *ySelectedBoxSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Selected Y");
    
-   ySelectedBoxSizer->Add(mYSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   ySelectedBoxSizer->Add(mYSelectedListBox, 1, wxALIGN_CENTRE| wxEXPAND |wxALL, bsize);
    ySelectedBoxSizer->Add(mViewYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------
-   wxFlexGridSizer *plotSizer = new wxFlexGridSizer(3, 0, 0);
+   wxBoxSizer *plotSizer = new wxBoxSizer(wxHORIZONTAL);
    plotSizer->Add(optionSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   plotSizer->Add(xSelectedBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   plotSizer->Add(ySelectedBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   plotSizer->Add(xSelectedBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   plotSizer->Add(ySelectedBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   pageBoxSizer->Add(plotSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(plotSizer, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(pageBoxSizer, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    
 }
 

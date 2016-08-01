@@ -107,7 +107,6 @@ SET(BASE_SRCS
     command/ClearPlot.cpp
     command/ConditionalBranch.cpp
     command/Create.cpp
-    command/Display.cpp
     command/Else.cpp
     command/EndFiniteBurn.cpp
     command/EndFor.cpp
@@ -141,6 +140,7 @@ SET(BASE_SRCS
     command/Toggle.cpp
     command/Vary.cpp
     command/While.cpp
+    command/Write.cpp
     configs/ConfigManagerException.cpp
     configs/ConfigManager.cpp
     coordsystem/AxisSystem.cpp
