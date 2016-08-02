@@ -272,6 +272,7 @@ private:
 
    void                   WriteReportFileHeaderPart1();
    void                   WriteReportFileHeaderPart2();
+   void                   WriteReportFileHeaderPart2b();
    void                   WriteReportFileHeaderPart3();
    void                   WriteReportFileHeaderPart4_1();
    void                   WriteReportFileHeaderPart4_2();

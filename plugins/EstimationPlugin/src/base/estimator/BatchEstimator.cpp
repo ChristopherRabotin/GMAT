@@ -100,6 +100,7 @@
 
 //#define SPACECRAFT_TABLE_COLUMN_BREAK_UP             1
 #define CELESTIAL_BODIES_TABLE_COLUMN_BREAK_UP       5
+#define MAX_COLUMNS                                  7                 // covariance matrix column
 
 //------------------------------------------------------------------------------
 // static data
@@ -540,8 +541,10 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
 bool BatchEstimator::SetStringParameter(const Integer id,
          const std::string &value)
 {
+#ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("BatchEstimator::SetStringParameter(%d, %s)\n",
          id, value.c_str());
+#endif
 
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
@@ -2646,6 +2649,7 @@ std::string BatchEstimator::GetUserID()
 * This function writes estimation report header. It contains 6 parts:
 *      . Part 1: contains information about GMAT build, OS, user infor
 *      . Part 2: contains batch least squares initial conditions
+*      . Part 2b: contains apriori covariance matrix
 *      . Part 3: contains information about orbit generator
 *      . Part 4: contains information about measurements
 *      . Part 5: contains information about astrodynamic constants
@@ -2656,6 +2660,10 @@ void BatchEstimator::WriteReportFileHeader()
 {
    WriteReportFileHeaderPart1();
    WriteReportFileHeaderPart2();
+
+   if (useApriori)
+      WriteReportFileHeaderPart2b();
+   
    WriteReportFileHeaderPart3();
    WriteReportFileHeaderPart4();
    WriteReportFileHeaderPart5();
@@ -2731,7 +2739,9 @@ void BatchEstimator::WriteReportFileHeaderPart2()
    paramNames.push_back("VY (km/s)");
    paramNames.push_back("VZ (km/s)");
    paramNames.push_back("Cr");
+   paramNames.push_back("CrSigma");
    paramNames.push_back("Cd");
+   paramNames.push_back("CdSigma");
    paramNames.push_back("DryMass  (kg)");
    paramNames.push_back("DragArea (m^2)");
    paramNames.push_back("SRPArea  (m^2)");
@@ -2743,10 +2753,13 @@ void BatchEstimator::WriteReportFileHeaderPart2()
    // 3. Write a table containing spacecraft initial condition:
    Integer colCount = 0;
    std::string scName, csName, s;
+   Real val;
+   bool found;
 
    for (UnsignedInt i = 0; i < participantNames.size(); ++i)
    {
       GmatBase* obj = GetConfiguredObject(participantNames[i]);
+
       if (obj->IsOfType(Gmat::SPACECRAFT))
       {
          // 3.1. Get a spacecraft for processing:
@@ -2770,12 +2783,56 @@ void BatchEstimator::WriteReportFileHeaderPart2()
          if (s.find('.') == s.npos)
             s = s + ".00";
          paramValues.push_back(s);
+       
+         StringArray solveforList = obj->GetStringArrayParameter("SolveFors");
+         found = false;
+         for (Integer j = 0; j < solveforList.size(); ++j)
+         {
+            if (solveforList[j] == "Cr")
+            {
+               found = true;
+               break;
+            }
+         }
+         if (found)
+         {
+            val = sc->GetRealParameter("CrSigma");
+            if ((1.0e-5 < val) && (val < 1.0e10))
+               s = GmatStringUtil::RealToString(val, false, false, true, 6, 22);
+            else
+               s = GmatStringUtil::RealToString(val, false, true, true, 10, 22);
+         }
+         else
+            s = "Not estimated";
+         paramValues.push_back(s);
+
 
          s = GmatStringUtil::RealToString(sc->GetRealParameter("Cd"), false, false, false, 8, 22);
          if (s.find('.') == s.npos)
             s = s + ".00";
          paramValues.push_back(s);
          
+         found = false;
+         for (Integer j = 0; j < solveforList.size(); ++j)
+         {
+            if (solveforList[j] == "Cd")
+            {
+               found = true;
+               break;
+            }
+         }
+         if (found)
+         {
+            val = sc->GetRealParameter("CdSigma");
+            if ((1.0e-5 < val) && (val < 1.0e10))
+               s = GmatStringUtil::RealToString(val, false, false, true, 6, 22);
+            else
+               s = GmatStringUtil::RealToString(val, false, true, true, 10, 22);
+         }
+         else
+            s = "Not estimated";
+         paramValues.push_back(s);
+
          paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("DryMass"), false, false, false, 8, 22));
          paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("DragArea"), false, false, false, 8, 22));
          paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("SRPArea"), false, false, false, 8, 22));
@@ -2820,6 +2877,151 @@ void BatchEstimator::WriteReportFileHeaderPart2()
    textFile.flush();
 }
 
+
+
+//------------------------------------------------------------------------------
+// void WriteReportFileHeaderPart2b()
+//------------------------------------------------------------------------------
+/**
+* This function is used to write apriori covariance matrix to report file.
+*/
+//------------------------------------------------------------------------------
+void BatchEstimator::WriteReportFileHeaderPart2b()
+{
+   // 1.1 Write subheader
+   textFile
+      << "*****************************************************************  APRIORI COVARIANCE MATRIX  ******************************************************************\n"
+      << "\n";
+
+   // 1.2. Prepare for writing
+   const std::vector<ListItem*> *map = esm.GetStateMap();
+   
+   Rmatrix aprioriCov = *(stateCovariance->GetCovariance());
+
+   // Convert covariance from CrEpsilon to Cr, from CdEpsilon to Cd
+   for (Integer i = 0; i < map->size(); ++i)
+   {
+      if ((*map)[i]->object->IsOfType(Gmat::SPACECRAFT))
+      {
+         GmatBase* obj = (*map)[i]->object;
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            // Convert covariance from CrEpsilon to Cr
+            Real ratio = obj->GetRealParameter("Cr");
+            for (Integer row = 0; row < aprioriCov.GetNumRows(); ++row)
+               aprioriCov(row, i) = aprioriCov(row, i) *ratio;
+            for (Integer col = 0; col < aprioriCov.GetNumColumns(); ++col)
+               aprioriCov(i, col) = aprioriCov(i, col) *ratio;
+         }
+
+         if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            // Convert covariance from CdEpsilon to Cd
+            Real ratio = obj->GetRealParameter("Cd");
+            for (Integer row = 0; row < aprioriCov.GetNumRows(); ++row)
+               aprioriCov(row, i) = aprioriCov(row, i) *ratio;
+            for (Integer col = 0; col < aprioriCov.GetNumColumns(); ++col)
+               aprioriCov(i, col) = aprioriCov(i, col) *ratio;
+         }
+      }
+   }
+
+   // 2. Write standard deviation
+   // 2.1. Specify maximum len of elements' names (Cartisian element names)
+   Integer max_len = 27;         // 27 is the maximum lenght of ancillary element names
+   for (int i = 0; i < map->size(); ++i)
+   {
+      std::stringstream ss;
+      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL)) &&
+         ((*map)[i]->elementName == "Bias"))
+      {
+         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+         StringArray sa = mm->GetStringArrayParameter("Participants");
+         ss << mm->GetStringParameter("Type") << " ";
+         for (UnsignedInt j = 0; j < sa.size(); ++j)
+            ss << sa[j] << (((j + 1) != sa.size()) ? "," : " Bias.");
+         ss << (*map)[i]->subelement;
+      }
+      else
+         ss << GetElementFullName((*map)[i], false);
+      max_len = (Integer)GmatMathUtil::Max(max_len, ss.str().size());
+   }
+   textFile << " " << GmatStringUtil::GetAlignmentString("State Component", max_len+3) << " " << GmatStringUtil::GetAlignmentString("Units", 8) << GmatStringUtil::GetAlignmentString("Standard Dev.", 19, GmatStringUtil::RIGHT) << "\n";
+   textFile << "\n";
+
+   // 2.2. Write a table containing solve-for name, unit, and standard deviation
+   for (Integer i = 0; i < map->size(); ++i)
+   {
+      std::stringstream ss;
+      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL)) &&
+         ((*map)[i]->elementName == "Bias"))
+      {
+         // Get full name for Bias
+         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+         StringArray sa = mm->GetStringArrayParameter("Participants");
+         ss << mm->GetStringParameter("Type") << " ";
+         for (UnsignedInt j = 0; j < sa.size(); ++j)
+            ss << sa[j] << (((j + 1) != sa.size()) ? "," : " Bias.");
+         ss << (*map)[i]->subelement;
+
+         // Get Bias unit. It is km for Range_KM, RU for DSNRange, km/s for Doppler_RangeRate, and Hz for Doppler_HZ 
+      }
+      else
+      {
+         // Get full name for Bias
+         ss << GetElementFullName((*map)[i], false);
+      }
+
+      std::string unit = GetElementUnit((*map)[i]);
+      int precision = GetElementPrecision(unit);
+
+      textFile << GmatStringUtil::ToString(i + 1, 3);
+      textFile << " ";
+      textFile << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 1, GmatStringUtil::LEFT);
+      textFile << GmatStringUtil::GetAlignmentString(unit, 8, GmatStringUtil::LEFT);
+
+      textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(aprioriCov.GetElement(i,i)), false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);     // standard deviation
+      textFile << "\n";
+   }
+   textFile << "\n";
+
+
+   // 3. write apriori covariance matrix
+   textFile
+      << "                                                    Apriori Covariance Matrix in Cartesian Coordinate System\n"
+      << "\n";
+
+   // 3.1 Specify who many digit of index
+   Integer indexLen = 1;
+   for (; GmatMathUtil::Pow(10, indexLen) < map->size(); ++indexLen);
+
+   // 3.2. Write apriori covariance to report file 
+   for (Integer startIndex = 0; startIndex < aprioriCov.GetNumColumns(); startIndex += MAX_COLUMNS)
+   {
+
+      textFile << "               ";
+      for (Integer i = startIndex; i < GmatMathUtil::Min(startIndex + MAX_COLUMNS, aprioriCov.GetNumColumns()); ++i)
+      {
+         textFile << GmatStringUtil::ToString(i + 1, 3);
+         if (i < aprioriCov.GetNumColumns() - 1)
+            textFile << "                  ";
+      }
+      textFile << "\n";
+
+      // write all rows from columns startIndex to startIndex+MAX_COLUMNS-1
+      for (Integer i = 0; i < aprioriCov.GetNumRows(); ++i)
+      {
+         textFile << "  " << GmatStringUtil::ToString(i + 1, indexLen) << "  ";
+         for (Integer j = startIndex; j < GmatMathUtil::Min(startIndex + MAX_COLUMNS, aprioriCov.GetNumColumns()); ++j)
+         {
+            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(aprioriCov.GetElement(i, j), false, true, true, 12, 20), 21, GmatStringUtil::RIGHT);
+         }
+         textFile << "\n";
+      }
+      textFile << "\n";
+   }
+
+}
 
 //------------------------------------------------------------------------------
 // void WriteReportFileHeaderPart3()
@@ -5327,7 +5529,6 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 }
 
 
-#define MAX_COLUMNS 7
 void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
 {
    const std::vector<ListItem*> *map = esm.GetStateMap();
