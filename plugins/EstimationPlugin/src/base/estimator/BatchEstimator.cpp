@@ -3642,7 +3642,14 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
          if ((nameLen+3+ colCount*24) > (160-48))
          {
             for (UnsignedInt j = 0; j < rowContent.size(); ++j)
+            {
+               // Remove 3 lines containing information about Temperature, Pressure, and Humidity when Troposphere model set to None for all stations in table
+               std::string s = GmatStringUtil::Trim(rowContent[j]);
+               if (s.at(s.size() - 1) == ')')
+                  continue;
+
                textFile << rowContent[j] << "\n";
+            }
             textFile << "\n";
             textFile << "\n";
 
@@ -3674,7 +3681,14 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
    }
    
    for (UnsignedInt j = 0; j < rowContent.size(); ++j)
+   {
+      // Remove 3 lines containing information about Temperature, Pressure, and Humidity when Troposphere model set to None for all stations in table
+      std::string s = GmatStringUtil::Trim(rowContent[j]);
+      if (s.at(s.size() - 1) == ')')
+         continue;
+
       textFile << rowContent[j] << "\n";
+   }
    textFile << "\n";
    textFile << "\n";
 
