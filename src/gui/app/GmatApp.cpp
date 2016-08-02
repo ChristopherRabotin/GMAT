@@ -843,7 +843,9 @@ void GmatApp::BuildAndRunScript(bool runScript)
       #ifdef DEBUG_CMD_LINE
       MessageInterface::ShowMessage("   Building script ...\n");
       #endif
+      #ifndef __WXMAC__
       wxSafeYield();
+      #endif
       builtOk = theMainFrame->BuildScript(scriptToRun.c_str(), true);
    }
    catch (BaseException &e)
@@ -866,7 +868,9 @@ void GmatApp::BuildAndRunScript(bool runScript)
          #ifdef DEBUG_CMD_LINE
          MessageInterface::ShowMessage("   Running script ...\n");
          #endif
+         #ifndef __WXMAC__
          wxSafeYield();
+         #endif
          runStatus = theMainFrame->RunCurrentScript();
          if (runStatus != 1)
          {
