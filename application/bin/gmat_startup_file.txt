@@ -182,7 +182,7 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 # Base location of MATLAB libraries (required only for OS X)
 #-----------------------------------------------------------
-MATLAB_APP_PATH        = /Applications/MATLAB_R2015b.app
+MATLAB_APP_PATH        = /Applications/MATLAB_R2016a.app
 
 #-----------------------------------------------------------
 # Debug options
