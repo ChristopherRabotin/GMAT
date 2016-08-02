@@ -37,8 +37,8 @@
 #include <sstream>                        // for stringstream
 
 //#define DEBUG_INITIALIZATION
-#define DEBUG_PROPAGATION
-#define DEBUG_INTERPOLATION
+//#define DEBUG_PROPAGATION
+//#define DEBUG_INTERPOLATION
 
 
 //---------------------------------
