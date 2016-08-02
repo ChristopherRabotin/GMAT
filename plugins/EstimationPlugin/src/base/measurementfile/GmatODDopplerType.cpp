@@ -180,6 +180,11 @@ bool GmatODDopplerType::Open(bool forRead, bool forWrite, bool append)
             (forWrite ? "true" : "false"),
             (append ? "true" : "false") );
    #endif
+
+   // when theStream open twice the content in theStream is always empty string. Therefore, it needs this verification.
+   if (theStream.is_open())
+      return true;
+
    bool retval = false;
 
    // temporary
