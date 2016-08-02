@@ -3638,14 +3638,30 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 27, GmatStringUtil::LEFT)+" ");      // each column has size of 28
          }
          
+
          // 3.5. Beak up columns in a table
          if ((nameLen+3+ colCount*24) > (160-48))
          {
+            // Check TroposphereModel value:
+            Integer tropoIndex = 0;
+            for (; tropoIndex < paramNames.size(); ++tropoIndex)
+               if (paramNames[tropoIndex] == "Troposphere Model")
+                  break;
+            std::string s = GmatStringUtil::Trim(rowContent[tropoIndex]);
+            while (s.substr(s.size() - 4) == "None")
+            {
+               s = s.substr(0, s.size() - 4);
+               s = GmatStringUtil::Trim(s);
+            }
+
+            bool skip = false;
+            if (s == "Troposphere Model")
+               skip = true;
+
             for (UnsignedInt j = 0; j < rowContent.size(); ++j)
             {
                // Remove 3 lines containing information about Temperature, Pressure, and Humidity when Troposphere model set to None for all stations in table
-               std::string s = GmatStringUtil::Trim(rowContent[j]);
-               if (s.at(s.size() - 1) == ')')
+               if (skip && (tropoIndex < j) && (j <= tropoIndex + 3))
                   continue;
 
                textFile << rowContent[j] << "\n";
@@ -3680,11 +3696,26 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
       }
    }
    
+   // Check TroposphereModel value:
+   Integer tropoIndex = 0;
+   for (; tropoIndex < paramNames.size(); ++tropoIndex)
+      if (paramNames[tropoIndex] == "Troposphere Model")
+         break;
+   std::string s = GmatStringUtil::Trim(rowContent[tropoIndex]);
+   while (s.substr(s.size() - 4) == "None")
+   {
+      s = s.substr(0, s.size() - 4);
+      s = GmatStringUtil::Trim(s);
+   }
+
+   bool skip = false;
+   if (s == "Troposphere Model")
+      skip = true;
+
    for (UnsignedInt j = 0; j < rowContent.size(); ++j)
    {
       // Remove 3 lines containing information about Temperature, Pressure, and Humidity when Troposphere model set to None for all stations in table
-      std::string s = GmatStringUtil::Trim(rowContent[j]);
-      if (s.at(s.size() - 1) == ')')
+      if (skip && (tropoIndex < j) && (j <= tropoIndex + 3))
          continue;
 
       textFile << rowContent[j] << "\n";
