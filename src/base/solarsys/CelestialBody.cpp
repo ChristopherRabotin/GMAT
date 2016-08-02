@@ -494,8 +494,6 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    default_textureMapFileName    (cBody.default_textureMapFileName),
    order               (cBody.order),
    degree              (cBody.degree),
-//   sij                 (cBody.sij),
-//   cij                 (cBody.cij),
    twoBodyFormat       (cBody.twoBodyFormat),
    twoBodyStateType    (cBody.twoBodyStateType),
    twoBodyEpoch        (cBody.twoBodyEpoch),
@@ -897,7 +895,8 @@ Rvector6 CelestialBody::GetLastState()
  * initial state time.
  */
 //------------------------------------------------------------------------------
-Real CelestialBody::GetFirstStateTime(){
+Real CelestialBody::GetFirstStateTime()
+{
    Real retval = -999.0;
    switch (posVelSrc)
    {
@@ -1578,84 +1577,6 @@ Real  CelestialBody::GetHourAngle(A1Mjd atTime)
    return hourAngle;
 }
 
-////------------------------------------------------------------------------------
-////  const Rmatrix& GetHarmonicCoefficientsSij()
-////------------------------------------------------------------------------------
-///**
-// * This method returns the spherical harmonic coefficients sij for the body.  It
-// * will read the potential file if that is requested.
-// *
-// * @return sij spherical harmonic coefficients for the body.
-// *
-// *
-// * @exception <SolarSystemException> thown if there is an error getting the data.
-// */
-////------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetHarmonicCoefficientsSij()
-//{
-//   return sij;
-//}
-//
-////------------------------------------------------------------------------------
-////  const Rmatrix& GetHarmonicCoefficientsCij()
-////------------------------------------------------------------------------------
-///**
-// * This method returns the spherical harmonic coefficients cij for the body.  It
-// * will read the potential file if that is requested.
-// *
-// * @return cij spherical harmonic coefficients for the body.
-// *
-// * @exception <SolarSystemException> thown if there is an error getting the data.
-// */
-////------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetHarmonicCoefficientsCij()
-//{
-//   return cij;
-//}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix& GetCoefDriftS()
-//------------------------------------------------------------------------------
-/**
- * This method returns the dSbar coefficient drift matrix for the body.  It
- * will read the potential file if that is requested.
- *
- * @return dSbar  coefficient drift matrix for the body.
- *
- * @exception <SolarSystemException> thown if there is an error getting the data.
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetCoefDriftS()
-//{
-//   if ((usePotentialFile == true) & (!potentialFileRead))
-//   {
-//      bool OK = ReadPotentialFile();
-//      if (!OK) throw SolarSystemException("Unable to read potential file");
-//   }
-//   return dSbar;
-//}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix& GetCoefDriftC()
-//------------------------------------------------------------------------------
-/**
- * This method returns the dCbar coefficient drift matrix for the body.  It
- * will read the potential file if that is requested.
- *
- * @return dCbar  coefficient drift matrix for the body.
- *
- * @exception <SolarSystemException> thown if there is an error getting the data.
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetCoefDriftC()
-//{
-//   if ((usePotentialFile == true) & (!potentialFileRead))
-//   {
-//      bool OK = ReadPotentialFile();
-//      if (!OK) throw SolarSystemException("Unable to read potential file");
-//   }
-//   return dCbar;
-//}
 
 //------------------------------------------------------------------------------
 // Integer GetDegree()
@@ -2368,19 +2289,6 @@ bool CelestialBody::SetDegree(Integer toDegree)
    return true;
 }
 
-//bool CelestialBody::SetHarmonicCoefficientsSij(const Rmatrix &coeffSij)
-//{
-//   sij                 = coeffSij;
-//   return true;
-//}
-//
-//bool CelestialBody::SetHarmonicCoefficientsCij(const Rmatrix &coeffCij)
-//{
-//   cij                 = coeffCij;
-//   return true;
-//}
-
-
 
 //------------------------------------------------------------------------------
 //  bool SetAtmosphereModelType(std::string toAtmModelType)
@@ -2899,62 +2807,6 @@ Rvector CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) cons
    }
 }
 
-
-//------------------------------------------------------------------------------
-//  bool SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
-//                             Real bodyPolarRad, Real bodyMu,
-//                             Integer coeffSize, Rmatrix& bodySij,
-//                             Rmatrix& bodyCij);
-//------------------------------------------------------------------------------
-/**
- * This method sets the physical parameters for the body.
- *
- * @param <bodyMass>     mass (kg) of the body.
- * @param <bodyMEqRad>   equatorial radius (km) of the body.
- * @param <bodyPolarRad> polar radius (km) of the body.
- * @param <bodyMu>       gravitational constant (km^3/s^2) of the body.
- * @param <coeffSize>    size of Sij and Cij for the body.
- * @param <bodySij>      coefficients Sij for the body (coeffSize x coeffSize).
- * @param <bodyCij>      coefficients Cij for the body (coeffSize x coeffSize).
- *
- * @return flag indicating success of the method.
- *
- * @exception <SolarSystemException> thrown if there is an error in the
- *                                   input data.
- */
-//------------------------------------------------------------------------------
-//bool CelestialBody::SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
-//                                          Real bodyPolarRad, Real bodyMu,
-//                                          Integer coeffSize, Rmatrix &bodySij,
-//                                          Rmatrix &bodyCij)
-//{
-//   // add data checks later <-
-//   mass             = bodyMass;
-//   equatorialRadius = bodyEqRad;
-//   polarRadius      = bodyPolarRad;
-//   mu               = bodyMu;
-//   coefficientSize  = coeffSize;
-//   Integer r,c;
-//   try
-//   {
-//      bodySij.GetSize(r,c);
-//      sij = bodySij;
-//   }
-//   catch (TableTemplateExceptions::IllegalSize& tte)
-//   {
-//      throw SolarSystemException("Sij input to body has no dimensions.");
-//   }
-//   try
-//   {
-//      bodyCij.GetSize(r,c);
-//      cij = bodyCij;
-//   }
-//   catch (TableTemplateExceptions::IllegalSize& tte)
-//   {
-//      throw SolarSystemException("Cij input to body has no dimensions.");
-//   }
-//   return true;
-//}
 
 
 //------------------------------------------------------------------------------
@@ -3987,96 +3839,7 @@ const Rvector& CelestialBody::SetRvectorParameter(const std::string &label,
    return SetRvectorParameter(GetParameterID(label), value);
 }
 
-//------------------------------------------------------------------------------
-//  const Rmatrix&  GetRmatrixParameter(const Integer id)
-//------------------------------------------------------------------------------
-/**
- * This method gets the Rmatrix parameter value, given the input
- * parameter ID.
- *
- * @param <id> ID for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetRmatrixParameter(const Integer id) const
-//{
-//   if (id == SIJ)               return sij;
-//   if (id == CIJ)               return cij;
-//   
-//   return SpacePoint::GetRmatrixParameter(id);
-//}
 
-//------------------------------------------------------------------------------
-//  const Rmatrix&  SetRmatrixParameter(const Integer id, const Rmatrix& value)
-//------------------------------------------------------------------------------
-/**
- * This method sets the Rmatrix parameter value, given the input
- * parameter ID.
- *
- * @param <id>    ID for the requested parameter.
- * @param <value> Rmatrix value for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::SetRmatrixParameter(const Integer id,
-//                                                  const Rmatrix &value)
-//{
-//   if (id == SIJ) 
-//   {
-//      sij = value;
-//      return true;
-//   }
-//   if (id == CIJ)
-//   {
-//      cij = value;
-//      return true;
-//   }
-//
-//   return SpacePoint::SetRmatrixParameter(id,value);
-//}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix&  GetRmatrixParameter(const std::string &label)
-//------------------------------------------------------------------------------
-/**
- * This method gets the Rmatrix parameter value, given the input
- * parameter ID.
- *
- * @param <label> string ID for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetRmatrixParameter(const std::string &label) const
-//{
-//   return GetRmatrixParameter(GetParameterID(label));
-//}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix&  SetRmatrixParameter(const std::string &label,
-//                                      const Rmatrix& value)
-//------------------------------------------------------------------------------
-/**
- * This method sets the Rmatrix parameter value, given the input
- * parameter ID.
- *
- * @param <label> string ID for the requested parameter.
- * @param <value> Rmatrix value for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::SetRmatrixParameter(const std::string &label,
-//                                                  const Rmatrix &value)
-//{
-//   return SetRmatrixParameter(GetParameterID(label), value);
-//}
 
 //------------------------------------------------------------------------------
 //  const StringArray&   GetStringArrayParameter((const Integer id) const

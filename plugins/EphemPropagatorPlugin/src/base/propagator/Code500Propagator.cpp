@@ -88,7 +88,9 @@ Code500Propagator::Code500Propagator(const std::string &name) :
    fileDataLoaded             (false),
    ephemRecords               (NULL),
    record                     (-1),
-   stateIndex                 (-1)
+   stateIndex                 (-1),
+   timeFromEphemStart         (-1.0),
+   lastEpoch                  (-1.0)
 {
    // GmatBase data
   objectTypeNames.push_back("Code500Propagator");
@@ -127,7 +129,9 @@ Code500Propagator::Code500Propagator(const Code500Propagator & prop) :
    fileDataLoaded             (false),
    ephemRecords               (NULL),
    record                     (-1),
-   stateIndex                 (-1)
+   stateIndex                 (-1),
+   timeFromEphemStart         (-1.0),
+   lastEpoch                  (-1.0)
 {
 }
 
@@ -160,7 +164,12 @@ Code500Propagator & Code500Propagator::operator=(const Code500Propagator & prop)
       ephemRecords = NULL;
       record = -1;
       stateIndex = -1;
-      currentEpoch = prop.currentEpoch;
+      lastEpoch = currentEpoch = prop.currentEpoch;
+      if (lastEpoch != -1.0)
+         timeFromEphemStart = (lastEpoch - ephemStart) *
+               GmatTimeConstants::SECS_PER_DAY;
+      else
+         timeFromEphemStart = -1.0;
    }
 
    return *this;
@@ -722,6 +731,19 @@ bool Code500Propagator::Initialize()
          interp = new NotAKnotInterpolator("Code500NotAKnot", 6);
          ephem.CloseForRead();
       }
+
+//      if (lastEpoch != currentEpoch)
+//      {
+//         lastEpoch = currentEpoch;
+//         timeFromEphemStart = (lastEpoch - ephemStart) *
+//               GmatTimeConstants::SECS_PER_DAY;
+//
+//         #ifdef DEBUG_PROPAGATION
+//            MessageInterface::ShowMessage("Last epoch = %.12lf, ephemStart = "
+//                  "%.12lf, Time from start = %lf sec\n", lastEpoch, ephemStart,
+//                  timeFromEphemStart);
+//         #endif
+//      }
    }
 
    return retval;
@@ -761,10 +783,28 @@ bool Code500Propagator::Step()
 
    Rvector6  outState;
 
-   timeFromEpoch += ephemStep;
+   if (lastEpoch != currentEpoch)
+   {
+      lastEpoch = currentEpoch;
+      timeFromEphemStart = (lastEpoch - ephemStart) *
+            GmatTimeConstants::SECS_PER_DAY;
+   }
+
+//   timeFromEpoch += ephemStep;
+//   stepTaken = ephemStep;
+//   currentEpoch = initialEpoch + timeFromEpoch /
+//         GmatTimeConstants::SECS_PER_DAY;
+   timeFromEphemStart += ephemStep;
    stepTaken = ephemStep;
-   currentEpoch = initialEpoch + timeFromEpoch /
+
+   currentEpoch = ephemStart + timeFromEphemStart /
          GmatTimeConstants::SECS_PER_DAY;
+
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("   ephemStart = %.12lf, timeFromStart = "
+            "%lf sec => currentEpoch after step = %.12lf\n", ephemStart,
+            timeFromEphemStart, currentEpoch);
+   #endif
 
    // Allow for slop in the last few bits
    if ((currentEpoch < ephemStart - 1e-10) ||
@@ -784,6 +824,7 @@ bool Code500Propagator::Step()
    }
 
    GetState(currentEpoch, outState);
+   lastEpoch = currentEpoch;
 
    std::memcpy(state, outState.GetDataVector(),
          dimension*sizeof(Real));
