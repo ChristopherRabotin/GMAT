@@ -1928,8 +1928,34 @@ std::string BatchEstimator::GetProgressString()
 
             finalCovariance = information.Inverse();
 
-            //progress.precision(12);
-            //progress.scientific;
+            // Convert covariance matrix for Cr_Epsilon and Cd_Epsilon to covariance matrix for Cr and Cd
+            for (UnsignedInt i = 0; i < map->size(); ++i)
+            {
+               if ((*map)[i]->elementName == "Cr_Epsilon")
+               {
+                  // Get Cr0
+                  Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
+
+                  // multiply row and column i with Cr0
+                  for (UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
+                     finalCovariance(i, j) *= Cr0;
+                  for (UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
+                     finalCovariance(j, i) *= Cr0;
+               }
+               if ((*map)[i]->elementName == "Cd_Epsilon")
+               {
+                  // Get Cd0
+                  Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
+
+                  // multiply row and column i with Cd0
+                  for (UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
+                     finalCovariance(i, j) *= Cd0;
+                  for (UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
+                     finalCovariance(j, i) *= Cd0;
+               }
+            }
+
+            // Display final coveriance matrix
             progress << "\nFinal Covariance Matrix:\n\n";
             for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
             {
@@ -1943,6 +1969,7 @@ std::string BatchEstimator::GetProgressString()
                progress << "\n";
             }
 
+            // Display final correlation matrix
             progress << "\nFinal Correlation Matrix:\n\n";
             for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
             {
@@ -5348,7 +5375,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 
       // 7. Write state information
       textFile3   << " " << GmatStringUtil::GetAlignmentString("State Component", max_len + 4, GmatStringUtil::LEFT)
-         << "Units         Current State      Apriori State      Standard Dev.     Previous State    Current-Apriori   Current-Previous\n";
+         << "Units           Current State        Apriori State      Standard Dev.       Previous State    Current-Apriori   Current-Previous\n";
       textFile3 << "\n";
       textFile3.precision(8);
 
@@ -5412,13 +5439,13 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
          textFile3 << " ";
          textFile3 << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 1, GmatStringUtil::LEFT);
          textFile3 << GmatStringUtil::GetAlignmentString(unit, 8, GmatStringUtil::LEFT);
-         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                    // current state
-         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                    // apriori state
+         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);                    // current state
+         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriSolveForState[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);                    // apriori state
          if (covar(i, i) >= 0.0)
             textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(covar(i, i)), false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);          // standard deviation
          else
             textFile3 << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT);
-         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                   // previous state
+         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousSolveForState[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);                   // previous state
          textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i] - aprioriSolveForState[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);   // current state - apriori
          textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i] - previousSolveForState[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);  // current state - previous state
          textFile3 << "\n";
@@ -5496,14 +5523,14 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             textFile3 << " ";
             textFile3 << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 1, GmatStringUtil::LEFT);
             textFile3 << GmatStringUtil::GetAlignmentString(unitList[i], 8, GmatStringUtil::LEFT);
-            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // current state
-            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // apriori state
+            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);             // current state
+            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriArr[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);             // apriori state
             if (stdArr[i] >= 0.0)
                textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(stdArr[i], false, true, true, 8, 18)), 19, GmatStringUtil::RIGHT);                       // standard deviation
             else
                textFile3 << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT);
 
-            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);            // previous state
+            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousArr[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);            // previous state
             textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i] - aprioriArr[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);   // current state - apriori 
             textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i] - previousArr[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);  // current state - previous state
             textFile3 << "\n";
@@ -5550,7 +5577,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
       }
 
       textFile3 << " " << GmatStringUtil::GetAlignmentString("Ancillary Elements", max_len + 4, GmatStringUtil::LEFT)
-         << "Units         Current State      Apriori State      Standard Dev.     Previous State    Current-Apriori   Current-Previous\n";
+         << "Units           Current State        Apriori State      Standard Dev.       Previous State    Current-Apriori   Current-Previous\n";
       textFile3 << "\n";
 
       // Specify value of all elements:
@@ -5579,15 +5606,15 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             }
             else
             {
-               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // current state
-               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // apriori state
+               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);             // current state
+               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriAE[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);             // apriori state
                //if (stdArr[i] >= 0.0)
                //   textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(stdArr[i], false, true, true, 8, 18)), 19, GmatStringUtil::RIGHT);                       // standard deviation
                //else
                //   textFile3 << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT);
                textFile3 << GmatStringUtil::GetAlignmentString("", 19, GmatStringUtil::RIGHT);
 
-               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);            // previous state
+               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousAE[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);            // previous state
                textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i] - aprioriAE[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);   // current state - apriori 
                textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i] - previousAE[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);  // current state - previous state
                textFile3 << "\n";
