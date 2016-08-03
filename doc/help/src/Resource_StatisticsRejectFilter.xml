@@ -22,34 +22,32 @@
   <refnamediv>
     <refname>StatisticsRejectFilter</refname>
 
-    <refpurpose>used to specify measurement noise for simulation and
-    estimation, and to apply or estimate measurement biases.</refpurpose>
+    <refpurpose>Allows selection of data subsets for processing by the batch
+    least squares estimator.</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>An ErrorModel is assigned on the ErrorModels field of an instance of
-    GroundStation to model biases and noise, and optionally to estimate biases
-    on each measurement type provided by the ground station. An ErrorModel
-    must be specified for each data type employed by each tracking station,
-    but a single instance of ErrorModel may be used by multiple ground
-    stations.</para>
+    <para>The <guilabel>StatisticsRejectFilter</guilabel> object is used to
+    create criteria for the exclusion of subsets of the available data in the
+    estimation process based on tracker, observed object, measurement type, or
+    time. A single <guilabel>StatisticsRejectFilter</guilabel> may employ
+    multiple selection criteria (for example simultaneous thinning by time and
+    tracker). Multiple criteria on a single filter are considered in an AND
+    sense. When multiple criteria are specified, an observation must meet all
+    specified criteria to be rejected. </para>
 
-    <para>The ErrorModel is used by both the simulator and the estimator. For
-    a data simulation run, the ErrorModel specifies the measurement type and
-    noise employed when generating the simulated measurement. A bias may
-    optionally be applied to the simulated observations.</para>
+    <para>Instances of <guilabel>StatisticsRejectFilter</guilabel> are
+    specified for use on the <guilabel>DataFilters</guilabel> field of a
+    <guilabel>TrackingFileSet</guilabel> object. Multiple a with different
+    selection criteria may be specified on a single
+    <guilabel>TrackingFileSet</guilabel>. When multiple filters are specified,
+    these act in an OR sense. Data meeting criteria for any of the specified
+    filters will be rejected.</para>
 
-    <para>For an estimation run, the ErrorModel specifies the observation
-    type, presumed observation noise, and an optional bias to be applied to
-    the observation. An observation bias may also be estimated by adding the
-    keyword Bias to the ErrorModel.SolveFors list. If the SolveFors list is
-    empty, no bias will be estimated. The SolveFors list is ignored by the
-    simulator. TODO: Fix SEE.. </para>
-
-    <para>TrackingFileSet, GroundStation, ErrorModel See Also <xref
-    linkend="GroundStation"/></para>
+    <para>See Also <xref linkend="StatisticsAcceptFilter"/>, <xref
+    linkend="TrackingFileSet"/></para>
   </refsection>
 
   <refsection>
@@ -71,17 +69,14 @@
 
         <tbody>
           <row>
-            <entry><guilabel>Bias</guilabel></entry>
+            <entry><guilabel>DataTypes</guilabel></entry>
 
-            <entry><para>The constant bias associated with the measurement.
-            For simulations, this bias is added to the measurement. As shown
-            below, the units used depend upon measurement type,
-            <guilabel>ErrorModel.Type</guilabel>. </para> <variablelist>
+            <entry><para>List of data types</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Real</para>
+                    <para>String Array</para>
                   </listitem>
                 </varlistentry>
 
@@ -89,178 +84,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any Real number</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>0.0</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>Range_RU: RU, Doppler_HZ: Hz</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>BiasSigma</guilabel></entry>
-
-            <entry><para>Standard deviation of bias</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real &gt; 0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>1e+70</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>NoiseSigma</guilabel></entry>
-
-            <entry><para>One sigma value of Gaussian noise. For simulations,
-            if Sim.AddNoise= true, this noise is added to the measurements.
-            For estimation, this value is used to as part of the batch
-            processing algorithms. </para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Real</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Real &gt; 0</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>
-                      <guilabel>TAIModJulian</guilabel>
-                    </para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>SolveFors</guilabel></entry>
-
-            <entry><para>List of fields to be solved for</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>StringArray</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Bias</para>
+                    <para>Range_KM, Range_RU, Doppler_RangeRate, Doppler_Hz,
+                    or All</para>
                   </listitem>
                 </varlistentry>
 
@@ -301,14 +126,15 @@
           </row>
 
           <row>
-            <entry><guilabel>Type</guilabel></entry>
+            <entry><guilabel>EpochFormat</guilabel></entry>
 
-            <entry><para>Measurement data type. </para> <variablelist>
+            <entry><para>Allows user to select format of the epoch</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Enumeration</para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -316,7 +142,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Range_RU, Doppler_HZ</para>
+                    <para>UTCGregorian, UTCModJulian, TAIGregorian,
+                    TAIModJulian, TTGregorian, TTModJulian A1Gregorian,
+                    A1ModJulian, TDBGregorian, TDBModJulian</para>
                   </listitem>
                 </varlistentry>
 
@@ -333,7 +161,298 @@
 
                   <listitem>
                     <para>
-                      <guilabel>Range_RU</guilabel>
+                      <guilabel>TAIModJulian</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>InitialEpoch</guilabel></entry>
+
+            <entry><para>Initial epoch of desired data to process</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any valid epoch</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>earliest day defined in GMAT</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FinalEpoch</guilabel></entry>
+
+            <entry><para>Final epoch of desired data to process</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any valid epoch</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>latest day defined in GMAT</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FileNames</guilabel></entry>
+
+            <entry><para>List of file names (a subset of the relevant
+            <guilabel>TrackingFileSet's</guilabel>
+            <guilabel>FileName</guilabel> field) containing the tracking data,
+            to be excluded from processing. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>StringArray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>valid file name, 'All', or
+                    'From_AddTrackingConfig'</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>{}</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ObservedObjects</guilabel></entry>
+
+            <entry><para>List of user-created tracked objects (e.g., name of
+            the <guilabel>Spacecraft</guilabel> resource being tracked)</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Object Array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>User defined observed object or 'All'</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>{}</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Trackers</guilabel></entry>
+
+            <entry><para>List of user-created trackers (e.g., name of the
+            <guilabel>GroundStation</guilabel> resource being used) </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Object Array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any valid user-created Tracker object (e.g.,
+                    <guilabel>GroundStation</guilabel>) or 'All'</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>{}</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -361,67 +480,44 @@
   </refsection>
 
   <refsection>
-    <title>Remarks</title>
-
-    <refsection>
-      <title>Measurement Type Names</title>
-
-      <para>Currently the measurement type names used to identify observation
-      types in GMD data files and on the TrackingFileSet.AddTrackingConfig
-      object field are not the same as those used to build measurement error
-      models for those types. Use the following table as a guide.</para>
-
-      <informaltable>
-        <tgroup cols="2">
-          <thead>
-            <row>
-              <entry align="center">GMD File and
-              TrackingFileSet.AddTrackingConfig Measurement Type Name</entry>
-
-              <entry align="center">ErrorModel Measurement Type Name</entry>
-            </row>
-          </thead>
-
-          <tbody>
-            <row>
-              <entry>DSNRange</entry>
-
-              <entry>Range_RU </entry>
-            </row>
-
-            <row>
-              <entry>Doppler </entry>
-
-              <entry>Doppler_HZ </entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-    </refsection>
-  </refsection>
-
-  <refsection>
     <title>Examples</title>
 
     <informalexample>
-      <para>This example shows how to create an ErrorModel for ground network
-      range observations and illustrates estimation of a range bias
-      parameter.</para>
+      <para>The <guilabel>StatisticsRejectFilter</guilabel> object should be
+      assigned to the <guilabel>DataFilters</guilabel> field of a
+      <guilabel>TrackingFileSet</guilabel>. This example shows how to create a
+      <guilabel>StatisticsRejectFilter</guilabel> to reject all observations
+      from station <guilabel>GDS</guilabel>.</para>
 
-      <programlisting>%   Create an ErrorModel
+      <programlisting>Create StatisticsRejectFilter srf;
  
-Create ErrorModel Range_ErrorModel;
-  
-Range_ErrorModel.Type       = 'Range_RU';
-Range_ErrorModel.NoiseSigma = 11;
-Range_ErrorModel.Bias       = 0.0;
-Range_ErrorModel.SolveFors  = {Bias};
+srf.Trackers        = {'GDS'};
+% srf.DataTypes     = {'Range_RU'}
+% srf.EpochFormat   = 'UTCGregorian';
+% srf.InitialEpoch  = '10 Jun 2012 00:00:00.000';
+% srf.FinalEpoch    = '10 Jun 2012 12:00:00.000';
  
-%   Assign it to a ground station
+Create TrackingFileSet estData;
  
-Create GroundStation USPS;
+estData.DataFilters = {srf};</programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>The next example will reject all Doppler_HZ tracking measurements
+      from station <guilabel>GDS</guilabel>, and all tracking of any type from
+      station <guilabel>CAN</guilabel>. All other tracking measurements will
+      be accepted.</para>
+
+      <programlisting>Create StatisticsRejectFilter srf1;
+Create StatisticsRejectFilter srf2;
  
-USPS.ErrorModels = {Range_ErrorModel};</programlisting>
+srf1.Trackers       = {'GDS'}; 
+srf1.DataTypes      = {'Doppler_HZ'};
+saf2.Trackers       = {'CAN'};
+ 
+Create TrackingFileSet estData;
+ 
+estData.DataFilters = {srf1, srf2};</programlisting>
     </informalexample>
   </refsection>
 </refentry>
