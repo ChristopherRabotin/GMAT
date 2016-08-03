@@ -532,22 +532,13 @@ void BatchEstimatorInv::Accumulate()
                sLine << "\n";
             }
             
-//            if (writeMatFile && (matWriter != NULL))
-//            {
-//               // write data to .mat file
-//               WriterData *realData = matWriter->GetContainer(Gmat::REAL_TYPE, "Observation");
-//               matWriter->AddData(realData);
-//               std::vector<RealArray> current_obs;
-//               current_obs.push_back(currentObs->value);
-//               realData->AddData(current_obs);
-//
-//               std::string object_name;
-//               std::stringstream convert;
-//               convert << "Iteration" << iterationsTaken;
-//               object_name = convert.str();
-//
-// //               matWriter->WriteData(object_name);
-//            }
+            // Write the .mat data
+            if (writeMatFile && (matWriter != NULL))
+            {
+               matData.realValues[matCalcIndex][matIndex] = calculatedMeas->value[0];
+               matData.realValues[matOmcIndex][matIndex]  = ocDiff;
+               matData.stringValues[matObsEditFlagIndex][matIndex] = ss;
+            }
 
             // Reset value for removed reason for all reuseable data records
             if (isReUsed)
@@ -866,7 +857,9 @@ void BatchEstimatorInv::Accumulate()
 
    if (writeMatFile && (matWriter != NULL))
    {
-      matData.stringValues[matObsEditFlagIndex][matIndex] = currentObs->removedReason;
+      if (matData.stringValues[matObsEditFlagIndex][matIndex] == "N/A")
+         matData.stringValues[matObsEditFlagIndex][matIndex] = currentObs->removedReason;
+
       if (calculatedMeas)
          matData.realValues[matElevationIndex][matIndex] = calculatedMeas->feasibilityValue;
 
