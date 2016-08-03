@@ -197,6 +197,8 @@ SET(MATLAB_ADDITIONAL_VERSIONS
   "R2016b=9.1"
   CACHE STRING "Additional searched MATLAB versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
   )
+SET(Matlab_MAT_LIBRARY "Matlab_MAT_LIBRARY-NOTFOUND" CACHE FILEPATH "Path to libmat" FORCE)
+MARK_AS_ADVANCED(CLEAR Matlab_MAT_LIBRARY)
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 
 if(NOT Matlab_FOUND)
@@ -222,6 +224,7 @@ else()
     )
   if(Matlab_MAT_LIBRARY)
     SET(Matlab_LIBRARIES ${Matlab_LIBRARIES} ${Matlab_MAT_LIBRARY})
+    MARK_AS_ADVANCED(FORCE Matlab_MAT_LIBRARY)
   else()
     MESSAGE(WARNING "libmat NOT FOUND. Please contact GMAT support with this error.")
   endif()
