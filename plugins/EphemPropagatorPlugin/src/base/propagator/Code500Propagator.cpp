@@ -34,7 +34,7 @@
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
 #include "NotAKnotInterpolator.hpp"    // Only one supported for now
-#include <sstream>                        // for stringstream
+#include <sstream>                     // for stringstream
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_PROPAGATION
@@ -56,7 +56,7 @@ const std::string Code500Propagator::PARAMETER_TEXT[
 const Gmat::ParameterType Code500Propagator::PARAMETER_TYPE[
                  Code500PropagatorParamCount - EphemerisPropagatorParamCount] =
 {
-      Gmat::FILENAME_TYPE        //EPHEMERISFILENAME
+      Gmat::FILENAME_TYPE          //EPHEMERISFILENAME
 };
 
 
@@ -595,6 +595,11 @@ bool Code500Propagator::Initialize()
    {
       stepTaken = 0.0;
 
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("   After base class initialization, "
+               "initialEpoch = %.12lf\n", initialEpoch);
+      #endif
+
       FileManager *fm = FileManager::Instance();
       std::string fullPath;
 
@@ -604,7 +609,7 @@ bool Code500Propagator::Initialize()
 
       // The PSM isn't set until PrepareToPropagate fires.  The following is
       // also last minute setup, so only do it if the PSM has been set
-      if ((psm != NULL) && (!fileDataLoaded))
+      if (psm != NULL)
       {
          for (UnsignedInt i = 0; i < propObjects.size(); ++i)
          {
@@ -627,109 +632,113 @@ bool Code500Propagator::Initialize()
                throw PropagatorException("Code 500 ephemeris propagators only "
                      "work for Spacecraft.");
 
-            if (ephemName == "")
-               throw PropagatorException("The Code-500 propagator requires a "
-                     "valid ephemeris file name");
-
-            fullPath = fm->FindPath(ephemName, "VEHICLE_EPHEM_PATH", true, false, true);
-            if (fullPath == "")
-               throw PropagatorException("The Code 500 ephemeris file " +
-                     ephemName + " does not exist");
-
-            if (!ephem.OpenForRead(fullPath))
-               throw PropagatorException("The Code 500 ephemeris file " +
-                     ephemName + " failed to open");
-
-            ephem.ReadHeader1(logOption);
-            ephem.ReadHeader2(logOption);
-            ephem.ReadDataRecords(-999, 0);
-
-            Real timeSystem = ephem.GetTimeSystem();
-
-            ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
-
-            #ifdef DEBUG_INITIALIZATION
-               if (ephemRecords != NULL)
-                  MessageInterface::ShowMessage("EphemRecords contains %d "
-                        "data blocks\n", ephemRecords->size());
-               MessageInterface::ShowMessage("Record contents:\n");
-            #endif
-
-            startEpochs.clear();
-            timeSteps.clear();
-            for (UnsignedInt i = 0; i < ephemRecords->size(); ++i)
+            if (!fileDataLoaded)
             {
-               // Save the data used by the Code500 propagator in GMAT compatible formats
-               Real startDate = ephemRecords->at(i).dateOfFirstEphemPoint_YYYMMDD;
-               Real startSecs = ephemRecords->at(i).secsOfDayForFirstEphemPoint;
-               Integer year   = (Integer)(startDate / 10000);
-               Integer month  = (Integer)((startDate - year * 10000) / 100);
-               Integer day    = (Integer)(startDate - year * 10000 - month * 100);
-               year += 1900;
-               Integer hour   = (Integer)(startSecs / 3600);
-               Integer minute = (Integer)((startSecs - hour * 3600) / 60);
-               Real second    = startSecs - hour * 3600 - minute * 60;
+               if (ephemName == "")
+                  throw PropagatorException("The Code-500 propagator requires a "
+                        "valid ephemeris file name");
+
+               fullPath = fm->FindPath(ephemName, "VEHICLE_EPHEM_PATH", true, false, true);
+               if (fullPath == "")
+                  throw PropagatorException("The Code 500 ephemeris file " +
+                        ephemName + " does not exist");
+
+               if (!ephem.OpenForRead(fullPath))
+                  throw PropagatorException("The Code 500 ephemeris file " +
+                        ephemName + " failed to open");
+
+               ephem.ReadHeader1(logOption);
+               ephem.ReadHeader2(logOption);
+               ephem.ReadDataRecords(-999, 0);
+
+               Real timeSystem = ephem.GetTimeSystem();
+
+               ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
 
                #ifdef DEBUG_INITIALIZATION
-                  MessageInterface::ShowMessage("Start:  %04d/%02d/%02d %02d:"
-                        "%02d:%lf %s\n", year, month, day, hour, minute, second,
-                        (timeSystem == 1.0 ? "A.1" : "UTC"));
+                  if (ephemRecords != NULL)
+                     MessageInterface::ShowMessage("EphemRecords contains %d "
+                           "data blocks\n", ephemRecords->size());
+                  MessageInterface::ShowMessage("Record contents:\n");
                #endif
 
-               GmatEpoch epoch = ModifiedJulianDate(year, month, day, hour, minute, second);
-               GmatEpoch theEpoch = 0.0;
+               startEpochs.clear();
+               timeSteps.clear();
+               for (UnsignedInt i = 0; i < ephemRecords->size(); ++i)
+               {
+                  // Save the data used by the Code500 propagator in GMAT compatible formats
+                  Real startDate = ephemRecords->at(i).dateOfFirstEphemPoint_YYYMMDD;
+                  Real startSecs = ephemRecords->at(i).secsOfDayForFirstEphemPoint;
+                  Integer year   = (Integer)(startDate / 10000);
+                  Integer month  = (Integer)((startDate - year * 10000) / 100);
+                  Integer day    = (Integer)(startDate - year * 10000 - month * 100);
+                  year += 1900;
+                  Integer hour   = (Integer)(startSecs / 3600);
+                  Integer minute = (Integer)((startSecs - hour * 3600) / 60);
+                  Real second    = startSecs - hour * 3600 - minute * 60;
 
-               // If not A.1 time, convert it!
-               if (timeSystem == 1.0)
-                  theEpoch = epoch;
-               else //if (timeSystem == 2.0) // Should check to be sure it was set
-                  theEpoch = TimeConverterUtil::Convert(epoch, TimeConverterUtil::UTCMJD,
-                        TimeConverterUtil::A1MJD);
+                  #ifdef DEBUG_INITIALIZATION
+                     MessageInterface::ShowMessage("Start:  %04d/%02d/%02d %02d:"
+                           "%02d:%lf %s\n", year, month, day, hour, minute, second,
+                           (timeSystem == 1.0 ? "A.1" : "UTC"));
+                  #endif
 
-               startEpochs.push_back(theEpoch);
-               timeSteps.push_back(ephemRecords->at(i).timeIntervalBetweenPoints_SEC);
+                  GmatEpoch epoch = ModifiedJulianDate(year, month, day, hour, minute, second);
+                  GmatEpoch theEpoch = 0.0;
+
+                  // If not A.1 time, convert it!
+                  if (timeSystem == 1.0)
+                     theEpoch = epoch;
+                  else //if (timeSystem == 2.0) // Should check to be sure it was set
+                     theEpoch = TimeConverterUtil::Convert(epoch, TimeConverterUtil::UTCMJD,
+                           TimeConverterUtil::A1MJD);
+
+                  startEpochs.push_back(theEpoch);
+                  timeSteps.push_back(ephemRecords->at(i).timeIntervalBetweenPoints_SEC);
+
+                  #ifdef DEBUG_INITIALIZATION
+                     MessageInterface::ShowMessage("   %3d: Date %.0lf : %lf secs "
+                           "=> %.12lf, stepping %lf s\n", i,
+                           ephemRecords->at(i).dateOfFirstEphemPoint_YYYMMDD,
+                           ephemRecords->at(i).secsOfDayForFirstEphemPoint, theEpoch,
+                           ephemRecords->at(i).timeIntervalBetweenPoints_SEC);
+
+                     MessageInterface::ShowMessage("      State: [%lf   %lf   "
+                           "%lf]   [%lf   %lf   %lf]\n",
+                           ephemRecords->at(i).firstStateVector_DULT[0] * DUL_TO_KM,
+                           ephemRecords->at(i).firstStateVector_DULT[1] * DUL_TO_KM,
+                           ephemRecords->at(i).firstStateVector_DULT[2] * DUL_TO_KM,
+                           ephemRecords->at(i).firstStateVector_DULT[3] * DUL_DUT_TO_KM_SEC,
+                           ephemRecords->at(i).firstStateVector_DULT[4] * DUL_DUT_TO_KM_SEC,
+                           ephemRecords->at(i).firstStateVector_DULT[5] * DUL_DUT_TO_KM_SEC);
+
+                     for (UnsignedInt j = 0; j < 4; ++j)
+                        MessageInterface::ShowMessage("          %d: [%lf   %lf   "
+                              "%lf]   [%lf   %lf   %lf]\n", j,
+                              ephemRecords->at(i).stateVector2Thru50_DULT[j][0] * DUL_TO_KM,
+                              ephemRecords->at(i).stateVector2Thru50_DULT[j][1] * DUL_TO_KM,
+                              ephemRecords->at(i).stateVector2Thru50_DULT[j][2] * DUL_TO_KM,
+                              ephemRecords->at(i).stateVector2Thru50_DULT[j][3] * DUL_DUT_TO_KM_SEC,
+                              ephemRecords->at(i).stateVector2Thru50_DULT[j][4] * DUL_DUT_TO_KM_SEC,
+                              ephemRecords->at(i).stateVector2Thru50_DULT[j][5] * DUL_DUT_TO_KM_SEC);
+                  #endif
+               }
 
                #ifdef DEBUG_INITIALIZATION
-                  MessageInterface::ShowMessage("   %3d: Date %.0lf : %lf secs "
-                        "=> %.12lf, stepping %lf s\n", i,
-                        ephemRecords->at(i).dateOfFirstEphemPoint_YYYMMDD,
-                        ephemRecords->at(i).secsOfDayForFirstEphemPoint, theEpoch,
-                        ephemRecords->at(i).timeIntervalBetweenPoints_SEC);
-
-                  MessageInterface::ShowMessage("      State: [%lf   %lf   "
-                        "%lf]   [%lf   %lf   %lf]\n",
-                        ephemRecords->at(i).firstStateVector_DULT[0] * DUL_TO_KM,
-                        ephemRecords->at(i).firstStateVector_DULT[1] * DUL_TO_KM,
-                        ephemRecords->at(i).firstStateVector_DULT[2] * DUL_TO_KM,
-                        ephemRecords->at(i).firstStateVector_DULT[3] * DUL_DUT_TO_KM_SEC,
-                        ephemRecords->at(i).firstStateVector_DULT[4] * DUL_DUT_TO_KM_SEC,
-                        ephemRecords->at(i).firstStateVector_DULT[5] * DUL_DUT_TO_KM_SEC);
-
-                  for (UnsignedInt j = 0; j < 4; ++j)
-                     MessageInterface::ShowMessage("          %d: [%lf   %lf   "
-                           "%lf]   [%lf   %lf   %lf]\n", j,
-                           ephemRecords->at(i).stateVector2Thru50_DULT[j][0] * DUL_TO_KM,
-                           ephemRecords->at(i).stateVector2Thru50_DULT[j][1] * DUL_TO_KM,
-                           ephemRecords->at(i).stateVector2Thru50_DULT[j][2] * DUL_TO_KM,
-                           ephemRecords->at(i).stateVector2Thru50_DULT[j][3] * DUL_DUT_TO_KM_SEC,
-                           ephemRecords->at(i).stateVector2Thru50_DULT[j][4] * DUL_DUT_TO_KM_SEC,
-                           ephemRecords->at(i).stateVector2Thru50_DULT[j][5] * DUL_DUT_TO_KM_SEC);
+                  MessageInterface::ShowMessage("The ephem spans from %.12lf to "
+                        "%.12lf\nRecords pointer = %p\n", ephemStart, ephemEnd,
+                        ephemRecords);
                #endif
+               fileDataLoaded = true;
+//            }
+
+            // Build the interpolator.  For now, use not-a-knot splines
+            if (interp != NULL)
+               delete interp;
+            interp = new NotAKnotInterpolator("Code500NotAKnot", 6);
+            ephem.CloseForRead();
             }
-
-            #ifdef DEBUG_INITIALIZATION
-               MessageInterface::ShowMessage("The ephem spans from %.12lf to "
-                     "%.12lf\nRecords pointer = %p\n", ephemStart, ephemEnd,
-                     ephemRecords);
-            #endif
-            fileDataLoaded = true;
          }
-
-         // Build the interpolator.  For now, use not-a-knot splines
-         if (interp != NULL)
-            delete interp;
-         interp = new NotAKnotInterpolator("Code500NotAKnot", 6);
-         ephem.CloseForRead();
       }
 
 //      if (lastEpoch != currentEpoch)
@@ -745,6 +754,12 @@ bool Code500Propagator::Initialize()
 //         #endif
 //      }
    }
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Code500Propagator::Initialize(), on exit, "
+            "initialEpoch = %.12lf, current = %.12lf\n", initialEpoch,
+            currentEpoch);
+   #endif
 
    return retval;
 }
@@ -762,9 +777,10 @@ bool Code500Propagator::Initialize()
 bool Code500Propagator::Step()
 {
    #ifdef DEBUG_PROPAGATION
-      MessageInterface::ShowMessage("Code500Propagator::Step() entered: "
+      MessageInterface::ShowMessage("Code500Propagator::Step() entered for %p: "
             "initialEpoch = %.12lf; stepsize = %.12lf; "
-            "timeFromEpoch = %.12lf\n", initialEpoch, ephemStep, timeFromEpoch);
+            "timeFromEpoch = %.12lf\n", this, initialEpoch, ephemStep,
+            timeFromEpoch);
    #endif
 
    bool retval = false;
