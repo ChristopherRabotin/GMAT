@@ -3069,6 +3069,14 @@ void BatchEstimator::WriteReportFileHeaderPart3()
    paramNames.push_back("Spacecraft Thermal Radiation Pressure");
    paramNames.push_back("Relativistic Accelerations");
 
+   // Set flag to skip some section in force model table
+   bool skipGravityModel = true;
+   bool skipRadPressure = true;
+   bool skipDrag = true;
+   Integer gmIndex = 0;                // index such as paramNames[index] == "Central Body Gravity Model"
+   Integer rpIndex = 0;                // index such as paramNames[index] == "Solar Radiation Pressure"
+   Integer dragIndex = 0;              // index such as paramNames[index] == "Drag"
+
    Integer nameLen = 0;
    for (UnsignedInt i = 0; i < paramNames.size(); ++i)
       nameLen = (Integer)GmatMathUtil::Max(nameLen, paramNames[i].size());
@@ -3146,12 +3154,15 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             ss.str(""); ss << deg << "x" << ord;
             paramValues.push_back(potentialFile);                                                        // Central Body Gravity Model
             paramValues.push_back(ss.str());                                                             //   Degree and Order
+
+            skipGravityModel = false;
          }
          else
          {
             paramValues.push_back("None");                                                               // Central Body Gravity Model
             paramValues.push_back("N/A");                                                                //   Degree and Order
          }
+         gmIndex = paramValues.size() - 2;
 
          
          // fill blanks
@@ -3253,6 +3264,7 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             ss.str(""); ss << GmatStringUtil::RealToString(srp->GetRealParameter(srp->GetParameterID("Nominal_Sun"))*GmatMathConstants::M_TO_KM, false, true, false, 8); 
             paramValues.push_back(ss.str());                                                              // Astronomical Unit
 
+            skipRadPressure = false;
          }
          else
          {
@@ -3261,8 +3273,9 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             paramValues.push_back("");                                                                     // Solar Irradiance
             paramValues.push_back("");                                                                     // Astronomical Unit
          }
-
+         rpIndex = paramValues.size() - 4;
          
+
          std::string drag = ode->GetStringParameter("Drag");
          if (drag == "None")
          {
@@ -3273,8 +3286,12 @@ void BatchEstimator::WriteReportFileHeaderPart3()
          {
             paramValues.push_back("Yes");                                                                  // Drag
             paramValues.push_back(drag);                                                                   // Atmospheric Density Model
+
+            skipDrag = false;
          }
+         dragIndex = paramValues.size() - 2;
          
+
          if (gvForce != NULL)
             paramValues.push_back(gvForce->GetStringParameter("EarthTideModel"));
          else
@@ -3308,7 +3325,21 @@ void BatchEstimator::WriteReportFileHeaderPart3()
          if ((nameLen+2 + colCount*26) > (160-26))
          {
             for (UnsignedInt j = 0; j < rowContent.size(); ++j)
+            {
+               // skip 1 line showing the details of central body gravity model
+               if (skipGravityModel && (j == (gmIndex + 1)))
+                  continue;
+
+               // skip 3 lines showing the details of solar radiation pressure 
+               if (skipRadPressure && (rpIndex + 1 <= j) && (j <= rpIndex + 3))
+                  continue;
+
+               // skip 1 line showing the details of drag model
+               if (skipDrag && (j == (dragIndex + 1)))
+                  continue;
+
                textFile << rowContent[j] << "\n";
+            }
             textFile << "\n";
             textFile << "\n";
 
@@ -3345,6 +3376,13 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             paramNames.push_back("Central Body Thermal Radiation");
             paramNames.push_back("Spacecraft Thermal Radiation Pressure");
             paramNames.push_back("Relativistic Accelerations");
+
+            skipGravityModel = true;
+            skipRadPressure = true;
+            skipDrag = true;
+            gmIndex = 0;
+            rpIndex = 0;
+            dragIndex = 0;
          }
          
          // 3.6. Clear paramValues and paramUnits
@@ -3353,7 +3391,21 @@ void BatchEstimator::WriteReportFileHeaderPart3()
    }
 
    for (UnsignedInt j = 0; j < rowContent.size(); ++j)
+   {
+      // skip 1 line showing the details of central body gravity model
+      if (skipGravityModel && (j == (gmIndex + 1)))
+         continue;
+
+      // skip 3 lines showing the details of solar radiation pressure 
+      if (skipRadPressure && (rpIndex + 1 <= j) &&(j <= rpIndex + 3))
+         continue;
+
+      // skip 1 line showing the details of drag model
+      if (skipDrag && (j == (dragIndex + 1)))
+         continue;
+
       textFile << rowContent[j] << "\n";
+   }
    textFile << "\n";
    textFile << "\n";
 
@@ -3540,6 +3592,9 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
    // 3. Write table containing ground stations' information
    textFile << GmatStringUtil::GetAlignmentString("", 66) + "Ground Station Configuration\n";
    textFile << "\n";
+   
+   bool skipTropoDesc = true;
+   Integer tropoIndex = 10;           // index such as paramNames[index] == "Troposphere Model"
 
    Integer colCount = 0;
    std::stringstream ss;
@@ -3574,6 +3629,8 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Temperature"), false, false, false, 8); paramValues.push_back(ss.str());
             ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Pressure"), false, false, false, 8); paramValues.push_back(ss.str());
             ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Humidity"), false, false, false, 8); paramValues.push_back(ss.str());
+            
+            skipTropoDesc = false;
          }
          else
          {
@@ -3642,26 +3699,10 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
          // 3.5. Beak up columns in a table
          if ((nameLen+3+ colCount*24) > (160-48))
          {
-            // Check TroposphereModel value:
-            Integer tropoIndex = 0;
-            for (; tropoIndex < paramNames.size(); ++tropoIndex)
-               if (paramNames[tropoIndex] == "Troposphere Model")
-                  break;
-            std::string s = GmatStringUtil::Trim(rowContent[tropoIndex]);
-            while (s.substr(s.size() - 4) == "None")
-            {
-               s = s.substr(0, s.size() - 4);
-               s = GmatStringUtil::Trim(s);
-            }
-
-            bool skip = false;
-            if (s == "Troposphere Model")
-               skip = true;
-
             for (UnsignedInt j = 0; j < rowContent.size(); ++j)
             {
                // Remove 3 lines containing information about Temperature, Pressure, and Humidity when Troposphere model set to None for all stations in table
-               if (skip && (tropoIndex < j) && (j <= tropoIndex + 3))
+               if (skipTropoDesc && (tropoIndex < j) && (j <= tropoIndex + 3))
                   continue;
 
                textFile << rowContent[j] << "\n";
@@ -3689,6 +3730,8 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             paramNames.push_back("  Pressure    (hPa)");
             paramNames.push_back("  Humidity    (%)");
             paramNames.push_back("Measurement Error Models");
+
+            skipTropoDesc = true;
          }
          
          // 3.6. Clear paramValues and paramUnits
@@ -3696,26 +3739,10 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
       }
    }
    
-   // Check TroposphereModel value:
-   Integer tropoIndex = 0;
-   for (; tropoIndex < paramNames.size(); ++tropoIndex)
-      if (paramNames[tropoIndex] == "Troposphere Model")
-         break;
-   std::string s = GmatStringUtil::Trim(rowContent[tropoIndex]);
-   while (s.substr(s.size() - 4) == "None")
-   {
-      s = s.substr(0, s.size() - 4);
-      s = GmatStringUtil::Trim(s);
-   }
-
-   bool skip = false;
-   if (s == "Troposphere Model")
-      skip = true;
-
    for (UnsignedInt j = 0; j < rowContent.size(); ++j)
    {
       // Remove 3 lines containing information about Temperature, Pressure, and Humidity when Troposphere model set to None for all stations in table
-      if (skip && (tropoIndex < j) && (j <= tropoIndex + 3))
+      if (skipTropoDesc && (tropoIndex < j) && (j <= tropoIndex + 3))
          continue;
 
       textFile << rowContent[j] << "\n";
