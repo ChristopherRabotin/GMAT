@@ -192,10 +192,23 @@ bool Write::InterpretAction()
       throw CommandException(typeName + "::InterpretAction() does not identify "
       "the command in line\n" + generatingString);
 
+   // delete old elements before adding the new elements
+   DeleteElements();
+
+   bool optionsParsed = false;
    for (unsigned int i = 1; i < chunks.size(); i++)
    {
       if (GmatStringUtil::IsEnclosedWithBraces(chunks[i]))
+      {
+         optionsParsed = true;
          CheckForOptions(chunks[i]);
+      }
+      else if (optionsParsed)
+      {
+         DeleteElements();
+         throw CommandException(typeName + "::InterpretAction() requires all resources and variables "
+            "are specified before options are specified\n" + generatingString);
+      }
       else
       {
          AddElements(chunks[i], i - 1);
@@ -842,7 +855,7 @@ const std::string& Write::GetGeneratingString(Gmat::WriteMode mode,
    else
       gen += " }";
 
-   generatingString = gen + ";";
+   generatingString = gen;
    
    #ifdef DEBUG_GEN_STRING
    MessageInterface::ShowMessage
