@@ -553,7 +553,7 @@ bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &fi
    // 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
    if (mCentralBodyIndicator == 1.0)
       centralBody = "Earth";
-   else if (mCentralBodyIndicator = 2.0)
+   else if (mCentralBodyIndicator == 2.0)
       centralBody = "Moon";
    else if (mCentralBodyIndicator == 3.0)
       centralBody = "Sun";
