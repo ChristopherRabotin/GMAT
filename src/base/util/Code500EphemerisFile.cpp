@@ -519,11 +519,26 @@ bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &fi
    #else
    ReadHeader1();
    #endif
+
+   // For initial state
+   ReadDataAt(1);
+   int i = 0;
+   double posDult, velDult;
+   for (int j = 0; j < 3; j++)
+   {
+      posDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      mInitialState[j] = posDult * DUL_TO_KM;
+   }
+   for (int j = 3; j < 6; j++)
+   {
+      velDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      mInitialState[j] = velDult * DUL_DUT_TO_KM_SEC;
+   }
    
    // For final state
    ReadDataAt(mNumberOfRecordsInFile-2);
-   int i = mLastStateIndexRead;
-   double posDult, velDult;
+   i = mLastStateIndexRead;
+   posDult, velDult;
    for (int j = 0; j < 3; j++)
    {
       posDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
