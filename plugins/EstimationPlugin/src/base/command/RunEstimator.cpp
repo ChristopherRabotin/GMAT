@@ -326,19 +326,19 @@ bool RunEstimator::Initialize()
    if (theEstimator != NULL)
       delete theEstimator;
 
-   GmatBase *simObj = FindObject(solverName);
-   if (simObj == NULL)
+   GmatBase *estObj = FindObject(solverName);
+   if (estObj == NULL)
       throw CommandException("Cannot initialize RunEstimator command -- the "
             "Estimator named " + solverName + " cannot be found.");
 
-   if (!simObj->IsOfType("Estimator"))
+   if (!estObj->IsOfType("Estimator"))
       throw CommandException("Cannot initialize RunEstimator command -- the "
             "object named " + solverName + " is not a Estimator.");
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1\n"); 
       #endif
-   theEstimator = (Estimator*)(simObj->Clone());
+   theEstimator = (Estimator*)(estObj->Clone());
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.1\n"); 
       #endif
@@ -349,9 +349,9 @@ bool RunEstimator::Initialize()
    theEstimator->Initialize();
 
    theEstimator->TakeAction("ResetInstanceCount");
-   simObj->TakeAction("ResetInstanceCount");
-   theEstimator->TakeAction("IncrementInstanceCount");
-   simObj->TakeAction("IncrementInstanceCount");
+   theEstimator->TakeAction("IncrementInstanceCount"); 
+   estObj->TakeAction("ResetInstanceCount");                // does it need to do it???
+   estObj->TakeAction("IncrementInstanceCount");            // does it need to do it???
 
    // Set the observation data streams for the measurement manager
    MeasurementManager *measman = theEstimator->GetMeasurementManager();
@@ -411,7 +411,7 @@ bool RunEstimator::Initialize()
 // void LoadSolveForsToESM()
 //--------------------------------------------------------------------------------
 /**
-* This function is used to load all solve-for variables and store into 
+* This function is used to load all solve-for variables and store them into 
 * EstimationStateManager object.
 */
 //--------------------------------------------------------------------------------
@@ -422,7 +422,7 @@ void RunEstimator::LoadSolveForsToESM()
 #endif
 
    EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
-   StringArray names = theEstimator->GetMeasurementManager()->GetParticipantList();
+   StringArray names = theEstimator->GetMeasurementManager()->GetParticipantList();        // a name list of all participants
 
    ObjectMap objectmap = GetConfiguredObjectMap();
 
