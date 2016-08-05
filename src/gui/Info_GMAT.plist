@@ -3,34 +3,22 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
+	<string>en-US</string>
 	<key>CFBundleExecutable</key>
 	<string>EXECUTABLE</string>
-	<key>CFBundleGetInfoString</key>
-	<string>GMAT-R2015a (Beta) (Mac OS X 10.8) </string>
 	<key>CFBundleIconFile</key>
 	<string>gmat.icns</string>
-	<key>CFBundleIdentifier</key>
-	<string>GMAT-R2015a (Beta)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-	<key>CFBundleLongVersionString</key>
-	<string>GMAT-R2015a (Beta)</string>
 	<key>CFBundleName</key>
 	<string>GMAT</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
-	<key>CFBundleSignature</key>
-	<string>APPL</string>
 	<key>CFBundleVersion</key>
 	<string>1.0.0</string>
-	<key>CSResourcesFileMapped</key>
-	<false/>
-	<key>LSRequiresCarbon</key>
-	<false/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright (c) 2002-2015 United States Government as represented by the Administrator of The National Aeronautics and Space Administration. All Other Rights Reserved.  Licensed under the Apache License, Version 2.0.  Please see GMAT documentation for further info.</string>
+	<string>Copyright (c) 2002-2016 United States Government as represented by the Administrator of The National Aeronautics and Space Administration. All Other Rights Reserved.  Licensed under the Apache License, Version 2.0.  Please see GMAT documentation for further info.</string>
 </dict>
 </plist>
