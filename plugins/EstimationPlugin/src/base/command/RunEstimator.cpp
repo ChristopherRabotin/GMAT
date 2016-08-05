@@ -422,7 +422,9 @@ void RunEstimator::LoadSolveForsToESM()
 #endif
 
    EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
-   StringArray names = theEstimator->GetMeasurementManager()->GetParticipantList();        // a name list of all participants
+
+   // Set solve-for for all participants used in this estimator only. Solve-fors for participants in other estimator and similator are not set to ESM 
+   StringArray names = theEstimator->GetMeasurementManager()->GetParticipantList();
 
    ObjectMap objectmap = GetConfiguredObjectMap();
 
