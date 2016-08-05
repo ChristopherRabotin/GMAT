@@ -634,6 +634,8 @@ bool EstimationStateManager::SetProperty(GmatBase *obj)
 //------------------------------------------------------------------------------
 StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
 {
+   StringArray participantNames = this->measMan->GetParticipantList();
+
    StringArray solveforList;
    
    if (obj->IsOfType(Gmat::SPACECRAFT))
@@ -651,6 +653,26 @@ StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
          ObjectArray errorModels = mapIndex->second;
          for (UnsignedInt i = 0; i < errorModels.size(); ++i)
          {
+            // Given fullName = 'CAN.SimSat_DSNRange_ErrorModel'. It needs to extract 'SimSat' from this string
+            std::string fullName = errorModels[i]->GetFullName();
+            std::string name = errorModels[i]->GetName();
+            std::string s = fullName.substr(0, fullName.size() - name.size() - 1);
+            std::string::size_type pos = s.find_first_of('.');
+            s = s.substr(pos + 1);
+
+            // If the name of spacecraft ('SimSat') is not in the participants list. It needs to skip setting solve-for
+            bool found = false;
+            for (Integer j = 0; j < participantNames.size(); ++j)
+            {
+               if (participantNames[j] == s)
+               {
+                  found = true;
+                  break;
+               }
+            }
+            if (!found)
+               continue;
+
             // 2.2. Get solve-for list from error models
             StringArray sfList = errorModels[i]->GetStringArrayParameter("SolveFors");
             for(UnsignedInt j = 0; j < sfList.size(); ++j)
