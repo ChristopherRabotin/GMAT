@@ -1079,10 +1079,6 @@ bool BatchEstimator::Finalize()
 
 
 //------------------------------------------------------------------------------
-// protected methods
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
 // Methods used in the finite state machine
 //------------------------------------------------------------------------------
 
@@ -1775,7 +1771,7 @@ std::string BatchEstimator::GetProgressString()
                      << bestResidualRMS;
             if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                 // fix bug GMT-5711
             {                                                                          // fix bug GMT-5711
-            progress << "\n   Reset value of BestRMS residuals         : "          // fix bug GMT-5711
+            progress << "\n   Reset value of BestRMS residuals         : "             // fix bug GMT-5711
                         << resetBestResidualRMS;                                       // fix bug GMT-5711
             }                                                                          // fix bug GMT-5711
             progress << "\n   PredictedRMS residuals for next iteration: "
@@ -2017,6 +2013,19 @@ std::string BatchEstimator::GetProgressString()
 }
 
 
+//--------------------------------------------------------------------------------------
+// std::string GetElementFullName(ListItem* infor, bool isInternalCS) const
+//--------------------------------------------------------------------------------------
+/**
+* This function is used to get a full name of an element as specified by ListItem* infor
+*
+* @param infor              The ListItem element containing information about the elment
+* @param isInternalCS       flag to indicate whether the element is presented in an 
+*                           internal coordinate system or not. 
+*
+* return                    a string containing element full name
+*/
+//--------------------------------------------------------------------------------------
 std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalCS) const
 {
    std::stringstream ss;
@@ -2094,6 +2103,17 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalC
 }
 
 
+//--------------------------------------------------------------------------------------
+// std::string GetElementUnit(ListItem* infor) const
+//--------------------------------------------------------------------------------------
+/**
+* Get element unit
+*
+* @param infor     The ListItem element containing information about the elment
+*
+* @return          unit of the element
+*/
+//--------------------------------------------------------------------------------------
 std::string BatchEstimator::GetElementUnit(ListItem* infor) const
 {
    std::string unit = "";
@@ -2168,6 +2188,17 @@ std::string BatchEstimator::GetElementUnit(ListItem* infor) const
 }
 
 
+//--------------------------------------------------------------------------------------
+// Integer GetElementPrecision(std::string unit) const
+//--------------------------------------------------------------------------------------
+/**
+* Get element precision associated with th given unit
+*
+* @param unit      a measurement unit
+*
+* @return          precision asscociated with the unit
+*/
+//--------------------------------------------------------------------------------------
 Integer BatchEstimator::GetElementPrecision(std::string unit) const
 {
    // parameter's precision is specified based on its unit 
@@ -2407,6 +2438,13 @@ std::string BatchEstimator::CTime(const time_t* time)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetGMATBuildDate()
+//------------------------------------------------------------------------------
+/**
+* Get GMAT build date
+*/
+//------------------------------------------------------------------------------
 std::string BatchEstimator::GetGMATBuildDate()
 {
    std::istringstream s(__DATE__);
@@ -2459,6 +2497,14 @@ std::string BatchEstimator::GetGMATBuildDate()
    return ss.str();
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetDayOfWeek(Integer day, Integer month, Integer year)
+//------------------------------------------------------------------------------
+/**
+* Specify day of week for a given date month/day/year
+*/
+//------------------------------------------------------------------------------
 std::string BatchEstimator::GetDayOfWeek(Integer day, Integer month, Integer year)
 {
 
@@ -2922,7 +2968,7 @@ void BatchEstimator::WriteReportFileHeaderPart2b()
 
    // 1.2. Prepare for writing
    const std::vector<ListItem*> *map = esm.GetStateMap();
-   
+
    Rmatrix aprioriCov = *(stateCovariance->GetCovariance());
 
    // Convert covariance from CrEpsilon to Cr, from CdEpsilon to Cd
@@ -3781,6 +3827,13 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
 }
 
 
+//-------------------------------------------------------------------------
+// void BatchEstimator::WriteReportFileHeaderPart4_3()
+//-------------------------------------------------------------------------
+/**
+* Write information about measurement ErrorModel to estimation report file
+*/
+//-------------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart4_3()
 {
    // 1. Get a list of all error models
@@ -3937,6 +3990,13 @@ void BatchEstimator::WriteReportFileHeaderPart4_3()
 }
 
 
+//----------------------------------------------------------------------
+// void WriteReportFileHeaderPart4()
+//----------------------------------------------------------------------
+/**
+* Write Measurement Modeling section to estimation report file 
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart4()
 {
    // 1. Write subheader
@@ -3966,6 +4026,13 @@ void BatchEstimator::WriteReportFileHeaderPart4()
 //Inverse Flattening Coefficient            2.9825700000e+03    1.00000000000e+00    1.00000000000e+00
 //Rotation Rate(rad / sec)                   7.2921159000e-04    7.29211590000e-04    7.29211590000e-04
 
+//----------------------------------------------------------------------
+// void WriteReportFileHeaderPart5()
+//----------------------------------------------------------------------
+/**
+* Write Astrodynamic Constants section to estimation report file
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart5()
 {
    // 1. Write astrodynamic contants header
@@ -4207,6 +4274,13 @@ void BatchEstimator::WriteReportFileHeaderPart6()
 }
 
 
+//----------------------------------------------------------------------
+// void WriteIterationHeader()
+//----------------------------------------------------------------------
+/**
+* Write iteration header
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteIterationHeader()
 {
    /// 1. Write iteration header
@@ -4231,6 +4305,13 @@ void BatchEstimator::WriteIterationHeader()
 }
 
 
+//----------------------------------------------------------------------
+// void WritePageHeader()
+//----------------------------------------------------------------------
+/**
+* Write page header
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WritePageHeader()
 {
    /// 4.1. Write page header
@@ -4253,6 +4334,13 @@ void BatchEstimator::WritePageHeader()
 }
 
 
+//----------------------------------------------------------------------
+// void WriteIterationSummaryPart1(Solver::SolverState sState)
+//----------------------------------------------------------------------
+/**
+* Write statistics summary for estimation
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
 {
    if (sState == ESTIMATING)
@@ -4369,6 +4457,13 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
 }
 
 
+//----------------------------------------------------------------------
+// std::string GetUnit(std::string type)
+//----------------------------------------------------------------------
+/**
+* Get unit for a given observation data type
+*/
+//----------------------------------------------------------------------
 std::string BatchEstimator::GetUnit(std::string type)
 {
    std::string unit = "";
@@ -4397,6 +4492,13 @@ std::string BatchEstimator::GetUnit(std::string type)
 }
 
 
+//----------------------------------------------------------------------
+// void WriteIterationSummaryPart2(Solver::SolverState sState)
+//----------------------------------------------------------------------
+/**
+* Write observation statistics summary
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
 {
    if (sState == ESTIMATING)
@@ -5301,7 +5403,13 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
 }
 
 
-
+//------------------------------------------------------------------------------------------
+// void WriteIterationSummaryPart3(Solver::SolverState sState)
+//------------------------------------------------------------------------------------------
+/**
+* Write State Information section
+*/
+//------------------------------------------------------------------------------------------
 void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 {
    const std::vector<ListItem*> *map = esm.GetStateMap();
@@ -5628,6 +5736,13 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 }
 
 
+//------------------------------------------------------------------------------------------
+// void WriteIterationSummaryPart4(Solver::SolverState sState)
+//------------------------------------------------------------------------------------------
+/**
+* Write Covariance/Correlation Matrix section
+*/
+//------------------------------------------------------------------------------------------
 void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
 {
    const std::vector<ListItem*> *map = esm.GetStateMap();
@@ -5848,6 +5963,13 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
 }
 
 
+//------------------------------------------------------------------------------------------
+// void WriteReportFileSummary(Solver::SolverState sState)
+//------------------------------------------------------------------------------------------
+/**
+* Write estimation summary
+*/
+//------------------------------------------------------------------------------------------
 void BatchEstimator::WriteReportFileSummary(Solver::SolverState sState)
 {
    WriteIterationSummaryPart1(sState);
@@ -5857,6 +5979,14 @@ void BatchEstimator::WriteReportFileSummary(Solver::SolverState sState)
 }
 
 
+//------------------------------------------------------------------------------------------
+// std::map<GmatBase*, Rvector6> CalculateCartesianStateMap(
+//                                  const std::vector<ListItem*> *map, GmatState state)
+//------------------------------------------------------------------------------------------
+/**
+* This function is used to calculate state in Cartesian coordinate system
+*/
+//------------------------------------------------------------------------------------------
 std::map<GmatBase*, Rvector6> BatchEstimator::CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, Rvector6> stateMap;
@@ -5876,6 +6006,14 @@ std::map<GmatBase*, Rvector6> BatchEstimator::CalculateCartesianStateMap(const s
 }
 
 
+//------------------------------------------------------------------------------------------
+// std::map<GmatBase*, Rvector6> CalculateKeplerianStateMap(
+//                                  const std::vector<ListItem*> *map, GmatState state)
+//------------------------------------------------------------------------------------------
+/**
+* This function is used to calculate state in Keplerian coordinate system
+*/
+//------------------------------------------------------------------------------------------
 std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, Rvector6> stateMap;
@@ -5904,6 +6042,14 @@ std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const s
 }
 
 
+//------------------------------------------------------------------------------------------
+// std::map<GmatBase*, Rvector6> CalculateAncillaryElements(
+//                                  const std::vector<ListItem*> *map, GmatState state)
+//------------------------------------------------------------------------------------------
+/**
+* This function is used to calculate ancillary elements
+*/
+//------------------------------------------------------------------------------------------
 std::map<GmatBase*, RealArray> BatchEstimator::CalculateAncillaryElements(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, RealArray> stateMap;
