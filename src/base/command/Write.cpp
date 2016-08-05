@@ -177,6 +177,8 @@ bool Write::InterpretAction()
        generatingString.c_str());
    #endif
 
+   if (generatingString[0] == '\n')
+      generatingString = generatingString.substr(1, generatingString.npos);
    StringArray blocks = parser.DecomposeBlock(generatingString);
 
    StringArray chunks = parser.SeparateBrackets(blocks[0], "{}", " ", false);
@@ -851,7 +853,7 @@ const std::string& Write::GetGeneratingString(Gmat::WriteMode mode,
    else
       gen += "MessageWindow = false";
    if (reportFile != "")
-      gen += ", ReportFile = \"" + reportFile + "\" }";
+      gen += ", ReportFile = " + reportFile + " }";
    else
       gen += " }";
 
