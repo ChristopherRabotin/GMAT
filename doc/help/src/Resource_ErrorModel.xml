@@ -29,27 +29,31 @@
   <refsection>
     <title>Description</title>
 
-    <para>An ErrorModel is assigned on the ErrorModels field of an instance of
-    GroundStation to model biases and noise, and optionally to estimate biases
-    on each measurement type provided by the ground station. An ErrorModel
-    must be specified for each data type employed by each tracking station,
-    but a single instance of ErrorModel may be used by multiple ground
+    <para>An <guilabel>ErrorModel</guilabel> is assigned on the
+    <guilabel>ErrorModels</guilabel> field of an instance of
+    <guilabel>GroundStation</guilabel> to model biases and noise, and
+    optionally to estimate biases on each measurement type provided by the
+    ground station. An <guilabel>ErrorModel</guilabel> must be specified for
+    each data type employed by each tracking station, but a single instance of
+    <guilabel>ErrorModel</guilabel> may be used by multiple ground
     stations.</para>
 
-    <para>The ErrorModel is used by both the simulator and the estimator. For
-    a data simulation run, the ErrorModel specifies the measurement type and
-    noise employed when generating the simulated measurement. A bias may
-    optionally be applied to the simulated observations.</para>
+    <para>The <guilabel>ErrorModel</guilabel> is used by both the simulator
+    and the estimator. For a data simulation run, the
+    <guilabel>ErrorModel</guilabel> specifies the measurement type and noise
+    employed when generating the simulated measurement. A bias may optionally
+    be applied to the simulated observations.</para>
 
-    <para>For an estimation run, the ErrorModel specifies the observation
-    type, presumed observation noise, and an optional bias to be applied to
-    the observation. An observation bias may also be estimated by adding the
-    keyword Bias to the ErrorModel.SolveFors list. If the SolveFors list is
-    empty, no bias will be estimated. The SolveFors list is ignored by the
-    simulator. TODO: Fix SEE.. </para>
+    <para>For an estimation run, the <guilabel>ErrorModel</guilabel> specifies
+    the observation type, presumed observation noise, and an optional bias to
+    be applied to the observation. An observation bias may also be estimated
+    by adding the keyword <guilabel>Bias</guilabel> to the
+    <guilabel>ErrorModel.SolveFors</guilabel> list. If the
+    <guilabel>SolveFor</guilabel>s list is empty, no bias will be estimated.
+    The <guilabel>SolveFors</guilabel> list is ignored by the simulator.
+    </para>
 
-    <para>TrackingFileSet, GroundStation, ErrorModel See Also <xref
-    linkend="GroundStation"/></para>
+    <para>See Also <xref linkend="GroundStation"/></para>
   </refsection>
 
   <refsection>
@@ -189,9 +193,9 @@
             <entry><guilabel>NoiseSigma</guilabel></entry>
 
             <entry><para>One sigma value of Gaussian noise. For simulations,
-            if Sim.AddNoise= true, this noise is added to the measurements.
-            For estimation, this value is used to as part of the batch
-            processing algorithms. </para> <variablelist>
+            if <guilabel>Sim.AddNoise</guilabel> = true, this noise is added
+            to the measurements. For estimation, this value is used to as part
+            of the batch processing algorithms. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -367,9 +371,10 @@
       <title>Measurement Type Names</title>
 
       <para>Currently the measurement type names used to identify observation
-      types in GMD data files and on the TrackingFileSet.AddTrackingConfig
-      object field are not the same as those used to build measurement error
-      models for those types. Use the following table as a guide.</para>
+      types in GMD data files and on the
+      <guilabel>TrackingFileSet.AddTrackingConfig</guilabel> object field are
+      not the same as those used to build measurement error models for those
+      types. Use the following table as a guide.</para>
 
       <informaltable>
         <tgroup cols="2">
@@ -386,13 +391,13 @@
             <row>
               <entry>DSNRange</entry>
 
-              <entry>Range_RU </entry>
+              <entry>Range_RU</entry>
             </row>
 
             <row>
-              <entry>Doppler </entry>
+              <entry>Doppler</entry>
 
-              <entry>Doppler_HZ </entry>
+              <entry>Doppler_HZ</entry>
             </row>
           </tbody>
         </tgroup>
@@ -404,9 +409,9 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>This example shows how to create an ErrorModel for ground network
-      range observations and illustrates estimation of a range bias
-      parameter.</para>
+      <para>This example shows how to create an
+      <guilabel>ErrorModel</guilabel> for ground network range observations
+      and illustrates estimation of a range bias parameter.</para>
 
       <programlisting>%   Create an ErrorModel
  
