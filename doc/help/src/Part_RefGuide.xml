@@ -131,6 +131,7 @@
       <xi:include href="Command_Toggle.xml" />
       <xi:include href="Command_Vary.xml" />
       <xi:include href="Command_While.xml" />
+	  <xi:include href="Command_Write.xml" />
     </reference>
 
     <reference xml:id="System">
