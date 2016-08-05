@@ -88,7 +88,7 @@ Solver* EstimatorFactory::CreateSolver(const std::string &ofType,
    if (ofType == "BatchEstimatorInv")
       return new BatchEstimatorInv(withName);
 
-#ifndef UNABLE_UNFINISHED_FEATURES
+#ifdef ENABLE_UNFINISHED_FEATURES
    if (ofType == "BatchEstimatorSVD")
       return new BatchEstimatorSVD(withName);
 
@@ -143,7 +143,7 @@ EstimatorFactory::EstimatorFactory() :
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
 
-#ifndef UNABLE_UNFINISHED_FEATURES
+#ifdef ENABLE_UNFINISHED_FEATURES
       creatables.push_back("BatchEstimatorSVD");
       creatables.push_back("ExtendedKalmanInv");
 #endif
@@ -200,7 +200,7 @@ EstimatorFactory::EstimatorFactory(const EstimatorFactory& fact) :
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
 
-#ifndef UNABLE_UNFINISHED_FEATURES
+#ifdef ENABLE_UNFINISHED_FEATURES
       creatables.push_back("BatchEstimatorSVD");
       creatables.push_back("ExtendedKalmanInv");
 #endif
@@ -283,7 +283,7 @@ bool EstimatorFactory::DoesObjectTypeMatchSubtype(const std::string &theType,
    }
 
    if ((theType == "BatchEstimatorInv")
-#ifndef UNABLE_UNFINISHED_FEATURES
+#ifdef ENABLE_UNFINISHED_FEATURES
        ||(theType == "BatchEstimatorSVD")  // Not yet implemented; leave off menu
        || (theType == "ExtendedKalmanInv")
 #endif
