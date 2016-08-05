@@ -1315,7 +1315,6 @@ Real BatchEstimatorInv::ObservationDataCorrection(Real cValue, Real oValue, Real
 }
 
 
-// made changes by TUAN NGUYEN
 void BatchEstimatorInv::ValidateMediaCorrection(const MeasurementData* measData)
 {
    if (measData->isIonoCorrectWarning)

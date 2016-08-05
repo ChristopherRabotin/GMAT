@@ -116,7 +116,7 @@ public:
    Integer GetRunMode();
 
    Integer GetRunModeStartUp(){return (isTesting? GmatGlobal::TESTING: runMode);};     // It is a temporary fix in order to run gression test with runmode = TESTING. 
-                                                                                       // It needs to improve in the next GMAT release       // made changes by TUAN NGUYEN
+                                                                                       // It needs to improve in the next GMAT release
    void SetRunMode(Integer mode);
    Integer GetGuiMode();
    void SetGuiMode(Integer mode);
@@ -286,7 +286,7 @@ private:
    bool includeFoundInScriptResource;
 
    Integer isTesting;            // It is a temporary fix in order to run gression test with runmode = TESTING. 
-                                 // It needs to improve in the next GMAT release       // made changes by TUAN NGUYEN
+                                 // It needs to improve in the next GMAT release
    
    Integer runMode;
    Integer guiMode;

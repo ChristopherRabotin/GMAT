@@ -316,9 +316,9 @@ void GmatGlobal::SetRunMode(Integer mode)
    runMode = mode;
 
    // It is a temporary fix in order to run gression test with runmode = TESTING. 
-   // It needs to improve in the next GMAT release       // made changes by TUAN NGUYEN
-   if (runMode == GmatGlobal::TESTING)                   // made changes by TUAN NGUYEN
-      isTesting = true;                                  // made changes by TUAN NGUYEN
+   // It needs to improve in the next GMAT release
+   if (runMode == GmatGlobal::TESTING)
+      isTesting = true;
 
    if (runMode == EXIT_AFTER_RUN)
       isBatchMode = true;
@@ -949,7 +949,7 @@ GmatGlobal::GmatGlobal()
    gmatVersion = "Nightly Build";
    
    isTesting = false;                      // It is a temporary fix in order to run gression test with runmode = TESTING. 
-                                           // It needs to improve in the next GMAT release       // made changes by TUAN NGUYEN
+                                           // It needs to improve in the next GMAT release
 
    isBatchMode = false;
    isNitsClient = false;
