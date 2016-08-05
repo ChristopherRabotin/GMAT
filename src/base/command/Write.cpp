@@ -192,10 +192,23 @@ bool Write::InterpretAction()
       throw CommandException(typeName + "::InterpretAction() does not identify "
       "the command in line\n" + generatingString);
 
+   // delete old elements before adding the new elements
+   DeleteElements();
+
+   bool optionsParsed = false;
    for (unsigned int i = 1; i < chunks.size(); i++)
    {
       if (GmatStringUtil::IsEnclosedWithBraces(chunks[i]))
+      {
+         optionsParsed = true;
          CheckForOptions(chunks[i]);
+      }
+      else if (optionsParsed)
+      {
+         DeleteElements();
+         throw CommandException(typeName + "::InterpretAction() requires all resources and variables "
+            "are specified before options are specified\n" + generatingString);
+      }
       else
       {
          AddElements(chunks[i], i - 1);
@@ -842,7 +855,7 @@ const std::string& Write::GetGeneratingString(Gmat::WriteMode mode,
    else
       gen += " }";
 
-   generatingString = gen + ";";
+   generatingString = gen;
    
    #ifdef DEBUG_GEN_STRING
    MessageInterface::ShowMessage
@@ -970,53 +983,56 @@ void Write::ExecuteReport()
       parms.size());
 #endif
 
-   // Build the data as a string
-   std::stringstream datastream;
+   if (outputStyle != SCRIPTABLE)
+   {
+      // Build the data as a string
+      std::stringstream datastream;
 
-   // Set the stream to use the settings in the ReportFile.
-   // Note that this is done here, rather than during initialization, in case
-   // the user has changed the values during the run.
-   Integer prec = reporter->GetIntegerParameter(reporter->GetParameterID("Precision"));
-   datastream.precision(prec);
+      // Set the stream to use the settings in the ReportFile.
+      // Note that this is done here, rather than during initialization, in case
+      // the user has changed the values during the run.
+      Integer prec = reporter->GetIntegerParameter(reporter->GetParameterID("Precision"));
+      datastream.precision(prec);
 
-   bool leftJustify = false;
-   if (reporter->GetOnOffParameter(reporter->GetParameterID("LeftJustify")) == "On")
-      leftJustify = true;
+      bool leftJustify = false;
+      if (reporter->GetOnOffParameter(reporter->GetParameterID("LeftJustify")) == "On")
+         leftJustify = true;
 
-   bool zeroFill = false;
-   if (reporter->GetOnOffParameter(reporter->GetParameterID("ZeroFill")) == "On")
-      zeroFill = true;
+      bool zeroFill = false;
+      if (reporter->GetOnOffParameter(reporter->GetParameterID("ZeroFill")) == "On")
+         zeroFill = true;
 
-   int colWidth = reporter->GetIntegerParameter(reporter->GetParameterID("ColumnWidth"));
+      int colWidth = reporter->GetIntegerParameter(reporter->GetParameterID("ColumnWidth"));
 
 #ifdef DEBUG_Write_EXEC
-   MessageInterface::ShowMessage
-      ("   precision=%d, leftJustify=%d, zeroFill=%d, colWidth=%d, needsHeaders=%d\n",
-      prec, leftJustify, zeroFill, colWidth, needsHeaders);
+      MessageInterface::ShowMessage
+         ("   precision=%d, leftJustify=%d, zeroFill=%d, colWidth=%d, needsHeaders=%d\n",
+         prec, leftJustify, zeroFill, colWidth, needsHeaders);
 #endif
 
-   if (leftJustify)
-      datastream.setf(std::ios::left);
+      if (leftJustify)
+         datastream.setf(std::ios::left);
 
-   // first time through, use cmd setting; after that, ask reporter
-   if (hasExecuted)
-      needsHeaders = reporter->TakeAction("CheckHeaderStatus");
-   else
-      needsHeaders = reporter->GetBooleanParameter(
-      reporter->GetParameterID("WriteHeaders"));
+      // first time through, use cmd setting; after that, ask reporter
+      if (hasExecuted)
+         needsHeaders = reporter->TakeAction("CheckHeaderStatus");
+      else
+         needsHeaders = reporter->GetBooleanParameter(
+         reporter->GetParameterID("WriteHeaders"));
 
-   if (needsHeaders)
-      WriteHeaders(datastream, colWidth);
+      if (needsHeaders)
+         WriteHeaders(datastream, colWidth);
 
-   // if zero fill, show decimal point
-   // showing decimal point automatically filles zero
-   if (zeroFill)
-      datastream.setf(std::ios::showpoint);
+      // if zero fill, show decimal point
+      // showing decimal point automatically filles zero
+      if (zeroFill)
+         datastream.setf(std::ios::showpoint);
+   }
 
    // Write to report file using ReportFile::WriateData().
    // This method takes ElementWrapper array to write data to stream
    reporter->TakeAction("ActivateForReport", "On");
-   bool retval = reporter->WriteData(elementWrappers);
+   bool retval = reporter->WriteData(elementWrappers, outputStyle == SCRIPTABLE);
    reporter->TakeAction("ActivateForReport", "Off");
    hasExecuted = true;
 }

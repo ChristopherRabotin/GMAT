@@ -61,7 +61,7 @@ public:
    std::string          GetFullPathFileName();
    Integer              GetNumParameters();
    bool                 AddParameter(const std::string &paramName, Integer index);
-   bool                 WriteData(WrapperArray dataArray);
+   bool                 WriteData(WrapperArray dataArray, bool parsable = false);
    
    // methods inherited from GmatBase
    virtual bool         Initialize();

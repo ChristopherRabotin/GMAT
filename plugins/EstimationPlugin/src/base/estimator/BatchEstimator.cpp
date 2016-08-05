@@ -541,10 +541,10 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
 bool BatchEstimator::SetStringParameter(const Integer id,
          const std::string &value)
 {
-#ifdef DEBUG_INITIALIZATION
-   MessageInterface::ShowMessage("BatchEstimator::SetStringParameter(%d, %s)\n",
-         id, value.c_str());
-#endif
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("BatchEstimator::SetStringParameter(%d, %s)\n",
+            id, value.c_str());
+   #endif
 
    if (id == ESTIMATION_EPOCH_FORMAT)
    {

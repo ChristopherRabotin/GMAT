@@ -362,7 +362,7 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
  * @param  wrapperArray  data wrapper array
  */
 //------------------------------------------------------------------------------
-bool ReportFile::WriteData(WrapperArray wrapperArray)
+bool ReportFile::WriteData(WrapperArray wrapperArray, bool parsable)
 {
    #if DBGLVL_WRITE_DATA > 0
    MessageInterface::ShowMessage
@@ -373,6 +373,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
    Real rval = -9999.999;
    std::string sval;
    std::string desc;
+   GmatBase *gb;
    
    // create output buffer
    StringArray *output = new StringArray[numData];
@@ -436,6 +437,28 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
       switch (wrapperType)
       {
       case Gmat::VARIABLE_WT:
+         {
+            if (parsable)
+            {
+               gb = wrapperArray[i]->GetRefObject();
+               sval = "Create " + gb->GetTypeName() + " " + gb->GetName() + ";\n";
+               sval += "GMAT " + gb->GetName() + " = " + wrapperArray[i]->ToString() + ";\n";
+               output[i].push_back(sval);
+            }
+            else
+            {
+               rval = wrapperArray[i]->EvaluateReal();
+               if (IsNotANumber(rval))
+                  output[i].push_back("NaN");
+               else
+                  output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
+            }
+   #ifdef DEBUG_REAL_DATA
+            MessageInterface::ShowMessage
+               ("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+   #endif
+            break;
+         }
       case Gmat::ARRAY_ELEMENT_WT:
       case Gmat::OBJECT_PROPERTY_WT:
          {
@@ -501,13 +524,31 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
          }
       case Gmat::ARRAY_WT:
          {
-            Rmatrix rmat = wrapperArray[i]->EvaluateArray();
-            colWidths[i] = WriteMatrix(output, i, rmat, maxRow, defWidth);
+            if (parsable)
+            {
+               gb = wrapperArray[i]->GetRefObject();
+               sval = gb->GetGeneratingString(Gmat::NO_COMMENTS, "", "");
+               output[i].push_back(sval);
+            }
+            else
+            {
+               Rmatrix rmat = wrapperArray[i]->EvaluateArray();
+               colWidths[i] = WriteMatrix(output, i, rmat, maxRow, defWidth);
+            }
             break;
          }
       case Gmat::STRING_OBJECT_WT:
          {
-            sval = wrapperArray[i]->EvaluateString();
+            if (parsable)
+            {
+               gb = wrapperArray[i]->GetRefObject();
+               sval = "Create " + gb->GetTypeName() + " " + gb->GetName() + ";\n";
+               sval += "GMAT " + gb->GetName() + " = " + wrapperArray[i]->ToString() + ";\n";
+            }
+            else
+            {
+               sval = wrapperArray[i]->EvaluateString();
+            }
             output[i].push_back(sval);
             #if DBGLVL_WRITE_DATA > 1
             MessageInterface::ShowMessage
@@ -515,6 +556,20 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
             #endif
             break;
          }
+      case Gmat::OBJECT_WT:
+      {
+         if (parsable)
+         {
+            gb = wrapperArray[i]->GetRefObject();
+            sval = gb->GetGeneratingString(Gmat::NO_COMMENTS, "", "");
+         }
+         else
+         {
+            sval = wrapperArray[i]->ToString();
+         }
+         output[i].push_back(sval);
+         break;
+      }
       default:
          break;
       }
