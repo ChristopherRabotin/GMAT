@@ -163,6 +163,7 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    psunrad             (0.0),
    pcbrad              (0.0),
    percentSun          (1.0),
+   warnSRPMath         (true),
    bodyID              (-1),
    satCount            (0),
    massID              (-1),
@@ -210,6 +211,7 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    psunrad             (srp.psunrad),
    pcbrad              (srp.pcbrad),
    percentSun          (srp.percentSun),
+   warnSRPMath         (srp.warnSRPMath),
    bodyID              (srp.bodyID),
    satCount            (srp.satCount),
    massID              (srp.massID),
@@ -258,6 +260,7 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       psunrad      = srp.psunrad;
       pcbrad       = srp.pcbrad;
       percentSun   = srp.percentSun;
+      warnSRPMath  = srp.warnSRPMath;
       bodyID       = srp.bodyID;
    
       satCount     = srp.satCount;
@@ -916,7 +919,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             {
                std::string shModel = "DualCone";
                if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
-#ifdef DEBUG_SHADOW_STATE
+
+               #ifdef DEBUG_SHADOW_STATE
                   MessageInterface::ShowMessage("before FSS, sunRadius= %12.10f, psunrad = %12.10f\n",
                      sunRadius, psunrad);
                   MessageInterface::ShowMessage("   state       = %12.10f %12.10f %12.10f\n",
@@ -927,7 +931,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                      sunSat[0], sunSat[1], sunSat[2]);
                   MessageInterface::ShowMessage("   forceVector = %12.10f %12.10f %12.10f\n",
                      forceVector[0], forceVector[1], forceVector[2]);
-#endif
+               #endif
+
                percentSun = shadowState->FindShadowState(inSunlight, inShadow,
                      shModel, &state[i6], cbSunVector, sunSat, forceVector,
                      sunRadius, bodyRadius, psunrad);
@@ -1047,6 +1052,19 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillSTM || fillAMatrix)
    {
+
+      if (warnSRPMath && (percentSun < 1.0))
+      {
+         if (srpModel == "Spherical")
+         {
+            MessageInterface::ShowMessage("Warning: The orbit state transition "
+                  "matrix does not currently contain SRP contributions from shadow "
+                  "partial derivatives when using Spherical SRP.\n");
+
+            warnSRPMath = false;
+         }
+      }
+
       Integer stmSize = stmRowCount * stmRowCount;
       Real *aTilde;
       aTilde = new Real[stmSize];
@@ -2115,12 +2133,12 @@ bool SolarRadiationPressure::SupportsDerivative(Gmat::StateElementId id)
    
    if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
    {
-      if (srpModel == "Spherical")
-      {
-         MessageInterface::ShowMessage("Warning: The orbit state transition "
-               "matrix does not currently contain SRP contributions from shadow "
-               "partial derivatives when using Spherical SRP.\n");
-      }
+//      if (srpModel == "Spherical")
+//      {
+//         MessageInterface::ShowMessage("Warning: The orbit state transition "
+//               "matrix does not currently contain SRP contributions from shadow "
+//               "partial derivatives when using Spherical SRP.\n");
+//      }
       return true;
    }
    
