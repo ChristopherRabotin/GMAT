@@ -216,6 +216,8 @@ protected:
    Real pcbrad;
    /// Weighting for partial lighting
    Real percentSun;
+   /// Flag used to track is the SRP STM partial sun message has posted
+   bool warnSRPMath;
    /// Central body ID for the model
    Integer bodyID;
    
