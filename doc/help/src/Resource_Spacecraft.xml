@@ -72,6 +72,11 @@
         <para><xref linkend="SpacecraftVisualizationProperties"
         xrefstyle="select:title"/></para>
       </listitem>
+
+      <listitem>
+        <para><xref linkend="SpacecraftNavigation"
+        xrefstyle="select:title"/></para>
+      </listitem>
     </itemizedlist>
   </refsection>
 </refentry>

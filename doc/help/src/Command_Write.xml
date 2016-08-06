@@ -22,8 +22,8 @@
     <refname>Write</refname>
 
     <refpurpose>Writes data to one or more of the following three
-    destinations: the message window, the log file, or a ReportFile
-    resource.</refpurpose>
+    destinations: the message window, the log file, or a
+    <guilabel>ReportFile</guilabel> resource.</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -344,7 +344,7 @@
 
     <informalexample>
       <para>Below are some sample scripts using the <guilabel>Write</guilabel>
-      command with the desired output shown in bold font.</para>
+      command with the output shown in bold font.</para>
 
       <programlisting><code>Create ChemicalTank ChemicalTank1
 Create Spacecraft Sat
@@ -400,7 +400,7 @@ Write myString2</code></programlisting>
 
     <informalexample>
       <para>The example below writes out a report that can be read into a GMAT
-      script using the Include command. </para>
+      script using the #Include capability.</para>
 
       <programlisting><code>Create Spacecraft Sat;
 Create ReportFile rf;

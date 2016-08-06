@@ -87,6 +87,7 @@
       <xi:include href="Resource_SpacecraftHardware.xml" />
       <xi:include href="Resource_SpacecraftOrbitState.xml"/>
       <xi:include href="Resource_SpacecraftVisualizationProperties.xml" />
+	  <xi:include href="Resource_SpacecraftNavigation.xml" />
 	  <xi:include href="Resource_StatisticsAcceptFilter.xml" />
 	  <xi:include href="Resource_StatisticsRejectFilter.xml" />
       <xi:include href="Resource_String.xml" />
