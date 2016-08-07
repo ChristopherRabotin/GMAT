@@ -34,6 +34,8 @@
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
 #include "NotAKnotInterpolator.hpp"    // Only one supported for now
+#include "PropagatorException.hpp"
+
 #include <sstream>                     // for stringstream
 
 //#define DEBUG_INITIALIZATION
@@ -821,8 +823,22 @@ bool Code500Propagator::Step()
    #endif
 
    // Allow for slop in the last few bits
-   if ((currentEpoch < ephemStart - 1e-10) ||
-       (currentEpoch > ephemEnd + 1e-10))
+   bool flagOutOfDomain = false;
+   if (currentEpoch < ephemStart)
+   {
+      if (ephemStart - currentEpoch < 1.0e-10)
+         currentEpoch = ephemStart;
+      else
+         flagOutOfDomain = true;
+   }
+   else if (currentEpoch > ephemEnd)
+   {
+      if (currentEpoch - ephemEnd < 1.0e-10)
+         currentEpoch = ephemEnd;
+      else
+         flagOutOfDomain = true;
+   }
+   if (flagOutOfDomain)
    {
       std::stringstream errmsg;
       errmsg.precision(16);
@@ -1003,7 +1019,8 @@ void Code500Propagator::GetState(GmatEpoch forEpoch, Rvector6 &outstate)
    else
    {
       throw PropagatorException("The propagator " + instanceName +
-               " failed to interpolate a valid state");
+               " failed to interpolate a valid state for " +
+               propObjects[0]->GetName());
    }
 
    #ifdef DEBUG_INTERPOLATION
@@ -1034,7 +1051,21 @@ void Code500Propagator::GetState(GmatEpoch forEpoch, Rvector6 &outstate)
 //------------------------------------------------------------------------------
 void Code500Propagator::UpdateInterpolator(const GmatEpoch &forEpoch)
 {
-   FindRecord(forEpoch);
+   GmatEpoch useEpoch = forEpoch;
+
+   if ((forEpoch < ephemStart) || (forEpoch > ephemEnd))
+   {
+      if (ephemStart - forEpoch < 1.0e-10)
+         useEpoch = ephemStart;
+      if (forEpoch - ephemEnd < 1.0e-10)
+         useEpoch = ephemEnd;
+   }
+
+   FindRecord(useEpoch);
+
+   if (stateIndex == -1)
+      throw PropagatorException("Requested epoch is outside of the span "
+            "covered by the ephemeris file " + ephemName);
 
    Integer usedRecords[5][2];
    Integer block = record, line = stateIndex - 1;
