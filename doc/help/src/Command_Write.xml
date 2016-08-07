@@ -161,12 +161,13 @@
 
             <entry><para>Name of <guilabel>ReportFile</guilabel> resource
             where output data will be written to. If this field is not set, no
-            <guilabel>ReportFile</guilabel> resource will be written to. Note
-            that if a <guilabel>ReportFile</guilabel> object is written to,
-            then most of the <guilabel>ReportFile</guilabel> fields, such as
+            <guilabel>ReportFile</guilabel> resource will be written to. The
+            user can set formatting options on a
+            <guilabel>ReportFile</guilabel> like
             <guilabel>Precision</guilabel> and
-            <guilabel>ColumnWidth</guilabel> are ignored by the
-            <guilabel>ReportFile</guilabel> resource. </para> <variablelist>
+            <guilabel>ColumnWidth</guilabel>. When writing data using the
+            <guilabel>Write</guilabel> command, those settings are not used.
+            </para><variablelist>
                 <varlistentry>
                   <term>Accepted Data Types</term>
 
@@ -188,9 +189,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>None</guilabel>
-                    </para>
+                    <para><guilabel>None</guilabel></para>
                   </listitem>
                 </varlistentry>
 
