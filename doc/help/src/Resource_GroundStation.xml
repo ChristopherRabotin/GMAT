@@ -228,6 +228,67 @@
           </row>
 
           <row>
+            <entry><guilabel>DataSource</guilabel></entry>
+
+            <entry><para>Source of where to get
+            <guilabel>Temperature</guilabel>, <guilabel>Pressure</guilabel>,
+            <guilabel>Humidity</guilabel>, and
+            <guilabel>MinimumElevationAngle</guilabel>. If the value is
+            Constant, then the values of these parameters, as set in the
+            <guilabel>GroundStation</guilabel> resource, remain constant for
+            all relevant measurements. Currently, the value of Constant is the
+            only allowed value. </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>??</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Constant</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>Constant</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>ErrorModels</guilabel></entry>
 
             <entry><para>User-defined list of <guilabel>ErrorModel</guilabel>
@@ -345,7 +406,9 @@
             <entry><guilabel>Humidity</guilabel></entry>
 
             <entry><para>Humidity at ground station used to calculate
-            tropospheric correction.</para><variablelist>
+            tropospheric correction. GMAT only uses this value if
+            <guilabel>DataSource</guilabel> is set to Constant.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -824,7 +887,9 @@
             from spacecraft to ground station. During simulation, this is the
             minimum elevation angle required in order for data to be output.
             During estimation, this is the minimum elevation angle required
-            for data to be used to calculate an estimate. </para><variablelist>
+            for data to be used to calculate an estimate. GMAT only uses this
+            value if <guilabel>DataSource</guilabel> is set to Constant.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -946,7 +1011,9 @@
             <entry><guilabel>Pressure</guilabel></entry>
 
             <entry><para>Air pressure at ground station used to calculate
-            tropospheric correction.</para><variablelist>
+            tropospheric correction. GMAT only uses this value if
+            <guilabel>DataSource</guilabel> is set to Constant.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1124,7 +1191,9 @@
             <entry><guilabel>Temperature</guilabel></entry>
 
             <entry><para>Air temperature at ground station used to calculate
-            tropospheric correction.</para><variablelist>
+            tropospheric correction. GMAT only uses this value if
+            <guilabel>DataSource</guilabel> is set to Constant.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
