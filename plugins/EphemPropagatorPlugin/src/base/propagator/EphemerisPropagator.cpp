@@ -1205,10 +1205,14 @@ bool EphemerisPropagator::Initialize()
       }
 
       #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Ephemeris has %spropagated\n",
+               (((SpaceObject*)(propObjects[0]))->HasEphemPropagated()) ? "" : "not ");
          MessageInterface::ShowMessage("State epoch %s from spacecraft\n",
                ((startEpochSource == FROM_SPACECRAFT) ? "is" : "is not"));
          MessageInterface::ShowMessage("State epoch %s from ephemeris\n",
                ((startEpochSource == FROM_EPHEM) ? "is" : "is not"));
+         MessageInterface::ShowMessage("State epoch %s from script\n",
+               ((startEpochSource == FROM_SCRIPT) ? "is" : "is not"));
       #endif
       switch (startEpochSource)
       {
