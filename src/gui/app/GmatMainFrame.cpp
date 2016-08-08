@@ -2441,7 +2441,6 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    GmatAppData *gmatAppData = GmatAppData::Instance();
    
    // Always refresh the gui before new scripts are read
-   UpdateAdvancedGuiMode(1);
    CloseAllChildren(closeScript, true, true, false, false, closeWelcomePanel);
    gmatAppData->GetResourceTree()->ClearResource(true);
    gmatAppData->GetMissionTree()->ClearMission();
