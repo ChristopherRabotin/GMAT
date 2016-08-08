@@ -23,8 +23,8 @@
     <refname>Spacecraft Navigation</refname>
 
     <refpurpose>There are a number of <guilabel>Spacecraft</guilabel> fields
-    that are used exclusively to support GMAT's navigation capability.
-    </refpurpose>
+    that are used exclusively to support GMAT's navigation
+    capability.</refpurpose>
   </refnamediv>
 
   <refsection>
@@ -248,12 +248,14 @@
           <row>
             <entry><guilabel>EstimationStateType</guilabel></entry>
 
-            <entry><para>xx</para><variablelist>
+            <entry><para>Choice of 6-element state type to be solved for.
+            Currently, Cartesian is the only allowed value.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>xx</para>
+                    <para>??</para>
                   </listitem>
                 </varlistentry>
 
@@ -261,7 +263,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>xx</para>
+                    <para>Cartesian</para>
                   </listitem>
                 </varlistentry>
 
@@ -277,7 +279,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>1e70</para>
+                    <para>Cartesian</para>
                   </listitem>
                 </varlistentry>
 
@@ -285,7 +287,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>dimensionless</para>
+                    <para>N/A</para>
                   </listitem>
                 </varlistentry>
 
@@ -425,7 +427,7 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>Solve for Cr and the spacecraft Cartesian state. </para>
+      <para>Solve for Cr and the spacecraft Cartesian state.</para>
 
       <programlisting><code>Create Spacecraft Sat
 Create BatchEstimatorInv bat
@@ -440,7 +442,7 @@ RunEstimator bat</code></programlisting>
     <informalexample>
       <para>Solve for Cd and the spacecraft Cartesian state assuming that the
       <emphasis>a priori</emphasis> information is included in the estimation
-      state vector. </para>
+      state vector.</para>
 
       <programlisting><code>Create Spacecraft Sat
 Sat.SolveFors = {CartesianState, Cd}
