@@ -4140,7 +4140,7 @@ std::string GmatBase::WriteObjectInfo(const std::string &title, GmatBase *obj,
                                       bool addEol)
 {
    std::stringstream objStream;
-   char buff[10];
+   char buff[20];  // was 10]; but that was too small
    sprintf(buff, "<%p>", obj);
    objStream << title << buff;
    
