@@ -623,10 +623,6 @@ bool Code500Propagator::Initialize()
                ephemName = propObjects[i]->GetStringParameter(
                      "EphemerisName");
                currentEpoch = ((Spacecraft*)propObjects[i])->GetEpoch();
-               initialEpoch = currentEpoch;
-//               initialEpoch = ((Spacecraft*)propObjects[i])->GetEpoch();
-//               currentEpoch = initialEpoch + timeFromEpoch /
-//                     GmatTimeConstants::SECS_PER_DAY;
 
                #ifdef DEBUG_INITIALIZATION
                   MessageInterface::ShowMessage("Spacecraft epoch is %.12lf\n",
@@ -741,21 +737,6 @@ bool Code500Propagator::Initialize()
             ephem.CloseForRead();
          }
       }
-      else
-         initialEpoch = currentEpoch;
-
-//      if (lastEpoch != currentEpoch)
-//      {
-//         lastEpoch = currentEpoch;
-//         timeFromEphemStart = (lastEpoch - ephemStart) *
-//               GmatTimeConstants::SECS_PER_DAY;
-//
-//         #ifdef DEBUG_PROPAGATION
-//            MessageInterface::ShowMessage("Last epoch = %.12lf, ephemStart = "
-//                  "%.12lf, Time from start = %lf sec\n", lastEpoch, ephemStart,
-//                  timeFromEphemStart);
-//         #endif
-//      }
    }
 
    #ifdef DEBUG_INITIALIZATION
@@ -860,13 +841,8 @@ bool Code500Propagator::Step()
          dimension*sizeof(Real));
 
    //MoveToOrigin(currentEpoch);
-//MessageInterface::ShowMessage("Before update, Sat1 epoch = %.12lf, X = %.12lf\n",
-//      ((Spacecraft*)propObjects[0])->GetEpoch(), propObjects[0]->GetRealParameter("X"));
 
    UpdateSpaceObject(currentEpoch);
-
-//MessageInterface::ShowMessage("After update,  Sat1 epoch = %.12lf, X = %.12lf\n",
-//      ((Spacecraft*)propObjects[0])->GetEpoch(), propObjects[0]->GetRealParameter("X"));
 
    #ifdef DEBUG_PROPAGATION
       MessageInterface::ShowMessage("(Step for %p) State at epoch "
