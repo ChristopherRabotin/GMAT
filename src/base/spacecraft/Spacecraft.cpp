@@ -4326,7 +4326,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == ESTIMATION_STATE_TYPE_ID)
    {
-      if ((value != "Cartesian") && (value != "Keplerian"))
+      if (value != "Cartesian")             //((value != "Cartesian") && (value != "Keplerian"))                                  // code changed for request in ticket GMT-5701
          throw GmatBaseException("Error: Estimation state type '" + value + "' was not implemented in current GMAT version.\n");
       estimationStateType = value;
    }
