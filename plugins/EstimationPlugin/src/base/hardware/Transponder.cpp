@@ -535,8 +535,8 @@ bool Transponder::SetStringParameter(const Integer id,
             // Specify numerator and denominator
             std::string numerator = "";
             std::string denominator = "";
-
             std::string::size_type pos = value.find_first_of('/');
+
             if (pos != value.npos)
             {
                numerator = value.substr(0, pos);
@@ -544,31 +544,32 @@ bool Transponder::SetStringParameter(const Integer id,
 
                if ((GmatStringUtil::IsNumber(numerator)) && (GmatStringUtil::IsNumber(denominator)))
                {
-                  Real n, d;
+                  Real n = 0.0, d = 0.0;
 
                   std::stringstream temp;
-                  temp << numerator;
+                  temp << numerator << " " << denominator;
                   temp >> n;
-
-                  temp.str("");
-                  temp << denominator;
                   temp >> d;
 
-                  if (d == 0)
+                  #ifdef DEBUG_INITIALIZATION
+                     MessageInterface::ShowMessage("Ratio is %le / %le\n", n, d);
+                  #endif
+
+                  if (d == 0.0)
                      throw HardwareException("Error: The denominator in the "
                            "field " + instanceName + ".TurnAroundRatio cannot "
-                           "be zero.");
+                           "be zero");
 
                   if (n/d < 0.0)
                      throw HardwareException("Error: a negative number (" +
                            value + ") was set for the field " + instanceName +
-                           ".TurnAroundRatio.");
+                           ".TurnAroundRatio");
                }
                else
                {
                   throw HardwareException("Error: Invalid value ('" + value +
                         "') set for the field " + instanceName +
-                        ".TurnAroundRatio.");
+                        ".TurnAroundRatio");
                }
             }
             else
