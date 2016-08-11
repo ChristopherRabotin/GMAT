@@ -38,7 +38,7 @@
 #include "Parameter.hpp"         // for GetReturnType()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_FUNCTION_CONSTRUCT
+//#define DEBUG_FUNCTION_CONSTRUCT 
 //#define DEBUG_FUNCTION_SET
 //#define DEBUG_FUNCTION_SET_PATH
 //#define DEBUG_FUNCTION_INIT
@@ -469,6 +469,11 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
    #endif
    
    // If object is global, move it to globalObjectStore
+   
+   // Save the ones that need to be removed from the objectStore here so as not to
+   // corrupt the objectStore in the middle of iterating!!
+   StringArray removeFromObjectStore;
+   
    for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
    {
       std::string objName = omi->first;
@@ -485,12 +490,13 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          if (globalObjectStore->find(objName) == globalObjectStore->end())
          {
             #ifdef DEBUG_FUNCTION_INIT
-            MessageInterface::ShowMessage
+               MessageInterface::ShowMessage
                ("   ==> obj<%p>'%s' is global and not local, so moving it from "
                 "objectStore to globalObjectStore\n", obj, objName.c_str());
             #endif
             globalObjectStore->insert(std::make_pair(objName, obj));
-            objectStore->erase(objName);
+            removeFromObjectStore.push_back(objName); /// save the name to remove it later
+//            objectStore->erase(objName); // do NOT remove it here while iterating!
          }
       }
       else
@@ -502,10 +508,13 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          #endif
       }
    }
+   // Now remove the ones that were moved to the global object store
+   for (Integer ii = 0; ii < removeFromObjectStore.size(); ii++)
+      objectStore->erase(removeFromObjectStore.at(ii));
    
    GmatCommand *current = fcs;
    
-   // Set object map on Validator (moved here from below) LOJ: 2015.04.09 
+   // Set object map on Validator (moved here from below) LOJ: 2015.04.09
    #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage("   Now about to set combined object map to Validator\n");
    ShowObjectMap(objectStore, "In GmatFunction::Initialize()", "objectStore");
@@ -531,7 +540,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
    
    // Initialize function objects here. Moved from Execute() (LOJ: 2015.02.27)
    if (!objectsInitialized ||
-       objectsInitialized && reinitialize)
+       (objectsInitialized && reinitialize))
    {
       objectsInitialized = true;
       validator->HandleCcsdsEphemerisFile(objectStore, true);
