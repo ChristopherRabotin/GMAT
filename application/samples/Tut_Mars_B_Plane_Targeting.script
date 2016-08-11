@@ -44,7 +44,7 @@ GMAT MAVEN.EulerAngleSequence = '321';
 %----------------------------------------
 %---------- Hardware Components
 %----------------------------------------
-Create FuelTank MainTank;
+Create ChemicalTank MainTank;
 GMAT MainTank.AllowNegativeFuelMass = false;
 GMAT MainTank.FuelMass = 1718;
 GMAT MainTank.Pressure = 5000;
