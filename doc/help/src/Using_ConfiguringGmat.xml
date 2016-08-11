@@ -193,7 +193,7 @@
       <para>The <filename>samples</filename> directory contains sample
       missions and scripts, ranging from a Hohmann transfer to libration point
       station-keeping to Mars B-plane targeting. Example files begin with
-      "Ex_" and files that corresponde to GMAT tutorials begin with "Tut_".
+      "Ex_" and files that correspond to GMAT tutorials begin with "Tut_".
       These files are intended to demonstrate GMAT’s capabilities and to
       provide you with a potential starting point for building common mission
       types for your application and flight regime. Samples with specific
