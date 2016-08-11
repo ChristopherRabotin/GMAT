@@ -44,12 +44,7 @@
 
     <itemizedlist>
       <listitem>
-        <para><xref linkend="SpacecraftOrbitState"
-        xrefstyle="select:title"/></para>
-      </listitem>
-
-      <listitem>
-        <para><xref linkend="SpacecraftEpoch"
+        <para><xref linkend="SpacecraftAttitude"
         xrefstyle="select:title"/></para>
       </listitem>
 
@@ -59,7 +54,7 @@
       </listitem>
 
       <listitem>
-        <para><xref linkend="SpacecraftAttitude"
+        <para><xref linkend="SpacecraftEpoch"
         xrefstyle="select:title"/></para>
       </listitem>
 
@@ -69,12 +64,17 @@
       </listitem>
 
       <listitem>
-        <para><xref linkend="SpacecraftVisualizationProperties"
+        <para><xref linkend="SpacecraftNavigation"
         xrefstyle="select:title"/></para>
       </listitem>
 
       <listitem>
-        <para><xref linkend="SpacecraftNavigation"
+        <para><xref linkend="SpacecraftOrbitState"
+        xrefstyle="select:title"/></para>
+      </listitem>
+
+      <listitem>
+        <para><xref linkend="SpacecraftVisualizationProperties"
         xrefstyle="select:title"/></para>
       </listitem>
     </itemizedlist>
