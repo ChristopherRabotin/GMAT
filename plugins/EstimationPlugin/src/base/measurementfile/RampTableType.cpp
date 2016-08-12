@@ -177,6 +177,11 @@ bool RampTableType::Open(bool forRead, bool forWrite, bool append)
             (forWrite ? "true" : "false"),
             (append ? "true" : "false") );
    #endif
+
+   // when theStream open twice the content in theStream is always empty string. Therefore, it needs this verification.
+   if (theStream.is_open())
+      return true;
+
    bool retval = false;
 
    // temporary
@@ -202,10 +207,9 @@ bool RampTableType::Open(bool forRead, bool forWrite, bool append)
             streamName.c_str(), mode);
    #endif
 
+   std::string fullPath = "";
    if (streamName != "")
    {
-      std::string fullPath = "";
-
       // If no path designation slash character is found, add the default path
       if ((streamName.find('/') == std::string::npos) &&
           (streamName.find('\\') == std::string::npos))
@@ -227,25 +231,32 @@ bool RampTableType::Open(bool forRead, bool forWrite, bool append)
          fullPath += ".rmp";
       }
 
+      // Change '\' to '/' in fullPath
+      for (Integer i = 0; i < fullPath.size(); ++i)
+      {
+         if (fullPath.at(i) == '\\')
+            fullPath.at(i) = '/';
+      }
+
       #ifdef DEBUG_FILE_ACCESS
-         MessageInterface::ShowMessage("   Full path is %s, mode = %d\n",
+         MessageInterface::ShowMessage("   Full path <%s>, mode = %d\n", 
                fullPath.c_str(), mode);
+         MessageInterface::ShowMessage("   open theStream = <%p>\n", theStream);
       #endif
       try
       {
          theStream.open(fullPath.c_str(), mode);
       } catch(...)
       {
-         throw MeasurementException("Error: "+ GetName() +" cannot open '" + fullPath +"' due to this file had been used by another DataFile object\n");
+         throw MeasurementException("Error: GMAT can't open ramp table file '" + fullPath +"'.\n");
       }
    }
-
+   
    retval = theStream.is_open();
 
    if (retval == false)
-   {
-      throw MeasurementException("Error: GMAT can't open ramp table file "+streamName+"\n");
-   }
+      throw MeasurementException("Error: GMAT can't open ramp table file '"+ fullPath +"'.\n");
+   
    return retval;
 }
 
@@ -287,32 +298,31 @@ RampTableData* RampTableType::ReadRampTableData()
       MessageInterface::ShowMessage("RampTableType::ReadRampTableData() Executing\n");
    #endif
 
-   std::string str;
+   std::string s1;
    std::stringstream theLine;
-
    Integer participantSize;
 
    // Do nothing when it is at the end of file
    if (theStream.eof())
       return NULL;
-
+   
    // Read a line when it is not end of file
-   std::getline (theStream, str);
+   std::getline(theStream, s1);
    
    // Skip header and comment lines or empty lines
-   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == "") ||
-          (str.length() < 2))
+   while ((s1[0] == '%') || (GmatStringUtil::RemoveAllBlanks(s1) == "") ||
+          (s1.length() < 2))
    {
-      std::getline(theStream, str);
-
+      std::getline(theStream, s1);
+      
       // Do nothing when it is at the end of file
       if (theStream.eof())
          return NULL;
    }
-
+   
 
    // Processing data in the line
-   theLine << str;
+   theLine << s1;
    currentRecord.Clear();
    currentRecord.dataFormat = "GMAT_RampTable";
 
@@ -360,8 +370,8 @@ RampTableData* RampTableType::ReadRampTableData()
    participantSize = 2;
    for (Integer i = 0; i < participantSize; ++i)
    {
-      theLine >> str;
-      currentRecord.participantIDs.push_back(str);
+      theLine >> s1;
+      currentRecord.participantIDs.push_back(s1);
    }
 
    theLine >> currentRecord.uplinkBand;
@@ -380,6 +390,78 @@ RampTableData* RampTableType::ReadRampTableData()
 
    return &currentRecord;
 }
+
+
+//RampTableData* RampTableType::ReadRampTableData()
+//{
+//#ifdef DEBUG_FILE_READ
+//   MessageInterface::ShowMessage("RampTableType::ReadRampTableData() Executing\n");
+//#endif
+//
+//   std::string str;
+//   std::stringstream theLine;
+//   Integer participantSize;
+//
+//   // Do nothing when it is at the end of file
+//   if (theStream.eof())
+//      return NULL;
+//
+//   // Read a line when it is not end of file
+//   std::getline(theStream, str);
+//
+//   // Skip header and comment lines or empty lines
+//   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == "") ||
+//      (str.length() < 2))
+//   {
+//      std::getline(theStream, str);
+//
+//      // Do nothing when it is at the end of file
+//      if (theStream.eof())
+//         return NULL;
+//   }
+//
+//
+//   // Processing data in the line
+//   theLine << str;
+//   currentRecord.Clear();
+//   currentRecord.dataFormat = "GMAT_RampTable";
+//
+//   // Record format of frequency ramp table: 
+//   // Epoch   StationID   SpacecraftID    Uplink Band       Ramp Type     Ramp Frequency     Ramp Rate
+//   // Real    string      string          Integer           Integer      Real               Real
+//   Real value;
+//
+//   GmatEpoch taiEpoch;
+//   theLine >> taiEpoch;
+//
+//   currentRecord.epoch = (currentRecord.epochSystem == TimeConverterUtil::TAIMJD ?
+//   taiEpoch :
+//            TimeConverterUtil::ConvertFromTaiMjd(currentRecord.epochSystem, taiEpoch,
+//            GmatTimeConstants::JD_NOV_17_1858));
+//
+//   participantSize = 2;
+//   for (Integer i = 0; i < participantSize; ++i)
+//   {
+//      theLine >> str;
+//      currentRecord.participantIDs.push_back(str);
+//   }
+//
+//   theLine >> currentRecord.uplinkBand;
+//   theLine >> currentRecord.rampType;
+//   theLine >> currentRecord.rampFrequency;
+//   theLine >> currentRecord.rampRate;
+//
+//#ifdef DEBUG_FILE_READ
+//   MessageInterface::ShowMessage(" %.12lf    %s    %d    ", currentRecord.epoch, currentRecord.typeName.c_str(), currentRecord.type);
+//   for (Integer i = 0; i < participantSize; ++i)
+//      MessageInterface::ShowMessage("%s    ", currentRecord.participantIDs.at(i).c_str());
+//
+//   MessageInterface::ShowMessage(" %d    %d    %.12le    %.12le\n", currentRecord.uplinkBand, currentRecord.rampType, currentRecord.rampFrequency, currentRecord.rampRate);
+//   MessageInterface::ShowMessage("RampTableType::ReadRampTableData() End\n");
+//#endif
+//
+//   return &currentRecord;
+//}
 
 
 //-----------------------------------------------------------------------------

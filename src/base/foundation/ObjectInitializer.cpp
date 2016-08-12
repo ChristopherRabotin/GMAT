@@ -1414,7 +1414,9 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
                   "RefObjectName " + oName + " not found; ignoring " +
                   ex.GetFullMessage() + "\n");
             #endif
-            //throw ex;
+            
+            if (ex.IsFatal())
+               throw ex;
          }
          catch (SubscriberException &ex)
          {
@@ -1449,7 +1451,9 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
             "RefObjectNameArray not found; ignoring " +
             ex.GetFullMessage() + "\n");
       #endif
-      //throw ex;
+      
+      if (ex.IsFatal())
+         throw ex;
    }
    catch (SubscriberException &ex)
    {

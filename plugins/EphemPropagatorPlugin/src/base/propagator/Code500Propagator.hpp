@@ -120,6 +120,10 @@ protected:
    RealArray               startEpochs;
    /// Array of time steps in each data block
    RealArray               timeSteps;
+   /// Time from the start of the ephem, in seconds
+   Real                    timeFromEphemStart;
+   /// Most recent epoch used from this propagator
+   GmatEpoch               lastEpoch;
 
    virtual void            UpdateState();
    virtual void            SetEphemSpan(Integer whichOne = 0);

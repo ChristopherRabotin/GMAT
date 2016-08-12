@@ -97,7 +97,7 @@ public:
    /// Filter observed data
    virtual ObservationData* 
                         FilteringData(ObservationData* dataObject, Integer& rejectedReason);
-   virtual bool         ValidateInput();
+//   virtual bool         ValidateInput();
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
@@ -168,13 +168,13 @@ protected:
    ObjectArray  GetListOfSpacecrafts();
    /// Get a list of all ground stations 
    ObjectArray  GetListOfGroundStations();
-   /// Get a list of all ground stations                                                  // made changes by TUAN NGUYEN
-   ObjectArray  GetListOfFiles();                                                         // made changes by TUAN NGUYEN
+   /// Get a list of all ground stations
+   ObjectArray  GetListOfFiles();
    ///// Get a list of valid epoch formats
    //StringArray  GetListOfValidEpochFormats();
 
-   /// Check observation data containing a file name listing in filenames                 // made changes by TUAN NGUYEN
-   bool     HasFile(ObservationData* dataObject);                                         // made changes by TUAN NGUYEN
+   /// Check observation data containing a file name listing in filenames
+   bool     HasFile(ObservationData* dataObject);
    /// Check observation data containing a spacecraft listing in observers
    bool     HasObserver(ObservationData* dataObject);
    /// Check observation data containing a ground station listing in trackers

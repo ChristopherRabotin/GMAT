@@ -533,72 +533,6 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
             // Set statistic filter to DataFile object. 
             // Filter will handle the selection of data record based on file names; therefore, the follwoing code is not needed.
             fileObj->SetDataFilter((DataFilter*)datafilter);
-
-            
-            //StringArray nameList = datafilter->GetStringArrayParameter("FileNames");
-
-            //bool setfilter = false;
-
-            //if (datafilter->IsOfType("StatisticsAcceptFilter"))
-            //{
-            //   // For StatisticsAcceptFilter, the filter is applied to data files which are specified in StatisticAcceptFilter.FileNames.
-            //   // Special case: if StatisticsAcceptFilter.Filenames is an empty list, the filter is applied for all data files 
-            //   if (nameList.size() == 0)
-            //      setfilter = true;                    // when no data file is set to StatisticsAcceptFilter.FileNames, statistics accept filter is used for all data file
-            //   else
-            //   {
-            //      if ((find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end())||
-            //              (find(nameList.begin(), nameList.end(), "All") != nameList.end()))
-            //            setfilter = true;
-            //      else
-            //      {
-            //         for (UnsignedInt q = 0; q < nameList.size(); ++q)
-            //         {
-            //            if (GmatStringUtil::ToUpper(nameList[q]) == GmatStringUtil::ToUpper(fileName))
-            //            {
-            //               setfilter = true;
-            //               break;
-            //            }
-            //         }
-            //      }
-            //   }
-            //}
-            //else if (datafilter->IsOfType("StatisticsRejectFilter"))
-            //{
-            //   // For StatisticsRejectFilter, the filter is applied to data files which are specified in StatisticRejectFilter.FileNames.
-            //   // Special case: if StatisticsRejectFilter.Filenames is an empty list, the filter is not applied for any data files 
-            //   if (nameList.size() == 0)
-            //   {
-            //      setfilter = false;                      // when no data file is set to TrackingFileSet.FileName, statistics reject filter is not used for any data file
-            //      
-            //   }
-            //   else
-            //   {
-            //      if (find(nameList.begin(), nameList.end(), "All") != nameList.end())
-            //         setfilter = true;
-            //      else
-            //      {
-            //         for (UnsignedInt q = 0; q < nameList.size(); ++q)
-            //         {
-            //            if (GmatStringUtil::ToUpper(nameList[q]) == GmatStringUtil::ToUpper(fileName))
-            //            {
-            //               setfilter = true;
-            //               break;
-            //            }
-            //         }
-            //      }
-            //   }
-            //}
-
-            //if (setfilter)
-            //{
-            //   #ifdef DEBUG_INITIALIZATION
-            //      MessageInterface::ShowMessage(" &&&&   Set data filter <%s,%p> to data file <%s,%p>.\n", datafilter->GetName().c_str(), datafilter, fileObj->GetName().c_str(), fileObj);
-            //   #endif
-            //   fileObj->SetDataFilter((DataFilter*)datafilter);
-            //}
-            
-
          }// for k loop
       }// for j loop
 
@@ -1140,7 +1074,6 @@ UnsignedInt MeasurementManager::LoadObservations()
    std::vector<UnsignedInt> count;                     // count[i] is number of all accepted records associated with file specified by streamList[i] after applying statistic filters
    std::vector<ObservationData*> dataBuffer;           // dataBuffer[i] contains the current data record read from streamList[i]  
    ObservationData* odPointer;
-   //MessageInterface::ShowMessage("Hi there 1: streamList.size() = %d\n", streamList.size());
 
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
@@ -1154,11 +1087,10 @@ UnsignedInt MeasurementManager::LoadObservations()
 
       count.push_back(0);
    }
-   //MessageInterface::ShowMessage("Hi there 2\n");
+   
    ObservationData od;
    while (true)
    {
-      //MessageInterface::ShowMessage("Hi there 3.1\n");
       // 1. get a data record in data buffer with smallest value of epoch
       UnsignedInt minIndex = dataBuffer.size();     // point to the outside of data buffer
       for (UnsignedInt i = 0; i < dataBuffer.size(); ++i)
@@ -1174,17 +1106,17 @@ UnsignedInt MeasurementManager::LoadObservations()
                minIndex = i;
          }
       }
-      //MessageInterface::ShowMessage("Hi there 3.2\n");
+      
       // 2. if dada buffer contains all NULL data record (that means all streams at EOF), then exit while loop
       if (minIndex == dataBuffer.size())
          break;
-      //MessageInterface::ShowMessage("Hi there 3.3\n");
+      
       // 3. Filter the data record do it for all filters
       Integer rejectedReason = 0;
       ObservationData* obsData = dataBuffer[minIndex];
       // This observation data is belong to data file: streamList[minIndex]. Therefore, it needs to use filters defined in that data file object
       ObservationData* selectedData = streamList[minIndex]->FilteringData(obsData, rejectedReason);
-      //MessageInterface::ShowMessage("Hi there 3.4\n");
+      
       // 4. if it passes all filters then add it to observations
       if (selectedData != NULL)
       {
@@ -1208,7 +1140,7 @@ UnsignedInt MeasurementManager::LoadObservations()
          else if (find(trackingConfigsMap[minIndex].begin(), trackingConfigsMap[minIndex].end(), ss.str()) == trackingConfigsMap[minIndex].end())
             trackingConfigsMap[minIndex].push_back(ss.str());
       }
-      //MessageInterface::ShowMessage("Hi there 3.5\n");
+      
       // 5. count throw recods based on rejectedReason
       switch (rejectedReason)
       {
@@ -1248,7 +1180,7 @@ UnsignedInt MeasurementManager::LoadObservations()
                }
             }
       }
-      //MessageInterface::ShowMessage("Hi there 3.6\n");
+      
       // 6. Read data record from streamList[minIndex] to fill data buffer if the stream is not EOF
       if (dataBuffer[minIndex] != NULL)
       {
@@ -1256,22 +1188,19 @@ UnsignedInt MeasurementManager::LoadObservations()
          if (dataBuffer[minIndex] != NULL)
             numRec[minIndex] = numRec[minIndex] + 1;        // count up number of read records if it really has one record read from file
       }
-      //MessageInterface::ShowMessage("Hi there 3.7\n");
    }
 
    // 7. Display all statistic of data records
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
    MessageInterface::ShowMessage("Number of thrown records due to:\n");
-   //MessageInterface::ShowMessage("      .Invalid measurement value       : %d\n", filter3Num);
-   //MessageInterface::ShowMessage("      .Record duplication or time order: %d\n", filter4Num);
-   //MessageInterface::ShowMessage("      .Trackers selection              : %d\n", filter5Num);
-   //MessageInterface::ShowMessage("      .Data thinning                   : %d\n", filter1Num);
-   //MessageInterface::ShowMessage("      .Time span                       : %d\n", filter2Num);
-   //MessageInterface::ShowMessage("      .Observers selection             : %d\n", filter6Num);
-   //MessageInterface::ShowMessage("      .Data types selection            : %d\n", filter7Num);
-   //MessageInterface::ShowMessage("      .Data files selection            : %d\n", filter8Num);
-   //MessageInterface::ShowMessage("      .Tracking configuration selection: %d\n", filter9Num);
    for(std::map<std::string,Integer>::iterator i = totalCount.begin(); i != totalCount.end(); ++i)
    {
+      //if ((runmode != GmatGlobal::TESTING) && (runmode != GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode != GmatGlobal::TESTING)
+      {
+         if (i->first.substr(0, 3) == "Old")
+            continue;
+      }
       MessageInterface::ShowMessage("     .%s : %d\n", i->first.c_str(), i->second); 
    }
 
@@ -1291,13 +1220,13 @@ UnsignedInt MeasurementManager::LoadObservations()
    for(UnsignedInt i = 0; i < trackingConfigsMap.size(); ++i)
    {
       MessageInterface::ShowMessage("List of tracking configurations (present in participant ID) for load records from data file '%s':\n", streamList[i]->GetName().c_str());
-      if (trackingConfigsMap[i].size() == 0)                                                    // made changes by TUAN NGUYEN
-         MessageInterface::ShowMessage("   None\n");                                            // made changes by TUAN NGUYEN
-      else                                                                                      // made changes by TUAN NGUYEN
-      {                                                                                         // made changes by TUAN NGUYEN
+      if (trackingConfigsMap[i].size() == 0)
+         MessageInterface::ShowMessage("   None\n");
+      else
+      {
          for (UnsignedInt j = 0; j < trackingConfigsMap[i].size(); ++j)
             MessageInterface::ShowMessage("   Config %d: {%s}\n", j, trackingConfigsMap[i].at(j).c_str());
-      }                                                                                         // made changes by TUAN NGUYEN
+      }
    }
    MessageInterface::ShowMessage("\n");
 
@@ -1310,6 +1239,15 @@ UnsignedInt MeasurementManager::LoadObservations()
 }
 
 
+//-----------------------------------------------------------------------------
+// bool AutoGenerateTrackingDataAdapters()
+//-----------------------------------------------------------------------------
+/**
+* This function is used to generate TrackingDataAdapters automatically based on
+* observation data.
+*
+*/
+//-----------------------------------------------------------------------------
 bool MeasurementManager::AutoGenerateTrackingDataAdapters()
 {
 #ifdef DEBUG_AUTO_GENERATE_TRACKINGDATAADAPTERS
@@ -1520,308 +1458,314 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
 
 
 
-UnsignedInt MeasurementManager::LoadObservationsOld()
-{
-   #ifdef DEBUG_LOAD_OBSERVATIONS
-      MessageInterface::ShowMessage(
-         "Entered MeasurementManager::LoadObservations() method\n");
-   #endif
+//UnsignedInt MeasurementManager::LoadObservationsOld()
+//{
+//   #ifdef DEBUG_LOAD_OBSERVATIONS
+//      MessageInterface::ShowMessage(
+//         "Entered MeasurementManager::LoadObservations() method\n");
+//   #endif
+//
+//   #ifdef USE_DATAFILE_PLUGINS
+//      DataFileAdapter dfa;
+//   #endif
+//
+//   std::vector<ObservationData>     obsTable;
+//   std::vector<UnsignedInt>         startIndexes;
+//   std::vector<UnsignedInt>         endIndexes;
+//   observations.clear();
+//   
+//   for (UnsignedInt i = 0; i < streamList.size(); ++i)
+//   {
+//      startIndexes.push_back(obsTable.size());
+//
+//      ObservationData *od;
+/////// TBD: Look at file handlers here once data file pieces are designed
+//      ObservationData od_old;
+//      od_old.epoch = -1.0;
+//
+//      std::string streamFormat = streamList[i]->GetStringParameter("Format");
+//
+/////// TBD: Especially here; this style will cause maintenence issues as more types are added
+//      if ((streamFormat == "GMAT_OD") || (streamFormat == "GMAT_ODDoppler") ||
+//          (streamFormat == "GMATInternal") || (streamFormat == "TDM"))      // It needs for loading all type of observation data (except ramp table)
+//      {
+//      #ifdef USE_DATAFILE_PLUGINS
+//         if (streamList[i]->GetIsOpen())
+//         {
+//            ObType *obs;
+//
+//            // This part needs some design information from Matt
+//            ObType *obd = dfa.GetObTypeObject(streamList[i]);
+//            if (!streamList[i]->GetData(obd))
+//            {
+//               throw MeasurementException("Could not load observation\n");
+//            }
+//            dfa.LoadObservation(*obd, *od);
+//
+//            while (!streamList[i]->IsEOF())
+//            {
+//               if (streamList[i]->GetData(obs))
+//               {
+//                  // Store the data for processing
+//               }
+//               streamList[i]->AdvanceToNextOb();
+//            }
+//         }
+//      #else
+//
+//         if (streamList[i]->IsOpen())
+//         {
+//            UnsignedInt filter0Num;
+//            filter0Num = 0;
+//            UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
+//            filter1Num = filter2Num = filter3Num = filter4Num = filter5Num =  count = numRec = 0;
+//            Real acc = 1.0;
+//
+//            Real epoch1 = 0.0;
+//            Real epoch2 = 0.0;
+//
+//            Real thinningRatio = streamList[i]->GetRealParameter("DataThinningRatio"); 
+//            StringArray selectedStations = streamList[i]->GetStringArrayParameter("SelectedStationIDs"); 
+//            bool EndofFile = false;
+//            while (true)
+//            {
+//               od = streamList[i]->ReadObservation();
+//               ++numRec;
+//               
+//               // End of file
+//               if (EndofFile)
+//               {
+//                  --numRec;
+//                  break;
+//               }
+//
+//               if (od == NULL)
+//               {
+//                  ++filter0Num;
+//                  continue;
+//               }
+//
+//               #ifdef DUMP_OBSDATA
+//                  // Write out the observation
+//                  MessageInterface::ShowMessage("In MeasurementManager: Observation record at %p:\n", od);
+//                  MessageInterface::ShowMessage("   typeName:  %s\n", od->typeName.c_str());
+//                  MessageInterface::ShowMessage("   type:  %d\n", od->type);
+//                  MessageInterface::ShowMessage("   inUsed:  %s\n", (od->inUsed ? "true" : "false"));
+//                  MessageInterface::ShowMessage("   removedReason:  %s\n", od->removedReason.c_str());
+//                  MessageInterface::ShowMessage("   uniqueID:  %d\n", od->uniqueID);
+//                  MessageInterface::ShowMessage("   epochSystem:  %d\n", od->epochSystem);
+//                  MessageInterface::ShowMessage("   epoch:  %.12le\n", od->epoch);
+//                  MessageInterface::ShowMessage("   epochAtEnd:  %s\n", (od->epochAtEnd ? "true" : "false"));
+//                  MessageInterface::ShowMessage("   epochAtIntegrationEnd:  %s\n", (od->epochAtIntegrationEnd ? "true" : "false"));
+//                  MessageInterface::ShowMessage("   participantIDs:  %d members\n", od->participantIDs.size());
+//                  for (UnsignedInt i = 0; i < od->participantIDs.size(); ++i)
+//                     MessageInterface::ShowMessage("      %d: %s\n", i, od->participantIDs[i].c_str());
+//                  MessageInterface::ShowMessage("   strands: %d strands in the record\n", od->strands.size());
+//                  MessageInterface::ShowMessage("   value:  %d members\n", od->value.size());
+//                  MessageInterface::ShowMessage("   dataMap:  %d members\n", od->dataMap.size());
+//                  for (UnsignedInt i = 0; i < od->value.size(); ++i)
+//                  {
+//                     if (od->dataMap.size() > i)
+//                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
+//                     else
+//                        MessageInterface::ShowMessage("      ");
+//                     MessageInterface::ShowMessage("%.12lf\n", od->value[i]);
+//                  }
+//                  MessageInterface::ShowMessage("   value_orig:  %d members\n", od->value_orig.size());
+//                  for (UnsignedInt i = 0; i < od->value_orig.size(); ++i)
+//                  {
+//                     if (od->dataMap.size() > i)
+//                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
+//                     else
+//                        MessageInterface::ShowMessage("      ");
+//                     MessageInterface::ShowMessage("%.12lf\n", od->value_orig[i]);
+//                  }
+//                  MessageInterface::ShowMessage("   unit:  %s\n", od->unit.c_str());
+//                  MessageInterface::ShowMessage("   noiseCovariance:  <%p>\n", od->noiseCovariance);
+//                  MessageInterface::ShowMessage("   extraDataDescriptions:  %d members\n", od->extraDataDescriptions.size());
+//                  MessageInterface::ShowMessage("   extraTypes:  %d members\n", od->extraTypes.size());
+//                  MessageInterface::ShowMessage("   extraData:  %d members\n", od->extraData.size());
+//                  MessageInterface::ShowMessage("   uplinkBand:  %d\n", od->uplinkBand);
+//                  MessageInterface::ShowMessage("   uplinkFreq:  %.12le\n", od->uplinkFreq);
+//                  MessageInterface::ShowMessage("   rangeModulo: %.12le\n", od->rangeModulo);
+//                  MessageInterface::ShowMessage("   dopplerCountInterval:  %.12le\n", od->dopplerCountInterval);
+//               #endif
+//
+//               // Get start epoch and end epoch when od != NULL
+//               if (epoch1 == 0.0)
+//               {
+//                  epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
+//                  epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
+//               }
+//               
+//               // Data thinning filter
+//               acc = acc + thinningRatio;
+//               if (acc < 1.0)
+//               {
+//                  #ifdef DEBUG_LOAD_OBSERVATIONS
+//                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+//                  #endif
+//                  ++filter4Num;
+//                  continue;
+//               }
+//               else
+//                  acc = acc -1.0;
+//               
+//               // Time span filter
+//               if ((od->epoch < epoch1)||(od->epoch > epoch2))
+//               {
+//                  #ifdef DEBUG_LOAD_OBSERVATIONS
+//                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+//                  #endif
+//                  ++filter5Num;
+//                  continue;
+//               }
+//               
+//               // Invalid measurement value filter
+//               if (od->value.size() > 0)
+//                  if (od->value[0] == -1.0)      // throw away this observation data if it is invalid
+//                  {
+//                     #ifdef DEBUG_LOAD_OBSERVATIONS
+//                        MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+//                     #endif
+//                     ++filter1Num;
+//                     continue;
+//                  }
+//
+//               
+//               // Duplication or time order filter
+//               if (od_old.epoch >= (od->epoch + 2.0e-12))
+//               {
+//                  #ifdef DEBUG_LOAD_OBSERVATIONS
+//                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+//                  #endif
+//                  ++filter2Num;
+//                  continue;
+//               }
+//
+//               // Selected stations filter
+//               bool choose = false;
+//               if (selectedStations.size() == 0)
+//                  choose = true;
+//               else
+//               {
+//                  for (int j=0; j < selectedStations.size(); ++j)
+//                  {
+//                     if (selectedStations[j] == od->participantIDs[0])
+//                     {
+//                        choose = true;
+//                         break;
+//                     }
+//                  }
+//               }
+//
+//               if (choose == false)
+//               {
+//                  #ifdef DEBUG_LOAD_OBSERVATIONS
+//                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+//                  #endif
+//                  ++filter3Num;
+//                  continue;
+//               }
+//
+//               obsTable.push_back(*od);
+//               #ifdef DEBUG_LOAD_OBSERVATIONS
+//                  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf   ", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+//                  if (od->typeName == "DSNTwoWayDoppler")
+//                     MessageInterface::ShowMessage(" Band = %d    Doppler count interval = %le\n", od->uplinkBand, od->dopplerCountInterval);
+//                  else if (od->typeName == "DSNTwoWayRange")
+//                     MessageInterface::ShowMessage(" Band = %d    Frequency = %.15le   Range Modulo = %.15le\n", od->uplinkBand, od->uplinkFreq, od->rangeModulo);
+//                  else
+//                     MessageInterface::ShowMessage("\n");
+//               #endif
+//
+//               ++count;
+//               od_old = *od;
+//            }// endwhile(true)   
+//
+//            MessageInterface::ShowMessage("Number of thrown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
+//            MessageInterface::ShowMessage("      .Filter by Satistic data filters        : %d\n", filter0Num);
+//            MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter1Num);
+//            MessageInterface::ShowMessage("      .Duplicated record or time order filter : %d\n", filter2Num);
+//            MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);
+//            MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter4Num);
+//            MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter5Num);
+//            MessageInterface::ShowMessage("Total number of records in '%s': %d\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec);
+//            MessageInterface::ShowMessage("Number of records in '%s' used for estimation: %d\n\n", streamList[i]->GetStringParameter("Filename").c_str(), count);
+//
+//         } // endif (streamList[i]->IsOpen())
+//       
+//      #endif
+//      } // endif ((streamFormat == "GMAT_OD")
+//
+//      // fix bug GMT-4394
+//      if (obsTable.size() == 0)
+//         throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
+//      else
+//      {
+//         if ((Integer)startIndexes[i] <= (obsTable.size()-1))
+//            endIndexes.push_back(obsTable.size()-1);
+//         else
+//            throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
+//      }
+//     
+//   }// for i loop
+//
+//
+//   // Sort observation data by epoch due to observations table is required to have an epoch ascending order
+//   bool completed = false;
+//   while (!completed)
+//   {
+//      UnsignedInt minIndex = streamList.size();
+//      for (UnsignedInt i = 0; i < streamList.size(); ++i)
+//      {
+//         if (startIndexes[i] > endIndexes[i])
+//            continue;
+//
+//         if (minIndex == streamList.size())
+//            minIndex = i;
+//         else
+//         {
+//            if (obsTable[startIndexes[minIndex]].epoch > obsTable[startIndexes[i]].epoch)
+//               minIndex = i;
+//         }
+//     }
+//     
+//     if (minIndex < streamList.size())
+//     {
+//        observations.push_back(obsTable[startIndexes[minIndex]]);
+//        startIndexes[minIndex]++;
+//     }
+//     else
+//        completed = true;
+//
+//   }
+//   
+//   #ifdef DEBUG_LOAD_OBSERVATIONS
+//      for (UnsignedInt i = 0; i < observations.size(); ++i)
+//         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
+//   #endif
+//
+//   // Set the current data pointer to the first observation value
+//   currentObs = observations.begin();
+//   MessageInterface::ShowMessage("Total number of load records : %d\n", observations.size());
+//
+//   #ifdef DEBUG_LOAD_OBSERVATIONS
+//     MessageInterface::ShowMessage(
+//         "Exit MeasurementManager::LoadObservations() method\n");
+//   #endif
+//
+//   return observations.size(); 
+//}
 
-   #ifdef USE_DATAFILE_PLUGINS
-      DataFileAdapter dfa;
-   #endif
 
-   std::vector<ObservationData>     obsTable;
-   std::vector<UnsignedInt>         startIndexes;
-   std::vector<UnsignedInt>         endIndexes;
-   observations.clear();
-   
-   for (UnsignedInt i = 0; i < streamList.size(); ++i)
-   {
-      startIndexes.push_back(obsTable.size());
-
-      ObservationData *od;
-///// TBD: Look at file handlers here once data file pieces are designed
-      ObservationData od_old;
-      od_old.epoch = -1.0;
-
-      std::string streamFormat = streamList[i]->GetStringParameter("Format");
-
-///// TBD: Especially here; this style will cause maintenence issues as more types are added
-      if ((streamFormat == "GMAT_OD") || (streamFormat == "GMAT_ODDoppler") ||
-          (streamFormat == "GMATInternal") || (streamFormat == "TDM"))      // It needs for loading all type of observation data (except ramp table)
-      {
-      #ifdef USE_DATAFILE_PLUGINS
-         if (streamList[i]->GetIsOpen())
-         {
-            ObType *obs;
-
-            // This part needs some design information from Matt
-            ObType *obd = dfa.GetObTypeObject(streamList[i]);
-            if (!streamList[i]->GetData(obd))
-            {
-               throw MeasurementException("Could not load observation\n");
-            }
-            dfa.LoadObservation(*obd, *od);
-
-            while (!streamList[i]->IsEOF())
-            {
-               if (streamList[i]->GetData(obs))
-               {
-                  // Store the data for processing
-               }
-               streamList[i]->AdvanceToNextOb();
-            }
-         }
-      #else
-
-         if (streamList[i]->IsOpen())
-         {
-            UnsignedInt filter0Num;
-            filter0Num = 0;
-            UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
-            filter1Num = filter2Num = filter3Num = filter4Num = filter5Num =  count = numRec = 0;
-            Real acc = 1.0;
-
-            Real epoch1 = 0.0;
-            Real epoch2 = 0.0;
-
-            Real thinningRatio = streamList[i]->GetRealParameter("DataThinningRatio"); 
-            StringArray selectedStations = streamList[i]->GetStringArrayParameter("SelectedStationIDs"); 
-            bool EndofFile = false;
-            while (true)
-            {
-               od = streamList[i]->ReadObservation();
-               ++numRec;
-               
-               // End of file
-               if (EndofFile)
-               {
-                  --numRec;
-                  break;
-               }
-
-               if (od == NULL)
-               {
-                  ++filter0Num;
-                  continue;
-               }
-
-               #ifdef DUMP_OBSDATA
-                  // Write out the observation
-                  MessageInterface::ShowMessage("In MeasurementManager: Observation record at %p:\n", od);
-                  MessageInterface::ShowMessage("   typeName:  %s\n", od->typeName.c_str());
-                  MessageInterface::ShowMessage("   type:  %d\n", od->type);
-                  MessageInterface::ShowMessage("   inUsed:  %s\n", (od->inUsed ? "true" : "false"));
-                  MessageInterface::ShowMessage("   removedReason:  %s\n", od->removedReason.c_str());
-                  MessageInterface::ShowMessage("   uniqueID:  %d\n", od->uniqueID);
-                  MessageInterface::ShowMessage("   epochSystem:  %d\n", od->epochSystem);
-                  MessageInterface::ShowMessage("   epoch:  %.12le\n", od->epoch);
-                  MessageInterface::ShowMessage("   epochAtEnd:  %s\n", (od->epochAtEnd ? "true" : "false"));
-                  MessageInterface::ShowMessage("   epochAtIntegrationEnd:  %s\n", (od->epochAtIntegrationEnd ? "true" : "false"));
-                  MessageInterface::ShowMessage("   participantIDs:  %d members\n", od->participantIDs.size());
-                  for (UnsignedInt i = 0; i < od->participantIDs.size(); ++i)
-                     MessageInterface::ShowMessage("      %d: %s\n", i, od->participantIDs[i].c_str());
-                  MessageInterface::ShowMessage("   strands: %d strands in the record\n", od->strands.size());
-                  MessageInterface::ShowMessage("   value:  %d members\n", od->value.size());
-                  MessageInterface::ShowMessage("   dataMap:  %d members\n", od->dataMap.size());
-                  for (UnsignedInt i = 0; i < od->value.size(); ++i)
-                  {
-                     if (od->dataMap.size() > i)
-                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
-                     else
-                        MessageInterface::ShowMessage("      ");
-                     MessageInterface::ShowMessage("%.12lf\n", od->value[i]);
-                  }
-                  MessageInterface::ShowMessage("   value_orig:  %d members\n", od->value_orig.size());
-                  for (UnsignedInt i = 0; i < od->value_orig.size(); ++i)
-                  {
-                     if (od->dataMap.size() > i)
-                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
-                     else
-                        MessageInterface::ShowMessage("      ");
-                     MessageInterface::ShowMessage("%.12lf\n", od->value_orig[i]);
-                  }
-                  MessageInterface::ShowMessage("   unit:  %s\n", od->unit.c_str());
-                  MessageInterface::ShowMessage("   noiseCovariance:  <%p>\n", od->noiseCovariance);
-                  MessageInterface::ShowMessage("   extraDataDescriptions:  %d members\n", od->extraDataDescriptions.size());
-                  MessageInterface::ShowMessage("   extraTypes:  %d members\n", od->extraTypes.size());
-                  MessageInterface::ShowMessage("   extraData:  %d members\n", od->extraData.size());
-                  MessageInterface::ShowMessage("   uplinkBand:  %d\n", od->uplinkBand);
-                  MessageInterface::ShowMessage("   uplinkFreq:  %.12le\n", od->uplinkFreq);
-                  MessageInterface::ShowMessage("   rangeModulo: %.12le\n", od->rangeModulo);
-                  MessageInterface::ShowMessage("   dopplerCountInterval:  %.12le\n", od->dopplerCountInterval);
-               #endif
-
-               // Get start epoch and end epoch when od != NULL
-               if (epoch1 == 0.0)
-               {
-                  epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-                  epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-               }
-               
-               // Data thinning filter
-               acc = acc + thinningRatio;
-               if (acc < 1.0)
-               {
-                  #ifdef DEBUG_LOAD_OBSERVATIONS
-                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  #endif
-                  ++filter4Num;
-                  continue;
-               }
-               else
-                  acc = acc -1.0;
-               
-               // Time span filter
-               if ((od->epoch < epoch1)||(od->epoch > epoch2))
-               {
-                  #ifdef DEBUG_LOAD_OBSERVATIONS
-                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  #endif
-                  ++filter5Num;
-                  continue;
-               }
-               
-               // Invalid measurement value filter
-               if (od->value.size() > 0)
-                  if (od->value[0] == -1.0)      // throw away this observation data if it is invalid
-                  {
-                     #ifdef DEBUG_LOAD_OBSERVATIONS
-                        MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                     #endif
-                     ++filter1Num;
-                     continue;
-                  }
-
-               
-               // Duplication or time order filter
-               if (od_old.epoch >= (od->epoch + 2.0e-12))
-               {
-                  #ifdef DEBUG_LOAD_OBSERVATIONS
-                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  #endif
-                  ++filter2Num;
-                  continue;
-               }
-
-               // Selected stations filter
-               bool choose = false;
-               if (selectedStations.size() == 0)
-                  choose = true;
-               else
-               {
-                  for (int j=0; j < selectedStations.size(); ++j)
-                  {
-                     if (selectedStations[j] == od->participantIDs[0])
-                     {
-                        choose = true;
-                         break;
-                     }
-                  }
-               }
-
-               if (choose == false)
-               {
-                  #ifdef DEBUG_LOAD_OBSERVATIONS
-                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  #endif
-                  ++filter3Num;
-                  continue;
-               }
-
-               obsTable.push_back(*od);
-               #ifdef DEBUG_LOAD_OBSERVATIONS
-                  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf   ", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  if (od->typeName == "DSNTwoWayDoppler")
-                     MessageInterface::ShowMessage(" Band = %d    Doppler count interval = %le\n", od->uplinkBand, od->dopplerCountInterval);
-                  else if (od->typeName == "DSNTwoWayRange")
-                     MessageInterface::ShowMessage(" Band = %d    Frequency = %.15le   Range Modulo = %.15le\n", od->uplinkBand, od->uplinkFreq, od->rangeModulo);
-                  else
-                     MessageInterface::ShowMessage("\n");
-               #endif
-
-               ++count;
-               od_old = *od;
-            }// endwhile(true)   
-
-            MessageInterface::ShowMessage("Number of thrown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
-            MessageInterface::ShowMessage("      .Filter by Satistic data filters        : %d\n", filter0Num);
-            MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter1Num);
-            MessageInterface::ShowMessage("      .Duplicated record or time order filter : %d\n", filter2Num);
-            MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);
-            MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter4Num);
-            MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter5Num);
-            MessageInterface::ShowMessage("Total number of records in '%s': %d\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec);
-            MessageInterface::ShowMessage("Number of records in '%s' used for estimation: %d\n\n", streamList[i]->GetStringParameter("Filename").c_str(), count);
-
-         } // endif (streamList[i]->IsOpen())
-       
-      #endif
-      } // endif ((streamFormat == "GMAT_OD")
-
-      // fix bug GMT-4394
-      if (obsTable.size() == 0)
-         throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
-      else
-      {
-         if ((Integer)startIndexes[i] <= (obsTable.size()-1))
-            endIndexes.push_back(obsTable.size()-1);
-         else
-            throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
-      }
-     
-   }// for i loop
-
-
-   // Sort observation data by epoch due to observations table is required to have an epoch ascending order
-   bool completed = false;
-   while (!completed)
-   {
-      UnsignedInt minIndex = streamList.size();
-      for (UnsignedInt i = 0; i < streamList.size(); ++i)
-      {
-         if (startIndexes[i] > endIndexes[i])
-            continue;
-
-         if (minIndex == streamList.size())
-            minIndex = i;
-         else
-         {
-            if (obsTable[startIndexes[minIndex]].epoch > obsTable[startIndexes[i]].epoch)
-               minIndex = i;
-         }
-     }
-     
-     if (minIndex < streamList.size())
-     {
-        observations.push_back(obsTable[startIndexes[minIndex]]);
-        startIndexes[minIndex]++;
-     }
-     else
-        completed = true;
-
-   }
-   
-   #ifdef DEBUG_LOAD_OBSERVATIONS
-      for (UnsignedInt i = 0; i < observations.size(); ++i)
-         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
-   #endif
-
-   // Set the current data pointer to the first observation value
-   currentObs = observations.begin();
-   MessageInterface::ShowMessage("Total number of load records : %d\n", observations.size());
-
-   #ifdef DEBUG_LOAD_OBSERVATIONS
-     MessageInterface::ShowMessage(
-         "Exit MeasurementManager::LoadObservations() method\n");
-   #endif
-
-   return observations.size(); 
-}
-
-
-
+//-----------------------------------------------------------------------------
+// std::vector<ObservationData>* GetObservationDataList()
+//-----------------------------------------------------------------------------
+/**
+* Get a list of all observations
+*/
+//-----------------------------------------------------------------------------
 std::vector<ObservationData>* MeasurementManager::GetObservationDataList()
 {
    return &observations;
@@ -2287,13 +2231,13 @@ const StringArray& MeasurementManager::GetMeasurementNames() const
 }
 
 
-
-//const std::vector<TrackingFileSet*> MeasurementManager::GetTrackingSets() const
-//{
-//   return trackingSets;
-//}
-
-
+//-----------------------------------------------------------------------------
+// const std::vector<TrackingDataAdapter*>& GetAllTrackingDataAdapters()
+//-----------------------------------------------------------------------------
+/**
+* Get a list of all TrackingAdapter objects
+*/
+//-----------------------------------------------------------------------------
 const std::vector<TrackingDataAdapter*>& MeasurementManager::GetAllTrackingDataAdapters()
 {
    return adapters;
@@ -2573,42 +2517,31 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             rt = &(rampTables[sr[0]]);
        
          if (withEvents)
-         {  
-            #ifdef DEBUG_CALCULATE_MEASUREMENTS
-               MessageInterface::ShowMessage(" Simulation: measurement with events\n");
-            #endif
-            //if (measurements[j].isFeasible)                                                        // made changes by TUAN NGUYEN
-            //{                                                                                      // made changes by TUAN NGUYEN
-               measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);
-               if (measurements[j].unfeasibleReason == "R")
-               {
-                  Real a1Time = measurements[j].epoch;
-                  Real taiTime;
-                  std::string tais;
-                  TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-                  char s[1000];
-                  sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", models[j]->GetName().c_str(), taiTime);
-                  throw MeasurementException(s); 
-               }
-            //}                                                                                       // made changes by TUAN NGUYEN
+         {
+#ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage(" Simulation: measurement with events\n");
+#endif
+            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);
          }
          else
          {
-            #ifdef DEBUG_CALCULATE_MEASUREMENTS
-               MessageInterface::ShowMessage(" Simulation: measurement without events\n");
-            #endif
-            // without event, no noise is added due to check feasibility
+#ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage(" Simulation: measurement without events\n");
+#endif
+            // when running without event, no noise is added due to check feasibility
             measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
-            if (measurements[j].unfeasibleReason == "R")
-            {
+         }
+
+         // Throw an error message if ramp table is missed when it needs
+         if (measurements[j].unfeasibleReason == "R")
+         {
                Real a1Time = measurements[j].epoch;
                Real taiTime;
                std::string tais;
                TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
                char s[1000];
-               sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", adapters[j]->GetName().c_str(), taiTime);
-               throw MeasurementException(s);
-            }
+               sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramped table cover all simulation epochs.\n", models[j]->GetName().c_str(), taiTime);
+               throw MeasurementException(s); 
          }
 
          if (measurements[j].isFeasible)
@@ -2637,62 +2570,40 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          if (sr.size() > 0)
             rt = &(rampTables[sr[0]]);
 
-         #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage("******** Ramp table names size = %d\n", sr.size());
-            if (sr.size() > 0)
-            {
-               MessageInterface::ShowMessage("******** Ramp table [%s] = <%p>\n", sr[0].c_str(), rt);
-               for(int ii=0; ii < rt->size(); ++ii)
-                  MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
-            }
-         #endif
          
          // Set AddNoise to measuement apdater
          adapters[i]->SetBooleanParameter("AddNoise", addNoise);
-         #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage("******** Finish setting noise\n");
-         #endif
 
-         // Run CalculateMeasurement() function 
-         if (withEvents)
-         {  
-            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+
+         // Run CalculateMeasurement() function          
+         //if (withEvents)
+         //{  
+         //   #ifdef DEBUG_CALCULATE_MEASUREMENTS
+         //      MessageInterface::ShowMessage(" Simulation: measurement adapter %s with events\n", adapters[i]->GetName().c_str());
+         //   #endif
+         //   measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         //   if (measurements[i].unfeasibleReason == "R")
+         //      throw MeasurementException(adapters[i]->GetErrorMessage());
+         //}
+         //else
+         //{
+         //   #ifdef DEBUG_CALCULATE_MEASUREMENTS
+         //      MessageInterface::ShowMessage(" Simulation: measurement adapter %s without events\n", adapters[i]->GetName().c_str());
+         //   #endif
+         //   measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         //   if (measurements[i].unfeasibleReason == "R")
+         //      throw MeasurementException(adapters[i]->GetErrorMessage());
+         //}
+
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            if (withEvents)
                MessageInterface::ShowMessage(" Simulation: measurement adapter %s with events\n", adapters[i]->GetName().c_str());
-            #endif
-            //if (measurements[i].isFeasible)                                                         // made changes by TUAN NGUYEN
-            //{                                                                                       // made changes by TUAN NGUYEN
-               measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-               if (measurements[i].unfeasibleReason == "R")
-               {
-               //   Real a1Time = measurements[i].epoch;
-               //   Real taiTime;
-               //   std::string tais;
-               //   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-               //   char s[1000];
-               //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramp table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
-               //   throw MeasurementException(s); 
-                  throw MeasurementException(adapters[i]->GetErrorMessage());
-               }
-            //}                                                                                       // made changes by TUAN NGUYEN
-         }
-         else
-         {
-            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            else
                MessageInterface::ShowMessage(" Simulation: measurement adapter %s without events\n", adapters[i]->GetName().c_str());
-            #endif
-            measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-            if (measurements[i].unfeasibleReason == "R")
-            {
-            //   Real a1Time = measurements[i].epoch;
-            //   Real taiTime;
-            //   std::string tais;
-            //   TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-            //   char s[1000];
-            //   sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramp table.\n Please make sure ramp table cover all simulation epochs.\n", adapters[i]->GetName().c_str(), taiTime);
-            //   throw MeasurementException(s);
-               throw MeasurementException(adapters[i]->GetErrorMessage());
-            }
-         }
+         #endif
+         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         if (measurements[i].unfeasibleReason == "R")
+            throw MeasurementException(adapters[i]->GetErrorMessage());
 
          if (measurements[i].isFeasible)
          {
@@ -3461,21 +3372,52 @@ Integer MeasurementManager::AddMeasurement(TrackingDataAdapter* adapter)
 }
 
 
+//------------------------------------------------------------------------------
+// const std::vector<MeasurementModel*>& GetAllMeasurementModels()
+//------------------------------------------------------------------------------
+/**
+* Get a list of all MeasurementModel objects
+*/
+//------------------------------------------------------------------------------
 const std::vector<MeasurementModel*>& MeasurementManager::GetAllMeasurementModels()
 {
    return models;
 }
 
+
+//------------------------------------------------------------------------------
+// const std::vector<TrackingSystem*>& GetAllTrackingSystems()
+//------------------------------------------------------------------------------
+/**
+* Get a list of all TrackingSystem objects
+*/
+//------------------------------------------------------------------------------
 const std::vector<TrackingSystem*>& MeasurementManager::GetAllTrackingSystems()
 {
    return systems;
 }
 
+
+//------------------------------------------------------------------------------
+// const std::vector<TrackingFileSet*>& GetAllTrackingFileSets()
+//------------------------------------------------------------------------------
+/**
+* Get a list of all TrackingFileSet objects
+*/
+//------------------------------------------------------------------------------
 const std::vector<TrackingFileSet*>& MeasurementManager::GetAllTrackingFileSets()
 {
    return trackingSets;
 }
 
+
+//------------------------------------------------------------------------------
+// UnsignedInt GetCurrentRecordNumber()
+//------------------------------------------------------------------------------
+/**
+* Get the current observation record number
+*/
+//------------------------------------------------------------------------------
 UnsignedInt MeasurementManager::GetCurrentRecordNumber()
 {
    UnsignedInt i = 0;

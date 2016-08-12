@@ -38,6 +38,9 @@
 #include "MeasurementManager.hpp"
 
 #include "OwnedPlot.hpp"
+#include "DataWriter.hpp"
+#include "WriterData.hpp"
+#include "DataBucket.hpp"
 
 /**
  * Implementation of a standard batch estimation state machine
@@ -120,6 +123,7 @@ protected:
    Real                    newResidualRMS;
    /// The best RMS residual
    Real                    bestResidualRMS;
+   Real                    resetBestResidualRMS;
    /// Predicted RMS residual
    Real predictedRMS;
    /// Number consecutive iterations diverging
@@ -135,6 +139,42 @@ protected:
    Rmatrix                 weights;
    /// Flag used to indicate propagation to estimation epoch is executing
    bool                    advanceToEstimationEpoch;
+
+   /// The .mat DataWriter object used to write data for MATLAB
+   DataWriter              *matWriter;
+   /// Flag indicating is the .mat file should be written
+   bool                    writeMatFile;
+   /// .mat data file name
+   std::string             matFileName;
+   /// Data container used during accumulation
+   DataBucket              matData;
+
+   // Indexing for the .mat data elements
+   /// Iteration number index
+   Integer                 matIterationIndex;
+   /// Index of the participants list in the .mat data
+   Integer                 matPartIndex;
+   /// Index of the participants list in the .mat data
+   Integer                 matTypeIndex;
+   /// Index of the TAI Mod Julian epoch data in the .mat data
+   Integer                 matEpochIndex;
+   /// Index of the observation data list in the .mat data
+   Integer                 matObsIndex;
+   /// Index of the calculated data in the .mat data
+   Integer                 matCalcIndex;
+   /// Index of the O-C data in the .mat data
+   Integer                 matOmcIndex;
+   /// Index of the elevation for the obs
+   Integer                 matElevationIndex;
+   /// TAI Gregorian epoch index
+   Integer                 matGregorianIndex;
+   ///  Observation edit flag index
+   Integer                 matObsEditFlagIndex;
+
+   // Extra entries
+   Integer                 matFrequencyIndex;
+   Integer                 matFreqBandIndex;
+   Integer                 matDoppCountIndex;
 
 //   /// Estimation status
 //   Integer                 estimationStatus;         // This variable is moved to Estimator class
@@ -166,7 +206,7 @@ protected:
    RealArray    sumResidualSquare;       // sum of all (O-C)^2 of accepted records
    RealArray    sumWeightResidualSquare; // sum of all [W*(O-C)]^2 of accepted records
 
-   // Statisrics information for sigma edited records
+   // Statistics information for sigma edited records
    IntegerArray sumSERecords;               // total all sigma edited records
    RealArray    sumSEResidual;              // sum of all O-C of all sigma edited records
    RealArray    sumSEResidualSquare;        // sum of all (O-C)^2 of  all sigma edited records
@@ -188,6 +228,7 @@ protected:
       USE_INITIAL_COVARIANCE,
       INVERSION_ALGORITHM,
       MAX_CONSECUTIVE_DIVERGENCES,
+      MATLAB_OUTPUT_FILENAME,
       BatchEstimatorParamCount,
    };
 
@@ -225,10 +266,13 @@ protected:
 
    virtual bool            DataFilter();
 
+   bool                    WriteMatData();
+
 private:
 
    void                   WriteReportFileHeaderPart1();
    void                   WriteReportFileHeaderPart2();
+   void                   WriteReportFileHeaderPart2b();
    void                   WriteReportFileHeaderPart3();
    void                   WriteReportFileHeaderPart4_1();
    void                   WriteReportFileHeaderPart4_2();
@@ -264,6 +308,8 @@ private:
 
    std::string            GetFileCreateTime(std::string fileName);
    std::string            CTime(const time_t* time);
+   std::string            GetGMATBuildDate();
+   std::string            GetDayOfWeek(Integer day, Integer month, Integer year);
    std::string            GetOperatingSystemName();
    std::string            GetOperatingSystemVersion();
    std::string            GetHostName();

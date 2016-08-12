@@ -76,7 +76,6 @@ DSNRangeAdapter::DSNRangeAdapter(const std::string& name) :
 //------------------------------------------------------------------------------
 DSNRangeAdapter::~DSNRangeAdapter()
 {
-   //freqRampedTable.clear();
 }
 
 
@@ -390,8 +389,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       rangeModulo = obsData->rangeModulo;                                                                         // unit: RU
    
    // 2. Compute range in km
-   //RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
-   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation);
+   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);             // it needs to include ramp table in calculation
    
    // 3. Convert range from km to RU and store in cMeasurement:
    for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
@@ -836,24 +834,6 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
    Real time_min = (*rampTB)[beginIndex].epoch;
 
-   //if ((t1 < time_min)||(t1 > time_max))
-   //{
-   //   char s[200];
-   //   sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
-   //   std::string st(&s[0]);
-   //   err = 4;
-   //   throw MeasurementException(st);
-   //}
-
-   //if ((t0 < time_min)||(t0 > time_max))
-   //{
-   //   char s[200];
-   //   sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
-   //   std::string st(&s[0]);
-   //   err = 5;
-   //   throw MeasurementException(st);
-   //}
-
    if (t1 < time_min)
    {
       // Convert t1 and time_min from A1Mjd to TAIMjd
@@ -895,13 +875,12 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
 
    // Search for end interval:
    UnsignedInt end_interval = beginIndex;
-   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   for (UnsignedInt i = beginIndex; i < endIndex; ++i)
    {
-      if (t1 < (*rampTB)[i].epoch)
-      {
-         end_interval = i-1;      
+      if (t1 >= (*rampTB)[i].epoch)
+         end_interval = i;
+      else
          break;
-      }
    }
 
    // Integration of the frequency from t0 to t1:

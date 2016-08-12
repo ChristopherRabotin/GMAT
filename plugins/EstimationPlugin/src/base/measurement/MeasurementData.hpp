@@ -98,8 +98,8 @@ public:
    Integer uplinkBand;
    /// Uplink frequency
    Real uplinkFreq;                            // unit: Hz
-   /// Uplink frequency at received epoch                             // made changes by TUAN NGUYEN
-   Real uplinkFreqAtRecei;                     // unit: Hz            // made changes by TUAN NGUYEN
+   /// Uplink frequency at received epoch
+   Real uplinkFreqAtRecei;                     // unit: Hz
    /// Range modulo
    Real rangeModulo;
 
@@ -115,6 +115,12 @@ public:
    Integer        tdrsSMARID;               // TDRS SMAR id
    Integer        tdrsDataFlag;             // TDRS data flag would be 0 or 1
 
+
+   // This part for media correction QA       GMT-5576
+   bool isTropoCorrectWarning;
+   bool isIonoCorrectWarning;
+   Real tropoCorrectWarningValue;          // unit: km
+   Real ionoCorrectWarningValue;           // unit: km
 };
 
 #endif /* MeasurementData_hpp */

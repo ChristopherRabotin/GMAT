@@ -34,7 +34,9 @@
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
 #include "NotAKnotInterpolator.hpp"    // Only one supported for now
-#include <sstream>                        // for stringstream
+#include "PropagatorException.hpp"
+
+#include <sstream>                     // for stringstream
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_PROPAGATION
@@ -56,7 +58,7 @@ const std::string Code500Propagator::PARAMETER_TEXT[
 const Gmat::ParameterType Code500Propagator::PARAMETER_TYPE[
                  Code500PropagatorParamCount - EphemerisPropagatorParamCount] =
 {
-      Gmat::FILENAME_TYPE        //EPHEMERISFILENAME
+      Gmat::FILENAME_TYPE          //EPHEMERISFILENAME
 };
 
 
@@ -88,7 +90,9 @@ Code500Propagator::Code500Propagator(const std::string &name) :
    fileDataLoaded             (false),
    ephemRecords               (NULL),
    record                     (-1),
-   stateIndex                 (-1)
+   stateIndex                 (-1),
+   timeFromEphemStart         (-1.0),
+   lastEpoch                  (-1.0)
 {
    // GmatBase data
   objectTypeNames.push_back("Code500Propagator");
@@ -127,7 +131,9 @@ Code500Propagator::Code500Propagator(const Code500Propagator & prop) :
    fileDataLoaded             (false),
    ephemRecords               (NULL),
    record                     (-1),
-   stateIndex                 (-1)
+   stateIndex                 (-1),
+   timeFromEphemStart         (-1.0),
+   lastEpoch                  (-1.0)
 {
 }
 
@@ -160,7 +166,12 @@ Code500Propagator & Code500Propagator::operator=(const Code500Propagator & prop)
       ephemRecords = NULL;
       record = -1;
       stateIndex = -1;
-      currentEpoch = prop.currentEpoch;
+      lastEpoch = currentEpoch = prop.currentEpoch;
+      if (lastEpoch != -1.0)
+         timeFromEphemStart = (lastEpoch - ephemStart) *
+               GmatTimeConstants::SECS_PER_DAY;
+      else
+         timeFromEphemStart = -1.0;
    }
 
    return *this;
@@ -586,6 +597,11 @@ bool Code500Propagator::Initialize()
    {
       stepTaken = 0.0;
 
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("   After base class initialization, "
+               "initialEpoch = %.12lf\n", initialEpoch);
+      #endif
+
       FileManager *fm = FileManager::Instance();
       std::string fullPath;
 
@@ -595,7 +611,7 @@ bool Code500Propagator::Initialize()
 
       // The PSM isn't set until PrepareToPropagate fires.  The following is
       // also last minute setup, so only do it if the PSM has been set
-      if ((psm != NULL) && (!fileDataLoaded))
+      if ((psm != NULL) && !fileDataLoaded)
       {
          for (UnsignedInt i = 0; i < propObjects.size(); ++i)
          {
@@ -607,7 +623,6 @@ bool Code500Propagator::Initialize()
                ephemName = propObjects[i]->GetStringParameter(
                      "EphemerisName");
                currentEpoch = ((Spacecraft*)propObjects[i])->GetEpoch();
-               initialEpoch = currentEpoch;
 
                #ifdef DEBUG_INITIALIZATION
                   MessageInterface::ShowMessage("Spacecraft epoch is %.12lf\n",
@@ -714,15 +729,21 @@ bool Code500Propagator::Initialize()
                      ephemRecords);
             #endif
             fileDataLoaded = true;
-         }
 
-         // Build the interpolator.  For now, use not-a-knot splines
-         if (interp != NULL)
-            delete interp;
-         interp = new NotAKnotInterpolator("Code500NotAKnot", 6);
-         ephem.CloseForRead();
+            // Build the interpolator.  For now, use not-a-knot splines
+            if (interp != NULL)
+               delete interp;
+            interp = new NotAKnotInterpolator("Code500NotAKnot", 6);
+            ephem.CloseForRead();
+         }
       }
    }
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Code500Propagator::Initialize(), on exit, "
+            "initialEpoch = %.12lf, current = %.12lf\n", initialEpoch,
+            currentEpoch);
+   #endif
 
    return retval;
 }
@@ -740,9 +761,10 @@ bool Code500Propagator::Initialize()
 bool Code500Propagator::Step()
 {
    #ifdef DEBUG_PROPAGATION
-      MessageInterface::ShowMessage("Code500Propagator::Step() entered: "
+      MessageInterface::ShowMessage("Code500Propagator::Step() entered for %p: "
             "initialEpoch = %.12lf; stepsize = %.12lf; "
-            "timeFromEpoch = %.12lf\n", initialEpoch, ephemStep, timeFromEpoch);
+            "timeFromEpoch = %.12lf\n", this, initialEpoch, ephemStep,
+            timeFromEpoch);
    #endif
 
    bool retval = false;
@@ -761,14 +783,43 @@ bool Code500Propagator::Step()
 
    Rvector6  outState;
 
+   if (lastEpoch != currentEpoch)
+   {
+      lastEpoch = currentEpoch;
+      timeFromEphemStart = (lastEpoch - ephemStart) *
+            GmatTimeConstants::SECS_PER_DAY;
+   }
+
+   timeFromEphemStart += ephemStep;
    timeFromEpoch += ephemStep;
    stepTaken = ephemStep;
-   currentEpoch = initialEpoch + timeFromEpoch /
+
+   currentEpoch = ephemStart + timeFromEphemStart /
          GmatTimeConstants::SECS_PER_DAY;
 
+   #ifdef DEBUG_PROPAGATION
+      MessageInterface::ShowMessage("   ephemStart = %.12lf, timeFromStart = "
+            "%lf sec => currentEpoch after step = %.12lf; lastEpoch = %.12lf\n",
+            ephemStart, timeFromEphemStart, currentEpoch, lastEpoch);
+   #endif
+
    // Allow for slop in the last few bits
-   if ((currentEpoch < ephemStart - 1e-10) ||
-       (currentEpoch > ephemEnd + 1e-10))
+   bool flagOutOfDomain = false;
+   if (currentEpoch < ephemStart)
+   {
+      if (ephemStart - currentEpoch < 1.0e-10)
+         currentEpoch = ephemStart;
+      else
+         flagOutOfDomain = true;
+   }
+   else if (currentEpoch > ephemEnd)
+   {
+      if (currentEpoch - ephemEnd < 1.0e-10)
+         currentEpoch = ephemEnd;
+      else
+         flagOutOfDomain = true;
+   }
+   if (flagOutOfDomain)
    {
       std::stringstream errmsg;
       errmsg.precision(16);
@@ -784,10 +835,13 @@ bool Code500Propagator::Step()
    }
 
    GetState(currentEpoch, outState);
+   lastEpoch = currentEpoch;
 
    std::memcpy(state, outState.GetDataVector(),
          dimension*sizeof(Real));
+
    //MoveToOrigin(currentEpoch);
+
    UpdateSpaceObject(currentEpoch);
 
    #ifdef DEBUG_PROPAGATION
@@ -856,6 +910,11 @@ void Code500Propagator::UpdateState()
       MessageInterface::ShowMessage("Updating state to epoch %.12lf\n",
             currentEpoch);
    #endif
+
+//   Rvector6 theState;
+//   GetState(currentEpoch, theState);
+//   std::memcpy(state, theState.GetDataVector(),
+//         dimension*sizeof(Real));
 }
 
 
@@ -936,7 +995,8 @@ void Code500Propagator::GetState(GmatEpoch forEpoch, Rvector6 &outstate)
    else
    {
       throw PropagatorException("The propagator " + instanceName +
-               " failed to interpolate a valid state");
+               " failed to interpolate a valid state for " +
+               propObjects[0]->GetName());
    }
 
    #ifdef DEBUG_INTERPOLATION
@@ -967,7 +1027,21 @@ void Code500Propagator::GetState(GmatEpoch forEpoch, Rvector6 &outstate)
 //------------------------------------------------------------------------------
 void Code500Propagator::UpdateInterpolator(const GmatEpoch &forEpoch)
 {
-   FindRecord(forEpoch);
+   GmatEpoch useEpoch = forEpoch;
+
+   if ((forEpoch < ephemStart) || (forEpoch > ephemEnd))
+   {
+      if (ephemStart - forEpoch < 1.0e-10)
+         useEpoch = ephemStart;
+      if (forEpoch - ephemEnd < 1.0e-10)
+         useEpoch = ephemEnd;
+   }
+
+   FindRecord(useEpoch);
+
+   if (stateIndex == -1)
+      throw PropagatorException("Requested epoch is outside of the span "
+            "covered by the ephemeris file " + ephemName);
 
    Integer usedRecords[5][2];
    Integer block = record, line = stateIndex - 1;

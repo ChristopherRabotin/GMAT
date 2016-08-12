@@ -14,7 +14,7 @@
 // Author: Tuan Dang Nguyen, NASA/GSFC
 // Created: August 13, 2015
 /**
- * A measurement adapter for TDRS Doppler
+ * A measurement adapter for TDRS Doppler   (unit: Hz)
  */
 //------------------------------------------------------------------------------
 

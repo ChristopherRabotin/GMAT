@@ -193,6 +193,7 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    instanceFullName           (nomme),
    scriptCreatedFrom          (""),
    isCreatedFromMainScript    (true),
+   forceGenerateObjectString  (false),
    type                       (typeId),
    ownedObjectCount           (0),
    isInitialized              (false),
@@ -279,6 +280,7 @@ GmatBase::GmatBase(const GmatBase &a) :
     instanceFullName          (a.instanceFullName),
     scriptCreatedFrom         (a.scriptCreatedFrom),
     isCreatedFromMainScript   (a.isCreatedFromMainScript),
+    forceGenerateObjectString (a.forceGenerateObjectString),
     type                      (a.type),
     ownedObjectCount          (a.ownedObjectCount),
     generatingString          (a.generatingString),
@@ -334,6 +336,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    //instanceName              = a.instanceName;
    scriptCreatedFrom         = a.scriptCreatedFrom;
    isCreatedFromMainScript   = a.isCreatedFromMainScript;
+   forceGenerateObjectString = a.forceGenerateObjectString;
    type                      = a.type;
    ownedObjectCount          = a.ownedObjectCount;
    generatingString          = a.generatingString;
@@ -3732,15 +3735,18 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    }
    
    // Don't write unless object is created from the main script
-   if (!isCreatedFromMainScript)
+   if (mode != Gmat::SHOW_SCRIPT && !isCreatedFromMainScript)
    {
-      generatingString = "";
-      #ifdef DEBUG_GENERATING_STRING
-      MessageInterface::ShowMessage
-         ("GmatBase::GetGeneratingString() just returning blank, it is not "
-          "created from the main script\n");
-      #endif
-      return generatingString;
+      if (!forceGenerateObjectString)
+      {
+         generatingString = "";
+         #ifdef DEBUG_GENERATING_STRING
+         MessageInterface::ShowMessage
+            ("GmatBase::GetGeneratingString() just returning blank, it is not "
+             "created from the main script\n");
+         #endif
+         return generatingString;
+      }
    }
    
    std::stringstream data;
@@ -3766,6 +3772,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       std::string tname = typeName;
       if (tname == "PropSetup")
          tname = "Propagator";
+      else if (tname == "DataFilter")
+         tname = objectTypeNames[objectTypeNames.size() - 1];
 
       if (mode == Gmat::EPHEM_HEADER)
       {
@@ -4138,7 +4146,7 @@ std::string GmatBase::WriteObjectInfo(const std::string &title, GmatBase *obj,
                                       bool addEol)
 {
    std::stringstream objStream;
-   char buff[10];
+   char buff[20];  // was 10]; but that was too small
    sprintf(buff, "<%p>", obj);
    objStream << title << buff;
    
@@ -4324,6 +4332,32 @@ void GmatBase::SetIsCreatedFromMainScript(bool flag)
 bool GmatBase::IsCreatedFromMainScript()
 {
    return isCreatedFromMainScript;
+}
+
+//---------------------------------------------------------------------------
+// void SetForceGenerateObjectString(bool flag)
+//---------------------------------------------------------------------------
+/**
+ * Sets flag indicating to generate object string even though it is not
+ * created from the main script.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetForceGenerateObjectString(bool flag)
+{
+   forceGenerateObjectString = flag;
+}
+
+//---------------------------------------------------------------------------
+// bool GetForceGenerateObjectString()
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating to generate object string even though it is not
+ * created from the main script.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::GetForceGenerateObjectString()
+{
+   return forceGenerateObjectString;
 }
 
 

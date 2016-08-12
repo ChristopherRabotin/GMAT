@@ -21,7 +21,7 @@ if(NOT EXISTS ${F2C_DIR})
   RETURN()
 endif()
 
-if(NOT XERCES_LIB_DIR)
+if(NOT XercesC_FOUND)
   MESSAGE(WARNING "Skipping Estimation: Xerces missing")
   RETURN()
 endif()
@@ -30,10 +30,7 @@ SET(TargetName GmatEstimation)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
-
-# ====================================================================
-# extra include directory for header file
-INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
+# ADD_DEFINITIONS("-DENABLE_UNFINISHED_FEATURES")
 
 # ====================================================================
 # list of directories containing source/header files
@@ -60,10 +57,6 @@ SET(PLUGIN_DIRS
   trackingfile
   trackingsystem
   )
-
-# ====================================================================
-# Include F2C
-INCLUDE_DIRECTORIES(${F2C_DIR})
 
 # ====================================================================
 # source files
@@ -172,7 +165,6 @@ SET(PLUGIN_SRCS
 # Temporarily disable Ionosphere for Mac/Linux
 #if(WIN32)
   ADD_DEFINITIONS("-DIONOSPHERE")
-# ADD_DEFINITIONS("-DDISABLE_UNNEEDED_GMAT_OBJECTS")
   SET(PLUGIN_SRCS ${PLUGIN_SRCS}
     measurement/Ionosphere/Ionosphere.cpp
     measurement/Ionosphere/iri2007.c
@@ -183,19 +175,32 @@ SET(PLUGIN_SRCS
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
+
+# ====================================================================
+# Additional includes
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${F2C_DIR})
+
 # ====================================================================
 # Additional link libraries
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
-  else()
-    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
-  endif()
-else()
-  set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
-  set(WS2_32_LIB Ws2_32)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE XercesC::XercesC)
+if(WIN32)
+  TARGET_COMPILE_DEFINITIONS(${TargetName} PUBLIC -DXERCES_STATIC_LIBRARY)
+  TARGET_LINK_LIBRARIES(${TargetName} PUBLIC Ws2_32)
 endif()
 
-TARGET_LINK_LIBRARIES(${TargetName} ${XERCES_LIB})
-TARGET_LINK_LIBRARIES(${TargetName} ${WS2_32_LIB})
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+# Disabled since static Xerces is being used. Enable in future if GMAT
+# switches to dynamic Xerces
+if(UNIX AND false)
+  if(APPLE)
+    SET(MAC_BASEPATH "../Frameworks/") # GmatBase and Xerces in Frameworks
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/${MAC_BASEPATH}"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/libxerces/"
+      )
+  endif()
+endif()
+

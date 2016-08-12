@@ -137,6 +137,7 @@ Thruster::Thruster(const std::string &typeStr, const std::string &nomme) :
    pressure             (1500.0),
    temperatureRatio     (1.0),
    thrust               (500.0),
+   appliedThrustMag     (0.0),
    impulse              (2150.0),
    mDot                 (0.0),
    decrementMass        (false),
@@ -237,6 +238,7 @@ Thruster::Thruster(const Thruster& th) :
    pressure             (th.pressure),
    temperatureRatio     (th.temperatureRatio),
    thrust               (th.thrust),
+   appliedThrustMag     (th.appliedThrustMag),
    impulse              (th.impulse),
    mDot                 (th.mDot),
    decrementMass        (th.decrementMass),
@@ -338,6 +340,7 @@ Thruster& Thruster::operator=(const Thruster& th)
    pressure            = th.pressure;
    temperatureRatio    = th.temperatureRatio;
    thrust              = th.thrust;
+   appliedThrustMag    = th.appliedThrustMag;
    impulse             = th.impulse;
    mDot                = th.mDot;
    
@@ -370,6 +373,44 @@ Thruster& Thruster::operator=(const Thruster& th)
    return *this;
 }
 
+//------------------------------------------------------------------------------
+// Real GetMassFlowRate()
+//------------------------------------------------------------------------------
+Real Thruster::GetMassFlowRate()
+{
+   Real mfr = 0.0;
+   if (thrusterFiring)
+      mfr = CalculateMassFlow();
+   return mfr;
+}
+
+//------------------------------------------------------------------------------
+// Real GetThrustMagnitude()
+//------------------------------------------------------------------------------
+Real Thruster::GetThrustMagnitude()
+{
+   Real thrustMag = 0.0;
+   if (thrusterFiring)
+   {
+      CalculateThrustAndIsp();
+      thrustMag = appliedThrustMag;
+   }
+   return thrustMag;
+}
+
+//------------------------------------------------------------------------------
+// Real GetIsp()
+//------------------------------------------------------------------------------
+Real Thruster::GetIsp()
+{
+   Real isp = 0.0;
+   if (thrusterFiring)
+   {
+      CalculateThrustAndIsp();
+      isp = impulse;
+   }
+   return isp;
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -502,7 +543,8 @@ bool Thruster::IsParameterReadOnly(const Integer id) const
       if (coordSystemName != "Local")
          return true;
    
-   if (id == THRUST || id == ISP || id == MASS_FLOW_RATE)
+   if (id == THRUST || id == ISP || id == MASS_FLOW_RATE ||
+       id == APPLIED_THRUST_MAG)
       return true;
    
    if (tankNames.size() == 0)
@@ -566,6 +608,8 @@ Real Thruster::GetRealParameter(const Integer id) const
          return gravityAccel;
       case THRUST:
          return thrust;
+      case APPLIED_THRUST_MAG:
+         return appliedThrustMag;
       case ISP:
          return impulse;
       case MASS_FLOW_RATE:

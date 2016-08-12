@@ -64,6 +64,7 @@ protected:
 
 private:
    Real                    ObservationDataCorrection(Real cValue, Real oValue, Real moduloConstant);
+   void                    ValidateMediaCorrection(const MeasurementData* measData);
 };
 
 #endif /* BatchEstimatorInv_hpp */

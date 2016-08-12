@@ -177,7 +177,8 @@ DragForce::DragForce(const std::string &name) :
    fillCartesian           (false),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (0)
+   kpApConversion          (0),
+   warnSTMMath             (true)            // TEMPORARY
 {
    #ifdef DEBUG_CONSTRUCTION
       MessageInterface::ShowMessage("DragForce default construction "
@@ -335,7 +336,8 @@ DragForce::DragForce(const DragForce& df) :
    fillCartesian           (df.fillCartesian),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (df.kpApConversion)
+   kpApConversion          (df.kpApConversion),
+   warnSTMMath             (true)            // TEMPORARY
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   enetered\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
@@ -452,6 +454,8 @@ DragForce& DragForce::operator=(const DragForce& df)
    cdInitial             = df.cdInitial;
    useCentralDifferences = df.useCentralDifferences;
    finiteDifferenceDv    = df.finiteDifferenceDv;
+
+   warnSTMMath           = true;            // TEMPORARY
 
    if (internalAtmos != NULL)
    {
@@ -1428,6 +1432,16 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillSTM || fillAMatrix)
    {
+
+      if (warnSTMMath)
+      {
+         MessageInterface::ShowMessage("Warning: The orbit state transition "
+               "matrix does not currently contain drag contribution "
+               "partial derivatives.\n");
+
+         warnSTMMath = false;
+      }
+
       Real *aTilde;
       Integer stmSize = stmRowCount * stmRowCount;
       aTilde = new Real[stmSize];
@@ -1440,6 +1454,10 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
             for (Integer k = 0; k < stmRowCount; ++k)
                aTilde[ix+k] = 0.0;
          }
+
+// Turn off finite differencing partials for now
+if (0)
+{
 
          // Build the base acceleration
          Rvector3 accel = Accelerate(&state[i*6], now, prefactor[0]);
@@ -1500,7 +1518,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          // Next handle the velocity submatrix
          if (finiteDifferenceDv)
          {
-            pert = 1e-6;
+            pert = 1.0e-6;
             for (UnsignedInt j = 0; j < 3; ++j)
             {
                val = state[i*6 + j+3];
@@ -1553,7 +1571,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
             throw ODEModelException("Analytic differencing for drag model A-matrix "
                   "d(accel)/dv terms in not yet implemented");
          }
-
+}
          if (estimatingCd)
          {
             for (UnsignedInt j = 0; j < 3; ++j)
@@ -1581,7 +1599,9 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
          }
 
          #ifdef DUMP_DERIVATIVE
-            MessageInterface::ShowMessage("A-matrix:\n");
+            MessageInterface::ShowMessage("Drag Force A-matrix at epoch %.12lf for state "
+                  "[%lf %lf %lf %.12lf %.12lf %.12lf]:\n",now, state[0],
+                  state[1], state[2], state[3], state[4], state[5]);
             for (Integer m = 0; m < stmRowCount; ++m)
             {
                MessageInterface::ShowMessage("      ");

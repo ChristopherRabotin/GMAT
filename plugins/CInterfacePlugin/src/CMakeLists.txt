@@ -33,21 +33,14 @@ SET(PLUGIN_SRCS
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
-if(APPLE)
-  # Override appbundle path so plugin is installed directly into bin
-  set(MAC_APPBUNDLE_PATH ${GMAT_MAC_APPBUNDLE_PATH}) # Save for later
-  set(GMAT_MAC_APPBUNDLE_PATH "") 
-endif()
 
-_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" bin)
+# FORCE the plugin to install directly into bin
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" bin FORCE)
 
 # Set RPATH to find shared libraries in default locations on Mac/Linux
 if(UNIX)
   if(APPLE)
-    set(GMAT_MAC_APPBUNDLE_PATH ${MAC_APPBUNDLE_PATH}) # Restore
-    if(GMAT_MAC_APPBUNDLE_PATH)
-      SET(MAC_BASEPATH "../${GMAT_MAC_APPBUNDLE_PATH}/Frameworks/")
-    endif()
+    SET(MAC_BASEPATH "../${GMAT_MAC_APPBUNDLE_PATH}/Frameworks/")
     SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
       "@loader_path/${MAC_BASEPATH}"
       )
@@ -80,7 +73,7 @@ if(Matlab_FOUND)
     # Need -wait on Windows so matlab call doesn't immediately return
     SET(MSTART "${MSTART} -wait")
   endif()
-  SET(MSTART "${MSTART} -nosplash -nojvm -nodesktop -nodisplay -r")
+  SET(MSTART "${MSTART} -nosplash -nodesktop -nodisplay -r")
   SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
   SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
   SET(MCD "cd('${CMAKE_CURRENT_SOURCE_DIR}/../build/matlab');")

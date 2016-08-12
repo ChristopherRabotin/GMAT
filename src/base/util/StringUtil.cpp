@@ -950,6 +950,16 @@ std::string GmatStringUtil::Replace(const std::string &str, const std::string &f
       return to;
    }
    
+   if (from == "")
+   {
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::Replace()> returning <%s>, from string is empty\n",
+          str.c_str());
+      #endif
+      return str;
+   }
+   
    std::string str1 = str;
    std::string prepend;
    if (startIndex > 0)

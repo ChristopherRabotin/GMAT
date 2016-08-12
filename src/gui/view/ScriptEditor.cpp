@@ -658,7 +658,7 @@ void ScriptEditor::OnReplaceAll(wxCommandEvent &event)
 {
    GotoPos(0);
    OnFindNext(event);
-   while (mFindText == GetSelectedText())
+   while (mFindText.IsSameAs(GetSelectedText(), false))
    {
       ReplaceSelection(mReplaceText);
       OnFindNext(event);

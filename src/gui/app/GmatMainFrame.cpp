@@ -609,16 +609,17 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    int osNum = osMajor * 10 + osMinor;
 
    // Flag to use "delete child" rather than child.Destroy()
-   useChildDelete = true;
+   useChildDelete = false;
 
-   if (osDescription.Find("Windows") == wxNOT_FOUND)
-      useChildDelete = false;
-   else if (osDescription.Find("Windows 7") == wxNOT_FOUND &&
-      osDescription.Find("Server") == wxNOT_FOUND)
-   {
-      if (osNum > 61)
-         useChildDelete = false;
-   }
+   // commenting out code because Win 64-bit GMAT blows up using delete too
+   //if (osDescription.Find("Windows") == wxNOT_FOUND)
+   //   useChildDelete = false;
+   //else if (osDescription.Find("Windows 7") == wxNOT_FOUND &&
+   //   osDescription.Find("Server") == wxNOT_FOUND)
+   //{
+   //   if (osNum > 61)
+   //      useChildDelete = false;
+   //}
 
 #ifdef DEBUG_OS_DETECTION
    MessageInterface::ShowMessage("OS info: %d.%d ==> %d gives id %d; %sWin 8 or higher\n", 
@@ -2561,6 +2562,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       // Update trees
       gmatAppData->GetResourceTree()->UpdateResource(true);
       gmatAppData->GetMissionTree()->UpdateMission(true);
+      UpdateAdvancedGuiMode(2);
    }
 #ifndef __WXMAC__
    wxSafeYield();
@@ -3560,6 +3562,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    mInterpretFailed = false;
    
    // Update trees
+   UpdateAdvancedGuiMode(1);
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetResourceTree()->UpdateResource(true);
    gmatAppData->GetMissionTree()->UpdateMission(true);
@@ -5668,6 +5671,11 @@ void GmatMainFrame::UpdateAdvancedGuiMode(int status)
    {
       gmatAppData->GetResourceTree()->
          SetBackgroundColour(wxTheColourDatabase->Find("WHITE"));
+      gmatAppData->GetMissionTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHITE"));
+      gmatAppData->GetOutputTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHITE"));
+      gmatAppData->GetMissionTree()->EnableShowScript(true);
       theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT, true);
       theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT_AS, true);
       theToolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, true);
@@ -5678,10 +5686,11 @@ void GmatMainFrame::UpdateAdvancedGuiMode(int status)
       //    SetForegroundColour(wxTheColourDatabase->Find("ORANGE"));
       gmatAppData->GetResourceTree()->
          SetBackgroundColour(wxTheColourDatabase->Find("WHEAT"));
-         //SetBackgroundColour(wxTheColourDatabase->Find("LIGHT STEEL BLUE"));
-         //SetBackgroundColour(wxTheColourDatabase->Find("CADET BLUE"));
-         //SetBackgroundColour(wxTheColourDatabase->Find("THISTLE")); // light pink purple
-         //SetBackgroundColour(wxTheColourDatabase->Find("STEEL BLUE")); // too dark
+      gmatAppData->GetMissionTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHEAT"));
+      gmatAppData->GetOutputTree()->
+         SetBackgroundColour(wxTheColourDatabase->Find("WHEAT"));
+      gmatAppData->GetMissionTree()->EnableShowScript(false);
       theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT, false);
       theMenuBar->Enable(MENU_FILE_SAVE_SCRIPT_AS, false);
       theToolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, false);

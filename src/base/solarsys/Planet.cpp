@@ -110,22 +110,6 @@ Planet::Planet(std::string name) :
    else if (name == SolarSystem::NEPTUNE_NAME)
       rotationSrc      = Gmat::IAU_2002;
 
-//   // defaults for now ...
-//   Rmatrix s(5,5,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0);
-//   Rmatrix c(5,5,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0);
-//   sij = s;
-//   cij = c;
-
 
    if (name == SolarSystem::EARTH_NAME)
    {
@@ -135,7 +119,8 @@ Planet::Planet(std::string name) :
       std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
       attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
       attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
-      attitudeSpiceKernelNames.push_back(path+"earth_000101_151228_151006.bpc");
+      attitudeSpiceKernelNames.push_back(path+"earth_latest_high_prec.bpc");
+//      attitudeSpiceKernelNames.push_back(path+"earth_000101_161025_160803.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();
@@ -182,9 +167,10 @@ Planet::Planet(std::string name, const std::string &cBody) :
          MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
       #endif
       std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
-         attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
-         attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
-         attitudeSpiceKernelNames.push_back(path+"earth_000101_151228_151006.bpc");
+      attitudeSpiceKernelNames.push_back(path+"earth_070425_370426_predict.bpc");
+      attitudeSpiceKernelNames.push_back(path+"earth_720101_070426.bpc");
+      attitudeSpiceKernelNames.push_back(path+"earth_latest_high_prec.bpc");
+      //      attitudeSpiceKernelNames.push_back(path+"earth_000101_161025_160803.bpc");
    }
 
    DeterminePotentialFileNameFromStartup();

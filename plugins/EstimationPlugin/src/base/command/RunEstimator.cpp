@@ -31,7 +31,7 @@
 
 
 #include "RunEstimator.hpp"
-
+#include "EstimatorException.hpp"
 #include "MessageInterface.hpp"
 #include "ODEModel.hpp"
 
@@ -326,19 +326,19 @@ bool RunEstimator::Initialize()
    if (theEstimator != NULL)
       delete theEstimator;
 
-   GmatBase *simObj = FindObject(solverName);
-   if (simObj == NULL)
+   GmatBase *estObj = FindObject(solverName);
+   if (estObj == NULL)
       throw CommandException("Cannot initialize RunEstimator command -- the "
             "Estimator named " + solverName + " cannot be found.");
 
-   if (!simObj->IsOfType("Estimator"))
+   if (!estObj->IsOfType("Estimator"))
       throw CommandException("Cannot initialize RunEstimator command -- the "
             "object named " + solverName + " is not a Estimator.");
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1\n"); 
       #endif
-   theEstimator = (Estimator*)(simObj->Clone());
+   theEstimator = (Estimator*)(estObj->Clone());
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.1\n"); 
       #endif
@@ -349,9 +349,9 @@ bool RunEstimator::Initialize()
    theEstimator->Initialize();
 
    theEstimator->TakeAction("ResetInstanceCount");
-   simObj->TakeAction("ResetInstanceCount");
-   theEstimator->TakeAction("IncrementInstanceCount");
-   simObj->TakeAction("IncrementInstanceCount");
+   theEstimator->TakeAction("IncrementInstanceCount"); 
+   estObj->TakeAction("ResetInstanceCount");                // does it need to do it???
+   estObj->TakeAction("IncrementInstanceCount");            // does it need to do it???
 
    // Set the observation data streams for the measurement manager
    MeasurementManager *measman = theEstimator->GetMeasurementManager();
@@ -407,7 +407,14 @@ bool RunEstimator::Initialize()
 }
 
 
-
+//--------------------------------------------------------------------------------
+// void LoadSolveForsToESM()
+//--------------------------------------------------------------------------------
+/**
+* This function is used to load all solve-for variables and store them into 
+* EstimationStateManager object.
+*/
+//--------------------------------------------------------------------------------
 void RunEstimator::LoadSolveForsToESM()
 {
 #ifdef DEBUG_LOAD_SOLVEFORS
@@ -415,6 +422,8 @@ void RunEstimator::LoadSolveForsToESM()
 #endif
 
    EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+
+   // Set solve-for for all participants used in this estimator only. Solve-fors for participants in other estimator and similator are not set to ESM 
    StringArray names = theEstimator->GetMeasurementManager()->GetParticipantList();
 
    ObjectMap objectmap = GetConfiguredObjectMap();
@@ -434,7 +443,6 @@ void RunEstimator::LoadSolveForsToESM()
 #endif
 
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -679,8 +687,11 @@ bool RunEstimator::Execute()
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("\nEstimator state is %d\n", state);
    #endif
-   switch (state)
+   
+   try
    {
+      switch (state)
+      {
       case Solver::INITIALIZING:
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): INITIALIZING state\n");
@@ -727,7 +738,7 @@ bool RunEstimator::Execute()
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): ACCUMULATING state\n");
          #endif
-       Accumulate();
+         Accumulate();
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): ACCUMULATING state\n");
          #endif
@@ -765,7 +776,6 @@ bool RunEstimator::Execute()
 //         Finalize();
          // Adding in for now.
          BuildCommandSummary(true);
-
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): FINISHED state\n");
          #endif
@@ -774,21 +784,26 @@ bool RunEstimator::Execute()
       default:
          throw CommandException("Unknown state "
                " encountered in the RunEstimator command");
-   }
+      }
 
-   #ifdef DEBUG_STATE
-      MessageInterface::ShowMessage("*** Start AdvanceState ... RunEstimator:Execute()\n");
-   #endif
+      #ifdef DEBUG_STATE
+         MessageInterface::ShowMessage("*** Start AdvanceState ... RunEstimator:Execute()\n");
+      #endif
 
-   if (state != Solver::FINISHED)
-      state = theEstimator->AdvanceState();
-   else
+      if (state != Solver::FINISHED)
+         theEstimator->AdvanceState();
+      else
+      {
+         // It has to run all work in AdvanceState() before Finalize()
+         theEstimator->AdvanceState();
+         Finalize();
+      }
+   } catch (...)//(EstimatorException ex1)
    {
-      // It has to run all work in AdvanceState() before Finalize()
-      state = theEstimator->AdvanceState();
       Finalize();
+      throw; // ex1;
    }
-   
+
    #ifdef DEBUG_STATE
       MessageInterface::ShowMessage("*** Exit RunEstimator:Execute()\n");
    #endif
@@ -1357,8 +1372,8 @@ void RunEstimator::Finalize()
    commandRunning  = false;
    propPrepared    = false;
 
-   overridePropInit = true;                   // made changes by TUAN NGUYEN
-   delayInitialization = true;                // made changes by TUAN NGUYEN
+   overridePropInit = true;
+   delayInitialization = true;
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::Finalize()\n");

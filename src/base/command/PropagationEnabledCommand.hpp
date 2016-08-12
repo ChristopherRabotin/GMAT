@@ -87,6 +87,8 @@ protected:
    std::vector<StringArray>      propObjectNames;
    /// The objects that are propagated; one PropObjectArray per PropSetup
    std::vector<PropObjectArray*> propObjects;
+   /// The complete set of spacecraft and formations that are propagated
+   ObjectArray                   sats;
 
    /// Flag indicating that the command has been executed once, so that some
    /// pieces of initialization can be skipped
@@ -144,6 +146,11 @@ protected:
    
    virtual void         SetNames(const std::string& name, 
                                  StringArray& owners, StringArray& elements);
+
+   void                 AddTransientForce(StringArray *sats, ODEModel *p,
+                              PropagationStateManager *propMan);
+   void                 ClearTransientForces();
+
 };
 
 #endif /* PropagationEnabledCommand_hpp */

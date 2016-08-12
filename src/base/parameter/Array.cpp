@@ -393,6 +393,26 @@ bool Array::IsParameterReadOnly(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterCloaked(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+* Checks to see if the requested parameter is cloaked
+*
+* @param <id> Description for the parameter.
+*
+* @return true if the parameter is cloaked
+*/
+//---------------------------------------------------------------------------
+bool Array::IsParameterCloaked(const Integer id) const
+{
+   if (id == OBJECT)
+      return true;
+
+   return Parameter::IsParameterCloaked(id);
+}
+
+
 //------------------------------------------------------------------------------
 // bool IsParameterCommandModeSettable(const Integer id) const
 //------------------------------------------------------------------------------
@@ -971,12 +991,12 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
    else
       nomme = instanceName;
    
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) || (mode == Gmat::NO_COMMENTS))
    {
       std::string tname = typeName;
 
       // Add comment line (loj: 03/27/07)
-      if (GetCommentLine() != "")
+      if ((mode != Gmat::NO_COMMENTS) && (GetCommentLine() != ""))
          data << GetCommentLine();
       
       data << "Create " << tname << " " << nomme 

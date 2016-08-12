@@ -34,7 +34,7 @@
 #include "EstimatorException.hpp"
 #include <sstream>
 #include "StringUtil.hpp"
-
+#include "DataWriter.hpp"
 
 //#define DEBUG_ACCUMULATION
 //#define DEBUG_ACCUMULATION_RESULTS
@@ -161,8 +161,11 @@ void BatchEstimatorInv::Accumulate()
 #endif
 
    // Measurements are possible!
-   const MeasurementData *calculatedMeas;
+   const MeasurementData *calculatedMeas = NULL;
    std::vector<RealArray> stateDeriv;
+
+   // .mat file indices
+   Integer matIndex;
 
    for (UnsignedInt i = 0; i < hTilde.size(); ++i)
       hTilde[i].clear();
@@ -277,6 +280,47 @@ void BatchEstimatorInv::Accumulate()
    }
    sLine << s;
 
+   if (writeMatFile && (matWriter != NULL))
+   {
+      std::string gregEpoch;
+      Real taiEpoch;
+      TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch, "", "TAIModJulian", taiEpoch, gregEpoch, 1);
+      TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch, "", "UTCGregorian", temp, gregEpoch, 1);
+
+      if (matEpochIndex == -1)
+      {
+         matIterationIndex   = matData.AddRealContainer("IterationNumber");
+         matEpochIndex       = matData.AddRealContainer("Epoch");
+         matObsIndex         = matData.AddRealContainer("Observed");
+         matCalcIndex        = matData.AddRealContainer("Calculated");
+         matOmcIndex         = matData.AddRealContainer("ObsMinusCalc");
+         matElevationIndex   = matData.AddRealContainer("Elevation");
+         matPartIndex        = matData.AddStringContainer("Participants");
+         matTypeIndex        = matData.AddStringContainer("Type");
+         matGregorianIndex   = matData.AddStringContainer("UTCGregorian");
+         matObsEditFlagIndex = matData.AddStringContainer("ObsEditFlag");
+
+         matFrequencyIndex   = matData.AddRealContainer("Frequency");
+         matFreqBandIndex    = matData.AddRealContainer("FrequencyBand");
+         matDoppCountIndex   = matData.AddRealContainer("DopplerCountInterval");
+      }
+
+      matIndex = matData.AddPoint();
+
+      matData.elementStatus[matIndex] = 0.0;
+      matData.realValues[matIterationIndex][matIndex] = iterationsTaken;
+      matData.realValues[matEpochIndex][matIndex] = taiEpoch;
+      matData.realValues[matObsIndex][matIndex]   = currentObs->value[0];
+
+      std::string parties;
+      for (UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
+         parties = parties + currentObs->participantIDs[n] + (((n + 1) ==
+               currentObs->participantIDs.size()) ? "" : ",");
+
+      matData.stringValues[matPartIndex][matIndex] = parties;
+      matData.stringValues[matTypeIndex][matIndex] = currentObs->typeName;
+      matData.stringValues[matGregorianIndex][matIndex] = gregEpoch;
+   }
 
    std::string ss;
    if (textFileMode == "Normal")
@@ -358,6 +402,9 @@ void BatchEstimatorInv::Accumulate()
       int count = measManager.Calculate(modelsToAccess[0], true);
       calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);
       
+      // verify media correction to be in acceptable range. It is [0m, 60m] for troposphere correction and [0m, 20m] for ionosphere correction
+      ValidateMediaCorrection(calculatedMeas);
+
       if (count == 0)
       {
          std::string ss = measManager.GetObsDataObject()->removedReason = calculatedMeas->unfeasibleReason;
@@ -434,7 +481,7 @@ void BatchEstimatorInv::Accumulate()
          
          if (measManager.GetObsDataObject()->inUsed == false)
          {
-            // Specify reamoved reason and count number of removed records
+            // Specify removed reason and count number of removed records
             std::string ss = measManager.GetObsDataObject()->removedReason;         //currentObs->removedReason;
             if (ss.substr(0,1) == "B")
                numRemovedRecords["B"]++;
@@ -484,7 +531,14 @@ void BatchEstimatorInv::Accumulate()
                sLine << s;
                sLine << "\n";
             }
-
+            
+            // Write the .mat data
+            if (writeMatFile && (matWriter != NULL))
+            {
+               matData.realValues[matCalcIndex][matIndex] = calculatedMeas->value[0];
+               matData.realValues[matOmcIndex][matIndex]  = ocDiff;
+               matData.stringValues[matObsEditFlagIndex][matIndex] = ss;
+            }
 
             // Reset value for removed reason for all reuseable data records
             if (isReUsed)
@@ -788,12 +842,40 @@ void BatchEstimatorInv::Accumulate()
                MessageInterface::ShowMessage("]\n");
             #endif
 
+            if (writeMatFile && (matWriter != NULL))
+            {
+               matData.elementStatus[matIndex] = 1.0;
+               matData.realValues[matCalcIndex][matIndex] = calculatedMeas->value[0];
+               matData.realValues[matOmcIndex][matIndex]  = ocDiff;
+            }
+
          } // end of if (measManager.GetObsDataObject()->inUsed)
 
       } // end of if (count >= 1)
 
    }  // end of if (modelsToAccess.size() == 0)
 
+   if (writeMatFile && (matWriter != NULL))
+   {
+      if (matData.stringValues[matObsEditFlagIndex][matIndex] == "N/A")
+         matData.stringValues[matObsEditFlagIndex][matIndex] = currentObs->removedReason;
+
+      if (calculatedMeas)
+         matData.realValues[matElevationIndex][matIndex] = calculatedMeas->feasibilityValue;
+
+      if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
+      {
+         matData.realValues[matFreqBandIndex][matIndex] = currentObs->uplinkBand;
+         matData.realValues[matFrequencyIndex][matIndex] = currentObs->uplinkFreqAtRecei;
+      }
+      else if ((currentObs->typeName == "DSNTwoWayDoppler") ||
+               (currentObs->typeName == "Doppler") ||
+               (currentObs->typeName == "Doppler_RangeRate"))
+      {
+         matData.realValues[matFreqBandIndex][matIndex] = currentObs->uplinkBand;
+         matData.realValues[matDoppCountIndex][matIndex] = currentObs->dopplerCountInterval;
+      }
+   }
    
    linesBuff = sLine.str();
    WriteToTextFile(currentState);
@@ -897,6 +979,17 @@ void BatchEstimatorInv::Estimate()
       try
       {
          Pdx0_inv = stateCovariance->GetCovariance()->Inverse();              // inverse of the initial estimation error covariance matrix
+
+         //MessageInterface::ShowMessage("Apriori covariance matrix:\n[");
+         //for (Integer row = 0; row < Pdx0_inv.GetNumRows(); ++row)
+         //{
+         //   for (Integer col = 0; col < Pdx0_inv.GetNumColumns(); ++col)
+         //      MessageInterface::ShowMessage("%le   ", Pdx0_inv.GetElement(row, col));
+         //   if (row < Pdx0_inv.GetNumRows() - 1)
+         //      MessageInterface::ShowMessage("\n");
+         //}
+         //MessageInterface::ShowMessage("]\n");
+
       }
       catch (...)
       {
@@ -933,12 +1026,12 @@ void BatchEstimatorInv::Estimate()
       bestResidualRMS = newResidualRMS;
    else
    {
-      // Reset best RMS as needed
-      if (resetBestRMSFlag)
-      {
-         if (estimationStatus == DIVERGING)
-            bestResidualRMS = oldResidualRMS;
-      }
+      //// Reset best RMS as needed                                     // fix bug GMT-5711
+      //if (resetBestRMSFlag)                                           // fix bug GMT-5711
+      //{                                                               // fix bug GMT-5711
+      //   if (estimationStatus == DIVERGING)                           // fix bug GMT-5711
+      //      bestResidualRMS = oldResidualRMS;                         // fix bug GMT-5711
+      //}                                                               // fix bug GMT-5711
 
       bestResidualRMS = GmatMathUtil::Min(bestResidualRMS, newResidualRMS);
    }
@@ -1213,3 +1306,53 @@ Real BatchEstimatorInv::ObservationDataCorrection(Real cValue, Real oValue, Real
 
    return (oValue + N*moduloConstant);
 }
+
+
+void BatchEstimatorInv::ValidateMediaCorrection(const MeasurementData* measData)
+{
+   if (measData->isIonoCorrectWarning)
+   {
+      // Get measurement pass:
+      std::stringstream ss1;
+      ss1 << "{{";
+      for (Integer i = 0; i < measData->participantIDs.size(); ++i)
+      {
+         ss1 << measData->participantIDs[i] << (((i + 1) < measData->participantIDs.size()) ? "," : "");
+      }
+      ss1 << "}," << measData->typeName << "}";
+
+      // if the pass is not in warning list, then display warning message
+      if (find(ionoWarningList.begin(), ionoWarningList.end(), ss1.str()) == ionoWarningList.end())
+      {
+         // generate warning message
+         MessageInterface::ShowMessage("Warning: When running estimator '%s', ionosphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->ionoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+
+         // add pass to the list
+         ionoWarningList.push_back(ss1.str());
+      }
+
+   }
+
+   if (measData->isTropoCorrectWarning)
+   {
+      // Get measurement path:
+      std::stringstream ss1;
+      ss1 << "{{";
+      for (Integer i = 0; i < measData->participantIDs.size(); ++i)
+      {
+         ss1 << measData->participantIDs[i] << (((i + 1) < measData->participantIDs.size()) ? "," : "");
+      }
+      ss1 << "}," << measData->typeName << "}";
+
+      // if the pass is not in warning list, then display warning message
+      if (find(tropoWarningList.begin(), tropoWarningList.end(), ss1.str()) == tropoWarningList.end())
+      {
+         // generate warning message
+         MessageInterface::ShowMessage("Warning: When running estimator '%s', troposphere correction is %lf m for measurement %s at measurement time tag %.12lf A1Mjd. Media corrections to the computed measurement may be inaccurate.\n", GetName().c_str(), measData->tropoCorrectWarningValue * 1000.0, ss1.str().c_str(), measData->epoch);
+
+         // add pass to the list
+         tropoWarningList.push_back(ss1.str());
+      }
+   }
+}
+

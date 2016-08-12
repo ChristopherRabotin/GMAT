@@ -72,6 +72,10 @@ public:
    
    static GmatGlobal* Instance();
    
+   // GMAT version
+   std::string GetGmatVersion();
+   bool IsGmatCompiledIn64Bit();
+   
    // Real to string conversion precison
    static const Integer DATA_PRECISION;
    static const Integer TIME_PRECISION;
@@ -110,6 +114,9 @@ public:
    Gmat::RunState GetDetailedRunState();
    void SetDetailedRunState(Gmat::RunState drs);
    Integer GetRunMode();
+
+   Integer GetRunModeStartUp(){return (isTesting? GmatGlobal::TESTING: runMode);};     // It is a temporary fix in order to run gression test with runmode = TESTING. 
+                                                                                       // It needs to improve in the next GMAT release
    void SetRunMode(Integer mode);
    Integer GetGuiMode();
    void SetGuiMode(Integer mode);
@@ -258,6 +265,8 @@ private:
       bool mAppendEol ;    /// appends eol if true. Default is true
    };
    
+   std::string gmatVersion;
+   
    Setting defaultSetting;
    Setting currentSetting;
    
@@ -275,6 +284,9 @@ private:
    
    bool isEventLocationAvailable;
    bool includeFoundInScriptResource;
+
+   Integer isTesting;            // It is a temporary fix in order to run gression test with runmode = TESTING. 
+                                 // It needs to improve in the next GMAT release
    
    Integer runMode;
    Integer guiMode;

@@ -44,12 +44,6 @@ ADD_DEFINITIONS("-DFMINCON_EXPORTS")
 SET(PLUGIN_DIRS factory include plugin solver)
 
 # ====================================================================
-# extra include directories for header files
-INCLUDE_DIRECTORIES("../../../MatlabInterfacePlugin/src/base/include")
-INCLUDE_DIRECTORIES("../../../MatlabInterfacePlugin/src/base/interface")
-INCLUDE_DIRECTORIES(${Matlab_INCLUDE_DIRS})
-
-# ====================================================================
 # source files
 SET(PLUGIN_SRCS
     factory/FminconOptimizerFactory.cpp
@@ -62,6 +56,10 @@ SET(PLUGIN_SRCS
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
+# Additional includes
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PRIVATE ${Matlab_INCLUDE_DIRS})
+
+# ====================================================================
 # Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} MatlabInterface)
-TARGET_LINK_LIBRARIES(${TargetName} ${Matlab_LIBRARIES})
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE MatlabInterface)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${Matlab_LIBRARIES})

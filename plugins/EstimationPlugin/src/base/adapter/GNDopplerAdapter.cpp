@@ -121,10 +121,6 @@ GNDopplerAdapter::GNDopplerAdapter(const GNDopplerAdapter& da) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GNDopplerAdapter copy constructor   from <%p> to <%p>\n", &da, this);
 #endif
-
-   //// Specify multiplier for S-path and E-path
-   //multiplierS = 1.0;
-   //multiplierE = 1.0;
 }
 
 
@@ -723,7 +719,7 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
    rangeOnly = true;
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
    measDataE = cMeasurement;
-   measDataE.value[0] = (measDataE.value[0] - 2 * GetIonoCorrection());                    // made changes by TUAN NGUYEN
+   measDataE.value[0] = (measDataE.value[0] - 2 * GetIonoCorrection());
    
    addNoise = addNoiseOption;
    addBias = addBiasOption;
@@ -763,8 +759,23 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
       delete obData;
 
    measDataS = adapterS->GetMeasurement();
-   // measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km                                    // made changes by TUAN NGUYEN
-   measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km   // made changes by TUAN NGUYEN
+   // measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();                                         // convert to full range in km
+   measDataS.value[0] = (measDataS.value[0] - 2 * adapterS->GetIonoCorrection()) / adapterS->GetMultiplierFactor();      // convert to full range in km
+
+
+   // Set value for isFeasible, feasibilityValue, and unfeasibleReason for measurement
+   if ((measDataE.unfeasibleReason.at(0) == 'B') || (measDataS.unfeasibleReason.at(0) == 'B'))
+   {
+      if (measDataE.unfeasibleReason.at(0) == 'B')
+         cMeasurement.unfeasibleReason = measDataE.unfeasibleReason + "E";
+      else
+      {
+         cMeasurement.unfeasibleReason = measDataS.unfeasibleReason + "S";
+         cMeasurement.isFeasible = false;
+         cMeasurement.feasibilityValue = measDataS.feasibilityValue;
+      }
+   }
+
 
    // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
@@ -1228,33 +1239,4 @@ void GNDopplerAdapter::SetCorrection(const std::string& correctionName,
    adapterS->SetCorrection(correctionName, correctionType);
    RangeAdapterKm::SetCorrection(correctionName, correctionType);
 }
-
-
-
-////------------------------------------------------------------------------------
-//// Real GetTurnAroundRatio(Integer freqBand)
-////------------------------------------------------------------------------------
-///**
-// * Retrieves turn around ratio
-// *
-// * @param freqBand   frequency band
-// *
-// * return   the value of trun around ratio associated with frequency band 
-// */
-////------------------------------------------------------------------------------
-//Real GNDopplerAdapter::GetTurnAroundRatio(Integer freqBand)
-//{
-//   switch (freqBand)
-//   {
-//      case 1:            // for S-band, turn around ratio is 240/221
-//         return 240.0/221.0;
-//      case 2:            // for X-band, turn around ratio is 880/749
-//         return 880.0/749.0;
-//   }
-//
-//   // Display an error message when frequency band is not specified 
-//   std::stringstream ss;
-//   ss << "Error: frequency band " << freqBand << " is not specified.\n";
-//   throw MeasurementException(ss.str());
-//}
 

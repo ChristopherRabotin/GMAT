@@ -66,13 +66,16 @@ public:
    void             Initialize();
    /// method to return the body ID for the requested body
    Integer          GetBodyID(std::string bodyName);
-   /// method to return the ASCII file name (unknown if created with
-   /// BINARY file)
-   std::string      GetAsciiFileName() const;
-   /// method to return the BINARY file name
-   std::string      GetBinaryFileName() const;
-   /// method to return the type of De File
-   Gmat::DeFileType GetDeFileType() const;
+   
+   // Not implemented and not used anywhere, so commented out
+   // /// method to return the ASCII file name (unknown if created with
+   // /// BINARY file)
+   // std::string      GetAsciiFileName() const;
+   // /// method to return the BINARY file name
+   // std::string      GetBinaryFileName() const;
+   // /// method to return the type of De File
+   // Gmat::DeFileType GetDeFileType() const;
+   
    /// method to return the position and velocity of the specified body
    /// at the specified time
    Real*            GetPosVel(Integer forBody, A1Mjd atTime,

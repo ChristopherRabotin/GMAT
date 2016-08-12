@@ -113,7 +113,7 @@ protected:
    /// Frequency band for E path in GNDoppler
    Integer              freqBandE;
    /// Doppler count interval
-   Real                 dopplerCountInterval;
+   Real                 dopplerCountInterval;             // unit: second
    /// Turn around ratio
    Real                 turnaround;
    /// Multiplier for S-path and E-path

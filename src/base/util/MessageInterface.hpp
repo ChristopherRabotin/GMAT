@@ -57,6 +57,7 @@ public:
    static void PopupMessage(Gmat::MessageType msgType, const char *format, ...);
    
    static std::string GetLogFileName();
+   static bool GetLogEnable();
    static void SetLogEnable(bool flag);
    static void SetLogPath(const char *pathname, bool append = false);
    static void SetLogPath(const std::string &pathname, bool append = false);

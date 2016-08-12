@@ -3,10 +3,10 @@
 # README file about FindMatlab.cmake module
 # By: Ravi Mathur
 # Original Date: 2/27/2015
-# Updated: 4/3/2015 (Updated CMake Git repo commit hash)
+# Updated: 7/8/2016 (Removed FindMatlab.cmake)
 #
 ################
 
-As of CMake 3.0.2, the built-in FindMatlab.cmake module is completely unusable. The CMake development repo has a fully rewritten version of FindMatlab.cmake, which is included here. This comes from commit [3664e7e] of the CMake Git repo.
+As of CMake 3.3, the built-in FindMatlab.cmake module has been completely overhauled. Since the minimum CMake version is now 3.5.2, there is no longer a need for a GMAT-supplied FindMatlab.cmake module.
 
-Once the new version of FindMatlab.cmake is included in CMake, the file included here can be removed from the GMAT repo. Note that this can only be done once all GMAT users are able to use the appropriate CMake version. For example, Ubuntu Linux often ships with an old version of CMake, so this must be taken into account.
+Therefore, FindMatlab.cmake is being removed from the build/cmake_modules directory.

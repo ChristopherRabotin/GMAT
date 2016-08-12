@@ -21,36 +21,14 @@ ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DGMAT_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
-# ====================================================================
-# SPICE specifics
-# SPICE is linked because it contains the F2C implementation
-LINK_LIBRARIES(optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
-
-if(GMAT_USE_SPICE)
-  SET(SPICE_SRCS
-    "attitude/SpiceAttitude.cpp"
-    "util/SpiceAttitudeKernelReader.cpp"
-    "util/SpiceInterface.cpp"
-    "util/SpiceOrbitKernelReader.cpp"
-    "util/SpiceKernelReader.cpp"
-    "util/SpiceKernelWriter.cpp"
-    "util/SpiceOrbitKernelWriter.cpp")
-endif()
-
-# ====================================================================
-# Additional link libraries (xerces)
-if(UNIX)
-  if(APPLE)
-    # Check this for Mac
-    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
-  else()
-    FIND_LIBRARY(XERCES_LIB ${XERCES_LIBRARY} ${XERCES_LIB_DIR})
-  endif()
-else()
-  set(XERCES_LIB ${XERCES_LIB_DIR}/${XERCES_LIBRARY}) 
-endif()
-
-LINK_LIBRARIES(${XERCES_LIB})
+SET(SPICE_SRCS
+  "attitude/SpiceAttitude.cpp"
+  "util/SpiceAttitudeKernelReader.cpp"
+  "util/SpiceInterface.cpp"
+  "util/SpiceOrbitKernelReader.cpp"
+  "util/SpiceKernelReader.cpp"
+  "util/SpiceKernelWriter.cpp"
+  "util/SpiceOrbitKernelWriter.cpp")
 
 # ====================================================================
 # F2C
@@ -88,26 +66,8 @@ SET(BASE_DIRS
   stopcond
   subscriber
   util
+  util/datawriter
   )
-
-# ====================================================================
-# Globally available list of GMAT Base include directories
-# Use absolute path so other GMAT dependencies can refer to them
-FOREACH(currdir ${BASE_DIRS})
-  SET(GMAT_BASE_INCLUDE_DIRECTORIES
-      ${GMAT_BASE_INCLUDE_DIRECTORIES}
-	  "${CMAKE_CURRENT_SOURCE_DIR}/${currdir}"
-	  CACHE INTERNAL "base includes"
-	  )
-ENDFOREACH(currdir)
-
-# ====================================================================
-# Include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-
-# ====================================================================
-# extra include directory for header file (LOJ)
-INCLUDE_DIRECTORIES(${XERCES_INCLUDE_DIR})
 
 # ====================================================================
 # source files
@@ -147,7 +107,6 @@ SET(BASE_SRCS
     command/ClearPlot.cpp
     command/ConditionalBranch.cpp
     command/Create.cpp
-    command/Display.cpp
     command/Else.cpp
     command/EndFiniteBurn.cpp
     command/EndFor.cpp
@@ -181,6 +140,7 @@ SET(BASE_SRCS
     command/Toggle.cpp
     command/Vary.cpp
     command/While.cpp
+    command/Write.cpp
     configs/ConfigManagerException.cpp
     configs/ConfigManager.cpp
     coordsystem/AxisSystem.cpp
@@ -285,6 +245,7 @@ SET(BASE_SRCS
     function/FunctionManager.cpp
     function/GetEphemStates.cpp
     function/GetLastState.cpp
+    function/SetSeed.cpp
     hardware/ChemicalTank.cpp
     hardware/ChemicalThruster.cpp
     hardware/ElectricTank.cpp
@@ -561,6 +522,11 @@ SET(BASE_SRCS
     util/SunSync.cpp
     util/RepeatSunSync.cpp
     util/RepeatGroundTrack.cpp
+    util/datawriter/DataBucket.cpp
+    util/datawriter/DataWriter.cpp
+    util/datawriter/DataWriterInterface.cpp
+    util/datawriter/DataWriterMaker.cpp
+    util/datawriter/WriterData.cpp
     solarsys/SimpleExponentialAtmosphere.cpp
     solarsys/SpecialCelestialPoint.cpp
     ${MSISE_SRCS}
@@ -578,6 +544,25 @@ FILE(GLOB_RECURSE BASE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 # Create GmatBase as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS} ${BASE_HEADERS})
 
+# Add necessary include directories
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${BASE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${CSPICE_INCLUDE_DIR})
+
+# Link needed libraries
+TARGET_LINK_LIBRARIES(${TargetName} PUBLIC optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE XercesC::XercesC)
+TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${CMAKE_DL_LIBS})
+if(UNIX)
+  if(APPLE)
+    TARGET_LINK_LIBRARIES(${TargetName} PRIVATE ${COREFOUNDATION_LIBRARY} ${CORESERVICES_LIBRARY})
+  else()
+    TARGET_LINK_LIBRARIES(${TargetName} PRIVATE Threads::Threads)
+  endif()
+else()
+  # XERCES_STATIC_LIBRARY required on Windows
+  TARGET_COMPILE_DEFINITIONS(${TargetName} PUBLIC -DXERCES_STATIC_LIBRARY)
+endif()
+
 # Library name should start with "lib"
 # This is always true for Mac/Linux, but needs to be specified for Windows
 SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
@@ -587,7 +572,7 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
 # Macro defined in top-level CMakeLists.txt
 _ADDSOURCEGROUPS("${BASE_DIRS}")
 
-# specify the version of the library. 
+# Windows-specific link flags
 if(WIN32)
   SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\" /INCREMENTAL:NO")
 endif()
@@ -605,7 +590,7 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES
 if(WIN32)
   INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION bin)
 else()
-  if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+  if(APPLE)
     SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
   else()
     SET(INSTALL_DIR bin)

@@ -147,14 +147,14 @@ void ThrusterPanel::Create()
    boxSizer2->Add(selectAllButton, 0, wxALIGN_CENTER|wxALL, bsize );
    boxSizer2->Add(removeAllButton, 0, wxALIGN_CENTER|wxALL, bsize );
    
-   staticBoxSizer1->Add( availableThrusterListBox, 0, wxALIGN_CENTER|wxALL, bsize ); 
-   staticBoxSizer2->Add( selectedThrusterListBox, 0, wxALIGN_CENTER|wxALL, bsize );
+   staticBoxSizer1->Add(availableThrusterListBox, 1, wxALIGN_CENTER | wxEXPAND | wxALL, bsize);
+   staticBoxSizer2->Add(selectedThrusterListBox, 1, wxALIGN_CENTER | wxEXPAND | wxALL, bsize);
    
-   boxSizer3->Add( staticBoxSizer1, 0, wxALIGN_CENTER|wxALL, bsize);
+   boxSizer3->Add(staticBoxSizer1, 1, wxALIGN_CENTER | wxEXPAND | wxALL, bsize);
    boxSizer3->Add( boxSizer2, 0, wxALIGN_CENTER|wxALL, bsize);
-   boxSizer3->Add( staticBoxSizer2, 0, wxALIGN_CENTRE|wxALL, bsize);
+   boxSizer3->Add(staticBoxSizer2, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    
-   boxSizer1->Add( boxSizer3, 0, wxALIGN_CENTRE|wxALL, bsize);
+   boxSizer1->Add(boxSizer3, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    
    this->SetAutoLayout( true );  
    this->SetSizer( boxSizer1 );

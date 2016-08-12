@@ -121,6 +121,12 @@ std::string Strrep::EvaluateString()
    std::string oldStr = inputArgWrappers[1]->EvaluateString();
    std::string newStr = inputArgWrappers[2]->EvaluateString();
    
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("   str='%s', oldStr='%s', newStr='%s'\n", str.c_str(), oldStr.c_str(),
+       newStr.c_str());
+   #endif
+   
    std::string result = GmatStringUtil::Replace(str, oldStr, newStr, 0);
    
    #ifdef DEBUG_EVALUATE

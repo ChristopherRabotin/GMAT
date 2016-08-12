@@ -51,6 +51,10 @@
 #include "CalculationUtilities.hpp"
 #include "GravityField.hpp"
 #include "ErrorModel.hpp"
+#include "EstimatorException.hpp"
+#include "FileManager.hpp"
+
+#include "DataWriterInterface.hpp"
 
 #include <ctime>
 #include <sys/types.h>
@@ -96,6 +100,7 @@
 
 //#define SPACECRAFT_TABLE_COLUMN_BREAK_UP             1
 #define CELESTIAL_BODIES_TABLE_COLUMN_BREAK_UP       5
+#define MAX_COLUMNS                                  7                 // covariance matrix column
 
 //------------------------------------------------------------------------------
 // static data
@@ -110,6 +115,7 @@ BatchEstimator::PARAMETER_TEXT[] =
    "UseInitialCovariance",
    "InversionAlgorithm",
    "MaxConsecutiveDivergences",
+   "MatlabFile",
    // todo Add useApriori here
 };
 
@@ -122,6 +128,7 @@ BatchEstimator::PARAMETER_TYPE[] =
    Gmat::BOOLEAN_TYPE,         // "UseInitialCovariance"
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::FILENAME_TYPE,        // MATLAB_OUTPUT_FILENAME
 };
 
 
@@ -139,7 +146,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
       const std::string &name) :
    Estimator                  (type, name),
    estEpochFormat             ("FromParticipants"),
-   estEpoch                   (""),
+   estEpoch                   ("FromParticipants"),
    oldResidualRMS             (0.0),
    newResidualRMS             (1.0e12),
    useApriori                 (false),                  // second term of Equation Eq8-184 in GTDS MathSpec is not used   
@@ -148,7 +155,23 @@ BatchEstimator::BatchEstimator(const std::string &type,
 //   estimationStatus           (UNKNOWN),
    chooseRMSP                 (true),
    maxConsDivergences         (3),
-   inversionType              ("Internal")
+   inversionType              ("Internal"),
+   matWriter                  (NULL),
+   writeMatFile               (false),
+   matFileName                (""),
+   matIterationIndex          (-1),
+   matPartIndex               (-1),
+   matTypeIndex               (-1),
+   matEpochIndex              (-1),
+   matObsIndex                (-1),
+   matCalcIndex               (-1),
+   matOmcIndex                (-1),
+   matElevationIndex          (-1),
+   matGregorianIndex          (-1),
+   matObsEditFlagIndex        (-1),
+   matFrequencyIndex          (-1),
+   matFreqBandIndex           (-1),
+   matDoppCountIndex          (-1)
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -167,6 +190,8 @@ BatchEstimator::~BatchEstimator()
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
       delete outerLoopBuffer[i];
    outerLoopBuffer.clear();
+  if (matWriter != NULL)
+     delete matWriter;
 }
 
 
@@ -191,12 +216,29 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
 //   estimationStatus           (UNKNOWN),
    chooseRMSP                 (est.chooseRMSP),
    maxConsDivergences         (est.maxConsDivergences),
-   inversionType              (est.inversionType)
+   inversionType              (est.inversionType),
+   matWriter                  (NULL),
+   writeMatFile               (est.writeMatFile),
+   matFileName                (est.matFileName),
+   matIterationIndex          (-1),
+   matPartIndex               (-1),
+   matTypeIndex               (-1),
+   matEpochIndex              (-1),
+   matObsIndex                (-1),
+   matCalcIndex               (-1),
+   matOmcIndex                (-1),
+   matElevationIndex          (-1),
+   matGregorianIndex          (-1),
+   matObsEditFlagIndex        (-1),
+   matFrequencyIndex          (-1),
+   matFreqBandIndex           (-1),
+   matDoppCountIndex          (-1)
 {
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
       delete outerLoopBuffer[i];
    outerLoopBuffer.clear();
+   
 }
 
 
@@ -237,6 +279,28 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       outerLoopBuffer.clear();
 
       inversionType = est.inversionType;
+
+      if (matWriter != NULL)
+         delete matWriter;
+      matWriter           = NULL;
+      matIterationIndex   = -1;
+      matPartIndex        = -1;
+      matTypeIndex        = -1;
+      matEpochIndex       = -1;
+      matObsIndex         = -1;
+      matCalcIndex        = -1;
+      matOmcIndex         = -1;
+      matGregorianIndex   = -1;
+      matObsEditFlagIndex = -1;
+      matElevationIndex   = -1;
+      matGregorianIndex   = -1;
+      matObsEditFlagIndex = -1;
+      matFrequencyIndex   = -1;
+      matFreqBandIndex    = -1;
+      matDoppCountIndex   = -1;
+
+      writeMatFile = est.writeMatFile;
+      matFileName  = est.matFileName;
    }
 
    return *this;
@@ -455,6 +519,9 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
       return inversionType;
    }
 
+   if (id == MATLAB_OUTPUT_FILENAME)
+      return matFileName;
+
    return Estimator::GetStringParameter(id);
 }
 
@@ -474,8 +541,16 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
 bool BatchEstimator::SetStringParameter(const Integer id,
          const std::string &value)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("BatchEstimator::SetStringParameter(%d, %s)\n",
+            id, value.c_str());
+   #endif
+
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
+      if (value != "FromParticipants")
+         throw EstimatorException("Error: An invalid value (" + value + ") was set to " + GetName() + ".EstimationEpochFormat parameter. In current GMAT version, only 'FromParticipants' is a valid value.\n");
+
       bool retVal = false;
       StringArray sa = GetPropertyEnumStrings(id);
       for (UnsignedInt i=0; i < sa.size(); ++i)
@@ -512,6 +587,9 @@ bool BatchEstimator::SetStringParameter(const Integer id,
 
    if (id == ESTIMATION_EPOCH)
    {
+      if (value != "FromParticipants")
+         throw EstimatorException("Error: An invalid value (" + value + ") was set to " + GetName() + ".EstimationEpoch parameter. In current GMAT version, only 'FromParticipants' is a valid value.\n");
+
       if (value == "")
          throw EstimatorException("Error: No value was set to " + GetName() + ".EstimationEpoch parameter.\n");
 
@@ -533,6 +611,14 @@ bool BatchEstimator::SetStringParameter(const Integer id,
             throw EstimatorException("Error: Cannot set value '" + value + " to " + GetName() + ".EstimationEpoch parameter due to its invalid time format.\n");
       }
 
+      return true;
+   }
+
+   if (id == MATLAB_OUTPUT_FILENAME)
+   {
+      matFileName = value;
+      if (matFileName.find(".mat") == std::string::npos)
+         matFileName += ".mat";
       return true;
    }
 
@@ -820,8 +906,33 @@ bool BatchEstimator::Initialize()
 
    if (Estimator::Initialize())
    {
-      //estimationStatus = UNKNOWN;          // This code is moved to Estimator::Initialize()      
       retval    = true;
+
+      if (matFileName != "")
+      {
+         // the mat writer
+         matWriter = DataWriterInterface::Instance()->GetDataWriter("MatWriter");
+         if (matWriter != NULL)
+         {
+            writeMatFile = true;
+            // Add default path is there is no path data in matFileName
+            if ((matFileName.find("/") == std::string::npos) &&
+                  (matFileName.find("\\") == std::string::npos))
+            {
+               FileManager *fileman = FileManager::Instance();
+               std::string path = fileman->GetPathname(FileManager::OUTPUT_PATH);
+               matFileName = path + matFileName;
+            }
+
+            MessageInterface::ShowMessage("MATLAB file will be written to "
+                  "%s\n", matFileName.c_str());
+
+            matWriter->Initialize(matFileName, "w5");
+
+            // Move later in the process
+            matData.Clear();
+         }
+      }
    }
 
    return retval;
@@ -842,13 +953,14 @@ Solver::SolverState BatchEstimator::AdvanceState()
 #ifdef DEBUG_STATE_MACHINE
    MessageInterface::ShowMessage("BatchEstimator::AdvanceState():  entered: currentState = %d\n", currentState);
 #endif
-
-   switch (currentState)
+   try
    {
+      switch (currentState)
+      {
       case INITIALIZING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "INITIALIZING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "INITIALIZING\n");
          #endif
          // ReportProgress();
          CompleteInitialization();
@@ -856,8 +968,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case PROPAGATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "PROPAGATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "PROPAGATING\n");
          #endif
          // ReportProgress();
          FindTimeStep();
@@ -865,8 +977,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case CALCULATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "CALCULATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "CALCULATING\n");
          #endif
          // ReportProgress();
          CalculateData();
@@ -874,8 +986,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case LOCATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "LOCATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "LOCATING\n");
          #endif
          // ReportProgress();
          ProcessEvent();
@@ -883,8 +995,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case ACCUMULATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "ACCUMULATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "ACCUMULATING\n");
          #endif
          // ReportProgress();
          Accumulate();
@@ -892,17 +1004,22 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case ESTIMATING:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "ESTIMATING\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "ESTIMATING\n");
          #endif
          // ReportProgress();
+
+         // Write .mat data
+         if (matWriter != NULL)
+            if (!WriteMatData())
+               throw EstimatorException("Error writing .mat data file");
          Estimate();
          break;
 
       case CHECKINGRUN:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "CHECKINGRUN\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "CHECKINGRUN\n");
          #endif
          // ReportProgress();
          CheckCompletion();
@@ -910,8 +1027,8 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       case FINISHED:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-                  "FINISHED\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "FINISHED\n");
          #endif
          RunComplete();
          // ReportProgress();
@@ -919,10 +1036,16 @@ Solver::SolverState BatchEstimator::AdvanceState()
 
       default:
          #ifdef DEBUG_STATE_MACHINE
-            MessageInterface::ShowMessage("Entered Estimator state machine: "
-               "Bad state for an estimator.\n");
+         MessageInterface::ShowMessage("Entered Estimator state machine: "
+            "Bad state for an estimator.\n");
          #endif
          /* throw EstimatorException("Solver state not supported for the simulator")*/;
+      }
+   }
+   catch (...) //(EstimatorException ex)
+   {
+      currentState = FINISHED;
+      throw; // ex;
    }
 
 #ifdef DEBUG_STATE_MACHINE
@@ -954,10 +1077,6 @@ bool BatchEstimator::Finalize()
    return retval;
 }
 
-
-//------------------------------------------------------------------------------
-// protected methods
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Methods used in the finite state machine
@@ -1358,6 +1477,13 @@ void BatchEstimator::CheckCompletion()
    convergenceReason = "";
    estimationStatus = TestForConvergence(convergenceReason);
    
+   // Reset best RMS as needed                           // fix bug GMT-5711
+   if (resetBestRMSFlag)                                 // fix bug GMT-5711
+   {                                                     // fix bug GMT-5711
+      if (estimationStatus == DIVERGING)                 // fix bug GMT-5711
+         resetBestResidualRMS = newResidualRMS;          // fix bug GMT-5711
+   }                                                     // fix bug GMT-5711
+
    #ifdef RUN_SINGLE_PASS
       converged = true;
    #endif
@@ -1463,6 +1589,9 @@ void BatchEstimator::CheckCompletion()
 
       WriteToTextFile();
       ReportProgress();
+      // After writing to GmatLog.txt file, bestResidualRMS is set to resetBestResdualRMS    // fix bug GMT-5711
+      if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                             // fix bug GMT-5711
+         bestResidualRMS = resetBestResidualRMS;                                             // fix bug GMT-5711
 
       numRemovedRecords["U"] = 0;
       numRemovedRecords["R"] = 0;
@@ -1488,6 +1617,9 @@ void BatchEstimator::CheckCompletion()
       sumSEResidualSquare.clear();
       sumSEWeightResidualSquare.clear();
 
+      // Clear all media correct warning lists
+      ionoWarningList.clear();
+      tropoWarningList.clear();
 
       if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
          currentState = CALCULATING;
@@ -1558,6 +1690,8 @@ void BatchEstimator::RunComplete()
    sumSEResidualSquare.clear();
    sumSEWeightResidualSquare.clear();
 
+   if (matWriter != NULL)
+      matWriter->CloseFile();
 }
 
 
@@ -1633,8 +1767,13 @@ std::string BatchEstimator::GetProgressString()
          case CHECKINGRUN:
             progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration     : "
+            progress << "\n   BestRMS residuals                        : "
                      << bestResidualRMS;
+            if ((resetBestRMSFlag) && (estimationStatus == DIVERGING))                 // fix bug GMT-5711
+            {                                                                          // fix bug GMT-5711
+            progress << "\n   Reset value of BestRMS residuals         : "             // fix bug GMT-5711
+                        << resetBestResidualRMS;                                       // fix bug GMT-5711
+            }                                                                          // fix bug GMT-5711
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
          
@@ -1690,7 +1829,7 @@ std::string BatchEstimator::GetProgressString()
          case FINISHED:
             progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration     : "
+            progress << "\n   BestRMS residuals                        : "
                      << bestResidualRMS;
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
@@ -1777,16 +1916,42 @@ std::string BatchEstimator::GetProgressString()
             {
                progress << "\n   WeightedRMS residuals for previous iteration: "
                         << oldResidualRMS;
-               progress << "\n   WeightedRMS residuals for this iteration    : "
+               progress << "\n   WeightedRMS residuals                       : "
                         << newResidualRMS;
                progress << "\n   BestRMS residuals for this iteration        : "
-                     << bestResidualRMS << "\n\n";
+                        << bestResidualRMS << "\n\n";
             }
 
             finalCovariance = information.Inverse();
 
-            //progress.precision(12);
-            //progress.scientific;
+            // Convert covariance matrix for Cr_Epsilon and Cd_Epsilon to covariance matrix for Cr and Cd
+            for (UnsignedInt i = 0; i < map->size(); ++i)
+            {
+               if ((*map)[i]->elementName == "Cr_Epsilon")
+               {
+                  // Get Cr0
+                  Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
+
+                  // multiply row and column i with Cr0
+                  for (UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
+                     finalCovariance(i, j) *= Cr0;
+                  for (UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
+                     finalCovariance(j, i) *= Cr0;
+               }
+               if ((*map)[i]->elementName == "Cd_Epsilon")
+               {
+                  // Get Cd0
+                  Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
+
+                  // multiply row and column i with Cd0
+                  for (UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
+                     finalCovariance(i, j) *= Cd0;
+                  for (UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
+                     finalCovariance(j, i) *= Cd0;
+               }
+            }
+
+            // Display final coveriance matrix
             progress << "\nFinal Covariance Matrix:\n\n";
             for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
             {
@@ -1800,6 +1965,7 @@ std::string BatchEstimator::GetProgressString()
                progress << "\n";
             }
 
+            // Display final correlation matrix
             progress << "\nFinal Correlation Matrix:\n\n";
             for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
             {
@@ -1847,6 +2013,19 @@ std::string BatchEstimator::GetProgressString()
 }
 
 
+//--------------------------------------------------------------------------------------
+// std::string GetElementFullName(ListItem* infor, bool isInternalCS) const
+//--------------------------------------------------------------------------------------
+/**
+* This function is used to get a full name of an element as specified by ListItem* infor
+*
+* @param infor              The ListItem element containing information about the elment
+* @param isInternalCS       flag to indicate whether the element is presented in an 
+*                           internal coordinate system or not. 
+*
+* return                    a string containing element full name
+*/
+//--------------------------------------------------------------------------------------
 std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalCS) const
 {
    std::stringstream ss;
@@ -1924,6 +2103,17 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalC
 }
 
 
+//--------------------------------------------------------------------------------------
+// std::string GetElementUnit(ListItem* infor) const
+//--------------------------------------------------------------------------------------
+/**
+* Get element unit
+*
+* @param infor     The ListItem element containing information about the elment
+*
+* @return          unit of the element
+*/
+//--------------------------------------------------------------------------------------
 std::string BatchEstimator::GetElementUnit(ListItem* infor) const
 {
    std::string unit = "";
@@ -1998,6 +2188,17 @@ std::string BatchEstimator::GetElementUnit(ListItem* infor) const
 }
 
 
+//--------------------------------------------------------------------------------------
+// Integer GetElementPrecision(std::string unit) const
+//--------------------------------------------------------------------------------------
+/**
+* Get element precision associated with th given unit
+*
+* @param unit      a measurement unit
+*
+* @return          precision asscociated with the unit
+*/
+//--------------------------------------------------------------------------------------
 Integer BatchEstimator::GetElementPrecision(std::string unit) const
 {
    // parameter's precision is specified based on its unit 
@@ -2237,6 +2438,128 @@ std::string BatchEstimator::CTime(const time_t* time)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetGMATBuildDate()
+//------------------------------------------------------------------------------
+/**
+* Get GMAT build date
+*/
+//------------------------------------------------------------------------------
+std::string BatchEstimator::GetGMATBuildDate()
+{
+   std::istringstream s(__DATE__);
+   std::string smonth;
+   Integer day, month, year;
+   s >> smonth >> day >> year;
+   switch(smonth.at(0))
+   {
+   case 'J':
+      if (smonth == "Jun")
+         month = 6;
+      else if (smonth == "Jul")
+         month = 7;
+      else
+         month = 1;
+      break;
+   case 'F':
+      month = 2;
+      break;
+   case 'M':
+      if (smonth == "May")
+         month = 5;
+      else
+         month = 3;
+      break;
+   case 'A':
+      if (smonth == "Apr")
+         month = 4;
+      else
+         month = 8;
+      break;
+   case 'S':
+      month = 9;
+      break;
+   case 'O':
+      month = 10;
+      break;
+   case 'N':
+      month = 11;
+      break;
+   case 'D':
+      month = 12;
+      break;
+   }
+
+   std::string sday = GetDayOfWeek(day, month, year);
+
+   std::stringstream ss;
+   ss << sday << " " << smonth << " " << day << ", " << year << " " << __TIME__;
+   return ss.str();
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetDayOfWeek(Integer day, Integer month, Integer year)
+//------------------------------------------------------------------------------
+/**
+* Specify day of week for a given date month/day/year
+*/
+//------------------------------------------------------------------------------
+std::string BatchEstimator::GetDayOfWeek(Integer day, Integer month, Integer year)
+{
+
+   Integer daysOfMonth[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+   // Specify number of days of February
+   if ((year % 400 == 0) || ((year % 4 == 0) && (year % 100 != 0)))
+      daysOfMonth[1] = 29;
+
+   // Calculate number of days from day, month, year to 01/01/0001
+   Integer y = year - 1;
+   Integer m = month - 1;
+   Integer d = day - 1;
+   Integer days = 365*y + (int)(y / 4) - (int)(y / 100) + (int)(y / 400);   // total number of days from 01/01/y  to 01/01/0001
+   for (Integer i = 0; i < m; ++i)
+      days += daysOfMonth[i];                          // total number of days from m/01/y   to 01/01/0001
+   days += d;                                          // total number of days from m/d/y    to 01/01/0001
+   
+   // Calculate weekday
+   Integer weekdayOffset = 1;
+   Integer weekday = days % 7 + weekdayOffset;
+
+   if (weekday > 6)
+      weekday -= 7;
+
+   std::string sweekday;
+   switch (weekday)
+   {
+   case 0:
+      sweekday = "Sunday";
+      break;
+   case 1:
+      sweekday = "Monday";
+      break;
+   case 2:
+      sweekday = "Tuesday";
+      break;
+   case 3:
+      sweekday = "Wednesday";
+      break;
+   case 4:
+      sweekday = "Thusday";
+      break;
+   case 5:
+      sweekday = "Friday";
+      break;
+   case 6:
+      sweekday = "Saturday";
+      break;
+   }
+   
+   return sweekday;
+}
+
+
 //----------------------------------------------------------------------------
 // std::string GetOperatingSystemName()
 //----------------------------------------------------------------------------
@@ -2399,6 +2722,7 @@ std::string BatchEstimator::GetUserID()
 * This function writes estimation report header. It contains 6 parts:
 *      . Part 1: contains information about GMAT build, OS, user infor
 *      . Part 2: contains batch least squares initial conditions
+*      . Part 2b: contains apriori covariance matrix
 *      . Part 3: contains information about orbit generator
 *      . Part 4: contains information about measurements
 *      . Part 5: contains information about astrodynamic constants
@@ -2409,6 +2733,10 @@ void BatchEstimator::WriteReportFileHeader()
 {
    WriteReportFileHeaderPart1();
    WriteReportFileHeaderPart2();
+
+   if (useApriori)
+      WriteReportFileHeaderPart2b();
+   
    WriteReportFileHeaderPart3();
    WriteReportFileHeaderPart4();
    WriteReportFileHeaderPart5();
@@ -2430,12 +2758,14 @@ void BatchEstimator::WriteReportFileHeaderPart1()
    /// 1. Write header 1:
    time_t now = time(NULL);
    std::string runDate = CTime(&now);
-   std::string buildTime = GetFileCreateTime("GMAT.exe");
-
+   //std::string buildTime = GetFileCreateTime("GMAT.exe");
+   std::string buildTime = GetGMATBuildDate();
+   std::string version = GmatGlobal::Instance()->GetGmatVersion();
+   
    textFile
       << "                                              *****  G E N E R A L  M I S S I O N  A N A L Y S I S  T O O L  *****\n"
       << "\n"
-      << "                                                                          Release 2016B\n"
+      << "                                                                          Release " << version << "\n"
       << GmatStringUtil::GetAlignmentString("", 59) + "Build Date : " << buildTime << "\n"
       << "\n"
       << GmatStringUtil::GetAlignmentString("", 36) + "Hostname : " << GmatStringUtil::GetAlignmentString(GetHostName(), 36, GmatStringUtil::LEFT) << " OS / Arch : " << GetOperatingSystemName() << " " << GetOperatingSystemVersion() << "\n"
@@ -2482,7 +2812,9 @@ void BatchEstimator::WriteReportFileHeaderPart2()
    paramNames.push_back("VY (km/s)");
    paramNames.push_back("VZ (km/s)");
    paramNames.push_back("Cr");
+   paramNames.push_back("CrSigma");
    paramNames.push_back("Cd");
+   paramNames.push_back("CdSigma");
    paramNames.push_back("DryMass  (kg)");
    paramNames.push_back("DragArea (m^2)");
    paramNames.push_back("SRPArea  (m^2)");
@@ -2494,10 +2826,13 @@ void BatchEstimator::WriteReportFileHeaderPart2()
    // 3. Write a table containing spacecraft initial condition:
    Integer colCount = 0;
    std::string scName, csName, s;
+   Real val;
+   bool found;
 
    for (UnsignedInt i = 0; i < participantNames.size(); ++i)
    {
       GmatBase* obj = GetConfiguredObject(participantNames[i]);
+
       if (obj->IsOfType(Gmat::SPACECRAFT))
       {
          // 3.1. Get a spacecraft for processing:
@@ -2521,12 +2856,56 @@ void BatchEstimator::WriteReportFileHeaderPart2()
          if (s.find('.') == s.npos)
             s = s + ".00";
          paramValues.push_back(s);
+       
+         StringArray solveforList = obj->GetStringArrayParameter("SolveFors");
+         found = false;
+         for (Integer j = 0; j < solveforList.size(); ++j)
+         {
+            if (solveforList[j] == "Cr")
+            {
+               found = true;
+               break;
+            }
+         }
+         if (found)
+         {
+            val = sc->GetRealParameter("CrSigma");
+            if ((1.0e-5 < val) && (val < 1.0e10))
+               s = GmatStringUtil::RealToString(val, false, false, true, 6, 22);
+            else
+               s = GmatStringUtil::RealToString(val, false, true, true, 10, 22);
+         }
+         else
+            s = "Not estimated";
+         paramValues.push_back(s);
+
 
          s = GmatStringUtil::RealToString(sc->GetRealParameter("Cd"), false, false, false, 8, 22);
          if (s.find('.') == s.npos)
             s = s + ".00";
          paramValues.push_back(s);
          
+         found = false;
+         for (Integer j = 0; j < solveforList.size(); ++j)
+         {
+            if (solveforList[j] == "Cd")
+            {
+               found = true;
+               break;
+            }
+         }
+         if (found)
+         {
+            val = sc->GetRealParameter("CdSigma");
+            if ((1.0e-5 < val) && (val < 1.0e10))
+               s = GmatStringUtil::RealToString(val, false, false, true, 6, 22);
+            else
+               s = GmatStringUtil::RealToString(val, false, true, true, 10, 22);
+         }
+         else
+            s = "Not estimated";
+         paramValues.push_back(s);
+
          paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("DryMass"), false, false, false, 8, 22));
          paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("DragArea"), false, false, false, 8, 22));
          paramValues.push_back(GmatStringUtil::RealToString(sc->GetRealParameter("SRPArea"), false, false, false, 8, 22));
@@ -2571,6 +2950,151 @@ void BatchEstimator::WriteReportFileHeaderPart2()
    textFile.flush();
 }
 
+
+
+//------------------------------------------------------------------------------
+// void WriteReportFileHeaderPart2b()
+//------------------------------------------------------------------------------
+/**
+* This function is used to write apriori covariance matrix to report file.
+*/
+//------------------------------------------------------------------------------
+void BatchEstimator::WriteReportFileHeaderPart2b()
+{
+   // 1.1 Write subheader
+   textFile
+      << "*****************************************************************  APRIORI COVARIANCE MATRIX  ******************************************************************\n"
+      << "\n";
+
+   // 1.2. Prepare for writing
+   const std::vector<ListItem*> *map = esm.GetStateMap();
+
+   Rmatrix aprioriCov = *(stateCovariance->GetCovariance());
+
+   // Convert covariance from CrEpsilon to Cr, from CdEpsilon to Cd
+   for (Integer i = 0; i < map->size(); ++i)
+   {
+      if ((*map)[i]->object->IsOfType(Gmat::SPACECRAFT))
+      {
+         GmatBase* obj = (*map)[i]->object;
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            // Convert covariance from CrEpsilon to Cr
+            Real ratio = obj->GetRealParameter("Cr");
+            for (Integer row = 0; row < aprioriCov.GetNumRows(); ++row)
+               aprioriCov(row, i) = aprioriCov(row, i) *ratio;
+            for (Integer col = 0; col < aprioriCov.GetNumColumns(); ++col)
+               aprioriCov(i, col) = aprioriCov(i, col) *ratio;
+         }
+
+         if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            // Convert covariance from CdEpsilon to Cd
+            Real ratio = obj->GetRealParameter("Cd");
+            for (Integer row = 0; row < aprioriCov.GetNumRows(); ++row)
+               aprioriCov(row, i) = aprioriCov(row, i) *ratio;
+            for (Integer col = 0; col < aprioriCov.GetNumColumns(); ++col)
+               aprioriCov(i, col) = aprioriCov(i, col) *ratio;
+         }
+      }
+   }
+
+   // 2. Write standard deviation
+   // 2.1. Specify maximum len of elements' names (Cartisian element names)
+   Integer max_len = 27;         // 27 is the maximum lenght of ancillary element names
+   for (int i = 0; i < map->size(); ++i)
+   {
+      std::stringstream ss;
+      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL)) &&
+         ((*map)[i]->elementName == "Bias"))
+      {
+         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+         StringArray sa = mm->GetStringArrayParameter("Participants");
+         ss << mm->GetStringParameter("Type") << " ";
+         for (UnsignedInt j = 0; j < sa.size(); ++j)
+            ss << sa[j] << (((j + 1) != sa.size()) ? "," : " Bias.");
+         ss << (*map)[i]->subelement;
+      }
+      else
+         ss << GetElementFullName((*map)[i], false);
+      max_len = (Integer)GmatMathUtil::Max(max_len, ss.str().size());
+   }
+   textFile << " " << GmatStringUtil::GetAlignmentString("State Component", max_len+3) << " " << GmatStringUtil::GetAlignmentString("Units", 8) << GmatStringUtil::GetAlignmentString("Standard Dev.", 19, GmatStringUtil::RIGHT) << "\n";
+   textFile << "\n";
+
+   // 2.2. Write a table containing solve-for name, unit, and standard deviation
+   for (Integer i = 0; i < map->size(); ++i)
+   {
+      std::stringstream ss;
+      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL)) &&
+         ((*map)[i]->elementName == "Bias"))
+      {
+         // Get full name for Bias
+         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+         StringArray sa = mm->GetStringArrayParameter("Participants");
+         ss << mm->GetStringParameter("Type") << " ";
+         for (UnsignedInt j = 0; j < sa.size(); ++j)
+            ss << sa[j] << (((j + 1) != sa.size()) ? "," : " Bias.");
+         ss << (*map)[i]->subelement;
+
+         // Get Bias unit. It is km for Range_KM, RU for DSNRange, km/s for Doppler_RangeRate, and Hz for Doppler_HZ 
+      }
+      else
+      {
+         // Get full name for Bias
+         ss << GetElementFullName((*map)[i], false);
+      }
+
+      std::string unit = GetElementUnit((*map)[i]);
+      int precision = GetElementPrecision(unit);
+
+      textFile << GmatStringUtil::ToString(i + 1, 3);
+      textFile << " ";
+      textFile << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 1, GmatStringUtil::LEFT);
+      textFile << GmatStringUtil::GetAlignmentString(unit, 8, GmatStringUtil::LEFT);
+
+      textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(aprioriCov.GetElement(i,i)), false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);     // standard deviation
+      textFile << "\n";
+   }
+   textFile << "\n";
+
+
+   // 3. write apriori covariance matrix
+   textFile
+      << "                                                    Apriori Covariance Matrix in Cartesian Coordinate System\n"
+      << "\n";
+
+   // 3.1 Specify who many digit of index
+   Integer indexLen = 1;
+   for (; GmatMathUtil::Pow(10, indexLen) < map->size(); ++indexLen);
+
+   // 3.2. Write apriori covariance to report file 
+   for (Integer startIndex = 0; startIndex < aprioriCov.GetNumColumns(); startIndex += MAX_COLUMNS)
+   {
+
+      textFile << "               ";
+      for (Integer i = startIndex; i < GmatMathUtil::Min(startIndex + MAX_COLUMNS, aprioriCov.GetNumColumns()); ++i)
+      {
+         textFile << GmatStringUtil::ToString(i + 1, 3);
+         if (i < aprioriCov.GetNumColumns() - 1)
+            textFile << "                  ";
+      }
+      textFile << "\n";
+
+      // write all rows from columns startIndex to startIndex+MAX_COLUMNS-1
+      for (Integer i = 0; i < aprioriCov.GetNumRows(); ++i)
+      {
+         textFile << "  " << GmatStringUtil::ToString(i + 1, indexLen) << "  ";
+         for (Integer j = startIndex; j < GmatMathUtil::Min(startIndex + MAX_COLUMNS, aprioriCov.GetNumColumns()); ++j)
+         {
+            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::RealToString(aprioriCov.GetElement(i, j), false, true, true, 12, 20), 21, GmatStringUtil::RIGHT);
+         }
+         textFile << "\n";
+      }
+      textFile << "\n";
+   }
+
+}
 
 //------------------------------------------------------------------------------
 // void WriteReportFileHeaderPart3()
@@ -2617,6 +3141,14 @@ void BatchEstimator::WriteReportFileHeaderPart3()
    paramNames.push_back("Central Body Thermal Radiation");
    paramNames.push_back("Spacecraft Thermal Radiation Pressure");
    paramNames.push_back("Relativistic Accelerations");
+
+   // Set flag to skip some section in force model table
+   bool skipGravityModel = true;
+   bool skipRadPressure = true;
+   bool skipDrag = true;
+   Integer gmIndex = 0;                // index such as paramNames[index] == "Central Body Gravity Model"
+   Integer rpIndex = 0;                // index such as paramNames[index] == "Solar Radiation Pressure"
+   Integer dragIndex = 0;              // index such as paramNames[index] == "Drag"
 
    Integer nameLen = 0;
    for (UnsignedInt i = 0; i < paramNames.size(); ++i)
@@ -2695,12 +3227,15 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             ss.str(""); ss << deg << "x" << ord;
             paramValues.push_back(potentialFile);                                                        // Central Body Gravity Model
             paramValues.push_back(ss.str());                                                             //   Degree and Order
+
+            skipGravityModel = false;
          }
          else
          {
             paramValues.push_back("None");                                                               // Central Body Gravity Model
             paramValues.push_back("N/A");                                                                //   Degree and Order
          }
+         gmIndex = paramValues.size() - 2;
 
          
          // fill blanks
@@ -2802,6 +3337,7 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             ss.str(""); ss << GmatStringUtil::RealToString(srp->GetRealParameter(srp->GetParameterID("Nominal_Sun"))*GmatMathConstants::M_TO_KM, false, true, false, 8); 
             paramValues.push_back(ss.str());                                                              // Astronomical Unit
 
+            skipRadPressure = false;
          }
          else
          {
@@ -2810,8 +3346,9 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             paramValues.push_back("");                                                                     // Solar Irradiance
             paramValues.push_back("");                                                                     // Astronomical Unit
          }
-
+         rpIndex = paramValues.size() - 4;
          
+
          std::string drag = ode->GetStringParameter("Drag");
          if (drag == "None")
          {
@@ -2822,8 +3359,12 @@ void BatchEstimator::WriteReportFileHeaderPart3()
          {
             paramValues.push_back("Yes");                                                                  // Drag
             paramValues.push_back(drag);                                                                   // Atmospheric Density Model
+
+            skipDrag = false;
          }
+         dragIndex = paramValues.size() - 2;
          
+
          if (gvForce != NULL)
             paramValues.push_back(gvForce->GetStringParameter("EarthTideModel"));
          else
@@ -2857,7 +3398,21 @@ void BatchEstimator::WriteReportFileHeaderPart3()
          if ((nameLen+2 + colCount*26) > (160-26))
          {
             for (UnsignedInt j = 0; j < rowContent.size(); ++j)
+            {
+               // skip 1 line showing the details of central body gravity model
+               if (skipGravityModel && (j == (gmIndex + 1)))
+                  continue;
+
+               // skip 3 lines showing the details of solar radiation pressure 
+               if (skipRadPressure && (rpIndex + 1 <= j) && (j <= rpIndex + 3))
+                  continue;
+
+               // skip 1 line showing the details of drag model
+               if (skipDrag && (j == (dragIndex + 1)))
+                  continue;
+
                textFile << rowContent[j] << "\n";
+            }
             textFile << "\n";
             textFile << "\n";
 
@@ -2894,6 +3449,13 @@ void BatchEstimator::WriteReportFileHeaderPart3()
             paramNames.push_back("Central Body Thermal Radiation");
             paramNames.push_back("Spacecraft Thermal Radiation Pressure");
             paramNames.push_back("Relativistic Accelerations");
+
+            skipGravityModel = true;
+            skipRadPressure = true;
+            skipDrag = true;
+            gmIndex = 0;
+            rpIndex = 0;
+            dragIndex = 0;
          }
          
          // 3.6. Clear paramValues and paramUnits
@@ -2902,7 +3464,21 @@ void BatchEstimator::WriteReportFileHeaderPart3()
    }
 
    for (UnsignedInt j = 0; j < rowContent.size(); ++j)
+   {
+      // skip 1 line showing the details of central body gravity model
+      if (skipGravityModel && (j == (gmIndex + 1)))
+         continue;
+
+      // skip 3 lines showing the details of solar radiation pressure 
+      if (skipRadPressure && (rpIndex + 1 <= j) &&(j <= rpIndex + 3))
+         continue;
+
+      // skip 1 line showing the details of drag model
+      if (skipDrag && (j == (dragIndex + 1)))
+         continue;
+
       textFile << rowContent[j] << "\n";
+   }
    textFile << "\n";
    textFile << "\n";
 
@@ -3089,6 +3665,9 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
    // 3. Write table containing ground stations' information
    textFile << GmatStringUtil::GetAlignmentString("", 66) + "Ground Station Configuration\n";
    textFile << "\n";
+   
+   bool skipTropoDesc = true;
+   Integer tropoIndex = 10;           // index such as paramNames[index] == "Troposphere Model"
 
    Integer colCount = 0;
    std::stringstream ss;
@@ -3123,6 +3702,8 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Temperature"), false, false, false, 8); paramValues.push_back(ss.str());
             ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Pressure"), false, false, false, 8); paramValues.push_back(ss.str());
             ss.str(""); ss << GmatStringUtil::RealToString(gs->GetRealParameter("Humidity"), false, false, false, 8); paramValues.push_back(ss.str());
+            
+            skipTropoDesc = false;
          }
          else
          {
@@ -3187,11 +3768,18 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             rowContent[j] += (GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(paramValues[j]), 27, GmatStringUtil::LEFT)+" ");      // each column has size of 28
          }
          
+
          // 3.5. Beak up columns in a table
          if ((nameLen+3+ colCount*24) > (160-48))
          {
             for (UnsignedInt j = 0; j < rowContent.size(); ++j)
+            {
+               // Remove 3 lines containing information about Temperature, Pressure, and Humidity when Troposphere model set to None for all stations in table
+               if (skipTropoDesc && (tropoIndex < j) && (j <= tropoIndex + 3))
+                  continue;
+
                textFile << rowContent[j] << "\n";
+            }
             textFile << "\n";
             textFile << "\n";
 
@@ -3215,6 +3803,8 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
             paramNames.push_back("  Pressure    (hPa)");
             paramNames.push_back("  Humidity    (%)");
             paramNames.push_back("Measurement Error Models");
+
+            skipTropoDesc = true;
          }
          
          // 3.6. Clear paramValues and paramUnits
@@ -3223,7 +3813,13 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
    }
    
    for (UnsignedInt j = 0; j < rowContent.size(); ++j)
+   {
+      // Remove 3 lines containing information about Temperature, Pressure, and Humidity when Troposphere model set to None for all stations in table
+      if (skipTropoDesc && (tropoIndex < j) && (j <= tropoIndex + 3))
+         continue;
+
       textFile << rowContent[j] << "\n";
+   }
    textFile << "\n";
    textFile << "\n";
 
@@ -3231,6 +3827,13 @@ void BatchEstimator::WriteReportFileHeaderPart4_2()
 }
 
 
+//-------------------------------------------------------------------------
+// void BatchEstimator::WriteReportFileHeaderPart4_3()
+//-------------------------------------------------------------------------
+/**
+* Write information about measurement ErrorModel to estimation report file
+*/
+//-------------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart4_3()
 {
    // 1. Get a list of all error models
@@ -3387,6 +3990,13 @@ void BatchEstimator::WriteReportFileHeaderPart4_3()
 }
 
 
+//----------------------------------------------------------------------
+// void WriteReportFileHeaderPart4()
+//----------------------------------------------------------------------
+/**
+* Write Measurement Modeling section to estimation report file 
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart4()
 {
    // 1. Write subheader
@@ -3416,6 +4026,13 @@ void BatchEstimator::WriteReportFileHeaderPart4()
 //Inverse Flattening Coefficient            2.9825700000e+03    1.00000000000e+00    1.00000000000e+00
 //Rotation Rate(rad / sec)                   7.2921159000e-04    7.29211590000e-04    7.29211590000e-04
 
+//----------------------------------------------------------------------
+// void WriteReportFileHeaderPart5()
+//----------------------------------------------------------------------
+/**
+* Write Astrodynamic Constants section to estimation report file
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteReportFileHeaderPart5()
 {
    // 1. Write astrodynamic contants header
@@ -3657,6 +4274,13 @@ void BatchEstimator::WriteReportFileHeaderPart6()
 }
 
 
+//----------------------------------------------------------------------
+// void WriteIterationHeader()
+//----------------------------------------------------------------------
+/**
+* Write iteration header
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteIterationHeader()
 {
    /// 1. Write iteration header
@@ -3673,7 +4297,7 @@ void BatchEstimator::WriteIterationHeader()
       << "\n"
       << "              Obs-Type            Obs/Computed Units   Residual Units                      Obs-Type            Obs/Computed Units   Residual Units\n"
       << "              Doppler_RangeRate   kilometers/second    kilometers/second                   Range_KM            kilometers           kilometers\n"
-      << "              Doppler_HZ          Hertz                Hertz                               Range_RU            Range Units          Range Units\n";
+      << "              Doppler             Hertz                Hertz                               DSNRange            Range Units          Range Units\n";
 
    textFile.flush();
 
@@ -3681,6 +4305,13 @@ void BatchEstimator::WriteIterationHeader()
 }
 
 
+//----------------------------------------------------------------------
+// void WritePageHeader()
+//----------------------------------------------------------------------
+/**
+* Write page header
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WritePageHeader()
 {
    /// 4.1. Write page header
@@ -3703,6 +4334,13 @@ void BatchEstimator::WritePageHeader()
 }
 
 
+//----------------------------------------------------------------------
+// void WriteIterationSummaryPart1(Solver::SolverState sState)
+//----------------------------------------------------------------------
+/**
+* Write statistics summary for estimation
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
 {
    if (sState == ESTIMATING)
@@ -3736,15 +4374,15 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
       case UNKNOWN:
          break;
       };
-      ss << "  ***\n";
-      textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER);
+      ss << "  ***";
+      textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER) << "\n";
 
-      // 1.2. Write reason for convergence 
-      textFile0 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(convergenceReason, GmatStringUtil::BOTH), 160, GmatStringUtil::CENTER);
+      // 1.2. Write reason for convergence
+      textFile0 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(convergenceReason.substr(0,convergenceReason.size()-1), GmatStringUtil::BOTH), 160, GmatStringUtil::CENTER) << "\n";
 
       // 1.3. Write number of iterations was run for estimation
       ss.str("");
-      ss << "Estimating completed in " << iterationsTaken << " iterations\n";
+      ss << "Estimating completed in " << iterationsTaken << " iterations";
       textFile0 << GmatStringUtil::GetAlignmentString(ss.str(), 160, GmatStringUtil::CENTER);
       textFile0 << "\n";
       textFile0 << "\n";
@@ -3819,6 +4457,13 @@ void BatchEstimator::WriteIterationSummaryPart1(Solver::SolverState sState)
 }
 
 
+//----------------------------------------------------------------------
+// std::string GetUnit(std::string type)
+//----------------------------------------------------------------------
+/**
+* Get unit for a given observation data type
+*/
+//----------------------------------------------------------------------
 std::string BatchEstimator::GetUnit(std::string type)
 {
    std::string unit = "";
@@ -3847,6 +4492,13 @@ std::string BatchEstimator::GetUnit(std::string type)
 }
 
 
+//----------------------------------------------------------------------
+// void WriteIterationSummaryPart2(Solver::SolverState sState)
+//----------------------------------------------------------------------
+/**
+* Write observation statistics summary
+*/
+//----------------------------------------------------------------------
 void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
 {
    if (sState == ESTIMATING)
@@ -3945,6 +4597,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
       for (UnsignedInt i = 0; i < stList.size(); ++i)
       {
          std::string keyword = stList[i] + " " + typeList[i];
+
          if (stList[i] == gsName)
          {
             // write a line on statistics table
@@ -4032,9 +4685,7 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
             sumSERes2Total = 0.0;
             sumSEWRes2Total = 0.0;
 
-            if (i < (stList.size()-1))
-               gsName = stList[i+1];
-
+            gsName = stList[i];
             lines.str("");
 
             // write a line on statistics table
@@ -4752,7 +5403,13 @@ void BatchEstimator::WriteIterationSummaryPart2(Solver::SolverState sState)
 }
 
 
-
+//------------------------------------------------------------------------------------------
+// void WriteIterationSummaryPart3(Solver::SolverState sState)
+//------------------------------------------------------------------------------------------
+/**
+* Write State Information section
+*/
+//------------------------------------------------------------------------------------------
 void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 {
    const std::vector<ListItem*> *map = esm.GetStateMap();
@@ -4762,7 +5419,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
    {
       // 1. Write state summary header
       textFile3 << "\n";
-      textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": STATE INFORMATION  **************************************************************\n";
+      //textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": STATE INFORMATION  **************************************************************\n";
+      textFile3 << "**************************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken+1, 3) << ": STATE INFORMATION  **************************************************************\n";
       textFile3 << "\n";
 
 
@@ -4825,7 +5483,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 
       // 7. Write state information
       textFile3   << " " << GmatStringUtil::GetAlignmentString("State Component", max_len + 4, GmatStringUtil::LEFT)
-         << "Units         Current State      Apriori State      Standard Dev.     Previous State    Current-Apriori   Current-Previous\n";
+         << "Units           Current State        Apriori State      Standard Dev.       Previous State    Current-Apriori   Current-Previous\n";
       textFile3 << "\n";
       textFile3.precision(8);
 
@@ -4889,13 +5547,13 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
          textFile3 << " ";
          textFile3 << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 1, GmatStringUtil::LEFT);
          textFile3 << GmatStringUtil::GetAlignmentString(unit, 8, GmatStringUtil::LEFT);
-         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                    // current state
-         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                    // apriori state
+         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);                    // current state
+         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriSolveForState[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);                    // apriori state
          if (covar(i, i) >= 0.0)
             textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(GmatMathUtil::Sqrt(covar(i, i)), false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);          // standard deviation
          else
             textFile3 << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT);
-         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousSolveForState[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);                   // previous state
+         textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousSolveForState[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);                   // previous state
          textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i] - aprioriSolveForState[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);   // current state - apriori
          textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentSolveForState[i] - previousSolveForState[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);  // current state - previous state
          textFile3 << "\n";
@@ -4973,14 +5631,14 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             textFile3 << " ";
             textFile3 << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 1, GmatStringUtil::LEFT);
             textFile3 << GmatStringUtil::GetAlignmentString(unitList[i], 8, GmatStringUtil::LEFT);
-            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // current state
-            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // apriori state
+            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);             // current state
+            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriArr[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);             // apriori state
             if (stdArr[i] >= 0.0)
                textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(stdArr[i], false, true, true, 8, 18)), 19, GmatStringUtil::RIGHT);                       // standard deviation
             else
                textFile3 << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT);
 
-            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousArr[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);            // previous state
+            textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousArr[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);            // previous state
             textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i] - aprioriArr[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);   // current state - apriori 
             textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentArr[i] - previousArr[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);  // current state - previous state
             textFile3 << "\n";
@@ -5027,7 +5685,7 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
       }
 
       textFile3 << " " << GmatStringUtil::GetAlignmentString("Ancillary Elements", max_len + 4, GmatStringUtil::LEFT)
-         << "Units         Current State      Apriori State      Standard Dev.     Previous State    Current-Apriori   Current-Previous\n";
+         << "Units           Current State        Apriori State      Standard Dev.       Previous State    Current-Apriori   Current-Previous\n";
       textFile3 << "\n";
 
       // Specify value of all elements:
@@ -5056,15 +5714,15 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
             }
             else
             {
-               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // current state
-               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);             // apriori state
+               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);             // current state
+               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(aprioriAE[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);             // apriori state
                //if (stdArr[i] >= 0.0)
                //   textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(stdArr[i], false, true, true, 8, 18)), 19, GmatStringUtil::RIGHT);                       // standard deviation
                //else
                //   textFile3 << GmatStringUtil::GetAlignmentString("N/A", 19, GmatStringUtil::RIGHT);
                textFile3 << GmatStringUtil::GetAlignmentString("", 19, GmatStringUtil::RIGHT);
 
-               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousAE[i], false, false, true, precision, 18)), 19, GmatStringUtil::RIGHT);            // previous state
+               textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(previousAE[i], false, false, true, precision, 20)), 21, GmatStringUtil::RIGHT);            // previous state
                textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i] - aprioriAE[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);   // current state - apriori 
                textFile3 << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::RealToString(currentAE[i] - previousAE[i], false, true, true, precision, 18)), 19, GmatStringUtil::RIGHT);  // current state - previous state
                textFile3 << "\n";
@@ -5078,7 +5736,13 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 }
 
 
-#define MAX_COLUMNS 7
+//------------------------------------------------------------------------------------------
+// void WriteIterationSummaryPart4(Solver::SolverState sState)
+//------------------------------------------------------------------------------------------
+/**
+* Write Covariance/Correlation Matrix section
+*/
+//------------------------------------------------------------------------------------------
 void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
 {
    const std::vector<ListItem*> *map = esm.GetStateMap();
@@ -5088,7 +5752,8 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
    {
       // 1. Write header:
       textFile4 << "\n";
-      textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
+      //textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
+      textFile4 << "********************************************************  ITERATION " << GmatStringUtil::ToString(iterationsTaken+1, 3) << ": COVARIANCE/CORRELATION MATRIX  ********************************************************\n";
       textFile4 << "\n";
 
       // 2. Write covariance and correlation matrxies in Cartesian coordiante system:
@@ -5298,6 +5963,13 @@ void BatchEstimator::WriteIterationSummaryPart4(Solver::SolverState sState)
 }
 
 
+//------------------------------------------------------------------------------------------
+// void WriteReportFileSummary(Solver::SolverState sState)
+//------------------------------------------------------------------------------------------
+/**
+* Write estimation summary
+*/
+//------------------------------------------------------------------------------------------
 void BatchEstimator::WriteReportFileSummary(Solver::SolverState sState)
 {
    WriteIterationSummaryPart1(sState);
@@ -5307,6 +5979,14 @@ void BatchEstimator::WriteReportFileSummary(Solver::SolverState sState)
 }
 
 
+//------------------------------------------------------------------------------------------
+// std::map<GmatBase*, Rvector6> CalculateCartesianStateMap(
+//                                  const std::vector<ListItem*> *map, GmatState state)
+//------------------------------------------------------------------------------------------
+/**
+* This function is used to calculate state in Cartesian coordinate system
+*/
+//------------------------------------------------------------------------------------------
 std::map<GmatBase*, Rvector6> BatchEstimator::CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, Rvector6> stateMap;
@@ -5326,6 +6006,14 @@ std::map<GmatBase*, Rvector6> BatchEstimator::CalculateCartesianStateMap(const s
 }
 
 
+//------------------------------------------------------------------------------------------
+// std::map<GmatBase*, Rvector6> CalculateKeplerianStateMap(
+//                                  const std::vector<ListItem*> *map, GmatState state)
+//------------------------------------------------------------------------------------------
+/**
+* This function is used to calculate state in Keplerian coordinate system
+*/
+//------------------------------------------------------------------------------------------
 std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, Rvector6> stateMap;
@@ -5354,6 +6042,14 @@ std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const s
 }
 
 
+//------------------------------------------------------------------------------------------
+// std::map<GmatBase*, Rvector6> CalculateAncillaryElements(
+//                                  const std::vector<ListItem*> *map, GmatState state)
+//------------------------------------------------------------------------------------------
+/**
+* This function is used to calculate ancillary elements
+*/
+//------------------------------------------------------------------------------------------
 std::map<GmatBase*, RealArray> BatchEstimator::CalculateAncillaryElements(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, RealArray> stateMap;
@@ -5899,6 +6595,89 @@ Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
       }
       retval = 0;
    }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool WriteMatData()
+//------------------------------------------------------------------------------
+/**
+ * Method used to write the MATLAB .mat file
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool BatchEstimator::WriteMatData()
+{
+   bool retval = true;
+
+   // Set the top level label
+   std::stringstream name;
+   name << "Iteration" << iterationsTaken;
+
+   StringArray dataDesc;
+
+   // Package the data lists
+   std::vector<WriterData*> containers;
+
+   // matData.elementStatus
+   dataDesc.push_back("Status");
+   WriterData* writerData = matWriter->GetContainer(Gmat::REAL_TYPE, "Status");
+   std::vector<RealArray> statData;
+   statData.push_back(matData.elementStatus);
+   writerData->AddData(statData);
+   containers.push_back(writerData);
+
+   // The Real data containers
+   for (UnsignedInt i = 0; i < matData.realNames.size(); ++i)
+   {
+      dataDesc.push_back(matData.realNames[i]);
+      writerData = matWriter->GetContainer(Gmat::REAL_TYPE, matData.realNames[i]);
+      std::vector<RealArray> vecData;
+      vecData.push_back(matData.realValues[i]);
+      writerData->AddData(vecData);
+      containers.push_back(writerData);
+   }
+
+   for (UnsignedInt i = 0; i < matData.stringNames.size(); ++i)
+   {
+      dataDesc.push_back(matData.stringNames[i]);
+      writerData = matWriter->GetContainer(Gmat::STRING_TYPE, matData.stringNames[i]);
+      std::vector<StringArray> strData;
+
+      #ifdef DEBUG_MAT_WRITER
+         MessageInterface::ShowMessage("%s has %d strings\n",
+               matData.stringNames[i].c_str(), matData.stringValues[i].size());
+         MessageInterface::ShowMessage("   %d:  %s\n", 0,
+               matData.stringValues[i][0].c_str());
+      #endif
+
+      strData.push_back(matData.stringValues[i]);
+
+      #ifdef DEBUG_MAT_WRITER
+         MessageInterface::ShowMessage("   vecData has %d entries\n",
+               vecData.size());
+         MessageInterface::ShowMessage("   vecData[0] has %d entries\n",
+               vecData[0].size());
+         MessageInterface::ShowMessage("      %d:  %s\n", 0,
+               vecData[0][0].c_str());
+      #endif
+
+      writerData->AddData(strData);
+      containers.push_back(writerData);
+   }
+
+   // Write it
+   matWriter->DescribeData(dataDesc);
+   for (UnsignedInt i = 0; i < containers.size(); ++i)
+      matWriter->AddData(containers[i]);
+
+   matWriter->WriteData(name.str());
+
+   // Clean up for the next pass
+   matData.Clear();
 
    return retval;
 }

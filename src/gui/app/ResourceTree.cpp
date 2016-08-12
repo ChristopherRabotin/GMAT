@@ -149,6 +149,9 @@
 // If we are ready to handle Constellations, enable this
 //define __ENABLE_CONSTELLATIONS__
 
+// If we are ready to handle GUI Navigation plugins, enable this
+//#define __ENABLE_NAV_GUI__
+
 //#define DEBUG_RESOURCE_TREE
 //#define DEBUG_ADD_DEFAULT_OBJECTS
 //#define DEBUG_ADD_OBJECT
@@ -209,6 +212,8 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_FUELTANK_ELECTRIC, ResourceTree::OnAddElectricFuelTank)
    EVT_MENU(POPUP_ADD_THRUSTER_CHEMICAL, ResourceTree::OnAddChemicalThruster)
    EVT_MENU(POPUP_ADD_THRUSTER_ELECTRIC, ResourceTree::OnAddElectricThruster)
+   EVT_MENU(POPUP_ADD_NUCLEAR_POWER_SYSTEM, ResourceTree::OnAddNuclearPowerSystem)
+   EVT_MENU(POPUP_ADD_SOLAR_POWER_SYSTEM, ResourceTree::OnAddSolarPowerSystem)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
    EVT_MENU(POPUP_ADD_CONSTELLATION, ResourceTree::OnAddConstellation)
    EVT_MENU(POPUP_ADD_IMPULSIVE_BURN, ResourceTree::OnAddImpulsiveBurn)
@@ -371,7 +376,6 @@ void ResourceTree::ClearResource(bool leaveScripts, bool onlyChildNodes)
    wxTreeItemId cf = GetFirstChild(root, cookie);
    for(UnsignedInt i = 0; i < GetChildrenCount(root, false); ++i)
    {
-//      if (cf != interfaceItem)
       {
          if (cf != mScriptItem)
          {
@@ -405,7 +409,6 @@ void ResourceTree::ClearResource(bool leaveScripts, bool onlyChildNodes)
    AddItemFolder(mSolverItem, mOptimizerItem, "Optimizers",
                  GmatTree::OPTIMIZER_FOLDER);
    
-   //AddUserResources(theGuiInterpreter->GetUserResources(), true);
    AddUserResources(theGuiInterpreter->GetUserResources(), onlyChildNodes);
 }
 
@@ -1026,6 +1029,10 @@ wxTreeItemId ResourceTree::AddObjectToTree(GmatBase *obj, bool showDebug)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultResources()
 {
+   #ifdef DEBUG_RESOURCE_TREE
+   MessageInterface::ShowMessage("ResourceTree::AddDefaultResources() entered\n");
+   #endif
+   
    wxTreeItemId resource =
       AddRoot(wxT("Resources"), -1, -1,
               new GmatTreeItemData(wxT("Resources"), GmatTree::RESOURCES_FOLDER));
@@ -1200,35 +1207,18 @@ void ResourceTree::AddDefaultResources()
       SetItemImage(mFunctionItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
                    wxTreeItemIcon_Expanded);
    }
-
-   // Changed to call UpdateResource() and commented out adding
-   // default resource (Fix for GMT-4714 LOJ: 2014.09.11)
    
    // Add default and user resources
    UpdateResource(true, false);
-   
-   // AddDefaultBodies(mUniverseItem);
-   // AddDefaultSpecialPoints(mSpecialPointsItem);
-   // AddDefaultSpacecraft(mSpacecraftItem);
-   // AddDefaultFormations(mFormationItem);
-   // AddDefaultGroundStation(mGroundStationItem);
-   // AddDefaultHardware(mHardwareItem);
-   // #ifdef __ENABLE__CONSTELLATIONS__
-   // AddDefaultConstellations(constellationItem);
-   // #endif
-   // AddDefaultPropagators(mPropagatorItem);
-   // AddDefaultSolvers(mSolverItem);
-   // AddDefaultSubscribers(mSubscriberItem);
-   // AddDefaultInterfaces(interfaceItem);
-   // AddDefaultVariables(mVariableItem);
-   // AddDefaultFunctions(mFunctionItem);
-   // AddDefaultCoordSys(mCoordSysItem);
-   // AddUserObjects();
    
    // Set scroll bar to left to show resource nodes (Fix for GMT-4714 LOJ: 2014.09.11)
    SetScrollPos(wxHORIZONTAL, 0, true);
    
    theGuiInterpreter->ResetConfigurationChanged(true, false);
+   
+   #ifdef DEBUG_RESOURCE_TREE
+   MessageInterface::ShowMessage("ResourceTree::AddDefaultResources() leaving\n");
+   #endif
 }
 
 
@@ -1498,7 +1488,6 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       itemType = GmatTree::INTERFACE;
 	  itemIcon = GmatTree::RESOURCE_ICON_FILEINTERFACE;
    }
-
    
    // ------------------- Plugin objects
    // Hardware
@@ -1562,7 +1551,8 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       {
          itemIcon = GmatTree::RESOURCE_ICON_CONTACT_LOCATOR;
       }
-   }   
+   }
+   
    // MeasurementModel
    else if (obj->IsOfType("MeasurementModel") || obj->IsOfType(Gmat::MEASUREMENT_MODEL))
    {
@@ -1621,7 +1611,7 @@ void ResourceTree::AddDefaultGroundStation(wxTreeItemId itemId, bool restartCoun
 
       #ifdef DEBUG_ADD_DEFAULT_OBJECTS
       MessageInterface::ShowMessage
-         ("ResourceTree::AddDefaultGroundStation() objName=%s\n", objName.c_str());
+         ("ResourceTree::AddDefaultGroundStation() objName=%s\n", objName.WX_TO_C_STRING);
       #endif
       
       AppendItem(itemId, objName, GmatTree::RESOURCE_ICON_GROUND_STATION, -1,
@@ -1704,6 +1694,10 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool restartCounter)
    for (int i = 0; i < size; i++)
    {
       GmatBase *obj = GetObject(itemNames[i]);
+      #ifndef __ENABLE_NAV_GUI__
+      if (obj->IsOfType("Antenna") || obj->IsOfType("RFHardware"))
+         continue;
+      #endif
       AddObjectToTree(obj, debugHardware);
    };
    
@@ -3135,6 +3129,56 @@ void ResourceTree::OnAddElectricThruster(wxCommandEvent &event)
       Expand(item);
       SelectItem(GetLastChild(item));            
       theGuiManager->UpdateThruster();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddNuclearPowerSystem(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a NuclearPowerSystem to hardware folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddNuclearPowerSystem(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   std::string newName = theGuiInterpreter->GetNewName("NuclearPowerSystem", 1);
+   GmatBase *obj = CreateObject("NuclearPowerSystem", newName);
+
+   if (obj != NULL)
+   {
+      AddObjectToTree(obj);
+      
+      Expand(item);
+      SelectItem(GetLastChild(item));            
+      theGuiManager->UpdatePowerSystem();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddSolarPowerSystem(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a SolarPowerSystem to hardware folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddSolarPowerSystem(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   std::string newName = theGuiInterpreter->GetNewName("SolarPowerSystem", 1);
+   GmatBase *obj = CreateObject("SolarPowerSystem", newName);
+
+   if (obj != NULL)
+   {
+      AddObjectToTree(obj);
+      
+      Expand(item);
+      SelectItem(GetLastChild(item));            
+      theGuiManager->UpdatePowerSystem();
    }
 }
 
@@ -5328,6 +5372,11 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       const Gmat::ObjectType gmatType, const std::string &subtype)
 {
+   #ifdef DEBUG_POPUP_MENU
+   MessageInterface::ShowMessage
+      ("ResourceTree::CreatePopupMenu() entered, itemType=%d, gmatType=%d, "
+       "sybtype='%s'\n", itemType, gmatType, subtype.c_str());
+   #endif
    wxMenu *menu = new wxMenu;
 
    StringArray listOfObjects;
@@ -5340,23 +5389,31 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       menu->Append(POPUP_ADD_FUELTANK_ELECTRIC, wxT("Electric Tank"));
       menu->Append(POPUP_ADD_THRUSTER_CHEMICAL, wxT("Chemical Thruster"));
       menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("Electric Thruster"));
+      menu->Append(POPUP_ADD_NUCLEAR_POWER_SYSTEM, wxT("NuclearPowerSystem"));
+      menu->Append(POPUP_ADD_SOLAR_POWER_SYSTEM, wxT("SolarPowerSystem"));
       listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::HARDWARE);
+      
+      #ifdef __ENABLE_NAV_GUI__
       newId = HARDWARE_BEGIN;
       for (StringArray::iterator i = listOfObjects.begin();
            i != listOfObjects.end(); ++i, ++newId)
       {
          // Drop the ones that are already there for now
          std::string hardwareType = (*i);
-//         if ((hardwareType != "FuelTank") &&
-//             (hardwareType != "Thruster") )
          if ((hardwareType.find("Thruster") == hardwareType.npos) &&
-            (hardwareType.find("Tank") == hardwareType.npos))
+             (hardwareType.find("Tank") == hardwareType.npos) &&
+             (hardwareType.find("PowerSystem") == hardwareType.npos))
          {
+            #ifdef DEBUG_POPUP_MENU
+            MessageInterface::ShowMessage
+               ("   ==> Adding hardwareType '%s' to menu\n", hardwareType.c_str());
+            #endif
             // Save the ID and type name for event handling
             pluginMap[POPUP_ADD_HARDWARE + newId] = hardwareType;
             menu->Append(POPUP_ADD_HARDWARE + newId, wxString(hardwareType.c_str()));
          }
       }
+      #endif
       break;
    case GmatTree::BURN_FOLDER:
       menu->Append(POPUP_ADD_IMPULSIVE_BURN, wxT("ImpulsiveBurn"));
@@ -5381,9 +5438,6 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       {
          // Drop the ones that are already there for now
          std::string solverType = (*i);
-//         if ((solverType != "DifferentialCorrector") &&
-//             (solverType != "FminconOptimizer") &&
-//             (solverType != "Quasi-Newton"))
          if (solverType != "FminconOptimizer")
          {
             // Save the ID and type name for event handling
@@ -5543,6 +5597,10 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       break;
    }
 
+   #ifdef DEBUG_POPUP_MENU
+   MessageInterface::ShowMessage
+      ("ResourceTree::CreatePopupMenu() returning menu <%p>\n", menu);
+   #endif
    return menu;
 }
 
@@ -6000,6 +6058,13 @@ void ResourceTree::AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
                r->subtype.c_str());
       #endif
 
+      #ifndef __ENABLE_NAV_GUI__
+      // Skip non-viewable resource (LOJ: 2016.06.22)
+      if (r->nodeName == "Simulators" || r->nodeName == "Estimators" ||
+          r->nodeName == "Measurements")
+         continue;
+      #endif
+      
       if (onlyChildNodes && (r->parentNodeName == ""))
          id = FindIdOfNode(r->nodeName.c_str(), GetRootItem());
       else

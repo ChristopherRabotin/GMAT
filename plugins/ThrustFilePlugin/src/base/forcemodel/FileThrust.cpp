@@ -25,6 +25,7 @@
 #include <sstream>               // for stringstream
 
 
+//#define DEBUG_INITIALIZATION
 //#define DEBUG_FILETHRUST_EXE
 //#define DEBUG_INTERPOLATION
 //#define DEBUG_MASS_FLOW

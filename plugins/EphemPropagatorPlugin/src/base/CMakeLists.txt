@@ -24,10 +24,6 @@ ADD_DEFINITIONS("-DEPHEM_PROPAGATOR_EXPORTS")
 SET(PLUGIN_DIRS factory include plugin propagator)
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-
-# ====================================================================
 # source files
 SET(PLUGIN_SRCS
     factory/EphemPropFactory.cpp
