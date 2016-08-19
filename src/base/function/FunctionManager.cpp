@@ -19,7 +19,7 @@
 // governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan
-// FunctionManagerd: 2008.03.24
+// Created: 2008.03.24
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CCA54C
@@ -61,7 +61,7 @@
 //#define DEBUG_SUBSCRIBER
 //#define DEBUG_CLEANUP
 //#define DEBUG_FIND_OBJ
-
+//#define DEBUG_CREATE_OBJ
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
 //#endif
@@ -1662,9 +1662,9 @@ void FunctionManager::RefreshFormalInputObjects()
           formalName.c_str());
       #endif
       
-      GmatBase *obj = NULL;
-      GmatBase *fosObj = NULL;
-      GmatBase *gosObj = NULL;
+      GmatBase *objPassed = NULL;
+      GmatBase *fosObjFormal = NULL;
+      GmatBase *gosObjFormal = NULL;
       if (functionObjectStore->find(formalName) == functionObjectStore->end())
       {
          // Try globalObjectStore (LOJ: 2015.10.19 GMT-5336)
@@ -1681,7 +1681,7 @@ void FunctionManager::RefreshFormalInputObjects()
                ("   formalName='%s' found from the global object store\n", formalName.c_str());
             #endif
             
-            gosObj = (*globalObjectStore)[formalName];
+            gosObjFormal = (*globalObjectStore)[formalName];
          }
       }
       else
@@ -1691,15 +1691,18 @@ void FunctionManager::RefreshFormalInputObjects()
             ("   formalName='%s' found from the function object store\n", formalName.c_str());
          #endif
          
-         // GmatBase *obj = NULL;
-         // GmatBase *fosObj = (*functionObjectStore)[formalName];
-         fosObj = (*functionObjectStore)[formalName];
+         fosObjFormal = (*functionObjectStore)[formalName];
       }
+      
+      #ifdef DEBUG_FM_EXECUTE
+      MessageInterface::ShowMessage("   fosObjFormal=<%p>\n", fosObjFormal);
+      MessageInterface::ShowMessage("   gosObjFormal=<%p>\n", gosObjFormal);
+      #endif
       
       // Now find the corresponding input object
       // if passed name not found in LOS or GOS, it may be a number, string literal,
       // array element, or automatic object such as sat.X
-      if (!(obj = FindObject(passedName)))
+      if (!(objPassed = FindObject(passedName)))
       {
          #ifdef DEBUG_FM_EXECUTE
          ShowObjectMap(&createdLiterals, "createdLiterals map in RefreshFormalInputObjects");
@@ -1709,7 +1712,7 @@ void FunctionManager::RefreshFormalInputObjects()
          if (createdLiterals.find(passedName) == createdLiterals.end())
          {
             #ifdef DEBUG_FM_EXECUTE
-            ShowObjectMap(&createdLiterals, "createdOthers map in RefreshFormalInputObjects");
+            ShowObjectMap(&createdOthers, "createdOthers map in RefreshFormalInputObjects");
             #endif            
             
             if (createdOthers.find(passedName) == createdOthers.end())
@@ -1724,10 +1727,13 @@ void FunctionManager::RefreshFormalInputObjects()
                ("   '%s' found from the createdOthers\n", passedName.c_str());
             #endif
             
-            GmatBase *oldFosObj = fosObj;
-            GmatBase *oldObj = createdOthers[passedName];
-            obj = CreateObject(passedName);
-            if (!obj)
+            GmatBase *oldObjPassed = createdOthers[passedName];
+            objPassed = CreateObject(passedName);
+            #ifdef DEBUG_FM_EXECUTE
+            MessageInterface::ShowMessage("   oldObjPassed=<%p>\n", oldObjPassed);
+            MessageInterface::ShowMessage("   objPassed=<%p>\n", objPassed);
+            #endif
+            if (!objPassed)
             {
                std::string errMsg2 =
                   "FunctionManager: Object not found or created for input string \"";
@@ -1735,35 +1741,36 @@ void FunctionManager::RefreshFormalInputObjects()
                errMsg2 += functionName + "\"\n";
                throw FunctionException(errMsg2);
             }
-            createdOthers[passedName] = obj;
-            fosObj = obj->Clone();
-            fosObj->SetName(formalName);
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Add
-               (fosObj, formalName, "FunctionManager::RefreshFormalInputObjects()",
-                "obj->Clone()");
-            #endif
+            createdOthers[passedName] = objPassed;
             
-            if (oldFosObj)
+            // Do not delete fosObjFormal here. when GmatFunction is called within
+            // a loop, fosObjFormal and oldObjPassed points to the same object,
+            // it will do double delete which causes a crash. (Fix for GMT-5717)
+            // if (fosObjFormal)
+            // {
+            //    MessageInterface::ShowMessage("==> Deleting fosObjFormal=<%p>\n", fosObjFormal);
+            //    #ifdef DEBUG_MEMORY
+            //    MemoryTracker::Instance()->Remove
+            //       (fosObjFormal, osObjFormal->GetName(),
+            //        "FunctionManager::RefreshFormalInputObjects()", "deleting fosObjFormal");
+            //    #endif
+            //    delete fosObjFormal;
+            //    fosObjFormal = NULL;
+            // }
+            
+            // Delete oldObjPassed if not the same as fosObjFormal
+            if (oldObjPassed && (fosObjFormal != oldObjPassed))
             {
+               #ifdef DEBUG_FM_EXECUTE
+               MessageInterface::ShowMessage("   Deleting oldObjPassed=<%p>\n", oldObjPassed);
+               #endif
                #ifdef DEBUG_MEMORY
                MemoryTracker::Instance()->Remove
-                  (oldFosObj, oldFosObj->GetName(),
-                   "FunctionManager::RefreshFormalInputObjects()", "deleting oldFosObj");
+                  (oldObjPassed, oldObjPassed->GetName(), "FunctionManager::RefreshFormalInputObjects()",
+                   "deleting oldObjPassed");
                #endif
-               delete oldFosObj;
-               oldFosObj = NULL;
-            }
-            
-            if (oldObj)
-            {
-               #ifdef DEBUG_MEMORY
-               MemoryTracker::Instance()->Remove
-                  (oldObj, oldObj->GetName(), "FunctionManager::RefreshFormalInputObjects()",
-                   "deleting oldObj");
-               #endif
-               delete oldObj;
-               oldObj = NULL;
+               delete oldObjPassed;
+               oldObjPassed = NULL;
             }
          }
          else
@@ -1772,7 +1779,7 @@ void FunctionManager::RefreshFormalInputObjects()
             MessageInterface::ShowMessage
                ("   '%s' found from the createdLiterals\n", passedName.c_str());
             #endif
-            obj = createdLiterals[passedName];
+            objPassed = createdLiterals[passedName];
          }
       }
       
@@ -1783,14 +1790,14 @@ void FunctionManager::RefreshFormalInputObjects()
       
       // Update the object in the function or global object store with the current/reset data
       // If global object use global object store (LOJ: 2015.10.19 for GMT-5336 fix)
-      if (fosObj)
+      if (fosObjFormal)
       {
-         fosObj->Copy(obj);
-         (inputWrapperMap[formalName])->SetRefObject(fosObj);  // is this necessary? I think so
+         fosObjFormal->Copy(objPassed);
+         (inputWrapperMap[formalName])->SetRefObject(fosObjFormal);  // is this necessary? I think so
       }
-      else if (gosObj)
+      else if (gosObjFormal)
       {
-         (inputWrapperMap[formalName])->SetRefObject(gosObj);
+         (inputWrapperMap[formalName])->SetRefObject(gosObjFormal);
       }
    }
    
