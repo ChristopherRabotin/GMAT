@@ -518,6 +518,8 @@ public:
    std::string GetScriptCreatedFrom();
    void SetIsCreatedFromMainScript(bool flag);
    bool IsCreatedFromMainScript();
+   void SetForceGenerateObjectString(bool flag);
+   bool GetForceGenerateObjectString();
    
    /// Functions use information from Moderator
    ObjectMap               GetConfiguredObjectMap();
@@ -555,7 +557,9 @@ protected:
    std::string         scriptCreatedFrom;
    /// Flag indicating object is created from the main script
    bool                isCreatedFromMainScript;
-   
+   /// Flag indicating force generate string even though this object is not
+   /// created from the main script
+   bool                forceGenerateObjectString;
    /// Enumerated base type of the object
    Gmat::ObjectType    type;
    /// Number of owned objects that belong to this instance

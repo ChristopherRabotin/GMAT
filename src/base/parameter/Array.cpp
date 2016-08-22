@@ -393,6 +393,26 @@ bool Array::IsParameterReadOnly(const Integer id) const
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterCloaked(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+* Checks to see if the requested parameter is cloaked
+*
+* @param <id> Description for the parameter.
+*
+* @return true if the parameter is cloaked
+*/
+//---------------------------------------------------------------------------
+bool Array::IsParameterCloaked(const Integer id) const
+{
+   if (id == OBJECT)
+      return true;
+
+   return Parameter::IsParameterCloaked(id);
+}
+
+
 //------------------------------------------------------------------------------
 // bool IsParameterCommandModeSettable(const Integer id) const
 //------------------------------------------------------------------------------

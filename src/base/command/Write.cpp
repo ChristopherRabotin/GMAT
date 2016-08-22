@@ -127,6 +127,8 @@ Write::Write(const Write &cmd) :
    elementNames = cmd.elementNames;
    actualElementNames = cmd.actualElementNames;
    elementWrappers.clear();
+   writableObjects.clear();
+   origWritableFlagMap.clear();
 }
 
 
@@ -177,6 +179,8 @@ bool Write::InterpretAction()
        generatingString.c_str());
    #endif
 
+   if (generatingString[0] == '\n')
+      generatingString = generatingString.substr(1, generatingString.npos);
    StringArray blocks = parser.DecomposeBlock(generatingString);
 
    StringArray chunks = parser.SeparateBrackets(blocks[0], "{}", " ", false);
@@ -851,7 +855,7 @@ const std::string& Write::GetGeneratingString(Gmat::WriteMode mode,
    else
       gen += "MessageWindow = false";
    if (reportFile != "")
-      gen += ", ReportFile = \"" + reportFile + "\" }";
+      gen += ", ReportFile = " + reportFile + " }";
    else
       gen += " }";
 
@@ -892,7 +896,9 @@ bool Write::Initialize()
    
    // parms.clear();
    GmatBase *mapObj = NULL;
-
+   writableObjects.clear();
+   origWritableFlagMap.clear();
+   
    if (reportFile != "")
    {
       mapObj = FindObject(reportFile);
@@ -939,6 +945,14 @@ bool Write::Initialize()
             throw CommandException(msg);
          }
       }
+      writableObjects.push_back(mapObj);
+      bool origFlag = mapObj->GetForceGenerateObjectString();
+      origWritableFlagMap.insert(std::make_pair(mapObj, origFlag));
+      #ifdef DEBUG_Write_EXEC
+      MessageInterface::ShowMessage
+         ("   Added object <%p><%s><%s> to writableObjects, origFlag=%d\n",
+          mapObj, mapObj->GetTypeName().c_str(), mapObj->GetName().c_str(), origFlag);
+      #endif      
    }
    
    // Set Wrapper references
@@ -974,15 +988,14 @@ void Write::ExecuteReport()
 {
    if (reporter == NULL)
       throw CommandException("Reporter is not yet set\n");
-
-#ifdef DEBUG_Write_EXEC
+   
+   #ifdef DEBUG_Write_EXEC
    MessageInterface::ShowMessage
-      ("\nReport::Execute() this=<%p> <%s> entered, reporter <%s> '%s' has %d Parameters\n",
-      this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
-      reporter->GetName().c_str(), reporter->GetStringParameter("Filename").c_str(),
-      parms.size());
-#endif
-
+      ("\nWrite::ExecuteReport() this=<%p> <%s> entered, reporter=<%s> '%s'\n",
+       this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       reporter->GetName().c_str(), reporter->GetStringParameter("Filename").c_str());
+   #endif
+   
    if (outputStyle != SCRIPTABLE)
    {
       // Build the data as a string
@@ -1057,19 +1070,32 @@ bool Write::Execute()
 
    bool retval = true;
    bool logging = MessageInterface::GetLogEnable();
-      
+   
    std::string prefix;
    std::string wrapperToStr;
    GmatBase *gb;
-
+   
+   // Allow generating object string even though it was not created in the
+   // main script (GMT-5756 Fix)
+   for (ObjectArray::iterator i = writableObjects.begin(); i < writableObjects.end(); i++)
+   {
+      GmatBase *mapObj = *i;
+      mapObj->SetForceGenerateObjectString(true);
+      #ifdef DEBUG_Write_EXEC
+      MessageInterface::ShowMessage
+         ("   ==> Set writable object <%p><%s><%s> to true\n",
+          mapObj, mapObj->GetTypeName().c_str(), mapObj->GetName().c_str());
+      #endif
+   }
+   
    // write to report file
    if (reporter != NULL)
       ExecuteReport();
-
+   
    // Write to Message Window using elementWrappers
    for (WrapperArray::iterator i = elementWrappers.begin(); i < elementWrappers.end(); i++)
    {
-      #ifdef DEBUG_Write_INIT
+      #ifdef DEBUG_Write_EXEC
       MessageInterface::ShowMessage
          ("   wrapper desc = '%s'\n", (*i)->GetDescription().c_str());
       #endif
@@ -1144,7 +1170,35 @@ bool Write::Execute()
          }
       }
    }
-
+   
+   // Reset allow generating object string even though it was not created in the
+   // main script (GMT-5756 Fix)
+   for (ObjectArray::iterator i = writableObjects.begin(); i < writableObjects.end(); i++)
+   {
+      GmatBase *mapObj = *i;
+      if (origWritableFlagMap.find(mapObj) != origWritableFlagMap.end())
+      {
+         bool origFlag = origWritableFlagMap[mapObj];
+         mapObj->SetForceGenerateObjectString(origFlag);
+         #ifdef DEBUG_Write_EXEC
+         MessageInterface::ShowMessage
+            ("   ==> Reset writable object <%p><%s><%s> to %s\n",
+             mapObj, mapObj->GetTypeName().c_str(), mapObj->GetName().c_str(),
+             origFlag ? "true" : "false");
+         #endif
+      }
+      else
+      {
+         std::string msg = "*** INTERNAL ERROR *** Object named \"" + (*i)->GetName() +
+            "\" cannot be found for the Write command during post-setting of writable objects'" +
+            GetGeneratingString(Gmat::NO_COMMENTS) + "'";
+         #ifdef DEBUG_Write_EXEC
+         MessageInterface::ShowMessage("%s\n", msg.c_str());
+         #endif
+         throw CommandException(msg);
+      }
+   }
+   
    BuildCommandSummary(true);
    
    #ifdef DEBUG_Write_EXEC

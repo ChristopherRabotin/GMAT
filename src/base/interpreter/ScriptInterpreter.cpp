@@ -1234,7 +1234,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader,bool rein
                #endif
                incRetval = InterpretIncludeFile(inCmd);
                #ifdef DBGLVL_SCRIPT_READING
-               MessageInterface::ShowMessage("   => Returned from InterpretIncludeFile()\n");
+               MessageInterface::ShowMessage("   => %d Returned from InterpretIncludeFile()\n", incRetval);
                #endif
             }
             retval1 = incRetval && retval1;
@@ -1279,6 +1279,10 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader,bool rein
          throw;
       }
       
+      #ifdef DBGLVL_SCRIPT_READING
+      MessageInterface::ShowMessage
+         ("   retval1=%d, continueOnError=%d\n", retval1, continueOnError);
+      #endif
       
       if (!retval1 && !continueOnError)
       {
@@ -2934,8 +2938,16 @@ bool ScriptInterpreter::ParseIncludeBlock(const StringArray &chunks)
    #endif
    if (incPath == "")
    {
-      // If incFile is not absolute path, throw an exception
-      if (!GmatFileUtil::IsPathAbsolute(incFile))
+      bool fileExist = false;
+      // If incFile is absolute file, check if it exist
+      if (GmatFileUtil::IsPathAbsolute(incFile))
+      {
+         if (GmatFileUtil::DoesFileExist(incFile))
+            fileExist = true;
+      }
+      
+      // If file does not exist, throw an exception
+      if (!fileExist)
       {
          // Throw an exception for non-existent include file
          throw InterpreterException("The include file \"" + incFile +

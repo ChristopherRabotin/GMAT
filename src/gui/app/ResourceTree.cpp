@@ -212,6 +212,8 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_FUELTANK_ELECTRIC, ResourceTree::OnAddElectricFuelTank)
    EVT_MENU(POPUP_ADD_THRUSTER_CHEMICAL, ResourceTree::OnAddChemicalThruster)
    EVT_MENU(POPUP_ADD_THRUSTER_ELECTRIC, ResourceTree::OnAddElectricThruster)
+   EVT_MENU(POPUP_ADD_NUCLEAR_POWER_SYSTEM, ResourceTree::OnAddNuclearPowerSystem)
+   EVT_MENU(POPUP_ADD_SOLAR_POWER_SYSTEM, ResourceTree::OnAddSolarPowerSystem)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
    EVT_MENU(POPUP_ADD_CONSTELLATION, ResourceTree::OnAddConstellation)
    EVT_MENU(POPUP_ADD_IMPULSIVE_BURN, ResourceTree::OnAddImpulsiveBurn)
@@ -3131,6 +3133,56 @@ void ResourceTree::OnAddElectricThruster(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
+// void OnAddNuclearPowerSystem(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a NuclearPowerSystem to hardware folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddNuclearPowerSystem(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   std::string newName = theGuiInterpreter->GetNewName("NuclearPowerSystem", 1);
+   GmatBase *obj = CreateObject("NuclearPowerSystem", newName);
+
+   if (obj != NULL)
+   {
+      AddObjectToTree(obj);
+      
+      Expand(item);
+      SelectItem(GetLastChild(item));            
+      theGuiManager->UpdatePowerSystem();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddSolarPowerSystem(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a SolarPowerSystem to hardware folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddSolarPowerSystem(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   std::string newName = theGuiInterpreter->GetNewName("SolarPowerSystem", 1);
+   GmatBase *obj = CreateObject("SolarPowerSystem", newName);
+
+   if (obj != NULL)
+   {
+      AddObjectToTree(obj);
+      
+      Expand(item);
+      SelectItem(GetLastChild(item));            
+      theGuiManager->UpdatePowerSystem();
+   }
+}
+
+//------------------------------------------------------------------------------
 // void OnAddFormation(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
@@ -5337,10 +5389,10 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       menu->Append(POPUP_ADD_FUELTANK_ELECTRIC, wxT("Electric Tank"));
       menu->Append(POPUP_ADD_THRUSTER_CHEMICAL, wxT("Chemical Thruster"));
       menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("Electric Thruster"));
-      menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("NuclearPowerSystem"));
-      menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("SolarPowerSystem"));
+      menu->Append(POPUP_ADD_NUCLEAR_POWER_SYSTEM, wxT("NuclearPowerSystem"));
+      menu->Append(POPUP_ADD_SOLAR_POWER_SYSTEM, wxT("SolarPowerSystem"));
       listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::HARDWARE);
-
+      
       #ifdef __ENABLE_NAV_GUI__
       newId = HARDWARE_BEGIN;
       for (StringArray::iterator i = listOfObjects.begin();

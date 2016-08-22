@@ -110,6 +110,10 @@ protected:
    StringArray                actualElementNames;
    /// Number of parameters
    Integer                    numElements;
+   /// Array of writable objects
+   ObjectArray                writableObjects;
+   /// Map of original writable object flags
+   std::map<GmatBase*, bool>  origWritableFlagMap;
    /// ElementWraper pointers of parameters
    std::vector<ElementWrapper*> elementWrappers;
    /// write to message window is optional, defaults to true

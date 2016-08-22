@@ -30,7 +30,11 @@
 #include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 #include <stdlib.h>                // for atof
-#include <regex>                   // for regular expression 
+#include "StringUtil.hpp"
+#include <sstream>
+
+// RHEL GCC has issues with RegEx code
+//#include <regex>                   // for regular expression
 
 
 //------------------------------------------------------------------------------
@@ -507,6 +511,8 @@ std::string Transponder::GetStringParameter(const Integer id) const
 bool Transponder::SetStringParameter(const Integer id,
                      const std::string &value)
 {
+   bool retval = false;
+
    switch (id)
    {
 //      case INPUT_FREQUENCY_MODEL:
@@ -519,7 +525,7 @@ bool Transponder::SetStringParameter(const Integer id,
       case INPUT_FREQUENCY_MODEL:
       case OUTPUT_FREQUENCY_MODEL:
          MessageInterface::ShowMessage("Warning: the script to assign '%s' to '%s.%s' parameter was skipped. In the current GMAT version, this parameter is not used.\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
-         return true;
+         retval = true;
          break;
 
       case TURN_AROUND_RATIO:
@@ -527,46 +533,81 @@ bool Transponder::SetStringParameter(const Integer id,
             //MessageInterface::ShowMessage("Turn around ratio: <%s>\n", value.c_str());
             // Validate turn around ratio
             // Specify numerator and denominator
-            std::string realNumberExpression = "[+-]?[0-9]+(\.[0-9]*)?([eE][0-9]+)?";
             std::string numerator = "";
             std::string denominator = "";
             std::string::size_type pos = value.find_first_of('/');
+
             if (pos != value.npos)
             {
                numerator = value.substr(0, pos);
                denominator = value.substr(pos+1);
-               if (std::regex_match(numerator, std::regex(realNumberExpression)) == false)
-               {
-                  //MessageInterface::ShowMessage("Error 1: numerator = <%s>\n", numerator.c_str());
-                  throw HardwareException("Error: Invalid value ('" + value + "') was set to " + GetName() + ".TurnAroundRatio parameter.\n");
-               }
-               if (std::regex_match(denominator, std::regex(realNumberExpression)) == false)
-               {
-                  //MessageInterface::ShowMessage("Error 2: denominator = <%s>\n", denominator.c_str());
-                  throw HardwareException("Error: Invalid value ('" + value + "') was set to " + GetName() + ".TurnAroundRatio parameter.\n");
-               }
 
-               if (atof(numerator.c_str()) / atof(denominator.c_str()) < 0.0)
-                  throw HardwareException("Error: a negative number was set to " + GetName() + ".TurnAroundRatio parameter.\n");
+               if ((GmatStringUtil::IsNumber(numerator)) && (GmatStringUtil::IsNumber(denominator)))
+               {
+                  Real n = 0.0, d = 0.0;
+
+                  std::stringstream temp;
+                  temp << numerator << " " << denominator;
+                  temp >> n;
+                  temp >> d;
+
+                  #ifdef DEBUG_INITIALIZATION
+                     MessageInterface::ShowMessage("Ratio is %le / %le\n", n, d);
+                  #endif
+
+                  if (d == 0.0)
+                     throw HardwareException("Error: The denominator in the "
+                           "field " + instanceName + ".TurnAroundRatio cannot "
+                           "be zero");
+
+                  if (n/d < 0.0)
+                     throw HardwareException("Error: a negative number (" +
+                           value + ") was set for the field " + instanceName +
+                           ".TurnAroundRatio");
+               }
+               else
+               {
+                  throw HardwareException("Error: Invalid value ('" + value +
+                        "') set for the field " + instanceName +
+                        ".TurnAroundRatio");
+               }
             }
             else
             {
                numerator = value;
-               if (std::regex_match(numerator, std::regex(realNumberExpression)) == false)
-                  throw HardwareException("Error: Invalid value ('" + value + "') was set to " + GetName() + ".TurnAroundRatio parameter.\n");
 
-               if (atof(numerator.c_str()) < 0.0)
-                  throw HardwareException("Error: a negative number was set to " + GetName() + ".TurnAroundRatio parameter.\n");
+               if (GmatStringUtil::IsNumber(numerator))
+               {
+                  Real n;
+
+                  std::stringstream temp;
+                  temp << numerator;
+                  temp >> n;
+
+                  if (n < 0.0)
+                     throw HardwareException("Error: a negative number (" +
+                           value + ") was set for the field " + instanceName +
+                           ".TurnAroundRatio.");
+               }
+               else
+               {
+                  throw HardwareException("Error: Invalid value ('" + value +
+                        "') set for the field " + instanceName +
+                        ".TurnAroundRatio.");
+               }
             }
 
             turnAroundRatio = value;
-            return true;
+            retval = true;
          }
          break;
 
       default:
          break;
    }
+
+   if (retval)
+      return retval;
 
    return RFHardware::SetStringParameter(id, value);
 }

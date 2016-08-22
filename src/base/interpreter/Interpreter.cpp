@@ -2865,9 +2865,9 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          StringArray varNames = GmatStringUtil::GetVarNames(input);
          
          #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-         MessageInterface::ShowMessage("   varNames.size()=%d\n", varNames.size());
-         for (unsigned int i = 0; i < varNames.size(); i++)
-            MessageInterface::ShowMessage("   varNames[%d] = '%s'\n", i, varNames[i].c_str());
+         MessageInterface::ShowMessage("   arg %d: varNames.size()=%d\n", i, varNames.size());
+         for (unsigned int ii = 0; ii < varNames.size(); ii++)
+            MessageInterface::ShowMessage("      varNames[%d] = '%s'\n", ii, varNames[ii].c_str());
          #endif
          
          // Currently array element cannot be passed to CallMatlabFunction and
@@ -2875,8 +2875,10 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          // If array element index is other than number, set input to "" so thatn
          // CallFunction will return false. Array element with numeric index will
          // be checked below.
-         if (varNames.size() > 1)
-            input = "";
+         
+         // I think this issue is fixed, so commented out (LOJ: 2016.08.11)
+         // if (varNames.size() > 1)
+         //    input = "";
          
          #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
          MessageInterface::ShowMessage

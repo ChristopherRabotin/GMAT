@@ -269,6 +269,11 @@ protected:
    Integer              kpApConversion;
 
 
+   // TEMPORARY UNTIL FINITE DIFFERENCING IS IN PLACE
+   /// Flag to only warn once time
+   bool warnSTMMath;
+
+
    
    void                 BuildPrefactors();
    void                 TranslateOrigin(const Real *state, const Real now);

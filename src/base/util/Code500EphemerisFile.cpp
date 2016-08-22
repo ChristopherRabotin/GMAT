@@ -519,11 +519,26 @@ bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &fi
    #else
    ReadHeader1();
    #endif
+
+   // For initial state
+   ReadDataAt(1);
+   int i = 0;
+   double posDult, velDult;
+   for (int j = 0; j < 3; j++)
+   {
+      posDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      mInitialState[j] = posDult * DUL_TO_KM;
+   }
+   for (int j = 3; j < 6; j++)
+   {
+      velDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      mInitialState[j] = velDult * DUL_DUT_TO_KM_SEC;
+   }
    
    // For final state
    ReadDataAt(mNumberOfRecordsInFile-2);
-   int i = mLastStateIndexRead;
-   double posDult, velDult;
+   i = mLastStateIndexRead;
+   posDult, velDult;
    for (int j = 0; j < 3; j++)
    {
       posDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
@@ -553,7 +568,7 @@ bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &fi
    // 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
    if (mCentralBodyIndicator == 1.0)
       centralBody = "Earth";
-   else if (mCentralBodyIndicator = 2.0)
+   else if (mCentralBodyIndicator == 2.0)
       centralBody = "Moon";
    else if (mCentralBodyIndicator == 3.0)
       centralBody = "Sun";

@@ -2562,6 +2562,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       // Update trees
       gmatAppData->GetResourceTree()->UpdateResource(true);
       gmatAppData->GetMissionTree()->UpdateMission(true);
+      UpdateAdvancedGuiMode(2);
    }
 #ifndef __WXMAC__
    wxSafeYield();
@@ -3561,6 +3562,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    mInterpretFailed = false;
    
    // Update trees
+   UpdateAdvancedGuiMode(1);
    GmatAppData *gmatAppData = GmatAppData::Instance();
    gmatAppData->GetResourceTree()->UpdateResource(true);
    gmatAppData->GetMissionTree()->UpdateMission(true);

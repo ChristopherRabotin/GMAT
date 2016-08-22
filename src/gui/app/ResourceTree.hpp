@@ -199,6 +199,8 @@ protected:
    void OnAddElectricFuelTank(wxCommandEvent &event);
    void OnAddChemicalThruster(wxCommandEvent &event);
    void OnAddElectricThruster(wxCommandEvent &event);
+   void OnAddNuclearPowerSystem(wxCommandEvent &event);
+   void OnAddSolarPowerSystem(wxCommandEvent &event);
    void OnAddReportFile(wxCommandEvent &event);
    void OnAddXyPlot(wxCommandEvent &event);
    //void OnAddOpenGlPlot(wxCommandEvent &event);
@@ -288,7 +290,9 @@ protected:
       POPUP_ADD_THRUSTER_ELECTRIC,
       POPUP_ADD_FUELTANK_CHEMICAL,
       POPUP_ADD_FUELTANK_ELECTRIC,
-
+      POPUP_ADD_NUCLEAR_POWER_SYSTEM,
+      POPUP_ADD_SOLAR_POWER_SYSTEM,
+      
       POPUP_ADD_PROPAGATOR,
 //      POPUP_ADD_SPK_PROPAGATOR,
       POPUP_ADD_BODY,
