@@ -637,7 +637,8 @@ const std::string& Variable::GetGeneratingString(Gmat::WriteMode mode,
       else
          generatingString = GetName() + " = " + GmatStringUtil::ToString(mRealValue, 16, false, 1) + ";";
       
-      generatingString = generatingString + inlineComment + "\n";
+      if ((mode != Gmat::OBJECT_EXPORT) && (mode != Gmat::NO_COMMENTS))
+         generatingString = generatingString + inlineComment + "\n";
    }
    
    #ifdef DEBUG_GEN_STRING
