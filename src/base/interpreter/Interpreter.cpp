@@ -9451,6 +9451,8 @@ bool Interpreter::FinalPass()
    {
       obj = FindObject(*i);
 
+      obj->TakeAction("CheckMixRatio");
+
       StringArray csNames = obj->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
       for (StringArray::iterator csName = csNames.begin();
            csName != csNames.end(); ++csName)

@@ -1556,6 +1556,20 @@ bool Thruster::TakeAction(const std::string &action,
       return true;
    }
 
+   if (action == "CheckMixRatio")
+   {
+      if (mixRatio[mixRatio.GetSize()-1] == RATIO_DEFAULT)
+      {
+         MessageInterface::ShowMessage("Warning: The number of coefficients in "
+               "the mix ratio does not match the number of tanks used by Thruster "
+               "%s.  Unset ratio values are set to 1.0\n", instanceName.c_str());
+
+         for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+            if (mixRatio[i] == RATIO_DEFAULT)
+               mixRatio[i] = 1.0;
+      }
+   }
+
    return Hardware::TakeAction(action, actionData);
 }
 
@@ -1619,17 +1633,6 @@ bool Thruster::Initialize()
    if (!retval)
       return false;
    
-   if (mixRatio[mixRatio.GetSize()-1] == RATIO_DEFAULT)
-   {
-      MessageInterface::ShowMessage("Warning: The number of coefficients in "
-            "the mix ratio does not match the number of tanks used by Thruster "
-            "%s.  Unset ratio values are set to 1.0\n", instanceName.c_str());
-
-      for (Integer i = 0; i < mixRatio.GetSize(); ++i)
-         if (mixRatio[i] == RATIO_DEFAULT)
-            mixRatio[i] = 1.0;
-   }
-
    if (mixRatio.GetSize() == 0)
    {
       mixRatio.SetSize(tankNames.size());
