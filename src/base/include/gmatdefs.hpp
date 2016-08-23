@@ -307,6 +307,7 @@ namespace Gmat
       EPHEM_HEADER,
       NO_COMMENTS,
       GUI_EDITOR,
+      OBJECT_EXPORT
    };
    
    enum StateElementId 
