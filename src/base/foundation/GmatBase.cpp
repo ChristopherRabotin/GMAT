@@ -3755,8 +3755,9 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    data.precision(GetDataPrecision()); // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
    
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
-       (mode == Gmat::SHOW_SCRIPT) || (mode == Gmat::NO_COMMENTS))
+   if ((mode == Gmat::SCRIPTING)   || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT) || (mode == Gmat::NO_COMMENTS)  ||
+       (mode == Gmat::OBJECT_EXPORT))
       inMatlabMode = false;
    if (mode == Gmat::MATLAB_STRUCT || mode == Gmat::EPHEM_HEADER)
       inMatlabMode = true;
@@ -3767,7 +3768,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       nomme = instanceName;
 
    if (mode == Gmat::SCRIPTING    || mode == Gmat::SHOW_SCRIPT ||
-       mode == Gmat::EPHEM_HEADER || mode == Gmat::NO_COMMENTS)
+       mode == Gmat::EPHEM_HEADER || mode == Gmat::NO_COMMENTS ||
+       mode == Gmat::OBJECT_EXPORT)
    {
       std::string tname = typeName;
       if (tname == "PropSetup")
@@ -3780,7 +3782,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
          data << tname << " = " << "'" << nomme << "';\n";
          preface = "";
       }
-      else if (mode == Gmat::NO_COMMENTS)
+      else if ((mode == Gmat::NO_COMMENTS) || (mode == Gmat::OBJECT_EXPORT))
       {
          #ifdef DEBUG_GENERATING_STRING
          MessageInterface::ShowMessage("==> Do not show comments\n");
@@ -4566,7 +4568,9 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                WriteParameterValue(id, value);
                if (value.str() != "")
                {
-                  std::string attCmtLn = GetAttributeCommentLine(id);
+                  std::string attCmtLn = "";
+                  if (mode != Gmat::OBJECT_EXPORT)
+                     attCmtLn = GetAttributeCommentLine(id);
 
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                      (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
@@ -4580,8 +4584,8 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                             << " = " << value.str() << ";";
 
                   // overwrite tmp variable for attribute cmt line
-                  attCmtLn = GetInlineAttributeComment(id);
-                  
+                  if (mode != Gmat::OBJECT_EXPORT)
+                     attCmtLn = GetInlineAttributeComment(id);
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                       (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn << "\n";
@@ -4675,7 +4679,9 @@ void GmatBase::WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
    StringArray sar = GetStringArrayParameter(id);
    if ((sar.size() > 0) || WriteEmptyStringArray(id))
    {
-      std::string attCmtLn = GetAttributeCommentLine(id);
+      std::string attCmtLn = "";
+      if (mode != Gmat::OBJECT_EXPORT)
+         attCmtLn = GetAttributeCommentLine(id);
       
       if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                                (mode == Gmat::OWNED_OBJECT) ||
@@ -4699,7 +4705,8 @@ void GmatBase::WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
             arrayStream << "'";
       }
       
-      attCmtLn  = GetInlineAttributeComment(id);
+      if (mode != Gmat::OBJECT_EXPORT)
+         attCmtLn  = GetInlineAttributeComment(id);
       
       if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                                (mode == Gmat::OWNED_OBJECT) ||

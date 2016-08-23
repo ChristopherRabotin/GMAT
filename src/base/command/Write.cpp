@@ -1124,7 +1124,7 @@ bool Write::Execute()
                }
                else
                {
-                  wrapperToStr = gb->GetGeneratingString(Gmat::NO_COMMENTS, "", "");
+                  wrapperToStr = gb->GetGeneratingString(Gmat::OBJECT_EXPORT, "", "");
                }
                break;
          }
