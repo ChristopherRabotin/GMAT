@@ -15,6 +15,7 @@ docbookxsldir = $(contribdir)/docbook-xsl-ns-1.78.1
 fopdir = $(contribdir)/fop-1.1
 
 # tools
+JAVAFLAGS = -Xmx1024M
 FOP = $(JAVA) -cp $(contribdir)/offo-hyphenation-binary/fop-hyph.jar -Dfop.home=$(fopdir) $(JAVAFLAGS) -jar $(fopdir)/build/fop.jar -c $(configdir)/fop.xconf
 JAVA = java
 JING = $(JAVA) $(ALL_JAVAFLAGS) -jar $(contribdir)/jing/bin/jing.jar

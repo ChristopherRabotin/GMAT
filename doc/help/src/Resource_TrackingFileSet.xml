@@ -29,32 +29,36 @@
   <refsection>
     <title>Description</title>
 
-    <para>A TrackingFileSet is required for both simulator and estimator runs.
-    For a data simulation run, the user must specify the desired tracking
-    strings for the simulated data (via AddTrackingConfig) and provide an
-    output file name for the simulated tracking observations (via FileName).
-    In simulation mode, the user may specify a range modulo constant, Doppler
-    count interval, and other parameters, depending on the type of tracking
-    data being simulated. See the remarks below for more details.</para>
+    <para>A <guilabel>TrackingFileSet</guilabel> is required for both
+    simulator and estimator runs. For a data simulation run, the user must
+    specify the desired tracking strings for the simulated data (via
+    <guilabel>AddTrackingConfig</guilabel>) and provide an output file name
+    for the simulated tracking observations (via
+    <guilabel>FileName</guilabel>). In simulation mode, the user may specify a
+    range modulo constant, Doppler count interval, and other parameters,
+    depending on the type of tracking data being simulated. See the remarks
+    below for more details.</para>
 
-    <para>When running the estimator, the FileName parameter specifies the
-    path to a pre-generated external tracking data file. It is not necessary
-    to explicitly specify tracking configurations when running the estimator;
-    GMAT will examine the specified external tracking data file and determine
-    the tracking configurations automatically. GMAT will throw an error
-    message if it is unable to uniquely identify all objects found in the
-    tracking data file.</para>
+    <para>When running the estimator, the <guilabel>FileName</guilabel>
+    parameter specifies the path to a pregenerated external tracking data
+    file. It is not necessary to explicitly specify tracking configurations
+    when running the estimator; GMAT will examine the specified external
+    tracking data file and determine the tracking configurations
+    automatically. GMAT will throw an error message if it is unable to
+    uniquely identify all objects found in the tracking data file.</para>
 
-    <para>When running the estimator, one or more StatisticsAcceptFilters
-    and/or StatisticsRejectFilters may be employed to select from all
-    available observations a smaller subset for use in the estimation
+    <para>When running the estimator, one or more
+    <guilabel>StatisticsAcceptFilter</guilabel>s and/or
+    <guilabel>StatisticsRejectFilter</guilabel>s may be employed to select
+    from all available observations a smaller subset for use in the estimation
     process.</para>
 
-    <para>The SimRangeModuloConstant and SimDopplerCountInterval fields apply
-    only to the simulator and are ignored by the estimator. When running the
-    estimator, these values are provided in the tracking data file. For both
-    the simulator and estimator, relativity, light time, and ET-TAI
-    corrections may optionally be applied.</para>
+    <para>The <guilabel>SimRangeModuloConstant</guilabel> and
+    <guilabel>SimDopplerCountInterval</guilabel> fields apply only to the
+    simulator and are ignored by the estimator. When running the estimator,
+    these values are provided in the tracking data file. For both the
+    simulator and estimator, relativity, light time, and ET-TAI corrections
+    may optionally be applied.</para>
 
     <para>See Also: <xref linkend="Simulator"/>, <xref
     linkend="BatchEstimatorInv"/>, <xref linkend="StatisticsAcceptFilter"/>,
@@ -141,8 +145,10 @@
             <entry><guilabel>DataFilters</guilabel></entry>
 
             <entry><para>Defines filters to be applied to the data. One or
-            more filters of either type (StatisticsAcceptFilter,
-            StatisticsRejectFilter) may be specified.</para><variablelist>
+            more filters of either type
+            (<guilabel>StatisticsAcceptFilter</guilabel>,
+            <guilabel>StatisticsRejectFilter</guilabel>) may be
+            specified.</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -155,8 +161,10 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>User defined instances of StatisticsAcceptFilter and
-                    StatisticsRejectFilter resources</para>
+                    <para>User defined instances of
+                    <guilabel>StatisticsAcceptFilter</guilabel> and
+                    <guilabel>StatisticsRejectFilter</guilabel>
+                    resources</para>
                   </listitem>
                 </varlistentry>
 
@@ -366,7 +374,10 @@
             <entry><guilabel>UseRelativityCorrection</guilabel></entry>
 
             <entry><para>Flag specifying if General Relativistic corrections
-            should be made to the measurements.</para> <variablelist>
+            should be made to the computed measurements. If this flag is set,
+            GMAT will adjust the computed light time to include the effects
+            due to the coordinate velocity of light and bending of the signal
+            path.</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -395,9 +406,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>False</guilabel>
-                    </para>
+                    <para><guilabel>False</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -423,8 +432,10 @@
             <entry><guilabel>UseETminusTAI</guilabel></entry>
 
             <entry><para>Flag specifying if General Relativistic time
-            corrections should be made to the measurements.</para>
-            <variablelist>
+            corrections should be made to the measurements. If this flag is
+            set, GMAT will apply the adjustment from TAI to Ephemeris Time
+            when solving the light time equations for the computed
+            measurement.</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -453,9 +464,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>False</guilabel>
-                    </para>
+                    <para><guilabel>False</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -481,7 +490,7 @@
             <entry><guilabel>SimRangeModuloConstant</guilabel></entry>
 
             <entry><para>Specifies the value of the maximum DSN Range value.
-            This value only used in simulation mode.</para> <variablelist>
+            This value is only used in simulation mode.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -599,25 +608,26 @@
   <refsection>
     <title>Remarks</title>
 
-    <para>The SimRangeModuloConstant field is used only in the simulation of
-    DSN tracking data. The user may specify a value to be used for this field
-    or may omit it, in which case the default value is used. This field is not
-    applicable to estimation. In estimation, this value is provided in the
-    input tracking data file.</para>
+    <para>The <guilabel>SimRangeModuloConstant</guilabel> field is used only
+    in the simulation of DSN tracking data. The user may specify a value to be
+    used for this field or may omit it, in which case the default value is
+    used. This field is not applicable to estimation. In estimation, this
+    value is provided in the input tracking data file.</para>
 
-    <para>The SimDopplerCountInterval is used in the simulation of DSN
-    tracking data. The user may specify a value to be used for this field or
-    may omit it, in which case default value of 1 second is used. This field
-    is not applicable to estimation. In estimation, this values is provided in
-    the input tracking data file.</para>
+    <para>The <guilabel>SimDopplerCountInterval</guilabel> is used in the
+    simulation of DSN tracking data. The user may specify a value to be used
+    for this field or may omit it, in which case default value of 1 second is
+    used. This field is not applicable to estimation. In estimation, this
+    values is provided in the input tracking data file.</para>
 
     <refsection>
       <title>Measurement Type Names</title>
 
       <para>Currently the measurement type names used to identify observation
-      types in GMD data files and on the TrackingFileSet.AddTrackingConfig
-      object field are not the same as those used to build measurement error
-      models for those types. Use the following table as a guide.</para>
+      types in GMD data files and on the
+      <guilabel>TrackingFileSet.AddTrackingConfig</guilabel> object field are
+      not the same as those used to build measurement error models for those
+      types. Use the following table as a guide.</para>
 
       <informaltable>
         <tgroup cols="2">
@@ -652,14 +662,24 @@
     <title>Examples</title>
 
     <informalexample>
-      <para>This example illustrates use of the TrackingFileSet object.
-      Specification of the tracking configurations (AddTrackingConfig) is
+      <para>This example illustrates use of the
+      <guilabel>TrackingFileSet</guilabel> object. Specification of the
+      tracking configurations (<guilabel>AddTrackingConfig</guilabel>) is
       optional when running the estimator. If omitted, GMAT will attempt to
       automatically detect the tracking configurations present in the tracking
-      data file. In this example, saf is an instance of a
-      StatisticsAcceptFilter, defined elsewhere in the script. The
-      GroundStation resources GDS, CAN, and MAD, and the Spacecraft resource
-      EstSat must also be defined elsewhere in the script.</para>
+      data file. In this example, <literal>saf</literal> is an instance of a
+      <guilabel>StatisticsAcceptFilter</guilabel>, defined elsewhere in the
+      script. The <guilabel>GroundStation</guilabel> resources GDS, CAN, and
+      MAD, and the <guilabel>Spacecraft</guilabel> resource EstSat must also
+      be defined elsewhere in the script.</para>
+
+      <para>In this example, the frequency ramp table file
+      <literal>dsn.ramp</literal> must be a preexisting ramp table. GMAT will
+      not simulate ramp table records. Alternatively, the user may omit
+      specification of a ramp table when simulating data. If the ramp table is
+      omitted, the simulator will use the frequency specified on the
+      <guilabel>Transmitter</guilabel> object attached to each
+      <guilabel>GroundStation</guilabel>.</para>
 
       <programlisting><?db-font-size 75% ?>Create TrackingFileSet dsnObs;
   
@@ -675,5 +695,317 @@ dsnObs.SimRangeModuloConstant  = 67108864;
 dsnObs.SimDopplerCountInterval = 10.; 
 dsnObs.DataFilters             = {saf};</programlisting>
     </informalexample>
+  </refsection>
+
+  <refsection>
+    <title>GMAT Tracking Data File Format</title>
+
+    <para>GMAT uses a native ASCII tracking data file format called a “GMAT
+    Measurement Data File”, or GMD file. This file format currently implements
+    the following observation measurement types:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>DSN Sequential Ranging, TRK-2-34 data Type 7</para>
+      </listitem>
+
+      <listitem>
+        <para>DSN Total Count Phase Doppler tracking, TRK-2-34 data Type
+        17</para>
+      </listitem>
+
+      <listitem>
+        <para>Transmit frequency ramp records, TRK-2-34 data Type 9</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Each GMD file consists of a series of space-delimited ASCII records.
+    Details of the GMD file format for each observation type are provided in
+    the following sections. A single GMD file may contain one or more of the
+    record types described below, but ramp records must be in a separate file.
+    For further details on the TRK-2-34 data formats, please consult the
+    <emphasis>TRK-2-34 DSN Tracking System Data Archival Format, 820-013 Deep
+    Space Network External Interface Specification</emphasis>.</para>
+
+    <refsection>
+      <title>DSN Sequential Range</title>
+
+      <para>DSN TRK-2-34 Sequential Ranging employs the DSNRange measurement
+      type. DSNRange is a round-trip range observation measured in range
+      units. The record format for DSNRange tracking data is shown in the
+      table below.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <colspec colwidth="147*"/>
+
+          <colspec colwidth="853*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Field</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>1</entry>
+
+              <entry>Observation receive time in TAIModJulian</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Observation type name - DSN TRK-2-34 Type 7 Sequential
+              Range = DSNRange</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry><para>Observation type index number - 9004 = DSNRange
+              (TRK-2-34)</para></entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Ground station pad ID</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>Spacecraft ID</entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Two-way (round-trip) range observation in Range
+              Units</entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</entry>
+            </row>
+
+            <row>
+              <entry>8</entry>
+
+              <entry>Uplink frequency in Hz</entry>
+            </row>
+
+            <row>
+              <entry>9</entry>
+
+              <entry>Range modulo value in Range Units</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>The TRK-2-34 Sequential Range value is assumed to include all
+      measurement adjustments (station calibration, time tag adjustments,
+      spacecraft delay, and z-height). The transmit frequency specified in the
+      TRK-2-34 range data GMD file is only used if a frequency ramp table is
+      not available. If a transmit frequency ramp record file is provided on
+      the <guilabel>TrackingFileSet.RampTable</guilabel> field, the transmit
+      frequency will be determined from the ramp table and the frequency
+      specified in the range data GMD file will be ignored. A sample of GMD
+      data records for TRK-2-34 Sequential Range data is shown below.</para>
+
+      <programlisting><?db-font-size 60% ?>%    - 1 -       - 2 -    3     4  5        - 6 -           7        - 8 -               - 9 -
+27236.157789352 DSNRange 9004  45 59 +9.810325186004e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.158240741 DSNRange 9004  45 59 +5.813243487947e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.158692130 DSNRange 9004  45 59 +1.863046908683e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.159143519 DSNRange 9004  45 59 +8.450116485521e+005   1 +2.091414432000e+009 +1.048576000000e+006</programlisting>
+    </refsection>
+
+    <refsection>
+      <title>DSN Total Count Phase</title>
+
+      <para>DSN TRK-2-34 Total Count Phase employs the Doppler measurement
+      type. The GMAT Doppler measurement type is a phase count observation
+      measured in Hz. The record format for Doppler tracking data is shown in
+      the table below.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <colspec colwidth="147*"/>
+
+          <colspec colwidth="853*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Field</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>1</entry>
+
+              <entry>Observation receive time in TAIModJulian</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Observation type name - DSN TRK-2-34 Type 17 Total Count
+              Phase = Doppler</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Observation type index number - 9006 = Doppler
+              (TRK-2-34)</entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Ground station pad ID</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>Spacecraft ID</entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Doppler count interval in seconds</entry>
+            </row>
+
+            <row>
+              <entry>8</entry>
+
+              <entry>Observation measurement - Total count phase observable
+              for TRK-2-34 Type 17 TCP</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>A sample of GMD data records for TRK-2-34 Total Count Phase data
+      is shown below.</para>
+
+      <programlisting><?db-font-size 90% ?>%    - 1 -        - 2 -     3   4   5    6   7            - 8 -
+27226.011944444  Doppler  9006 15 6241   1  10  -2.2445668331979342e+09
+27226.012060185  Doppler  9006 15 6241   1  10  -2.2445668330920730e+09
+27226.012175926  Doppler  9006 15 6241   1  10  -2.2445668329843016e+09
+27226.012291667  Doppler  9006 15 6241   1  10  -2.2445668328729177e+09</programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Transmit Frequency Ramp Records</title>
+
+      <para>GMAT supports DSN tracking utilizing both constant and ramped
+      transmit frequencies. If the transmit frequency is constant, GMAT will
+      use the transmit frequency specified on the DSNRange measurement records
+      for the computation of the range observation and a ramp table file is
+      not required. If the transmit frequency is ramped, the user must
+      generate a GMD file of ramp records from TRK-2-34 Type 9 raw data, and
+      provide the GMD ramp table on the
+      <guilabel>TrackingFileSet.RampTable</guilabel> object field. If a ramp
+      table is provided, GMAT ignores the frequency specified on the DSNRange
+      records and instead computes the transmit frequency from the ramp
+      records.</para>
+
+      <para>The record format for ground-based range-rate tracking data is
+      shown in the table below.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <colspec colwidth="147*"/>
+
+          <colspec colwidth="853*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Field</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>1</entry>
+
+              <entry>Observation receive time in TAIModJulian</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Ground station pad ID</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Spacecraft ID</entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>Ramp type - 0 = snap, 1 = start of new ramp, 2 = medial
+              report, 3 = periodic report, 4 = end of ramps, 5 = ramping
+              terminated by operator, 6 = invalid/unknown</entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Ramp frequency in Hz</entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Ramp rate in Hz/sec</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>A sample GMD ramp file is shown below.</para>
+
+      <programlisting><?db-font-size 90% ?>
+%     - 1 -      2  3    4   5         - 6 -              - 7 -
+27238.640625000 34 234   2   1 +7.186571173393e+09 +6.010599999990e-01
+27238.654513889 34 234   2   1 +7.186571894665e+09 +5.822699999990e-01
+27238.659664352 34 234   2   3 +7.186572153775e+09 +5.822699999990e-01
+27238.668402778 34 234   2   1 +7.186572593389e+09 +5.590199999990e-01
+27238.682291667 34 234   2   1 +7.186573264213e+09 +5.315100000000e-01</programlisting>
+    </refsection>
   </refsection>
 </refentry>
