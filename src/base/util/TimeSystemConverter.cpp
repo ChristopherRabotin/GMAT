@@ -474,6 +474,42 @@ Real TimeConverterUtil::NumberOfLeapSecondsFrom(Real utcMjd, Real jdOfMjdRef)
    return numLeapSecs;
 }
 
+//---------------------------------------------------------------------------
+// Real GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd, Real jdOfMjdRef)
+//---------------------------------------------------------------------------
+Real TimeConverterUtil::GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd,
+                                              Real jdOfMjdRef)
+{
+   #ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage
+      ("GetFirstLeapSecondMJD() entered, fromUtcMjd=%f, toUtcMjd=%f, jdOfMjdRef=%f\n",
+       fromUtcMjd, toUtcMjd, jdOfMjdRef);
+   #endif
+   
+   Real offsetValue = 0;
+   
+   if (jdOfMjdRef != GmatTimeConstants::JD_NOV_17_1858)
+      offsetValue = jdOfMjdRef - GmatTimeConstants::JD_NOV_17_1858;
+   
+   if (theLeapSecsFileReader == NULL)
+      throw TimeFileException
+         ("theLeapSecsFileReader is unknown\n");
+   
+   // look up leap secs from file
+   Real firstUtcMjd =
+      theLeapSecsFileReader->GetFirstLeapSecondMJD(fromUtcMjd + offsetValue,
+                                                    toUtcMjd + offsetValue);
+   
+   firstUtcMjd = firstUtcMjd - (GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_NOV_17_1858);
+   
+   #ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage
+      ("GetFirstLeapSecondMJD() returning %f, offsetValue=%f\n",
+       firstUtcMjd, offsetValue);
+   #endif
+   
+   return firstUtcMjd;
+}
 
 //---------------------------------------------------------------------------
 // void SetEopFile(EopFile *eopFile)

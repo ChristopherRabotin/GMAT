@@ -270,6 +270,8 @@ protected:
    double mTimeIntervalBetweenPointsSecs;
    double mLeapSecsStartOutput;
    double mLeapSecsEndOutput;
+   double mStartUtcMjd;
+   double mEndUtcMjd;
    double mLeapSecsInput;
    
    // Data used in propagation

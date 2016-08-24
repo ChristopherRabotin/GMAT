@@ -142,6 +142,8 @@ namespace TimeConverterUtil
                          Real refJd = GmatTimeConstants::JD_NOV_17_1858);
    Real GMAT_API NumberOfLeapSecondsFrom(Real utcMjd,
                          Real jdOfMjdRef = GmatTimeConstants::JD_JAN_5_1941);
+   Real GMAT_API GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd,
+                         Real jdOfMjdRef = GmatTimeConstants::JD_JAN_5_1941);
    
    void GMAT_API SetEopFile(EopFile *eopFile);
    void GMAT_API SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
