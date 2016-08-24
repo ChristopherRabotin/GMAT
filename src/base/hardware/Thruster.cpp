@@ -57,6 +57,8 @@
 #include "MemoryTracker.hpp"
 #endif
 
+#define RATIO_DEFAULT -1.0
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -787,7 +789,7 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value)
 
                for (Integer i = 0; i < mixRatio.GetSize(); ++i)
                {
-                  mixRatio[i] = (i < max ? temp[i] : 1.0);
+                  mixRatio[i] = (i < max ? temp[i] : RATIO_DEFAULT);
                }
             }
          }
@@ -886,7 +888,7 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
 
                for (Integer i = 0; i < mixRatio.GetSize(); ++i)
                {
-                  mixRatio[i] = (i < max ? temp[i] : 1.0);
+                  mixRatio[i] = (i < max ? temp[i] : RATIO_DEFAULT);
                }
             }
          }
@@ -1552,6 +1554,23 @@ bool Thruster::TakeAction(const std::string &action,
       mixRatio.SetSize(0);
 
       return true;
+   }
+
+   if (action == "CheckMixRatio")
+   {
+      if (mixRatio.GetSize() > 0)
+      {
+         if (mixRatio[mixRatio.GetSize()-1] == RATIO_DEFAULT)
+         {
+            MessageInterface::ShowMessage("Warning: The number of coefficients in "
+                  "the mix ratio does not match the number of tanks used by Thruster "
+                  "%s.  Unset ratio values are set to 1.0\n", instanceName.c_str());
+
+            for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+               if (mixRatio[i] == RATIO_DEFAULT)
+                  mixRatio[i] = 1.0;
+         }
+      }
    }
 
    return Hardware::TakeAction(action, actionData);
