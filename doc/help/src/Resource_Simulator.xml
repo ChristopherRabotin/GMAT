@@ -35,20 +35,20 @@
     estimation run.</para>
 
     <para>The <guilabel>Simulator</guilabel> object requires specification of
-    one or more instances of <guilabel>TrackingFileSet</guilabel> which
-    identify the specific tracking data observation strands, data types,
+    one or more instances of a <guilabel>TrackingFileSet</guilabel> resource
+    which identify the specific tracking data observation strands, data types,
     desired measurement corrections, and the output tracking data file name.
-    Simulated data will be written in the GMAT ASCII GMD tracking data
-    format.The user must additionally specify a time span for the simulation
-    run and a time interval between simulated observations. Simulated
-    observations are only generated when a tracking strand meets the
-    visibility constraints of all objects in the strand (for example, the
-    observation must be above the ground station minimum elevation mask). The
-    user additionally must configure and specify an instance of a
-    <guilabel>Propagator</guilabel> for the simulator. Finally, the user can
-    choose to add random Gaussian noise to the generated measurements or to
-    generate measurements without noise. If the Simulator.AddNoise option is
-    set to On, the noise and bias parameters specified on each strand’s
+    Simulated data will be written in the GMAT ASCII GMD tracking data format.
+    You must additionally specify a time span for the simulation run and a
+    time interval between simulated observations. Simulated observations are
+    only generated when a tracking strand meets the visibility constraints of
+    all objects in the strand (for example, the observation must be above the
+    ground station minimum elevation mask). The user additionally must
+    configure and specify an instance of a <guilabel>Propagator</guilabel> for
+    the simulator. Finally, you can choose to add random Gaussian white noise
+    to the generated measurements or to generate measurements without noise.
+    If the Simulator.AddNoise option is set to On, the noise and bias
+    parameters specified on each measurement strand’s
     <guilabel>GroundStation.ErrorModel</guilabel> are used.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
@@ -76,8 +76,8 @@
           <row>
             <entry><guilabel>AddData</guilabel></entry>
 
-            <entry><para>A list of one or more TrackingFileSets</para>
-            <variablelist>
+            <entry><para>A list of one or more
+            <guilabel>TrackingFileSets</guilabel></para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -140,7 +140,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>true/false</para>
+                    <para>Boolean</para>
                   </listitem>
                 </varlistentry>
 
@@ -148,7 +148,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>true or false</para>
+                    <para>true, false, on, off</para>
                   </listitem>
                 </varlistentry>
 
@@ -434,7 +434,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Propagator Objectl</para>
+                    <para><guilabel>Propagator</guilabel> Object</para>
                   </listitem>
                 </varlistentry>
 
@@ -442,7 +442,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any Valid Propagator object</para>
+                    <para>Any valid <guilabel>Propagator</guilabel>
+                    object</para>
                   </listitem>
                 </varlistentry>
 
@@ -511,7 +512,7 @@
               <entry><guilabel>TrackingFileSet resource</guilabel></entry>
 
               <entry><para> Must be created in order to tell the
-              <guilabel>Simulator</guilabel> resource which data will be
+              <guilabel>Simulator</guilabel> resource which data types will be
               simulated</para></entry>
             </row>
 
@@ -539,7 +540,7 @@
       <guilabel>prop</guilabel> <guilabel>Propagator</guilabel> are configured
       elsewhere in the script.</para>
 
-      <programlisting>%   Configure the Simulator object. This assumes that prop is an existing
+      <programlisting>%   Configure the Simulator object. We assume prop is an existing
 %   instance of a Propagator and simData is an existing instance of a 
 %   TrackingFileSet. 
 
