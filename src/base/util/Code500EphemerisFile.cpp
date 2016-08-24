@@ -291,6 +291,8 @@ void Code500EphemerisFile::Initialize()
    mTimeIntervalBetweenPointsSecs = 0.0;
    mLeapSecsStartOutput = 0.0;
    mLeapSecsEndOutput = 0.0;
+   mStartUtcMjd = 0.0;
+   mEndUtcMjd = 0.0;
    mLeapSecsInput = 0.0;
    
    //mCentralBodyMu = 0.0;
@@ -1327,9 +1329,15 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
    
    double startMjd = 0.0;
    if (mOutputTimeSystem == 1) // A1 time system
+   {
       startMjd = a1Mjd.GetReal();
+      mStartUtcMjd = ToUtcModJulian(a1Mjd);
+   }
    else  // UTC time system
+   {
       startMjd = ToUtcModJulian(a1Mjd);
+      mStartUtcMjd = startMjd;
+   }
    
    mLeapSecsStartOutput = TimeConverterUtil::NumberOfLeapSecondsFrom(startMjd);
    #ifdef DEBUG_SET
@@ -1363,7 +1371,7 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
    #ifdef DEBUG_SET
    if (mOutputYearFormat == 2)
       yyymmdd = yyymmdd - 19000000;
-   std::string ymdhms = ToYearMonthDayHourMinSec(yymmdd, secsOfDay);
+   std::string ymdhms = ToYearMonthDayHourMinSec(yyymmdd, secsOfDay);
    MessageInterface::ShowMessage("startYYYYMMDDHHMMSSsss = %s\n", ymdhms.c_str());
    DebugDouble("mEphemHeader1.startTimeOfEphemeris_DUT = %f\n", startDut, mSwapOutputEndian);
    MessageInterface::ShowMessage("Code500EphemerisFile::SetEphemerisStartTime() leaving\n");
@@ -1387,9 +1395,15 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    
    double endMjd = 0.0;
    if (mOutputTimeSystem == 1) // A1 time system
+   {
       endMjd = a1Mjd.GetReal();
+      mEndUtcMjd = ToUtcModJulian(a1Mjd);
+   }
    else  // UTC time system
+   {
       endMjd = ToUtcModJulian(a1Mjd);
+      mEndUtcMjd = endMjd;
+   }
    
    // Leap seconds info
    mLeapSecsEndOutput = TimeConverterUtil::NumberOfLeapSecondsFrom(endMjd);
@@ -1399,9 +1413,30 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    
    if ((mLeapSecsEndOutput - mLeapSecsStartOutput) > 0)
    {
-      mEphemHeader1.leapSecondIndicator = 1;
-      mEphemHeader1.utcTimeAdjustment_SEC = mLeapSecsEndOutput - mLeapSecsStartOutput;
-      // @todo Compute time of leap second occurrs using LeapSecsFileReader
+      // Find out UTC date and time of the first leap second occurred between start and end time
+      double firstUtcMjd = TimeConverterUtil::GetFirstLeapSecondMJD(mStartUtcMjd, mEndUtcMjd);
+      
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("firstUtcMjd       = %.12f\n", firstUtcMjd);
+      #endif
+      if (firstUtcMjd != -1.0)
+      {
+         double ymd, hms;
+         ToYYYMMDDHHMMSS(firstUtcMjd, ymd, hms);
+         // Add a couple of seconds to avoid noise at the leap second date boundary
+         Real firstUtcMjd2 = firstUtcMjd + (2.0/86400);
+         Real firstA1Mjd = TimeConverterUtil::Convert(firstUtcMjd2, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);
+         double a1UtcOffsetInSecs = (firstA1Mjd - firstUtcMjd2) * 86400.0;
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage("firstUtcMjd+2sec  = %.12f\n", firstUtcMjd2);
+         MessageInterface::ShowMessage("firstA1Mjd        = %.12f\n", firstA1Mjd);
+         MessageInterface::ShowMessage("a1UtcOffsetInSecs = %.12f\n", a1UtcOffsetInSecs);
+         #endif
+         WriteIntegerField(&mEphemHeader1.leapSecondIndicator, 2); // 1 = no leap second occurs, 2 = leap second occurs
+         WriteDoubleField(&mEphemHeader1.dateOfLeapSeconds_YYYMMDD, ymd);
+         WriteDoubleField(&mEphemHeader1.timeOfLeapSeconds_HHMMSS,  hms);
+         WriteDoubleField(&mEphemHeader1.utcTimeAdjustment_SEC,     a1UtcOffsetInSecs);
+      }
    }
    
    double yyymmdd = ToYYYMMDD(endMjd);
@@ -1420,7 +1455,7 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    if (mOutputYearFormat == 2)
       yyymmdd = yyymmdd - 19000000;
    std::string ymdhms = ToYearMonthDayHourMinSec(yyymmdd, secsOfDay);
-   MessageInterface::ShowMessage(("endYYYYMMDDHHMMSSsss. = %s\n", ymdhms.c_str());
+   MessageInterface::ShowMessage("endYYYYMMDDHHMMSSsss. = %s\n", ymdhms.c_str());
    DebugDouble("mEphemHeader1.endDateOfEphem_YYYMMDD = %f\n", mEphemHeader1.endDateOfEphem_YYYMMDD, mSwapOutputEndian);
    DebugDouble("mEphemHeader1.endTimeOfEphemeris_DUT = %f\n", mEphemHeader1.endTimeOfEphemeris_DUT, mSwapOutputEndian);
    MessageInterface::ShowMessage("Code500EphemerisFile::SetEphemerisEndTime() leaving\n");
@@ -1980,7 +2015,10 @@ void Code500EphemerisFile::UnpackHeader1()
    DebugDouble("atmosphericDragPerturbIndicator     = % f\n", mEphemHeader1.atmosphericDragPerturbIndicator, swap);
    DebugDouble("dateOfInitiationOfEphemComp_YYYMMDD = % f\n", mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD, swap);
    DebugDouble("timeOfInitiationOfEphemComp_HHMMSS  = % f\n", mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS, swap);
-   DebugDouble("utcTimeAdjustment_SEC               = % f\n", mEphemHeader1.utcTimeAdjustment_SEC, swap);
+   DebugInteger("leapSecondIndicator                 = % d\n", mEphemHeader1.leapSecondIndicator, swap);
+   DebugDouble("dateOfLeapSeconds_YYYMMDD           = % f\n", mEphemHeader1.dateOfLeapSeconds_YYYMMDD, swap);
+   DebugDouble("dateOfLeapSeconds_HHMMSS            = % f\n", mEphemHeader1.timeOfLeapSeconds_HHMMSS, swap);
+   DebugDouble("utcTimeAdjustment_SEC               = % .9f\n", mEphemHeader1.utcTimeAdjustment_SEC, swap);
    
    MessageInterface::ShowMessage("======================================== End of Header1\n");
 }

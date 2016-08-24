@@ -222,7 +222,7 @@ bool LeapSecsFileReader::Parse(std::string line)
 }
 
 //------------------------------------------------------------------------------
-// Real NumberOfLeapSecondsFrom(UtcMjd *utcMjd)
+// Real NumberOfLeapSecondsFrom(UtcMjd utcMjd)
 //------------------------------------------------------------------------------
 /**
  * Converts utcmjd to utcjd and then looks it up from the table.  If file is not
@@ -255,4 +255,69 @@ Real LeapSecsFileReader::NumberOfLeapSecondsFrom(UtcMjd utcMjd)
    }
    else
       return 0;
+}
+
+//------------------------------------------------------------------------------
+// Real GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd)
+//------------------------------------------------------------------------------
+/**
+ * Returns UTCMJD of first leap seconds occurred between fromUtcMjd and toUtcMjd.
+ * If file is not read or fromUtcMjd is greater than toUtcMjd, or no leap seconds
+ * occurred between input dates, -1 is returned.
+ *
+ * @return First date of leap seconds occurred between two input dates
+ * @note Assumes that JD from table is utcjd.
+ */
+//------------------------------------------------------------------------------
+Real LeapSecsFileReader::GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd)
+{
+   #ifdef DEBUG_LEAP_SECOND
+   MessageInterface::ShowMessage
+      ("LeapSecsFileReader::GetFirstLeapSecondMJD() entered, fromUtcMjd=%.12f, "
+       "toUtcMjd=%.12f, isInitialized=%d\n", fromUtcMjd, toUtcMjd, isInitialized);
+   #endif
+   Real firstMjd = -1.0;
+   
+   if (isInitialized && (toUtcMjd >= fromUtcMjd))
+   {
+      Real fromJd = fromUtcMjd + GmatTimeConstants::JD_MJD_OFFSET;
+      Real toJd = toUtcMjd + GmatTimeConstants::JD_MJD_OFFSET;
+      Real currJd = 0.0;
+      RealArray utcMjdArray;
+      
+      // look up each entry in the table to see if value is greater then the
+      // julian date
+      std::vector<LeapSecondInformation>::iterator info;
+      for (std::vector<LeapSecondInformation>::iterator i = lookUpTable.end();
+           i > lookUpTable.begin(); i--)
+      {
+          info = i-1;
+          currJd = info->julianDate;
+          if ((currJd >= fromJd) && (currJd <= toJd))
+          {
+             utcMjdArray.push_back(currJd);
+          }
+          else if (currJd < fromJd)
+          {
+             break;
+          }
+      }
+      
+      // Compute MJD of first JD in the array
+      if (utcMjdArray.empty())
+      {
+         firstMjd = -1.0;
+      }
+      else
+      {
+         //Since iterator goes backward in the above for loop, larger jd is moved to front
+         firstMjd = utcMjdArray.back() - GmatTimeConstants::JD_MJD_OFFSET;
+      }
+   }
+   
+   #ifdef DEBUG_LEAP_SECOND
+   MessageInterface::ShowMessage
+      ("LeapSecsFileReader::GetFirstLeapSecondMJD() returning %.12f\n", firstMjd);
+   #endif
+   return firstMjd;
 }

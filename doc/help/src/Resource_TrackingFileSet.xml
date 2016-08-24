@@ -620,6 +620,12 @@
     used. This field is not applicable to estimation. In estimation, this
     values is provided in the input tracking data file.</para>
 
+    <para>When displaying or saving a <guilabel>TrackingFileSet</guilabel>
+    object using the <guilabel>Write</guilabel> command, GMAT will display a
+    number of items relevant to simulating TDRS data formats. These options
+    are not implemented in the current release and should be ignored or
+    manually removed from the output file.</para>
+
     <refsection>
       <title>Measurement Type Names</title>
 

@@ -62,10 +62,11 @@ public:
    virtual ~LeapSecsFileReader();
    LeapSecsFileReader(const LeapSecsFileReader& lsfr);
    LeapSecsFileReader& operator=(const LeapSecsFileReader& lsfr);
-
+   
    bool Initialize();
-   Real    NumberOfLeapSecondsFrom(UtcMjd utcMjd);
-
+   Real NumberOfLeapSecondsFrom(UtcMjd utcMjd);
+   Real GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd);
+   
 private:
 
    bool Parse(std::string line);
