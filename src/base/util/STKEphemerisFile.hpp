@@ -87,6 +87,7 @@ protected:
    std::string centralBody;
    std::string coordinateSystem;
    std::string coordinateSystemEpochStr;
+   std::string distanceUnit;
    
    // The file name for read/write
    std::string stkFileNameForRead;
