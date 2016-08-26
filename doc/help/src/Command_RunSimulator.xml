@@ -682,11 +682,10 @@
             <row>
               <entry align="center">Measurement Type</entry>
 
-              <entry align="center">Value of C (Range) or M2 (Doppler) used to
-              calculate “Computed” measurement</entry>
+              <entry align="center">Uplink Band</entry>
 
-              <entry align="center">Value of transmit frequency used to
-              calculate “Computed” measurement</entry>
+              <entry align="center">Value of C (Range) or M2 (Doppler) used to
+              calculate Observation</entry>
 
               <entry align="center">Transmit freq used to calculate
               Observation</entry>
@@ -710,12 +709,12 @@
               <entry><itemizedlist>
                   <listitem>
                     <para>Set based upon Uplink Band result shown in previous
-                    column. C=½ for S-band and 221/1498 for X-band.</para>
+                    column. C=½ for S-band and 221/1498 for X-band. </para>
                   </listitem>
 
                   <listitem>
                     <para>Value of Transponder.TurnAroundRatio has no effect
-                    on C</para>
+                    on C </para>
                   </listitem>
                 </itemizedlist></entry>
 
@@ -743,19 +742,19 @@
                   <listitem>
                     <para>Uplink Band in ramp table takes precedence over both
                     transmitter frequency set by user and transmit frequency
-                    in ramp table.</para>
+                    in ramp table. </para>
                   </listitem>
                 </itemizedlist></entry>
 
               <entry><itemizedlist>
                   <listitem>
                     <para>Set based upon Uplink Band result shown in previous
-                    column. C=½ for S-band and 221/1498 for X-band.</para>
+                    column. C=½ for S-band and 221/1498 for X-band. </para>
                   </listitem>
 
                   <listitem>
                     <para>Value of Transponder.TurnAroundRatio has no effect
-                    on C</para>
+                    on C </para>
                   </listitem>
                 </itemizedlist></entry>
 
@@ -784,13 +783,13 @@
                     <para>Set based upon transmitter frequency set by user on
                     the Transmitter.Frequency" field. If freq is in
                     [2000-4000] MHz, then Uplink Band is S-band. If freq is in
-                    [7000-8000] MHz, then Uplink Band is X-band.</para>
+                    [7000-8000] MHz, then Uplink Band is X-band. </para>
                   </listitem>
                 </itemizedlist></entry>
 
               <entry><itemizedlist>
                   <listitem>
-                    <para>M2 = Transponder.TurnAroundRatio</para>
+                    <para>M2=Transponder.TurnAroundRatio</para>
                   </listitem>
                 </itemizedlist></entry>
 
@@ -804,7 +803,8 @@
                             <m:mi>T</m:mi>
                           </m:msub>
                         </m:math>
-                      </inlineequation>=Transmitter.frequency</para>
+                      </inlineequation>=Transmitter.frequency (This frequency
+                    will be written to the the GMD file)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -824,13 +824,13 @@
               <entry><itemizedlist>
                   <listitem>
                     <para>Set based upon Uplink Band result shown in previous
-                    column. M2=240/221 for S-band and 880/749 for X
-                    band.</para>
+                    column. M2=240/221 for S-band and 880/749 for X band.
+                    </para>
                   </listitem>
 
                   <listitem>
                     <para>Value of Transponder.TurnAroundRatio has no effect
-                    on M2</para>
+                    on M2 </para>
                   </listitem>
                 </itemizedlist></entry>
 
@@ -844,7 +844,8 @@
                             <m:mi>T</m:mi>
                           </m:msub>
                         </m:math>
-                      </inlineequation>=Transmitter.frequency</para>
+                      </inlineequation>=Ramp Table frequency (This frequency
+                    will be written to the GMD file)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>

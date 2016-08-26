@@ -40,8 +40,8 @@
   <refsection>
     <title>Fields</title>
 
-    <para>There are no fields for the <guilabel>Antenna</guilabel> resource.
-    </para>
+    <para>There are no fields for the <guilabel>Antenna</guilabel>
+    resource.</para>
   </refsection>
 
   <refsection>
@@ -49,9 +49,9 @@
 
     <informalexample>
       <para>This example shows how the <guilabel>Antenna</guilabel> resource
-      is used. </para>
+      is used.</para>
 
-      <programlisting width="90">Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
+      <programlisting width="72">Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
 
 Create Transponder SatTransponder;
 SatTransponder.PrimaryAntenna   = SatTranponderAntenna
@@ -67,12 +67,14 @@ DSNReceiver.PrimaryAntenna      = DSNReceiverAntenna;
 
 Create GroundStation DSN;
 DSN.AddHardware                 = ...
- {DSNTransmitter, DSNReceiver, DSNTransmitterAntenna, DSNReceiverAntenna};</programlisting>
+ {DSNTransmitter, DSNReceiver, DSNTransmitterAntenna, DSNReceiverAntenna};
+BeginMissionSequence;</programlisting>
 
       <para>Since the <guilabel>Antenna</guilabel> resource currently has no
-      fields and thus has no function, for this GMAT release, we only needed
-      to create one <guilabel>Antenna</guilabel> resource. Thus, the example
-      above simplifies as shown below. </para>
+      fields and thus has no function, for this GMAT release, we only need to
+      create one <guilabel>Antenna</guilabel> resource that can be used
+      multiple times. Thus, the example above simplifies as shown
+      below.</para>
 
       <programlisting>Create Antenna GenericAntenna;
 
@@ -89,7 +91,8 @@ DSNReceiver.PrimaryAntenna        = GenericAntenna;
 
 Create GroundStation DSN;
 DSN.AddHardware                   = ...
-                       {DSNTransmitter, DSNReceiver, GenericAntenna};</programlisting>
+                       {DSNTransmitter, DSNReceiver, GenericAntenna};
+BeginMissionSequence;</programlisting>
     </informalexample>
   </refsection>
 </refentry>

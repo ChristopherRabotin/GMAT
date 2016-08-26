@@ -1616,7 +1616,7 @@ void Thruster::SetSolarSystem(SolarSystem *ss)
 
 
 //------------------------------------------------------------------------------
-//  bool Initialize()
+//  bool cat ialize()
 //------------------------------------------------------------------------------
 /**
  * Sets up the bodies used in the thrust calculations.
