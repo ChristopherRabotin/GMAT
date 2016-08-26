@@ -432,7 +432,7 @@ bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA
       else if (line.find(distanceUnitKeyword) != line.npos)
       {
          index1 = line.find(distanceUnitKeyword);
-         item = line.substr(index1 + timePosVelKeyword.size());
+         item = line.substr(index1 + distanceUnitKeyword.size());
          item = GmatStringUtil::Strip(item);
          #ifdef DEBUG_INITIAL_FINAL
          MessageInterface::ShowMessage
