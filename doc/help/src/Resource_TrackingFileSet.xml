@@ -629,8 +629,8 @@
     <refsection>
       <title>Measurement Types Supported</title>
 
-      <para>Currently, GMAT supports the following measurement types using
-      either X-band or S-band only. </para>
+      <para>Currently, GMAT supports the following ramped or non-ramped
+      measurement types using either X-band or S-band only. </para>
 
       <itemizedlist>
         <listitem>
