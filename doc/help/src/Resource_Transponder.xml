@@ -34,16 +34,15 @@
     for modeling DSN two way range and Doppler data types. The
     <guilabel>Transponder</guilabel> object includes modeling of a
     retransmission delay due to the spacecraft transponder electronics. You
-    can also specify a turn around ratio to specify how the receive frequency
-    is changed for upon spacecraft retransmission as needed to avoid RF
-    interference between the signal transmitted by the ground station to the
-    spacecraft and the return signal from the spacecraft to the ground
-    station. </para>
+    can also specify a turn around ratio which is a multiplicative ratio
+    describing how the frequency of the retransmitted signal differs from the
+    received frequency. The incoming and outgoing frequencies are designed to
+    be different so as to avoid RF interference between the signal transmitted
+    by the ground station to the spacecraft and the return signal from the
+    spacecraft to the ground station.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="GroundStation"/>, <xref linkend="Antenna"/></para>
-
-    <para> </para>
   </refsection>
 
   <refsection>
@@ -313,8 +312,8 @@
       (880/749) turn-around ratios. For Doppler data where a ramp table is not
       used, setting the <guilabel>Transponder</guilabel> turn-around ratio
       will correctly model the <guilabel>Doppler</guilabel> data. GMAT cannot
-      currently accommodate custom turn-around ratios for ramped Doppler data.
-      </para>
+      currently accommodate custom turn-around ratios for ramped Doppler
+      data.</para>
     </refsection>
   </refsection>
 

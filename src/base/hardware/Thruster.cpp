@@ -1571,6 +1571,8 @@ bool Thruster::TakeAction(const std::string &action,
                   mixRatio[i] = 1.0;
          }
       }
+	  
+	  return true;
    }
 
    return Hardware::TakeAction(action, actionData);
@@ -1616,7 +1618,7 @@ void Thruster::SetSolarSystem(SolarSystem *ss)
 
 
 //------------------------------------------------------------------------------
-//  bool cat ialize()
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Sets up the bodies used in the thrust calculations.

@@ -627,6 +627,24 @@
     manually removed from the output file.</para>
 
     <refsection>
+      <title>Measurement Types Supported</title>
+
+      <para>Currently, GMAT supports the following ramped or non-ramped
+      measurement types using either X-band or S-band only. </para>
+
+      <itemizedlist>
+        <listitem>
+          <para>DSN Sequential Ranging (TRK-2-34 data Type 7)</para>
+        </listitem>
+
+        <listitem>
+          <para>Derived "Doppler" type measurement obtained using successive
+          DSN Total Count Phase (TRK-2-34 data Type 17) measurements</para>
+        </listitem>
+      </itemizedlist>
+    </refsection>
+
+    <refsection>
       <title>Measurement Type Names</title>
 
       <para>Currently the measurement type names used to identify observation
