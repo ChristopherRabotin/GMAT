@@ -848,6 +848,10 @@ bool GetEphemStates::ReadCode500EphemerisFile()
          ("   centralBodyOnFile = '%s', coordSystemOnFile = '%s', coordSysIndicator = %d\n",
           centralBodyOnFile.c_str(), coordSystemOnFile.c_str(), coordSysIndicator);
       #endif
+
+      if (centralBodyOnFile == "Moon")
+         centralBodyOnFile = "Luna";
+
       ephemInitialA1Mjd = initialEpoch;
       ephemFinalA1Mjd   = finalEpoch;
       ephemInitialState = initialState;
