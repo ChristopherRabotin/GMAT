@@ -667,8 +667,9 @@
       calculated.</para>
 
       <para>Finally, the fourth column shows how the transmit frequency, which
-      shows up directly in the GMD file and is also used to calculate the
-      observation value given in the GMD file, is calculated.</para>
+      shows up directly in the GMD file (for DSN range but not DSN Doppler)
+      and is also used to calculate the observation value given in the GMD
+      file, is calculated.</para>
 
       <informaltable pgwide="1">
         <tgroup cols="4">
@@ -805,9 +806,7 @@
                             <m:mi>T</m:mi>
                           </m:msub>
                         </m:math>
-                      </inlineequation>=Transmitter.frequency (This frequency
-                    will be written to the the GMD range file, if
-                    applicable)</para>
+                      </inlineequation>=Transmitter.frequency </para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -847,9 +846,7 @@
                             <m:mi>T</m:mi>
                           </m:msub>
                         </m:math>
-                      </inlineequation>=Ramp Table frequency (This frequency
-                    will be written to the GMD range file, if
-                    applicable)</para>
+                      </inlineequation>=Ramp Table frequency </para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
