@@ -185,7 +185,10 @@
       <guilabel>GroundStation</guilabel> resource. As discussed in the
       <guilabel>RunSimulator</guilabel> Help, for the case where a ramp table
       is not used, the transmit frequency is used directly to calculate the
-      DSN range and Doppler measurements.</para>
+      DSN range and Doppler measurements. If a ramp table is specified on the
+      relevant <guilabel>TrackingFileSet</guilabel>, the frequency profile
+      specified in the ramp table is used and the transmitter frequency is
+      ignored.</para>
     </refsection>
   </refsection>
 

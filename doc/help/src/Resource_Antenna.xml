@@ -51,7 +51,7 @@
       <para>This example shows how the <guilabel>Antenna</guilabel> resource
       is used.</para>
 
-      <programlisting width="72">Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
+      <programlisting><?db-font-size 75% ?>Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
 
 Create Transponder SatTransponder;
 SatTransponder.PrimaryAntenna   = SatTranponderAntenna

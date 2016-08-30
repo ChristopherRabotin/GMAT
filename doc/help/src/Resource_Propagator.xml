@@ -4162,6 +4162,10 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
     <refsection>
       <title>Fields</title>
 
+      <para>The only <guilabel>Propagator</guilabel> fields applicable to the
+      Code500 ephemeris propagator are <guilabel>StepSize</guilabel> and
+      <guilabel>Type</guilabel>.</para>
+
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
           <colspec colwidth="1.3*"/>
@@ -4181,6 +4185,8 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
               <entry><guilabel>StepSize</guilabel></entry>
 
               <entry><para>The step size for a Code500 Propagator. GMAT will
+              use this step size when traversing the ephemeris file,
+              regardless of the internal step size of the ephemeris. GMAT will
               perform interpolation for times not present on the ephemeris
               file.</para><variablelist>
                   <varlistentry>
@@ -4575,6 +4581,13 @@ EarthView.ViewScaleFactor = 30
 BeginMissionSequence
 Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlisting>
       </informalexample>
+
+      <para>An additional example of use of the Code500 ephemeris propagator
+      is shown in the <filename>Ex_Code500_EphemerisCompare.script</filename>
+      file provided in the <filename>samples\Navigation</filename> directory.
+      This script generates a report showing the difference, in RIC
+      coordinates, between the orbits in two different Earth-centered Code500
+      ephemeris files.</para>
     </refsection>
   </refsection>
 </refentry>
