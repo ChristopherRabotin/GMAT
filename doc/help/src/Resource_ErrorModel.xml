@@ -22,7 +22,7 @@
   <refnamediv>
     <refname>ErrorModel</refname>
 
-    <refpurpose>used to specify measurement noise for simulation and
+    <refpurpose>Used to specify measurement noise for simulation and
     estimation, and to apply or estimate measurement biases.</refpurpose>
   </refnamediv>
 
@@ -49,9 +49,9 @@
     be applied to the observation. An observation bias may also be estimated
     by adding the keyword <guilabel>Bias</guilabel> to the
     <guilabel>ErrorModel.SolveFors</guilabel> list. If the
-    <guilabel>SolveFor</guilabel>s list is empty, no bias will be estimated.
-    The <guilabel>SolveFors</guilabel> list is ignored by the simulator.
-    </para>
+    <guilabel>SolveFors</guilabel> list is empty, no bias will be estimated.
+    The <guilabel>SolveFors</guilabel> list is ignored by the
+    simulator.</para>
 
     <para>See Also <xref linkend="GroundStation"/></para>
   </refsection>
@@ -136,7 +136,14 @@
           <row>
             <entry><guilabel>BiasSigma</guilabel></entry>
 
-            <entry><para>Standard deviation of bias</para> <variablelist>
+            <entry><para>Standard deviation of <guilabel>Bias</guilabel>. This
+            field, which only has a function if both (1)
+            <guilabel>BatchEstimatorInv.UseInitialCovariance = true</guilabel>
+            and (2) <guilabel>Bias</guilabel> is a solve-for parameter, is
+            used to constrain the estimated value of
+            <guilabel>Bias</guilabel>. As shown below, the units used depend
+            upon measurement type, <guilabel>ErrorModel.Type</guilabel>.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -175,7 +182,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N/A</para>
+                    <para>Range_RU: RU, Doppler_HZ: Hz</para>
                   </listitem>
                 </varlistentry>
 
@@ -195,7 +202,10 @@
             <entry><para>One sigma value of Gaussian noise. For simulations,
             if <guilabel>Sim.AddNoise</guilabel> = true, this noise is added
             to the measurements. For estimation, this value is used to as part
-            of the batch processing algorithms. </para> <variablelist>
+            of the batch processing algorithms to calculate the measurement
+            type weighting. As shown below, the units used depend upon
+            measurement type, <guilabel>ErrorModel.Type</guilabel>. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -225,7 +235,7 @@
 
                   <listitem>
                     <para>
-                      <guilabel>TAIModJulian</guilabel>
+                      <guilabel>103</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -234,7 +244,7 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>N/A</para>
+                    <para>Range_RU: RU, Doppler_HZ: Hz</para>
                   </listitem>
                 </varlistentry>
 
@@ -264,7 +274,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Bias</para>
+                    <para>{} or {Bias}</para>
                   </listitem>
                 </varlistentry>
 
@@ -370,8 +380,8 @@
     <refsection>
       <title>Measurement Type Names</title>
 
-      <para>Currently the measurement type names used to identify observation
-      types in GMD data files and on the
+      <para>Currently, the measurement type names used to identify observation
+      types in GMAT Measurement Data (GMD) data files and on the
       <guilabel>TrackingFileSet.AddTrackingConfig</guilabel> object field are
       not the same as those used to build measurement error models for those
       types. Use the following table as a guide.</para>
@@ -410,8 +420,8 @@
 
     <informalexample>
       <para>This example shows how to create an
-      <guilabel>ErrorModel</guilabel> for ground network range observations
-      and illustrates estimation of a range bias parameter.</para>
+      <guilabel>ErrorModel</guilabel> for DSN range observations and
+      illustrates estimation of a range bias parameter.</para>
 
       <programlisting>%   Create an ErrorModel
  
@@ -424,9 +434,10 @@ Range_ErrorModel.SolveFors  = {Bias};
  
 %   Assign it to a ground station
  
-Create GroundStation USPS;
+Create GroundStation DSN;
  
-USPS.ErrorModels = {Range_ErrorModel};</programlisting>
+DSN.ErrorModels = {Range_ErrorModel};
+BeginMissionSequence;</programlisting>
     </informalexample>
   </refsection>
 </refentry>
