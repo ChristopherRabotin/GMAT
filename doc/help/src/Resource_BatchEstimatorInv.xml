@@ -1255,9 +1255,9 @@
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
-          <colspec colnum="1" colwidth=".5*"/>
+          <colspec colwidth=".5*"/>
 
-          <colspec colnum="2" colwidth="3*"/>
+          <colspec colwidth="3*"/>
 
           <thead>
             <row>
@@ -1274,6 +1274,12 @@
               <entry><para> Must be created in order to tell the
               <guilabel>BatchEstimatorInv</guilabel> resource which data will
               be processed</para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Propagator resource</guilabel></entry>
+
+              <entry>Used by GMAT to generate the predicted orbit</entry>
             </row>
 
             <row>

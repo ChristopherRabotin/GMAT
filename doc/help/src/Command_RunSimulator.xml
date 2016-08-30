@@ -63,7 +63,7 @@
       7 measurement, a row of data has the following GMAT internal file
       format.</para>
 
-      <programlisting><?db-font-size 50% ?>TAIMJD  DSNTwoWayRange 7050 [Downlink Station ID][S/C ID] [Range Observable (RU)][Uplink Band] [Uplink Freq (Hz)] [Range Modulo (RU)]</programlisting>
+      <programlisting><?db-font-size 50% ?>TAIMJD  DSNRange 9004 [Downlink Station ID] [S/C ID] [Range Observable (RU)] [Uplink Band] [Uplink Freq (Hz)] [Range Modulo (RU)]</programlisting>
 
       <para>where [Uplink Band] species the frequency band of the transmitting
       station as shown in the table below.</para>
@@ -237,7 +237,7 @@
       for a DSN TRK-2-34 type 17 measurement, a row of data has the following
       GMAT internal file format.</para>
 
-      <programlisting><?db-font-size 50% ?># TAIMJD_t3e DSNTwoWayDoppler 7051 [Downlink Station ID] [S/C ID] [Uplink Band] DopplerCountInterval_seconds DopplerMeas_Hz</programlisting>
+      <programlisting><?db-font-size 50% ?># TAIMJD_t3e Doppler 9006 [Downlink Station ID] [S/C ID] [Uplink Band] [DopplerCountInterval_seconds] [DopplerMeas_Hz]</programlisting>
 
       <para>where [Uplink Band] has been previously described and where
       DopplerMeas_Hz, the Doppler measurement, is calculated according
@@ -663,12 +663,12 @@
       <para>The output GMAT Measurement Data (GMD) file contains the
       observable value which is calculated using the equations shown above.
       The third column shows how the value of C or M2, which is used to
-      calculate the observation value shown in the GMD file, is calculated.
-      </para>
+      calculate the observation value shown in the GMD file, is
+      calculated.</para>
 
       <para>Finally, the fourth column shows how the transmit frequency, which
       shows up directly in the GMD file and is also used to calculate the
-      observation value given in the GMD file, is calculated. </para>
+      observation value given in the GMD file, is calculated.</para>
 
       <informaltable pgwide="1">
         <tgroup cols="4">
@@ -731,7 +731,7 @@
                           </m:msub>
                         </m:math>
                       </inlineequation>=Transmitter.frequency (This frequency
-                    will be written to the the GMD file)</para>
+                    will be written to the GMD range file)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -771,7 +771,7 @@
                           </m:msub>
                         </m:math>
                       </inlineequation>=Ramp Table frequency (This frequency
-                    will be written to the GMD file)</para>
+                    will be written to the GMD range file)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -806,7 +806,8 @@
                           </m:msub>
                         </m:math>
                       </inlineequation>=Transmitter.frequency (This frequency
-                    will be written to the the GMD file)</para>
+                    will be written to the the GMD range file, if
+                    applicable)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -847,7 +848,8 @@
                           </m:msub>
                         </m:math>
                       </inlineequation>=Ramp Table frequency (This frequency
-                    will be written to the GMD file)</para>
+                    will be written to the GMD range file, if
+                    applicable)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
