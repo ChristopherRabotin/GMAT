@@ -269,7 +269,7 @@
 
                   <listitem>
                     <para>Gregorian: 04 Oct 1957 12:00:00.000 &lt;= Epoch
-                    &lt;= 28 Feb 2100 00:00:00.000 </para>
+                    &lt;= 28 Feb 2100 00:00:00.000</para>
 
                     <para>Modified Julian: 6116.0 &lt;= Epoch &lt;=
                     58127.5</para>
@@ -331,7 +331,7 @@
 
                   <listitem>
                     <para>Gregorian: 04 Oct 1957 12:00:00.000 &lt;= Epoch
-                    &lt;= 28 Feb 2100 00:00:00.000 </para>
+                    &lt;= 28 Feb 2100 00:00:00.000</para>
 
                     <para>Modified Julian: 6116.0 &lt;= Epoch &lt;=
                     58127.5</para>
@@ -520,7 +520,15 @@
               <entry><para> Must be created in order to tell the
               <guilabel>Simulator</guilabel> resource, via the
               <guilabel>AddData</guilabel> field, which data types will be
-              simulated</para></entry>
+              simulated and to specify the name of the output tracking data
+              file (via <guilabel>FileName</guilabel>)</para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Propagator</guilabel>
+              <guilabel>resource</guilabel></entry>
+
+              <entry> Used by GMAT to generate the simulated orbit</entry>
             </row>
 
             <row>
@@ -546,9 +554,9 @@
       that contains a single range measurement for a fictional DSN ground
       station. For a more comprehensive example of simulating measurements,
       see the <xref linkend="Tut_Simulate_DSN_Range_and_Doppler_Data"/>
-      tutorial. </para>
+      tutorial.</para>
 
-      <programlisting width="100">%Create and Configure Spacecraft
+      <programlisting><?db-font-size 75% ?>%Create and Configure Spacecraft
 Create Spacecraft SimSat;
 GMAT SimSat.DateFormat = UTCGregorian;
 GMAT SimSat.Epoch = '19 Aug 2015 00:00:00.000';
@@ -585,7 +593,7 @@ GMAT DSNrange.NoiseSigma = 10;
 
 %Define data types
 Create TrackingFileSet simData;
-GMAT simData.AddTrackingConfig = {'{{DSN,SimSat,DSN},DSNRange}'};
+GMAT simData.AddTrackingConfig = {{DSN,SimSat,DSN}, DSNRange};
 GMAT simData.FileName          = {'simData.gmd'};
 
 %   Create and configure the Simulator object
