@@ -66,7 +66,10 @@
           <row>
             <entry><guilabel>HardwareDelay</guilabel></entry>
 
-            <entry><para>Transponder electronics delay</para> <variablelist>
+            <entry><para>Transponder electronics delay between receiving time
+            and transmitting time at the transponder. It is applied for both
+            simulation and estimation, with or without ramp table use.</para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -122,9 +125,8 @@
           <row>
             <entry><guilabel>PrimaryAntenna</guilabel></entry>
 
-            <entry><para><guilabel>Antenna</guilabel> resource used by
-            <guilabel>GroundStation</guilabel> resource to transmit a
-            signal</para> <variablelist>
+            <entry><para><guilabel>Antenna</guilabel> resource used by the
+            <guilabel>Transponder</guilabel> resource</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -185,7 +187,7 @@
             input ramp table is not used, changing the transponder turn around
             ratio appreciably changes the measurement. For all DSN data types,
             changing the turn around ratio affects the media correction
-            calculations which will result in a small change in the
+            calculations which will typically result in a small change in the
             measurement. See the <guilabel>RunSimulator</guilabel> and
             <guilabel>RunEstimator</guilabel> help for additional details.
             </para> <variablelist>
@@ -268,8 +270,8 @@
       measurements?</title>
 
       <para>Assume that media corrections are turned off so that we can ignore
-      any small changes to the DSN measurements caused by media corrections.
-      We make the following observations.</para>
+      any, typically small, changes to the DSN measurements caused by media
+      corrections. We make the following observations.</para>
 
       <orderedlist>
         <listitem>
