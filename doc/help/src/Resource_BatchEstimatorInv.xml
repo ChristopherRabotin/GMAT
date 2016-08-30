@@ -698,13 +698,13 @@
           <row>
             <entry><guilabel>Propagator</guilabel></entry>
 
-            <entry><para>Specifies propagator object used for batch
+            <entry><para><guilabel>Propagator</guilabel> object used for batch
             estimation</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Real</para>
+                    <para>Object</para>
                   </listitem>
                 </varlistentry>
 
@@ -712,7 +712,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>valid propagator object</para>
+                    <para>valid <guilabel>Propagator</guilabel> object</para>
                   </listitem>
                 </varlistentry>
 
@@ -870,11 +870,11 @@
           <row>
             <entry><guilabel>ReportStyle</guilabel></entry>
 
-            <entry><para>Specifies the type of estimation report. The Normal
-            style excludes reporting of observation TAI, partials, and
-            frequency information. For GMAT version R2016A, for normal GMAT
-            operation, only the Normal style is an allowed choice. </para>
-            <variablelist>
+            <entry><para>Specifies the type of estimation report. The
+            <code>Normal</code> style excludes reporting of observation TAI,
+            partials, and frequency information. For GMAT version R2016A, for
+            normal GMAT operation, only the <code>Normal</code> style is an
+            allowed choice. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1165,7 +1165,7 @@
     <refsection>
       <title>Behavior of Convergence Criteria</title>
 
-      <para>GMAT has three input fields, <guilabel>RelativeTol</guilabel>,
+      <para>GMAT has four input fields, <guilabel>RelativeTol</guilabel>,
       <guilabel>AbsoluteTol</guilabel>,
       <guilabel>MaximumIterations</guilabel>, and
       <guilabel>MaxConsecutiveDivergences</guilabel> that are used to
@@ -1315,7 +1315,16 @@ bat.InversionAlgorithm         = 'Internal';
 bat.EstimationEpochFormat      = 'FromParticipants';
 bat.EstimationEpoch            = 'FromParticipants'; 
 bat.ReportStyle                = 'Normal';
-bat.ReportFile                 = 'BatchEstimator_Report.txt';</programlisting>
+bat.ReportFile                 = 'BatchEstimator_Report.txt';
+
+BeginMissionSequence;</programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>For a comprehensive example of reading in measurements and running
+      the estimator, see the <xref
+      linkend="Orbit_Estimation_using_DSN_Range_and_Doppler_Data"/>
+      tutorial.</para>
     </informalexample>
   </refsection>
 </refentry>
