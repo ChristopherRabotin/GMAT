@@ -575,7 +575,6 @@ GMAT DSNReceiver.PrimaryAntenna = DSNReceiverAntenna;
 
 %Create and configure ground station and related error model
 Create GroundStation DSN;
-GMAT DSN.OrbitColor  = Thistle;
 GMAT DSN.AddHardware = ...
   {DSNTransmitter, DSNReceiver, DSNTransmitterAntenna, DSNReceiverAntenna};
 GMAT DSN.ErrorModels = {DSNrange};
