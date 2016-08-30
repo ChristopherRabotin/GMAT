@@ -33,12 +33,13 @@
     create criteria for the inclusion of subsets of the available data in the
     estimation process based on observation frequency, tracker, measurement
     type, or time. Instances of <guilabel>StatisticsAcceptFilter</guilabel>
-    are specified for use on the <guilabel>DataFilters</guilabel> field of an
-    object. A single <guilabel>StatisticsAcceptFilter</guilabel> may employ
-    multiple selection criteria (for example simultaneously thinning different
-    stations or data types by differing intervals). Multiple criteria on a
-    single filter are considered in an AND sense. When multiple criteria are
-    specified, an observation must meet all specified criteria to be
+    are specified for use on the <guilabel>DataFilters</guilabel> field of a
+    <guibutton>TrackingFileSet</guibutton> object. A single
+    <guilabel>StatisticsAcceptFilter</guilabel> may employ multiple selection
+    criteria (for example simultaneously thinning different stations or data
+    types by differing intervals). Multiple criteria on a single filter are
+    considered in an AND sense. When multiple criteria are specified on a
+    single filter, an observation must meet all specified criteria to be
     accepted.</para>
 
     <para>Multiple <guilabel>StatisticsAcceptFilters</guilabel> with different
@@ -48,7 +49,7 @@
     filters will be accepted.</para>
 
     <para>See Also <xref linkend="StatisticsRejectFilter"/>, <xref
-    linkend="TrackingFileSet"/> </para>
+    linkend="TrackingFileSet"/></para>
   </refsection>
 
   <refsection>
@@ -85,8 +86,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Range_KM, Range_RU, Doppler_RangeRate, Doppler_Hz,
-                    or All</para>
+                    <para>Range_RU, Doppler_Hz, or All</para>
                   </listitem>
                 </varlistentry>
 
@@ -135,7 +135,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -194,7 +194,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String </para>
+                    <para>String</para>
                   </listitem>
                 </varlistentry>
 
@@ -533,7 +533,8 @@
                   <term>Units</term>
 
                   <listitem>
-                    <para>Depends on ThinMode value</para>
+                    <para>Depends on <guilabel>ThinMode</guilabel>
+                    value</para>
                   </listitem>
                 </varlistentry>
 
@@ -616,8 +617,7 @@
       assigned to the <guilabel>DataFilters</guilabel> field of a
       <guilabel>TrackingFileSet</guilabel>. This example shows how to create a
       <guilabel>StatisticsAcceptFilter</guilabel> to sample the data at a
-      frequency of 1:10 (thinning the data to one tenth of its volume).
-      </para>
+      frequency of 1:10 (thinning the data to one tenth of its volume).</para>
 
       <programlisting>Create StatisticsAcceptFilter saf;
   
@@ -625,7 +625,8 @@ saf.ThinningFrequency = 10;
 
 Create TrackingFileSet estData;
 
-estData.DataFilters = {saf};</programlisting>
+estData.DataFilters = {saf};
+BeginMissionSequence;</programlisting>
     </informalexample>
 
     <informalexample>
@@ -638,13 +639,16 @@ estData.DataFilters = {saf};</programlisting>
       <programlisting>Create StatisticsAcceptFilter saf1;
 Create StatisticsAcceptFilter saf2;
  
+Create GroundStation GDS CAN;
+
 saf1.Trackers          = {'GDS'}; 
 saf2.Trackers          = {'CAN'};
 saf2.ThinningFrequency = 5;
  
 Create TrackingFileSet estData;
  
-estData.DataFilters = {saf1, saf2};</programlisting>
+estData.DataFilters = {saf1, saf2};
+BeginMissionSequence;</programlisting>
     </informalexample>
 
     <informalexample>
@@ -658,7 +662,8 @@ saf.ThinningFrequency = 300;
  
 Create TrackingFileSet estData;
  
-estData.DataFilters = {saf};</programlisting>
+estData.DataFilters = {saf};
+BeginMissionSequence;</programlisting>
     </informalexample>
   </refsection>
 </refentry>
