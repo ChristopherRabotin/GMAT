@@ -309,8 +309,9 @@
             happen; (1) All of the files in the relevant
             <guilabel>TrackingFileSet</guilabel> are used as a starting point,
             and (2) Of the data in all of the files, only the data defined by
-            the a field of the relevant <guilabel>TrackingFileSet</guilabel>
-            are used. </para> <variablelist>
+            the <guilabel>AddTrackingConfig</guilabel> field of the relevant
+            <guilabel>TrackingFileSet</guilabel> are used. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
