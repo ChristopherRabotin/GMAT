@@ -32,7 +32,7 @@
 
     <para>When using GMAT's navigation capabilities, certain Spacecraft
     parameters can be "solved-for." As discussed in the <xref
-    linkend="SpacecraftBallisticMass" xrefstyle="select:title"/> section the
+    linkend="SpacecraftBallisticMass" xrefstyle="select:title"/> section, the
     <guilabel>Spacecraft</guilabel> ballistic and mass properties include the
     coefficient of reflectivity, <guilabel>Cr</guilabel>, and the coefficient
     of drag, <guilabel>Cd</guilabel>. As discussed in the <xref
@@ -41,7 +41,8 @@
     <guilabel>X</guilabel>, <guilabel>Y</guilabel>, <guilabel>Z</guilabel>
     position (km), and the <guilabel>Vx</guilabel>, <guilabel>Vy</guilabel>,
     <guilabel>Vz</guilabel> velocity (km/s) of a
-    <guilabel>Spacecraft</guilabel>. You can solve for
+    <guilabel>Spacecraft</guilabel>. As part of GMAT's navigation capability,
+    GMAT can ingest measurements and estimate ("solve-for") values for
     <guilabel>Cr</guilabel>, <guilabel>Cd</guilabel>, and
     <guilabel>CartesianState</guilabel>.</para>
 
@@ -72,7 +73,8 @@
 
             <entry><para>List of <guilabel>Antenna</guilabel>,
             <guilabel>Transmitter</guilabel>, <guilabel>Receiver</guilabel>,
-            and <guilabel>Transponder</guilabel> objects</para><variablelist>
+            and <guilabel>Transponder</guilabel> objects attached to a
+            <guilabel>Spacecraft</guilabel> </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -134,9 +136,10 @@
 
             <entry><para>Standard deviation of the coefficient of
             reflectivity, <guilabel>Cd</guilabel>. This field is only used if
-            the <guilabel>UseInitialCovariance</guilabel> of the
-            <guilabel>BatchEstimatorInv</guilabel> resource is set to True and
-            <guilabel>Cd</guilabel> is being solved for. </para><variablelist>
+            the <guilabel>UseInitialCovariance</guilabel> field of the
+            <guilabel>BatchEstimatorInv</guilabel> resource is set to
+            <code>True</code> and <guilabel>Cd</guilabel> is being solved for.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -192,9 +195,10 @@
 
             <entry><para>Standard deviation of the coefficient of
             reflectivity, <guilabel>Cr</guilabel>. This field is only used if
-            the <guilabel>UseInitialCovariance</guilabel> of the
-            <guilabel>BatchEstimatorInv</guilabel> resource is set to True and
-            <guilabel>Cr</guilabel> is being solved for. </para><variablelist>
+            the <guilabel>UseInitialCovariance</guilabel> field of the
+            <guilabel>BatchEstimatorInv</guilabel> resource is set to
+            <code>True</code> and <guilabel>Cr</guilabel> is being solved for.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -249,13 +253,15 @@
             <entry><guilabel>EstimationStateType</guilabel></entry>
 
             <entry><para>Choice of 6-element state type to be solved for.
-            Currently, Cartesian is the only allowed value.
+            Currently, <code>Cartesian</code> is the only allowed value. This
+            field only has a function if the
+            <guilabel>CartesianState</guilabel> is being solved-for.
             </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>??</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -307,13 +313,14 @@
             <entry><para>Cartesian State 6x6 error covariance matrix. This
             field is only used if the
             <guilabel>UseInitialCovariance</guilabel> of the
-            <guilabel>BatchEstimatorInv</guilabel> resource is set to True and
-            the CartesianState is being solved for. </para><variablelist>
+            <guilabel>BatchEstimatorInv</guilabel> resource is set to
+            <code>True</code> and the CartesianState is being solved for.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>StringArray</para>
+                    <para>Real Matrix</para>
                   </listitem>
                 </varlistentry>
 
@@ -348,7 +355,9 @@
 
                   <listitem>
                     <para>Covariance matrix where position specified in km and
-                    velocity in km/s.</para>
+                    velocity in km/s. (Thus, first three diagonal elements
+                    have units km^2 and last three diagonal elements have
+                    units (km/s)^2)</para>
                   </listitem>
                 </varlistentry>
 
@@ -366,9 +375,10 @@
             <entry><guilabel>SolveFors</guilabel></entry>
 
             <entry><para>List of fields to be solved for. Currently, if
-            anything is solved for, then CartesianState must be included as a
-            solve-for. For example, Cr cannot be the only parameter solved
-            for. </para><variablelist>
+            anything is solved for, then <guilabel>CartesianState</guilabel>
+            must be included as a solve-for. For example,
+            <guilabel>Cr</guilabel> cannot be the only parameter solved for.
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 

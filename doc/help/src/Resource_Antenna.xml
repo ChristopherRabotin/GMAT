@@ -30,7 +30,7 @@
     <para>A number of GMAT resources, <guilabel>GroundStation</guilabel>,
     <guilabel>Transponder</guilabel>, <guilabel>Receiver</guilabel>, and
     <guilabel>Transmitter</guilabel>, use an <guilabel>Antenna</guilabel>
-    resource to transmit and receive RF signals.</para>
+    resource to transmit and/or receive RF signals.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="GroundStation"/>, <xref linkend="Transponder"/>, <xref
@@ -51,7 +51,7 @@
       <para>This example shows how the <guilabel>Antenna</guilabel> resource
       is used.</para>
 
-      <programlisting width="72">Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
+      <programlisting><?db-font-size 75% ?>Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
 
 Create Transponder SatTransponder;
 SatTransponder.PrimaryAntenna   = SatTranponderAntenna

@@ -22,20 +22,21 @@
   <refnamediv>
     <refname>Transmitter</refname>
 
-    <refpurpose>Defines the electronics hardware, attached to a Ground Station
-    resource, that transmits an RF signal.</refpurpose>
+    <refpurpose>Defines the electronics hardware, attached to a
+    <guilabel>GroundStation</guilabel> resource, that transmits an RF
+    signal.</refpurpose>
   </refnamediv>
 
   <refsection>
     <title>Description</title>
 
-    <para>A Ground Station needs a <guilabel>Transmitter</guilabel> to
+    <para>A ground station needs a <guilabel>Transmitter</guilabel> to
     transmit the RF signal to both user spacecraft and to navigation
     spacecraft such as TDRS. A <guilabel>Transmitter</guilabel> is assigned on
     the <guilabel>AddHardware</guilabel> list of an instance of a
-    <guilabel>GroundStation</guilabel>. </para>
+    <guilabel>GroundStation</guilabel>.</para>
 
-    <para>See Also <xref linkend="GroundStation"/>. </para>
+    <para>See Also <xref linkend="GroundStation"/>.</para>
   </refsection>
 
   <refsection>
@@ -59,9 +60,7 @@
           <row>
             <entry><guilabel>Frequency</guilabel></entry>
 
-            <entry><para>When simulating or estimating data, and not using a
-            ramp table, this frequency is used to help calculate the media
-            corrections. TO DO: check on this. </para> <variablelist>
+            <entry><para>Transmit frequency</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -91,7 +90,7 @@
 
                   <listitem>
                     <para>
-                      <guilabel>0 (right value??)</guilabel>
+                      <guilabel>0</guilabel>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -124,7 +123,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>Antenna Object</para>
+                    <para><guilabel>Antenna</guilabel> Object</para>
                   </listitem>
                 </varlistentry>
 
@@ -132,7 +131,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any Antenna object</para>
+                    <para>Any <guilabel>Antenna</guilabel> object</para>
                   </listitem>
                 </varlistentry>
 
@@ -183,15 +182,13 @@
       <title>Discussion of how Transmitter frequency is used</title>
 
       <para>A transmitter will be attached to a
-      <guilabel>GroundStation</guilabel> resource. Media corrections to DSN
-      range and Doppler measurements, with this ground station as the
-      receiving ground station, will be calculated based upon the transmitter
-      frequency. TO DO: check on this. Not true if have ramp table.</para>
-
-      <para>Independent of media corrections, as discussed in the
+      <guilabel>GroundStation</guilabel> resource. As discussed in the
       <guilabel>RunSimulator</guilabel> Help, for the case where a ramp table
       is not used, the transmit frequency is used directly to calculate the
-      DSN range and Doppler measurements.</para>
+      DSN range and Doppler measurements. If a ramp table is specified on the
+      relevant <guilabel>TrackingFileSet</guilabel>, the frequency profile
+      specified in the ramp table is used and the transmitter frequency is
+      ignored.</para>
     </refsection>
   </refsection>
 

@@ -35,7 +35,7 @@
   <refsection>
     <title>Description</title>
 
-    <para>The <guilabel>RunEstimator</guilabel> generates ingests navigation
+    <para>The <guilabel>RunEstimator</guilabel> command ingests navigation
     measurements and generates an estimated state vector according to the
     specifications of the input <guilabel>BatchEstimatorInv</guilabel>
     resource.</para>
@@ -52,8 +52,9 @@
 
       <para>As part of the estimation process, GMAT must calculate the
       so-called observation residual, “O-C,” where “C” is the “Computed”
-      measurement. As discussed in the <guilabel>RunSimulator</guilabel> help,
-      GMAT calculates the DSN range “C” measurement as</para>
+      measurement. As discussed in the <guilabel><xref
+      linkend="RunSimulator"/></guilabel> help, GMAT calculates the DSN range
+      “C” measurement as</para>
 
       <informalequation>
         <m:math display="block">
@@ -668,7 +669,8 @@
               <entry><itemizedlist>
                   <listitem>
                     <para>Use Ground Station transmit frequency set via
-                    Transmitter.Frequency</para>
+                    Transmitter.Frequency (Note that for Doppler data, there
+                    is no frequency data in the GMD file)</para>
                   </listitem>
                 </itemizedlist></entry>
             </row>
@@ -691,7 +693,8 @@
 
               <entry><itemizedlist>
                   <listitem>
-                    <para>Use frequency in ramp table</para>
+                    <para>Use frequency in ramp table. (Note that for Doppler
+                    data, there is no frequency data in the GMD file)</para>
                   </listitem>
 
                   <listitem>
@@ -703,13 +706,6 @@
           </tbody>
         </tgroup>
       </informaltable>
-
-      <para>TO DO: Check on THIS. There is one clarification to the table
-      above. If media corrections are modeled, the frequency set on the
-      Transmitter object, Transmitter.Frequency, and the turn around ratio set
-      on the Transponder object, Transponder.TurnAroundRatio, will be used to
-      calculate the, typically small, media corrections needed to determine
-      the computed, C, value of the range and Doppler measurements.</para>
     </refsection>
   </refsection>
 
@@ -723,6 +719,13 @@
 
 BeginMissionSequence
 RunEstimator myBatchEstimator</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>For a comprehensive example of reading in measurements and running
+      the estimator, see the <xref
+      linkend="Orbit_Estimation_using_DSN_Range_and_Doppler_Data"/>
+      tutorial.</para>
     </informalexample>
   </refsection>
 </refentry>

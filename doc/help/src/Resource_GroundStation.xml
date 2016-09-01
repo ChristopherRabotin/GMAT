@@ -94,7 +94,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>empty list</para>
+                    <para>None</para>
                   </listitem>
                 </varlistentry>
 
@@ -242,7 +242,7 @@
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>??</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -306,8 +306,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>List can contain any user-defined
-                    ErrorModel object</guilabel></para>
+                    <para>Any valid user-defined
+                    <guilabel>ErrorModel</guilabel> resource</para>
                   </listitem>
                 </varlistentry>
 
@@ -323,7 +323,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para><guilabel>empty list</guilabel></para>
+                    <para><guilabel>None</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -463,8 +463,8 @@
           <row>
             <entry><guilabel>Id</guilabel></entry>
 
-            <entry><para>The Id of the <guilabel>GroundStation</guilabel> used
-            in estimation and measurement modelling..</para><variablelist>
+            <entry><para>Id of the <guilabel>GroundStation</guilabel> used in
+            simulation and estimation</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -477,8 +477,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Must begin with a letter; may contain letters,
-                    integers, dashes, underscores</para>
+                    <para>May contain letters, integers, dashes,
+                    underscores</para>
                   </listitem>
                 </varlistentry>
 
@@ -1459,6 +1459,32 @@ aGroundStation.Location1   = 2260.697433050543
 aGroundStation.Location2   = 2260.697433050542
 aGroundStation.Location3   = 5500.485954732006
 </code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Configure a <guilabel>GroundStation</guilabel> that, when used for
+      navigation, will model how the RF signal is refracted in the atmosphere.
+      </para>
+
+      <programlisting><code>Create GroundStation aGroundStation
+aGroundStation.IonosphereModel       = 'IRI2007';
+aGroundStation.TroposphereModel      = 'HopfieldSaastamoinen';
+
+BeginMissionSequence;</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Attach a <guilabel>Transmitter</guilabel> and
+      <guilabel>Receiver</guilabel> resource to a
+      <guilabel>GroundStation.</guilabel></para>
+
+      <programlisting><code>Create Transmitter Transmitter1
+Create Receiver Receiver1
+
+Create GroundStation aGroundStation;
+aGroundStation.AddHardware = {Transmitter1, Receiver1};
+
+BeginMissionSequence;</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>
