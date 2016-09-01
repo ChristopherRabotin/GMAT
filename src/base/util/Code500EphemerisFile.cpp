@@ -118,7 +118,7 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
    mSourceId    = sourceId;
    mCentralBody = centralBody;
    mFileMode    = fileMode;
-   
+   mCentralBodyIndicator = -99.99;
    if (mFileMode == 1)
    {
       mInputFileName = fileName;
@@ -182,6 +182,7 @@ Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef)
    mTimeSystem = ef.mTimeSystem;
    mSourceId = ef.mSourceId;
    mCentralBody = ef.mCentralBody;
+   mCentralBodyIndicator = ef.mCentralBodyIndicator;
    mFileMode = ef.mFileMode;
    mInputFileFormat = ef.mInputFileFormat;
    mOutputFileFormat = ef.mOutputFileFormat;
@@ -211,6 +212,7 @@ Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile
       mTimeSystem = ef.mTimeSystem;
       mSourceId = ef.mSourceId;
       mCentralBody = ef.mCentralBody;
+      mCentralBodyIndicator = ef.mCentralBodyIndicator;
       mFileMode = ef.mFileMode;
       mInputFileFormat = ef.mInputFileFormat;
       mOutputFileFormat = ef.mOutputFileFormat;
@@ -318,7 +320,8 @@ void Code500EphemerisFile::Initialize()
    }
    
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() leaving\n");
+   MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() leaving, "
+         "mCentralBody = %s\n", mCentralBody.c_str());
    #endif
 }
 
@@ -2313,6 +2316,54 @@ Real Code500EphemerisFile::GetTimeSystem()
 {
    return mOutputTimeSystem;
 }
+
+
+//------------------------------------------------------------------------------
+// std::string Code500EphemerisFile::GetCentralBody()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of the central body
+ *
+ * @return The central body name
+ */
+//------------------------------------------------------------------------------
+std::string Code500EphemerisFile::GetCentralBody()
+{
+   // Default to body used in the constructor call
+   std::string retval = mCentralBody;
+
+   // Find central body name from central body indicator
+   // 1.0 = Earth, 2.0 = Luna(Earth Moon), 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter,
+   // 6.0 = Saturn, 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury,
+   // 11.0 = Venus
+   if (mCentralBodyIndicator == 1.0)
+      retval = "Earth";
+   if (mCentralBodyIndicator == 2.0)
+      retval = "Luna";
+   if (mCentralBodyIndicator == 3.0)
+      retval = "Sun";
+   if (mCentralBodyIndicator == 4.0)
+      retval = "Mars";
+   if (mCentralBodyIndicator == 5.0)
+      retval = "Jupiter";
+   if (mCentralBodyIndicator == 6.0)
+      retval = "Saturn";
+   if (mCentralBodyIndicator == 7.0)
+      retval = "Uranus";
+   if (mCentralBodyIndicator == 8.0)
+      retval = "Neptune";
+   if (mCentralBodyIndicator == 9.0)
+      retval = "Pluto";
+   if (mCentralBodyIndicator == 10.0)
+      retval = "Mercury";
+   if (mCentralBodyIndicator == 11.0)
+      retval = "Venus";
+
+   // Should we also set mCentralBody here?  Not sure why it wasn't set on read.
+
+   return retval;
+}
+
 
 //------------------------------------------------------------------------------
 // void ToYearMonthDayHourMinSec(double yyymmdd, double secsOfDay, ...

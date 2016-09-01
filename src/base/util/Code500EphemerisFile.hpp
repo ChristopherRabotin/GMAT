@@ -68,6 +68,7 @@ public:
    void ConvertEbcdicToAscii(char *ebcdic, char *ascii, int numChars);
    
    Real GetTimeSystem();
+   std::string GetCentralBody();
 
 protected:
    static const int    RECORD_SIZE = 2800;

@@ -362,13 +362,19 @@ bool Code500Propagator::SetStringParameter(const Integer id,
 
    if (id == EPHEMERISFILENAME)
    {
-
       return true;         // Idempotent, so return true
    }
 
-   bool retval = EphemerisPropagator::SetStringParameter(id, value);
+   if (id == EPHEM_CENTRAL_BODY)
+   {
+      MessageInterface::ShowMessage("Warning:  Central bodies set on Code500 "
+            "propagators have no effect.  Propagation uses the body specified"
+            "on the ephemeris file for the propagator %s.\n",
+            instanceName.c_str());
+      return false;
+   }
 
-   return retval;
+   return EphemerisPropagator::SetStringParameter(id, value);
 }
 
 
@@ -729,6 +735,18 @@ bool Code500Propagator::Initialize()
                      ephemRecords);
             #endif
             fileDataLoaded = true;
+
+            // Setup central body
+            centralBody = ephem.GetCentralBody();
+            if (centralBody == "Moon")
+               centralBody = "Luna";
+
+            propOrigin = solarSystem->GetBody(centralBody);
+
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("Setting central body to %s <%p>\n",
+                     centralBody.c_str(), propOrigin);
+            #endif
 
             // Build the interpolator.  For now, use not-a-knot splines
             if (interp != NULL)
