@@ -348,9 +348,11 @@
       <programlisting><code>Create ChemicalTank ChemicalTank1
 Create Spacecraft Sat
 Create String myString1 myString2
-Create Variable myVarCreate Array myArray[2,2]
+Create Variable myVar
+Create Array myArray[2,2]
 
-myString1 = 'This is my string'
+myVar        = 3.14
+myString1    = 'This is my string'
 myArray(1,1) = 1
 myArray(2,2) = 1
 
