@@ -303,7 +303,12 @@
             <entry><para>List of file names (a subset of the relevant
             <guilabel>TrackingFileSet's</guilabel>
             <guilabel>FileName</guilabel> field) containing the tracking data,
-            to be excluded from processing. </para> <variablelist>
+            to be excluded from processing. If this field equals
+            From_AddTrackingConfig, then two things happen; (1) All of the
+            files in the relevant TrackingFileSet are used as a starting
+            point, and (2) Of the data in all of the files, the data defined
+            by the AddTrackingConfig field of the relevant TrackingFileSet are
+            excluded.</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -333,9 +338,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>{}</guilabel>
-                    </para>
+                    <para><guilabel>{}</guilabel></para>
                   </listitem>
                 </varlistentry>
 

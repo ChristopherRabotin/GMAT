@@ -351,7 +351,7 @@ Create String myString1 myString2
 Create Variable myVar
 Create Array myArray[2,2]
 
-myVar        = 3.14
+myVar        = 3.1415
 myString1    = 'This is my string'
 myArray(1,1) = 1
 myArray(2,2) = 1
