@@ -4377,13 +4377,13 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
     <refsection>
       <title>GUI</title>
 
-      <screenshot>
+       <screenshot>
         <mediaobject>
           <imageobject>
-            <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_EphemerisPropagator_GUI.png"
-                       scalefit="1" width="100%"/>
-          </imageobject>
+             <imagedata align="center" contentdepth="100%"
+            fileref="files/images/Resource_EphemerisPropagator_Code500_GUI.png"
+                         scalefit="1" width="100%"/>
+                         </imageobject>
         </mediaobject>
       </screenshot>
 

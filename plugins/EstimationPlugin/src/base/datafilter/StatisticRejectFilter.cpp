@@ -297,6 +297,32 @@ bool StatisticRejectFilter::SetStringParameter(const Integer id, const std::stri
    return DataFilter::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value,
+//                         const Integer index)
+//------------------------------------------------------------------------------
+/**
+* Sets an element of a string array property
+*
+* @param id The ID of the property
+* @param value The new value
+* @param index The index of a given element in a string array
+*
+* @return true on success, false on failure
+*/
+//------------------------------------------------------------------------------
+bool StatisticRejectFilter::SetStringParameter(const Integer id, 
+   const std::string &value, const Integer index)
+{
+   if (id == FILENAMES)
+   {
+      if (value == "From_AddTrackingConfig")
+         throw MeasurementException("Error: 'From_AddTrackingConfig' is an invalid value for " + GetName() + ".FileNames parameter.\n");
+   }
+
+   return DataFilter::SetStringParameter(id, value, index);
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)
@@ -314,6 +340,27 @@ bool StatisticRejectFilter::SetStringParameter(const std::string &label,
       const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value,
+//                         const Integer index)
+//------------------------------------------------------------------------------
+/**
+* Sets an element of a string array property
+*
+* @param label The text description of the property
+* @param value The new value
+* @param index The index of a given element in a string array
+*
+* @return true on success, false on failure
+*/
+//------------------------------------------------------------------------------
+bool StatisticRejectFilter::SetStringParameter(const std::string &label, 
+   const std::string &value, const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
 }
 
 
