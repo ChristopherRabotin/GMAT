@@ -17,16 +17,16 @@ Create Variable CompareStep
 %------------------------------------------------------------------------------
 
 % Enter your first and second ephemeris file names and locations here
-Ephemeris1 = 'DemoLEO-1.ephem';
-Ephemeris2 = 'DemoLEO-2.ephem';
+Ephemeris1 = '../data/vehicle/ephem/code500/DemoLEO-1.ephem';
+Ephemeris2 = '../data/vehicle/ephem/code500/DemoLEO-2.ephem';
 
 % Enter the spacecraft names, to be displayed in the report, here:
 Sat1Id = 'DemoLEO'
 Sat2Id = 'DemoLEO'
 
 % Enter the UTC Gregorian start and end epochs for the comparison 
-compareStart = '09 May 2016 00:00:00.000'
-compareEnd   = '01 Jul 2016 00:00:00.000'
+compareStart = '28 Apr 2015 00:00:00.000'
+compareEnd   = '30 Apr 2015 00:00:00.000'
 
 % Enter the step size for the comparisons, in seconds, here
 CompareStep        = 600; 

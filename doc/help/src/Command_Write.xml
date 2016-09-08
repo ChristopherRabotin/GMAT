@@ -287,7 +287,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>{Concise, Verbose, script}</para>
+                    <para>{Concise, Verbose, Script}</para>
                   </listitem>
                 </varlistentry>
 
