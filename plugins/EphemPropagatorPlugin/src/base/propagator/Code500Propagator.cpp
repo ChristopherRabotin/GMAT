@@ -659,8 +659,14 @@ bool Code500Propagator::Initialize()
             Real timeSystem = ephem.GetTimeSystem();
 
             ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
+            timeFromEphemStart = (initialEpoch - ephemStart) *
+                  GmatTimeConstants::SECS_PER_DAY;
 
             #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("EphemStart: %.12lf, InitialEpoch: "
+                     "%.12lf, Time from start: %lf\n", ephemStart, initialEpoch,
+                     timeFromEphemStart);
+
                if (ephemRecords != NULL)
                   MessageInterface::ShowMessage("EphemRecords contains %d "
                         "data blocks\n", ephemRecords->size());
@@ -757,6 +763,10 @@ bool Code500Propagator::Initialize()
       }
    }
 
+   if (startEpochSource == FROM_SCRIPT)
+      for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+         propObjects[i]->SetRealParameter("A1Epoch", currentEpoch);
+
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Code500Propagator::Initialize(), on exit, "
             "initialEpoch = %.12lf, current = %.12lf\n", initialEpoch,
@@ -781,8 +791,8 @@ bool Code500Propagator::Step()
    #ifdef DEBUG_PROPAGATION
       MessageInterface::ShowMessage("Code500Propagator::Step() entered for %p: "
             "initialEpoch = %.12lf; stepsize = %.12lf; "
-            "timeFromEpoch = %.12lf\n", this, initialEpoch, ephemStep,
-            timeFromEpoch);
+            "timeFromEpoch = %.12lf, Time from ephem start = %lf\n", this,
+            initialEpoch, ephemStep, timeFromEpoch, timeFromEphemStart);
    #endif
 
    bool retval = false;
