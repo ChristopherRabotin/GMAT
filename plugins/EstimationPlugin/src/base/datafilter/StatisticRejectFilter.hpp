@@ -49,6 +49,8 @@ public:
 
    virtual bool         SetStringParameter(const Integer id, const std::string &value);
    virtual bool         SetStringParameter(const std::string &label, const std::string &value);
+   virtual bool         SetStringParameter(const Integer id, const std::string &value, const Integer index);
+   virtual bool         SetStringParameter(const std::string &label, const std::string &value, const Integer index);
 
    /// This function is used to set tracking configs to data file object in order to use for data filter
    virtual bool         SetTrackingConfigs(StringArray tkconfigs);
