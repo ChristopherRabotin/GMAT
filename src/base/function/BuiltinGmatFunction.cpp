@@ -39,9 +39,15 @@
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
 //#endif
+//#ifndef DEBUG_TRACE
+//#define DEBUG_TRACE
+//#endif
 
 #ifdef DEBUG_MEMORY
 #include "MemoryTracker.hpp"
+#endif
+#ifdef DEBUG_TRACE
+#include <ctime>                 // for clock()
 #endif
 
 //---------------------------------
@@ -125,7 +131,8 @@ bool BuiltinGmatFunction::Initialize(ObjectInitializer *objInit, bool reinitiali
    static Integer callCount = 0;
    callCount++;      
    clock_t t1 = clock();
-   MessageInterface::ShowMessage("\n");
+   MessageInterface::ShowMessage
+      ("BuiltinGmatFunction::Initialize() entered, callCount=%d\n", callCount);
    ShowTrace(callCount, t1, "BuiltinGmatFunction::Initialize() entered");
    #endif
    
@@ -140,16 +147,7 @@ bool BuiltinGmatFunction::Initialize(ObjectInitializer *objInit, bool reinitiali
                                  fcs ? (fcs->GetTypeName()).c_str() : "NULL");
    MessageInterface::ShowMessage("   internalCS is %p\n", internalCoordSys);
    #endif
-   
-   if (!fcs)
-   {
-      #ifdef DEBUG_FUNCTION_INIT
-      MessageInterface::ShowMessage
-         ("BuiltinGmatFunction::Initialize() returning false, fcs is NULL\n");
-      #endif
-      return false;
-   }
-   
+      
    Function::Initialize(objInit);
    
    // Initialize the Validator - I think I need to do this each time - or do I?

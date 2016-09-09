@@ -182,6 +182,10 @@ protected:
    void                 RefreshFormalInputObjects();
    GmatBase*            FindObject(const std::string &name, bool arrayElementsAllowed = false);
    GmatBase*            CreateObject(const std::string &fromString);
+   GmatBase*            CreateObjectForBuiltinGmatFunction(
+                           const std::string &outName,
+                           Gmat::WrapperDataType wType, 
+                           Integer numRows, Integer numCols);
    void                 AssignResult();
    bool                 HandleCallStack();
    void                 SaveLastResult();

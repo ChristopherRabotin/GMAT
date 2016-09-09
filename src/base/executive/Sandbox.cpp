@@ -948,7 +948,7 @@ bool Sandbox::Execute()
    MessageInterface::ShowMessage("\n==================== Sandbox::Execute() entered\n");
    #if DBGLVL_SANDBOX_RUN > 1
    ShowObjectMap(objectMap, "Sandbox::Execute() Here is the current object map:\n");
-   ShowObjectMap(objectMap, "Sandbox::Execute() Here is the current global object map:\n");
+   ShowObjectMap(globalObjectMap, "Sandbox::Execute() Here is the current global object map:\n");
    MessageInterface::ShowMessage("Sandbox::Execute() Here is the mission sequence:\n");
    std::string seq = GmatCommandUtil::GetCommandSeqString(sequence);
    MessageInterface::ShowMessage(seq);
@@ -1009,7 +1009,7 @@ bool Sandbox::Execute()
          if (current != NULL)
          {
             MessageInterface::ShowMessage
-               ("Sandbox::Execute() running [%s]\n", current->GetTypeName().c_str());
+               ("Sandbox::Execute() .................... RUNNING [%s]\n", current->GetTypeName().c_str());
             
             #if DBGLVL_SANDBOX_RUN > 1
             MessageInterface::ShowMessage
@@ -1599,7 +1599,7 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
 {
    #ifdef DEBUG_SANDBOX_GMATFUNCTION
       MessageInterface::ShowMessage(
-         "Now entering HandleGmatFunction with command of type %s, '%s'\n",
+         "Sandbox::HandleGmatFunction() entered, with command of type %s,\n   '%s'\n",
          (cmd->GetTypeName()).c_str(), cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
       
@@ -1650,7 +1650,7 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
       if (globalObjectMap.find(fName) == globalObjectMap.end())
       {
          #ifdef DEBUG_SANDBOX_GMATFUNCTION
-         MessageInterface::ShowMessage("Creating function '%s'\n", fName.c_str());
+         MessageInterface::ShowMessage("Sandbox creating function '%s'\n", fName.c_str());
          #endif
          if (isMatlabFunction)
             f = moderator->CreateFunction("MatlabFunction",fName, 0);
@@ -1761,6 +1761,9 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
          }
       }
    }
+   #ifdef DEBUG_SANDBOX_GMATFUNCTION
+   MessageInterface::ShowMessage("Sandbox::HandleGmatFunction() returning %d\n", OK);
+   #endif
    return OK;
 }
 
