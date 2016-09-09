@@ -813,7 +813,9 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
                {
                   // Check if it is string function call such as: sprintf('arr33 = [%s]', arr33)
                   // Figure out how to get list of builtin functions (LOJ: 2016.03.04)
-                  MessageInterface::ShowMessage("===> Check if it is string function call\n");
+                  #if DBGLVL_WRAPPERS > 1
+                  MessageInterface::ShowMessage("   Check if it is string function call\n");
+                  #endif
                   bool isValid = GmatStringUtil::IsValidFunctionCall(theDescription);
                   if (!isValid)
                   {

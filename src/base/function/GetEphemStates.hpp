@@ -59,12 +59,12 @@ public:
    
 protected:
    Spacecraft*          inSat;
+   CoordinateSystem*    coordSysOnFile;
+   CoordinateSystem*    outCoordSys;
    std::string          inEphemType;
    std::string          centralBodyOnFile;
    std::string          axisSystemOnFile;
    std::string          outEpochFormat;
-   CoordinateSystem*    coordSysOnFile;
-   CoordinateSystem*    outCoordSys;
    Real                 ephemInitialA1Mjd;
    Real                 ephemFinalA1Mjd;
    Rvector6             ephemInitialState;

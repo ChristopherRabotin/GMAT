@@ -83,41 +83,44 @@
 GetEphemStates::GetEphemStates(const std::string &typeStr, const std::string &name) :
    BuiltinGmatFunction(typeStr, name),
    inSat             (NULL),
+   coordSysOnFile    (NULL),
+   outCoordSys       (NULL),
    inEphemType       (""),
    centralBodyOnFile (""),
    axisSystemOnFile  (""),
    outEpochFormat    (""),
-   coordSysOnFile    (NULL),
-   outCoordSys       (NULL),
    ephemInitialA1Mjd (0.0),
    ephemFinalA1Mjd   (0.0)
 {
    objectTypeNames.push_back(typeStr);
    objectTypeNames.push_back("GetEphemStates");
+
+   ephemInitialState.Set(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   ephemFinalState.Set(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    
    // Build input and output arrays. Function interface is:
    // [initialEpoch, initialState, finalEpoch, finalState] =
    //     GetEphemStates(ephemType, sat, epochFormat, coordinateSystem)
    
    // Add dummy input names
-   inputNames.push_back("__builtin_input_1_ephemtype__");
-   inputArgMap.insert(std::make_pair("__builtin_input_1_ephemtype__", (ElementWrapper*) NULL));
-   inputNames.push_back("__builtin_input_2_spacecraft__");
-   inputArgMap.insert(std::make_pair("__builtin_input_2_spacecraft__", (ElementWrapper*) NULL));
-   inputNames.push_back("__builtin_input_3_epochformat__");
-   inputArgMap.insert(std::make_pair("__builtin_input_3_epochformat__", (ElementWrapper*) NULL));
-   inputNames.push_back("__builtin_input_4_coordsys__");
-   inputArgMap.insert(std::make_pair("__builtin_input_4_coordsys__", (ElementWrapper*) NULL));
+   inputNames.push_back("__GetEphemStates_input_1_ephemtype__");
+   inputArgMap.insert(std::make_pair("__GetEphemStates_input_1_ephemtype__", (ElementWrapper*) NULL));
+   inputNames.push_back("__GetEphemStates_input_2_spacecraft__");
+   inputArgMap.insert(std::make_pair("__GetEphemStates_input_2_spacecraft__", (ElementWrapper*) NULL));
+   inputNames.push_back("__GetEphemStates_input_3_epochformat__");
+   inputArgMap.insert(std::make_pair("__GetEphemStates_input_3_epochformat__", (ElementWrapper*) NULL));
+   inputNames.push_back("__GetEphemStates_input_4_coordsys__");
+   inputArgMap.insert(std::make_pair("__GetEphemStates_input_4_coordsys__", (ElementWrapper*) NULL));
    
    // Add dummy output names
-   outputNames.push_back("__builtin_output_1_initialepoch__");
-   outputArgMap.insert(std::make_pair("__builtin_output_1_initialepoch__", (ElementWrapper*) NULL));
-   outputNames.push_back("__builtin_output_2_initialstate__");
-   outputArgMap.insert(std::make_pair("__builtin_output_2_initialstate__", (ElementWrapper*) NULL));
-   outputNames.push_back("__builtin_output_3_finalepoch__");
-   outputArgMap.insert(std::make_pair("__builtin_output_3_finalepoch__", (ElementWrapper*) NULL));
-   outputNames.push_back("__builtin_output_4_finalstate__");
-   outputArgMap.insert(std::make_pair("__builtin_output_4_finalstate__", (ElementWrapper*) NULL));
+   outputNames.push_back("__GetEphemStates_output_1_initialepoch__");
+   outputArgMap.insert(std::make_pair("__GetEphemStates_output_1_initialepoch__", (ElementWrapper*) NULL));
+   outputNames.push_back("__GetEphemStates_output_2_initialstate__");
+   outputArgMap.insert(std::make_pair("__GetEphemStates_output_2_initialstate__", (ElementWrapper*) NULL));
+   outputNames.push_back("__GetEphemStates_output_3_finalepoch__");
+   outputArgMap.insert(std::make_pair("__GetEphemStates_output_3_finalepoch__", (ElementWrapper*) NULL));
+   outputNames.push_back("__GetEphemStates_output_4_finalstate__");
+   outputArgMap.insert(std::make_pair("__GetEphemStates_output_4_finalstate__", (ElementWrapper*) NULL));
    
    // Add output types
    outputWrapperTypes.push_back(Gmat::STRING_OBJECT_WT); // initialEpoch
@@ -174,7 +177,9 @@ GetEphemStates::GetEphemStates(const GetEphemStates &f) :
    coordSysOnFile    (f.coordSysOnFile),
    outCoordSys       (f.outCoordSys),
    ephemInitialA1Mjd (f.ephemInitialA1Mjd),
-   ephemFinalA1Mjd   (f.ephemFinalA1Mjd)
+   ephemFinalA1Mjd   (f.ephemFinalA1Mjd),
+   ephemInitialState (f.ephemInitialState),
+   ephemFinalState   (f.ephemFinalState)
 {
 }
 
@@ -205,6 +210,8 @@ GetEphemStates& GetEphemStates::operator=(const GetEphemStates &f)
    outCoordSys       = f.outCoordSys;
    ephemInitialA1Mjd = f.ephemInitialA1Mjd;
    ephemFinalA1Mjd   = f.ephemFinalA1Mjd;
+   ephemInitialState = f.ephemInitialState;
+   ephemFinalState   = f.ephemFinalState;
    
    return *this;
 }
@@ -273,7 +280,7 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage
       ("GetEphemStates::Execute() <%p>'%s' entered\n", this, GetName().c_str());
-   ShowObjects("");
+   ShowObjects("In GetEphemStates::Execute()");
    MessageInterface::ShowMessage("   inputArgMap.size() = %d\n", inputArgMap.size());
    MessageInterface::ShowMessage
       ("   outputArgMap.size() = %d\n   outputWrapperTypes.size() = %d\n",
@@ -483,6 +490,8 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    //=======================================================
    
    ElementWrapper *outWrapper1 = CreateOutputEpochWrapper(ephemInitialA1Mjd, ewi->first);
+   if (!outWrapper1)
+      return false;
    
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage("   Setting outWrapper1 to outputWrapperMap\n");
@@ -496,6 +505,8 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    ++ewi;
    
    ElementWrapper *outWrapper2 = CreateOutputStateWrapper(index, ewi->first);
+   if (!outWrapper2)
+      return false;
    
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage("   Setting outWrapper2 to outputWrapperMap\n");
@@ -509,6 +520,8 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    ++ewi;
    
    ElementWrapper *outWrapper3 = CreateOutputEpochWrapper(ephemFinalA1Mjd, ewi->first);
+   if (!outWrapper3)
+      return false;
    
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage("   Setting outWrapper3 to outputWrapperMap\n");
@@ -522,6 +535,8 @@ bool GetEphemStates::Execute(ObjectInitializer *objInit, bool reinitialize)
    ++ewi;
    
    ElementWrapper *outWrapper4 = CreateOutputStateWrapper(index, ewi->first);
+   if (!outWrapper4)
+      return false;
    
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage("   Setting outWrapper4 to outputWrapperMap\n");
@@ -1089,7 +1104,7 @@ ElementWrapper* GetEphemStates::CreateOutputEpochWrapper(Real a1MjdEpoch,
 {
    #ifdef DEBUG_WRAPPERS
    MessageInterface::ShowMessage
-      ("GetEphemStates::CreateOutputStateWrapper() entered, a1MjdEpoch=%.12f, outName='%s'\n",
+      ("GetEphemStates::CreateOutputEpochWrapper() entered, a1MjdEpoch=%.12f, outName='%s'\n",
        a1MjdEpoch, outName.c_str());
    #endif
    
@@ -1098,17 +1113,24 @@ ElementWrapper* GetEphemStates::CreateOutputEpochWrapper(Real a1MjdEpoch,
    Real toMjd;
    TimeConverterUtil::Convert("A1ModJulian", a1MjdEpoch, "",
                               outEpochFormat, toMjd, epochStr);
+
+   // Find StringVar object with outName
+   ObjectMap::iterator objIter = objectStore->find(outName);
+   GmatBase *obj = NULL;
+   StringVar *outString = NULL;
+   if (objIter != objectStore->end())
+   {
+      obj = objIter->second;
+      #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage
+         ("   outName = <%p><%s>'%s'\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+          obj ? obj->GetName().c_str() : "NULL");
+      #endif
+      outString = (StringVar*)obj;
+      outString->SetString(epochStr);
+   }
    
-   // Create StringVar, this will be deleted when StringObjectWrapper is deleted
-   StringVar *outString = new StringVar(outName);
-   #ifdef DEBUG_MEMORY
-   MemoryTracker::Instance()->Add
-      (outString, "outString", "GetEphemStates::CreateOutputEpochWrapper()",
-       "outString = new StringVar()");
-   #endif
-   outString->SetString(epochStr);
-   
-   // Create ArrayWrapper
+   // Create StringObjectWrapper
    ElementWrapper *outWrapper = new StringObjectWrapper();         
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
@@ -1196,19 +1218,25 @@ ElementWrapper* GetEphemStates::CreateOutputStateWrapper(Integer outIndex,
       rmat.SetElement(jj, 0, state(jj));
    
    #ifdef DEBUG_FUNCTION_EXEC
-   MessageInterface::ShowMessage("   rmat = %s", rmat.ToString().c_str());
+   MessageInterface::ShowMessage("   rmat = %s\n", rmat.ToString().c_str());
    #endif
-   
-   // Create Array, this array will be deleted when ArrayWrapper is deleted
-   Array *outArray = new Array(outName);
-   #ifdef DEBUG_MEMORY
-   MemoryTracker::Instance()->Add
-      (outArray, "outArray", "GetEphemStates::CreateOutputStateWrapper()",
-       "outArray = new Array()");
-   #endif
-   
-   outArray->SetSize(numRows, numCols);
-   outArray->SetRmatrix(rmat);
+      
+   // Find Array object with outName
+   ObjectMap::iterator objIter = objectStore->find(outName);
+   GmatBase *obj = NULL;
+   Array *outArray = NULL;
+   if (objIter != objectStore->end())
+   {
+      obj = objIter->second;
+      #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage
+         ("   outName = <%p><%s>'%s'\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+          obj ? obj->GetName().c_str() : "NULL");
+      #endif
+      outArray = (Array*)obj;
+      outArray->SetSize(numRows, numCols);
+      outArray->SetRmatrix(rmat);
+   }
    
    #ifdef DEBUG_FUNCTION_EXEC
    MessageInterface::ShowMessage("   Creating ArrayWrapper for output\n");
