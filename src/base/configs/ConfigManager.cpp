@@ -39,6 +39,7 @@
 //#define DEBUG_CONFIG_SS 1
 //#define DEBUG_CONFIG_ADD
 //#define DEBUG_CONFIG_ADD_CLONE 1
+//#define DEBUG_CONFIG_CHANGE 1
 //#define DEBUG_CONFIG_REMOVE
 //#define DEBUG_CONFIG_REMOVE_MORE
 //#define DEBUG_CONFIG_OBJ_USING
@@ -878,9 +879,20 @@ void ConfigManager::AddObject(GmatBase *obj)
    
    // Object was added, so set configuration changed to true.
    // Until we can add TextEphemFile to resource tree, we don't want to
-   // write to script file on save script. (loj: 2007.04.07)
-   if (obj->GetTypeName() != "TextEphemFile")
+   // write to script file on save script. (LOJ: 2007.04.07)
+   // We can ignore BuiltinGmatFunction such as GetEphemState since it is
+   // added internally. (LOJ: 2016.08.31)
+   if ((obj->GetTypeName() != "TextEphemFile") &&
+       (!obj->IsOfType("BuiltinGmatFunction")))
+   {
+      #ifdef DEBUG_CONFIG_CHANGE
+      MessageInterface::ShowMessage
+         ("ConfigManager::AddObject() Object <%p><%s>'%s'was added, so setting "
+          "configuration changed to true\n", obj, obj->GetTypeName().c_str(),
+          obj->GetName().c_str());
+      #endif
       configChanged = true;
+   }
    
 } // AddObject(GmatBase *obj)
 
@@ -1718,6 +1730,11 @@ bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
    }
    
    // Item was removed, so set configuration changed flag to true
+   #ifdef DEBUG_CONFIG_CHANGE
+   MessageInterface::ShowMessage
+      ("ConfigManager::RenameItem() Item was removed, so setting configuration "
+       "changed to true\n");
+   #endif
    configChanged = true;
    
    #if DEBUG_RENAME
@@ -2006,6 +2023,11 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name,
    }
    
    // Item was removed, so set conguration changed flag to true
+   #ifdef DEBUG_CONFIG_CHANGE
+   MessageInterface::ShowMessage
+      ("ConfigManager::RemoveItem() Item was removed, so setting configuration "
+       "changed to true\n");
+   #endif
    configChanged = true;
    
    #ifdef DEBUG_CONFIG_REMOVE

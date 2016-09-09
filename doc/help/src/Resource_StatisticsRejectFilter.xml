@@ -71,7 +71,7 @@
           <row>
             <entry><guilabel>DataTypes</guilabel></entry>
 
-            <entry><para>List of data types</para> <variablelist>
+            <entry><para>List of data types</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -100,9 +100,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>{}</guilabel>
-                    </para>
+                    <para><guilabel>{}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -127,8 +125,8 @@
           <row>
             <entry><guilabel>EpochFormat</guilabel></entry>
 
-            <entry><para>Allows user to select format of the epoch</para>
-            <variablelist>
+            <entry><para>Allows user to select format of the
+            epoch</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -159,9 +157,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>TAIModJulian</guilabel>
-                    </para>
+                    <para><guilabel>TAIModJulian</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -186,8 +182,8 @@
           <row>
             <entry><guilabel>InitialEpoch</guilabel></entry>
 
-            <entry><para>Initial epoch of desired data to process</para>
-            <variablelist>
+            <entry><para>Initial epoch of desired data to
+            process</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -216,9 +212,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>earliest day defined in GMAT</guilabel>
-                    </para>
+                    <para><guilabel>earliest day defined in
+                    GMAT</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -243,8 +238,8 @@
           <row>
             <entry><guilabel>FinalEpoch</guilabel></entry>
 
-            <entry><para>Final epoch of desired data to process</para>
-            <variablelist>
+            <entry><para>Final epoch of desired data to
+            process</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -273,9 +268,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>latest day defined in GMAT</guilabel>
-                    </para>
+                    <para><guilabel>latest day defined in
+                    GMAT</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -303,12 +297,7 @@
             <entry><para>List of file names (a subset of the relevant
             <guilabel>TrackingFileSet's</guilabel>
             <guilabel>FileName</guilabel> field) containing the tracking data,
-            to be excluded from processing. If this field equals
-            From_AddTrackingConfig, then two things happen; (1) All of the
-            files in the relevant TrackingFileSet are used as a starting
-            point, and (2) Of the data in all of the files, the data defined
-            by the AddTrackingConfig field of the relevant TrackingFileSet are
-            excluded.</para><variablelist>
+            to be excluded from processing. </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -321,8 +310,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>valid file name, 'All', or
-                    'From_AddTrackingConfig'</para>
+                    <para>valid file name or 'All'</para>
                   </listitem>
                 </varlistentry>
 
@@ -364,8 +352,8 @@
             <entry><guilabel>ObservedObjects</guilabel></entry>
 
             <entry><para>List of user-created tracked objects (e.g., name of
-            the <guilabel>Spacecraft</guilabel> resource being tracked)</para>
-            <variablelist>
+            the <guilabel>Spacecraft</guilabel> resource being
+            tracked)</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -394,9 +382,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>{}</guilabel>
-                    </para>
+                    <para><guilabel>{}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -422,8 +408,8 @@
             <entry><guilabel>Trackers</guilabel></entry>
 
             <entry><para>List of user-created trackers (e.g., name of the
-            <guilabel>GroundStation</guilabel> resource being used) </para>
-            <variablelist>
+            <guilabel>GroundStation</guilabel> resource being used)
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -453,9 +439,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>{}</guilabel>
-                    </para>
+                    <para><guilabel>{}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -489,7 +473,7 @@
       assigned to the <guilabel>DataFilters</guilabel> field of a
       <guilabel>TrackingFileSet</guilabel>. This example shows how to create a
       <guilabel>StatisticsRejectFilter</guilabel> to reject all observations
-      from station <guilabel>GDS</guilabel>.</para>
+      from station <guilabel>GDS</guilabel>. </para>
 
       <programlisting>Create GroundStation GDS;
 

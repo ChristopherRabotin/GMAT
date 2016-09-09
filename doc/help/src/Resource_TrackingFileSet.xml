@@ -630,7 +630,7 @@
       <title>Measurement Types Supported</title>
 
       <para>Currently, GMAT supports the following ramped or non-ramped
-      measurement types using either X-band or S-band only. </para>
+      measurement types using either X-band or S-band only.</para>
 
       <itemizedlist>
         <listitem>
@@ -835,12 +835,10 @@ dsnObs.DataFilters             = {saf};</programlisting>
         </tgroup>
       </informaltable>
 
-      <para>The TRK-2-34 Sequential Range value is assumed to include all
-      measurement adjustments (station calibration, time tag adjustments,
-      spacecraft delay, and z-height). The transmit frequency specified in the
-      TRK-2-34 range data GMD file is only used if a frequency ramp table is
-      not available. If a transmit frequency ramp record file is provided on
-      the <guilabel>TrackingFileSet.RampTable</guilabel> field, the transmit
+      <para>The transmit frequency specified in the TRK-2-34 range data GMD
+      file is only used if a frequency ramp table is not available. If a
+      transmit frequency ramp record file is provided on the
+      <guilabel>TrackingFileSet.RampTable</guilabel> field, the transmit
       frequency will be determined from the ramp table and the frequency
       specified in the range data GMD file will be ignored. A sample of GMD
       data records for TRK-2-34 Sequential Range data is shown below.</para>

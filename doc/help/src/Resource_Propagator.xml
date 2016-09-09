@@ -3539,7 +3539,7 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
               <entry><guilabel>CentralBody</guilabel></entry>
 
               <entry><para>The central body of propagation. This field has no
-              affect for SPK propagators.</para> <variablelist>
+              effect for SPK or Code500 propagators.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3568,9 +3568,7 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                     <term>Default Value</term>
 
                     <listitem>
-                      <para>
-                        <guilabel>Earth</guilabel>
-                      </para>
+                      <para><guilabel>Earth</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -3595,8 +3593,9 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
             <row>
               <entry><guilabel>EpochFormat</guilabel></entry>
 
-              <entry><para> Only used for an SPK propagator. The format of the
-              epoch contained in the StartEpoch field. </para> <variablelist>
+              <entry><para> Only used for an SPK or Code500 propagator. The
+              format of the epoch contained in the
+              <guilabel>StartEpoch</guilabel> field. </para> <variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3662,11 +3661,11 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
             <row>
               <entry><guilabel>Start Epoch</guilabel></entry>
 
-              <entry><para>Only used for an SPK propagator. The initial epoch
-              of propagation. When an epoch is provided that epoch is used as
-              the initial epoch. When the keyword "FromSpacecraft" is
-              provided, the start epoch is inherited from the
-              spacecraft.</para> <variablelist>
+              <entry><para>Only used for an SPK or Code500 propagator. The
+              initial epoch of propagation. When an epoch is provided that
+              epoch is used as the initial epoch. When the keyword
+              "FromSpacecraft" is provided, the start epoch is inherited from
+              the spacecraft.</para> <variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3722,8 +3721,8 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
             <row>
               <entry><guilabel>StepSize</guilabel></entry>
 
-              <entry><para> The step size for an SPK Propagator.</para>
-              <variablelist>
+              <entry><para> The step size for an SPK or Code500
+              Propagator.</para> <variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3798,7 +3797,7 @@ Propagate RKV89(moonSat) {moonSat.ElapsedSecs = 300}</code></programlisting>
                       <guilabel>RungeKutta56</guilabel>,
                       <guilabel>BulirschStoer</guilabel>,
                       <guilabel>AdamsBashforthMoulton</guilabel>,
-                      <guilabel>SPK</guilabel></para>
+                      <guilabel>SPK, Code500</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -3995,7 +3994,8 @@ spkProp.StepSize = 300
       </refsection>
 
       <refsection>
-        <title>Interaction with the Propagate Command</title>
+        <title xml:id="Ephemeris_Prop_Interaction">Interaction with the
+        Propagate Command</title>
 
         <para>An SPK-configured <guilabel>Propagator</guilabel> works with the
         <guilabel>Propagate</guilabel> command in the same way numerical
@@ -4134,28 +4134,25 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
 
       <para>A Code500 ephemeris-configured <guilabel>Propagator</guilabel>
       propagates a spacecraft by interpolating or stepping along a
-      user-provided GSFC Code500 ephemeris file. You configure a
+      user-provided Code500-format binary ephemeris file. You configure a
       <guilabel>Propagator</guilabel> to use a Code500 ephemeris by setting
       the <guilabel>Type</guilabel> field to <guilabel>Code500</guilabel>. The
-      Code500 ephemeris file to use is specified on the
-      <guilabel>Spacecraft.EphemerisName</guilabel> resource. You control
-      propagation, including stopping conditions, using the
+      Code500 ephemeris file is specified on the
+      <guilabel>Spacecraft.EphemerisName</guilabel> resource. The user
+      controls propagation, including stopping conditions, using the
       <guilabel>Propagate</guilabel> command. This resource cannot be modified
       in the Mission Sequence. However, you can do whole object assignment in
       the mission, (i.e. <literal>myPropagator = yourPropagator</literal>
       ).</para>
 
-      <para>When using a Code500 ephemeris propagator, the
-      <guilabel>Propagator.StartEpoch</guilabel> field must be set to
-      <guilabel>FromSpacecraft</guilabel>. The <guilabel>Propagator</guilabel>
-      <guilabel>CentralBody</guilabel>, <guilabel>EpochFormat</guilabel>, and
-      <guilabel>ForceModel</guilabel> options are not applicable to the
-      Code500 propagator and should not be used with the Code500 propagator
-      type. GMAT will automatically detect and use the central body of the
-      ephemeris file. The <guilabel>Propagate</guilabel> command should be
-      used to traverse the ephemeris file. GMAT will throw an error message
-      and terminate when attempting to propagate before the start or after the
-      end of the ephemeris file.</para>
+      <para>The <guilabel>Propagator</guilabel>
+      <guilabel>CentralBody</guilabel> option is not applicable to the Code500
+      propagator and should not be used with the Code500 propagator type. GMAT
+      will automatically detect and use the central body of the ephemeris
+      file. The <guilabel>Propagate</guilabel> command should be used to
+      traverse the ephemeris file. GMAT will throw an error message and
+      terminate when attempting to propagate outside the bounds of the
+      ephemeris file.</para>
 
       <para>Code500 ephemeris files are binary-format files. GMAT can generate
       Code500 ephemeris files in both PC (little-endian) and UNIX (big-endian)
@@ -4171,8 +4168,9 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
       <title>Fields</title>
 
       <para>The only <guilabel>Propagator</guilabel> fields applicable to the
-      Code500 ephemeris propagator are <guilabel>StartEpoch</guilabel>,
-      <guilabel>StepSize</guilabel> and <guilabel>Type</guilabel>.</para>
+      Code500 ephemeris propagator are <guilabel>EpochFormat</guilabel>,
+      <guilabel>StartEpoch</guilabel>, <guilabel>StepSize</guilabel> and
+      <guilabel>Type</guilabel>.</para>
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="2">
@@ -4190,13 +4188,79 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
 
           <tbody>
             <row>
+              <entry><guilabel>EpochFormat</guilabel></entry>
+
+              <entry><para> Only used for an SPK or Code500 propagator. The
+              format of the epoch contained in the
+              <guilabel>StartEpoch</guilabel> field. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Enumeration</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Allowed Values</term>
+
+                    <listitem>
+                      <para><guilabel>A1ModJulian</guilabel>,
+                      <guilabel>TAIModJulian</guilabel>,
+                      <guilabel>UTCModJulian</guilabel>,
+                      <guilabel>TTModJulian</guilabel>,
+                      <guilabel>TDBModJulian</guilabel>,
+                      <guilabel>A1Gregorian</guilabel>,
+                      <guilabel>TAIGregorian</guilabel>,
+                      <guilabel>TTGregorian</guilabel>,
+                      <guilabel>UTCGregorian</guilabel>,
+                      <guilabel>TDBGregorian</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Access</term>
+
+                    <listitem>
+                      <para>set</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default Value</term>
+
+                    <listitem>
+                      <para><guilabel>A1ModJulian</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/A unless Mod Julian and in that case Modified
+                      Julian Date</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Interfaces</term>
+
+                    <listitem>
+                      <para>GUI, script</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>Start Epoch</guilabel></entry>
 
               <entry><para>Only used for an SPK or Code500 propagator. The
               initial epoch of propagation. When an epoch is provided that
               epoch is used as the initial epoch. When the keyword
-              "FromSpacecraft" is provided, the start epoch is inherited from
-              the spacecraft.</para><variablelist>
+              <userinput>FromSpacecraft</userinput> is provided, the start
+              epoch is inherited from the spacecraft.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -4252,7 +4316,7 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
             <row>
               <entry><guilabel>StepSize</guilabel></entry>
 
-              <entry><para>The step size for a Code500 Propagator. GMAT will
+              <entry><para>The step size for an Code500 Propagator. GMAT will
               use this step size when traversing the ephemeris file,
               regardless of the internal step size of the ephemeris. GMAT will
               perform interpolation between vectors on the file as
@@ -4381,38 +4445,40 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
         <mediaobject>
           <imageobject>
             <imagedata align="center" contentdepth="100%"
-                       fileref="files/images/Resource_EphemerisPropagator_GUI.png"
+                       fileref="files/images/Resource_EphemerisPropagator_Code500_GUI.png"
                        scalefit="1" width="100%"/>
           </imageobject>
         </mediaobject>
       </screenshot>
 
-      <para>To configure a <guilabel>Propagator</guilabel> to use Code500
-      ephemeris files, on the <guilabel>Propagator</guilabel> dialog box,
-      select <guilabel>Code500</guilabel> in the <guilabel>Type</guilabel>
-      menu. There are four fields you can configure for an SPK propagator
-      including <guilabel>StepSize</guilabel>,
-      <guilabel>CentralBody</guilabel>, <guilabel>EpochFormat</guilabel>, and
-      <guilabel>StartEpoch</guilabel>. Note that changing the
-      <guilabel>EpochFormat</guilabel> setting converts the input epoch to the
-      selected format. You can also type <userinput>FromSpacecraft</userinput>
-      into the <guilabel>StartEpoch</guilabel> field and the
+      <para>To configure a <guilabel>Propagator</guilabel> from the GMAT GUI
+      to use Code500 ephemeris files, select and open a
+      <guilabel>Propagator</guilabel> from the Resources tree. In the
+      <guilabel>Integrator</guilabel> category select
+      <guilabel>Code500</guilabel> from the <guilabel>Type</guilabel>
+      drop-down box. This will display the Code500 propagator options dialog.
+      There are four fields displayed for a Code500 propagator -
+      <guilabel>StepSize</guilabel>, <guilabel>CentralBody</guilabel>,
+      <guilabel>EpochFormat</guilabel>, and <guilabel>StartEpoch</guilabel>.
+      Note that changing the <guilabel>EpochFormat</guilabel> setting converts
+      the input epoch to the selected format. You can also type
+      <userinput>FromSpacecraft</userinput> into the
+      <guilabel>StartEpoch</guilabel> field and the
       <guilabel>Propagator</guilabel> will use the epoch of the
-      <guilabel>Spacecraft</guilabel> as the initial propagation epoch.</para>
+      <guilabel>Spacecraft</guilabel> as the initial propagation epoch. The
+      <guilabel>CentralBody</guilabel> field is displayed to the user, but is
+      unused when the integrator type is Code500.</para>
     </refsection>
 
     <refsection>
       <title>Remarks</title>
 
-      <para>To use a Code500 ephemeris-configured
-      <guilabel>Propagator</guilabel>, you must specify the Code500 ephemeris
-      file on the
+      <para>There is currently no GUI option to assign the Code500 ephemeris
+      file to the <guilabel>Spacecraft</guilabel> resource. You must specify
+      the Code500 ephemeris file on the
       <guilabel>Spacecraft</guilabel><guilabel>.EphemerisName</guilabel>
-      parameter, configure a <guilabel>Propagator</guilabel> to use Code500
-      ephemeris type as opposed to numerical methods, and configure the
-      <guilabel>Propagate</guilabel> command to use the configured Code500
-      propagator. The subsections and examples below discuss each of these
-      items in detail.</para>
+      parameter via script. The subsections below provide examples of how to
+      do this.</para>
 
       <refsection>
         <title>Configuring Spacecraft Ephemeris Files</title>
@@ -4422,11 +4488,13 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
         file to the <guilabel>Spacecraft</guilabel>. A sample spacecraft
         Code500 ephemeris, (<filename>sat_leo.ephem</filename>, in the
         <filename>data/vehicle/ephem/code500</filename> directory) is
-        distributed with GMAT. An example of how to assign this ephemeris to a
-        spacecraft is shown below. Relative paths are defined with respect to
-        the GMAT bin directory of your local installation.</para>
+        distributed with GMAT. This sample file has a span of 4/20/2015
+        00:00:00 to 4/30/2015 00:00:00. An example of how to assign this
+        ephemeris to a spacecraft is shown below. Relative paths are defined
+        with respect to the GMAT <filename>bin</filename> directory of your
+        local installation.</para>
 
-        <programlisting><code>Create Spacecraft aSpacecraft
+        <programlisting><?db-font-size 80% ?><code>Create Spacecraft aSpacecraft
 
 aSpacecraft.EphemerisName = '../data/vehicle/ephem/code500/sat_leo.ephem'</code></programlisting>
 
@@ -4441,79 +4509,24 @@ aSpacecraft.EphemerisName = '../data/vehicle/ephem/code500/sat_leo.ephem'</code>
         <para>If you have assigned the ephemeris file to your spacecraft,
         configuring the propagator only requires assigning the
         <guilabel>Code500</guilabel> type and the desired step size on a
-        <guilabel>Propagator</guilabel> resource.</para>
+        <guilabel>Propagator</guilabel> resource. The central body of
+        propagation will be the central body of the the ephemeris file. If
+        desired, you may also specify an <guilabel>EpochFormat</guilabel> and
+        <guilabel>StartEpoch</guilabel> on the propagator to specify an
+        initial epoch from which to start propagation. The same effect can be
+        accomplished with an independent <guilabel>Propagate</guilabel>
+        command (see <xref linkend="Propagate"/>) to the desired starting
+        epoch.</para>
 
         <programlisting><code>Create Propagator Code500Prop
 
 Code500Prop.Type     = 'Code500'
 Code500Prop.StepSize = 60.</code></programlisting>
-      </refsection>
 
-      <refsection>
-        <title>Interaction with the Propagate Command</title>
-
-        <para>A Code500 ephemeris <guilabel>Propagator</guilabel> works with
-        the <guilabel>Propagate</guilabel> command in the same way numerical
-        propagators work with the <guilabel>Propagate</guilabel> command with
-        the following exceptions:</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>If a <guilabel>Propagate</guilabel> command uses an SPK
-            propagator, then you can only propagate one spacecraft using that
-            propagator. You can however, mix SPK propagators and numeric
-            propagators in a single propagate command.</para>
-          </listitem>
-
-          <listitem>
-            <para>SPK-configured <guilabel>Propagators</guilabel> will not
-            propagate the STM or compute the orbit Jacobian (A matrix).</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>In the example below, we assume a
-        <guilabel>Spacecraft</guilabel> named <guilabel>aSpacecraf</guilabel>t
-        and a <guilabel>Propagator</guilabel> named
-        <guilabel>spkProp</guilabel> have been configured a-priori. An example
-        command to propagate <guilabel>aSpacecraft</guilabel> to Earth
-        Periapsis using <guilabel>spkProp</guilabel> is shown below.</para>
-
-        <programlisting><code>Propagate spkProp(aSpacecraft) {aSpacecraft.Earth.Periapsis}</code></programlisting>
-
-        <para>Below is a script snippet that demonstrates how to propagate
-        backwards using an SPK propagator.</para>
-
-        <programlisting><code>Propagate BackProp spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = -1.5}</code></programlisting>
-      </refsection>
-
-      <refsection>
-        <title>Behavior Near Ephemeris Boundaries</title>
-
-        <para>In general, ephemeris interpolation is less accurate near the
-        boundaries of ephemeris files and we recommend providing ephemeris for
-        significant periods beyond the initial and final epochs of your
-        application for this and other reasons. When propagating near the
-        beginning or end of ephemeris files, the use of the double precision
-        arithmetic may affect results. For example, if an ephemeris file has
-        has an initial epoch TDBModJulian = 21545.00037249916, and you specify
-        the StartEpoch in UTC Gregorian, round off error in time conversions
-        and/or truncation of time using the Gregorian format (only accurate to
-        millisecond) may cause the requested epoch to fall slightly outside of
-        the range provided on the ephemeris file. The best solution is to
-        provide extra ephemeris data to avoid time issues at the boundaries
-        and the more subtle issue of poor interpolation.</para>
-
-        <warning>
-          <para>To locate requested stopping conditions, GMAT needs to bracket
-          the root of the stopping condition function. Then, GMAT uses
-          standard root finding techniques to locate the stopping condition to
-          the requested accuracy. If the requested stopping condition lies at
-          or near the beginning or end of the ephemeris data, then bracketing
-          the stopping condition may not be possible without stepping off the
-          ephemeris file which throw an error and execution will stop. In this
-          case, you must provide more ephemeris data to locate the desired
-          stopping condition.</para>
-        </warning>
+        <para>The same remarks mentioned in the prior section on SPK
+        propagators with regard to interaction with the Propagate command and
+        behavior near ephemeris boundaries also apply to the Code500 ephemeris
+        propagator.</para>
       </refsection>
     </refsection>
 
@@ -4521,66 +4534,51 @@ Code500Prop.StepSize = 60.</code></programlisting>
       <title>Examples</title>
 
       <informalexample>
-        <para>Propagate a GEO spacecraft using an SPK-configured
-        <guilabel>Propagator</guilabel>. Define the
-        <guilabel>StartEpoch</guilabel> from the spacecraft. Note: the SPK
-        kernel GEOSat.bsp is distributed with GMAT.</para>
+        <para>This example propagates a spacecraft using a Code500 ephemeris,
+        defining the <guilabel>StartEpoch</guilabel> from the spacecraft. The
+        ephemeris file used in this example is included in the GMAT
+        distribution at the indicated location. The code below will run if you
+        copy and paste it into a new GMAT script.</para>
 
-        <programlisting><code>Create Spacecraft aSpacecraft;
-aSpacecraft.Epoch.UTCGregorian = '02 Jun 2004 12:00:00.000'
-aSpacecraft.NAIFId = -123456789
-aSpacecraft.OrbitSpiceKernelName = {'..\data\vehicle\ephem\spk\GEOSat.bsp'}
+        <programlisting><?db-font-size 80% ?><code>Create Spacecraft aSpacecraft
 
-Create Propagator spkProp
-spkProp.Type = SPK
-spkProp.StepSize = 300
-spkProp.CentralBody = Earth
-spkProp.StartEpoch = FromSpacecraft
+% Ephem file span is 4/20/2015 - 4/30/2015
 
-Create OrbitView EarthView
-EarthView.Add = {aSpacecraft, Earth, Luna}
-EarthView.ViewPointVector = [ 30000 -20000 10000 ]
-EarthView.ViewScaleFactor = 2.5
+aSpacecraft.EphemerisName = '../data/vehicle/ephem/code500/sat_leo.ephem'
+aSpacecraft.DateFormat    = UTCGregorian
+aSpacecraft.Epoch         = '22 Apr 2015 00:00:00.000'
 
-BeginMissionSequence
-Propagate spkProp(aSpacecraft) {aSpacecraft.TA = 90}
-Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 2.4}</code></programlisting>
-      </informalexample>
+Create Propagator Code500Prop
 
-      <informalexample>
-        <para>Simulate a lunar transfer using an SPK-configured
-        <guilabel>Propagator</guilabel>. Define
-        <guilabel>StartEpoch</guilabel> on the
-        <guilabel>Propagator</guilabel>. Note: the SPK kernel MoonTransfer.bsp
-        is distributed with GMAT.</para>
+Code500Prop.Type       = 'Code500'
+Code500Prop.StepSize   = 60.
+Code500Prop.StartEpoch = 'FromSpacecraft'
 
-        <programlisting><code>Create Spacecraft aSpacecraft
-aSpacecraft.NAIFId = -123456789
-aSpacecraft.OrbitSpiceKernelName = {...
-                          '..\data\vehicle\ephem\spk\MoonTransfer.bsp'}
+Create ReportFile PropReport
 
-Create Propagator spkProp
-spkProp.Type = SPK
-spkProp.StepSize = 300
-spkProp.CentralBody = Earth
-spkProp.EpochFormat = 'UTCGregorian'
-spkProp.StartEpoch = '22 Jul 2014 11:29:10.811'
-
-Create OrbitView EarthView
-EarthView.Add = {aSpacecraft, Earth, Luna}
-EarthView.ViewPointVector = [ 30000 -20000 10000 ]
-EarthView.ViewScaleFactor = 30
+PropReport.Filename     = 'EphemPropagator_Code500_ForwardProp.txt'
+PropReport.WriteHeaders = True
 
 BeginMissionSequence
-Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlisting>
+
+While aSpacecraft.ElapsedDays &lt;= 1
+
+    Propagate Code500Prop(aSpacecraft)
+
+    Report PropReport aSpacecraft.UTCGregorian aSpacecraft.TAIModJulian ...
+        aSpacecraft.X aSpacecraft.Y aSpacecraft.Z ...
+        aSpacecraft.VX aSpacecraft.VY aSpacecraft.VZ
+
+EndWhile</code></programlisting>
       </informalexample>
 
-      <para>An additional example of use of the Code500 ephemeris propagator
-      is shown in the <filename>Ex_Code500_EphemerisCompare.script</filename>
-      file provided in the <filename>samples\Navigation</filename> directory.
-      This script generates a report showing the difference, in RIC
-      coordinates, between the orbits in two different Earth-centered Code500
-      ephemeris files.</para>
+      <para>An additional, more detailed, example of use of the Code500
+      ephemeris propagator is shown in the
+      <filename>Ex_Code500_EphemerisCompare.script</filename> file provided in
+      the <filename>samples\Navigation</filename> directory. This script
+      generates a report showing the difference, in RIC coordinates, between
+      the orbits in two different Earth-centered Code500 ephemeris
+      files.</para>
     </refsection>
   </refsection>
 </refentry>
