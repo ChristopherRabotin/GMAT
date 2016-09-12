@@ -4142,8 +4142,8 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
       controls propagation, including stopping conditions, using the
       <guilabel>Propagate</guilabel> command. This resource cannot be modified
       in the Mission Sequence. However, you can do whole object assignment in
-      the mission, (i.e. <literal>myPropagator = yourPropagator</literal>
-      ).</para>
+      the mission sequence, (i.e. <literal>myPropagator =
+      yourPropagator</literal> ).</para>
 
       <para>The <guilabel>Propagator</guilabel>
       <guilabel>CentralBody</guilabel> option is not applicable to the Code500
@@ -4154,14 +4154,16 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
       terminate when attempting to propagate outside the bounds of the
       ephemeris file.</para>
 
-      <para>Code500 ephemeris files are binary-format files. GMAT can generate
-      Code500 ephemeris files in both PC (little-endian) and UNIX (big-endian)
-      binary format (via <guilabel>EphemerisFile.OutputFormat</guilabel>), but
-      the Code500 propagator only permits little-endian formatted
+      <para>Code500 ephemeris files are binary-format files. As discussed in
+      the <xref linkend="EphemerisFile"/> help, GMAT can generate Code500
+      ephemeris files in both PC (little-endian) and UNIX (big-endian) binary
+      format (via <guilabel>EphemerisFile.OutputFormat</guilabel>). The
+      Code500 propagator, however, only permits little-endian formatted
       files.</para>
 
       <para><phrase role="ref_seealso">See Also</phrase>: <xref
-      linkend="Spacecraft"/>, <xref linkend="Propagate"/></para>
+      linkend="Spacecraft"/>, <xref linkend="Propagate"/>, <xref
+      linkend="EphemerisFile"/></para>
     </refsection>
 
     <refsection>
@@ -4190,8 +4192,8 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
             <row>
               <entry><guilabel>EpochFormat</guilabel></entry>
 
-              <entry><para> Only used for an SPK or Code500 propagator. The
-              format of the epoch contained in the
+              <entry><para> Only used for an SPK or Code500 propagator.
+              Specifies format of the epoch contained in the
               <guilabel>StartEpoch</guilabel> field. </para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
@@ -4256,11 +4258,12 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
             <row>
               <entry><guilabel>Start Epoch</guilabel></entry>
 
-              <entry><para>Only used for an SPK or Code500 propagator. The
-              initial epoch of propagation. When an epoch is provided that
-              epoch is used as the initial epoch. When the keyword
-              <userinput>FromSpacecraft</userinput> is provided, the start
-              epoch is inherited from the spacecraft.</para><variablelist>
+              <entry><para>Only used for an SPK or Code500 propagator.
+              Specifies initial epoch of propagation. When an epoch is
+              provided that epoch is used as the initial epoch. When the
+              keyword <userinput>FromSpacecraft</userinput> is provided, the
+              start epoch is inherited from the
+              spacecraft.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -4496,7 +4499,9 @@ Propagate spkProp(aSpacecraft) {aSpacecraft.ElapsedDays = 12}</code></programlis
 
         <programlisting><?db-font-size 80% ?><code>Create Spacecraft aSpacecraft
 
-aSpacecraft.EphemerisName = '../data/vehicle/ephem/code500/sat_leo.ephem'</code></programlisting>
+aSpacecraft.EphemerisName = '../data/vehicle/ephem/code500/sat_leo.ephem'
+
+BeginMissionSequence</code></programlisting>
 
         <para>A spacecraft may have only one Code500 ephemeris assigned. There
         is currently no GUI option to add a Code500 ephemeris file to a
@@ -4521,12 +4526,14 @@ aSpacecraft.EphemerisName = '../data/vehicle/ephem/code500/sat_leo.ephem'</code>
         <programlisting><code>Create Propagator Code500Prop
 
 Code500Prop.Type     = 'Code500'
-Code500Prop.StepSize = 60.</code></programlisting>
+Code500Prop.StepSize = 60.
+
+BeginMissionSequence</code></programlisting>
 
         <para>The same remarks mentioned in the prior section on SPK
-        propagators with regard to interaction with the Propagate command and
-        behavior near ephemeris boundaries also apply to the Code500 ephemeris
-        propagator.</para>
+        propagators with regard to interaction with the
+        <guilabel>Propagate</guilabel> command and behavior near ephemeris
+        boundaries also apply to the Code500 ephemeris propagator.</para>
       </refsection>
     </refsection>
 
