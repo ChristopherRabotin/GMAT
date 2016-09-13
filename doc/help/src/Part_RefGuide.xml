@@ -140,6 +140,7 @@
       <xi:include href="System_CalculationParameters.xml" />
       <xi:include href="System_Color.xml" />
       <xi:include href="System_CommandLineUsage.xml" />
+	  <xi:include href="System_IncludeMacro.xml" />
       <xi:include href="System_KeyboardShortcuts.xml" />      
       <xi:include href="System_MatlabInterface.xml" />
 	  <xi:include href="System_PythonInterface.xml" />
