@@ -29,6 +29,7 @@
 
 #include "EphemWriterCode500.hpp"
 #include "SubscriberException.hpp"   // for exception
+#include "TimeSystemConverter.hpp"   // For NumberOfLeapSecondsFrom()
 #include "MessageInterface.hpp"
 
 
@@ -238,11 +239,25 @@ void EphemWriterCode500::BufferOrbitData(Real epochInDays, const Real state[6])
    if (a1MjdArray.size() >= maxSegmentSize)
       WriteCode500OrbitDataSegment(false);
    
-   // Add new data point
-   A1Mjd *a1mjd = new A1Mjd(epochInDays);
-   Rvector6 *rv6 = new Rvector6(state);
-   a1MjdArray.push_back(a1mjd);
-   stateArray.push_back(rv6);
+   // Check if epochInDays is in leap second
+   // Add new data point only if not in leap second
+   Real taiMjd = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, epochInDays);
+   bool isInLeapSecond = TimeConverterUtil::IsInLeapSecond(taiMjd);
+   if (isInLeapSecond)
+   {
+      #ifdef DEBUG_LEAP_SECOND
+      DebugWriteTime("   epochInDays = ", epochInDays, true, 2);
+      MessageInterface::ShowMessage
+         ("   =====> epochInDays %.12f is in leap second, so skipping...\n", epochInDays);
+      #endif
+   }
+   else
+   {
+      A1Mjd *a1mjd = new A1Mjd(epochInDays);
+      Rvector6 *rv6 = new Rvector6(state);
+      a1MjdArray.push_back(a1mjd);
+      stateArray.push_back(rv6);
+   }
    
    #ifdef DEBUG_EPHEMFILE_BUFFER
    MessageInterface::ShowMessage
