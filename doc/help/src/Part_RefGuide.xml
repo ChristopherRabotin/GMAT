@@ -36,7 +36,7 @@
     on GMAT Commands such as <guilabel>Maneuver</guilabel>,
     <guilabel>Assignment</guilabel>, <guilabel>Optimize</guilabel>, and
     <guilabel>Propagate</guilabel> to name just a few. Go here for details
-    regarding syntax, options, variable ranges and data types, defaults, and
+    regarding syntax, options, variable ranges and data types, defaults and
     expected behavior. Each section contains detailed, copy-and-paste ready
     examples.</para>
 
