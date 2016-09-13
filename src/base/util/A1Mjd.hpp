@@ -81,7 +81,7 @@ public:
    void SetReal(Real val) { mMjd = val; }
 
    UtcDate ToUtcDate();
-   A1Date ToA1Date();
+   A1Date ToA1Date(bool handleLeapSecond = false);
 
    Real   UtcMjdToA1Mjd(const Real utcMjd);
    //Real   Ut1MjdToA1Mjd(const Real ut1Mjd); //wcs: add later
@@ -100,7 +100,7 @@ private:
    //Real GetA1Ut1Diff(const UtcMjd &utcmjd); //wcs: add later
    Real GetA1UtcDiffAnalytic(const UtcMjd &utcmjd);
    GmatTimeUtil::CalDate A1MjdToCalDate(const A1Mjd &a1mjd);
-   GmatTimeUtil::CalDate UtcMjdToCalDate(const UtcMjd &utcmjd);
+   GmatTimeUtil::CalDate UtcMjdToCalDate(const UtcMjd &utcmjd, bool handleLeapSecond = false);
 
 //     static Real SecondsSinceReference(Integer year, MonthOfYear month,
 //                                       DayOfMonth day, HourOfDay hour,

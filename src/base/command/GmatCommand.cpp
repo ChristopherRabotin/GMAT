@@ -2663,6 +2663,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             Real utcModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
+            bool handleLeapSecond   = TimeConverterUtil::HandleLeapSecond();
             Real taiModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
@@ -2672,7 +2673,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             Real tdbModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
-            std::string utcString   = TimeConverterUtil::ConvertMjdToGregorian(utcModJulEpoch);
+            std::string utcString   = TimeConverterUtil::ConvertMjdToGregorian(utcModJulEpoch, handleLeapSecond);
             std::string taiString   = TimeConverterUtil::ConvertMjdToGregorian(taiModJulEpoch);
             std::string ttString    = TimeConverterUtil::ConvertMjdToGregorian(ttModJulEpoch);
             std::string tdbString   = TimeConverterUtil::ConvertMjdToGregorian(tdbModJulEpoch);

@@ -720,6 +720,7 @@ void TextEphemFile::WriteTime(Real epoch)
    
    Real time = TimeConverterUtil::Convert(epoch, TimeConverterUtil::A1MJD, 
                                           mEpochSysId, GmatTimeConstants::JD_JAN_5_1941);
+   bool handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
 
    dstream.width(mColWidth[0]);
    dstream.precision(precision);
@@ -733,7 +734,9 @@ void TextEphemFile::WriteTime(Real epoch)
    
    if (mIsGregorian)
    {
-      std::string timeStr = TimeConverterUtil::ConvertMjdToGregorian(time);
+      bool isUTC = ((mEpochSysId == TimeConverterUtil::UTCMJD) ||
+                    (mEpochSysId == TimeConverterUtil::UTC));
+      std::string timeStr = TimeConverterUtil::ConvertMjdToGregorian(time, (isUTC && handleLeapSecond));
       dstream << timeStr << "   ";
    }
    else

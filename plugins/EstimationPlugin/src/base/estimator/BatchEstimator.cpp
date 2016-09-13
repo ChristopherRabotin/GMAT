@@ -1715,6 +1715,8 @@ std::string BatchEstimator::GetProgressString()
    progress.precision(12);
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
+   bool handleLeapSecond;
+
    GmatState outputEstimationState;
 
    if (isInitialized)
@@ -1747,9 +1749,10 @@ std::string BatchEstimator::GetProgressString()
                   progress << "   " << s << " A.1 modified Julian\n";
                   taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
                   utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+                  handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
                   sprintf(&s[0], "%22.12lf", taiMjdEpoch);
                   progress << "   " << s << " TAI modified Julian\n";
-                  utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+                  utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch, handleLeapSecond);
                   progress << "   " << utcEpoch << " UTCG\n";
                }
 
@@ -1808,7 +1811,8 @@ std::string BatchEstimator::GetProgressString()
             sprintf(&s[0], "%22.12lf", estimationEpoch);
             taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
             utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
-            utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+            handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
+            utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch, handleLeapSecond);
             progress << "   Estimation Epoch:\n";
             progress << "   " << s << " A.1 modified Julian\n";
             sprintf(&s[0], "%22.12lf", taiMjdEpoch);
@@ -1898,9 +1902,10 @@ std::string BatchEstimator::GetProgressString()
                progress << "   " << s << " A.1 modified Julian\n";
                taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
                utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+               handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
                sprintf(&s[0], "%22.12lf", taiMjdEpoch);
                progress << "   " << s << " TAI modified Julian\n";
-               utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+               utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch, handleLeapSecond);
                progress << "   " << utcEpoch << " UTCG\n";
             }
 
@@ -4247,7 +4252,8 @@ void BatchEstimator::WriteReportFileHeaderPart6()
       char s[100];
       taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
       utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
-      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+      bool handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
+      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch, handleLeapSecond);
 
       ss.str(""); ss << utcEpoch << " UTCG"; sa3.push_back(ss.str());
       ss.str(""); ss << estimationEpoch << " A.1 Mod. Julian"; sa3.push_back(ss.str());
@@ -5426,7 +5432,8 @@ void BatchEstimator::WriteIterationSummaryPart3(Solver::SolverState sState)
 
       // 2. Write estimation time
       Real utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
-      std::string utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+      bool handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
+      std::string utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch, handleLeapSecond);
       textFile3 << " Estimation Epoch : " << utcEpoch << " UTCG\n";
       textFile3 << "\n";
 
