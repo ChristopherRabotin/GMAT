@@ -22,7 +22,7 @@
   <refnamediv>
     <refname>#Include Macro</refname>
 
-    <refpurpose>Call a GMAT function</refpurpose>
+    <refpurpose>Import a script snippet</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
