@@ -29,7 +29,7 @@
     <title>Description</title>
 
     <para><guilabel>EphemerisFile</guilabel> is a user-defined resource that
-    generates spacecraft’s ephemeris data in a report format. You can generate
+    generates spacecraft’s ephemeris in a report format. You can generate
     spacecraft’s ephemeris data in any of the user-defined coordinate frames.
     GMAT allows you to output ephemeris data in CCSDS-OEM, SPK, Code-500 and STK .e (STK -TimePosVel)
     formats. See the <xref linkend="EphemerisFile_Remarks"
