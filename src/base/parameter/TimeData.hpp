@@ -89,6 +89,8 @@ protected:
    Spacecraft *mSpacecraft;
    SpacePoint *mSpacePoint;
    
+   bool handleLeapSecond;
+   
    const static Real TIME_REAL_UNDEFINED;
    const static std::string TIME_STRING_UNDEFINED;
    

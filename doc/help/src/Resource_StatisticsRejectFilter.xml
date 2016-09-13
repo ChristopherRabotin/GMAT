@@ -100,7 +100,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para><guilabel>{}</guilabel></para>
+                    <para><guilabel>{All}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -326,7 +326,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para><guilabel>{}</guilabel></para>
+                    <para><guilabel>{All}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -382,7 +382,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para><guilabel>{}</guilabel></para>
+                    <para><guilabel>{All}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -439,7 +439,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para><guilabel>{}</guilabel></para>
+                    <para><guilabel>{All}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -473,7 +473,7 @@
       assigned to the <guilabel>DataFilters</guilabel> field of a
       <guilabel>TrackingFileSet</guilabel>. This example shows how to create a
       <guilabel>StatisticsRejectFilter</guilabel> to reject all observations
-      from station <guilabel>GDS</guilabel>. </para>
+      from station <guilabel>GDS</guilabel>.</para>
 
       <programlisting>Create GroundStation GDS;
 

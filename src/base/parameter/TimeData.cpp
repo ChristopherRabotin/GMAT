@@ -81,6 +81,8 @@ TimeData::TimeData(const std::string &name, const std::string &typeName,
    mIsInitialEpochSet = false;
    mSpacecraft = NULL;
    mSpacePoint = NULL;
+   
+   handleLeapSecond = false;
    #ifdef DEBUG_CONSTRUCTOR
    MessageInterface::ShowMessage
       ("TimeData::TimeData(default) <%p>'%s' leaving, mInitialEpoch=%f, "
@@ -112,6 +114,9 @@ TimeData::TimeData(const TimeData &copy)
    mIsInitialEpochSet = copy.mIsInitialEpochSet;
    mSpacecraft        = copy.mSpacecraft;
    mSpacePoint        = copy.mSpacePoint;
+   
+   handleLeapSecond   = copy.handleLeapSecond;
+   
    #ifdef DEBUG_CONSTRUCTOR
    MessageInterface::ShowMessage
       ("TimeData::TimeData(copy) <%p>'%s' leaving, mInitialEpoch=%f, "
@@ -142,6 +147,8 @@ TimeData& TimeData::operator= (const TimeData &right)
       mIsInitialEpochSet = right.mIsInitialEpochSet;
       mSpacecraft        = right.mSpacecraft;
       mSpacePoint        = right.mSpacePoint;
+      handleLeapSecond   = right.handleLeapSecond;
+      
    }
    
    return *this;
@@ -255,6 +262,8 @@ Real TimeData::GetTimeReal(Integer id)
    
    Real time = -999.999;
    
+   handleLeapSecond = false;
+   
    switch (id)
    {
    case A1:
@@ -279,6 +288,7 @@ Real TimeData::GetTimeReal(Integer id)
       time = TimeConverterUtil::Convert(a1Mjd, TimeConverterUtil::A1MJD,
                                         TimeConverterUtil::UTCMJD,
                                         GmatTimeConstants::JD_JAN_5_1941);
+      handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
       break;
    default:
       throw ParameterException("TimeData::GetTimeReal() Unknown parameter id: " +
@@ -381,7 +391,8 @@ std::string TimeData::GetTimeString(Integer id)
    if (mSpacePoint == NULL)
       InitializeRefObjects();
    
-   Real time = GetTimeReal(id);
+   Real time  = GetTimeReal(id);
+   bool isUTC = (id == UTC);
    
    switch (id)
    {
@@ -393,9 +404,9 @@ std::string TimeData::GetTimeString(Integer id)
       #ifdef DEBUG_TIMEDATA
       MessageInterface::ShowMessage
          ("TimeData::GetTimeString() id=%d, timeStr = %s\n", id,
-          TimeConverterUtil::ConvertMjdToGregorian(time).c_str());
+          TimeConverterUtil::ConvertMjdToGregorian(time, isUTC).c_str());
       #endif
-      return TimeConverterUtil::ConvertMjdToGregorian(time);// need toUTC
+      return TimeConverterUtil::ConvertMjdToGregorian(time, (isUTC && handleLeapSecond));// need toUTC
    default:
       throw ParameterException("TimeData::GetTimeString() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));

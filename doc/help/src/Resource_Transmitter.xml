@@ -36,7 +36,8 @@
     the <guilabel>AddHardware</guilabel> list of an instance of a
     <guilabel>GroundStation</guilabel>.</para>
 
-    <para>See Also <xref linkend="GroundStation"/>.</para>
+    <para>See Also <xref linkend="GroundStation"/>, <xref
+    linkend="Antenna"/></para>
   </refsection>
 
   <refsection>

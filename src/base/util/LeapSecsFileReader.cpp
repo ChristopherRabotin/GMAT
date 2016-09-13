@@ -34,6 +34,7 @@
 #include "LeapSecsFileReader.hpp"
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
+#include "RealUtilities.hpp"
 #include "StringUtil.hpp"
 #include "UtilityException.hpp"
 
@@ -45,6 +46,8 @@
 #include <cstdlib>			// Required for GCC 4.3
 
 //#define DEBUG_READ_LEAP_SECS_FILE
+//#define DEBUG_IN_LEAP_SECOND
+//#define DEBUG_DUMP_DATA
 
 //---------------------------------
 // static data
@@ -52,9 +55,10 @@
 // hard coded for now - need to allow user to set later
 //std::string LeapSecsFileReader::withFileName = "tai-utc.dat";
 
-//---------------------------------
+//------------------------------------------------------------------------------
 // public
-//---------------------------------
+//------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------
 //  LeapSecsFileReader()
 //------------------------------------------------------------------------------
@@ -157,69 +161,6 @@ bool LeapSecsFileReader::Initialize()
    return isInitialized;
 }
 
-//------------------------------------------------------------------------------
-// bool Parse()
-//------------------------------------------------------------------------------
-/**
- * Parses each line to add leap second information to the table
- *
- * Format of the line is:
- *       YYYY MMM  D =JD jDate  TAI-UTC= off1 S + (MJD - off2) X off3 S
- * @return true if the file parses successfully
- */
-//------------------------------------------------------------------------------
-bool LeapSecsFileReader::Parse(std::string line)
-{
-   #ifdef DEBUG_READ_LEAP_SECS_FILE
-      MessageInterface::ShowMessage("Entering LeapSecsFileReader::Parse with line = %s\n", line.c_str());
-   #endif
-   Real jDate, off1, off2, off3;
-
-   // ignore blank lines
-   if (GmatStringUtil::IsBlank(line, true))  return true;
-
-   std::istringstream ss(line);
-   Integer year, day;
-   std::string month, equalsJD, tai_utc, S, plus, mjd, minus, closeParen, X, S2;
-   // clear error flags
-   ss.clear();
-   try
-   {
-      ss >> year >> month >> day >> equalsJD >> jDate >> tai_utc >> off1 >> S >> plus >> mjd >> minus >> off2 >> closeParen >> X >> off3 >> S2;
-      #ifdef DEBUG_READ_LEAP_SECS_FILE
-         MessageInterface::ShowMessage("Entering LeapSecsFileReader::Parse - data read from line are: \n");
-         MessageInterface::ShowMessage("         year       = %d\n", year);
-         MessageInterface::ShowMessage("         month      = %s\n", month.c_str());
-         MessageInterface::ShowMessage("         day        = %d\n", day);
-         MessageInterface::ShowMessage("         equalsJD   = %s\n", equalsJD.c_str());
-         MessageInterface::ShowMessage("   >>>jDate = %12.10f\n", jDate);
-         MessageInterface::ShowMessage("         tai_utc    = %s\n", tai_utc.c_str());
-         MessageInterface::ShowMessage("   >>>off1  = %12.10f\n", off1);
-         MessageInterface::ShowMessage("         S          = %s\n", S.c_str());
-         MessageInterface::ShowMessage("         plus       = %s\n", plus.c_str());
-         MessageInterface::ShowMessage("         mjd        = %s\n", mjd.c_str());
-         MessageInterface::ShowMessage("         minus      = %s\n", minus.c_str());
-         MessageInterface::ShowMessage("   >>>off2  = %12.10f\n", off2);
-         MessageInterface::ShowMessage("         closeParen = %s\n", closeParen.c_str());
-         MessageInterface::ShowMessage("         X          = %s\n", X.c_str());
-         MessageInterface::ShowMessage("   >>>off3  = %12.10f\n", off3);
-         MessageInterface::ShowMessage("         S2         = %s\n", S2.c_str());
-         if (ss.fail()) MessageInterface::ShowMessage(" ------ fail is true ------\n");
-         if (ss.bad())  MessageInterface::ShowMessage(" ------ bad  is true ------\n");
-         if (ss.eof())  MessageInterface::ShowMessage(" ------ eof  is true ------\n");
-      #endif
-      // if there was an error reading all of the items from the stream, return false
-         // don't check for eof here, as it will return true when it gets to the end of the line
-      if (ss.bad() || ss.fail()) return false;
-      LeapSecondInformation leapSecInfo = {jDate, off1, off2, off3};
-      lookUpTable.push_back(leapSecInfo);
-      return true;
-   }
-   catch (BaseException &be)
-   {
-      return false;
-   }
-}
 
 //------------------------------------------------------------------------------
 // Real NumberOfLeapSecondsFrom(UtcMjd utcMjd)
@@ -237,25 +178,26 @@ Real LeapSecsFileReader::NumberOfLeapSecondsFrom(UtcMjd utcMjd)
    if (isInitialized)
    {
       Real jd = utcMjd + GmatTimeConstants::JD_MJD_OFFSET;
-
+      
       // look up each entry in the table to see if value is greater then the
       // julian date
       std::vector<LeapSecondInformation>::iterator info;
       for (std::vector<LeapSecondInformation>::iterator i = lookUpTable.end();
-                 i > lookUpTable.begin(); i--)
+           i > lookUpTable.begin(); i--)
       {
-          info = i-1;
-          if (jd > info->julianDate)
-          {
-             return (info->offset1 + ((utcMjd - info->offset2) * info->offset3));
-          }
+         info = i-1;
+         if (jd >= info->julianDate)
+         {
+            return (info->offset1 + ((utcMjd - info->offset2) * info->offset3));
+         }
       }
-
-      return 0;
+      
+      return 0.0;
    }
    else
-      return 0;
+      return 0.0;
 }
+
 
 //------------------------------------------------------------------------------
 // Real GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd)
@@ -321,3 +263,166 @@ Real LeapSecsFileReader::GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd)
    #endif
    return firstMjd;
 }
+
+
+//------------------------------------------------------------------------------
+// bool IsInLeapSecond(Real theTaiMjd)
+// theTaiMjd is referenced to GmatTimeConstants::JD_NOV_17_1858
+//------------------------------------------------------------------------------
+bool LeapSecsFileReader::IsInLeapSecond(Real theTaiMjd)
+{
+   bool isLeap = false;
+
+   // Find rhe nearest leap second to the input tai mjd time
+   Real nearestLeapSecond = 0.0;
+   
+   // Is the time before or after the lookup table?
+   Integer sz    = lookUpTable.size();
+   Real    tai0  = lookUpTable.at(0).taiMJD;
+   Real    taif  = lookUpTable.at(sz-1).taiMJD;
+
+   #ifdef DEBUG_IN_LEAP_SECOND
+      MessageInterface::ShowMessage("In IsInLS, theTaiMjd = %12.10f\n", theTaiMjd);
+      MessageInterface::ShowMessage("           tai0      = %12.10f\n", tai0);
+      MessageInterface::ShowMessage("           taif      = %12.10f\n", taif);
+      MessageInterface::ShowMessage(" one sec = %12.10f\n", 1.0 /GmatTimeConstants::SECS_PER_DAY);
+   #endif
+
+   if (theTaiMjd <= tai0)
+      nearestLeapSecond = tai0;
+   else if (theTaiMjd >= taif)
+      nearestLeapSecond = taif;
+   else
+   {
+      Real diff        = GmatRealConstants::REAL_MAX;
+      Real currDiff    = 0.0;
+      Real currTai     = 0.0;
+      Real previousTai = taif;
+      std::vector<LeapSecondInformation>::iterator info;
+      for (std::vector<LeapSecondInformation>::iterator i = lookUpTable.end();
+           i > lookUpTable.begin(); i--)
+      {
+         info     = i-1;
+         currTai  = info->taiMJD;
+         currDiff = GmatMathUtil::Abs(currTai - theTaiMjd);
+         #ifdef DEBUG_IN_LEAP_SECOND
+            MessageInterface::ShowMessage(
+                  "In IsInLS, comparing LS time %12.10f to input time %12.10f\n",
+                  currTai, theTaiMjd);
+            MessageInterface::ShowMessage("---------- diff = %12.10f\n", currDiff);
+         #endif
+         if (currDiff > diff)
+         {
+            nearestLeapSecond = previousTai;
+            break;
+         }
+         if (currDiff < diff)
+         {
+            diff        = currDiff;
+            previousTai = currTai;
+         }
+      }
+   }
+   if (nearestLeapSecond == 0.0)
+   {
+      std::string errMsg = "ERROR finding nearest leap second\n";
+      throw UtilityException(errMsg);
+   }
+   
+   Real nearestMinusOne = nearestLeapSecond - (1.0/GmatTimeConstants::SECS_PER_DAY);
+   // Determine if the input time is within the leap second
+   if ((theTaiMjd >= nearestMinusOne) && (theTaiMjd < nearestLeapSecond))
+      isLeap = true;
+   
+   #ifdef DEBUG_IN_LEAP_SECOND
+      MessageInterface::ShowMessage("---------- nearestLeapSecond = %12.10f\n", nearestLeapSecond);
+      MessageInterface::ShowMessage("---------- nearestMinusOne   = %12.10f\n", nearestMinusOne);
+      MessageInterface::ShowMessage("---------- isLeap = %s\n", (isLeap? " true" : "false"));
+   #endif
+//   if ((theTaiMjd >= nearestMinusOne) && (theTaiMjd < nearestLeapSecond))
+//      return true;
+//   return false;
+   return isLeap;
+}
+
+//------------------------------------------------------------------------------
+// private methods
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// bool Parse()
+//------------------------------------------------------------------------------
+/**
+ * Parses each line to add leap second information to the table
+ *
+ * Format of the line is:
+ *       YYYY MMM  D =JD jDate  TAI-UTC= off1 S + (MJD - off2) X off3 S
+ * @return true if the file parses successfully
+ */
+//------------------------------------------------------------------------------
+bool LeapSecsFileReader::Parse(std::string line)
+{
+#ifdef DEBUG_READ_LEAP_SECS_FILE
+   MessageInterface::ShowMessage("Entering LeapSecsFileReader::Parse with line = %s\n", line.c_str());
+#endif
+   Real jDate, off1, off2, off3;
+   
+   // ignore blank lines
+   if (GmatStringUtil::IsBlank(line, true))  return true;
+   
+   std::istringstream ss(line);
+   Integer year, day;
+   std::string month, equalsJD, tai_utc, S, plus, mjd, minus, closeParen, X, S2;
+   // clear error flags
+   ss.clear();
+   try
+   {
+      ss >> year >> month >> day >> equalsJD >> jDate >> tai_utc >> off1 >> S >> plus >> mjd >> minus >> off2 >> closeParen >> X >> off3 >> S2;
+#ifdef DEBUG_READ_LEAP_SECS_FILE
+      MessageInterface::ShowMessage("Entering LeapSecsFileReader::Parse - data read from line are: \n");
+      MessageInterface::ShowMessage("         year       = %d\n", year);
+      MessageInterface::ShowMessage("         month      = %s\n", month.c_str());
+      MessageInterface::ShowMessage("         day        = %d\n", day);
+      MessageInterface::ShowMessage("         equalsJD   = %s\n", equalsJD.c_str());
+      MessageInterface::ShowMessage("   >>>jDate = %12.10f\n", jDate);
+      MessageInterface::ShowMessage("         tai_utc    = %s\n", tai_utc.c_str());
+      MessageInterface::ShowMessage("   >>>off1  = %12.10f\n", off1);
+      MessageInterface::ShowMessage("         S          = %s\n", S.c_str());
+      MessageInterface::ShowMessage("         plus       = %s\n", plus.c_str());
+      MessageInterface::ShowMessage("         mjd        = %s\n", mjd.c_str());
+      MessageInterface::ShowMessage("         minus      = %s\n", minus.c_str());
+      MessageInterface::ShowMessage("   >>>off2  = %12.10f\n", off2);
+      MessageInterface::ShowMessage("         closeParen = %s\n", closeParen.c_str());
+      MessageInterface::ShowMessage("         X          = %s\n", X.c_str());
+      MessageInterface::ShowMessage("   >>>off3  = %12.10f\n", off3);
+      MessageInterface::ShowMessage("         S2         = %s\n", S2.c_str());
+      if (ss.fail()) MessageInterface::ShowMessage(" ------ fail is true ------\n");
+      if (ss.bad())  MessageInterface::ShowMessage(" ------ bad  is true ------\n");
+      if (ss.eof())  MessageInterface::ShowMessage(" ------ eof  is true ------\n");
+#endif
+      // if there was an error reading all of the items from the stream, return false
+      // don't check for eof here, as it will return true when it gets to the end of the line
+      if (ss.bad() || ss.fail()) return false;
+      // Convert to TAI time (MJD) here and store that as well
+      Real numLeapSeconds = off1 + ((jDate - off2) * off3);
+      Real taiDate        = jDate - GmatTimeConstants::JD_MJD_OFFSET +
+                            (numLeapSeconds/GmatTimeConstants::SECS_PER_DAY);  
+#ifdef DEBUG_DUMP_DATA
+      MessageInterface::ShowMessage(" LookUpTable(%d)::\n", (Integer) lookUpTable.size());
+      MessageInterface::ShowMessage("     jDate   =============== %12.10f\n", jDate);
+      MessageInterface::ShowMessage("     taiDate =============== %12.10f\n", taiDate);
+      MessageInterface::ShowMessage("     off1    =============== %12.10f\n", off1);
+      MessageInterface::ShowMessage("     off2    =============== %12.10f\n", off2);
+      MessageInterface::ShowMessage("     off3    =============== %12.10f\n", off3);
+#endif
+      LeapSecondInformation leapSecInfo = {jDate, taiDate, off1, off2, off3};
+      lookUpTable.push_back(leapSecInfo);
+      return true;
+   }
+   catch (BaseException &be)
+   {
+      return false;
+   }
+}
+

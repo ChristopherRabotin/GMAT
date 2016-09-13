@@ -51,7 +51,7 @@
 #include "FileUtil.hpp"            // for GmatFileUtil::DoesFileExist()
 #include "MessageInterface.hpp"
 #include "SubscriberException.hpp"
-#include "TimeSystemConverter.hpp" // for ConvertMjdToGregorian()
+#include "TimeSystemConverter.hpp" 
 #include "GmatDefaults.hpp"
 #include "BodyFixedAxes.hpp"
 #include "Rendering.hpp"
