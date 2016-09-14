@@ -42,7 +42,7 @@
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="FuelTank"/>, <xref linkend="Thruster"/>, <xref
     linkend="Spacecraft"/>, <xref linkend="BeginFiniteBurn"/>, <xref
-    linkend="EndFiniteBurn"/></para>
+    linkend="EndFiniteBurn"/>, <xref linkend="CalculationParameters"/></para>
   </refsection>
 
   <refsection>
@@ -242,7 +242,7 @@
       <title>FiniteBurn Using Multiple Thrusters</title>
 
       <para>Using the GUI, a <guilabel>FiniteBurn</guilabel> resource must be
-      associated with exactly one <guilabel>Thruster</guilabel>. </para>
+      associated with exactly one <guilabel>Thruster</guilabel>.</para>
 
       <para>Using the scripting interface, one can assign multiple thrusters
       to a single <guilabel>FiniteBurn</guilabel> resource.</para>
@@ -320,9 +320,26 @@
         </tbody>
       </tgroup>
     </informaltable>
+
+    <refsection>
+      <title>Reporting FiniteBurn Parameters</title>
+
+      <para>GMAT now supports finite burn parameters that report the thrust
+      component data for a finite burn. The parameters include total thrust
+      from all thrusters in the three coordinate directions, the total
+      acceleration from all thrusters in the three coordinate directions, and
+      the total mass flow rate from all thrusters. Furthermore, you can
+      now also report out any thruster's individual parameters such as thrust
+      magnitude, Isp and mass flow rate. See the <xref
+      linkend="CalculationParameters"/> reference for definitions of these
+      finite burn and thruster specific parameters. Also see the <xref
+      linkend="FiniteBurn_Examples" xrefstyle="select:title"/> section for an
+      example that shows how to report the finite burn and individual thruster
+      specific parameters to a report file.</para>
+    </refsection>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="FiniteBurn_Examples">
     <title>Examples</title>
 
     <informalexample>
@@ -368,5 +385,52 @@ BeginFiniteBurn FiniteBurn1(DefaultSC)
 Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 1800}
 EndFiniteBurn FiniteBurn1(DefaultSC)  </programlisting>
     </informalexample>
+	
+	    <informalexample>
+      <para>This example shows how to report finite burn parameters such as total acceleration (from all thrusters), total thrust (from all thrusters) in the three coordinate directions. We also report total mass flow
+	  rate from all thrusters. Additionally, individual thruster specific parameters such as thruster mass flow rate, thrust magnitude and thruster Isp are also reported. Note that in the generated
+	  report, all finite burn and thruster parameters are reported as zeros when thrusters are not turned on.</para>
+
+      <programlisting>Create Spacecraft aSat
+
+Create ChemicalTank aFuelTank
+
+Create ChemicalThruster aThruster
+aThruster.DecrementMass = true
+aThruster.Tank = {aFuelTank}
+aThruster.C1 = 1000  % Constant Thrust
+aThruster.K1 = 300 % Constant Isp
+
+aSat.Thrusters = {aThruster}
+aSat.Tanks = {aFuelTank}
+
+Create ForceModel aFM
+aFM.CentralBody = Earth
+aFM.PointMasses = {Earth}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create FiniteBurn aFB
+aFB.Thrusters = {aThruster}
+
+Create ReportFile rf
+rf.Add = {aSat.UTCGregorian, aFB.TotalAcceleration1, aFB.TotalAcceleration2, ...
+aFB.TotalAcceleration3, aFB.TotalMassFlowRate, aFB.TotalThrust1, ...
+aFB.TotalThrust2, aFB.TotalThrust3, aSat.aThruster.MassFlowRate, ...
+aSat.aThruster.ThrustMagnitude, aSat.aThruster.Isp}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}
+
+% Do a Finite-Burn for 1800 Secs
+BeginFiniteBurn aFB(aSat)
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1800}
+EndFiniteBurn aFB(aSat)
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}</programlisting>
+    </informalexample>
+	
   </refsection>
 </refentry>
