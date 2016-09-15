@@ -288,6 +288,7 @@ bool LeapSecsFileReader::IsInLeapSecond(Real theTaiMjd)
       MessageInterface::ShowMessage(" one sec = %12.10f\n", 1.0 /GmatTimeConstants::SECS_PER_DAY);
    #endif
 
+   // is this correct? or should it be 0.0 before the earliest time on the file?
    if (theTaiMjd <= tai0)
       nearestLeapSecond = tai0;
    else if (theTaiMjd >= taif)
@@ -298,32 +299,31 @@ bool LeapSecsFileReader::IsInLeapSecond(Real theTaiMjd)
       Real currDiff    = 0.0;
       Real currTai     = 0.0;
       Real previousTai = taif;
-      std::vector<LeapSecondInformation>::iterator info;
-      for (std::vector<LeapSecondInformation>::iterator i = lookUpTable.end();
-           i > lookUpTable.begin(); i--)
+      
+      Integer lookupSize = lookUpTable.size();
+      for (Integer ii = lookupSize - 1; ii >= 0; ii--)
       {
-         info     = i-1;
-         currTai  = info->taiMJD;
+         currTai  = lookUpTable.at(ii).taiMJD;
          currDiff = GmatMathUtil::Abs(currTai - theTaiMjd);
-         #ifdef DEBUG_IN_LEAP_SECOND
-            MessageInterface::ShowMessage(
-                  "In IsInLS, comparing LS time %12.10f to input time %12.10f\n",
-                  currTai, theTaiMjd);
-            MessageInterface::ShowMessage("---------- diff = %12.10f\n", currDiff);
-         #endif
-         if (currDiff > diff)
+         // added '=' because if it's exactly in-between, we want the later one
+         // - is that correct?
+         if (currDiff >= diff)
          {
             nearestLeapSecond = previousTai;
             break;
          }
-         if (currDiff < diff)
+         else // currDiff < diff   so save it as the smallest diff so far
          {
             diff        = currDiff;
             previousTai = currTai;
+            if (ii == 0)  // we've reached the end (beginning!) of the table
+            {
+               nearestLeapSecond = currTai;
+            }
          }
       }
    }
-   if (nearestLeapSecond == 0.0)
+   if (nearestLeapSecond == 0.0) // something went wrong
    {
       std::string errMsg = "ERROR finding nearest leap second\n";
       throw UtilityException(errMsg);
@@ -339,9 +339,6 @@ bool LeapSecsFileReader::IsInLeapSecond(Real theTaiMjd)
       MessageInterface::ShowMessage("---------- nearestMinusOne   = %12.10f\n", nearestMinusOne);
       MessageInterface::ShowMessage("---------- isLeap = %s\n", (isLeap? " true" : "false"));
    #endif
-//   if ((theTaiMjd >= nearestMinusOne) && (theTaiMjd < nearestLeapSecond))
-//      return true;
-//   return false;
    return isLeap;
 }
 
