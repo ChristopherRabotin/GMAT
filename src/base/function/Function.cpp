@@ -837,7 +837,7 @@ bool Function::TakeAction(const std::string &action,
 bool Function::IsParameterReadOnly(const Integer id) const
 {
    // We want both path and name when we write out, so skip this parameter
-   if (id == FUNCTION_NAME)
+   if ((id == FUNCTION_NAME) || (id == FUNCTION_INPUT) || (id == FUNCTION_OUTPUT))
       return true;
    
    return GmatBase::IsParameterReadOnly(id);
