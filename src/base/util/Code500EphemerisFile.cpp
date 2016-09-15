@@ -285,7 +285,7 @@ void Code500EphemerisFile::Initialize()
    mLastStateIndexRead = -1;
    mNumberOfRecordsInFile = -1;
    
-   mSentinelData = 9.99999999999999e15;
+   mSentinelData = 9.999999999999999e15;
    mSentinelsFound = false;
    mGregorianOfDUTRef = "18 Sep 1957 00:00:00.000";
    mRefTimeForDUT_YYMMDD = 570918.0;
@@ -1662,23 +1662,18 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
       return;
    }
    
-   //std::string mLastDataRecStartGreg;
-   //std::string mLastDataRecEndGreg;
    double startMjd = 0.0;
-   //double endMjd = 0.0;
    if (mOutputTimeSystem == 1) // A1 time system
    {
       mLastDataRecStartGreg = ToA1Gregorian(*start);
       mLastDataRecEndGreg = ToA1Gregorian(*end);
       startMjd = start->GetReal();
-      //endMjd = end->GetReal();
    }
    else  // UTC time system
    {
       mLastDataRecStartGreg = ToUtcGregorian(*start);
       mLastDataRecEndGreg = ToUtcGregorian(*end);
       startMjd = ToUtcModJulian(*start);
-      //endMjd = ToUtcModJulian(*end);
    }
    
    // Write data record
@@ -1727,7 +1722,8 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    WriteDoubleField(&mEphemData.firstStateVector_DULT[5], stateDULT[5]);
    
    #ifdef DEBUG_WRITE_DATA_SEGMENT
-   DebugDouble("mEphemData.firstStateVector_DULT[0]  =% 1.15e\n", mEphemData.firstStateVector_DULT[0], mSwapOutputEndian);
+   DebugDouble("mEphemData.firstStateVector_DULT[0]  =% 1.15e\n",
+               mEphemData.firstStateVector_DULT[0], mSwapOutputEndian);
    #endif
    
    // Write state 2 through numPoints,
@@ -2056,7 +2052,7 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
 {
    if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
       MessageInterface::ShowMessage
-         ("======================================== Begin of data record %d\n   mSentinelsFound = %s",
+         ("======================================== Begin of data record %d\nmSentinelsFound = %s\n",
           recNum, mSentinelsFound ? "true" : "false");
    
    bool swap = mSwapInputEndian;
