@@ -114,6 +114,7 @@
       <xi:include href="Command_EndFiniteBurn.xml" />
 	  <xi:include href="Command_FindEvents.xml" />
       <xi:include href="Command_For.xml" />
+	  <xi:include href="Command_GetEphemStates.xml" />
 	  <xi:include href="Command_Global.xml" />
       <xi:include href="Command_If.xml" />
       <xi:include href="Command_Maneuver.xml" />
