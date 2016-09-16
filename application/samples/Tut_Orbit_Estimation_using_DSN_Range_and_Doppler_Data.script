@@ -127,7 +127,7 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};
 
                    
 DSNsimData.FileName 						= {'Simulate DSN Range and Doppler Data 3 weeks.gmd'};
-DSNsimData.RampTable 				   = {'../output/Simulate DSN Range and Doppler Data 3 weeks.rmp'};
+DSNsimData.RampTable 				   = {'../data/navdata/Simulate DSN Range and Doppler Data 3 weeks.rmp'};
 DSNsimData.UseLightTime 				= true;
 DSNsimData.UseRelativityCorrection 	= true;
 DSNsimData.UseETminusTAI 				= true;

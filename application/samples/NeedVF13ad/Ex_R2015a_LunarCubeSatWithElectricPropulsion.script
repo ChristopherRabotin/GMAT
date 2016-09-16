@@ -29,6 +29,10 @@ GMAT DefaultSC.NAIFId = -123456789;
 GMAT DefaultSC.NAIFIdReferenceFrame = -123456789;
 GMAT DefaultSC.OrbitColor = Red;
 GMAT DefaultSC.TargetColor = Teal;
+GMAT DefaultSC.EstimationStateType = 'Cartesian';
+GMAT DefaultSC.OrbitErrorCovariance = [ 1e+070 0 0 0 0 0 ; 0 1e+070 0 0 0 0 ; 0 0 1e+070 0 0 0 ; 0 0 0 1e+070 0 0 ; 0 0 0 0 1e+070 0 ; 0 0 0 0 0 1e+070 ];
+GMAT DefaultSC.CdSigma = 1e+070;
+GMAT DefaultSC.CrSigma = 1e+070;
 GMAT DefaultSC.Id = 'SatId';
 GMAT DefaultSC.Attitude = CoordinateSystemFixed;
 GMAT DefaultSC.SPADSRPScaleFactor = 1;
@@ -69,6 +73,10 @@ GMAT initSat.NAIFId = -123456789;
 GMAT initSat.NAIFIdReferenceFrame = -123456789;
 GMAT initSat.OrbitColor = Green;
 GMAT initSat.TargetColor = LightGray;
+GMAT initSat.EstimationStateType = 'Cartesian';
+GMAT initSat.OrbitErrorCovariance = [ 1e+070 0 0 0 0 0 ; 0 1e+070 0 0 0 0 ; 0 0 1e+070 0 0 0 ; 0 0 0 1e+070 0 0 ; 0 0 0 0 1e+070 0 ; 0 0 0 0 0 1e+070 ];
+GMAT initSat.CdSigma = 1e+070;
+GMAT initSat.CrSigma = 1e+070;
 GMAT initSat.Id = 'SatId';
 GMAT initSat.Attitude = CoordinateSystemFixed;
 GMAT initSat.SPADSRPScaleFactor = 1;
@@ -104,6 +112,7 @@ GMAT ElectricThruster1.DutyCycle = 1;
 GMAT ElectricThruster1.ThrustScaleFactor = 0.9;
 GMAT ElectricThruster1.DecrementMass = false;
 GMAT ElectricThruster1.Tank = {ElectricTank1};
+GMAT ElectricThruster1.MixRatio = [ 1 ];
 GMAT ElectricThruster1.GravitationalAccel = 9.810000000000001;
 GMAT ElectricThruster1.ThrustModel = ConstantThrustAndIsp;
 GMAT ElectricThruster1.MaximumUsablePower = 7.266;
@@ -133,6 +142,7 @@ GMAT MoonThruster.DutyCycle = 1;
 GMAT MoonThruster.ThrustScaleFactor = 0.9;
 GMAT MoonThruster.DecrementMass = false;
 GMAT MoonThruster.Tank = {ElectricTank1};
+GMAT MoonThruster.MixRatio = [ 1 ];
 GMAT MoonThruster.GravitationalAccel = 9.810000000000001;
 GMAT MoonThruster.ThrustModel = ConstantThrustAndIsp;
 GMAT MoonThruster.MaximumUsablePower = 7.266;
@@ -169,20 +179,6 @@ GMAT SolarPowerSystem1.SolarCoeff4 = 0.10843;
 GMAT SolarPowerSystem1.SolarCoeff5 = -0.01279;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
@@ -216,7 +212,7 @@ GMAT DefaultProp.FM = DefaultProp_ForceModel;
 GMAT DefaultProp.Type = RungeKutta89;
 GMAT DefaultProp.InitialStepSize = 60;
 GMAT DefaultProp.Accuracy = 9.999999999999999e-012;
-GMAT DefaultProp.MinStep = 0.001;
+GMAT DefaultProp.MinStep = 0;
 GMAT DefaultProp.MaxStep = 86400;
 GMAT DefaultProp.MaxStepAttempts = 50;
 GMAT DefaultProp.StopIfAccuracyIsViolated = true;
@@ -226,7 +222,7 @@ GMAT LunarProp.FM = LunarProp_ForceModel;
 GMAT LunarProp.Type = RungeKutta89;
 GMAT LunarProp.InitialStepSize = 60;
 GMAT LunarProp.Accuracy = 9.999999999999999e-012;
-GMAT LunarProp.MinStep = 0.001;
+GMAT LunarProp.MinStep = 0;
 GMAT LunarProp.MaxStep = 2700;
 GMAT LunarProp.MaxStepAttempts = 50;
 GMAT LunarProp.StopIfAccuracyIsViolated = true;
@@ -305,9 +301,9 @@ GMAT VF13ad1.FeasibilityTolerance = 0.001;
 
 Create OrbitView MoonInertialView;
 GMAT MoonInertialView.SolverIterations = Current;
-GMAT MoonInertialView.UpperLeft = [ 0.3735294117647059 0.3326293558606125 ];
-GMAT MoonInertialView.Size = [ 0.4441176470588235 0.6568109820485745 ];
-GMAT MoonInertialView.RelativeZOrder = 27;
+GMAT MoonInertialView.UpperLeft = [ 0.3731117824773414 0.3309659090909091 ];
+GMAT MoonInertialView.Size = [ 0.4441087613293052 0.65625 ];
+GMAT MoonInertialView.RelativeZOrder = 1216;
 GMAT MoonInertialView.Maximized = false;
 GMAT MoonInertialView.Add = {DefaultSC, Luna, Sun, Earth};
 GMAT MoonInertialView.CoordinateSystem = MoonJ2k;
@@ -336,9 +332,9 @@ GMAT MoonInertialView.EnableConstellations = Off;
 
 Create OrbitView EarthMoonRotatingView;
 GMAT EarthMoonRotatingView.SolverIterations = Current;
-GMAT EarthMoonRotatingView.UpperLeft = [ 0.6358823529411765 -0.001055966209081309 ];
-GMAT EarthMoonRotatingView.Size = [ 0.3235294117647059 0.5227032734952481 ];
-GMAT EarthMoonRotatingView.RelativeZOrder = 25;
+GMAT EarthMoonRotatingView.UpperLeft = [ 0.6351963746223565 0 ];
+GMAT EarthMoonRotatingView.Size = [ 0.3240181268882175 0.5227272727272727 ];
+GMAT EarthMoonRotatingView.RelativeZOrder = 1211;
 GMAT EarthMoonRotatingView.Maximized = false;
 GMAT EarthMoonRotatingView.Add = {DefaultSC, Earth, Sun, Luna};
 GMAT EarthMoonRotatingView.CoordinateSystem = CS_EMRotating;
@@ -378,9 +374,9 @@ GMAT XYPlot1.ShowPlot = false;
 
 Create OrbitView EarthSunRotatingView;
 GMAT EarthSunRotatingView.SolverIterations = Current;
-GMAT EarthSunRotatingView.UpperLeft = [ 0.2535294117647059 0.009503695881731784 ];
-GMAT EarthSunRotatingView.Size = [ 0.3694117647058823 0.5174234424498416 ];
-GMAT EarthSunRotatingView.RelativeZOrder = 21;
+GMAT EarthSunRotatingView.UpperLeft = [ 0.2530211480362538 0.008522727272727272 ];
+GMAT EarthSunRotatingView.Size = [ 0.3693353474320242 0.5170454545454546 ];
+GMAT EarthSunRotatingView.RelativeZOrder = 1206;
 GMAT EarthSunRotatingView.Maximized = false;
 GMAT EarthSunRotatingView.Add = {DefaultSC, Earth, Sun, Luna};
 GMAT EarthSunRotatingView.CoordinateSystem = CS_ESRotating;
@@ -464,6 +460,7 @@ Create Variable loopIdx caseIdx burnDuration coastDuration;
 Create String newCase;
 GMAT newCase = '================================ New Case ===========================';
 
+
 %----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------
@@ -488,14 +485,14 @@ For burnDuration = 1.98:0.02:1.98;
    EndFiniteBurn FiniteBurn1(DefaultSC);
    Propagate 'Earth Apoapsis' DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis, OrbitColor = Green};
    Propagate 'Earth Periapsis' DefaultProp(DefaultSC) {DefaultSC.Earth.Periapsis, OrbitColor = Green};
-   Propagate 'Earth RMAG = 400000' DefaultProp(DefaultSC) {DefaultSC.Earth.RMAG = 400000, OrbitColor = Green, StopTolerance = 1e-5};
+   Propagate 'Earth RMAG = 400000' DefaultProp(DefaultSC) {DefaultSC.Earth.RMAG = 400000, StopTolerance = 1e-005, OrbitColor = Green};
    Propagate 'Earth Apoapsis' DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis, OrbitColor = Green};
 
 
 EndFor;
 
 
-Optimize VF13ad1 {SolveMode = Solve, ExitMode = DiscardAndContinue};
+Optimize VF13ad1 {SolveMode = Solve, ExitMode = DiscardAndContinue, ShowProgressWindow = true};
    
    Propagate 'Prop One Lunar Period' DefaultProp(DefaultSC) {DefaultSC.ElapsedDays = 27.5, OrbitColor = Green};
    Propagate 'Prop One Lunar Period' DefaultProp(DefaultSC) {DefaultSC.ElapsedDays = 27.5, OrbitColor = Yellow};
@@ -529,7 +526,7 @@ Optimize VF13ad1 {SolveMode = Solve, ExitMode = DiscardAndContinue};
    %NonlinearConstraint VF13ad1(DefaultSC.Luna.RMAG<=15000);
    NonlinearConstraint VF13ad1(DefaultSC.Luna.RMAG>=6000);
    %NonlinearConstraint VF13ad1(DefaultSC.Luna.RMAG>= 1838);
-   NonlinearConstraint VF13ad1(DefaultSC.Luna.C3Energy<=-0.16);
+   NonlinearConstraint VF13ad1(DefaultSC.Luna.C3Energy<=-0.11);
    NonlinearConstraint VF13ad1(DefaultSC.MoonJ2k.RAAN=250);
 
 EndOptimize;  % For targeter DC1
@@ -545,7 +542,7 @@ BeginFiniteBurn MoonVNBBurn(DefaultSC);
 Propagate 'Prop One Periselene' LunarProp(DefaultSC) {DefaultSC.Luna.TA = 90, OrbitColor = Red};
 Propagate 'Prop One Periselene' LunarProp(DefaultSC) {DefaultSC.Luna.TA = 359, OrbitColor = Red};
 EndFiniteBurn MoonVNBBurn(DefaultSC);
-Propagate 'Prop One Periselene' LunarProp(DefaultSC) {DefaultSC.Luna.TA = 240, OrbitColor = Green,StopTolerance = 1e-5};
+Propagate 'Prop One Periselene' LunarProp(DefaultSC) {DefaultSC.Luna.TA = 240, StopTolerance = 1e-005, OrbitColor = Green};
 
 For loopIdx = 1:1:20;
    BeginFiniteBurn MoonVNBBurn(DefaultSC);
@@ -554,6 +551,7 @@ For loopIdx = 1:1:20;
    Propagate 'Prop One Periselene' LunarProp(DefaultSC) {DefaultSC.Luna.TA = 240, OrbitColor = Green};
 EndFor;
 %Propagate 'Prop One Periselene' LunarProp(DefaultSC) {DefaultSC.ElapsedDays = 20, OrbitColor = Green};
+
 
 
 

@@ -69,6 +69,7 @@ GMAT ChemicalThruster1.DutyCycle = 1;
 GMAT ChemicalThruster1.ThrustScaleFactor = 1;
 GMAT ChemicalThruster1.DecrementMass = true;
 GMAT ChemicalThruster1.Tank = {ChemicalTank1};
+GMAT ChemicalThruster1.MixRatio = [1];
 GMAT ChemicalThruster1.GravitationalAccel = 9.810000000000001;
 GMAT ChemicalThruster1.C1 = 1000;
 GMAT ChemicalThruster1.C2 = 0;

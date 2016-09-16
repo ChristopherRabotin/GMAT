@@ -86,6 +86,7 @@ GMAT engine1.DutyCycle = 1;
 GMAT engine1.ThrustScaleFactor = 1;
 GMAT engine1.DecrementMass = false;
 GMAT engine1.Tank = {tank1};
+GMAT engine1.MixRatio = [1];
 GMAT engine1.GravitationalAccel = 9.810000000000001;
 GMAT engine1.C1 = 500;
 GMAT engine1.C2 = 0;
