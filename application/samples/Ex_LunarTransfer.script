@@ -3,20 +3,9 @@
 %  This script demonstrates how to set up a lunar transfer mission
 %
 
-
 %----------------------------------------
 %---------- Spacecraft
 %----------------------------------------
-
-
-%**************************************************************************
-%************ Create Objects for Use in Mission Sequence ******************
-%**************************************************************************
-
-
-%--------------------------------------------------------------------------
-%----------------- SpaceCraft, Formations, Constellations -----------------
-%--------------------------------------------------------------------------
 
 Create Spacecraft Sat;
 GMAT Sat.DateFormat = UTCGregorian;
@@ -34,35 +23,10 @@ GMAT Sat.Cd = 2.2;
 GMAT Sat.Cr = 1.7;
 GMAT Sat.DragArea = 15;
 GMAT Sat.SRPArea = 1;
-GMAT Sat.NAIFId = -123456789;
-GMAT Sat.NAIFIdReferenceFrame = -123456789;
-GMAT Sat.OrbitColor = Red;
-GMAT Sat.TargetColor = Teal;
-GMAT Sat.Id = 'SatId';
-GMAT Sat.Attitude = CoordinateSystemFixed;
-GMAT Sat.SPADSRPScaleFactor = 1;
-GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT Sat.ModelOffsetX = 0;
-GMAT Sat.ModelOffsetY = 0;
-GMAT Sat.ModelOffsetZ = 0;
-GMAT Sat.ModelRotationX = 0;
-GMAT Sat.ModelRotationY = 0;
-GMAT Sat.ModelRotationZ = 0;
-GMAT Sat.ModelScale = 1;
-GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
-GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Sat.AttitudeCoordinateSystem = EarthMJ2000Eq;
-GMAT Sat.EulerAngleSequence = '321';
-
 
 %----------------------------------------
-%---------- ForceModels
+%---------- Propagators
 %----------------------------------------
-
-
-%--------------------------------------------------------------------------
-%------------------------------ Propagators -------------------------------
-%--------------------------------------------------------------------------
 
 Create ForceModel AllForces;
 GMAT AllForces.CentralBody = Earth;
@@ -104,10 +68,6 @@ GMAT MoonAllForces.SRP.Flux = 1367;
 GMAT MoonAllForces.SRP.SRPModel = Spherical;
 GMAT MoonAllForces.SRP.Nominal_Sun = 149597870.691;
 
-%----------------------------------------
-%---------- Propagators
-%----------------------------------------
-
 Create Propagator EarthFull;
 GMAT EarthFull.FM = AllForces;
 GMAT EarthFull.Type = RungeKutta89;
@@ -132,10 +92,6 @@ GMAT MoonFull.StopIfAccuracyIsViolated = true;
 %---------- Burns
 %----------------------------------------
 
-%--------------------------------------------------------------------------
-%--------------------------------- Burns ----------------------------------
-%--------------------------------------------------------------------------
-
 Create ImpulsiveBurn TOI;
 GMAT TOI.CoordinateSystem = Local;
 GMAT TOI.Origin = Earth;
@@ -143,9 +99,6 @@ GMAT TOI.Axes = VNB;
 GMAT TOI.Element1 = 0.14676929889;
 GMAT TOI.Element2 = 0.046042675892;
 GMAT TOI.Element3 = 0.090223244097;
-GMAT TOI.DecrementMass = false;
-GMAT TOI.Isp = 300;
-GMAT TOI.GravitationalAccel = 9.810000000000001;
 
 Create ImpulsiveBurn LOI;
 GMAT LOI.CoordinateSystem = Local;
@@ -154,9 +107,6 @@ GMAT LOI.Axes = VNB;
 GMAT LOI.Element1 = -0.652;
 GMAT LOI.Element2 = 0;
 GMAT LOI.Element3 = 0;
-GMAT LOI.DecrementMass = false;
-GMAT LOI.Isp = 300;
-GMAT LOI.GravitationalAccel = 9.810000000000001;
 
 %----------------------------------------
 %---------- Coordinate Systems
@@ -169,10 +119,6 @@ GMAT EarthSunRot.XAxis = R;
 GMAT EarthSunRot.ZAxis = N;
 GMAT EarthSunRot.Primary = Sun;
 GMAT EarthSunRot.Secondary = Earth;
-
-%--------------------------------------------------------------------------
-%-------------------------- Coordinate Systems ----------------------------
-%--------------------------------------------------------------------------
 
 Create CoordinateSystem MoonMJ2000Eq;
 GMAT MoonMJ2000Eq.Origin = Luna;
@@ -190,56 +136,21 @@ GMAT EarthMoonRot.Secondary = Luna;
 %---------- Solvers
 %----------------------------------------
 
-%--------------------------------------------------------------------------
-%-------------------------------- Solvers ---------------------------------
-%--------------------------------------------------------------------------
-
 Create DifferentialCorrector DC1;
-GMAT DC1.ShowProgress = true;
-GMAT DC1.ReportStyle = Normal;
-GMAT DC1.ReportFile = 'DifferentialCorrectorDC1.data';
-GMAT DC1.MaximumIterations = 25;
-GMAT DC1.DerivativeMethod = ForwardDifference;
-GMAT DC1.Algorithm = NewtonRaphson;
 
 %----------------------------------------
 %---------- Subscribers
 %----------------------------------------
 
-%--------------------------------------------------------------------------
-%-------------------------- Plots and Reports -----------------------------
-%--------------------------------------------------------------------------
-
 Create OrbitView EarthInertialView;
-GMAT EarthInertialView.SolverIterations = Current;
 GMAT EarthInertialView.UpperLeft = [ 0.3088235294117647 0.003978779840848806 ];
 GMAT EarthInertialView.Size = [ 0.3588235294117647 0.4535809018567639 ];
 GMAT EarthInertialView.RelativeZOrder = 716;
 GMAT EarthInertialView.Maximized = false;
 GMAT EarthInertialView.Add = {Sat, Earth, Luna};
-GMAT EarthInertialView.CoordinateSystem = EarthMJ2000Eq;
 GMAT EarthInertialView.DrawObject = [ true true true ];
-GMAT EarthInertialView.DataCollectFrequency = 1;
-GMAT EarthInertialView.UpdatePlotFrequency = 50;
-GMAT EarthInertialView.NumPointsToRedraw = 0;
-GMAT EarthInertialView.ShowPlot = true;
-GMAT EarthInertialView.ShowLabels = true;
-GMAT EarthInertialView.ViewPointReference = Earth;
 GMAT EarthInertialView.ViewPointVector = [ 30000 -20000 10000 ];
-GMAT EarthInertialView.ViewDirection = Earth;
 GMAT EarthInertialView.ViewScaleFactor = 30;
-GMAT EarthInertialView.ViewUpCoordinateSystem = EarthMJ2000Eq;
-GMAT EarthInertialView.ViewUpAxis = Z;
-GMAT EarthInertialView.EclipticPlane = Off;
-GMAT EarthInertialView.XYPlane = On;
-GMAT EarthInertialView.WireFrame = Off;
-GMAT EarthInertialView.Axes = On;
-GMAT EarthInertialView.Grid = Off;
-GMAT EarthInertialView.SunLine = Off;
-GMAT EarthInertialView.UseInitialView = On;
-GMAT EarthInertialView.StarCount = 7000;
-GMAT EarthInertialView.EnableStars = On;
-GMAT EarthInertialView.EnableConstellations = On;
 
 Create OrbitView MoonInertialView;
 GMAT MoonInertialView.SolverIterations = Current;
@@ -256,21 +167,8 @@ GMAT MoonInertialView.NumPointsToRedraw = 0;
 GMAT MoonInertialView.ShowPlot = true;
 GMAT MoonInertialView.ShowLabels = true;
 GMAT MoonInertialView.ViewPointReference = Luna;
-GMAT MoonInertialView.ViewPointVector = [ 0 0 30000 ];
 GMAT MoonInertialView.ViewDirection = Luna;
-GMAT MoonInertialView.ViewScaleFactor = 1;
 GMAT MoonInertialView.ViewUpCoordinateSystem = MoonMJ2000Eq;
-GMAT MoonInertialView.ViewUpAxis = X;
-GMAT MoonInertialView.EclipticPlane = Off;
-GMAT MoonInertialView.XYPlane = On;
-GMAT MoonInertialView.WireFrame = Off;
-GMAT MoonInertialView.Axes = On;
-GMAT MoonInertialView.Grid = Off;
-GMAT MoonInertialView.SunLine = Off;
-GMAT MoonInertialView.UseInitialView = On;
-GMAT MoonInertialView.StarCount = 7000;
-GMAT MoonInertialView.EnableStars = On;
-GMAT MoonInertialView.EnableConstellations = On;
 
 Create XYPlot RadApoPlot;
 GMAT RadApoPlot.SolverIterations = None;
@@ -286,8 +184,8 @@ GMAT RadApoPlot.ShowPlot = true;
 %**************************************************************************
 %**************************The Mission Sequence****************************
 %**************************************************************************
-BeginMissionSequence;
 
+BeginMissionSequence;
 
 %------------------------------
 %  Propagate to Earth periapsis

@@ -1,6 +1,3 @@
-%General Mission Analysis Tool(GMAT) Script
-%Created: 2010-11-14 06:33:24
-
 
 %----------------------------------------
 %---------- Spacecraft
@@ -20,28 +17,7 @@ GMAT LunaSat.TA = 38.03104991952923;
 GMAT LunaSat.DryMass = 850;
 GMAT LunaSat.Cd = 2.2;
 GMAT LunaSat.Cr = 1.8;
-GMAT LunaSat.DragArea = 15;
-GMAT LunaSat.SRPArea = 1;
-GMAT LunaSat.NAIFId = -123456789;
-GMAT LunaSat.NAIFIdReferenceFrame = -123456789;
-GMAT LunaSat.OrbitColor = Red;
-GMAT LunaSat.TargetColor = Teal;
-GMAT LunaSat.Id = 'SatId';
-GMAT LunaSat.Attitude = CoordinateSystemFixed;
-GMAT LunaSat.SPADSRPScaleFactor = 1;
-GMAT LunaSat.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT LunaSat.ModelOffsetX = 0;
-GMAT LunaSat.ModelOffsetY = 0;
-GMAT LunaSat.ModelOffsetZ = 0;
-GMAT LunaSat.ModelRotationX = 0;
-GMAT LunaSat.ModelRotationY = 0;
-GMAT LunaSat.ModelRotationZ = 0;
-GMAT LunaSat.ModelScale = 0.25;
-GMAT LunaSat.AttitudeDisplayStateType = 'Quaternion';
-GMAT LunaSat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT LunaSat.AttitudeCoordinateSystem = EarthMJ2000Eq;
-GMAT LunaSat.EulerAngleSequence = '321';
-
+GMAT LunaSat.ModelScale = 0.08;
 
 %----------------------------------------
 %---------- ForceModels
@@ -84,24 +60,11 @@ Create ImpulsiveBurn dv1;
 GMAT dv1.CoordinateSystem = Local;
 GMAT dv1.Origin = Luna;
 GMAT dv1.Axes = VNB;
-GMAT dv1.Element1 = 0;
-GMAT dv1.Element2 = 0;
-GMAT dv1.Element3 = 0;
-GMAT dv1.DecrementMass = false;
-GMAT dv1.Isp = 300;
-GMAT dv1.GravitationalAccel = 9.810000000000001;
 
 Create ImpulsiveBurn dv2;
 GMAT dv2.CoordinateSystem = Local;
 GMAT dv2.Origin = Luna;
 GMAT dv2.Axes = VNB;
-GMAT dv2.Element1 = 0;
-GMAT dv2.Element2 = 0;
-GMAT dv2.Element3 = 0;
-GMAT dv2.DecrementMass = false;
-GMAT dv2.Isp = 300;
-GMAT dv2.GravitationalAccel = 9.810000000000001;
-
 
 %----------------------------------------
 %---------- Coordinate Systems
@@ -116,64 +79,36 @@ GMAT MoonInertial.Axes = BodyInertial;
 %----------------------------------------
 
 Create DifferentialCorrector DefaultDC;
-GMAT DefaultDC.ShowProgress = true;
-GMAT DefaultDC.ReportStyle = Normal;
-GMAT DefaultDC.ReportFile = 'DifferentialCorrectorDefaultDC.data';
-GMAT DefaultDC.MaximumIterations = 25;
-GMAT DefaultDC.DerivativeMethod = ForwardDifference;
-GMAT DefaultDC.Algorithm = NewtonRaphson;
 
 %----------------------------------------
 %---------- Subscribers
 %----------------------------------------
 
 Create OrbitView DefaultOrbitView;
-GMAT DefaultOrbitView.SolverIterations = Current;
 GMAT DefaultOrbitView.UpperLeft = [ 0.4064705882352941 0.01856763925729443 ];
 GMAT DefaultOrbitView.Size = [ 0.451764705882353 0.4509283819628647 ];
 GMAT DefaultOrbitView.RelativeZOrder = 661;
-GMAT DefaultOrbitView.Maximized = false;
 GMAT DefaultOrbitView.Add = {LunaSat, Luna};
 GMAT DefaultOrbitView.CoordinateSystem = MoonInertial;
 GMAT DefaultOrbitView.DrawObject = [ true true ];
-GMAT DefaultOrbitView.DataCollectFrequency = 3;
-GMAT DefaultOrbitView.UpdatePlotFrequency = 50;
-GMAT DefaultOrbitView.NumPointsToRedraw = 300;
-GMAT DefaultOrbitView.ShowPlot = true;
-GMAT DefaultOrbitView.ShowLabels = true;
 GMAT DefaultOrbitView.ViewPointReference = Luna;
 GMAT DefaultOrbitView.ViewPointVector = [ 3500 3500 3500 ];
 GMAT DefaultOrbitView.ViewDirection = Luna;
 GMAT DefaultOrbitView.ViewScaleFactor = 1;
 GMAT DefaultOrbitView.ViewUpCoordinateSystem = MoonInertial;
-GMAT DefaultOrbitView.ViewUpAxis = Z;
-GMAT DefaultOrbitView.EclipticPlane = Off;
-GMAT DefaultOrbitView.XYPlane = Off;
-GMAT DefaultOrbitView.WireFrame = Off;
-GMAT DefaultOrbitView.Axes = On;
-GMAT DefaultOrbitView.Grid = Off;
-GMAT DefaultOrbitView.SunLine = Off;
-GMAT DefaultOrbitView.UseInitialView = On;
-GMAT DefaultOrbitView.StarCount = 7000;
-GMAT DefaultOrbitView.EnableStars = On;
-GMAT DefaultOrbitView.EnableConstellations = On;
 
 Create XYPlot XYPlot1;
-GMAT XYPlot1.SolverIterations = Current;
 GMAT XYPlot1.UpperLeft = [ 0.3858823529411765 0.4986737400530504 ];
 GMAT XYPlot1.Size = [ 0.5229411764705882 0.4509283819628647 ];
 GMAT XYPlot1.RelativeZOrder = 656;
-GMAT XYPlot1.Maximized = false;
 GMAT XYPlot1.XVariable = LunaSat.A1ModJulian;
 GMAT XYPlot1.YVariables = {LunaSat.Luna.RadPer};
-GMAT XYPlot1.ShowGrid = true;
-GMAT XYPlot1.ShowPlot = true;
 
 %----------------------------------------
 %---------- Arrays, Variables, Strings
 %----------------------------------------
-Create Variable I;
 
+Create Variable I;
 
 %----------------------------------------
 %---------- Mission Sequence

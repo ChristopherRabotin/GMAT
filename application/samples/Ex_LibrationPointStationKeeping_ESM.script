@@ -1,16 +1,7 @@
-%  Script Mission - Station Keeping Example 
-%
-%  This script demonstrates how to ...
-%
-
 
 %----------------------------------------
 %---------- Calculated Points
 %----------------------------------------
-
-%----------------------------------------------------------------------
-%----------------- Create BaryCenter and Libration Point --------------
-%----------------------------------------------------------------------
 
 Create Barycenter DefaultBC;
 GMAT DefaultBC.BodyNames = {Earth, Luna};
@@ -23,10 +14,6 @@ GMAT ESL1.Point = L1;
 %----------------------------------------
 %---------- Spacecraft
 %----------------------------------------
-
-%----------------------------------------------------------------------
-%-----------------------  Create Spacecraft ---------------------------
-%----------------------------------------------------------------------
 
 Create Spacecraft ACE;
 GMAT ACE.DateFormat = UTCGregorian;
@@ -44,30 +31,10 @@ GMAT ACE.Cd = 2.2;
 GMAT ACE.Cr = 1.8;
 GMAT ACE.DragArea = 15;
 GMAT ACE.SRPArea = 1;
-GMAT ACE.NAIFId = -123456789;
-GMAT ACE.NAIFIdReferenceFrame = -123456789;
-GMAT ACE.Id = 'SatId';
-GMAT ACE.Attitude = CoordinateSystemFixed;
-GMAT ACE.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT ACE.ModelOffsetX = 0;
-GMAT ACE.ModelOffsetY = 0;
-GMAT ACE.ModelOffsetZ = 0;
-GMAT ACE.ModelRotationX = 0;
-GMAT ACE.ModelRotationY = 0;
-GMAT ACE.ModelRotationZ = 0;
-GMAT ACE.ModelScale = 3;
-GMAT ACE.AttitudeDisplayStateType = 'Quaternion';
-GMAT ACE.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT ACE.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
 
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
-
-
-%----------------------------------------------------------------------
-%-----------------------------  Force Model ---------------------------
-%----------------------------------------------------------------------
 
 Create ForceModel DefaultProp_ForceModel;
 GMAT DefaultProp_ForceModel.CentralBody = Earth;
@@ -95,10 +62,6 @@ GMAT EarthSunMoon.StopIfAccuracyIsViolated = true;
 %---------- Burns
 %----------------------------------------
 
-%----------------------------------------------------------------------
-%----------------------  Create Maneuvers and DC ----------------------
-%----------------------------------------------------------------------
-
 Create ImpulsiveBurn MCC;
 GMAT MCC.CoordinateSystem = EarthSunRotCS;
 GMAT MCC.Element1 = 0;
@@ -113,15 +76,9 @@ GMAT MCC.GravitationalAccel = 9.810000000000001;
 %----------------------------------------
 Create Variable I;
 
-
-
 %----------------------------------------
 %---------- Coordinate Systems
 %----------------------------------------
-
-%----------------------------------------------------------------------
-%---------------------- Create Coordinate Systems ---------------------
-%----------------------------------------------------------------------
 
 Create CoordinateSystem EarthSunL1CS;
 GMAT EarthSunL1CS.Origin = ESL1;
@@ -144,15 +101,6 @@ GMAT EarthSunRotCS.Secondary = Earth;
 %----------------------------------------
 
 Create DifferentialCorrector DefaultDC;
-GMAT DefaultDC.ShowProgress = true;
-GMAT DefaultDC.ReportStyle = Normal;
-GMAT DefaultDC.ReportFile = 'targeter_DefaultDC.data';
-GMAT DefaultDC.MaximumIterations = 25;
-GMAT DefaultDC.DerivativeMethod = ForwardDifference;
-
-%----------------------------------------
-%---------- Subscribers
-%----------------------------------------
 
 %----------------------------------------------------------------------
 %----------------------  Create OpenGL Plots -------------------------
@@ -175,17 +123,6 @@ GMAT L1View.ViewPointVector = [ 0 0 30000 ];
 GMAT L1View.ViewDirection = ESL1;
 GMAT L1View.ViewScaleFactor = 18;
 GMAT L1View.ViewUpCoordinateSystem = EarthSunL1CS;
-GMAT L1View.ViewUpAxis = Z;
-GMAT L1View.EclipticPlane = Off;
-GMAT L1View.XYPlane = On;
-GMAT L1View.WireFrame = Off;
-GMAT L1View.Axes = On;
-GMAT L1View.Grid = Off;
-GMAT L1View.SunLine = Off;
-GMAT L1View.UseInitialView = On;
-GMAT L1View.StarCount = 7000;
-GMAT L1View.EnableStars = On;
-GMAT L1View.EnableConstellations = On;
 
 Create OrbitView EarthSunRotView;
 GMAT EarthSunRotView.SolverIterations = Current;
@@ -204,25 +141,13 @@ GMAT EarthSunRotView.ViewPointVector = [ -30000 -15000 10000 ];
 GMAT EarthSunRotView.ViewDirection = Earth;
 GMAT EarthSunRotView.ViewScaleFactor = 100;
 GMAT EarthSunRotView.ViewUpCoordinateSystem = EarthSunRotCS;
-GMAT EarthSunRotView.ViewUpAxis = Z;
-GMAT EarthSunRotView.EclipticPlane = Off;
-GMAT EarthSunRotView.XYPlane = On;
-GMAT EarthSunRotView.WireFrame = Off;
-GMAT EarthSunRotView.Axes = On;
-GMAT EarthSunRotView.Grid = Off;
-GMAT EarthSunRotView.SunLine = Off;
-GMAT EarthSunRotView.UseInitialView = On;
-GMAT EarthSunRotView.StarCount = 7000;
-GMAT EarthSunRotView.EnableStars = On;
-GMAT EarthSunRotView.EnableConstellations = On;
 
-
-%**********************************************************************
 %----------------------------------------------------------------------
 %------------------------ The Mission Sequence ------------------------
 %----------------------------------------------------------------------
-%**********************************************************************
+
 BeginMissionSequence;
+
 % Comment:  This is for simple example purposes and results in a Delta v
 % that is much too high!  Delta V's should be on the order of cm/s.  The
 % targeting scheme is beyond the scope of this simple demo. -SPH

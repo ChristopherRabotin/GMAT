@@ -38,24 +38,12 @@ GMAT LCROSS.SRPArea = 1;
 %% Create a force model for near Lunar propagation
 Create ForceModel NearMoonProp_ForceModel;
 GMAT NearMoonProp_ForceModel.CentralBody = Luna;
-%GMAT NearMoonProp_ForceModel.PrimaryBodies =
 GMAT NearMoonProp_ForceModel.PointMasses = {Sun, Earth, Jupiter, Luna};
 GMAT NearMoonProp_ForceModel.Drag = None;
 GMAT NearMoonProp_ForceModel.SRP = On;
 GMAT NearMoonProp_ForceModel.ErrorControl = RSSStep;
 GMAT NearMoonProp_ForceModel.SRP.Flux = 1367;
 GMAT NearMoonProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
-
-%% Create a force model for near Lunar propagation
-%Create ForceModel NearMoonProp_ForceModel;
-%%GMAT NearMoonProp_ForceModel.CentralBody = Luna;
-%GMAT NearMoonProp_ForceModel.PrimaryBodies =
-%GMAT NearMoonProp_ForceModel.PointMasses = {Sun, Earth, Luna};
-%GMAT NearMoonProp_ForceModel.Drag = None;
-%GMAT NearMoonProp_ForceModel.SRP = On;
-%GMAT NearMoonProp_ForceModel.ErrorControl = RSSStep;
-%GMAT NearMoonProp_ForceModel.Luna.Flux = 1367;
-%GMAT NearMoonProp_ForceModel.Luna.Nominal_Sun = 149597870.691;
 
 %% Create a force model for deep space propagation
 Create ForceModel EarthFull_ForceModel;
@@ -77,7 +65,7 @@ GMAT EarthFull_ForceModel.Earth.Nominal_Sun = 149597870.691;
 
 Create Propagator NearMoonProp;
 GMAT NearMoonProp.FM = NearMoonProp_ForceModel;
-GMAT NearMoonProp.Type = PrinceDormand78;  %PrinceDormand45;   %PrinceDormand78;
+GMAT NearMoonProp.Type = PrinceDormand78; 
 GMAT NearMoonProp.InitialStepSize = 60;
 GMAT NearMoonProp.Accuracy = 1e-9;
 GMAT NearMoonProp.MinStep = 0.001;
@@ -86,7 +74,7 @@ GMAT NearMoonProp.MaxStepAttempts = 50;
 
 Create Propagator EarthFull;
 GMAT EarthFull.FM = EarthFull_ForceModel;
-GMAT EarthFull.Type = RungeKutta56;  %PrinceDormand45;  %PrinceDormand78;
+GMAT EarthFull.Type = RungeKutta56;  
 GMAT EarthFull.InitialStepSize = 60; 
 GMAT EarthFull.Accuracy = 1e-09;
 GMAT EarthFull.MinStep = 0.001;
@@ -163,7 +151,6 @@ GMAT dVatMoon.Element3 = 0;
 %----------------------------------------
 %---------- Variables, Arrays, Strings
 %----------------------------------------
-%----- These are variables that are just useful -------
 Create Variable LoopCounter PositionError VelocityError Cost LCM1Mag LCM2Mag EDUSdvMag EDMdvEpoch LCM1Epoch LCM2Epoch;
 Create Variable A1ImpactEpoch LoopCounter2 ConstraintError dx dy dz dVx dVy dVz SF_EDUSx dVatMoonMag;
 Create Variable  Min_Cost UseGMAToutput_Flag RefEpoch PropEpoch ET_EDUSdV ET_LCM1;
@@ -295,19 +282,10 @@ GMAT MoonView.UpdatePlotFrequency = 50;
 GMAT MoonView.NumPointsToRedraw = 0;
 GMAT MoonView.ShowPlot = true;
 
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-%------------------------------------------------------------------------
 %------------------------------------------------------------------------
 %-------------------------- Mission Sequence ----------------------------
 %------------------------------------------------------------------------
-%------------------------------------------------------------------------
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-%  Input state information and initial guesses for optimization variables
-%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 BeginMissionSequence
 
 %---- Initializations

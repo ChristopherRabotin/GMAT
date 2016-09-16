@@ -27,26 +27,6 @@ GMAT Sat.Cd = 2.25;
 GMAT Sat.Cr = 1.21;
 GMAT Sat.DragArea = 4;
 GMAT Sat.SRPArea = 4;
-GMAT Sat.NAIFId = -123456789;
-GMAT Sat.NAIFIdReferenceFrame = -123456789;
-GMAT Sat.OrbitColor = Red;
-GMAT Sat.TargetColor = Teal;
-GMAT Sat.Id = 'SatId';
-GMAT Sat.Attitude = CoordinateSystemFixed;
-GMAT Sat.SPADSRPScaleFactor = 1;
-GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT Sat.ModelOffsetX = 0;
-GMAT Sat.ModelOffsetY = 0;
-GMAT Sat.ModelOffsetZ = 0;
-GMAT Sat.ModelRotationX = 0;
-GMAT Sat.ModelRotationY = 0;
-GMAT Sat.ModelRotationZ = 0;
-GMAT Sat.ModelScale = 1;
-GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
-GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Sat.AttitudeCoordinateSystem = EarthMJ2000Eq;
-GMAT Sat.EulerAngleSequence = '321';
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -158,7 +138,7 @@ GMAT SRP.SRP.SRPModel = Spherical;
 GMAT SRP.SRP.Nominal_Sun = 149597870.691;
 
 
-%  Define Force Model with SRP
+%  Define Force Model with all forces
 Create ForceModel AllForces;
 GMAT AllForces.CentralBody = Earth;
 GMAT AllForces.PrimaryBodies = {Earth};

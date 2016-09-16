@@ -4,17 +4,6 @@
 %  multiple targeting sequences.
 %
 
-
-%----------------------------------------
-%---------- Spacecraft
-%----------------------------------------
-
-
-%**************************************************************************
-%************ Create Objects for Use in Mission Sequence ******************
-%**************************************************************************
-
-
 %--------------------------------------------------------------------------
 %----------------- SpaceCraft, Formations, Constellations -----------------
 %--------------------------------------------------------------------------
@@ -35,67 +24,6 @@ GMAT MMSRef.Cd = 2.2;
 GMAT MMSRef.Cr = 1.7;
 GMAT MMSRef.DragArea = 5;
 GMAT MMSRef.SRPArea = 5;
-GMAT MMSRef.NAIFId = -123456789;
-GMAT MMSRef.NAIFIdReferenceFrame = -123456789;
-GMAT MMSRef.OrbitColor = Red;
-GMAT MMSRef.TargetColor = Teal;
-GMAT MMSRef.Id = 'SatId';
-GMAT MMSRef.Attitude = CoordinateSystemFixed;
-GMAT MMSRef.SPADSRPScaleFactor = 1;
-GMAT MMSRef.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT MMSRef.ModelOffsetX = 0;
-GMAT MMSRef.ModelOffsetY = 0;
-GMAT MMSRef.ModelOffsetZ = 0;
-GMAT MMSRef.ModelRotationX = 0;
-GMAT MMSRef.ModelRotationY = 0;
-GMAT MMSRef.ModelRotationZ = 0;
-GMAT MMSRef.ModelScale = 3;
-GMAT MMSRef.AttitudeDisplayStateType = 'Quaternion';
-GMAT MMSRef.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT MMSRef.AttitudeCoordinateSystem = EarthMJ2000Eq;
-GMAT MMSRef.EulerAngleSequence = '321';
-
-Create Spacecraft Spacecraft1;
-GMAT Spacecraft1.DateFormat = TAIModJulian;
-GMAT Spacecraft1.Epoch = '21545';
-GMAT Spacecraft1.CoordinateSystem = EarthMJ2000Eq;
-GMAT Spacecraft1.DisplayStateType = Cartesian;
-GMAT Spacecraft1.X = 7100;
-GMAT Spacecraft1.Y = 0;
-GMAT Spacecraft1.Z = 1300;
-GMAT Spacecraft1.VX = 0;
-GMAT Spacecraft1.VY = 7.35;
-GMAT Spacecraft1.VZ = 1;
-GMAT Spacecraft1.DryMass = 850;
-GMAT Spacecraft1.Cd = 2.2;
-GMAT Spacecraft1.Cr = 1.8;
-GMAT Spacecraft1.DragArea = 15;
-GMAT Spacecraft1.SRPArea = 1;
-GMAT Spacecraft1.NAIFId = -123456789;
-GMAT Spacecraft1.NAIFIdReferenceFrame = -123456789;
-GMAT Spacecraft1.OrbitColor = Green;
-GMAT Spacecraft1.TargetColor = LightGray;
-GMAT Spacecraft1.Id = 'SatId';
-GMAT Spacecraft1.Attitude = CoordinateSystemFixed;
-GMAT Spacecraft1.SPADSRPScaleFactor = 1;
-GMAT Spacecraft1.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT Spacecraft1.ModelOffsetX = 0;
-GMAT Spacecraft1.ModelOffsetY = 0;
-GMAT Spacecraft1.ModelOffsetZ = 0;
-GMAT Spacecraft1.ModelRotationX = 0;
-GMAT Spacecraft1.ModelRotationY = 0;
-GMAT Spacecraft1.ModelRotationZ = 0;
-GMAT Spacecraft1.ModelScale = 3;
-GMAT Spacecraft1.AttitudeDisplayStateType = 'Quaternion';
-GMAT Spacecraft1.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Spacecraft1.AttitudeCoordinateSystem = EarthMJ2000Eq;
-GMAT Spacecraft1.EulerAngleSequence = '321';
-
-
-%----------------------------------------
-%---------- ForceModels
-%----------------------------------------
-
 
 %--------------------------------------------------------------------------
 %------------------------------ Propagators -------------------------------
@@ -117,7 +45,7 @@ Create Propagator LunarSB;
 GMAT LunarSB.FM = LunarSB_ForceModel;
 GMAT LunarSB.Type = RungeKutta89;
 GMAT LunarSB.InitialStepSize = 60;
-GMAT LunarSB.Accuracy = 9.999999999999999e-012;
+GMAT LunarSB.Accuracy = 1e-011;
 GMAT LunarSB.MinStep = 0.001;
 GMAT LunarSB.MaxStep = 30000;
 GMAT LunarSB.MaxStepAttempts = 50;
@@ -211,10 +139,6 @@ GMAT GSE.Secondary = Earth;
 %---------- Solvers
 %----------------------------------------
 
-%--------------------------------------------------------------------------
-%-------------------------------- Solvers ---------------------------------
-%--------------------------------------------------------------------------
-
 Create DifferentialCorrector DC1;
 GMAT DC1.ShowProgress = true;
 GMAT DC1.ReportStyle = Normal;
@@ -226,10 +150,6 @@ GMAT DC1.Algorithm = NewtonRaphson;
 %----------------------------------------
 %---------- Subscribers
 %----------------------------------------
-
-%--------------------------------------------------------------------------
-%-------------------------- Plots and Reports -----------------------------
-%--------------------------------------------------------------------------
 
 Create XYPlot EarthDistance;
 GMAT EarthDistance.SolverIterations = None;

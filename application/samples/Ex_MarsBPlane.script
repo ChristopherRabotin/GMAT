@@ -1,6 +1,3 @@
-%General Mission Analysis Tool(GMAT) Script
-%Created: 2012-05-16 04:37:14
-
 
 %----------------------------------------
 %---------- Spacecraft
@@ -55,12 +52,6 @@ GMAT MainTank.RefTemperature = 20;
 GMAT MainTank.Volume = 2;
 GMAT MainTank.FuelDensity = 1000;
 GMAT MainTank.PressureModel = PressureRegulated;
-
-
-
-
-
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -168,10 +159,6 @@ GMAT MOI.Element3 = 0;
 GMAT MOI.DecrementMass = false;
 GMAT MOI.Isp = 300;
 GMAT MOI.GravitationalAccel = 9.810000000000001;
-
-
-
-
 
 %----------------------------------------
 %---------- Coordinate Systems
@@ -304,8 +291,6 @@ GMAT SolarSystemView.EnableConstellations = On;
 Create Variable EarthSOI MarsSOI BdotT BdotR deltaV;
 GMAT EarthSOI = 1000000;
 GMAT MarsSOI = 577204;
-
-
 
 %----------------------------------------
 %---------- Mission Sequence
