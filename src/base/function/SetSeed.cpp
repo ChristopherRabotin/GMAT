@@ -76,8 +76,8 @@ SetSeed::SetSeed(const std::string &typeStr, const std::string &name) :
    // SetSeed(seed)
    
    // Add dummy input names
-   inputNames.push_back("__input__1__");
-   inputArgMap.insert(std::make_pair("__input__1__", (ElementWrapper*) NULL));
+   inputNames.push_back("__SetSeed_input_1_seed__");
+   inputArgMap.insert(std::make_pair("__SetSeed_input_1_seed__", (ElementWrapper*) NULL));
    
    // SetSeed has no output
 }

@@ -2032,8 +2032,27 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    #ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage("   Found %d Functions\n", objs.size());
    #endif
+   
+   // Skip built-in functions
    if (objs.size() > 0)
-      WriteObjects(objs, "Functions", mode);
+   {
+      StringArray userFunctions;
+      StringArray::iterator current;
+      GmatBase *object =  NULL;
+      
+      for (current = objs.begin(); current != objs.end(); ++current)
+      {
+         object = FindObject(*current);
+         if (object != NULL)
+         {
+            if (!object->IsOfType("BuiltinGmatFunction"))
+               userFunctions.push_back(*current);
+         }
+      }
+      
+      if (userFunctions.size() > 0)
+         WriteObjects(userFunctions, "Functions", mode);
+   }
    
    //-----------------------------------
    // Array, Variable and String

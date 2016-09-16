@@ -36,7 +36,7 @@
     on GMAT Commands such as <guilabel>Maneuver</guilabel>,
     <guilabel>Assignment</guilabel>, <guilabel>Optimize</guilabel>, and
     <guilabel>Propagate</guilabel> to name just a few. Go here for details
-    regarding syntax, options, variable ranges and data types, defaults, and
+    regarding syntax, options, variable ranges and data types, defaults and
     expected behavior. Each section contains detailed, copy-and-paste ready
     examples.</para>
 
@@ -114,6 +114,7 @@
       <xi:include href="Command_EndFiniteBurn.xml" />
 	  <xi:include href="Command_FindEvents.xml" />
       <xi:include href="Command_For.xml" />
+	  <xi:include href="Command_GetEphemStates.xml" />
 	  <xi:include href="Command_Global.xml" />
       <xi:include href="Command_If.xml" />
       <xi:include href="Command_Maneuver.xml" />
@@ -140,6 +141,7 @@
       <xi:include href="System_CalculationParameters.xml" />
       <xi:include href="System_Color.xml" />
       <xi:include href="System_CommandLineUsage.xml" />
+	  <xi:include href="System_IncludeMacro.xml" />
       <xi:include href="System_KeyboardShortcuts.xml" />      
       <xi:include href="System_MatlabInterface.xml" />
 	  <xi:include href="System_PythonInterface.xml" />

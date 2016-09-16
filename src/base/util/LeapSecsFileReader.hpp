@@ -44,6 +44,7 @@
 struct LeapSecondInformation
 {
    Real julianDate;         // arg: 2/1/05 assumed to be utc
+   Real taiMJD;
    Real offset1;
    Real offset2;
    Real offset3;
@@ -62,10 +63,15 @@ public:
    virtual ~LeapSecsFileReader();
    LeapSecsFileReader(const LeapSecsFileReader& lsfr);
    LeapSecsFileReader& operator=(const LeapSecsFileReader& lsfr);
-
+   
    bool Initialize();
-   Real    NumberOfLeapSecondsFrom(UtcMjd utcMjd);
-
+   Real NumberOfLeapSecondsFrom(UtcMjd utcMjd);
+   Real GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd);
+   
+   /// Determines whether or not the input time (in TAI MJD, referenced to
+   /// GmatTimeConstants::JD_MJD_OFFSET) is in a leap second
+   bool IsInLeapSecond(Real theTaiMjd);
+   
 private:
 
    bool Parse(std::string line);

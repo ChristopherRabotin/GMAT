@@ -142,6 +142,8 @@ namespace TimeConverterUtil
                          Real refJd = GmatTimeConstants::JD_NOV_17_1858);
    Real GMAT_API NumberOfLeapSecondsFrom(Real utcMjd,
                          Real jdOfMjdRef = GmatTimeConstants::JD_JAN_5_1941);
+   Real GMAT_API GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd,
+                         Real jdOfMjdRef = GmatTimeConstants::JD_JAN_5_1941);
    
    void GMAT_API SetEopFile(EopFile *eopFile);
    void GMAT_API SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
@@ -149,7 +151,8 @@ namespace TimeConverterUtil
    void GMAT_API GetTimeSystemAndFormat(const std::string &type, std::string &system,
                          std::string &format);
    
-   std::string GMAT_API ConvertMjdToGregorian(const Real mjd, Integer format = 1);   
+   std::string GMAT_API ConvertMjdToGregorian(const Real mjd, bool handleLeapSecond = false,
+                                              Integer format = 1);
    Real GMAT_API ConvertGregorianToMjd(const std::string &greg);
    
    void GMAT_API Convert(const char *fromType, Real fromMjd,
@@ -168,7 +171,13 @@ namespace TimeConverterUtil
    StringArray GMAT_API GetValidTimeRepresentations();
    
    bool GMAT_API IsValidTimeSystem(const std::string& system);
-
+   
+   bool GMAT_API IsInLeapSecond(Real theTaiMjd);
+   
+   bool GMAT_API HandleLeapSecond();
+   
+   static bool isInLeapSecond;
+   
 }
 
 #endif // TimeSystemConverter_hpp

@@ -362,13 +362,19 @@ bool Code500Propagator::SetStringParameter(const Integer id,
 
    if (id == EPHEMERISFILENAME)
    {
-
       return true;         // Idempotent, so return true
    }
 
-   bool retval = EphemerisPropagator::SetStringParameter(id, value);
+   if (id == EPHEM_CENTRAL_BODY)
+   {
+      MessageInterface::ShowMessage("Warning:  Central bodies set on Code500 "
+            "propagators have no effect.  Propagation uses the body specified"
+            "on the ephemeris file for the propagator %s.\n",
+            instanceName.c_str());
+      return false;
+   }
 
-   return retval;
+   return EphemerisPropagator::SetStringParameter(id, value);
 }
 
 
@@ -653,8 +659,14 @@ bool Code500Propagator::Initialize()
             Real timeSystem = ephem.GetTimeSystem();
 
             ephem.GetStartAndEndEpochs(ephemStart, ephemEnd, &ephemRecords);
+            timeFromEphemStart = (initialEpoch - ephemStart) *
+                  GmatTimeConstants::SECS_PER_DAY;
 
             #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("EphemStart: %.12lf, InitialEpoch: "
+                     "%.12lf, Time from start: %lf\n", ephemStart, initialEpoch,
+                     timeFromEphemStart);
+
                if (ephemRecords != NULL)
                   MessageInterface::ShowMessage("EphemRecords contains %d "
                         "data blocks\n", ephemRecords->size());
@@ -730,6 +742,18 @@ bool Code500Propagator::Initialize()
             #endif
             fileDataLoaded = true;
 
+            // Setup central body
+            centralBody = ephem.GetCentralBody();
+            if (centralBody == "Moon")
+               centralBody = "Luna";
+
+            propOrigin = solarSystem->GetBody(centralBody);
+
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("Setting central body to %s <%p>\n",
+                     centralBody.c_str(), propOrigin);
+            #endif
+
             // Build the interpolator.  For now, use not-a-knot splines
             if (interp != NULL)
                delete interp;
@@ -738,6 +762,10 @@ bool Code500Propagator::Initialize()
          }
       }
    }
+
+   if (startEpochSource == FROM_SCRIPT)
+      for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+         propObjects[i]->SetRealParameter("A1Epoch", currentEpoch);
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Code500Propagator::Initialize(), on exit, "
@@ -763,8 +791,8 @@ bool Code500Propagator::Step()
    #ifdef DEBUG_PROPAGATION
       MessageInterface::ShowMessage("Code500Propagator::Step() entered for %p: "
             "initialEpoch = %.12lf; stepsize = %.12lf; "
-            "timeFromEpoch = %.12lf\n", this, initialEpoch, ephemStep,
-            timeFromEpoch);
+            "timeFromEpoch = %.12lf, Time from ephem start = %lf\n", this,
+            initialEpoch, ephemStep, timeFromEpoch, timeFromEphemStart);
    #endif
 
    bool retval = false;

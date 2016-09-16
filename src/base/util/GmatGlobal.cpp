@@ -946,7 +946,7 @@ GmatGlobal::GmatGlobal()
 {
    // Current GMAT version.
    // @note: Make sure to switch it to the official release number for RC1
-   gmatVersion = "Nightly Build";
+   gmatVersion = "R2016a";
    
    isTesting = false;                      // It is a temporary fix in order to run gression test with runmode = TESTING. 
                                            // It needs to improve in the next GMAT release

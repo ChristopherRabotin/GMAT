@@ -5067,20 +5067,33 @@ bool Spacecraft::TakeAction(const std::string &action,
    if (action == "UpdateEpoch")
    {
       Real currEpoch = state.GetEpoch();
+      
+      bool isInLeapSecond = false;
+      bool isUTC          = false;
 
       if (epochSystem != "")
       {
          if (epochSystem != "A1")
+         {
+            Integer epochSystemID = TimeConverterUtil::GetTimeTypeID(epochSystem);
             currEpoch = TimeConverterUtil::Convert(currEpoch,
                           TimeConverterUtil::A1,
-                          TimeConverterUtil::GetTimeTypeID(epochSystem),
+                          epochSystemID,
                           GmatTimeConstants::JD_JAN_5_1941);
+            isInLeapSecond = TimeConverterUtil::HandleLeapSecond();
+            if ((epochSystemID == TimeConverterUtil::UTCMJD) ||
+                (epochSystemID == TimeConverterUtil::UTC))
+               isUTC = true;
+         }
       }
 
       if (epochFormat != "")
       {
          if (epochFormat == "Gregorian")
-            scEpochStr = TimeConverterUtil::ConvertMjdToGregorian(currEpoch);
+         {
+            bool handleLeapSecond = isInLeapSecond && isUTC;
+            scEpochStr = TimeConverterUtil::ConvertMjdToGregorian(currEpoch, handleLeapSecond);
+         }
          else
          {
             std::stringstream timestream;
@@ -6347,10 +6360,6 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
       #endif
    }
 
-   #ifdef DEBUG_MASS_FLOW
-      MessageInterface::ShowMessage("\n");
-   #endif
-
    return retval;
 }
 
@@ -7073,8 +7082,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
        repState.ToString().c_str());
    #endif
    
-   std::string fieldComment;
-   std::string inlineFieldComment;
+   std::string fieldComment = "";
+   std::string inlineFieldComment = "";
    for (i = 0; i < parameterCount; ++i)
    {
       if ((IsParameterReadOnly(parmOrder[i]) == false) &&
@@ -7084,9 +7093,13 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
           (parmOrder[i] != ATTITUDE))
       {
          parmType = GetParameterType(parmOrder[i]);
-         fieldComment = GetAttributeCommentLine(parmOrder[i]);
-         inlineFieldComment = GetInlineAttributeComment(parmOrder[i]);
          
+         if (mode != Gmat::OBJECT_EXPORT)
+         {
+            fieldComment = GetAttributeCommentLine(parmOrder[i]);
+            inlineFieldComment = GetInlineAttributeComment(parmOrder[i]);
+         }
+
          // Handle StringArray parameters separately
          if (parmType != Gmat::STRINGARRAY_TYPE &&
              parmType != Gmat::OBJECTARRAY_TYPE)

@@ -1551,12 +1551,19 @@ Report aReport aSat.UTCGregorian</code></programlisting>
       listed in the <filename>tai-utc.dat</filename> file, which historically
       has been either January 1 or July 1. In the Gregorian date format, the
       leap second appears as a “60<superscript>th</superscript> second”: for
-      example, “31 Dec 2008 23:59:60.000”. GMAT will correctly output this
-      epoch, and will accept it as input. GMAT’s Modified Julian format is
-      based on an 86,400-second day, however, and will repeat the first second
-      of the following day. Input of the leap second in Modified Julian format
-      is not supported. (See Release Notes for a known bug related to this
-      functionality).</para>
+      example, “31 Dec 2008 23:59:60.000”. From the International Astronomical
+      Union's Standards of Fundamental Astronomy "SOFA Time Scale and Calendar
+      Tools" documentation: "<emphasis>Note that UTC has to be expressed as
+      hours, minutes and seconds (or at least in seconds in a given day) if
+      leap seconds are to be taken into account in the correct
+      manner</emphasis>. In particular, it is inappropriate to express UTC as
+      a Julian Date, because there will be an ambiguity during a leap second
+      so that for example 1994 June 30 23:59:60:0 and 1994 July 1 00:00:00:0
+      would both come out as MJD 49534.00000 and because subtracting two such
+      JDs would not yield the correct interval in cases that contain leap
+      seconds." For this reason, we discourage use of the UTC modified Julian
+      system, and recommend using UTC Gregorian when a UTC time system is
+      required. </para>
 
       <para>For epochs prior to the first entry in the leap-second file, the
       UTC and TAI time systems are considered identical (i.e. zero leap

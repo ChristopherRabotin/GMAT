@@ -29,9 +29,9 @@
     <title>Description</title>
 
     <para><guilabel>EphemerisFile</guilabel> is a user-defined resource that
-    generates spacecraft’s ephemeris data in a report format. You can generate
+    generates spacecraft’s ephemeris in a report format. You can generate
     spacecraft’s ephemeris data in any of the user-defined coordinate frames.
-    GMAT allows you to output ephemeris data in either CCSDS or SPK file
+    GMAT allows you to output ephemeris data in CCSDS-OEM, SPK, Code-500 and STK .e (STK -TimePosVel)
     formats. See the <xref linkend="EphemerisFile_Remarks"
     xrefstyle="select:title"/> section for more details.
     <guilabel>EphemerisFile</guilabel> resource can be configured to generate
@@ -40,8 +40,7 @@
 
     <para>GMAT allows you to generate any number of ephemeris data files by
     creating multiple <guilabel>EphermisFile</guilabel> resources.
-    Spacecraft’s ephemeris data is always provided in UTC epoch format. An
-    <guilabel>EphemerisFile</guilabel> resource can be created using either
+    An <guilabel>EphemerisFile</guilabel> resource can be created using either
     the GUI or script interface. GMAT also provides the option of when to
     write and stop writing ephemeris data to a text file through the
     <guilabel>Toggle</guilabel>
@@ -76,17 +75,14 @@
           <row>
             <entry><guilabel>CoordinateSystem</guilabel></entry>
 
-            <entry><para>Allows you to set the interpolation order for the
-            available interpolator methods (<guilabel>Lagrange</guilabel> or
-            <guilabel>Hermite</guilabel>) for either
-            <guilabel>CCSDS-OEM</guilabel>, <guilabel>SPK</guilabel> or
-            <guilabel>Code 500</guilabel> file formats. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
+            <entry><para>Allows you to generate spacecraft ephemeris w.r.t the coordinate system that you select for this field. 
+			Ephemeris can also be generated w.r.t a user-specified coordinate system. This field cannot be modified in the Mission Sequence.
+            </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
                   <listitem>
-                    <para>String</para>
+                    <para>Enumeration</para>
                   </listitem>
                 </varlistentry>
 
@@ -94,9 +90,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>For CCSDS-OEM and Code-500 file formats: 1 &lt;=
-                    Integer Number &lt;= 10. For SPK file format: 1 &lt;= Odd
-                    Integer Number &lt;= 9</para>
+                    <para>Any default coordinate system or a user-defined coordinate system</para>
                   </listitem>
                 </varlistentry>
 
@@ -139,11 +133,7 @@
           <row>
             <entry><guilabel>EpochFormat</guilabel></entry>
 
-            <entry><para>The ephemeris file is generated at the step size that
-            is specified for <guilabel>StepSize</guilabel> field. The user can
-            generate ephemeris file at default Integration step size (using
-            raw integrator steps) or by defining a fixed step size provided by
-            user. For Code-500 ephemeris, only fixed step size is supported
+            <entry><para>The field allows you to set the type of the epoch that you choose to enter for <guilabel>InitialEpoch</guilabel> and <guilabel>FinalEpoch</guilabel> fields. 
             This field cannot be modified in the Mission Sequence.</para>
             <variablelist>
                 <varlistentry>
@@ -158,7 +148,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>UTCGregorian</guilabel>,<guilabel>
+                    <para>Any of the following epoch formats:<guilabel>
+                    UTCGregorian</guilabel><guilabel>
                     UTCModJulian</guilabel>,<guilabel>
                     TAIGregorian</guilabel>,<guilabel>
                     TAIModJulian</guilabel>,<guilabel>
@@ -207,8 +198,8 @@
           <row>
             <entry><guilabel>FileFormat</guilabel></entry>
 
-            <entry><para>Allows the user to generate ephemeris file in three
-            available file formats: CCSDS-OEM, SPK or Code-500. This field
+            <entry><para>Allows the user to generate ephemeris file in four
+            available ephemeris formats: CCSDS-OEM, SPK, Code-500 or STK-TimePosVel (i.e. STK .e format). This field
             cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -224,7 +215,7 @@
                   <listitem>
                     <para><guilabel>CCSDS-OEM</guilabel>,
                     <guilabel>SPK</guilabel>,
-                    <guilabel>Code-500</guilabel></para>
+                    <guilabel>Code-500</guilabel>, <guilabel>STK-TimePosVel</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -267,8 +258,8 @@
           <row>
             <entry><guilabel>FileName</guilabel></entry>
 
-            <entry><para>Allows the user to generate ephemeris file in three
-            available file formats: CCSDS-OEM, SPK and Code-500. This field
+            <entry><para>Allows the user to name the ephemeris file that is generated.
+            File extensions for CCSDS-OEM, SPK, Code-500 and STK-TimePosVel ephemeris types are *.oem, *.bsp, *.eph and *.e respectively. This field
             cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -446,9 +437,7 @@
 
             <entry><para>Allows you to set the interpolation order for the
             available interpolator methods (<guilabel>Lagrange</guilabel> or
-            <guilabel>Hermite</guilabel>) for either
-            <guilabel>CCSDS-OEM</guilabel> or <guilabel>SPK</guilabel> file
-            formats. This field cannot be modified in the Mission
+            <guilabel>Hermite</guilabel>) for any of the ephemeris types. This field cannot be modified in the Mission
             Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -521,8 +510,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>Lagrange</guilabel> for CCSDS-OEM and
-                    Code-500 files, <guilabel>Hermite</guilabel> for SPK
+                    <para><guilabel>Lagrange</guilabel> for CCSDS-OEM, Code-500 and STK-TimePosVel ephemeris types,<guilabel>Hermite</guilabel> for SPK
                     file</para>
                   </listitem>
                 </varlistentry>
@@ -865,7 +853,7 @@
             is specified for <guilabel>StepSize</guilabel> field. The user can
             generate ephemeris file at default Integration step size (using
             raw integrator steps) or by defining a fixed step size. For
-            <literal>CCSDS-OEM</literal> file format, you can generate
+            <literal>CCSDS-OEM</literal> and <literal>STK-TimePosVel</literal> file formats, you can generate
             ephemeris at either Integrator steps or fixed step size. For
             <literal>SPK</literal> file format, GMAT lets you generate
             ephemeris at only raw integrator step sizes. For
@@ -901,7 +889,7 @@
 
                   <listitem>
                     <para><literal>IntegratorSteps </literal> for
-                    <literal>CCSDS-OEM</literal> and <literal>SPK</literal>
+                    <literal>CCSDS-OEM</literal>, <literal>SPK</literal> and <literal>STK-TimePosVel</literal>
                     file formats and <literal>60</literal> seconds for
                     <literal>Code-500</literal> file format</para>
                   </listitem>
@@ -1140,7 +1128,7 @@
       require that the ephemeris be generated in increasing time order and
       only going forward. However version 2 of CCSDS ODM document now allows
       for ephemeris file to be generated backwards as well. Currently in GMAT,
-      when you propagate a spacecraft backwards in time, then the ephemeris is
+      when you propagate a spacecraft backwards in time, then the CCSDS ephemeris is
       also generated backwards.</para>
 
       <warning>
@@ -1154,6 +1142,11 @@
         maneuvers grow in magnitude. We recommend using more modern ephemeris
         file formats for this reasson.</para>
       </warning>
+	  
+	  <para>Similar to CCSDS ephemeris format, the STK-TimePosVel ephemeris is also generated in separate chunks of ephemeris data whenever an event 
+	  such as an impulsive or a finite maneuver takes place or a change in dynamic models occurs. However, unlike the CCSDS ephemeris, 
+	  STK-TimePosVel ephemeris is not generated during backward propagations and only forward propagation ephemeris is reported.</para>
+	  
     </refsection>
 
     <refsection>
@@ -1179,11 +1172,10 @@
     </refsection>
 
     <refsection>
-      <title>Behavior of Interpolation Order Field for CCSDS, SPK and Code 500
-      File Formats</title>
+      <title>Behavior of Interpolation Order Field for the Ephemeris File Formats:</title>
 
       <para>For CCSDS file formats, whenever there is not enough raw data
-      available to support the requested interpolation type and order, GMA
+      available to support the requested interpolation type and order, GMAT
       throws an error message and stops interpolation. GMAT still generates
       the ephemeris file but no spacecraft ephemeris data is written to the
       file and only the file’s Header section will be there. Within the Header
@@ -1205,6 +1197,13 @@
       For code 500 file formats, if there is not enough raw data available to
       support interpolation type and order, GMAT will throw an error message
       and stop interpolation.</para>
+	  
+	  <para>For the STK-TimePosVel ephemeris format, whenever there is not enough raw data available to support 
+	  the generation of ephemeris at the requested interpolation order and fixed step size, GMAT will internally adjust the interpolation order such that
+      at least the beginning and the last ephemeris points are reported in the STK .e ephemeris file. This new interpolation order will be reported at
+STK . e ephemeris's header data.  	  
+	</para>
+	  
     </refsection>
 
     <refsection>
@@ -1223,7 +1222,7 @@
       command is issued. Similarly, when a <guilabel>Toggle</guilabel>
       <guilabel>On</guilabel> command is used, ephemeris data is sent to a
       file at each integration step until a <guilabel>Toggle</guilabel> Off
-      command is used.</para>
+      command is used. The Toggle command can be used on all four ephemeris types that GMAT supports.</para>
 
       <para>Below is an example script snippet that shows how to use
       <guilabel>Toggle Off/On</guilabel> commands while using the
@@ -1743,5 +1742,32 @@ EndTarget
 
 Propagate aProp(aSat) {aSat.ElapsedDays = 1}</code></programlisting>
     </informalexample>
+	
+	    <informalexample>
+      <para>This example shows how to generate a simple STK-TimePosVel (i.e. STK .e) ephemeris file.
+      Ephemeris file is generated for 1 day of propagation, then a simple impulsive maneuver takes place and spacecraft propagates for another day. This ephemeris is generated at raw integrator steps.
+	  </para>
+
+      <programlisting><code>Create Spacecraft aSat
+Create Propagator aProp
+
+Create ImpulsiveBurn IB
+IB.Element1 = 0.5
+
+Create EphemerisFile anEphmerisFile
+
+anEphmerisFile.Spacecraft = aSat
+anEphmerisFile.Filename = 'EphemerisFile.e'
+anEphmerisFile.FileFormat = STK-TimePosVel
+
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+Maneuver IB(aSat)
+Propagate aProp(aSat) {aSat.ElapsedDays = 1}
+</code></programlisting>
+    </informalexample>
+	
   </refsection>
 </refentry>

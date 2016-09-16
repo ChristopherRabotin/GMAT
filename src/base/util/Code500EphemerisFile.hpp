@@ -68,6 +68,7 @@ public:
    void ConvertEbcdicToAscii(char *ebcdic, char *ascii, int numChars);
    
    Real GetTimeSystem();
+   std::string GetCentralBody();
 
 protected:
    static const int    RECORD_SIZE = 2800;
@@ -270,6 +271,8 @@ protected:
    double mTimeIntervalBetweenPointsSecs;
    double mLeapSecsStartOutput;
    double mLeapSecsEndOutput;
+   double mStartUtcMjd;
+   double mEndUtcMjd;
    double mLeapSecsInput;
    
    // Data used in propagation

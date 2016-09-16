@@ -2147,8 +2147,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             if (find(functionList.begin(), functionList.end(), funcName) != 
                 functionList.end())
             {
+               #ifdef DEBUG_CREATE_CALL_FUNCTION
                MessageInterface::ShowMessage
-                  ("==> 1 %s is builtin GmatFunction\n", funcName.c_str());
+                  ("   1 %s is builtin GmatFunction\n", funcName.c_str());
+               #endif
                type1 = "CallBuiltinGmatFunction";
             }
             else if (gmatFunctionsAvailable)
@@ -2222,7 +2224,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                {
                   #ifdef DEBUG_CREATE_CALL_FUNCTION
                   MessageInterface::ShowMessage
-                     ("==> 2 %s is builtin GmatFunction\n", funcName.c_str());
+                     ("   2 %s is builtin GmatFunction\n", funcName.c_str());
                   #endif
                   type1 = "CallBuiltinGmatFunction";
                }
@@ -2318,7 +2320,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                      {
                         #ifdef DEBUG_CREATE_CALL_FUNCTION
                         MessageInterface::ShowMessage
-                           ("==> 3 %s is builtin GmatFunction\n", funcName.c_str());
+                           ("   3 %s is builtin GmatFunction\n", funcName.c_str());
                         #endif
                         type1 = "CallBuiltinGmatFunction";
                      }
@@ -2865,9 +2867,9 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          StringArray varNames = GmatStringUtil::GetVarNames(input);
          
          #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-         MessageInterface::ShowMessage("   varNames.size()=%d\n", varNames.size());
-         for (unsigned int i = 0; i < varNames.size(); i++)
-            MessageInterface::ShowMessage("   varNames[%d] = '%s'\n", i, varNames[i].c_str());
+         MessageInterface::ShowMessage("   arg %d: varNames.size()=%d\n", i, varNames.size());
+         for (unsigned int ii = 0; ii < varNames.size(); ii++)
+            MessageInterface::ShowMessage("      varNames[%d] = '%s'\n", ii, varNames[ii].c_str());
          #endif
          
          // Currently array element cannot be passed to CallMatlabFunction and
@@ -2875,8 +2877,10 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          // If array element index is other than number, set input to "" so thatn
          // CallFunction will return false. Array element with numeric index will
          // be checked below.
-         if (varNames.size() > 1)
-            input = "";
+         
+         // I think this issue is fixed, so commented out (LOJ: 2016.08.11)
+         // if (varNames.size() > 1)
+         //    input = "";
          
          #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
          MessageInterface::ShowMessage
@@ -3094,20 +3098,28 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       }
    }
    
+   // We want to continue here to set function pointer to CallFunction.
+   // For GMT-5764 Fix (LOJ: 2016.09.01)
    // if in function mode, just return retval
-   if (inFunctionMode)
-   {
-      #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-      MessageInterface::ShowMessage
-         ("Interpreter::AssembleCallFunctionCommand() returning %d, it's in "
-          "function mode\n", retval);
-      #endif
-      return retval;
-   }
+   // if (inFunctionMode)
+   // {
+   //    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+   //    MessageInterface::ShowMessage
+   //       ("Interpreter::AssembleCallFunctionCommand() returning %d, it's in "
+   //        "function mode\n", retval);
+   //    #endif
+   //    return retval;
+   // }
    
    // See if Function is MatlabFunction since all MatlabFunctions are created
    // before mission sequence, if not, create as GmatFunction.
    GmatBase *func = FindObject(funcName);
+   #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+   MessageInterface::ShowMessage
+      ("   It is %sin function mode and function<%p>'%s' found for funcName\n   "
+       "Now checking if GmatFunction needs to be created\n", inFunctionMode ? "" : "NOT ",
+       func, func ? func->GetName().c_str() : "NULL");
+   #endif
    if (func == NULL)
    {
       if (!isPythonFunction)
@@ -3115,10 +3127,35 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          // Check if function name is built-in GmatFunction
          if (find(functionList.begin(), functionList.end(), funcName) != 
              functionList.end())
-            //func = CreateObject("BuiltinGmatFunction", funcName);
+         {
+            #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+            MessageInterface::ShowMessage
+               ("   '%s' is built-in GmatFunction so creating...\n", funcName.c_str());
+            #endif
             func = CreateObject(funcName, funcName);
+         }
          else
-            func = CreateObject("GmatFunction", funcName);
+         {
+            // Create GmatFunction if not in function mode since Sandbox handles
+            // GmatFunction creation during the initialization.
+            if (!inFunctionMode)
+            {
+               #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   It is not in function mode and '%s' is user defined "
+                   "GmatFunction, so creating...\n", funcName.c_str());
+               #endif
+               func = CreateObject("GmatFunction", funcName);
+            }
+            else
+            {
+               #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   It is in function mode so GmatFunction '%s' is not created\n",
+                   funcName.c_str());
+               #endif
+            }
+         }
       }
       else
          func = NULL;
@@ -9451,6 +9488,8 @@ bool Interpreter::FinalPass()
    {
       obj = FindObject(*i);
 
+      obj->TakeAction("CheckMixRatio");
+
       StringArray csNames = obj->GetRefObjectNameArray(Gmat::COORDINATE_SYSTEM);
       for (StringArray::iterator csName = csNames.begin();
            csName != csNames.end(); ++csName)
@@ -10469,7 +10508,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       if (numLeft > 0 && lhsParts[0] != "function")
       {
          InterpreterException ex
-            ("The \"function\" is missing in the GmatFunction file \"" +
+            ("The \"function\" keyword is missing in the GmatFunction file \"" +
              fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;

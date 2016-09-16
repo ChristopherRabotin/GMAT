@@ -19,7 +19,7 @@
 // governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan
-// FunctionManagerd: 2008.03.24
+// Created: 2008.03.24
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CCA54C
@@ -61,6 +61,7 @@
 //#define DEBUG_SUBSCRIBER
 //#define DEBUG_CLEANUP
 //#define DEBUG_FIND_OBJ
+//#define DEBUG_CREATE_OBJ
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -351,7 +352,6 @@ void FunctionManager::SetFunction(Function *theFunction)
    currentFunction = theFunction;
    currentFunction->SetStringParameter("FunctionName", functionName);
    // Now BuiltinGmatFunction should be also allowed (LOJ: 2016.05.04)
-   //if (currentFunction->IsOfType("GmatFunction"))
    if (currentFunction->IsOfType("GmatFunction") ||
        currentFunction->IsOfType("BuiltinGmatFunction"))
    {
@@ -872,7 +872,7 @@ bool FunctionManager::Initialize()
 bool FunctionManager::Execute(FunctionManager *callingFM)
 {
    if (currentFunction == NULL)
-      throw FunctionException("FunctionManager: Function pointer is NULL");
+      throw FunctionException("FunctionManager::Execute() Function pointer is NULL");
    
    #ifdef DEBUG_TRACE
    static Integer callCount = 0;
@@ -884,10 +884,11 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
       ("=======================================================================\n"
-       "Entering FM::Execute(), current function is '%s'\n   calling FM is '%s'\n"
-       "   solarSys is %p, internalCS is %p, forces is %p\n",
-       functionName.c_str(), callingFM ? callingFM->GetFunctionName().c_str() : "NULL",
-       solarSys, internalCS, forces);
+       "Entering FM::Execute(), this FM is <%p>, current function is <%p>'%s'\n   "
+       "calling FM is '%s'\n   solarSys is %p, internalCS is %p, forces is %p\n",
+       this, currentFunction, functionName.c_str(),
+       callingFM ? callingFM->GetFunctionName().c_str() : "NULL", solarSys,
+       internalCS, forces);
    MessageInterface::ShowMessage("   === firstExecution=%d\n", firstExecution);
    #endif
    
@@ -990,7 +991,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    #ifdef DEBUG_FM_EXECUTE
       MessageInterface::ShowMessage("   new objInit=<%p> created\n", objInit);
       MessageInterface::ShowMessage(
-         "in FM::Execute (%s), about to set calling function <%p> '%s' on commands\n",
+         "in FM::Execute (%s), calling function is <%p>'%s'\n",
          functionName.c_str(), callingFunction, callingFunction ?
          callingFunction->GetFunctionName().c_str() : "NULL");
    #endif
@@ -999,8 +1000,8 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    {
       #ifdef DEBUG_FM_EXECUTE
          MessageInterface::ShowMessage(
-               "in FM::Execute, about to set calling function on command '%s'\n",
-               (cmd->GetTypeName()).c_str());
+            "in FM::Execute, about to set calling function manager <%p> on command '%s'\n",
+            this, (cmd->GetTypeName()).c_str());
       #endif
       cmd->SetCallingFunction(this);
       cmd->SetInternalCoordSystem(internalCS);
@@ -1008,7 +1009,9 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    }
    
    #ifdef DEBUG_FM_EXECUTE
-   MessageInterface::ShowMessage("in FM::Execute, Now calling function->Execute()\n");
+   MessageInterface::ShowMessage
+      ("in FM::Execute, Now calling currentFunction<%p>'%s'->Execute()\n", currentFunction,
+       currentFunction->GetName().c_str());
    MessageInterface::ShowMessage
       ("   Create and Global command may have updated FOS/GOS in the function <%p>'%s'\n",
        currentFunction, GetFunctionName().c_str());
@@ -1382,6 +1385,9 @@ bool FunctionManager::CreatePassingArgWrappers()
    MessageInterface::ShowMessage("\n==================================================\n");
    MessageInterface::ShowMessage
       ("FunctionManager::CreatePassingArgWrappers() entered for '%s'\n", functionName.c_str());
+   MessageInterface::ShowMessage
+      ("currentFunction=<%p>, isBuiltinGmatFunction=%d\n", currentFunction,
+       currentFunction ? currentFunction->IsOfType("BuiltinGmatFunction") : -1);
    ShowObjectMap(functionObjectStore, "functionObjectStore in FM:CreatePassingArgWrappers()");
    ShowObjectMap(localObjectStore, "localObjectStore in FM:CreatePassingArgWrappers()");
    ShowObjectMap(globalObjectStore, "globalObjectStore in FM:CreatePassingArgWrappers()");
@@ -1510,6 +1516,51 @@ bool FunctionManager::CreatePassingArgWrappers()
    }
    else
    {
+      // If function is BuiltinGmatFunction, create objects with formal output names
+      // and add to FOS
+      if (currentFunction->IsOfType("BuiltinGmatFunction"))
+      {
+         IntegerArray rowCounts, colCounts;
+         WrapperTypeArray outWrapperTypes = currentFunction->GetOutputTypes(rowCounts, colCounts);
+         #ifdef DEBUG_FM_INIT
+         MessageInterface::ShowMessage
+            ("   Current function is BuiltinGmatFunction, outWrapperTypes.size() = %d\n",
+             outWrapperTypes.size());
+         #endif
+         for (unsigned int ii=0; ii<outFormalNames.size(); ii++)
+         {
+            GmatBase *obj = NULL;
+            std::string outName = outFormalNames[ii];
+            Gmat::WrapperDataType wType = outWrapperTypes[ii];
+            Integer numRows = rowCounts[ii];
+            Integer numCols = colCounts[ii];
+            #ifdef DEBUG_FM_INIT
+            MessageInterface::ShowMessage
+               ("   wType=%d, numRos=%d, numCols=%d\n", wType, numRows, numCols);
+            #endif
+            
+            obj = CreateObjectForBuiltinGmatFunction(outName, wType, numRows, numCols);
+            
+            if (obj)
+            {
+               #ifdef DEBUG_FM_INIT
+               MessageInterface::ShowMessage
+                  ("   Adding object '%s' to the FOS\n", outName.c_str());
+               #endif
+               functionObjectStore->insert(std::make_pair(outName,obj));
+            }
+            else
+            {
+               std::string errMsg = "FunctionManager: error creating output object \"";
+               errMsg += outName + "\"\n";
+               #ifdef DEBUG_FM_INIT
+               MessageInterface::ShowMessage(errMsg + " so throwing an exception\n");
+               #endif
+               throw FunctionException(errMsg);
+            }
+         }
+      }
+      
       for (unsigned int jj = 0; jj < passedOuts.size(); jj++)
       {
          if (!(obj = FindObject(passedOuts.at(jj))))
@@ -1518,9 +1569,6 @@ bool FunctionManager::CreatePassingArgWrappers()
             errMsg += " not found for function \"" + functionName + "\"";
             throw FunctionException(errMsg);
          }
-         // Do we neet to set this inside the loop? commented out (loj: 2008.11.21)
-         //validator->SetObjectMap(&combinedObjectStore);
-         //validator->SetSolarSystem(solarSys);
          std::string outName = passedOuts.at(jj);         
          #ifdef DEBUG_WRAPPERS
          MessageInterface::ShowMessage
@@ -1539,7 +1587,8 @@ bool FunctionManager::CreatePassingArgWrappers()
          outWrapper->SetRefObject(obj); 
          outputWrappers.push_back(outWrapper);
          #ifdef DEBUG_FM_INIT // ------------------------------------------------- debug ---
-            MessageInterface::ShowMessage("   Output wrapper created for %s\n", outName.c_str());
+         MessageInterface::ShowMessage
+            ("   Output wrapper created <%p> for %s\n", outWrapper, outName.c_str());
          #endif // -------------------------------------------------------------- end debug ---
       }
    }
@@ -1662,9 +1711,9 @@ void FunctionManager::RefreshFormalInputObjects()
           formalName.c_str());
       #endif
       
-      GmatBase *obj = NULL;
-      GmatBase *fosObj = NULL;
-      GmatBase *gosObj = NULL;
+      GmatBase *objPassed = NULL;
+      GmatBase *fosObjFormal = NULL;
+      GmatBase *gosObjFormal = NULL;
       if (functionObjectStore->find(formalName) == functionObjectStore->end())
       {
          // Try globalObjectStore (LOJ: 2015.10.19 GMT-5336)
@@ -1681,7 +1730,7 @@ void FunctionManager::RefreshFormalInputObjects()
                ("   formalName='%s' found from the global object store\n", formalName.c_str());
             #endif
             
-            gosObj = (*globalObjectStore)[formalName];
+            gosObjFormal = (*globalObjectStore)[formalName];
          }
       }
       else
@@ -1691,15 +1740,18 @@ void FunctionManager::RefreshFormalInputObjects()
             ("   formalName='%s' found from the function object store\n", formalName.c_str());
          #endif
          
-         // GmatBase *obj = NULL;
-         // GmatBase *fosObj = (*functionObjectStore)[formalName];
-         fosObj = (*functionObjectStore)[formalName];
+         fosObjFormal = (*functionObjectStore)[formalName];
       }
+      
+      #ifdef DEBUG_FM_EXECUTE
+      MessageInterface::ShowMessage("   fosObjFormal=<%p>\n", fosObjFormal);
+      MessageInterface::ShowMessage("   gosObjFormal=<%p>\n", gosObjFormal);
+      #endif
       
       // Now find the corresponding input object
       // if passed name not found in LOS or GOS, it may be a number, string literal,
       // array element, or automatic object such as sat.X
-      if (!(obj = FindObject(passedName)))
+      if (!(objPassed = FindObject(passedName)))
       {
          #ifdef DEBUG_FM_EXECUTE
          ShowObjectMap(&createdLiterals, "createdLiterals map in RefreshFormalInputObjects");
@@ -1709,7 +1761,7 @@ void FunctionManager::RefreshFormalInputObjects()
          if (createdLiterals.find(passedName) == createdLiterals.end())
          {
             #ifdef DEBUG_FM_EXECUTE
-            ShowObjectMap(&createdLiterals, "createdOthers map in RefreshFormalInputObjects");
+            ShowObjectMap(&createdOthers, "createdOthers map in RefreshFormalInputObjects");
             #endif            
             
             if (createdOthers.find(passedName) == createdOthers.end())
@@ -1724,10 +1776,13 @@ void FunctionManager::RefreshFormalInputObjects()
                ("   '%s' found from the createdOthers\n", passedName.c_str());
             #endif
             
-            GmatBase *oldFosObj = fosObj;
-            GmatBase *oldObj = createdOthers[passedName];
-            obj = CreateObject(passedName);
-            if (!obj)
+            GmatBase *oldObjPassed = createdOthers[passedName];
+            objPassed = CreateObject(passedName);
+            #ifdef DEBUG_FM_EXECUTE
+            MessageInterface::ShowMessage("   oldObjPassed=<%p>\n", oldObjPassed);
+            MessageInterface::ShowMessage("   objPassed=<%p>\n", objPassed);
+            #endif
+            if (!objPassed)
             {
                std::string errMsg2 =
                   "FunctionManager: Object not found or created for input string \"";
@@ -1735,35 +1790,36 @@ void FunctionManager::RefreshFormalInputObjects()
                errMsg2 += functionName + "\"\n";
                throw FunctionException(errMsg2);
             }
-            createdOthers[passedName] = obj;
-            fosObj = obj->Clone();
-            fosObj->SetName(formalName);
-            #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Add
-               (fosObj, formalName, "FunctionManager::RefreshFormalInputObjects()",
-                "obj->Clone()");
-            #endif
+            createdOthers[passedName] = objPassed;
             
-            if (oldFosObj)
+            // Do not delete fosObjFormal here. when GmatFunction is called within
+            // a loop, fosObjFormal and oldObjPassed points to the same object,
+            // it will do double delete which causes a crash. (Fix for GMT-5717)
+            // if (fosObjFormal)
+            // {
+            //    MessageInterface::ShowMessage("==> Deleting fosObjFormal=<%p>\n", fosObjFormal);
+            //    #ifdef DEBUG_MEMORY
+            //    MemoryTracker::Instance()->Remove
+            //       (fosObjFormal, osObjFormal->GetName(),
+            //        "FunctionManager::RefreshFormalInputObjects()", "deleting fosObjFormal");
+            //    #endif
+            //    delete fosObjFormal;
+            //    fosObjFormal = NULL;
+            // }
+            
+            // Delete oldObjPassed if not the same as fosObjFormal
+            if (oldObjPassed && (fosObjFormal != oldObjPassed))
             {
+               #ifdef DEBUG_FM_EXECUTE
+               MessageInterface::ShowMessage("   Deleting oldObjPassed=<%p>\n", oldObjPassed);
+               #endif
                #ifdef DEBUG_MEMORY
                MemoryTracker::Instance()->Remove
-                  (oldFosObj, oldFosObj->GetName(),
-                   "FunctionManager::RefreshFormalInputObjects()", "deleting oldFosObj");
+                  (oldObjPassed, oldObjPassed->GetName(), "FunctionManager::RefreshFormalInputObjects()",
+                   "deleting oldObjPassed");
                #endif
-               delete oldFosObj;
-               oldFosObj = NULL;
-            }
-            
-            if (oldObj)
-            {
-               #ifdef DEBUG_MEMORY
-               MemoryTracker::Instance()->Remove
-                  (oldObj, oldObj->GetName(), "FunctionManager::RefreshFormalInputObjects()",
-                   "deleting oldObj");
-               #endif
-               delete oldObj;
-               oldObj = NULL;
+               delete oldObjPassed;
+               oldObjPassed = NULL;
             }
          }
          else
@@ -1772,7 +1828,7 @@ void FunctionManager::RefreshFormalInputObjects()
             MessageInterface::ShowMessage
                ("   '%s' found from the createdLiterals\n", passedName.c_str());
             #endif
-            obj = createdLiterals[passedName];
+            objPassed = createdLiterals[passedName];
          }
       }
       
@@ -1783,14 +1839,14 @@ void FunctionManager::RefreshFormalInputObjects()
       
       // Update the object in the function or global object store with the current/reset data
       // If global object use global object store (LOJ: 2015.10.19 for GMT-5336 fix)
-      if (fosObj)
+      if (fosObjFormal)
       {
-         fosObj->Copy(obj);
-         (inputWrapperMap[formalName])->SetRefObject(fosObj);  // is this necessary? I think so
+         fosObjFormal->Copy(objPassed);
+         (inputWrapperMap[formalName])->SetRefObject(fosObjFormal);  // is this necessary? I think so
       }
-      else if (gosObj)
+      else if (gosObjFormal)
       {
-         (inputWrapperMap[formalName])->SetRefObject(gosObj);
+         (inputWrapperMap[formalName])->SetRefObject(gosObjFormal);
       }
    }
    
@@ -2052,6 +2108,77 @@ GmatBase* FunctionManager::CreateObject(const std::string &fromString)
 
 
 //------------------------------------------------------------------------------
+// GmatBase* CreateObjectForBuiltinGmatFunction(const std::string outName,
+//           Gmat::WrapperDataType wType, Integer numRows, Integer numCols)
+//------------------------------------------------------------------------------
+GmatBase* FunctionManager::
+CreateObjectForBuiltinGmatFunction(const std::string &outName,
+                                   Gmat::WrapperDataType wType, 
+                                   Integer numRows, Integer numCols)
+{
+   #ifdef DEBUG_CREATE_OBJ
+   MessageInterface::ShowMessage
+      ("FunctionManager::CreateObjectForBuiltinGmatFunction() entered\n   "
+       "wType=%d, numRos=%d, numCols=%d\n", wType, numRows, numCols);
+   #endif
+   
+   GmatBase *obj = NULL;
+   
+   //@todo Need to handle more wrapper types here (LOJ: 2016.08.31)
+   switch (wType)
+   {
+   case Gmat::VARIABLE_WT :
+   {
+      Variable *variable   = new Variable(outName);               
+      obj = (GmatBase*) variable;
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (variable, outName, "FunctionManager::CreateObject()", "variable = new Variable()");
+      #endif
+      break;
+   }
+   case Gmat::ARRAY_WT :
+   {
+      Array *array   = new Array(outName);               
+      array->SetSize(numRows, numCols);
+      obj = (GmatBase*) array;
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (array, outName, "FunctionManager::CreateObject()", "array = new Array()");
+      #endif
+      break;
+   }
+   case Gmat::STRING_OBJECT_WT :
+   {
+      StringVar *string = new StringVar(outName);
+      obj = (GmatBase*) string;
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Add
+         (string, outName, "FunctionManager::CreateObject()", "string = new String()");
+      #endif
+      break;
+   }
+   default:
+   {
+      // Do nothing here. Caller should handle NULL object pointer
+      #ifdef DEBUG_CREATE_OBJ
+      MessageInterface::ShowMessage
+         ("FunctionManager::CreateObjectForBuiltinGmatFunction() cannot create an "
+          "object named '%s' of wrappter type %d\n", outName.c_str(), wType);
+      #endif
+   }
+   }
+   
+   #ifdef DEBUG_CREATE_OBJ
+   MessageInterface::ShowMessage
+      ("FunctionManager::CreateObjectForBuiltinGmatFunction() returning new object "
+       "<%p><%s>'%s'\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetTypeName().c_str() : "NULL");
+   #endif
+   return obj;
+}
+
+//------------------------------------------------------------------------------
 // void AssignResult()
 //------------------------------------------------------------------------------
 /*
@@ -2089,9 +2216,8 @@ void FunctionManager::AssignResult()
          
          #ifdef DEBUG_FM_RESULT
          MessageInterface::ShowMessage
-            ("Now setting result to output wrapper <%s>\n", ew->GetDescription().c_str());
-         MessageInterface::ShowMessage
-            ("   outputWrapper(%d)='%s'\n", jj, outputWrappers.at(jj)->ToString().c_str());
+            ("Now setting result to output argment wrapper <%p>'%s'\n", ew,
+             ew->GetDescription().c_str());
          #endif
          
          retval = ElementWrapper::SetValue(outputWrappers.at(jj), ew, solarSys,
@@ -2099,6 +2225,12 @@ void FunctionManager::AssignResult()
          if (!retval)
             throw FunctionException
                ("FunctionManager::AssignResult() failed to assign results to function output");
+         
+         #ifdef DEBUG_FM_RESULT
+         MessageInterface::ShowMessage
+            ("   outputWrapper(%d) = <%p>'%s'\n", jj, outputWrappers.at(jj),
+             outputWrappers.at(jj)->ToString().c_str());
+         #endif
          
          // Delete output wrappers here (loj: 2008.11.12)
          // Do we need to delete it here? (loj: 2008.11.21)
@@ -2129,7 +2261,7 @@ bool FunctionManager::HandleCallStack()
    //ShowStackContents(callStack, "Stack contents at beg. of PushToStack");
    //ShowObjectMap(functionObjectStore, "FOS at beg. of PushToStack");
    #endif
-   
+      
    if (callingFunction != NULL)
    {
       #ifdef DEBUG_FM_EXECUTE

@@ -35,6 +35,7 @@
 #include "TimeSystemConverter.hpp"   // for TimeConverterUtil::Convert()
 #include "A1Mjd.hpp"
 #include "Rvector6.hpp"
+#include "GmatGlobal.hpp"
 #include <sstream>
 #include <limits>
 
@@ -136,6 +137,7 @@ void STKEphemerisFile::InitializeData()
    centralBody = "";
    coordinateSystem = "";
    coordinateSystemEpochStr = "";
+   distanceUnit = "";
    ephemTypeForRead = "";
    ephemTypeForWrite = "";
    stkTempFileName = "";
@@ -339,6 +341,7 @@ bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA
    std::string centralBodyKeyword = "CentralBody";
    std::string coordSysKeyword = "CoordinateSystem";
    std::string timePosVelKeyword = "EphemerisTimePosVel";
+   std::string distanceUnitKeyword = "DistanceUnit";
    std::string item;
    std::string::size_type index1;
    
@@ -426,9 +429,22 @@ bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA
          headerCount++;
          break;
       }
+      else if (line.find(distanceUnitKeyword) != line.npos)
+      {
+         index1 = line.find(distanceUnitKeyword);
+         item = line.substr(index1 + distanceUnitKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s : %s\n", distanceUnitKeyword.c_str(), item.c_str());
+         #endif
+         distanceUnit = item;		// The reader will use this in propagation
+         headerCount++;
+         break;
+      }
    }
    
-   if (headerCount != 5)
+   if (headerCount != 6)
    {
       MessageInterface::ShowMessage
          ("*** ERROR *** Cannot read header info from '%s'\n",
@@ -663,6 +679,7 @@ bool STKEphemerisFile::WriteHeader()
    
    std::stringstream ss("");
    ss << stkVersion << std::endl;
+   ss << "# WrittenBy    GMAT " << GmatGlobal::Instance()->GetGmatVersion() << std::endl;
    ss << "BEGIN Ephemeris" << std::endl;
    stkOutStream << ss.str();
    
@@ -693,6 +710,9 @@ bool STKEphemerisFile::WriteHeader()
    ss << "CentralBody             " << centralBody << std::endl;
    ss << "CoordinateSystem        " << coordinateSystem << std::endl;
    
+   // GMAT writes in km only for now
+   ss << "DistanceUnit            Kilometers" << std::endl;
+
    // Write begin segment times if not empty
    if (!beginSegmentArray.empty())
    {

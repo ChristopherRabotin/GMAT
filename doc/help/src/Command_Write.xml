@@ -87,7 +87,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>True</para>
+                    <para>False</para>
                   </listitem>
                 </varlistentry>
 
@@ -287,7 +287,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>{Concise, Verbose, script}</para>
+                    <para>{Concise, Verbose, Script}</para>
                   </listitem>
                 </varlistentry>
 
@@ -348,30 +348,50 @@
       <programlisting><code>Create ChemicalTank ChemicalTank1
 Create Spacecraft Sat
 Create String myString1 myString2
-Create Variable myVarCreate Array myArray[2,2]
+Create Variable myVar
+Create Array myArray[2,2]
 
-myString1 = 'This is my string'
+myVar        = 3.1415
+myString1    = 'This is my string'
 myArray(1,1) = 1
 myArray(2,2) = 1
 
 BeginMissionSequence
-myString2 = sprintf('%10.7f',Sat.X)  
 
-Write ChemicalTank1 {Style =  Script}
-Create ChemicalTank ChemicalTank1;
-GMAT ChemicalTank1.AllowNegativeFuelMass = false;
-GMAT ChemicalTank1.FuelMass = 756;
-GMAT ChemicalTank1.Pressure = 1500;
-GMAT ChemicalTank1.Temperature = 20;
-GMAT ChemicalTank1.RefTemperature = 20;
-GMAT ChemicalTank1.Volume = 0.75;
-GMAT ChemicalTank1.FuelDensity = 1260;
-GMAT ChemicalTank1.PressureModel = PressureRegulated;
-Write Sat.X Sat.VZ</code></programlisting>
+Write ChemicalTank1 {Style =  Script}</code></programlisting>
+
+      <para><emphasis role="bold">Create ChemicalTank ChemicalTank1;
+      </emphasis></para>
+
+      <para><emphasis role="bold">GMAT ChemicalTank1.AllowNegativeFuelMass =
+      false; </emphasis></para>
+
+      <para><emphasis role="bold">GMAT ChemicalTank1.FuelMass = 756;
+      </emphasis></para>
+
+      <para><emphasis role="bold">GMAT ChemicalTank1.Pressure = 1500;
+      </emphasis></para>
+
+      <para><emphasis role="bold">GMAT ChemicalTank1.Temperature = 20;
+      </emphasis></para>
+
+      <para><emphasis role="bold">GMAT ChemicalTank1.RefTemperature =
+      20;</emphasis></para>
+
+      <para><emphasis role="bold">GMAT ChemicalTank1.Volume = 0.75;
+      </emphasis></para>
+
+      <para><emphasis role="bold">GMAT ChemicalTank1.FuelDensity =
+      1260;</emphasis></para>
+
+      <para><emphasis role="bold">GMAT ChemicalTank1.PressureModel =
+      PressureRegulated;</emphasis></para>
+
+      <programlisting><code>Write Sat.X Sat.VZ</code></programlisting>
 
       <para><emphasis role="bold">7100</emphasis></para>
 
-      <para><emphasis role="bold">1 1</emphasis></para>
+      <para><emphasis role="bold">1</emphasis></para>
 
       <programlisting><code>Write myVar myString1</code></programlisting>
 
@@ -389,17 +409,22 @@ Write Sat.X Sat.VZ</code></programlisting>
 
       <para><emphasis role="bold">1</emphasis></para>
 
-      <programlisting><code>Write myString2 {Style = Script}
-Create String myString2;
-myString2 = '7100.0000000';
-Write myString2</code></programlisting>
+      <programlisting><code>myString2 = sprintf('%10.7f',Sat.X)  
+Write myString2 {Style = Script}</code></programlisting>
+
+      <para><emphasis role="bold">Create String myString2;</emphasis></para>
+
+      <para><emphasis role="bold">myString2 =
+      '7100.0000000';</emphasis></para>
+
+      <programlisting><code>Write myString2</code></programlisting>
 
       <para><emphasis role="bold">'7100.0000000'</emphasis></para>
     </informalexample>
 
     <informalexample>
       <para>The example below writes out a report that can be read into a GMAT
-      script using the #Include capability.</para>
+      script using the <guilabel>#Include</guilabel> capability.</para>
 
       <programlisting><code>Create Spacecraft Sat;
 Create ReportFile rf;

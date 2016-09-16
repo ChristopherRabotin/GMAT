@@ -35,13 +35,13 @@
     time. A single <guilabel>StatisticsRejectFilter</guilabel> may employ
     multiple selection criteria (for example simultaneous thinning by time and
     tracker). Multiple criteria on a single filter are considered in an AND
-    sense. When multiple criteria are specified, an observation must meet all
-    specified criteria to be rejected. </para>
+    sense. When multiple criteria are specified in a single filter, an
+    observation must meet all specified criteria to be rejected.</para>
 
     <para>Instances of <guilabel>StatisticsRejectFilter</guilabel> are
     specified for use on the <guilabel>DataFilters</guilabel> field of a
-    <guilabel>TrackingFileSet</guilabel> object. Multiple a with different
-    selection criteria may be specified on a single
+    <guilabel>TrackingFileSet</guilabel> object. Multiple filters with
+    different selection criteria may be specified on a single
     <guilabel>TrackingFileSet</guilabel>. When multiple filters are specified,
     these act in an OR sense. Data meeting criteria for any of the specified
     filters will be rejected.</para>
@@ -71,7 +71,7 @@
           <row>
             <entry><guilabel>DataTypes</guilabel></entry>
 
-            <entry><para>List of data types</para> <variablelist>
+            <entry><para>List of data types</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -84,8 +84,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Range_KM, Range_RU, Doppler_RangeRate, Doppler_Hz,
-                    or All</para>
+                    <para>Range_RU, Doppler_Hz, or All</para>
                   </listitem>
                 </varlistentry>
 
@@ -101,9 +100,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>{}</guilabel>
-                    </para>
+                    <para><guilabel>{All}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -128,8 +125,8 @@
           <row>
             <entry><guilabel>EpochFormat</guilabel></entry>
 
-            <entry><para>Allows user to select format of the epoch</para>
-            <variablelist>
+            <entry><para>Allows user to select format of the
+            epoch</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -160,9 +157,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>TAIModJulian</guilabel>
-                    </para>
+                    <para><guilabel>TAIModJulian</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -187,8 +182,8 @@
           <row>
             <entry><guilabel>InitialEpoch</guilabel></entry>
 
-            <entry><para>Initial epoch of desired data to process</para>
-            <variablelist>
+            <entry><para>Initial epoch of desired data to
+            process</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -217,9 +212,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>earliest day defined in GMAT</guilabel>
-                    </para>
+                    <para><guilabel>earliest day defined in
+                    GMAT</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -244,8 +238,8 @@
           <row>
             <entry><guilabel>FinalEpoch</guilabel></entry>
 
-            <entry><para>Final epoch of desired data to process</para>
-            <variablelist>
+            <entry><para>Final epoch of desired data to
+            process</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -274,9 +268,8 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>latest day defined in GMAT</guilabel>
-                    </para>
+                    <para><guilabel>latest day defined in
+                    GMAT</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -304,7 +297,7 @@
             <entry><para>List of file names (a subset of the relevant
             <guilabel>TrackingFileSet's</guilabel>
             <guilabel>FileName</guilabel> field) containing the tracking data,
-            to be excluded from processing. </para> <variablelist>
+            to be excluded from processing. </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -317,8 +310,7 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>valid file name, 'All', or
-                    'From_AddTrackingConfig'</para>
+                    <para>valid file name or 'All'</para>
                   </listitem>
                 </varlistentry>
 
@@ -334,9 +326,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>{}</guilabel>
-                    </para>
+                    <para><guilabel>{All}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -362,8 +352,8 @@
             <entry><guilabel>ObservedObjects</guilabel></entry>
 
             <entry><para>List of user-created tracked objects (e.g., name of
-            the <guilabel>Spacecraft</guilabel> resource being tracked)</para>
-            <variablelist>
+            the <guilabel>Spacecraft</guilabel> resource being
+            tracked)</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -392,9 +382,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>{}</guilabel>
-                    </para>
+                    <para><guilabel>{All}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -420,8 +408,8 @@
             <entry><guilabel>Trackers</guilabel></entry>
 
             <entry><para>List of user-created trackers (e.g., name of the
-            <guilabel>GroundStation</guilabel> resource being used) </para>
-            <variablelist>
+            <guilabel>GroundStation</guilabel> resource being used)
+            </para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -451,9 +439,7 @@
                   <term>Default Value</term>
 
                   <listitem>
-                    <para>
-                      <guilabel>{}</guilabel>
-                    </para>
+                    <para><guilabel>{All}</guilabel></para>
                   </listitem>
                 </varlistentry>
 
@@ -489,35 +475,36 @@
       <guilabel>StatisticsRejectFilter</guilabel> to reject all observations
       from station <guilabel>GDS</guilabel>.</para>
 
-      <programlisting>Create StatisticsRejectFilter srf;
- 
+      <programlisting>Create GroundStation GDS;
+
+Create StatisticsRejectFilter srf;
 srf.Trackers        = {'GDS'};
-% srf.DataTypes     = {'Range_RU'}
-% srf.EpochFormat   = 'UTCGregorian';
-% srf.InitialEpoch  = '10 Jun 2012 00:00:00.000';
-% srf.FinalEpoch    = '10 Jun 2012 12:00:00.000';
  
 Create TrackingFileSet estData;
  
-estData.DataFilters = {srf};</programlisting>
+estData.DataFilters = {srf};
+BeginMissionSequence;</programlisting>
     </informalexample>
 
     <informalexample>
-      <para>The next example will reject all Doppler_HZ tracking measurements
-      from station <guilabel>GDS</guilabel>, and all tracking of any type from
-      station <guilabel>CAN</guilabel>. All other tracking measurements will
-      be accepted.</para>
+      <para>The next example will reject all DSN Doppler (i.e., Doppler_HZ)
+      tracking measurements from station <guilabel>GDS</guilabel>, and all
+      tracking of any type from station <guilabel>CAN</guilabel>. All other
+      tracking measurements will be accepted.</para>
 
-      <programlisting>Create StatisticsRejectFilter srf1;
+      <programlisting>Create GroundStation GDS CAN;
+
+Create StatisticsRejectFilter srf1;
 Create StatisticsRejectFilter srf2;
  
 srf1.Trackers       = {'GDS'}; 
 srf1.DataTypes      = {'Doppler_HZ'};
-saf2.Trackers       = {'CAN'};
+srf2.Trackers       = {'CAN'};
  
 Create TrackingFileSet estData;
  
-estData.DataFilters = {srf1, srf2};</programlisting>
+estData.DataFilters = {srf1, srf2};
+BeginMissionSequence;</programlisting>
     </informalexample>
   </refsection>
 </refentry>

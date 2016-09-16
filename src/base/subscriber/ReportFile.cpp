@@ -527,7 +527,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray, bool parsable)
             if (parsable)
             {
                gb = wrapperArray[i]->GetRefObject();
-               sval = gb->GetGeneratingString(Gmat::NO_COMMENTS, "", "");
+               sval = gb->GetGeneratingString(Gmat::OBJECT_EXPORT, "", "");
                output[i].push_back(sval);
             }
             else
@@ -561,7 +561,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray, bool parsable)
          if (parsable)
          {
             gb = wrapperArray[i]->GetRefObject();
-            sval = gb->GetGeneratingString(Gmat::NO_COMMENTS, "", "");
+            sval = gb->GetGeneratingString(Gmat::OBJECT_EXPORT, "", "");
          }
          else
          {

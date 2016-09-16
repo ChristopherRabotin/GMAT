@@ -40,13 +40,13 @@
 
 
 //#define DEBUG_CALL_FUNCTION_PARAM
+//#define DEBUG_CALL_FUNCTION_REF_OBJ
 //#define DEBUG_CALL_FUNCTION_INIT
 //#define DEBUG_CALL_FUNCTION_EXEC
 //#define DEBUG_SEND_PARAM
 //#define DEBUG_UPDATE_VAR
 //#define DEBUG_UPDATE_OBJECT
 //#define DEBUG_SHOW_ARRAY
-//#define DEBUG_GMAT_FUNCTION_INIT
 //#define DEBUG_GET_OUTPUT
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_GLOBAL_OBJECT_MAP
@@ -970,7 +970,11 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                MessageInterface::ShowMessage
                   ("CallFunction::SetRefObject(), '%s' is builtin GMAT function\n",
                    mFunctionName.c_str());
+               MessageInterface::ShowMessage
+                  ("   Setting function<%p>'%s' to FunctionManager\n",
+                   mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
                #endif
+               fm.SetFunction(mFunction);
                isGmatFunction = false;
                isMatlabFunction = false;
                isBuiltinGmatFunction = true;
@@ -979,7 +983,7 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             {
                #ifdef DEBUG_FUNCTION
                MessageInterface::ShowMessage
-                  ("CallFunction::SetRefObject() setting function<%p>'%s' to FunctionManager\n",
+                  ("CallFunction::SetRefObject() Setting function<%p>'%s' to FunctionManager\n",
                    mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
                #endif
                fm.SetFunction(mFunction);
@@ -1040,10 +1044,12 @@ bool CallFunction::Initialize()
 {
    #ifdef DEBUG_CALL_FUNCTION_INIT
       MessageInterface::ShowMessage
-         ("CallFunction::Initialize() this=<%p> entered, command = '%s'\n   "
-          "function type is '%s', callingFunction is '%s'\n", this,
-          GetGeneratingString(Gmat::NO_COMMENTS).c_str(), mFunction->GetTypeName().c_str(),
-          callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL");
+         ("CallFunction::Initialize() this=<%p> entered\n   command = '%s'\n   "
+          "function type is '%s', callingFunction is '%s', isBuiltinGmatFunction=%d\n",
+          this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+          mFunction ? mFunction->GetTypeName().c_str() : "NULL",
+          callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL",
+          isBuiltinGmatFunction);
    #endif
    
    GmatCommand::Initialize();
@@ -1081,7 +1087,7 @@ bool CallFunction::Initialize()
 
       #ifdef DEBUG_CALL_FUNCTION_INIT
       MessageInterface::ShowMessage
-         ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s', "
+         ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s', ...\n   "
           "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
           mFunctionPathAndName.c_str());
       #endif
