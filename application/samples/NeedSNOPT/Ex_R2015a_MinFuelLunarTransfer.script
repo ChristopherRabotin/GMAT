@@ -196,7 +196,6 @@ GMAT SQP1.MajorFeasibilityTolerance = 1e-005;
 GMAT SQP1.MajorIterationsLimit = 100;
 GMAT SQP1.TotalIterationsLimit = 100000;
 GMAT SQP1.OutputFileName = 'SNOPT.out';
-GMAT SQP1.SpecsFileName = 'SNOPT.spec';
 GMAT SQP1.OverrideSpecsFileValues = true;
 
 
