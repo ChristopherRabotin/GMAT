@@ -203,6 +203,7 @@ rssR = Radial     * Radial;
 rssI = InTrack    * InTrack;
 rssC = CrossTrack * CrossTrack;
 rssT = rssR + rssI + rssC;
+
 rssRv = RadialV     * RadialV;
 rssIv = InTrackV    * InTrackV;
 rssCv = CrossTrackV * CrossTrackV;
@@ -288,10 +289,11 @@ While Sat1.ElapsedDays < interval
    rssC = rssC + CrossTrack * CrossTrack;
    rssT = rssR + rssI + rssC;
    
-	 rssRv = RadialV     * RadialV;
-   rssIv = InTrackV    * InTrackV;
-   rssCv = CrossTrackV * CrossTrackV;
+   rssRv = rssRv + RadialV     * RadialV;
+   rssIv = rssIv + InTrackV    * InTrackV;
+   rssCv = rssCv + CrossTrackV * CrossTrackV;
    rssTv = rssRv + rssIv + rssCv;
+   
    count = count + 1;
 
    a1 = Abs(Radial);
