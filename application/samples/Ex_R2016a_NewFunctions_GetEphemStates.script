@@ -1,0 +1,20 @@
+
+Create Spacecraft Sat1;
+GMAT Sat1.DateFormat = UTCGregorian;
+%  Put the Code 500 ephemeris file on the spacecraft.  Approach is the same for other file types
+Sat1.EphemerisName = '../data/vehicle/ephem/code500/DemoLEO-1.ephem';
+
+%  Creates some user defined data types
+Create String initialEpoch finalEpoch
+Create Array initialState[6,1] finalState[6,1]
+
+Create ReportFile rf
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence;
+
+%  Extract the initial epoch from the ephemeris file so we know when to start propgation
+[initialEpoch, initialState, finalEpoch, finalState] = GetEphemStates('Code500', Sat1, 'UTCGregorian', EarthMJ2000Eq);
+Report rf initialEpoch initialState finalEpoch finalState
