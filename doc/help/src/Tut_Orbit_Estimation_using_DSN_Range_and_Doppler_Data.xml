@@ -499,7 +499,7 @@ DSNsimData.UseETminusTAI             = true;</programlisting>
     <guilabel>MAD</guilabel> range and Doppler measurements. Note that the
     input GMD and ramp table files that we specified are files that we created
     as part of the <emphasis role="bold">Simulate DSN Range and Doppler Data
-    Tutorial</emphasis>. Don’t’ forget to put these files in the GMAT “output”
+    Tutorial</emphasis>. Don’t forget to put these files in the GMAT “output”
     directory.</para>
 
     <para>The second section above sets some processing parameters that apply
@@ -657,7 +657,9 @@ bat.MatlabFile                 =  ...
     <para>Finally, we set the value of <guilabel>MatlabFile</guilabel>. This
     is the name of the MATLAB output file that will be created, which, by
     default, is written to GMAT’s ‘output’ directory. This file can be read
-    into MATLAB to perform detailed calculations and analysis.</para>
+    into MATLAB to perform detailed calculations and analysis. The MATLAB file
+    can only be created if you have MATLAB installed and properly configured
+    for use with GMAT.</para>
   </section>
 
   <section xml:id="DSN_Estimation_Run_the_mission_and_analyze_the_results">
@@ -1238,7 +1240,8 @@ Mission run completed.
       <guilabel>BatchEstimatorInv</guilabel> resource, bat, we chose our
       MATLAB output file name, '<filename>Orbit Estimation using DSN Range and
       Doppler Data.mat</filename>.' By default, this file is created in GMAT’s
-      ‘output’ directory.</para>
+      ‘output’ directory. This file will only be created if you have MATLAB
+      installed and properly configured for use with GMAT.</para>
 
       <para>Start up a MATLAB session. Change the directory to your GMAT
       ‘output’ directory and then type the following at the MATLAB command
@@ -1249,11 +1252,136 @@ Mission run completed.
       <para>After the file has loaded, type the following command to obtain a
       list of available variable names inside this file.</para>
 
-      <programlisting>&gt;&gt; who</programlisting>
+      <programlisting>&gt;&gt; whos</programlisting>
 
-      <para>TO DO: Get SES to describe a use case. Include step by step
-      instruction. Maybe include a sample MATLAB file that performs some
-      function.</para>
+      <para>You should see something similar to the following:</para>
+
+      <para><programlisting>&gt;&gt; whos
+  Name            Size             Bytes  Class     Attributes
+
+  Iteration0      1x1             847660  struct              
+  Iteration1      1x1             847690  struct              
+  Iteration2      1x1             847696  struct             </programlisting></para>
+
+      <para>You may see more or fewer iterations depending on your run. Each
+      iteration variable is a structure containing the following
+      arrays:</para>
+
+      <informaltable colsep="0" frame="none" rowsep="0">
+        <tgroup cols="2">
+          <tbody>
+            <row>
+              <entry>Status</entry>
+
+              <entry>Observation status flag, 1 = observation is
+              good/useable</entry>
+            </row>
+
+            <row>
+              <entry>IterationNumber</entry>
+
+              <entry>The iteration number. This matches the iteration number
+              in the structure name.</entry>
+            </row>
+
+            <row>
+              <entry>Epoch</entry>
+
+              <entry>The TAIModJulian time tag of each observation, computed
+              value, and residual</entry>
+            </row>
+
+            <row>
+              <entry>Observed</entry>
+
+              <entry>The observed value (from the GMD file) in Range Units or
+              Hertz</entry>
+            </row>
+
+            <row>
+              <entry>Calculated</entry>
+
+              <entry>The predicted observation, in Range Units or Hertz,
+              computed by GMAT using the force modeling specified in the batch
+              estimator propagator</entry>
+            </row>
+
+            <row>
+              <entry>ObsMinusCalculated</entry>
+
+              <entry>The observation residual, in Range Units or Hertz</entry>
+            </row>
+
+            <row>
+              <entry>Elevation</entry>
+
+              <entry>The computed elevation of the observation, in
+              degrees</entry>
+            </row>
+
+            <row>
+              <entry>Frequency</entry>
+
+              <entry>The transmit frequency at the time of the observation, in
+              Hertz</entry>
+            </row>
+
+            <row>
+              <entry>FrequencyBand</entry>
+
+              <entry>The frequency band of the observation. See the
+              <guilabel>TrackingFileSet</guilabel> help for a list of
+              frequency band indicators.</entry>
+            </row>
+
+            <row>
+              <entry>DopplerCountInterval</entry>
+
+              <entry>The Doppler count interval in seconds, for Doppler
+              observations. Set to -1 for range observations.</entry>
+            </row>
+
+            <row>
+              <entry>Participants</entry>
+
+              <entry>For each observation, a comma-separated string
+              identifying the transmit station, tracked object, and receive
+              station in order</entry>
+            </row>
+
+            <row>
+              <entry>Type</entry>
+
+              <entry>A string identifying the observation type, DSNRange or
+              Doppler</entry>
+            </row>
+
+            <row>
+              <entry>UTCGregorian</entry>
+
+              <entry>The UTCGregorian epoch string of each observation</entry>
+            </row>
+
+            <row>
+              <entry>ObsEditFlag</entry>
+
+              <entry>The editing status flag for each observation. N = not
+              edited, U = no computed value configuration available, R = out
+              of ramp table range, B = blocked by elevation edit criteria,
+              IRMS = initial RMS sigma edit, OLSE = outer-loop sigma
+              edit</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>Any unset or uncomputed values are set to -1. You can use these
+      arrays to perform custom plots and statistical analysis using MATLAB.
+      For example, to produce a plot of all range residuals from the final
+      iteration, you can do the following:</para>
+
+      <para><programlisting>>> I = find(strcmp(Iteration2.Type, 'DSNRange'));
+>> plot(Iteration2.Epoch(I), Iteration2.ObsMinusCalc(I), 'go');</programlisting></para>
     </section>
   </section>
 
