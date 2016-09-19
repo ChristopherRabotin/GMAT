@@ -104,11 +104,6 @@ GMAT SolarPowerSystem1.SolarCoeff3 = -0.11665;
 GMAT SolarPowerSystem1.SolarCoeff4 = 0.10843;
 GMAT SolarPowerSystem1.SolarCoeff5 = -0.01279;
 
-
-
-
-
-
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------

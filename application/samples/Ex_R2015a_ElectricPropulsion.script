@@ -1,3 +1,4 @@
+
 %----------------------------------------
 %---------- Spacecraft
 %----------------------------------------
@@ -19,27 +20,8 @@ GMAT DefaultSC.Cr = 1.8;
 GMAT DefaultSC.DragArea = 15;
 GMAT DefaultSC.SRPArea = 1;
 GMAT DefaultSC.Tanks = {ElectricTank1};
-GMAT DefaultSC.Thrusters = {ElectricThruster1, MoonThruster};
+GMAT DefaultSC.Thrusters = {ElectricThruster1};
 GMAT DefaultSC.PowerSystem = SolarPowerSystem1;
-GMAT DefaultSC.NAIFId = -123456789;
-GMAT DefaultSC.NAIFIdReferenceFrame = -123456789;
-GMAT DefaultSC.OrbitColor = Red;
-GMAT DefaultSC.TargetColor = Teal;
-GMAT DefaultSC.Id = 'SatId';
-GMAT DefaultSC.Attitude = CoordinateSystemFixed;
-GMAT DefaultSC.SPADSRPScaleFactor = 1;
-GMAT DefaultSC.ModelFile = 'aura.3ds';
-GMAT DefaultSC.ModelOffsetX = 0;
-GMAT DefaultSC.ModelOffsetY = 0;
-GMAT DefaultSC.ModelOffsetZ = 0;
-GMAT DefaultSC.ModelRotationX = 0;
-GMAT DefaultSC.ModelRotationY = 0;
-GMAT DefaultSC.ModelRotationZ = 0;
-GMAT DefaultSC.ModelScale = 3;
-GMAT DefaultSC.AttitudeDisplayStateType = 'Quaternion';
-GMAT DefaultSC.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT DefaultSC.AttitudeCoordinateSystem = EarthMJ2000Eq;
-GMAT DefaultSC.EulerAngleSequence = '321';
 
 %----------------------------------------
 %---------- Hardware Components
@@ -79,36 +61,6 @@ GMAT ElectricThruster1.FixedEfficiency = 0.7;
 GMAT ElectricThruster1.Isp = 2800;
 GMAT ElectricThruster1.ConstantThrust = 0.0012;
 
-Create ElectricThruster MoonThruster;
-GMAT MoonThruster.CoordinateSystem = Local;
-GMAT MoonThruster.Origin = Luna;
-GMAT MoonThruster.Axes = VNB;
-GMAT MoonThruster.ThrustDirection1 = -1;
-GMAT MoonThruster.ThrustDirection2 = 0;
-GMAT MoonThruster.ThrustDirection3 = 0;
-GMAT MoonThruster.DutyCycle = 1;
-GMAT MoonThruster.ThrustScaleFactor = 0.9;
-GMAT MoonThruster.DecrementMass = false;
-GMAT MoonThruster.Tank = {ElectricTank1};
-GMAT MoonThruster.MixRatio = [1];
-GMAT MoonThruster.GravitationalAccel = 9.810000000000001;
-GMAT MoonThruster.ThrustModel = ConstantThrustAndIsp;
-GMAT MoonThruster.MaximumUsablePower = 7.266;
-GMAT MoonThruster.MinimumUsablePower = 0.01;
-GMAT MoonThruster.ThrustCoeff1 = -5.19082;
-GMAT MoonThruster.ThrustCoeff2 = 2.96519;
-GMAT MoonThruster.ThrustCoeff3 = -14.4789;
-GMAT MoonThruster.ThrustCoeff4 = 54.05382;
-GMAT MoonThruster.ThrustCoeff5 = -0.00100092;
-GMAT MoonThruster.MassFlowCoeff1 = -0.004776;
-GMAT MoonThruster.MassFlowCoeff2 = 0.05717;
-GMAT MoonThruster.MassFlowCoeff3 = -0.09956;
-GMAT MoonThruster.MassFlowCoeff4 = 0.03211;
-GMAT MoonThruster.MassFlowCoeff5 = 2.13781;
-GMAT MoonThruster.FixedEfficiency = 0.7;
-GMAT MoonThruster.Isp = 2800;
-GMAT MoonThruster.ConstantThrust = 0.0012;
-
 Create SolarPowerSystem SolarPowerSystem1;
 GMAT SolarPowerSystem1.EpochFormat = 'UTCGregorian';
 GMAT SolarPowerSystem1.InitialEpoch = ''01 Jan 2000 11:59:28.000'';
@@ -125,7 +77,6 @@ GMAT SolarPowerSystem1.SolarCoeff2 = -0.10848;
 GMAT SolarPowerSystem1.SolarCoeff3 = -0.11665;
 GMAT SolarPowerSystem1.SolarCoeff4 = 0.10843;
 GMAT SolarPowerSystem1.SolarCoeff5 = -0.01279;
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -179,24 +130,9 @@ GMAT LunarProp.StopIfAccuracyIsViolated = true;
 %---------- Burns
 %----------------------------------------
 
-Create ImpulsiveBurn DefaultIB;
-GMAT DefaultIB.CoordinateSystem = Local;
-GMAT DefaultIB.Origin = Earth;
-GMAT DefaultIB.Axes = VNB;
-GMAT DefaultIB.Element1 = 0;
-GMAT DefaultIB.Element2 = 0;
-GMAT DefaultIB.Element3 = 0;
-GMAT DefaultIB.DecrementMass = false;
-GMAT DefaultIB.Isp = 300;
-GMAT DefaultIB.GravitationalAccel = 9.810000000000001;
-
 Create FiniteBurn FiniteBurn1;
 GMAT FiniteBurn1.Thrusters = {ElectricThruster1};
 GMAT FiniteBurn1.ThrottleLogicAlgorithm = 'MaxNumberOfThrusters';
-
-Create FiniteBurn MoonVNBBurn;
-GMAT MoonVNBBurn.Thrusters = {MoonThruster};
-GMAT MoonVNBBurn.ThrottleLogicAlgorithm = 'MaxNumberOfThrusters';
 
 %----------------------------------------
 %---------- Coordinate Systems
@@ -221,18 +157,6 @@ GMAT CS_EMRotating.XAxis = R;
 GMAT CS_EMRotating.ZAxis = N;
 GMAT CS_EMRotating.Primary = Earth;
 GMAT CS_EMRotating.Secondary = Luna;
-
-%----------------------------------------
-%---------- Solvers
-%----------------------------------------
-
-Create DifferentialCorrector DC1;
-GMAT DC1.ShowProgress = true;
-GMAT DC1.ReportStyle = Normal;
-GMAT DC1.ReportFile = 'DifferentialCorrectorDC1.data';
-GMAT DC1.MaximumIterations = 75;
-GMAT DC1.DerivativeMethod = ForwardDifference;
-GMAT DC1.Algorithm = NewtonRaphson;
 
 %----------------------------------------
 %---------- Subscribers
@@ -332,24 +256,16 @@ GMAT EarthSunRotatingView.EnableStars = On;
 GMAT EarthSunRotatingView.EnableConstellations = Off;
 
 %----------------------------------------
-%---------- Arrays, Variables, Strings
-%----------------------------------------
-Create Variable burnDuration;
-
-%----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------
 
 BeginMissionSequence;
 
-BeginScript 'Loop Initializations'
-   GMAT burnDuration = 1.98;
-EndScript;
 
 Propagate 'Coast for 2 Hours' DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 7200};
 %  Turn on the electric propulsion system
 BeginFiniteBurn FiniteBurn1(DefaultSC);
-Propagate 'Prop Through Burn' DefaultProp(DefaultSC) {DefaultSC.ElapsedDays = burnDuration, OrbitColor = Red};
+Propagate 'Prop Through Burn' DefaultProp(DefaultSC) {DefaultSC.ElapsedDays = 1.98, OrbitColor = Red};
 %  Turn off the electric propulsion system
 EndFiniteBurn FiniteBurn1(DefaultSC);
 Propagate 'Lunar Periapsis' DefaultProp(DefaultSC) {DefaultSC.Luna.Periapsis, OrbitColor = Green};

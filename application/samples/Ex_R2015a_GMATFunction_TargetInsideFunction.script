@@ -21,26 +21,6 @@ GMAT LEOsat.DryMass = 850;
 GMAT LEOsat.Cd = 2.2;
 GMAT LEOsat.Cr = 1.8;
 GMAT LEOsat.DragArea = 15;
-GMAT LEOsat.SRPArea = 1;
-GMAT LEOsat.NAIFId = -123456789;
-GMAT LEOsat.NAIFIdReferenceFrame = -123456789;
-GMAT LEOsat.OrbitColor = Red;
-GMAT LEOsat.TargetColor = Teal;
-GMAT LEOsat.Id = 'SatId';
-GMAT LEOsat.Attitude = CoordinateSystemFixed;
-GMAT LEOsat.SPADSRPScaleFactor = 1;
-GMAT LEOsat.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT LEOsat.ModelOffsetX = 0;
-GMAT LEOsat.ModelOffsetY = 0;
-GMAT LEOsat.ModelOffsetZ = 0;
-GMAT LEOsat.ModelRotationX = 0;
-GMAT LEOsat.ModelRotationY = 0;
-GMAT LEOsat.ModelRotationZ = 0;
-GMAT LEOsat.ModelScale = 3;
-GMAT LEOsat.AttitudeDisplayStateType = 'Quaternion';
-GMAT LEOsat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT LEOsat.AttitudeCoordinateSystem = EarthMJ2000Eq;
-GMAT LEOsat.EulerAngleSequence = '321';
 
 
 %----------------------------------------
@@ -78,13 +58,6 @@ GMAT LEOprop_ForceModel.Drag.SchattenTimingModel = 'NominalCycle';
 
 Create Propagator LEOprop;
 GMAT LEOprop.FM = LEOprop_ForceModel;
-GMAT LEOprop.Type = RungeKutta89;
-GMAT LEOprop.InitialStepSize = 60;
-GMAT LEOprop.Accuracy = 9.999999999999999e-012;
-GMAT LEOprop.MinStep = 0.001;
-GMAT LEOprop.MaxStep = 2700;
-GMAT LEOprop.MaxStepAttempts = 50;
-GMAT LEOprop.StopIfAccuracyIsViolated = true;
 
 %----------------------------------------
 %---------- Burns
@@ -94,36 +67,17 @@ Create ImpulsiveBurn TCM1;
 GMAT TCM1.CoordinateSystem = Local;
 GMAT TCM1.Origin = Earth;
 GMAT TCM1.Axes = VNB;
-GMAT TCM1.Element1 = 0;
-GMAT TCM1.Element2 = 0;
-GMAT TCM1.Element3 = 0;
-GMAT TCM1.DecrementMass = false;
-GMAT TCM1.Isp = 300;
-GMAT TCM1.GravitationalAccel = 9.810000000000001;
 
 Create ImpulsiveBurn TCM2;
 GMAT TCM2.CoordinateSystem = Local;
 GMAT TCM2.Origin = Earth;
 GMAT TCM2.Axes = VNB;
-GMAT TCM2.Element1 = 0;
-GMAT TCM2.Element2 = 0;
-GMAT TCM2.Element3 = 0;
-GMAT TCM2.DecrementMass = false;
-GMAT TCM2.Isp = 300;
-GMAT TCM2.GravitationalAccel = 9.810000000000001;
-
 
 %----------------------------------------
 %---------- Solvers
 %----------------------------------------
 
 Create DifferentialCorrector DC;
-GMAT DC.ShowProgress = true;
-GMAT DC.ReportStyle = Normal;
-GMAT DC.ReportFile = 'DifferentialCorrectorDC1.data';
-GMAT DC.MaximumIterations = 25;
-GMAT DC.DerivativeMethod = ForwardDifference;
-GMAT DC.Algorithm = NewtonRaphson;
 
 %----------------------------------------
 %---------- Subscribers
@@ -136,40 +90,15 @@ GMAT DefaultOrbitView.Size = [ 0.5957446808510638 0.4330218068535826 ];
 GMAT DefaultOrbitView.RelativeZOrder = 370;
 GMAT DefaultOrbitView.Maximized = false;
 GMAT DefaultOrbitView.Add = {LEOsat, Earth};
-GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
-GMAT DefaultOrbitView.DrawObject = [ true true ];
-GMAT DefaultOrbitView.DataCollectFrequency = 1;
-GMAT DefaultOrbitView.UpdatePlotFrequency = 50;
-GMAT DefaultOrbitView.NumPointsToRedraw = 0;
-GMAT DefaultOrbitView.ShowPlot = true;
-GMAT DefaultOrbitView.ShowLabels = true;
-GMAT DefaultOrbitView.ViewPointReference = Earth;
 GMAT DefaultOrbitView.ViewPointVector = [ 30000 0 0 ];
-GMAT DefaultOrbitView.ViewDirection = Earth;
-GMAT DefaultOrbitView.ViewScaleFactor = 1;
-GMAT DefaultOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq;
-GMAT DefaultOrbitView.ViewUpAxis = Z;
-GMAT DefaultOrbitView.EclipticPlane = Off;
-GMAT DefaultOrbitView.XYPlane = On;
-GMAT DefaultOrbitView.WireFrame = Off;
-GMAT DefaultOrbitView.Axes = On;
-GMAT DefaultOrbitView.Grid = Off;
-GMAT DefaultOrbitView.SunLine = Off;
-GMAT DefaultOrbitView.UseInitialView = On;
-GMAT DefaultOrbitView.StarCount = 7000;
-GMAT DefaultOrbitView.EnableStars = On;
-GMAT DefaultOrbitView.EnableConstellations = On;
 
 Create XYPlot XYPlot1;
 GMAT XYPlot1.SolverIterations = Current;
 GMAT XYPlot1.UpperLeft = [ 0.3762088974854932 0.4439252336448598 ];
 GMAT XYPlot1.Size = [ 0.5957446808510638 0.4361370716510903 ];
 GMAT XYPlot1.RelativeZOrder = 368;
-GMAT XYPlot1.Maximized = false;
 GMAT XYPlot1.XVariable = LEOsat.A1ModJulian;
 GMAT XYPlot1.YVariables = {LEOsat.Earth.Altitude};
-GMAT XYPlot1.ShowGrid = true;
-GMAT XYPlot1.ShowPlot = true;
 
 Create GroundTrackPlot GroundTrackPlot1
 GroundTrackPlot1.Add = {LEOsat};
@@ -217,7 +146,7 @@ While 'While ElapsedDays < 10' LEOsat.ElapsedDays < 10.0
    If 'If Alt < Threshold' LEOsat.Earth.Altitude < 342
       Propagate 'Prop To Periapsis' LEOprop(LEOsat) {LEOsat.Periapsis};
 		
-		% Call function to implement SK
+		% Call function to implement station keeping
 		TargetLEOStationKeeping(desiredRMAG,desiredECC)
    EndIf;
 	

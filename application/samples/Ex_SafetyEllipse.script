@@ -78,28 +78,11 @@ GMAT Follower.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Follower.AttitudeCoordinateSystem = LeaderVNB;
 GMAT Follower.EulerAngleSequence = '321';
 
-
-
-
-%----------------------------------------
-%---------- ForceModels
-%----------------------------------------
-
-Create ForceModel DefaultProp_ForceModel;
-GMAT DefaultProp_ForceModel.CentralBody = Earth;
-GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
-GMAT DefaultProp_ForceModel.Drag = None;
-GMAT DefaultProp_ForceModel.SRP = Off;
-GMAT DefaultProp_ForceModel.RelativisticCorrection = Off;
-GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
-GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
-GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
-GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
-GMAT DefaultProp_ForceModel.GravityField.Earth.EarthTideModel = 'None';
-
 %----------------------------------------
 %---------- Propagators
 %----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel
 
 Create Propagator DefaultProp;
 GMAT DefaultProp.FM = DefaultProp_ForceModel;
@@ -110,24 +93,6 @@ GMAT DefaultProp.MinStep = 0.001;
 GMAT DefaultProp.MaxStep = 5;
 GMAT DefaultProp.MaxStepAttempts = 50;
 GMAT DefaultProp.StopIfAccuracyIsViolated = true;
-%GMAT DefaultProp.StopIfAccuracyIsViolated = true;
-
-%----------------------------------------
-%---------- Burns
-%----------------------------------------
-
-Create ImpulsiveBurn deltaV;
-GMAT deltaV.CoordinateSystem = Local;
-GMAT deltaV.Origin = Earth;
-GMAT deltaV.Axes = VNB;
-GMAT deltaV.Element1 = 0;
-GMAT deltaV.Element2 = 0;
-GMAT deltaV.Element3 = 0;
-GMAT deltaV.DecrementMass = false;
-GMAT deltaV.Isp = 300;
-GMAT deltaV.GravitationalAccel = 9.810000000000001;
-
-
 
 %----------------------------------------
 %---------- Coordinate Systems
@@ -148,18 +113,6 @@ GMAT LeaderVNB.XAxis = V;
 GMAT LeaderVNB.YAxis = N;
 GMAT LeaderVNB.Primary = Earth;
 GMAT LeaderVNB.Secondary = Leader;
-
-%----------------------------------------
-%---------- Solvers
-%----------------------------------------
-
-Create DifferentialCorrector DefaultDC;
-GMAT DefaultDC.ShowProgress = true;
-GMAT DefaultDC.ReportStyle = Normal;
-GMAT DefaultDC.ReportFile = 'DifferentialCorrectorDefaultDC.data';
-GMAT DefaultDC.MaximumIterations = 25;
-GMAT DefaultDC.DerivativeMethod = ForwardDifference;
-GMAT DefaultDC.Algorithm = NewtonRaphson;
 
 %----------------------------------------
 %---------- Subscribers
@@ -195,11 +148,6 @@ GMAT VbarView.UseInitialView = Off;
 GMAT VbarView.StarCount = 7000;
 GMAT VbarView.EnableStars = On;
 GMAT VbarView.EnableConstellations = On;
-
-
-%----------------------------------------
-%---------- Subscribers
-%----------------------------------------
 
 Create OrbitView ViewFromAbove;
 GMAT ViewFromAbove.SolverIterations = None;
@@ -263,10 +211,6 @@ GMAT InertialView.StarCount = 7000;
 GMAT InertialView.EnableStars = On;
 GMAT InertialView.EnableConstellations = On;
 
-%----------------------------------------
-%---------- Subscribers
-%----------------------------------------
-
 Create OrbitView SideView;
 GMAT SideView.SolverIterations = None;
 GMAT SideView.UpperLeft = [ 0.6288235294117647 0.003198294243070362 ];
@@ -297,14 +241,6 @@ GMAT SideView.UseInitialView = Off;
 GMAT SideView.StarCount = 7000;
 GMAT SideView.EnableStars = On;
 GMAT SideView.EnableConstellations = On;
-
-%----------------------------------------
-%---------- Arrays, Variables, Strings
-%----------------------------------------
-Create Variable dEcc dRAAN dINC;
-
-
-
 
 %----------------------------------------
 %---------- Mission Sequence

@@ -9,10 +9,6 @@
 %---------- Spacecraft
 %----------------------------------------
 
-% -------------------------------------------------------------------------
-% --------------------------- Create Objects ------------------------------
-% -------------------------------------------------------------------------
-
 %  Create a default spacecraft
 Create Spacecraft Sc;
 GMAT Sc.DateFormat = TAIModJulian;
@@ -121,16 +117,9 @@ GMAT engine1.K14 = 0;
 GMAT engine1.K15 = 0;
 GMAT engine1.K16 = 0;
 
-
-
-
-
-
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
-
-
 
 %  Create a force model
 Create ForceModel fm;
@@ -182,11 +171,6 @@ GMAT DefaultIB.Element3 = 0;
 GMAT DefaultIB.DecrementMass = false;
 GMAT DefaultIB.Isp = 300;
 GMAT DefaultIB.GravitationalAccel = 9.810000000000001;
-
-
-
-
-
 
 %----------------------------------------
 %---------- Solvers
@@ -270,7 +254,6 @@ Create Variable halfBurnDuration timeToWait backPropDuration backDeltaT forwardD
 GMAT halfBurnDuration = 500;
 GMAT timeToWait = 600;
 GMAT backPropDuration = 0;
-
 
 % -------------------------------------------------------------------------
 % --------------------------- Mission Sequence ----------------------------
