@@ -197,7 +197,7 @@ GmatCommand* GmatCommandUtil::GetPreviousCommand(GmatCommand *from,
 // GmatCommand* GetMatchingEnd(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /*
- * Returns matching EndScript of BeginScrpt or matching EndBranch of BranchCommand
+ * Returns matching EndScript of BeginScript or matching EndBranch of BranchCommand
  *
  * @param  cmd  BeginScript command which search begins from
  * @return  Matching end command, NULL if matching end command not found
@@ -303,7 +303,7 @@ GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd, bool getMatchingE
 // GmatCommand* GetParentCommand(GmatCommand *top, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
- * Returns outer most parent command from the commans sequence string at top node.
+ * Returns outer most parent command from the commands sequence string at top node.
  */
 //------------------------------------------------------------------------------
 GmatCommand* GmatCommandUtil::GetParentCommand(GmatCommand *top, GmatCommand *cmd)

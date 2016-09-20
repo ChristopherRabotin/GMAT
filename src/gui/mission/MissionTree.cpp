@@ -53,6 +53,7 @@
 #include "bitmaps/beginfb.xpm"
 #include "bitmaps/endfb.xpm"
 #include "bitmaps/report.xpm"
+#include "bitmaps/mt_WriteCommand.xpm"
 #include "bitmaps/penup.xpm"
 #include "bitmaps/pendown.xpm"
 #include "bitmaps/optimize.xpm"
@@ -2910,7 +2911,8 @@ void MissionTree::AddIcons()
    theGuiManager->LoadIcon("beginfb", bitmapType, &bitmaps[++index], beginfb_xpm);
    theGuiManager->LoadIcon("endfb", bitmapType, &bitmaps[++index], endfb_xpm);
    theGuiManager->LoadIcon("report", bitmapType, &bitmaps[++index], report_xpm);
-   
+   theGuiManager->LoadIcon("write", bitmapType, &bitmaps[++index], mt_WriteCommand_xpm);
+
    theGuiManager->LoadIcon("mt_Set", bitmapType, &bitmaps[++index], mt_SetCommand_xpm);
    theGuiManager->LoadIcon("mt_Stop", bitmapType, &bitmaps[++index], mt_Stop_xpm);
    theGuiManager->LoadIcon("penup", bitmapType, &bitmaps[++index], penup_xpm);
@@ -4197,6 +4199,8 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
       return GmatTree::MISSION_ICON_ASSIGNMENT;
    if (cmd == "Report")
       return GmatTree::MISSION_ICON_REPORT;
+   if (cmd == "Write")
+      return GmatTree::MISSION_ICON_WRITE;
    if (cmd == "Toggle")
       return GmatTree::MISSION_ICON_TOGGLE;
    if (cmd == "For")
@@ -4400,6 +4404,8 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::MANAGE_OBJECT;
    if (cmd == "Report")
       return GmatTree::REPORT;
+   if (cmd == "Write")
+      return GmatTree::WRITE_COMMAND;
    if (cmd == "For")
       return GmatTree::FOR_CONTROL;
    if (cmd == "EndFor")

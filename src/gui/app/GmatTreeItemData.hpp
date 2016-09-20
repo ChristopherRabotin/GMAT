@@ -151,6 +151,7 @@ namespace GmatTree
       MISSION_ICON_BEGIN_FB,
       MISSION_ICON_END_FB,
       MISSION_ICON_REPORT,
+      MISSION_ICON_WRITE,
 
       MISSION_ICON_SET,
       MISSION_ICON_STOP,
@@ -334,6 +335,7 @@ namespace GmatTree
       PLOT_ACTION,
       XY_PLOT_ACTION,
       REPORT,
+      WRITE_COMMAND,
       CALL_FUNCTION,
       ASSIGNMENT,
       FREE_FORM_SCRIPT,
