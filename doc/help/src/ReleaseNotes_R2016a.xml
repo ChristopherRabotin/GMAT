@@ -93,7 +93,7 @@
       initial epoch, initial state, final epoch and final state in any GMAT
       supported epoch formats and coordinate systems. This allows you to
       perform numerical propagation using states off of ephemiris files for
-      comparisona and other analysis. </para>
+      comparison and other analysis.</para>
 
       <para>See the <link
       linkend="GetEphemStates_Function">GetEphemStates</link> referece for
@@ -178,7 +178,8 @@
       distributed with the source code. Thanks to CMake, it is much easier to
       compile GMAT. See the <link
       xlink:href="http://gmatcentral.org/display/GW/Compiling">wiki
-      documentation for details</link>.</para>
+      documentation for details</link>. Note that old build files are no
+      longer supported and are considered obsolete.</para>
     </section>
 
     <section>
@@ -236,7 +237,6 @@
             </thead>
 
             <tbody>
-
               <row>
                 <entry><link
                 xlink:href="http://li64-187.members.linode.com:8080/browse/GMT-5269">GMT-5269</link></entry>
@@ -299,7 +299,7 @@
                 <entry>Unrelated script line in Optimize changes results
                 (causes crash)</entry>
               </row>
-			  
+
               <row>
                 <entry><link
                 xlink:href="http://bugs.gmatcentral.org/browse/GMT-4398">GMT-4520</link></entry>

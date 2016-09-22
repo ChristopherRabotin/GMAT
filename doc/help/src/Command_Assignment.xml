@@ -893,7 +893,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
           </tgroup>
         </informaltable>
 
-		<informaltable colsep="0" frame="topbot">
+        <informaltable colsep="0" frame="topbot">
           <tgroup cols="2">
             <colspec colnum="1" colwidth=".5*"/>
 
@@ -905,57 +905,92 @@ aSat2.X = aSat1.X</code>        </programlisting>
 
                 <entry><variablelist>
                     <varlistentry>
-                      <term><literal>norm</literal></term>
+                      <term><literal>a</literal></term>
 
                       <listitem>
-                        <para>2-norm. In <literal>Y = norm(X)</literal>,
-                        <literal>Y</literal> is the 2-norm of
-                        <literal>X</literal>, where <literal>X</literal> must
-                        be a vector (i.e. one dimension must be 1). If
-                        <literal>X</literal> is a scalar, <literal>Y</literal>
-                        is equal to <literal>X</literal>.</para>
+                        <para>Hexadecimal floating point, lowercase.</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term><literal>det</literal></term>
+                      <term><literal>A</literal></term>
 
                       <listitem>
-                        <para>Determinant. In <literal>Y = det(X)</literal>,
-                        <literal>Y</literal> is tthe cross product of the
-                        vectors <literal>A</literal> and <literal>B</literal>.
-                        If <literal>X</literal> is a matrix, the number of
-                        rows must equal the number of columns. If
-                        <literal>X</literal> is a scalar, <literal>Y</literal>
-                        is equal to <literal>X</literal>. For efficiency,
-                        GMAT’s implementation of the determinant is currently
-                        limited to matrices 9×9 or smaller.</para>
+                        <para>Hexadecimal floating point, uppercase</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term><literal>cross</literal></term>
+                      <term><literal>e</literal></term>
 
                       <listitem>
-                        <para>Vector cross product. In <literal>C =
-                        cross(A,B)</literal>, <literal>C</literal> is the
-                        vector cross product of <literal>A</literal> and
-                        <literal>B</literal> . <literal>A</literal> and
-                        <literal>B</literal> must be 3 element arrays.</para>
+                        <para>Scientific notation (mantissa/exponent),
+                        lowercase</para>
                       </listitem>
                     </varlistentry>
 
                     <varlistentry>
-                      <term><literal>inv</literal></term>
+                      <term><literal>E</literal></term>
 
                       <listitem>
-                        <para>Inverse. In <literal>Y = inv(X)</literal>,
-                        <literal>Y</literal> is the inverse of
-                        <literal>X</literal>. <literal>X</literal> must be a
-                        matrix or a scalar. If <literal>X</literal> is a
-                        matrix, the number of rows must equal the number of
-                        columns. <literal>X^(-1)</literal> is an alternate
-                        syntax.</para>
+                        <para>Scientific notation (mantissa/exponent),
+                        uppercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>f</literal></term>
+
+                      <listitem>
+                        <para>Decimal floating point, lowercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>F</literal></term>
+
+                      <listitem>
+                        <para>Decimal floating point, uppercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>g</literal></term>
+
+                      <listitem>
+                        <para>Use the shortest representation: %e or %f</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>G</literal></term>
+
+                      <listitem>
+                        <para>Use the shortest representation: %E or %F</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>o</literal></term>
+
+                      <listitem>
+                        <para>Unsigned octal</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>x</literal></term>
+
+                      <listitem>
+                        <para>Unsigned hexadecimal integer, lowercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>X</literal></term>
+
+                      <listitem>
+                        <para>Unsigned hexadecimal integer, uppercase</para>
                       </listitem>
                     </varlistentry>
                   </variablelist></entry>
@@ -963,7 +998,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
             </tbody>
           </tgroup>
         </informaltable>
-		
+
         <para><informaltable colsep="0" frame="topbot">
             <tgroup cols="2">
               <colspec colnum="1" colwidth=".5*"/>
