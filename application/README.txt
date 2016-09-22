@@ -50,7 +50,7 @@ MAC
 
 The Mac distribution is packaged as a compressed TAR file, ready for 
 expansion and use.  This prebuilt release was built and tested on 
-Mac OS X 10.8.  
+Mac OS X 10.11.  
 
 Mac users can download the tarball file and uncompress it into place 
 using the Finder or by opening a Terminal window and typing the 
@@ -111,7 +111,7 @@ application in that folder:
 
    ./GmatConsole
 
-The Beta GUI application can be run using the open Terminal command, 
+The Beta GUI application can be run using the ‘open’ Terminal command, 
 executed in the bin folder:
 
    open GMAT_Beta.app
