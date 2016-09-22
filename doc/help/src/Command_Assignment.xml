@@ -877,7 +877,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         format spec.</para>
 
                         <para>Note: The GMAT <code>sprintf</code> function
-                        calls through to the sprintf function in
+                        calls through to the sprintf function in the c-library
                         <code>iostream</code>. Additionally, the GMAT script
                         language does not support an integer data type, only
                         doubles.</para>
@@ -885,8 +885,6 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <para>A format spec follows this prototype:</para>
 
                         <para><literal>%[flags][width][.precision][length]specifier</literal></para>
-						
-						<para>See the table below for supported spec settings.</para>
                       </listitem>
                     </varlistentry>
                   </variablelist></entry>
@@ -895,6 +893,77 @@ aSat2.X = aSat1.X</code>        </programlisting>
           </tgroup>
         </informaltable>
 
+		<informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth=".5*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
+              <row>
+                <entry><guilabel>Specifiers</guilabel></entry>
+
+                <entry><variablelist>
+                    <varlistentry>
+                      <term><literal>norm</literal></term>
+
+                      <listitem>
+                        <para>2-norm. In <literal>Y = norm(X)</literal>,
+                        <literal>Y</literal> is the 2-norm of
+                        <literal>X</literal>, where <literal>X</literal> must
+                        be a vector (i.e. one dimension must be 1). If
+                        <literal>X</literal> is a scalar, <literal>Y</literal>
+                        is equal to <literal>X</literal>.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>det</literal></term>
+
+                      <listitem>
+                        <para>Determinant. In <literal>Y = det(X)</literal>,
+                        <literal>Y</literal> is tthe cross product of the
+                        vectors <literal>A</literal> and <literal>B</literal>.
+                        If <literal>X</literal> is a matrix, the number of
+                        rows must equal the number of columns. If
+                        <literal>X</literal> is a scalar, <literal>Y</literal>
+                        is equal to <literal>X</literal>. For efficiency,
+                        GMAT’s implementation of the determinant is currently
+                        limited to matrices 9×9 or smaller.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>cross</literal></term>
+
+                      <listitem>
+                        <para>Vector cross product. In <literal>C =
+                        cross(A,B)</literal>, <literal>C</literal> is the
+                        vector cross product of <literal>A</literal> and
+                        <literal>B</literal> . <literal>A</literal> and
+                        <literal>B</literal> must be 3 element arrays.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>inv</literal></term>
+
+                      <listitem>
+                        <para>Inverse. In <literal>Y = inv(X)</literal>,
+                        <literal>Y</literal> is the inverse of
+                        <literal>X</literal>. <literal>X</literal> must be a
+                        matrix or a scalar. If <literal>X</literal> is a
+                        matrix, the number of rows must equal the number of
+                        columns. <literal>X^(-1)</literal> is an alternate
+                        syntax.</para>
+                      </listitem>
+                    </varlistentry>
+                  </variablelist></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+		
         <para><informaltable colsep="0" frame="topbot">
             <tgroup cols="2">
               <colspec colnum="1" colwidth=".5*"/>
@@ -955,9 +1024,8 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <term><literal>(space)</literal></term>
 
                         <listitem>
-                          <para>Left-pads the number with zeroes (0) instead
-                          of spaces when padding is specified (see width
-                          sub-specifier).</para>
+                          <para>If no sign is going to be written, a blank
+                          space is inserted before the value.</para>
                         </listitem>
                       </varlistentry>
                     </variablelist></entry>
