@@ -8822,8 +8822,9 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>First component of the total acceleration from all
-              thrusters in the three coordinate directions. Zero is reported
-              whenever thruster is not turned on </para><variablelist>
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8858,8 +8859,9 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>Second component of the total acceleration from all
-              thrusters in the three coordinate directions. Zero is reported
-              whenever thruster is not turned on </para><variablelist>
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8894,8 +8896,9 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>Third component of the total acceleration from all
-              thrusters in the three coordinate directions. Zero is reported
-              whenever thruster is not turned on </para><variablelist>
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8965,8 +8968,9 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>First component of the total thrust from all
-              thrusters in the three coordinate directions. Zero is reported
-              whenever thruster is not turned on </para><variablelist>
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -9001,8 +9005,9 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>Second component of the total thrust from all
-              thrusters in the three coordinate directions. Zero is reported
-              whenever thruster is not turned on </para><variablelist>
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -9037,8 +9042,9 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>Third component of the total thrust from all
-              thrusters in the three coordinate directions. Zero is reported
-              whenever thruster is not turned on </para><variablelist>
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
