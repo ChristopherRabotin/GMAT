@@ -440,7 +440,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
 
             <tbody>
               <row>
-                <entry><guilabel>Scalar functions</guilabel></entry>
+                <entry><guilabel>Scalar Math Functions</guilabel></entry>
 
                 <entry><variablelist>
                     <varlistentry>
@@ -475,7 +475,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <literal>Y</literal> is the tangent of the angle
                         <literal>X</literal>. <literal>X</literal> must be in
                         radians. The tangent function is undefined at angles
-                        that normalize to π/2 or -π/2.</para>
+                        that normalize to p/2 or -p/2.</para>
                       </listitem>
                     </varlistentry>
 
@@ -487,7 +487,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <literal>Y</literal> is the arcsine of
                         <literal>X</literal>. <literal>X</literal> must be in
                         the range [-1, 1], and <literal>Y</literal> will be in
-                        the range [-π/2, π/2].</para>
+                        the range [-p/2, p/2].</para>
                       </listitem>
                     </varlistentry>
 
@@ -499,7 +499,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <literal>Y</literal> is the arccosine of
                         <literal>X</literal>. <literal>X</literal> must be in
                         the range [-1, 1], and <literal>Y</literal> will be in
-                        the range [0, π].</para>
+                        the range [0, p].</para>
                       </listitem>
                     </varlistentry>
 
@@ -510,7 +510,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <para>Arctangent. In <literal>Y = atan(X)</literal>,
                         <literal>Y</literal> is the arctangent of
                         <literal>X</literal>. <literal>Y</literal> will be in
-                        the range (-π/2, π/2).</para>
+                        the range (-p/2, p/2).</para>
                       </listitem>
                     </varlistentry>
 
@@ -521,7 +521,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <para>Four-quadrant arctangent. In <literal>A =
                         atan2(Y, X)</literal>, <literal>A</literal> is the
                         arctangent of <literal>Y/X</literal>.
-                        <literal>A</literal> will be in the range (-π, π].
+                        <literal>A</literal> will be in the range (-p, p].
                         <literal>atan2(Y, X)</literal> is equivalent to
                         <literal>atan(Y/X)</literal> except for the expanded
                         range.</para>
@@ -605,7 +605,24 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         non-negative.</para>
                       </listitem>
                     </varlistentry>
+                  </variablelist></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
 
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth="1.0*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
+              <row>
+                <entry><guilabel>Numeric Manipulation
+                Functions</guilabel></entry>
+
+                <entry><variablelist>
                     <varlistentry>
                       <term><literal>mod</literal></term>
 
@@ -648,7 +665,23 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         towards zero.</para>
                       </listitem>
                     </varlistentry>
+                  </variablelist></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
 
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth=".5*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
+              <row>
+                <entry><guilabel>Random Number Functions</guilabel></entry>
+
+                <entry><variablelist>
                     <varlistentry>
                       <term><literal>randn</literal></term>
 
@@ -691,14 +724,24 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         numbers, casting is performed by the compiler which
                         rounds the real number down to the nearest integer. We
                         recommend passing in real numbers with zero mantissa
-                        (i.e "1.0" or "198.0"). </para>
+                        (i.e "1.0" or "198.0").</para>
                       </listitem>
                     </varlistentry>
                   </variablelist></entry>
               </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
 
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth=".5*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
               <row>
-                <entry><guilabel>Matrix functions</guilabel></entry>
+                <entry><guilabel>Matrix Functions</guilabel></entry>
 
                 <entry><variablelist>
                     <varlistentry>
@@ -757,9 +800,20 @@ aSat2.X = aSat1.X</code>        </programlisting>
                     </varlistentry>
                   </variablelist></entry>
               </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
 
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth="1.0*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
               <row>
-                <entry><guilabel>String functions</guilabel></entry>
+                <entry><guilabel>String Manipulation
+                Functions</guilabel></entry>
 
                 <entry><variablelist>
                     <varlistentry>
@@ -823,7 +877,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         format spec.</para>
 
                         <para>Note: The GMAT <code>sprintf</code> function
-                        calls through to the sprintf function in
+                        calls through to the sprintf function in the c-library
                         <code>iostream</code>. Additionally, the GMAT script
                         language does not support an integer data type, only
                         doubles.</para>
@@ -831,127 +885,6 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <para>A format spec follows this prototype:</para>
 
                         <para><literal>%[flags][width][.precision][length]specifier</literal></para>
-
-                        <para><informaltable colsep="0" frame="topbot">
-                            <tgroup cols="2">
-                              <colspec colnum="1" colwidth=".5*"/>
-
-                              <colspec colnum="2" colwidth="3*"/>
-
-                              <tbody>
-                                <row>
-                                  <entry><guilabel>Flags</guilabel></entry>
-
-                                  <entry><variablelist>
-                                      <varlistentry>
-                                        <term><literal>+</literal></term>
-
-                                        <listitem>
-                                          <para>Forces to preceed the result with a plus or
-                                          minus sign (+ or -) even for positive numbers. By
-                                          default, only negative numbers are preceded with a -
-                                          sign.</para>
-                                        </listitem>
-                                      </varlistentry>
-
-                                      <varlistentry>
-                                        <term><literal>-</literal></term>
-
-                                        <listitem>
-                                          <para>Left-justify within the given field width;
-                                          Right justification is the default (see width
-                                          sub-specifier).</para>
-                                        </listitem>
-                                      </varlistentry>
-
-                                      <varlistentry>
-                                        <term><literal>#</literal></term>
-
-                                        <listitem>
-                                          <para>Used with o, x or X specifiers the value is
-                                          preceeded with 0, 0x or 0X respectively for values
-                                          different than zero. Used with a, A, e, E, f, F, g
-                                          or G it forces the written output to contain a
-                                          decimal point even if no more digits follow. By
-                                          default, if no digits follow, no decimal point is
-                                          written.</para>
-                                        </listitem>
-                                      </varlistentry>
-
-                                      <varlistentry>
-                                        <term><literal>0</literal></term>
-
-                                        <listitem>
-                                          <para>Left-pads the number with zeroes (0) instead
-                                          of spaces when padding is specified (see width
-                                          sub-specifier).</para>
-                                        </listitem>
-                                      </varlistentry>
-
-                                      <varlistentry>
-                                        <term><literal>(space)</literal></term>
-
-                                        <listitem>
-                                          <para>Left-pads the number with zeroes (0) instead
-                                          of spaces when padding is specified (see width
-                                          sub-specifier).</para>
-                                        </listitem>
-                                      </varlistentry>
-                                    </variablelist></entry>
-                                </row>
-
-                                <row>
-                                  <entry><guilabel>Width</guilabel></entry>
-
-                                  <entry><variablelist>
-                                      <varlistentry>
-                                        <term><literal/></term>
-
-                                        <listitem>
-                                          <para>Minimum number of characters to be printed. If
-                                          the value to be printed is shorter than this number,
-                                          the result is padded with blank spaces. The value is
-                                          not truncated even if the result is larger.</para>
-                                        </listitem>
-                                      </varlistentry>
-                                    </variablelist></entry>
-                                </row>
-
-                                <row>
-                                  <entry><guilabel>Precision</guilabel></entry>
-
-                                  <entry><variablelist>
-                                      <varlistentry>
-                                        <term><literal/></term>
-
-                                        <listitem>
-                                          <para>For integer specifiers (d, i, o, u, x, X):
-                                          precision specifies the minimum number of digits to
-                                          be written. If the value to be written is shorter
-                                          than this number, the result is padded with leading
-                                          zeros. The value is not truncated even if the result
-                                          is longer. A precision of 0 means that no character
-                                          is written for the value 0.</para>
-
-                                          <para>For a, A, e, E, f and F specifiers: this is
-                                          the number of digits to be printed after the decimal
-                                          point (by default, this is 6).</para>
-
-                                          <para>For g and G specifiers: This is the maximum
-                                          number of significant digits to be printed.</para>
-
-                                          <para>For s: this is the maximum number of
-                                          characters to be printed. By default all characters
-                                          are printed until the ending null character is
-                                          encountered. If the period is specified without an
-                                          explicit value for precision, 0 is assumed.</para>
-                                        </listitem>
-                                      </varlistentry>
-                                    </variablelist></entry>
-                                </row>
-                              </tbody>
-                            </tgroup>
-                          </informaltable></para>
                       </listitem>
                     </varlistentry>
                   </variablelist></entry>
@@ -959,6 +892,228 @@ aSat2.X = aSat1.X</code>        </programlisting>
             </tbody>
           </tgroup>
         </informaltable>
+
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth=".5*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
+              <row>
+                <entry><guilabel>Specifiers</guilabel></entry>
+
+                <entry><variablelist>
+                    <varlistentry>
+                      <term><literal>a</literal></term>
+
+                      <listitem>
+                        <para>Hexadecimal floating point, lowercase.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>A</literal></term>
+
+                      <listitem>
+                        <para>Hexadecimal floating point, uppercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>e</literal></term>
+
+                      <listitem>
+                        <para>Scientific notation (mantissa/exponent),
+                        lowercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>E</literal></term>
+
+                      <listitem>
+                        <para>Scientific notation (mantissa/exponent),
+                        uppercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>f</literal></term>
+
+                      <listitem>
+                        <para>Decimal floating point, lowercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>F</literal></term>
+
+                      <listitem>
+                        <para>Decimal floating point, uppercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>g</literal></term>
+
+                      <listitem>
+                        <para>Use the shortest representation: %e or %f</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>G</literal></term>
+
+                      <listitem>
+                        <para>Use the shortest representation: %E or %F</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>o</literal></term>
+
+                      <listitem>
+                        <para>Unsigned octal</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>x</literal></term>
+
+                      <listitem>
+                        <para>Unsigned hexadecimal integer, lowercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>X</literal></term>
+
+                      <listitem>
+                        <para>Unsigned hexadecimal integer, uppercase</para>
+                      </listitem>
+                    </varlistentry>
+                  </variablelist></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <para><informaltable colsep="0" frame="topbot">
+            <tgroup cols="2">
+              <colspec colnum="1" colwidth=".5*"/>
+
+              <colspec colnum="2" colwidth="3*"/>
+
+              <tbody>
+                <row>
+                  <entry><guilabel>Flags</guilabel></entry>
+
+                  <entry><variablelist>
+                      <varlistentry>
+                        <term><literal>+</literal></term>
+
+                        <listitem>
+                          <para>Forces to preceed the result with a plus or
+                          minus sign (+ or -) even for positive numbers. By
+                          default, only negative numbers are preceded with a -
+                          sign.</para>
+                        </listitem>
+                      </varlistentry>
+
+                      <varlistentry>
+                        <term><literal>-</literal></term>
+
+                        <listitem>
+                          <para>Left-justify within the given field width;
+                          Right justification is the default (see width
+                          sub-specifier).</para>
+                        </listitem>
+                      </varlistentry>
+
+                      <varlistentry>
+                        <term><literal>#</literal></term>
+
+                        <listitem>
+                          <para>Used with o, x or X specifiers the value is
+                          preceeded with 0, 0x or 0X respectively for values
+                          different than zero. Used with a, A, e, E, f, F, g
+                          or G it forces the written output to contain a
+                          decimal point even if no more digits follow. By
+                          default, if no digits follow, no decimal point is
+                          written.</para>
+                        </listitem>
+                      </varlistentry>
+
+                      <varlistentry>
+                        <term><literal>0</literal></term>
+
+                        <listitem>
+                          <para>Left-pads the number with zeroes (0) instead
+                          of spaces when padding is specified (see width
+                          sub-specifier).</para>
+                        </listitem>
+                      </varlistentry>
+
+                      <varlistentry>
+                        <term><literal>(space)</literal></term>
+
+                        <listitem>
+                          <para>If no sign is going to be written, a blank
+                          space is inserted before the value.</para>
+                        </listitem>
+                      </varlistentry>
+                    </variablelist></entry>
+                </row>
+
+                <row>
+                  <entry><guilabel>Width</guilabel></entry>
+
+                  <entry><variablelist>
+                      <varlistentry>
+                        <term><literal/></term>
+
+                        <listitem>
+                          <para>Minimum number of characters to be printed. If
+                          the value to be printed is shorter than this number,
+                          the result is padded with blank spaces. The value is
+                          not truncated even if the result is larger.</para>
+                        </listitem>
+                      </varlistentry>
+                    </variablelist></entry>
+                </row>
+
+                <row>
+                  <entry><guilabel>Precision</guilabel></entry>
+
+                  <entry><variablelist>
+                      <varlistentry>
+                        <term><literal/></term>
+
+                        <listitem>
+                          <para>For a, A, e, E, f and F specifiers: this is
+                          the number of digits to be printed after the decimal
+                          point (by default, this is 6).</para>
+
+                          <para>For g and G specifiers: This is the maximum
+                          number of significant digits to be printed.</para>
+
+                          <para>For s: this is the maximum number of
+                          characters to be printed. By default all characters
+                          are printed until the ending null character is
+                          encountered. If the period is specified without an
+                          explicit value for precision, 0 is assumed.</para>
+
+                          <para>Integer specifiers are not supported as GMAT
+                          does not have an integer data type in the script
+                          language.</para>
+                        </listitem>
+                      </varlistentry>
+                    </variablelist></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable></para>
       </refsection>
     </refsection>
   </refsection>

@@ -6,20 +6,14 @@ Vision. It is a collaboratively developed, open-source tool written to
 enable the development of new mission concepts and to improve current
 missions.
 
-This release of GMAT introduces production quality builds of the core 
-GMAT system for Mac and Linux workstations.  The command line GMAT
-application has been tested extensively using GMAT's script based test
-system, and is now certified as fully functional.  The GUI interface
-for Mac and Linux users has not undergone rigorous testing, and should
-be considered as a beta interface into GMAT for Mac and Linux users. 
-Additional notes can be found below for the Mac and Linux release 
-packages.
+This release of GMAT introduces production quality orbit determination
+functionality along with other important improvements and bug fixes. 
 
 -----------------------------------------------------------------------
                           License and Copyright
 -----------------------------------------------------------------------
 
-Copyright (c) 2002 - 2015 United States Government as represented by
+Copyright (c) 2002 - 2016 United States Government as represented by
 the Administrator of the National Aeronautics and Space Administration.
 All Other Rights Reserved.
 
@@ -49,29 +43,26 @@ tarball file and uncompress it into place using the command
 
     tar -zxf <TarballPackageName>
 
-where <TarballPackageName> is either gmat-ubuntu-x64-R2015a.tar.gz
-or gmat-rhel5-x64-R2015a.tar.gz.  
-
+where <TarballPackageName> is either gmat-ubuntu-x64-R2016a.tar.gz
+or gmat-rhel5-x64-R2016a.tar.gz.  
 
 MAC
 
 The Mac distribution is packaged as a compressed TAR file, ready for 
 expansion and use.  This prebuilt release was built and tested on 
-Mac OS X 10.8.  
+Mac OS X 10.11.  
 
 Mac users can download the tarball file and uncompress it into place 
 using the Finder or by opening a Terminal window and typing the 
 command
 
-    tar -zxf gmat-macosx-x64-R2015a.tar.gz
+    tar -zxf gmat-macosx-x64-R2016a.tar.gz
 
 BUILDING FROM SOURCE
 
 GMAT is distributed in source form as well, and can be compiled on OS X,
 Linux and Windows. Build instructions for GMAT can be found at
 http://gmatcentral.org/display/GW/GMAT+CMake+Build+System.
-
-
 
 -----------------------------------------------------------------------
                            Running GMAT
@@ -80,9 +71,8 @@ http://gmatcentral.org/display/GW/GMAT+CMake+Build+System.
 WINDOWS
 
 On Windows, click Start, and then point to All Programs. Point to GMAT,
-GMAT R2015a, and then click GMAT R2015a. If you are using the zip-file bundle,
+GMAT R2016a, and then click GMAT R2016a. If you are using the zip-file bundle,
 double-click the bin\GMAT.exe application.
-
 
 LINUX
 
@@ -105,11 +95,11 @@ MATLAB interface note for Linux users:
 If the Matlab interface does not work with the GmatConsole command line 
 application (or the Gmat_Beta GUI), you may need to set the library load 
 path to include the path to your installed Matlab libraries.  For example, 
-if MATLAB is installed in the /usr/local/MATLAB/R2015b folder and the GMAT 
+if MATLAB is installed in the /usr/local/MATLAB/R2016b folder and the GMAT 
 console application is not loading the MATLAB plugin, you may need to 
 update the library path before starting the application, like this:
 
-export LD_LIBRARY_PATH=/usr/local/MATLAB/R2015b/bin/glnxa64:./libwx:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=/usr/local/MATLAB/R2016b/bin/glnxa64:./libwx:$LD_LIBRARY_PATH 
 ./GmatConsole
 
 
@@ -121,7 +111,7 @@ application in that folder:
 
    ./GmatConsole
 
-The Beta GUI application can be run using the open Terminal command, 
+The Beta GUI application can be run using the ‘open’ Terminal command, 
 executed in the bin folder:
 
    open GMAT_Beta.app
@@ -164,10 +154,10 @@ use) or online at http://gmat.sf.net/docs.
             HOW TO RUN THE DEMOS INCLUDED IN THIS DISTRIBUTION
 -----------------------------------------------------------------------
 
-We've included over 50 sample missions in the distribution.
+We've included over 70 sample missions in the distribution.
 The sample missions show how to apply GMAT to problems ranging from
 the Hohmann transfer to Libration point stationkeeping to trajectory
-optimization.
+optimization to orbit determination.
 
 Here are instructions for running the sample missions:
 
@@ -185,13 +175,7 @@ libMatlabInterface plugin in the gmat_startup_file.txt (located in the bin
 folder). External configuration is necessary to successfully connect
 to Matlab. See the documentation for instructions. The NeedVF13ad folder
 contains samples that require libVf13adOptimizer, which is not shipped
-with this distribution. It is available for internal NASA users. Other
-users will be able to find instructions on the forums for building and
-using the VF13ad optimizer soon. Finally, those samples in the
-PreliminaryEstimation folder require the libGmatEstimation plugin to be
-enabled in the gmat_startup_file.txt. GMAT's estimation features in this
-release are of alpha quality, and are included here as a preview only.
-
+with this distribution. It is available for internal NASA users. 
 
 -----------------------------------------------------------------------
                       Credits and Acknowledgments
@@ -211,7 +195,6 @@ NASA World Wind (http://worldwind.arc.nasa.gov/)
 
 Some icons are courtesy of Mark James ( http://www.famfamfam.com/ )
 
-
 -----------------------------------------------------------------------
                            Contact Information
 -----------------------------------------------------------------------
@@ -223,14 +206,13 @@ http://sourceforge.net/projects/gmat/
 
 For other comments and questions, email: gmat@gsfc.nasa.gov
 
-
 -----------------------------------------------------------------------
                          Known Issues and Status
 -----------------------------------------------------------------------
 
 NOTES ON THE LINUX AND MAC RELEASES
 
-GMAT R2015a is the first non-beta release of GMAT on Mac and Linux 
+GMAT R2016a is the first non-beta release of GMAT on Mac and Linux 
 workstations.  The release on those platforms is production quality for 
 the command line application, GmatConsole, and beta quality for the GMAT
 graphical user interface, GMAT, which has been renamed Gmat_Beta.
@@ -256,13 +238,10 @@ GMAT numerical engine.  There are two options for the console application
 that are not recommended for use in this release: the --save option and
 the --verbose option.
 
-
-NOTES ON THE R2015a RELEASE 
+NOTES ON THE Windows RELEASE 
 
 Please see the release notes, located online at http://gmat.sf.net/docs.
-
-For a list of known issues, please visit
-http://bugs.gmatcentral.org or email gmat@gsfc.nasa.gov.
+and in the user guide for a list of new features and known issues.
 
 The following plugins are included and have the listed status:
 
@@ -270,26 +249,27 @@ Official plugins:
   libDataInterface
   libEphemPropagator
   libEventLocator
-  libFminconOptimizer
   libFormation
   libGmatFunction
-  libMatlabInterface
   libNewParameters
-  libProductionPropagators
   libPythonInterface
   libStation
+  libMatlabInterface
+  libFminconOptimizer
+  libProductionPropagators
+  libGmatEstimation
 
 Alpha plugins (disabled by default):
   libCInterface
-  libExtraPropagators
   libGeometricMeasurements
-  libGmatEstimation
+  libExtraPropagators
   libPolyhedronGravity
   libSaveCommand
+  libThrustFile
 
 Internal-only plugins (disabled for public releases):
-  libMarsGRAM
-  libMsise86
-  libNRLMsise00
-  libSNOptimizer
-  libVF13Optimizer
+  proprietary/libMarsGRAM
+  proprietary/libMsise86
+  proprietary/libNRLMsise00
+  proprietary/libSNOptimizer
+  proprietary/libVF13Optimizer

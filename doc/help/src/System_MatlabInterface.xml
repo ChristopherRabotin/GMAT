@@ -115,7 +115,6 @@
                 (or <filename>win64</filename> for use with 64-bit versions of
                 GMAT)</para>
 
-                <para/>
               </listitem>
 
               <listitem>
@@ -126,8 +125,10 @@
 
                 <para>This is done automatically by the MATLAB installer. To
                 do it manually, open an elevated command window and run the
-                command above. Make sure the proper instance of MATLAB is
-                being run by this command.</para>
+                command above. Make sure to runn the command in the folder
+                containing the executable you wish to use (i.e.
+                <replaceable>MATLAB</replaceable>\bin\win32 or
+                <replaceable>MATLAB</replaceable>\bin\win64.)</para>
               </listitem>
             </orderedlist></para>
         </listitem>
