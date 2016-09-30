@@ -915,6 +915,69 @@
           </row>
 
           <row>
+            <entry><guilabel>MixRatio</guilabel></entry>
+
+            <entry><para>The mixture ratio employed to draw fuel from multiple
+            tanks. For example, if there are two tanks and
+            <guilabel>MixRatio</guilabel> is set to [2 1], then twice as much
+            fuel will be drawn from tank one as from tank 2 in the
+            <guilabel>Tank</guilabel> list. Note, if a MixRatio is not
+            supplied, fuel is drawn from tanks in equal amounts, (the
+            <guilabel>MixRatio</guilabel> is set to a vector of ones the same
+            length as the <guilabel>Tank</guilabel> list). </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Array of real numbers with same length as number of
+                    tanks in the <guilabel>Tank</guilabel> array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[1]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>Origin</guilabel></entry>
 
             <entry><para>This field, used in conjunction with the
@@ -985,7 +1048,7 @@
           </row>
 
           <row>
-            <entry><guilabel>Tank</guilabel></entry>
+            <entry><guilabel>Tanks</guilabel></entry>
 
             <entry><para><guilabel>ElectricTank</guilabel> from which the
             <guilabel>ElectricThruster</guilabel> draws propellant from. In a
@@ -1494,8 +1557,9 @@
           <row>
             <entry><guilabel>ThrustModel</guilabel></entry>
 
-            <entry><para>The type of thruster model. See <xref linkend="ElectricThruster_Models"
-                    xrefstyle="select:title"/> for a detailed description of the options.</para> <variablelist>
+            <entry><para>The type of thruster model. See <xref
+            linkend="ElectricThruster_Models" xrefstyle="select:title"/> for a
+            detailed description of the options.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1680,7 +1744,7 @@
     </informaltable>
   </refsection>
 
-  <refsection >
+  <refsection>
     <title>GUI</title>
 
     <para>The <guilabel>ElectricThruster</guilabel> dialog box allows you to

@@ -34,7 +34,7 @@
       extensively documented in tutorials and reference material. Navigation
       components include BatchEstimator, Simulator, ErrorModel,
       StatisticsAcceptFilter, StatisticsRejectFilter, TrackingDataSet, and the
-      RunEstiamtor and RunSimulator Commands. We recommend taking the
+      RunEstimator and RunSimulator Commands. We recommend taking the
       tutorials first then reviewing the reference material for orbit
       determination components to get started.</para>
 

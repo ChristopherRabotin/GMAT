@@ -2113,6 +2113,69 @@
           </row>
 
           <row>
+            <entry><guilabel>MixRatio</guilabel></entry>
+
+            <entry><para>The mixture ratio employed to draw fuel from multiple
+            tanks. For example, if there are two tanks and
+            <guilabel>MixRatio</guilabel> is set to [2 1], then twice as much
+            fuel will be drawn from tank one as from tank 2 in the
+            <guilabel>Tank</guilabel> list. Note, if a MixRatio is not
+            supplied, fuel is drawn from tanks in equal amounts, (the
+            <guilabel>MixRatio</guilabel> is set to a vector of ones the same
+            length as the <guilabel>Tank</guilabel> list). </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Array of real numbers with same length as number of
+                    tanks in the <guilabel>Tank</guilabel> array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>[1]</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>Origin</guilabel></entry>
 
             <entry><para>This field, used in conjunction with the
@@ -2183,7 +2246,7 @@
           </row>
 
           <row>
-            <entry><guilabel>Tank</guilabel></entry>
+            <entry><guilabel>Tanks</guilabel></entry>
 
             <entry><para>A list of<guilabel> ChemicalTank(s)</guilabel> from
             which the thruster draws propellant from. In the script, an empty
@@ -2842,6 +2905,32 @@ Thruster1.K16 = 0
 Create Spacecraft DefaultSC
 DefaultSC.Tanks = {FuelTank1}
 DefaultSC.Thrusters = {Thruster1}
+
+BeginMissionSequence</programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Create two <guilabel>ChemicalTank</guilabel>s (called
+      <guilabel>aTank1</guilabel> and <guilabel>aTank2</guilabel>) and a
+      <guilabel>ChemicalThruster</guilabel>, attach both the
+      <guilabel>ChemicalThruster</guilabel> and
+      <guilabel>ChemicalTanks</guilabel> to a <guilabel>Spacecraft</guilabel>,
+      and configure the thruster to draw four times as much fuel from
+      <guilabel>aTank1</guilabel> than <guilabel>aTank2</guilabel>.</para>
+
+      <programlisting>%  Create the ChemicalTank Resource
+Create Spacecraft aSat
+aSat.Tanks = {aTank1,aTank2}
+aSat.Thrusters = {aThruster}
+
+% Create two tanks
+Create ChemicalTank aTank1 aTank2
+
+%  Configure thruster to draw four times as much fuel 
+%  from aTank1 than aTank2
+Create ChemicalThruster aThruster
+aThruster.Tank = {aTank1,aTank2}
+aThruster.MixRatio = [4 1]
 
 BeginMissionSequence</programlisting>
     </informalexample>
