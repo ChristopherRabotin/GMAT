@@ -1157,9 +1157,15 @@ Mission run completed.
 
       <para>Note that if the elevation angle of any of the measurements is
       below our input criteria of 7 degrees, then the measurement would be
-      edited because the signal would be considered to be “blocked.” In this
-      case, we would see BXY in the output where X = Path index and Y = Count
-      index (Doppler). TO DO: Need elaboration on what X and Y means.</para>
+      edited because the signal would be considered to be “blocked.” For range
+      data, we would see Bn where n is an integer specifying the leg number.
+      For our two way range data type, we have two legs, the uplink leg
+      represented by the integer, 1, and the downlink leg, represented by the
+      integer 2. Thus, if we saw “B1” in this field, this would mean that the
+      signal was blocked for the uplink leg. Correspondingly, for Doppler
+      data, we would also see Bn, but the integer n would be 1 or 2 depending
+      upon whether the blockage occurred in the start path (n=1) or the end
+      path (n=2). </para>
 
       <para>After all of the individual iteration 0 residuals are printed out,
       four different iteration 0 observation summary reports, as shown below,
@@ -1380,8 +1386,8 @@ Mission run completed.
       For example, to produce a plot of all range residuals from the final
       iteration, you can do the following:</para>
 
-      <para><programlisting>>> I = find(strcmp(Iteration2.Type, 'DSNRange'));
->> plot(Iteration2.Epoch(I), Iteration2.ObsMinusCalc(I), 'go');</programlisting></para>
+      <para><programlisting>&gt;&gt; I = find(strcmp(Iteration2.Type, 'DSNRange'));
+&gt;&gt; plot(Iteration2.Epoch(I), Iteration2.ObsMinusCalc(I), 'go');</programlisting></para>
     </section>
   </section>
 
