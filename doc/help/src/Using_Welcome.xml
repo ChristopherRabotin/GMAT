@@ -28,6 +28,13 @@
     script language. Here are some of GMAT’s key features broken down by
     feature group.</para>
 
+    <para>Release R2016a is the first version of GMAT to contain production
+    navigation functionality. We've also added the ability to read and export
+    script snippets from external files, the ability to write STK .e ephem
+    files, and added many new built-in math functions. See the <link
+    linkend="ReleaseNotesR2016a">R2016a Release Notes</link> for other
+    additions and bug fixes.</para>
+
     <section>
       <title>Dynamics and Environment Modelling</title>
 
@@ -166,6 +173,41 @@
     </section>
 
     <section>
+      <title>Orbit Determination Infrastructure</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Batch estimator</para>
+        </listitem>
+
+        <listitem>
+          <para>Extensive statistical results reporting</para>
+        </listitem>
+
+        <listitem>
+          <para>DSN data types</para>
+        </listitem>
+
+        <listitem>
+          <para>Beta SN and GN data types (turned off but can be turned on for
+          experimentation)</para>
+        </listitem>
+
+        <listitem>
+          <para>Measurement data editing</para>
+        </listitem>
+
+        <listitem>
+          <para>Media corrections</para>
+        </listitem>
+
+        <listitem>
+          <para>Error modeling</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
       <title>Interfaces</title>
 
       <itemizedlist>
@@ -207,10 +249,10 @@
     <para>GMAT has enabled and enhanced missions in nearly every NASA flight
     regime including enabling new mission types, extending the life of
     existing missions, and enabling new science observations. GMAT has
-    supported 8 NASA missions and 8 NASA proposal efforts. The system has
+    supported 8 NASA missions and 10+ NASA proposal efforts. The system has
     experienced broad application and adoption around the world. To date, GMAT
     has been used by over 30 organizations, with 15 universities and 12
-    commercial firms publishing results in the open literature. </para>
+    commercial firms publishing results in the open literature.</para>
   </section>
 
   <section>
@@ -226,11 +268,12 @@
     perform nightly regression tests running almost 13,000 test cases for the
     system core and over 4000 test cases for the GUI interface.</para>
 
-    <para>For release R2015a, we have only addressed issues on Mac and Linux
-    that also occur on the Windows 7 platform. We are currently addressing the
-    few remaining critical issues on Mac and Linux and will release production
-    quality console builds on those platforms soon after the Windows release
-    of R2015a.</para>
+    <para>For release R2016a, we have addressed issues on Windows including
+    the GUI, and the Mac and Linux console (GUI is provided but is in alpha
+    form on Mac and Linux).</para>
+
+    <para>Note that this is the last 32-bit version of GMAT on Windows. Future
+    versions will be 64-bit on all platforms.</para>
   </section>
 
   <section>
@@ -253,7 +296,7 @@
       </listitem>
 
       <listitem>
-        <para>Omitron, Inc (testing)</para>
+        <para>Omitron, Inc (testing, requirements, specifications)</para>
       </listitem>
 
       <listitem>

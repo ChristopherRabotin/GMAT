@@ -234,11 +234,15 @@
       <para>GMAT reads several files that are used for high fidelity modelling
       of time and coordinate systems: the leap second files and the Earth
       orientation parameters (EOP) provided by the IERS. The EOP file is
-      updated daily by the IERS. To update your local file with the latest
-      data, simply replace the file <filename>eopc04_08.62-now</filename> in
-      the <filename>data/planetary_coeff</filename> directory. Updated
-      versions of this file are available from the <link
-      xlink:href="http://data.iers.org/products/213/14444/orig/eopc04_08.62-now">IERS</link>.</para>
+      updated by the IERS. To update your local file with the latest data,
+      replace the file <filename>eopc04_08.62-now</filename> in the
+      <filename>data/planetary_coeff</filename> directory. Historical EOP data
+      is available from the <link
+      xlink:href="https://datacenter.iers.org/eop/-/somos/5Rgv/latest/213">IERS
+      here</link> and recent and predicted EOP data is avialable from the
+      <link
+      xlink:href="https://datacenter.iers.org/eop/-/somos/5Rgv/latest/8">IERS
+      here</link>.</para>
 
       <para>For use with GMAT's event location subsystem, you will also need
       to update the SPICE EOP files, distributed by NAIF: <link
