@@ -220,7 +220,6 @@ simmer.AddNoise = On;
 
 Create BatchEstimatorInv bat;
 bat.ShowProgress = true;
-bat.ReportStyle = Verbose;
 bat.ReportFile = 'TrkFile_SimEst_DSN_DS_WorkingFile.report';
 bat.MaximumIterations = 4;
 bat.Measurements = {estData};
