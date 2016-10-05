@@ -195,8 +195,8 @@ SatTransponder.TurnAroundRatio     = '880/749';
 
 Sat.AddHardware                    = {SatTransponder, HGA};</programlisting>
 
-      <para>Note that after we create the <guilabel>Transponder</guilabel>
-      object, there are three fields, <guilabel>PrimaryAntenna</guilabel>,
+      <para>After we create the <guilabel>Transponder</guilabel> object, there
+      are three fields, <guilabel>PrimaryAntenna</guilabel>,
       <guilabel>HardwareDelay</guilabel>, and
       <guilabel>TurnAroundRatio</guilabel> that must be set.</para>
 
@@ -304,7 +304,7 @@ CAN.AddHardware           = {DSNTransmitter, DSNAntenna, ...
       ionosphere model we wish to use to model RF signal atmospheric
       refraction effects. Finally, in the fifth section, we attached three
       pieces of previously created required hardware to our ground station, a
-      transmitter, a receiver, and an antenna. </para>
+      transmitter, a receiver, and an antenna.</para>
     </section>
 
     <section>
@@ -316,8 +316,8 @@ CAN.AddHardware           = {DSNTransmitter, DSNAntenna, ...
       <guilabel>GroundStation</guilabel> object and its related hardware, we
       now create the ground station error models. Since we wish to simulate
       both range and Doppler data, we need to create two error models as shown
-      below, one for range measurements and one for Doppler measurements.
-      </para>
+      below, one for range measurements and one for Doppler
+      measurements.</para>
 
       <programlisting>%   Create Ground station error models
 Create ErrorModel DSNrange;
@@ -337,14 +337,14 @@ CAN.ErrorModels                = {DSNrange, DSNdoppler};</programlisting>
       <guilabel>DSNrange</guilabel>. The error model Type is Range_RU which
       indicates that it is an error model for DSN range measurements. The 1
       sigma standard deviation of the Gaussian white noise is set to 10.63
-      Range Units (RU) and the measurement bias is set to 0 RU. </para>
+      Range Units (RU) and the measurement bias is set to 0 RU.</para>
 
       <para>The second section above defines an
       <guilabel>ErrorModel</guilabel> named <guilabel>DSNdoppler</guilabel>.
       The error model Type is Doppler_HZ which indicates that it is an error
       model for DSN Doppler measurements. The 1 sigma standard deviation of
       the Gaussian white noise is set to 0.0282 Hz and the measurement bias is
-      set to 0 Hz. </para>
+      set to 0 Hz.</para>
 
       <para>The third section above attaches the two
       <guilabel>ErrorModel</guilabel> resources we have just created to the
@@ -363,13 +363,13 @@ CAN.ErrorModels                = {DSNrange, DSNdoppler};</programlisting>
       <guilabel>GroundStation</guilabel> to this simulation. The measurement
       error for observations involving this new
       <guilabel>GroundStation</guilabel> would be defined by the
-      <guilabel>ErrorModel</guilabel> resources attached to it. </para>
+      <guilabel>ErrorModel</guilabel> resources attached to it.</para>
 
       <para>See <xref
       linkend="Appendix_A_Determination_of_Measurement_Noise_Values"
       xrefstyle="select:title"/> for a discussion of how we determined the
-      values for NoiseSigma for the two ErrorModel resources we created.
-      </para>
+      values for NoiseSigma for the two <guilabel>ErrorModel</guilabel>
+      resources we created.</para>
     </section>
   </section>
 
@@ -387,7 +387,7 @@ CAN.ErrorModels                = {DSNrange, DSNdoppler};</programlisting>
 DSNsimData.AddTrackingConfig        = {{CAN, Sat, CAN}, 'DSNRange'};   
 DSNsimData.AddTrackingConfig        = {{CAN, Sat, CAN}, 'Doppler'};                 
 DSNsimData.FileName                 = ...
-                         {'Sat_dsn_range_and_doppler_measurements.gmd'};
+                     {'Sat_dsn_range_and_doppler_measurements.gmd'};
 
 DSNsimData.UseLightTi               = true;
 DSNsimData.UseRelativityCorrection  = true;
@@ -562,7 +562,7 @@ RunSimulator Sim</programlisting>
     specified, is the GMAT ‘output’ directory. Let’s analyze the contents of
     this “GMAT Measurement Data” or GMD file as shown below.</para>
 
-    <programlisting width="100">% GMAT Internal Measurement Data File
+    <programlisting width="100"><?db-font-size 80% ?>% GMAT Internal Measurement Data File
 27253.500405092593 DSNRange 9004 22222 11111 26016945.24902344 2 7.2e+009 3.3554432e+007
 27253.500405092593 Doppler  9006 22222 11111 2 10 -8459336323.89349840 
 27253.507349537038 DSNRange 9004 22222 11111 21728172.10375977 2 7.2e+009 3.3554432e+007 
@@ -802,7 +802,7 @@ DSNsimData.AddTrackingConfig = {{MAD, Sat, MAD}, 'Doppler'};</programlisting>
     first ramp record. The first field, 27252, is the TAIMJD date of the ramp
     record.</para>
 
-    <para>The second field, is 22222, is the ground station ID of the
+    <para>The second field, 22222, is the ground station ID of the
     <guilabel>GroundStation</guilabel> object whose frequency is being
     specified. We note that the ID 22222 corresponds to the
     <guilabel>CAN</guilabel> ground station. The third field, 11111, is the ID
@@ -1048,11 +1048,11 @@ Sim.MeasurementTimeStep = 3600;</programlisting>
 
     <para>A complete script, containing all the changes we have made in the
     <xref linkend="Create_Realistic_GMD" xrefstyle="select:title"/> section,
-    is contained in the file, <filename>Simulate DSN Range and Doppler Data 3
-    weeks.script</filename>. Note that in this file, in addition to the
-    changes above, we have also changed the GMD output file name to
-    <filename>Simulate DSN Range and Doppler Data 3
-    weeks.gmd</filename>.</para>
+    is contained in the file,
+    <filename>Tut_Simulate_DSN_Range_and_Doppler_Data_3_weeks.script</filename>.
+    Note that in this file, in addition to the changes above, we have also
+    changed the GMD output file name to <filename>Simulate DSN Range and
+    Doppler Data 3 weeks.gmd</filename>.</para>
 
     <para>Now run the script which should take approximately 1-2 minutes since
     we are generating much more data than previously. We will use the GMD file
