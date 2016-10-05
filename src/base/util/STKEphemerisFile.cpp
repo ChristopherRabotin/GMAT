@@ -312,7 +312,8 @@ void STKEphemerisFile::CloseForWrite()
 
 //------------------------------------------------------------------------------
 // bool GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA1Mjd,
-//                              Rvector6 &initialState, Rvector6 &finalState)
+//                               Rvector6 &initialState, Rvector6 &finalState,
+//                               std::string &cbName, std::string &csName)
 //------------------------------------------------------------------------------
 /**
  * Retrieves initial and final state from STK ephem file. Assumes ephem file
@@ -322,6 +323,10 @@ void STKEphemerisFile::CloseForWrite()
  * @param finalA1Mjd    output final epoch in a1mjd
  * @param initialState  output initial cartesian state in MJ2000Eq
  * @param finalState    output final cartesian state in MJ2000Eq
+ * @param cbName        output central body name
+ * @param csName        output coordinate system name
+ *
+ * @return true if all output parameter values are assigned, false otherwise
  */
 //------------------------------------------------------------------------------
 bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA1Mjd,
@@ -333,40 +338,89 @@ bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA
       ("STKEphemerisFile::GetInitialAndFinalState() entered\n");
    #endif
    
+   // Set defaults for output
+   cbName = "Earth";
+   csName = "J2000";
+   
    // Read headers
-   std::string line;
-   int headerCount = 0;
-   std::string numPointsKeyword = "NumberOfEphemerisPoints";
-   std::string epochKeyword = "ScenarioEpoch";
+   std::string line1, line;
+   std::string stkVersionKeyword = "stk.v.";
+   std::string beginEphemKeyword = "BEGIN Ephemeris";
+   std::string numEphemPointsKeyword = "NumberOfEphemerisPoints";
+   std::string scenarioEpochKeyword = "ScenarioEpoch";
    std::string centralBodyKeyword = "CentralBody";
-   std::string coordSysKeyword = "CoordinateSystem";
+   std::string coordSystemKeyword = "CoordinateSystem";
    std::string timePosVelKeyword = "EphemerisTimePosVel";
    std::string distanceUnitKeyword = "DistanceUnit";
    std::string item;
    std::string::size_type index1;
    
+   // Required header fields
+   bool stkVersionFound = false;
+   bool beginEphemFound = false;
+   bool numEphemPointsFound = false;
+   bool scenarioEpochFound = false;
+   bool timePosVelFound = false;
+   
    while (!stkInStream.eof())
    {
-      getline(stkInStream, line);
-      if (line.find(numPointsKeyword) != line.npos)
+      getline(stkInStream, line1);
+      #ifdef DEBUG_INITIAL_FINAL_MORE
+      MessageInterface::ShowMessage
+         ("   ............... line = %s\n", line1.c_str());
+      #endif
+      
+      line = GmatStringUtil::Strip(line1);
+      
+      // Skip comment line
+      if ((line.size() > 1) && (line[0] == '#'))
+         continue;
+      
+      // Now go through each keyword
+      if (line.find(stkVersionKeyword) != line.npos)
       {
-         index1 = line.find(numPointsKeyword);
-         item = line.substr(index1 + numPointsKeyword.size());
+         index1 = line.find(stkVersionKeyword);
+         item = line.substr(index1 + stkVersionKeyword.size());
          item = GmatStringUtil::Strip(item);
          #ifdef DEBUG_INITIAL_FINAL
          MessageInterface::ShowMessage
-            ("   %24s : %s\n", numPointsKeyword.c_str(), item.c_str());
+            ("   %24s%s\n", stkVersionKeyword.c_str(), item.c_str());
          #endif
-         headerCount++;
+         if (item.size() > 0)
+            stkVersionFound = true;
       }
-      else if (line.find(epochKeyword) != line.npos)
+      else if (line.find(beginEphemKeyword) != line.npos)
       {
-         index1 = line.find(epochKeyword);
-         item = line.substr(index1 + epochKeyword.size());
+         index1 = line.find(beginEphemKeyword);
+         item = line.substr(index1 + beginEphemKeyword.size());
          item = GmatStringUtil::Strip(item);
          #ifdef DEBUG_INITIAL_FINAL
          MessageInterface::ShowMessage
-            ("   %24s : %s\n", epochKeyword.c_str(), item.c_str());
+            ("   %24s%s\n", beginEphemKeyword.c_str(), item.c_str());
+         #endif
+         if (item == "")
+            beginEphemFound = true;
+      }
+      else if (line.find(numEphemPointsKeyword) != line.npos)
+      {
+         numEphemPointsFound = true;
+         index1 = line.find(numEphemPointsKeyword);
+         item = line.substr(index1 + numEphemPointsKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s : %s\n", numEphemPointsKeyword.c_str(), item.c_str());
+         #endif
+      }
+      else if (line.find(scenarioEpochKeyword) != line.npos)
+      {
+         scenarioEpochFound = true;
+         index1 = line.find(scenarioEpochKeyword);
+         item = line.substr(index1 + scenarioEpochKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s : %s\n", scenarioEpochKeyword.c_str(), item.c_str());
          #endif
          scenarioEpochUtcGreg = item;
          // Convert epoch from UTCGregorian to A1Mjd
@@ -376,7 +430,6 @@ bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA
             MessageInterface::ShowMessage
                ("         scenarioEpochA1Mjd : %.12f\n", scenarioEpochA1Mjd);
             #endif
-            headerCount++;
          }
          else
          {
@@ -402,32 +455,18 @@ bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA
          #endif
          centralBody = item;
          cbName = item;
-         headerCount++;
       }
-      else if (line.find(coordSysKeyword) != line.npos)
+      else if (line.find(coordSystemKeyword) != line.npos)
       {
-         index1 = line.find(coordSysKeyword);
-         item = line.substr(index1 + coordSysKeyword.size());
+         index1 = line.find(coordSystemKeyword);
+         item = line.substr(index1 + coordSystemKeyword.size());
          item = GmatStringUtil::Strip(item);
          #ifdef DEBUG_INITIAL_FINAL
          MessageInterface::ShowMessage
-            ("   %24s : %s\n", coordSysKeyword.c_str(), item.c_str());
+            ("   %24s : %s\n", coordSystemKeyword.c_str(), item.c_str());
          #endif
          coordinateSystem = item;
          csName = item;
-         headerCount++;
-      }
-      else if (line.find(timePosVelKeyword) != line.npos)
-      {
-         index1 = line.find(timePosVelKeyword);
-         item = line.substr(index1 + timePosVelKeyword.size());
-         item = GmatStringUtil::Strip(item);
-         #ifdef DEBUG_INITIAL_FINAL
-         MessageInterface::ShowMessage
-            ("   %24s : %s\n", timePosVelKeyword.c_str(), item.c_str());
-         #endif
-         headerCount++;
-         break;
       }
       else if (line.find(distanceUnitKeyword) != line.npos)
       {
@@ -439,16 +478,34 @@ bool STKEphemerisFile::GetInitialAndFinalStates(Real &initialA1Mjd, Real &finalA
             ("   %24s : %s\n", distanceUnitKeyword.c_str(), item.c_str());
          #endif
          distanceUnit = item;		// The reader will use this in propagation
-         headerCount++;
+      }
+      // This field shoud be the last one before reading actual ephem states
+      else if (line.find(timePosVelKeyword) != line.npos)
+      {
+         index1 = line.find(timePosVelKeyword);
+         item = line.substr(index1 + timePosVelKeyword.size());
+         item = GmatStringUtil::Strip(item);
+         #ifdef DEBUG_INITIAL_FINAL
+         MessageInterface::ShowMessage
+            ("   %24s%s\n", timePosVelKeyword.c_str(), item.c_str());
+         #endif
+         if (item == "")
+            timePosVelFound = true;
+         
          break;
       }
    }
    
-   if (headerCount != 6)
+   if (!stkVersionFound || !beginEphemFound || !numEphemPointsFound ||
+       !scenarioEpochFound || !timePosVelFound)
    {
       MessageInterface::ShowMessage
-         ("*** ERROR *** Cannot read header info from '%s'\n",
-          stkFileNameForRead.c_str());
+         ("*** ERROR *** Cannot find required header info from '%s'. "
+          "Missing one or more of the following keywords:\n   "
+          "\" '%s'  '%s'  '%s'  '%s'  '%s' \"\n", stkFileNameForRead.c_str(),
+          stkVersionKeyword.c_str(), beginEphemKeyword.c_str(),
+          numEphemPointsKeyword.c_str(), scenarioEpochKeyword.c_str(),
+          timePosVelKeyword.c_str());
       return false;
    }
    
