@@ -38,10 +38,9 @@
       <term>Script Files</term>
 
       <listitem>
-        <para><filename>Simulate DSN Range and Doppler
-        Data.script</filename></para>
+        <para><filename>Tut_Simulate_DSN_Range_and_Doppler_Data.script</filename></para>
 
-        <para><filename>Simulate DSN Range and Doppler Data 3 weeks.script
+        <para><filename>Tut_Simulate_DSN_Range_and_Doppler_Data_3_weeks.script
         </filename></para>
       </listitem>
     </varlistentry>
@@ -294,23 +293,83 @@ CAN.TroposphereModel      = 'HopfieldSaastamoinen';
 CAN.AddHardware           = {DSNTransmitter, DSNAntenna, ...
                                 DSNReceiver};</programlisting>
 
-      <para>We now create and configure the force model and propagator that
-      will be used for the simulation. For this deep space drift away orbit,
-      we naturally choose the Sun as our central body. Since we are far away
-      from all the planets, we use point mass gravity models and we include
-      the effects of the Sun, Earth, Moon, and most of the other planets. In
-      addition, we model Solar Radiation Pressure (SRP) affects and we include
-      the affect of general relativity on the dynamics. The script segment
-      accomplishing this is shown below.</para>
+      <para>The script segment above is broken into five sections. In the
+      first section, we create our <guilabel>GroundStation</guilabel> object
+      and we set our Earth-Centered Fixed Cartesian coordinates. In the second
+      section, we set the ID of the ground station that will output to the GMD
+      file created by the <guilabel>RunSimulator</guilabel> command. In the
+      third section, we set the minimum elevation angle to 7 degrees. Below
+      this ground station to spacecraft elevation angle, no simulated data
+      will be created. In the fourth section, we specify which troposphere and
+      ionosphere model we wish to use to model RF signal atmospheric
+      refraction effects. Finally, in the fifth section, we attached three
+      pieces of previously created required hardware to our ground station, a
+      transmitter, a receiver, and an antenna. </para>
+    </section>
 
-      <programlisting>Create ForceModel Fm;
-Create Propagator Prop;
-Fm.CentralBody            = Sun;
-Fm.PointMasses            = {Sun, Earth, Luna, Mars, Saturn, ...
-                             Uranus, Mercury, Venus, Jupiter};
-Fm.SRP                    = On;
-Fm.RelativisticCorrection = On;
-Prop.FM                   = Fm;</programlisting>
+    <section>
+      <title>Create Ground Station Error Models</title>
+
+      <para>It is well known that all measurement types have random noise
+      and/or biases associated with them. For GMAT, these affects are modelled
+      using ground station error models. Since we have already created the
+      <guilabel>GroundStation</guilabel> object and its related hardware, we
+      now create the ground station error models. Since we wish to simulate
+      both range and Doppler data, we need to create two error models as shown
+      below, one for range measurements and one for Doppler measurements.
+      </para>
+
+      <programlisting>%   Create Ground station error models
+Create ErrorModel DSNrange;
+DSNrange.Type                  = 'Range_RU';
+DSNrange.NoiseSigma            = 10.63;
+DSNrange.Bias                  = 0.0;
+
+Create ErrorModel DSNdoppler;
+DSNdoppler.Type                = 'Doppler_HZ';
+DSNdoppler.NoiseSigma          = 0.0282;
+DSNdoppler.Bias                = 0.0;
+
+CAN.ErrorModels                = {DSNrange, DSNdoppler};</programlisting>
+
+      <para>The script segment above is broken into three sections. The first
+      section defines an <guilabel>ErrorModel</guilabel> named
+      <guilabel>DSNrange</guilabel>. The error model Type is Range_RU which
+      indicates that it is an error model for DSN range measurements. The 1
+      sigma standard deviation of the Gaussian white noise is set to 10.63
+      Range Units (RU) and the measurement bias is set to 0 RU. </para>
+
+      <para>The second section above defines an
+      <guilabel>ErrorModel</guilabel> named <guilabel>DSNdoppler</guilabel>.
+      The error model Type is Doppler_HZ which indicates that it is an error
+      model for DSN Doppler measurements. The 1 sigma standard deviation of
+      the Gaussian white noise is set to 0.0282 Hz and the measurement bias is
+      set to 0 Hz. </para>
+
+      <para>The third section above attaches the two
+      <guilabel>ErrorModel</guilabel> resources we have just created to the
+      <guilabel>CAN</guilabel> <guilabel>GroundStation</guilabel>. Note that
+      in GMAT, the measurement noise or bias is defined on a per ground
+      station basis. Thus, any range measurement error involving the CAN
+      GroundStation is defined by the <guilabel>DSNRange</guilabel>
+      <guilabel>ErrorModel</guilabel> and any Doppler measurement error
+      involving the <guilabel>CAN</guilabel>
+      <guilabel>GroundStation</guilabel> is defined by the
+      <guilabel>DSNdoppler</guilabel> <guilabel>ErrorModel</guilabel>. Note
+      that since GMAT currently only models two way measurements where the
+      transmitting and receiving ground stations are the same, we do not have
+      to consider the case where the transmitting and receiving ground
+      stations are different. Suppose we were to add an additional
+      <guilabel>GroundStation</guilabel> to this simulation. The measurement
+      error for observations involving this new
+      <guilabel>GroundStation</guilabel> would be defined by the
+      <guilabel>ErrorModel</guilabel> resources attached to it. </para>
+
+      <para>See <xref
+      linkend="Appendix_A_Determination_of_Measurement_Noise_Values"
+      xrefstyle="select:title"/> for a discussion of how we determined the
+      values for NoiseSigma for the two ErrorModel resources we created.
+      </para>
     </section>
   </section>
 
@@ -325,17 +384,17 @@ Prop.FM                   = Fm;</programlisting>
     define needed simulation parameters for the various data types.</para>
 
     <programlisting>Create TrackingFileSet DSNsimData;
-DSNsimData.AddTrackingConfig             = {{CAN, Sat, CAN}, 'DSNRange'};   
-DSNsimData.AddTrackingConfig             = {{CAN, Sat, CAN}, 'Doppler'};                 
-DSNsimData.FileName                      = ...
+DSNsimData.AddTrackingConfig        = {{CAN, Sat, CAN}, 'DSNRange'};   
+DSNsimData.AddTrackingConfig        = {{CAN, Sat, CAN}, 'Doppler'};                 
+DSNsimData.FileName                 = ...
                          {'Sat_dsn_range_and_doppler_measurements.gmd'};
 
-DSNsimData.UseLightTime                  = true;
-DSNsimData.UseRelativityCorrection       = true;
-DSNsimData.UseETminusTAI                 = true;
+DSNsimData.UseLightTi               = true;
+DSNsimData.UseRelativityCorrection  = true;
+DSNsimData.UseETminusTAI            = true;
 
-DSNsimData.SimDopplerCountInterval       = 10.0;
-DSNsimData.SimRangeModuloConstant        = 3.3554432e+07;</programlisting>
+DSNsimData.SimDopplerCountInterval  = 10.0;
+DSNsimData.SimRangeModuloConstant   = 3.3554432e+07;</programlisting>
 
     <para>The script lines above are broken into three sections. In the first
     section, the resource name, <guilabel>DSNsimData</guilabel>, is declared,

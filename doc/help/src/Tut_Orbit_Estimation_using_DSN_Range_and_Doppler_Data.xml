@@ -39,8 +39,7 @@
       <term>Script Files</term>
 
       <listitem>
-        <para><filename>Orbit Estimation using DSN Range and Doppler
-        Data.script</filename></para>
+        <para><filename>Tut_Orbit_Estimation_using_DSN_Range_and_Doppler_Data.script</filename></para>
       </listitem>
     </varlistentry>
   </variablelist>
@@ -578,7 +577,7 @@ bat.MaximumIterations          = 10
 bat.MaxConsecutiveDivergences  = 3;
 bat.Propagator                 = Prop;
 bat.ShowAllResiduals           = On;
-bat.OLSEInitialRMSSigma        = 10000;f
+bat.OLSEInitialRMSSigma        = 10000;
 bat.OLSEMultiplicativeConstant = 3;
 bat.OLSEAdditiveConstant       = 0;
 bat.EstimationEpochFormat      = 'FromParticipants'; 
@@ -1165,7 +1164,7 @@ Mission run completed.
       signal was blocked for the uplink leg. Correspondingly, for Doppler
       data, we would also see Bn, but the integer n would be 1 or 2 depending
       upon whether the blockage occurred in the start path (n=1) or the end
-      path (n=2). </para>
+      path (n=2).</para>
 
       <para>After all of the individual iteration 0 residuals are printed out,
       four different iteration 0 observation summary reports, as shown below,
