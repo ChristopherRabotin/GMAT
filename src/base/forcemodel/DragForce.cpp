@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -26,6 +36,8 @@
 #include "MessageInterface.hpp"
 #include "CoordinateSystem.hpp"
 #include "TimeTypes.hpp"
+#include "FileManager.hpp"    // for flux files
+#include "PropagationStateManager.hpp"
 
 #include <sstream>                 // for <<
 #include <cmath>
@@ -38,6 +50,9 @@
 //#define DEBUG_DRAGFORCE_REFOBJ
 //#define DEBUG_ANGVEL
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_NAN_CONDITIONS
+//#define DEBUG_FLUX_FILE
+//#define DEBUG_FINITEDIFF
 
 //#define DUMP_DERIVATIVE
 //#define DUMP_DENSITY
@@ -74,10 +89,15 @@ DragForce::PARAMETER_TEXT[DragForceParamCount - PhysicalModelParamCount] =
    "AtmosphereModel",               // ATMOSPHERE_MODEL
    "AtmosphereBody",                // ATMOSPHERE_BODY
    "InputSource",                   // SOURCE_TYPE
-   "SolarFluxFile",                 // FLUX_FILE
+   "HistoricWeatherSource",         // HISTORIC_WEATHER_SOURCE
+   "PredictedWeatherSource",        // PREDICTED_WEATHER_SOURCE
+   "CSSISpaceWeatherFile",          // CSSI_WEATHER_FILE
+   "SchattenFile",                  // SCHATTEN_WEATHER_FILE
    "F107",                          // FLUX
    "F107A",                         // AVERAGE_FLUX
    "MagneticIndex",                 // MAGNETIC_INDEX
+   "SchattenErrorModel",            // SCHATTEN_ERROR_MODEL
+   "SchattenTimingModel",           // SCHATTEN_TIMING_MODEL
    "FixedCoordinateSystem",         // FIXED_COORD_SYSTEM  (Read-only parameter)
    "AngularMomentumUpdateInterval", // W_UPDATE_INTERVAL (in days, Read-only)
    "KpToApMethod",                  // KP2AP_METHOD (Read-only)
@@ -89,10 +109,15 @@ DragForce::PARAMETER_TYPE[DragForceParamCount - PhysicalModelParamCount] =
    Gmat::OBJECT_TYPE,   // "AtmosphereModel"
    Gmat::STRING_TYPE,   // "AtmosphereBody",
    Gmat::STRING_TYPE,   // "InputSource", ("File" or "Constant" for now)
-   Gmat::STRING_TYPE,   // "SolarFluxFile",
+   Gmat::STRING_TYPE,   // "HistoricWeatherSource",
+   Gmat::STRING_TYPE,   // "PredictedWeatherSource",
+   Gmat::STRING_TYPE,   // "CSSISpaceWeatherFile",
+   Gmat::STRING_TYPE,   // "SchattenFile",
    Gmat::REAL_TYPE,     // "F107",
    Gmat::REAL_TYPE,     // "F107A",
    Gmat::REAL_TYPE,     // "MagneticIndex",
+   Gmat::STRING_TYPE,   // "SchattenError",
+   Gmat::STRING_TYPE,   // "SchattenTiming",
    Gmat::STRING_TYPE,   // "FixedCoordinateSystem"
    Gmat::REAL_TYPE,     // "AngularMomentumUpdateInterval"
    Gmat::INTEGER_TYPE,  // "KpToApMethod"
@@ -117,6 +142,8 @@ DragForce::DragForce(const std::string &name) :
    atmos                   (NULL),
    internalAtmos           (NULL),
    density                 (NULL),
+   densityModel            (""),
+   inputFile               (""),
    prefactor               (NULL),
    firedOnce               (false),
    hasWindModel            (false),
@@ -131,23 +158,33 @@ DragForce::DragForce(const std::string &name) :
    F107ID                  (-1),
    F107AID                 (-1),
    KPID                    (-1),
-   //bodyName               ("Earth"),
+   cssiWFileID             (-1),
+   schattenWFileID         (-1),
+   estimatingCd            (false),
+   cdEpsilonID             (-1),
+   cdEpsilonRow            (-1),
+   useCentralDifferences   (false),
+   finiteDifferenceDv      (true),
    dataType                ("Constant"),
-   fluxFile                (""),
+   historicWSource         ("ConstantFluxAndGeoMag"),
+   predictedWSource        ("ConstantFluxAndGeoMag"),
    fluxF107                (150.0),
    fluxF107A               (150.0),
    kp                      (3.0),
+   schattenErrorModel      ("Nominal"),
+   schattenTimingModel     ("NominalCycle"),
    cartIndex               (0),
    fillCartesian           (false),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
    kpApConversion          (0),
-   densityModel            (""),									// made changes by TUAN NGUYEN	for GMT-4299
-   inputFile               ("")										// made changes by TUAN NGUYEN	for GMT-4299
+   warnSTMMath             (true)            // TEMPORARY
 {
-#ifdef DEBUG_CONSTRUCTION
-	MessageInterface::ShowMessage("DragForce default construction <'%s',%p>\n", GetName().c_str(), this);
-#endif
+   #ifdef DEBUG_CONSTRUCTION
+      MessageInterface::ShowMessage("DragForce default construction "
+            "<'%s',%p>\n", GetName().c_str(), this);
+   #endif
+
    dimension = 6;
    parameterCount = DragForceParamCount;
    objectTypeNames.push_back("DragForce");
@@ -164,10 +201,10 @@ DragForce::DragForce(const std::string &name) :
    
    density = new Real[1];
 
-//   // Nominal Earth angular velocity
-//   angVel[0]      = 0.0;
-//   angVel[1]      = 0.0;
-//   angVel[2]      = 7.29211585530e-5;
+   FileManager *fm = FileManager::Instance();
+   fluxPath = fm->GetAbsPathname("ATMOSPHERE_PATH");
+   cssiWFile = fm->GetFilename("CSSI_FLUX_FILE");
+   schattenWFile = fm->GetFilename("SCHATTEN_FILE");
    
    ap = CalculateAp(kp);
    
@@ -259,6 +296,8 @@ DragForce::DragForce(const DragForce& df) :
    atmosphereType          (df.atmosphereType),
    atmos                   (NULL),
    density                 (NULL),
+   densityModel            (df.densityModel),
+   inputFile               (df.inputFile),
    prefactor               (NULL),
    firedOnce               (false),
    hasWindModel            (df.hasWindModel),
@@ -270,19 +309,35 @@ DragForce::DragForce(const DragForce& df) :
    massID                  (df.massID),
    cdID                    (df.cdID),
    areaID                  (df.areaID),
-   //bodyName                (df.bodyName),
+   F107ID                  (df.F107ID),
+   F107AID                 (df.F107AID),
+   KPID                    (df.KPID),
+   cssiWFileID             (df.cssiWFileID),
+   schattenWFileID         (df.schattenWFileID),
+   estimatingCd            (df.estimatingCd),
+   cdEpsilonID             (df.cdEpsilonID),
+   cdEpsilonRow            (df.cdEpsilonRow),
+   cdEpsilon               (df.cdEpsilon),
+   cdInitial               (df.cdInitial),
+   useCentralDifferences   (df.useCentralDifferences),
+   finiteDifferenceDv      (df.finiteDifferenceDv),
    dataType                (df.dataType),
-   fluxFile                (df.fluxFile),
+   historicWSource         (df.historicWSource),
+   predictedWSource        (df.predictedWSource),
+   fluxPath                (df.fluxPath),
+   cssiWFile               (df.cssiWFile),
+   schattenWFile           (df.schattenWFile),
    fluxF107                (df.fluxF107),
    fluxF107A               (df.fluxF107A),
    kp                      (df.kp),
+   schattenErrorModel      (df.schattenErrorModel),
+   schattenTimingModel     (df.schattenTimingModel),
    cartIndex               (df.cartIndex),
    fillCartesian           (df.fillCartesian),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
    kpApConversion          (df.kpApConversion),
-   densityModel            (df.densityModel),							// made changes by TUAN NGUYEN	for GMT-4299
-   inputFile               (df.inputFile)								// made changes by TUAN NGUYEN	for GMT-4299
+   warnSTMMath             (true)            // TEMPORARY
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   enetered\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
@@ -302,7 +357,8 @@ DragForce::DragForce(const DragForce& df) :
 //      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());      // Any other initialization needed?
       cbFixed = (CoordinateSystem*)(df.cbFixed);
 
-   parameterCount += 7;
+   parameterCount = DragForceParamCount;
+
    dimension = df.dimension;
    orbitDimension = df.orbitDimension;
 
@@ -314,22 +370,26 @@ DragForce::DragForce(const DragForce& df) :
    cbLoc[1]  = df.cbLoc[1];
    cbLoc[2]  = df.cbLoc[2];
    
-   density = new Real[1];
+   //density = new Real[1];
+   if (df.satCount < 1)
+      density = new Real[1];
+   else
+      density = new Real[df.satCount];
    ap = CalculateAp(kp);
    
    area.clear();
    mass.clear();
    dragCoeff.clear();
 
-   if (internalAtmos != NULL)													// made changes by TUAN NGUYEN	for GMT-4299
-   {																			// made changes by TUAN NGUYEN	for GMT-4299
-	   try																		// made changes by TUAN NGUYEN	for GMT-4299
-	   {																		// made changes by TUAN NGUYEN	for GMT-4299
-	      densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes by TUAN NGUYEN	for GMT-4299
-		  inputFile    = internalAtmos->GetStringParameter("InputFile");		// made changes by TUAN NGUYEN	for GMT-4299
-	   }																		// made changes by TUAN NGUYEN	for GMT-4299
-	   catch(...){};															// made changes by TUAN NGUYEN	for GMT-4299
-   }																			// made changes by TUAN NGUYEN	for GMT-4299
+   if (internalAtmos != NULL)													            // made changes for GMT-4299
+   {																			                  // made changes for GMT-4299
+	   try																		               // made changes for GMT-4299
+	   {																		                  // made changes for GMT-4299
+	      densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes for GMT-4299
+		  inputFile    = internalAtmos->GetStringParameter("InputFile");		   // made changes for GMT-4299
+	   }																		                  // made changes for GMT-4299
+	   catch(...){};															               // made changes for GMT-4299
+   }																			                  // made changes for GMT-4299
    
 #ifdef DEBUG_CONSTRUCTION
    if (df.atmos == NULL)
@@ -381,7 +441,22 @@ DragForce& DragForce::operator=(const DragForce& df)
    massID                = df.massID;
    cdID                  = df.cdID;
    areaID                = df.areaID;
+   F107ID                = df.F107ID;
+   F107AID               = df.F107AID;
+   KPID                  = df.KPID;
+   cssiWFileID           = df.cssiWFileID;
+   schattenWFileID       = df.schattenWFileID;
    
+   estimatingCd          = df.estimatingCd;
+   cdEpsilonID           = df.cdEpsilonID;
+   cdEpsilonRow          = df.cdEpsilonRow;
+   cdEpsilon             = df.cdEpsilon;
+   cdInitial             = df.cdInitial;
+   useCentralDifferences = df.useCentralDifferences;
+   finiteDifferenceDv    = df.finiteDifferenceDv;
+
+   warnSTMMath           = true;            // TEMPORARY
+
    if (internalAtmos != NULL)
    {
       #ifdef DEBUG_MEMORY
@@ -389,6 +464,8 @@ DragForce& DragForce::operator=(const DragForce& df)
          (internalAtmos, "internalAtmos", "DragForce::operator=()",
           "deleting internal atmosphere model");
       #endif
+      if (atmos == internalAtmos)
+         atmos = NULL;
       delete internalAtmos;
    }
    
@@ -404,18 +481,24 @@ DragForce& DragForce::operator=(const DragForce& df)
       #endif
    }
    
-   if (df.cbFixed)
-   {
-//      if (cbFixed)
-//         delete cbFixed;
-//      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());
-      cbFixed = (CoordinateSystem*)(df.cbFixed);
-   }
+//   if (df.cbFixed)                                             // made changes for bug GMT-5282
+//   {                                                           // made changes for bug GMT-5282
+////      if (cbFixed)                                           // made changes for bug GMT-5282
+////         delete cbFixed;                                     // made changes for bug GMT-5282
+////      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());    // made changes for bug GMT-5282
+//      cbFixed = (CoordinateSystem*)(df.cbFixed);               // made changes for bug GMT-5282
+//   }                                                           // made changes for bug GMT-5282
+   cbFixed               = df.cbFixed;                           // made changes for bug GMT-5282
+   internalCoordSystem   = df.internalCoordSystem;               // made changes for bug GMT-5282
 
    atmos                 = NULL;
    angVel                = NULL;
 //   density               = NULL;
-   density = new Real[1];
+   //density = new Real[1];
+   if (df.satCount < 1)
+      density = new Real[1];
+   else
+      density = new Real[df.satCount];
    prefactor             = NULL;
    firedOnce             = false;
    hasWindModel          = df.hasWindModel;
@@ -426,9 +509,14 @@ DragForce& DragForce::operator=(const DragForce& df)
    wUpdateInterval       = df.wUpdateInterval;
    wUpdateEpoch          = df.wUpdateEpoch;
    dataType              = df.dataType;
-   fluxFile              = df.fluxFile;
+   historicWSource       = df.historicWSource;
+   predictedWSource      = df.predictedWSource;
+   cssiWFile             = df.cssiWFile;
+   schattenWFile         = df.schattenWFile;
    fluxF107              = df.fluxF107;
    fluxF107A             = df.fluxF107A;
+   schattenErrorModel    = df.schattenErrorModel;
+   schattenTimingModel   = df.schattenTimingModel;
    kpApConversion        = df.kpApConversion;
    kp                    = df.kp;
    ap                    = CalculateAp(kp);
@@ -453,8 +541,8 @@ DragForce& DragForce::operator=(const DragForce& df)
    cartIndex = df.cartIndex;
    fillCartesian = df.fillCartesian;
 
-   densityModel = df.densityModel;							// made changes by TUAN NGUYEN	for GMT-4299
-   inputFile    = df.inputFile;								// made changes by TUAN NGUYEN	for GMT-4299
+   densityModel = df.densityModel;							// made changes for GMT-4299
+   inputFile    = df.inputFile;								// made changes for GMT-4299
 
    return *this;
 }
@@ -557,9 +645,16 @@ void DragForce::SetSatelliteParameter(const Integer i,
    if (parmName == "Cd")
    {
       if (parmNumber < dragCoeff.size())
+      {
          dragCoeff[i] = parm;
+         if (cdInitial[i] == -99999999.9999)
+            cdInitial[i] = parm;
+      }
       else
+      {
          dragCoeff.push_back(parm);
+         cdInitial.push_back(parm);
+      }
       if (parmID >= 0)
          cdID = parmID;
    }
@@ -571,6 +666,15 @@ void DragForce::SetSatelliteParameter(const Integer i,
          area.push_back(parm);
       if (parmID >= 0)
          areaID = parmID;
+   }
+   if (parmName == "CdEpsilon")
+   {
+       if (parmNumber < cdEpsilon.size())
+          cdEpsilon[i] = parm;
+       else
+          cdEpsilon.push_back(parm);
+       if (parmID >= 0)
+          cdEpsilonID = parmID;
    }
 }
 
@@ -621,6 +725,13 @@ void DragForce::SetSatelliteParameter(const Integer i,
       else
          area.push_back(parm);
    }
+   if (parmID == cdEpsilonID)
+   {
+      if (parmNumber < cdEpsilon.size())
+         cdEpsilon[i] = parm;
+      else
+         cdEpsilon.push_back(parm);
+   }
 }
 
 
@@ -668,7 +779,12 @@ void DragForce::ClearSatelliteParameters(const std::string parmName)
    if ((parmName == "Mass") || (parmName == ""))
       mass.clear();
    if ((parmName == "Cd") || (parmName == ""))
+   {
       dragCoeff.clear();
+      cdInitial.clear();
+   }
+   if ((parmName == "CdEpsilon") || (parmName == ""))
+      cdEpsilon.clear();
    if ((parmName == "DragArea") || (parmName == ""))
       area.clear();
 }
@@ -763,24 +879,25 @@ bool DragForce::Initialize()
          if (!sun)
             throw ODEModelException("The Sun is not in solar system");
            
-         std::string bodyName;
+         //std::string bodyName;
 
-         // Drag currently requires that the drag body be the Earth.  When other
-         // drag models are implemented, remove this block and test.
-         for (StringArray::iterator i = dragBody.begin(); i != dragBody.end(); 
-              ++i)
-         {
-            if ((*i) != "Earth" && (*i) != "Mars")
-               throw ODEModelException(
-                  "Drag modeling only works at the Earth or Mars in current "
-                  "GMAT builds.");
-         }
-         
-		 if (dragBody.size() > 0)
-            bodyName = dragBody[0];
-         else
-            bodyName = "Earth";
+         //// Drag currently requires that the drag body be the Earth or Mars.  When other
+         //// drag models are implemented, remove this block and test.
+         //for (StringArray::iterator i = dragBody.begin(); i != dragBody.end(); 
+         //     ++i)
+         //{
+         //   if ((*i) != "Earth" && (*i) != "Mars")
+         //      throw ODEModelException(
+         //         "Drag modeling only works at the Earth or Mars in current "
+         //         "GMAT builds.");
+         //}
+         //
+         //if (dragBody.size() > 0)
+         //   bodyName = dragBody[0];
+         //else
+         //   bodyName = "Earth";
          centralBody = solarSystem->GetBody(bodyName);
+         body = solarSystem->GetBody(bodyName);                      // made changes for bug GMT-5282
    
          if (!centralBody)
             throw ODEModelException(
@@ -820,8 +937,9 @@ bool DragForce::Initialize()
                }
             }
             
-            if ((atmosphereType == "BodyDefault") ||
-                (atmosphereType == modelBodyIsUsing))
+//            if ((atmosphereType == "BodyDefault") ||
+//                (atmosphereType == modelBodyIsUsing))
+            if ((atmosphereType == "BodyDefault") || (atmosphereType == "MarsGRAM2005"))
                atmos = centralBody->GetAtmosphereModel();
             else
                atmos = internalAtmos;
@@ -837,7 +955,9 @@ bool DragForce::Initialize()
                throw ODEModelException("No central body is defined for DragForce\n");
 
             if (body->GetName() != atmos->GetCentralBodyName())
-				throw ODEModelException("Force model's central body ('" + body->GetName() + "') and Atmosphere model's central body ('" + atmos->GetCentralBodyName() + "')are different\n"); 
+               throw ODEModelException("Force model's central body ('" +
+                  body->GetName() + "') and Atmosphere model's central body ('" +
+                  atmos->GetCentralBodyName() + "')are different\n");
 
             atmos->SetSunVector(sunLoc);
             atmos->SetCentralBodyVector(cbLoc);
@@ -852,29 +972,71 @@ bool DragForce::Initialize()
             F107ID = atmos->GetParameterID("F107");
             F107AID = atmos->GetParameterID("F107A");
             KPID = atmos->GetParameterID("MagneticIndex");
+            cssiWFileID = atmos->GetParameterID("CSSISpaceWeatherFile");
+            schattenWFileID = atmos->GetParameterID("SchattenFile");
 
-            if (fluxFile == "")
-            {
-               if (F107ID < 0)
-                  throw ODEModelException("Atmosphere model initialization is "
-                        "incomplete");
-               atmos->SetRealParameter(F107ID, fluxF107);
-               atmos->SetRealParameter(F107AID, fluxF107A);
-               atmos->SetRealParameter(KPID, kp);
-            }
+            if (F107ID < 0)
+               throw ODEModelException("Atmosphere model initialization is incomplete");
+            atmos->SetRealParameter(F107ID, fluxF107);
+            atmos->SetRealParameter(F107AID, fluxF107A);
+            atmos->SetRealParameter(KPID, kp);
 
-			if (cbFixed != NULL)										// made changes by TUAN NGUYEN
-               atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
-            if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
-               atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
-			try
-			{
-//				MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
-			   atmos->SetStringParameter("DensityModel", densityModel);	// made changes by TUAN NGUYEN		for GMT-4299
-			   atmos->SetStringParameter("InputFile", inputFile);		// made changes by TUAN NGUYEN		for GMT-4299
-			} catch (...){}
+            // Set the file names, possibly with path prefixes
+            FileManager *fm = FileManager::Instance();
 
-			atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
+            std::string weatherfile = cssiWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               weatherfile = fluxPath + cssiWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               throw ODEModelException("Cannot open the observated space weather file " +
+                     cssiWFile + ", nor the file at the location " + weatherfile);
+            atmos->SetStringParameter(cssiWFileID, weatherfile);
+
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("CSSI File setting: %s\n",
+                     atmos->GetStringParameter(cssiWFileID).c_str());
+            #endif
+
+            weatherfile = schattenWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               weatherfile = fluxPath + schattenWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               throw ODEModelException("Cannot open the predicted space weather file " +
+                     schattenWFile + ", nor the file at the location " + weatherfile);
+            atmos->SetStringParameter(schattenWFileID, weatherfile);
+
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("Schatten File setting: %s\n",
+                     atmos->GetStringParameter(schattenWFileID).c_str());
+            #endif
+
+            if (cbFixed != NULL)
+               atmos->SetFixedCoordinateSystem(cbFixed);
+            if (internalCoordSystem != NULL)
+               atmos->SetInternalCoordSystem(internalCoordSystem);
+            if (atmos->GetCbJ2000CoordinateSystem() == NULL)                                                        // made changes for bug GMT-5282
+            {                                                                                                       // made changes for bug GMT-5282
+               // Create an cbJ2000 coordinate system if it is not ready set in atmos                               // made changes for bug GMT-5282
+               if (centralBody != NULL)                                                                             // made changes for bug GMT-5282
+               {                                                                                                    // made changes for bug GMT-5282
+                  CoordinateSystem* cbJ2000 = CoordinateSystem::CreateLocalCoordinateSystem("cbJ2000", "MJ2000Eq",  // made changes for bug GMT-5282
+                  centralBody, NULL, NULL, centralBody, solarSystem);                                               // made changes for bug GMT-5282
+                  atmos->SetCbJ2000CoordinateSystem(cbJ2000);                                                       // made changes for bug GMT-5282
+               }                                                                                                    // made changes for bug GMT-5282
+            }                                                                                                       // made changes for bug GMT-5282
+
+			   try
+			   {
+//				   MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
+			      atmos->SetStringParameter("DensityModel", densityModel);	// made changes for GMT-4299
+			      atmos->SetStringParameter("InputFile", inputFile);		   // made changes for GMT-4299
+               } catch (...){}
+
+
+			   atmos->Initialize();										// Note: it needs to initialize before use. Fixed bug GMT-4124
+            // Set the source flags: constants, files, etc
+            atmos->SetInputSource(historicWSource, predictedWSource);
+            atmos->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
          }
          else
          {
@@ -932,6 +1094,7 @@ void DragForce::BuildPrefactors()
       throw ODEModelException(
          "Cannot use drag force: force model origin not set.");
     
+   /// @todo: for maneuvering, need to be updating mass here
    for (Integer i = 0; i < satCount; ++i)
    {
       if (mass.size() < (unsigned)(i+1))
@@ -1036,30 +1199,43 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
       dragdata << "Entered DragForce::GetDerivatives()\n";
    #endif
 
-   Integer i, i6, j6;
+   Integer i, i6, ix, j6;
    Real vRelative[3], vRelMag, factor;
 
-   if (!firedOnce)
+   if (mass.size() > 0)
+      BuildPrefactors();
+   else
    {
-      if (mass.size() > 0)
-         BuildPrefactors();
-      else
-         if (mass.size() == 0)
-            for (Integer i = 0; i < satCount; ++i)
-            {
-               if (!forceOrigin)
-                  throw ODEModelException(
-                     "Cannot use drag force: force model origin not set.");
-    
-               #ifdef DEBUG_DRAGFORCE_DENSITY
-                   dragdata << "Using default prefactors for " << satCount
-                            << " Spacecraft\n";
-               #endif
-               prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0; // Dummy up the product
-            }
-               
-      firedOnce = true;
+      if (mass.size() == 0)
+      {
+         for (Integer i = 0; i < satCount; ++i)
+         {
+            if (!forceOrigin)
+               throw ODEModelException(
+                  "Cannot use drag force: force model origin not set.");
+
+            #ifdef DEBUG_DRAGFORCE_DENSITY
+                dragdata << "Using default prefactors for " << satCount
+                         << " Spacecraft\n";
+            #endif
+            prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0; // Dummy up the product
+         }
+      }
    }
+
+   Integer index = psm->GetSTMIndex(cdID);
+   if (index >= 0)
+   {
+      estimatingCd = true;
+      cdEpsilonRow = index;
+   }
+
+   #ifdef DEBUG_INITIALIZE
+      MessageInterface::ShowMessage("STM row count %d ==> %sestimating Cd\n",
+            stmRowCount, (estimatingCd ? "" : "NOT "));
+   #endif
+
+   firedOnce = true;
     
    // First translate to the drag body from the force model origin
    Real now = epoch + (elapsedTime + dt) / GmatTimeConstants::SECS_PER_DAY;
@@ -1105,7 +1281,6 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillCartesian)
    {
-   
       for (i = 0; i < satCount; ++i)
       {
          i6 = i * 6;
@@ -1192,6 +1367,28 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
                      "   Density:    %16.9le\n", density[i]);
                }
             #endif
+
+         #ifdef DEBUG_NAN_CONDITIONS
+            for (Integer j = 0; j < 6; ++j)
+            if (GmatMathUtil::IsNaN(deriv[j6+j]))
+            {
+               MessageInterface::ShowMessage("NAN found in drag force"
+                     " element %d, Value is %lf at epoch %.12lf\n", j,
+                     deriv[j], now);
+               MessageInterface::ShowMessage(
+                  "   Position:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6], state[i6+1], state[i6+2]);
+               MessageInterface::ShowMessage(
+                  "   Velocity:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6+3], state[i6+4], state[i6+5]);
+               MessageInterface::ShowMessage(
+                  "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+                  deriv[3+i6], deriv[4+i6], deriv[5+i6]);
+               MessageInterface::ShowMessage(
+                  "   Density:    %16.9le\n", density[i]);
+            }
+         #endif
+
          }
          else
          {
@@ -1226,10 +1423,222 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
             #endif
          }
       }
+
+      #ifdef DUMP_DERIVATIVE
+         MessageInterface::ShowMessage("State(%.12lf): [%le %le %le %le %le %le]\n",
+               now, deriv[0], deriv[1], deriv[2], deriv[3], deriv[4], deriv[5]);
+      #endif
    }
 
-   //#ifdef DUMP_DERIVATIVE
+   if (fillSTM || fillAMatrix)
+   {
 
+      if (warnSTMMath)
+      {
+         MessageInterface::ShowMessage("Warning: The orbit state transition "
+               "matrix does not currently contain drag contribution "
+               "partial derivatives.\n");
+
+         warnSTMMath = false;
+      }
+
+      Real *aTilde;
+      Integer stmSize = stmRowCount * stmRowCount;
+      aTilde = new Real[stmSize];
+
+      for (i = 0; i < satCount; ++i)
+      {
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            ix = j * stmRowCount;
+            for (Integer k = 0; k < stmRowCount; ++k)
+               aTilde[ix+k] = 0.0;
+         }
+
+// Turn off finite differencing partials for now
+if (0)
+{
+
+         // Build the base acceleration
+         Rvector3 accel = Accelerate(&state[i*6], now, prefactor[0]);
+
+         Rvector3 daccel, daccelm;
+         Real pert = 1.0e-3;
+         Real val;
+
+         // Finite difference the position submatrix
+         for (UnsignedInt j = 0; j < 3; ++j)
+         {
+            val = state[i*6 + j];
+            state[i*6 + j] += pert;
+            daccel = Accelerate(&state[i*6], now, prefactor[0]);
+            ix = stmRowCount * (3 + j);
+
+            if (useCentralDifferences)
+            {
+               state[j] -= 2.0 * pert;
+               daccelm = Accelerate(&state[i*6], now, prefactor[0]);
+
+               #ifdef DEBUG_FINITEDIFF
+                  MessageInterface::ShowMessage("R: [%le  %le  %le] - [%le  %le  %le] ==> ",
+                        daccel[0], daccel[1], daccel[2], daccelm[0], daccelm[1], daccelm[2]);
+               #endif
+
+               for (UnsignedInt k = 0; k < 3; ++k)
+                  aTilde[ix+k] = (daccel[k] - daccelm[k]) / (2.0 * pert);
+
+               #ifdef DEBUG_FINITEDIFF
+                  MessageInterface::ShowMessage("[%le  %le  %le]\n",
+                        aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
+               #endif
+            }
+            else
+            {
+               #ifdef DEBUG_FINITEDIFF
+                  MessageInterface::ShowMessage("R: [%le  %le  %le] - [%le  %le  %le] ==> ",
+                        daccel[0], daccel[1], daccel[2],  accel[0], accel[1], accel[2]);
+               #endif
+
+               for (UnsignedInt k = 0; k < 3; ++k)
+                  aTilde[ix+k] = (daccel[k] - accel[k]) / pert;
+
+               #ifdef DEBUG_FINITEDIFF
+                  MessageInterface::ShowMessage("[%le  %le  %le]\n",
+                        aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
+               #endif
+            }
+
+            #ifdef DEBUG_A_MATRIX
+               MessageInterface::ShowMessage("%d: [%.12le  %.12le  %.12le]\n", j,
+                     aTilde[ix], aTilde[ix+1], aTilde[ix+2]);
+            #endif
+
+            state[i*6 + j] = val;
+         }
+         // Next handle the velocity submatrix
+         if (finiteDifferenceDv)
+         {
+            pert = 1.0e-6;
+            for (UnsignedInt j = 0; j < 3; ++j)
+            {
+               val = state[i*6 + j+3];
+               state[i*6 + j+3] += pert;
+               daccel = Accelerate(&state[i*6], now, prefactor[0]);
+               ix = stmRowCount * (3 + j);
+
+               if (useCentralDifferences)
+               {
+                  state[j+3] -= 2.0 * pert;
+                  daccelm = Accelerate(&state[i*6], now, prefactor[0]);
+
+                  #ifdef DEBUG_FINITEDIFF
+                     MessageInterface::ShowMessage("V: [%le  %le  %le] - [%le  %le  %le] ==> ",
+                           daccel[0], daccel[1], daccel[2], daccelm[0], daccelm[1], daccelm[2]);
+                  #endif
+
+                  for (UnsignedInt k = 0; k < 3; ++k)
+                     aTilde[ix+k+3] = (daccel[k] - daccelm[k]) / (2.0 * pert);
+
+                  #ifdef DEBUG_FINITEDIFF
+                     MessageInterface::ShowMessage("[%le  %le  %le]\n",
+                           aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                  #endif
+               }
+               else
+               {
+                  #ifdef DEBUG_FINITEDIFF
+                     MessageInterface::ShowMessage("V: [%le  %le  %le] - [%le  %le  %le] ==> ",
+                           daccel[0], daccel[1], daccel[2],  accel[0], accel[1], accel[2]);
+                  #endif
+
+                  for (UnsignedInt k = 0; k < 3; ++k)
+                     aTilde[ix+k+3] = (daccel[k] - accel[k]) / pert;
+
+                  #ifdef DEBUG_FINITEDIFF
+                     MessageInterface::ShowMessage("[%le  %le  %le]\n",
+                           aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+                  #endif
+               }
+               #ifdef DEBUG_A_MATRIX
+                  MessageInterface::ShowMessage("%d: [%.12le  %.12le  %.12le]\n",
+                        j+3, aTilde[ix+3], aTilde[ix+4], aTilde[ix+5]);
+               #endif
+               state[i*6 + j+3] = val;
+            }
+         }
+         else
+         {
+            throw ODEModelException("Analytic differencing for drag model A-matrix "
+                  "d(accel)/dv terms in not yet implemented");
+         }
+}
+         if (estimatingCd)
+         {
+            for (UnsignedInt j = 0; j < 3; ++j)
+            {
+               ix = stmRowCount * (3 + j);
+               aTilde[ix+cdEpsilonRow] = deriv[i*6 + 3+j] * cdInitial[i] / dragCoeff[i];
+
+               #ifdef DEBUG_A_MATRIX
+                  MessageInterface::ShowMessage("Cd deriv %d: %.12le\n", j,
+                        aTilde[ix+cdEpsilonRow]);
+               #endif
+            }
+         }
+
+
+         Integer iStart = stmStart + i * stmSize;
+         Integer element;
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            for (Integer k = 0; k < stmRowCount; ++k)
+            {
+               element = j * stmRowCount + k;
+               deriv[iStart+element] = aTilde[element];
+            }
+         }
+
+         #ifdef DUMP_DERIVATIVE
+            MessageInterface::ShowMessage("Drag Force A-matrix at epoch %.12lf for state "
+                  "[%lf %lf %lf %.12lf %.12lf %.12lf]:\n",now, state[0],
+                  state[1], state[2], state[3], state[4], state[5]);
+            for (Integer m = 0; m < stmRowCount; ++m)
+            {
+               MessageInterface::ShowMessage("      ");
+               for (Integer n = 0; n < stmRowCount; ++n)
+               {
+                  if (n > 0)
+                     MessageInterface::ShowMessage(", ");
+                  MessageInterface::ShowMessage("%le", aTilde[m*stmRowCount+n]);
+               }
+               MessageInterface::ShowMessage("\n");
+            }
+            MessageInterface::ShowMessage("--------------------------------------"
+                  "-----------------------------------------------------------\n");
+         #endif
+
+         #ifdef DEBUG_FINITEDIFF
+            MessageInterface::ShowMessage("Drag derivatives:\n   State: [");
+            Integer p,q;
+            for (p = 0; p < 6; ++p)
+               MessageInterface::ShowMessage(" %le ", deriv[p]);
+            MessageInterface::ShowMessage("]\n\n   A-Matrix: [");
+            for (p = 0; p < stmRowCount; ++p)
+            {
+               if (p > 0)
+                  MessageInterface::ShowMessage(";\n              ");
+               for (q = 0; q < stmRowCount; ++q)
+               {
+                  MessageInterface::ShowMessage(" %le ", deriv[6+p*stmRowCount+q]);
+               }
+            }
+            MessageInterface::ShowMessage("]\n\n");
+         #endif
+
+      }
+
+      delete [] aTilde;
+   }
 
    #ifdef DEBUG_SHOW_Force
       static int iter = 0;
@@ -1239,7 +1648,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
       if (++iter == 16)
          iter = 0;
    #endif
-   
+
    return true;
 }
 
@@ -1427,12 +1836,23 @@ std::string DragForce::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool DragForce::IsParameterReadOnly(const Integer id) const
 {
-   if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX)
+   if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX ||
+       id == HISTORIC_WEATHER_SOURCE || id == PREDICTED_WEATHER_SOURCE ||
+       id == CSSI_WEATHER_FILE || id == SCHATTEN_WEATHER_FILE ||
+       id == SCHATTEN_ERROR_MODEL || id == SCHATTEN_TIMING_MODEL)
    {
       if (atmosphereType == "Exponential")
          return true;
       else
-         return false;
+      {
+         if (bodyName == "Earth")
+            return false;
+
+         // Only support the CSSI file and Schatten file at the Earth
+         if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX)
+            return false;
+         return true;
+      }
    }
    
    if (id == ATMOSPHERE_BODY || id == SOURCE_TYPE ||
@@ -1450,6 +1870,19 @@ bool DragForce::IsParameterReadOnly(const Integer id) const
 bool DragForce::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
+}
+
+bool DragForce::WriteEmptyStringParameter(const Integer id) const
+{
+   if (id == HISTORIC_WEATHER_SOURCE || id == PREDICTED_WEATHER_SOURCE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+      else
+         return true;
+   }
+
+   return PhysicalModel::WriteEmptyStringParameter(id);
 }
 
 
@@ -1650,9 +2083,24 @@ std::string DragForce::GetStringParameter(const Integer id) const
    
    if (id == SOURCE_TYPE)
       return dataType;
+
+   if (id == HISTORIC_WEATHER_SOURCE)
+      return historicWSource;
+
+   if (id == PREDICTED_WEATHER_SOURCE)
+      return predictedWSource;
     
-   if (id == FLUX_FILE)
-      return fluxFile;
+   if (id == CSSI_WEATHER_FILE)
+      return cssiWFile;
+
+   if (id == SCHATTEN_WEATHER_FILE)
+      return schattenWFile;
+
+   if(id == SCHATTEN_ERROR_MODEL)
+      return schattenErrorModel;
+
+   if (id == SCHATTEN_TIMING_MODEL)
+      return schattenTimingModel;
     
    if (id == FIXED_COORD_SYSTEM)
       return bodyName + "Fixed";
@@ -1668,6 +2116,17 @@ std::string DragForce::GetStringParameter(const std::string &label) const
    return GetStringParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * @see SetStringParameter(const Integer id, const std::string &value)
+ */
+//------------------------------------------------------------------------------
+bool DragForce::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
@@ -1737,20 +2196,119 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
     
-   if (id == FLUX_FILE)
+   if (id == HISTORIC_WEATHER_SOURCE)
    {
-      fluxFile = value;
-      if (!internalAtmos)
-         throw ODEModelException(
-            "Cannot set flux file: Atmosphere Model undefined");
-         
-      internalAtmos->SetSolarFluxFile(fluxFile);
-      internalAtmos->SetNewFileFlag(true);
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if ((value == "CSSISpaceWeatherFile") ||
+          (value == "ConstantFluxAndGeoMag"))
+      {
+         historicWSource = value;
+         return true;
+      }
+      
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'CSSISpaceWeatherFile', 'ConstantFluxAndGeoMag'");
+      throw badVal;
+   }
+
+   if (id == PREDICTED_WEATHER_SOURCE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if ( // (value == "CSSISpaceWeatherFile") ||
+          (value == "ConstantFluxAndGeoMag") ||
+          (value == "SchattenFile"))
+      {
+         predictedWSource = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+//            "'CSSISpaceWeatherFile', 'ConstantFluxAndGeoMag', 'SchattenFile'");
+            "'ConstantFluxAndGeoMag', 'SchattenFile'");
+      throw badVal;
+   }
+
+   if (id == CSSI_WEATHER_FILE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if (value == "")
+         return false;
+
+      cssiWFile = value;
       return true;
    }
 
+   if (id == SCHATTEN_WEATHER_FILE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if (value == "")
+         return false;
+
+      schattenWFile = value;
+      return true;
+   }
+
+   if (id == SCHATTEN_ERROR_MODEL)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if ((value == "Nominal") || (value == "PlusTwoSigma") ||
+          (value == "MinusTwoSigma"))
+      {
+         schattenErrorModel = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'Nominal', 'PlusTwoSigma', 'MinusTwoSigma'");
+      throw badVal;
+   }
+
+   if (id == SCHATTEN_TIMING_MODEL)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if ((value == "NominalCycle") || (value == "EarlyCycle") ||
+          (value == "LateCycle"))
+      {
+         schattenTimingModel = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'NominalCycle', 'EarlyCycle, 'LateCycle'");
+      throw badVal;
+   }
 
    return PhysicalModel::SetStringParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool DragForce::SetStringParameter(const std::string &label,
+                                   const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
 }
 
 //------------------------------------------------------------------------------
@@ -1980,16 +2538,37 @@ bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
          (internalAtmos, "internalAtmos", "DragForce::SetInternalAtmosphereModel()",
           "deleting internal atmosphere model");
       #endif
+      if (atmos == internalAtmos)
+         atmos = NULL;
       delete internalAtmos;
    }
    
    internalAtmos = atm;
+   if (atmos == NULL)
+      atmos = internalAtmos;
 
    if (cbFixed != NULL)
       internalAtmos->SetFixedCoordinateSystem(cbFixed);
    if (internalCoordSystem != NULL)
       internalAtmos->SetInternalCoordSystem(internalCoordSystem);
    
+   F107ID = internalAtmos->GetParameterID("F107");
+   F107AID = internalAtmos->GetParameterID("F107A");
+   KPID = internalAtmos->GetParameterID("MagneticIndex");
+   cssiWFileID = internalAtmos->GetParameterID("CSSISpaceWeatherFile");
+   schattenWFileID = internalAtmos->GetParameterID("SchattenFile");
+
+   if (F107ID < 0)
+      throw ODEModelException("Atmosphere model initialization is incomplete");
+   internalAtmos->SetRealParameter(F107ID, fluxF107);
+   internalAtmos->SetRealParameter(F107AID, fluxF107A);
+   internalAtmos->SetRealParameter(KPID, kp);
+
+   // Set the file names
+   internalAtmos->SetStringParameter(cssiWFileID, cssiWFile);
+   internalAtmos->SetStringParameter(schattenWFileID, schattenWFile);
+
+
    #ifdef DEBUG_DRAGFORCE_REFOBJ
    MessageInterface::ShowMessage
       ("DragForce::SetInternalAtmosphereModel() returning true, internalAtmos=<%p>\n",
@@ -2016,6 +2595,166 @@ AtmosphereModel* DragForce::GetInternalAtmosphereModel()
 
 
 //------------------------------------------------------------------------------
+// AtmosphereModel* GetInternalAtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ * Gets the internal atmosphere model for the DragForce.
+ *
+ * @return pointer to the internal atmosphere model used by the DragForce
+ *         object when useExternalAtmosphere is set to false.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* DragForce::GetAtmosphereModel()
+{
+   return (internalAtmos ? internalAtmos : atmos);
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckFluxFile(const std::string &filename, bool isHistoric)
+//------------------------------------------------------------------------------
+/**
+ * Checks (1) for file existence and (2) for file keywords
+ *
+ * @param filename The file to check
+ * @param isHistoric Flag indicating if the file is used for measured data
+ *
+ * @return true if the file is valid and in contains the expected keywords
+ */
+//------------------------------------------------------------------------------
+std::string DragForce::CheckFluxFile(const std::string &filename, bool isHistoric)
+{
+   std::string retval = "";
+
+   Integer loc = 0;
+
+   // This is the keyword list, consisting of a header followed by begin/end tags
+   std::vector<StringArray> keywords;
+   StringArray tags;
+   // CSSI used for historic data
+   tags.push_back("DATATYPE CSSISPACEWEATHER");
+   tags.push_back("BEGIN OBSERVED");
+   tags.push_back("END OBSERVED");
+   keywords.push_back(tags);
+   tags.clear();
+
+   // CSSI used for predict data
+   tags.push_back("DATATYPE CSSISPACEWEATHER");
+   tags.push_back("BEGIN DAILY_PREDICTED");
+   tags.push_back("END DAILY_PREDICTED");
+   tags.push_back("BEGIN MONTHLY_PREDICTED");
+   tags.push_back("END MONTHLY_PREDICTED");
+   keywords.push_back(tags);
+   tags.clear();
+
+   // Schatten
+   tags.push_back("PREDICTED SOLAR DATA");
+   tags.push_back("BEGIN_DATA");
+   tags.push_back("END_DATA");
+   keywords.push_back(tags);
+
+   // Check for file existence, possibly with path prefixes
+   FileManager *fm = FileManager::Instance();
+   std::string fluxPath = fm->GetAbsPathname("ATMOSPHERE_PATH");
+
+   std::string weatherfile = filename;
+
+   MessageInterface::ShowMessage("%d %s\n", ++loc, weatherfile.c_str());
+
+   if (fm->DoesFileExist(weatherfile) == false)
+   {
+      MessageInterface::ShowMessage("No file; adding path %s\n", fluxPath.c_str());
+      weatherfile = fluxPath + filename;
+   }
+
+   MessageInterface::ShowMessage("%d %s\n", ++loc, weatherfile.c_str());
+
+   if (fm->DoesFileExist(weatherfile) == false)
+   {
+      MessageInterface::ShowMessage("Cannot locate\n");
+
+      std::string fileUsage = isHistoric ? "observed" : "predicted";
+      throw ODEModelException("Cannot open the " +
+            fileUsage + " space weather file " +
+            filename + ", nor the file at the location " + weatherfile);
+   }
+
+   MessageInterface::ShowMessage("The file %s exists\n", weatherfile.c_str());
+
+   // File exists; check for keywords
+   UnsignedInt count = (isHistoric ? 1 : keywords.size());
+   UnsignedInt start = (isHistoric ? 0 : 1);
+   UnsignedInt index = 9999;
+
+   bool fileIsValid = false;
+
+   std::ifstream inStream(weatherfile.c_str());
+   std::string line;
+
+   MessageInterface::ShowMessage("Checking for the header:\n");
+
+
+   // Check headers to determine the index of the keywork list
+   while (!inStream.eof() && (index == 9999))
+   {
+      getline(inStream, line);
+
+      // if the line is blank, skip it
+      if (GmatStringUtil::IsBlank(line, true)) continue;
+
+      // Make upper case, so we can check for certain keyword
+      line = GmatStringUtil::ToUpper(line);
+      for (UnsignedInt i = start; i < count; ++i)
+      {
+         if (std::string(line).find(keywords[i][0]) != std::string::npos)
+         {
+            index = i;
+            break;
+         }
+      }
+   }
+
+   if (index < 9999)
+   {
+      // Check start/end tags
+      UnsignedInt kwCount = keywords[index].size();
+      for (UnsignedInt i = 1; i < kwCount; ++i)
+      {
+         bool kwFound = false;
+         std::string currentString = keywords[index][i];
+
+         while (!inStream.eof() && !kwFound)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(currentString) != std::string::npos)
+            {
+               kwFound = true;
+               if (i == kwCount - 1)
+                  // Valid iff header and all keywords, in order, were found
+                  fileIsValid = true;
+            }
+         }
+      }
+   }
+   inStream.close();
+
+   if (fileIsValid)
+      retval = weatherfile;
+
+   MessageInterface::ShowMessage("The file %s; returning \"%s\"\n",
+         (fileIsValid ? "is valid" : "is NOT valid"), retval.c_str());
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // bool SupportsDerivative(Gmat::StateElementId id)
 //------------------------------------------------------------------------------
 /**
@@ -2038,12 +2777,11 @@ bool DragForce::SupportsDerivative(Gmat::StateElementId id)
       return true;
    
    if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
-   {
-      MessageInterface::ShowMessage("Warning: The orbit state transition "
-            "matrix does not currently contain drag contributions.\n");
-      return false;
-   }
+      return true;
    
+   if (id == Gmat::ORBIT_A_MATRIX)
+      return true;
+
    return PhysicalModel::SupportsDerivative(id);
 }
 
@@ -2064,7 +2802,7 @@ bool DragForce::SupportsDerivative(Gmat::StateElementId id)
  */
 //------------------------------------------------------------------------------
 bool DragForce::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity)
+                      Integer quantity, Integer sizeOfType)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("DragForce setting start data for id = %d"
@@ -2077,22 +2815,36 @@ bool DragForce::SetStart(Gmat::StateElementId id, Integer index,
    {
       case Gmat::CARTESIAN_STATE:
          satCount = quantity;
+         cartesianCount = quantity;
          cartIndex = index;
          fillCartesian = true;
          retval = true;
          break;
          
-//      case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
-//         stmCount = quantity;
-//         stmIndex = index;
-//         fillSTM = true;
-//         retval = true;
-//         break;
+      case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
+         stmCount = quantity;
+         stmStart = index;
+         fillSTM = true;
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
+         retval = true;
+         break;
+
+      case Gmat::ORBIT_A_MATRIX:
+         aMatrixCount = quantity;
+         aMatrixStart = index;
+         fillAMatrix = true;
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
+         retval = true;
+         break;
          
       default:
          break;
    }
    
+   #ifdef DEBUG_INITIALIZE
+      MessageInterface::ShowMessage("SetStart: STM Row count %d\n", stmRowCount);
+   #endif
+
    return retval;
 }
 
@@ -2127,8 +2879,8 @@ Real DragForce::GetDensity(Real *state, Real when, Integer count)
    }
    else
    {
-      if (atmos)
-      {
+      //if (atmos)
+      //{
          if (sun && centralBody)
          {
             // Update the Sun vector
@@ -2142,7 +2894,7 @@ Real DragForce::GetDensity(Real *state, Real when, Integer count)
             cbLoc[1]  = cbV[1];
             cbLoc[2]  = cbV[2];
          }
-      }
+      //}
 
       #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata << "Calling atmos->Density() on " << atmos->GetTypeName()
@@ -2187,6 +2939,64 @@ bool DragForce::IsUnique(const std::string& forBody)
       return true;
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// Rvector3 Accelerate(Real *theState, GmatEpoch &theEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Computed the drag acceleration at the input state and epoch
+ *
+ * This method is used to finite difference the data for the A-matrix and STM
+ *
+ * @param theState The state used for the calculations
+ * @param theEpoch The epoch associated with the state
+ * @param prefactor The prefactor term: -1/2 Cd A/m
+ *
+ * @return The resulting acceleration, as a 3-vector
+ */
+//------------------------------------------------------------------------------
+Rvector3 DragForce::Accelerate(Real *theState, GmatEpoch &theEpoch, Real prefactor)
+{
+   Real vRelative[3], vRelMag, factor;
+   Rvector3 accel;
+
+   Real theDensity = GetDensity(theState, theEpoch, 1);
+
+   if (hasWindModel)
+   {
+      Real wind[6];
+
+      // v_rel = v - w x R
+      atmos->Wind(theState, wind, theEpoch, 1);
+      vRelative[0] = theState[3] - wind[3];
+      vRelative[1] = theState[4] - wind[4];
+      vRelative[2] = theState[5] - wind[5];
+      vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
+                     vRelative[2]*vRelative[2]);
+   }
+   else
+   {
+      // v_rel = v - w x R
+      vRelative[0] = theState[3] -
+                     (angVel[1]*theState[2] - angVel[2]*theState[1]);
+      vRelative[1] = theState[4] -
+                     (angVel[2]*theState[0] - angVel[0]*theState[2]);
+      vRelative[2] = theState[5] -
+                     (angVel[0]*theState[1] - angVel[1]*theState[0]);
+      vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
+                     vRelative[2]*vRelative[2]);
+   }
+
+   factor = prefactor * theDensity;
+
+   accel[0] = factor * vRelMag * vRelative[0];
+   accel[1] = factor * vRelMag * vRelative[1];
+   accel[2] = factor * vRelMag * vRelative[2];
+
+   return accel;
+}
+
 
 //------------------------------------------------------------------------------
 // Real CalculateAp(Real kp)

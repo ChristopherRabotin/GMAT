@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -269,7 +279,7 @@ std::string Array::ToString()
 {
    // use default global precision to convert to string (loj: 2008.03.05)
    return mRmatValue.ToString(false, false, false, GmatGlobal::DATA_PRECISION, 1,
-                              true, 1, "", false);
+                              false, 1, "", false);
    
 }
 
@@ -380,6 +390,26 @@ bool Array::IsParameterReadOnly(const Integer id) const
       return true;
    
    return Parameter::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterCloaked(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+* Checks to see if the requested parameter is cloaked
+*
+* @param <id> Description for the parameter.
+*
+* @return true if the parameter is cloaked
+*/
+//---------------------------------------------------------------------------
+bool Array::IsParameterCloaked(const Integer id) const
+{
+   if (id == OBJECT)
+      return true;
+
+   return Parameter::IsParameterCloaked(id);
 }
 
 
@@ -847,7 +877,6 @@ std::string Array::GetStringParameter(const std::string &label) const
    return GetStringParameter(GetParameterID(label));
 }
 
-
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
@@ -903,6 +932,14 @@ bool Array::SetStringParameter(const Integer id, const std::string &value)
    }
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool Array::SetStringParameter(const std::string &label, const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)
@@ -954,12 +991,13 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
    else
       nomme = instanceName;
    
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) || 
+      (mode == Gmat::NO_COMMENTS) || (mode == Gmat::OBJECT_EXPORT))
    {
       std::string tname = typeName;
 
       // Add comment line (loj: 03/27/07)
-      if (GetCommentLine() != "")
+      if ((mode != Gmat::NO_COMMENTS) && (mode != Gmat::OBJECT_EXPORT) && (GetCommentLine() != ""))
          data << GetCommentLine();
       
       data << "Create " << tname << " " << nomme 

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -141,7 +151,7 @@ bool UserInputValidator::IsValidName(const wxString &name)
    {
       std::string format = GmatStringUtil::GetInvalidNameMessageFormat();
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, format.c_str(), name.c_str());
+         (Gmat::ERROR_, format.c_str(), name.WX_TO_C_STRING);
       
       SetErrorFlag();
       return false;
@@ -192,6 +202,46 @@ bool UserInputValidator::CheckFileName(const std::string &str,
    }
    
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckLength(const wxString &str, const std::string &field, ...)
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckLength(const std::string &str, const std::string &field,
+                                     const std::string &expLength,
+                                     const Integer min, const Integer max)
+{
+   Integer len = str.length();
+   // We don't want allow blank file name so pass false
+   if ((len < min) || (len > max))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
+          expLength.c_str());
+      
+      return false;
+   }
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckReal(Real &rvalue, const char *str,
+//                const std::string &field, const std::string &expRange,
+//                bool onlyMsg, bool checkRange, bool positive bool zeroOk)
+//------------------------------------------------------------------------------
+/*
+ * @see CheckReal(Real &rvalue, const std::string &str, ...)
+ */
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckReal(Real &rvalue, const char *str,
+                          const std::string &field, const std::string &expRange,
+                          bool onlyMsg, bool checkRange, bool positive, bool zeroOk)
+{
+   return CheckReal(rvalue, std::string(str), field, expRange,
+                    onlyMsg, checkRange, positive, zeroOk);
 }
 
 
@@ -269,6 +319,23 @@ bool UserInputValidator::CheckReal(Real &rvalue, const std::string &str,
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool CheckInteger(Integer &ivalue, const std::string &str,
+//                   const std::string &field, const std::string &expRange,
+//                   bool onlyMsg = false, bool positive, bool zeroOk)
+//------------------------------------------------------------------------------
+/*
+ * @see CheckInteger(Integer &ivalue, const std::string &str, ...)
+ */
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckInteger(Integer &ivalue, const char *str,
+                                      const std::string &field,
+                                      const std::string &expRange, bool onlyMsg,
+                                      bool checkRange, bool positive, bool zeroOk)
+{
+   return CheckInteger(ivalue, std::string(str), field, expRange, onlyMsg,
+                       checkRange, positive, zeroOk);
+}
 
 //------------------------------------------------------------------------------
 // bool CheckInteger(Integer &ivalue, const std::string &str,
@@ -384,6 +451,38 @@ bool UserInputValidator::CheckIntegerRange(Integer &ivalue, const std::string &s
 
 
 //------------------------------------------------------------------------------
+// bool CheckVariable(const char *varName, ObjectTypeArray ownerTypes,
+//                    const std::string &field, const std::string &expRange,
+//                    bool allowNumber  = true, bool allowNonPlottable = false,
+//                    bool allowWholeArray = false)
+//------------------------------------------------------------------------------
+/*
+ * Checks if input variable is a Number, Variable, Array element, or parameter of
+ * input owner type.
+ *
+ * @param  varName     Input variable name to be checked
+ * @param  ownerTypes  Input owner array of types if Parameter (such as Gmat::SPACECRAFT),
+ *                     if type is UNKNOWN_OBJECT, it doesn't check for type
+ * @param  field       Field name should be used in the error message
+ * @param  expRange    Expected value range to be used in the error message
+ * @param  allowNumber true if varName can be a Real number [true]
+ * @param  allowNonPlottable  true if varName can be a non-plottable [false]
+ * @param  allowWholeArray    true if varName can be an whole array [false]
+ *
+ * @return true if varName is valid
+ */
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckVariable(const char *varName, ObjectTypeArray ownerTypes,
+                                       const std::string &field, const std::string &expRange,
+                                       bool allowNumber, bool allowNonPlottable,
+                                       bool allowObjectProperty, bool allowWholeArray)
+{
+   return CheckVariable(std::string(varName), ownerTypes, field, expRange, allowNumber,
+                        allowNonPlottable, allowObjectProperty, allowWholeArray);
+}
+
+
+//------------------------------------------------------------------------------
 // bool CheckVariable(const std::string &varName, ObjectTypeArray ownerTypes,
 //                    const std::string &field, const std::string &expRange,
 //                    bool allowNumber  = true, bool allowNonPlottable = false,
@@ -449,7 +548,7 @@ bool UserInputValidator::CheckVariable(const std::string &varName, ObjectTypeArr
    
    if (retval == -1)
    {
-      std::string lastMsg = mGuiManager->GetLastErrorMessage().c_str();
+      std::string lastMsg = mGuiManager->GetLastErrorMessage().WX_TO_STD_STRING;
       lastMsg = " - " + lastMsg;
       MessageInterface::PopupMessage
          (Gmat::ERROR_, mMsgFormat.c_str(), varName.c_str(), field.c_str(),

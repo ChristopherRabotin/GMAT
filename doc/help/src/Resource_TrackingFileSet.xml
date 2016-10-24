@@ -1,0 +1,1234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="TrackingFileSet"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>TrackingFileSet</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>TrackingFileSet</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>TrackingFileSet</refname>
+
+    <refpurpose>Manages the observation data contained in one or more external
+    tracking data files.</refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>A <guilabel>TrackingFileSet</guilabel> is required for both
+    simulator and estimator runs. For a data simulation run, the user must
+    specify the desired tracking strings for the simulated data (via
+    <guilabel>AddTrackingConfig</guilabel>) and provide an output file name
+    for the simulated tracking observations (via
+    <guilabel>FileName</guilabel>). In simulation mode, the user may specify a
+    range modulo constant, Doppler count interval, and other parameters,
+    depending on the type of tracking data being simulated. See the remarks
+    below for more details.</para>
+
+    <para>When running the estimator, the <guilabel>FileName</guilabel>
+    parameter specifies the path to a pregenerated external tracking data
+    file. It is not necessary to explicitly specify tracking configurations
+    when running the estimator; GMAT will examine the specified external
+    tracking data file and determine the tracking configurations
+    automatically. GMAT will throw an error message if it is unable to
+    uniquely identify all objects found in the tracking data file.</para>
+
+    <para>When running the estimator, one or more
+    <guilabel>StatisticsAcceptFilter</guilabel>s and/or
+    <guilabel>StatisticsRejectFilter</guilabel>s may be employed to select
+    from all available observations a smaller subset for use in the estimation
+    process.</para>
+
+    <para>The <guilabel>SimRangeModuloConstant</guilabel> and
+    <guilabel>SimDopplerCountInterval</guilabel> fields apply only to the
+    simulator and are ignored by the estimator. When running the estimator,
+    these values are provided in the tracking data file. For both the
+    simulator and estimator, relativity, light time, and ET-TAI corrections
+    may optionally be applied.</para>
+
+    <para>See Also: <xref linkend="Simulator"/>, <xref
+    linkend="BatchEstimatorInv"/>, <xref linkend="StatisticsAcceptFilter"/>,
+    <xref linkend="StatisticsRejectFilter"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colwidth="1.0*"/>
+
+        <colspec colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>AddTrackingConfig</guilabel></entry>
+
+            <entry><para>One or more signal paths and measurement types for
+            simulation or estimation. See notes and examples for
+            details.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>{{&lt;XMIT_GroundStation&gt;, &lt;Spacecraft&gt;,
+                    &lt;RECV_GroundStation&gt;}, MeasurementType1[,
+                    MeasurementType2]}</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>None</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>DataFilters</guilabel></entry>
+
+            <entry><para>Defines filters to be applied to the data. One or
+            more filters of either type
+            (<guilabel>StatisticsAcceptFilter</guilabel>,
+            <guilabel>StatisticsRejectFilter</guilabel>) may be
+            specified.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Resource</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>User defined instances of
+                    <guilabel>StatisticsAcceptFilter</guilabel> and
+                    <guilabel>StatisticsRejectFilter</guilabel>
+                    resources</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>None</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FileName</guilabel></entry>
+
+            <entry><para>For simulation, specifies an output file for the
+            simulated measurement data. For estimation, specifies one or more
+            preexisting tracking data input files in
+            GMD-format.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Valid file path</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>None</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>RampTable</guilabel></entry>
+
+            <entry><para>Specifies a transmit frequency ramp table to be used
+            when computing measurements for both simulation and
+            estimation.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Valid file path</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>None</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>SimDopplerCountInterval</guilabel></entry>
+
+            <entry><para>Specifies the Doppler count interval used for Doppler
+            measurements. This value is only used in simulation mode.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>1.0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Seconds</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>SimRangeModuloConstant</guilabel></entry>
+
+            <entry><para>Specifies the value of the maximum DSN Range value.
+            This value is only used in simulation mode.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>1.00E+18</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Range Units (RU)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>UseETminusTAI</guilabel></entry>
+
+            <entry><para>Flag specifying if General Relativistic time
+            corrections should be made to the measurements. If this flag is
+            set, GMAT will apply the adjustment from TAI to Ephemeris Time
+            when solving the light time equations for the computed
+            measurement.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>True, False</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>False</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>UseLightTime</guilabel></entry>
+
+            <entry><para>Flag specifying whether light time corrections should
+            be applied to computed measurements.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>True, False</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>True</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>UseRelativityCorrection</guilabel></entry>
+
+            <entry><para>Flag specifying if General Relativistic corrections
+            should be made to the computed measurements. If this flag is set,
+            GMAT will adjust the computed light time to include the effects
+            due to the coordinate velocity of light and bending of the signal
+            path.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>True, False</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>False</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <para>The <guilabel>SimRangeModuloConstant</guilabel> field is used only
+    in the simulation of DSN range tracking data. The user may specify a value
+    to be used for this field or may omit it, in which case the default value
+    is used. This field is not applicable to estimation. In estimation, this
+    value is provided in the input tracking data file.</para>
+
+    <para>The <guilabel>SimDopplerCountInterval</guilabel> is used in the
+    simulation of DSN Doppler tracking data. The user may specify a value to
+    be used for this field or may omit it, in which case default value of 1
+    second is used. This field is not applicable to estimation. In estimation,
+    this value is provided in the input tracking data file.</para>
+
+    <para>When displaying or saving a <guilabel>TrackingFileSet</guilabel>
+    object using the <guilabel>Write</guilabel> command, GMAT will display a
+    number of items relevant to simulating TDRS data formats. These options
+    are not implemented in the current release and should be ignored or
+    manually removed from the output file.</para>
+
+    <refsection>
+      <title>Measurement Types Supported</title>
+
+      <para>Currently, GMAT supports the following ramped or non-ramped
+      measurement types using either X-band or S-band only.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>DSN Sequential Ranging (TRK-2-34 data Type 7)</para>
+        </listitem>
+
+        <listitem>
+          <para>Derived "Doppler" type measurement obtained using successive
+          DSN Total Count Phase (TRK-2-34 data Type 17) measurements</para>
+        </listitem>
+      </itemizedlist>
+    </refsection>
+
+    <refsection>
+      <title>Measurement Type Names</title>
+
+      <para>Currently the measurement type names used to identify observation
+      types in GMD data files and on the
+      <guilabel>TrackingFileSet.AddTrackingConfig</guilabel> object field are
+      not the same as those used to build measurement error models for those
+      types. Use the following table as a guide.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <thead>
+            <row>
+              <entry align="center">GMD File and
+              TrackingFileSet.AddTrackingConfig Measurement Type Name</entry>
+
+              <entry align="center">ErrorModel Measurement Type Name</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>DSNRange</entry>
+
+              <entry>Range_RU</entry>
+            </row>
+
+            <row>
+              <entry>Doppler</entry>
+
+              <entry>Doppler_HZ</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>This example illustrates use of the
+      <guilabel>TrackingFileSet</guilabel> object. Specification of the
+      tracking configurations (<guilabel>AddTrackingConfig</guilabel>) is
+      optional when running the estimator. If omitted, GMAT will attempt to
+      automatically detect the tracking configurations present in the tracking
+      data file.</para>
+
+      <para>In this example, the frequency ramp table file
+      <literal>dsn.ramp</literal> must be a preexisting ramp table. GMAT will
+      not simulate ramp table records. Alternatively, the user may omit
+      specification of a ramp table when simulating data. If the ramp table is
+      omitted, the simulator will use the frequency specified on the
+      <guilabel>Transmitter</guilabel> object attached to each
+      <guilabel>GroundStation</guilabel>.</para>
+
+      <programlisting><?db-font-size 75% ?>Create TrackingFileSet dsnObs;
+
+%Create objects referenced by dnsObs
+Create GroundStation GDS CAN MAD;
+Create Spacecraft EstSat;
+Create StatisticsAcceptFilter saf;
+  
+dsnObs.AddTrackingConfig       = {{GDS, EstSat, GDS}, 'Doppler'};
+dsnObs.AddTrackingConfig       = {{CAN, EstSat, CAN}, 'Doppler'};
+dsnObs.AddTrackingConfig       = {{MAD, EstSat, MAD}, 'Doppler', 'Range_KM'};
+dsnObs.FileName                = {'dsn.gmd'};
+dsnObs.RampTable               = {'dsn.ramp'};
+dsnObs.UseLightTime            = True;
+dsnObs.UseRelativityCorrection = False;
+dsnObs.UseETminusTAI           = False;
+dsnObs.SimRangeModuloConstant  = 67108864;
+dsnObs.SimDopplerCountInterval = 10.; 
+dsnObs.DataFilters             = {saf};
+
+BeginMissionSequence;</programlisting>
+    </informalexample>
+  </refsection>
+
+  <refsection>
+    <title>GMAT Tracking Data File Format</title>
+
+    <para>GMAT uses a native ASCII tracking data file format called a “GMAT
+    Measurement Data File”, or GMD file. This file format currently implements
+    the following observation measurement types:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>DSN Sequential Ranging, TRK-2-34 data Type 7</para>
+      </listitem>
+
+      <listitem>
+        <para>Derived Doppler using successive DSN Total Count Phase Doppler
+        tracking measurements, TRK-2-34 data Type 17</para>
+      </listitem>
+
+      <listitem>
+        <para>Transmit frequency ramp records, TRK-2-34 data Type 9</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Each GMD file consists of a series of space-delimited ASCII records.
+    Details of the GMD file format for each observation type are provided in
+    the following sections. A single GMD file may contain one or more of the
+    record types described below, but ramp records must be in a separate file.
+    For further details on the TRK-2-34 data formats, please consult the
+    <emphasis>TRK-2-34 DSN Tracking System Data Archival Format, 820-013 Deep
+    Space Network External Interface Specification</emphasis>.</para>
+
+    <refsection>
+      <title>DSN Sequential Range</title>
+
+      <para>DSN TRK-2-34 Sequential Ranging employs the DSNRange measurement
+      type. DSNRange is a round-trip range observation measured in range
+      units. The GMD record format for DSNRange tracking data is shown in the
+      table below.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <colspec colwidth="147*"/>
+
+          <colspec colwidth="853*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Field</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>1</entry>
+
+              <entry>Observation receive time in TAIModJulian</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Observation type name - DSN TRK-2-34 Type 7 Sequential
+              Range = DSNRange</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry><para>Observation type index number - 9004 = DSNRange
+              (TRK-2-34)</para></entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Downlink Ground station pad ID</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>Spacecraft ID</entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Two-way (round-trip) range observation in Range
+              Units</entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</entry>
+            </row>
+
+            <row>
+              <entry>8</entry>
+
+              <entry>Uplink frequency in Hz</entry>
+            </row>
+
+            <row>
+              <entry>9</entry>
+
+              <entry>Range modulo value in Range Units</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>The transmit frequency specified in the TRK-2-34 range data GMD
+      file is only used if a frequency ramp table is not available. If a
+      transmit frequency ramp record file is provided on the
+      <guilabel>TrackingFileSet.RampTable</guilabel> field, the transmit
+      frequency will be determined from the ramp table and the frequency
+      specified in the range data GMD file will be ignored. A sample of GMD
+      data records for TRK-2-34 Sequential Range data is shown below.</para>
+
+      <programlisting><?db-font-size 60% ?>%    - 1 -       - 2 -    3     4  5        - 6 -           7        - 8 -               - 9 -
+27236.157789352 DSNRange 9004  45 59 +9.810325186004e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.158240741 DSNRange 9004  45 59 +5.813243487947e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.158692130 DSNRange 9004  45 59 +1.863046908683e+005   1 +2.091414432000e+009 +1.048576000000e+006
+27236.159143519 DSNRange 9004  45 59 +8.450116485521e+005   1 +2.091414432000e+009 +1.048576000000e+006</programlisting>
+    </refsection>
+
+    <refsection>
+      <title>DSN Total Count Phase</title>
+
+      <para>DSN TRK-2-34 Total Count Phase employs the Doppler measurement
+      type. As shown below, the GMAT Doppler measurement type, measured in Hz,
+      is derived from successive Total Phase Count (TCP) observations.</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mrow>
+            <m:mtext>         Derived "Doppler" Observation=</m:mtext>
+
+            <m:mo>−</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:mrow>
+                  <m:mo>[</m:mo>
+
+                  <m:mrow>
+                    <m:mi>ϕ</m:mi>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+
+                    <m:mo>−</m:mo>
+
+                    <m:mi>ϕ</m:mi>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+                  </m:mrow>
+
+                  <m:mo>]</m:mo>
+                </m:mrow>
+              </m:mrow>
+
+              <m:mrow>
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>3</m:mn>
+
+                    <m:mi>e</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>−</m:mo>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>3</m:mn>
+
+                    <m:mi>s</m:mi>
+                  </m:mrow>
+                </m:msub>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mtext> = </m:mtext>
+
+            <m:mo>−</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:mrow>
+                  <m:mo>[</m:mo>
+
+                  <m:mrow>
+                    <m:mi>ϕ</m:mi>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+
+                    <m:mo>−</m:mo>
+
+                    <m:mi>ϕ</m:mi>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+                  </m:mrow>
+
+                  <m:mo>]</m:mo>
+                </m:mrow>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mtext>DCI</m:mtext>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mtext>  (Hz)</m:mtext>
+          </m:mrow>
+        </m:math>
+      </informalequation>
+
+      <para>where</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mtable columnalign="left">
+            <m:mtr/>
+
+            <m:mtr/>
+
+            <m:mtr>
+              <m:mtd>
+                <m:msub>
+                  <m:mi>         t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>3</m:mn>
+
+                    <m:mi>s</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>,</m:mo>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mrow>
+                    <m:mn>3</m:mn>
+
+                    <m:mi>e</m:mi>
+                  </m:mrow>
+                </m:msub>
+
+                <m:mo>=</m:mo>
+
+                <m:mtext>start and end of reception interval</m:mtext>
+              </m:mtd>
+            </m:mtr>
+
+            <m:mtr>
+              <m:mtd>
+                <m:mtext>         DCI      = Doppler Count Interval in
+                seconds</m:mtext>
+              </m:mtd>
+            </m:mtr>
+
+            <m:mtr>
+              <m:mtd>
+                <m:mi>         ϕ         </m:mi>
+
+                <m:mo>=</m:mo>
+
+                <m:mtext>Total Count Phase (from
+                type 17 TRK-2-34 record)</m:mtext>
+              </m:mtd>
+            </m:mtr>
+          </m:mtable>
+        </m:math>
+      </informalequation>
+
+      <para>The GMD record format for Doppler tracking data is shown in the
+      table below.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <colspec colwidth="147*"/>
+
+          <colspec colwidth="853*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Field</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>1</entry>
+
+              <entry>Observation receive time in TAIModJulian</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Observation type name - DSN TRK-2-34 Type 17 Total Count
+              Phase = Doppler</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Observation type index number - 9006 = Doppler
+              (TRK-2-34)</entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Downlink Ground station pad ID</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>Spacecraft ID</entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Doppler count interval in seconds</entry>
+            </row>
+
+            <row>
+              <entry>8</entry>
+
+              <entry>Observation value - Doppler observable derived from Total
+              Count Phase (TCP) TRK-2-34 Type 17 measurements</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>A sample of GMD data records for TRK-2-34 Total Count Phase data
+      is shown below.</para>
+
+      <programlisting><?db-font-size 90% ?>%    - 1 -        - 2 -     3   4   5    6   7            - 8 -
+27226.011944444  Doppler  9006 15 6241   1  10  -2.2445668331979342e+09
+27226.012060185  Doppler  9006 15 6241   1  10  -2.2445668330920730e+09
+27226.012175926  Doppler  9006 15 6241   1  10  -2.2445668329843016e+09
+27226.012291667  Doppler  9006 15 6241   1  10  -2.2445668328729177e+09</programlisting>
+    </refsection>
+
+    <refsection>
+      <title>Transmit Frequency Ramp Records</title>
+
+      <para>GMAT supports DSN tracking utilizing both constant and ramped
+      transmit frequencies. If the transmit frequency is constant, GMAT will
+      use the transmit frequency specified on the DSNRange measurement records
+      for the computation of the range observation and a ramp table file is
+      not required. If the transmit frequency is ramped, the user must
+      generate a GMD file of ramp records from TRK-2-34 Type 9 raw data, and
+      provide the GMD ramp table on the
+      <guilabel>TrackingFileSet.RampTable</guilabel> object field. If a ramp
+      table is provided, GMAT ignores the frequency specified on the DSNRange
+      records and instead computes the transmit frequency from the ramp
+      records.</para>
+
+      <para>The record format for ground-based range-rate tracking data is
+      shown in the table below.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <colspec colwidth="147*"/>
+
+          <colspec colwidth="853*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Field</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>1</entry>
+
+              <entry>Observation receive time in TAIModJulian</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>Ground station pad ID</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Spacecraft ID</entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Uplink frequency band indicator - 0 = unknown, 1 =
+              S-band, 2 = X-band, 3 = Ka-band, 4 = Ku-band, 5 = L-band</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>Ramp type - 0 = snap, 1 = start of new ramp, 2 = medial
+              report, 3 = periodic report, 4 = end of ramps, 5 = ramping
+              terminated by operator, 6 = invalid/unknown</entry>
+            </row>
+
+            <row>
+              <entry>6</entry>
+
+              <entry>Ramp frequency in Hz</entry>
+            </row>
+
+            <row>
+              <entry>7</entry>
+
+              <entry>Ramp rate in Hz/sec</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>A sample GMD ramp file is shown below.</para>
+
+      <programlisting><?db-font-size 90% ?>
+%     - 1 -      2  3    4   5         - 6 -              - 7 -
+27238.640625000 34 234   2   1 +7.186571173393e+09 +6.010599999990e-01
+27238.654513889 34 234   2   1 +7.186571894665e+09 +5.822699999990e-01
+27238.659664352 34 234   2   3 +7.186572153775e+09 +5.822699999990e-01
+27238.668402778 34 234   2   1 +7.186572593389e+09 +5.590199999990e-01
+27238.682291667 34 234   2   1 +7.186573264213e+09 +5.315100000000e-01</programlisting>
+    </refsection>
+  </refsection>
+</refentry>

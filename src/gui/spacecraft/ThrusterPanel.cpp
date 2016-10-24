@@ -5,9 +5,19 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -77,22 +87,22 @@ void ThrusterPanel::Create()
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
-   pConfig->SetPath(wxT("/Spacecraft Thrusters"));
+   pConfig->SetPath(wxString("/Spacecraft Thrusters"));
 
    // wxButton
-   selectButton = new wxButton( this, ID_BUTTON, wxT("-"GUI_ACCEL_KEY">"),
+   selectButton = new wxButton( this, ID_BUTTON, wxString("-" GUI_ACCEL_KEY ">"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    selectButton->SetToolTip(pConfig->Read(_T("AddThrusterHint")));
 
-   removeButton = new wxButton( this, ID_BUTTON, wxT(GUI_ACCEL_KEY"<-"),
+   removeButton = new wxButton( this, ID_BUTTON, wxString(GUI_ACCEL_KEY"<-"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    removeButton->SetToolTip(pConfig->Read(_T("RemoveThrusterHint")));
 
-   selectAllButton = new wxButton( this, ID_BUTTON, wxT("=>"),
+   selectAllButton = new wxButton( this, ID_BUTTON, wxString("=>"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    selectAllButton->SetToolTip(pConfig->Read(_T("AddAllThrustersHint")));
 
-   removeAllButton = new wxButton( this, ID_BUTTON, wxT("<"GUI_ACCEL_KEY"="),
+   removeAllButton = new wxButton( this, ID_BUTTON, wxString("<" GUI_ACCEL_KEY "="),
                               wxDefaultPosition, wxDefaultSize, 0 );
    removeAllButton->SetToolTip(pConfig->Read(_T("ClearThrustersHint")));
 
@@ -123,9 +133,9 @@ void ThrusterPanel::Create()
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
-   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxT(GUI_ACCEL_KEY"Available Thrusters") );
+   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxString(GUI_ACCEL_KEY"Available Thrusters") );
    wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxHORIZONTAL );
-   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxT(GUI_ACCEL_KEY"Selected Thrusters") );
+   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxString(GUI_ACCEL_KEY"Selected Thrusters") );
    wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxHORIZONTAL );
 
    // Add to wx*Sizers   
@@ -137,14 +147,14 @@ void ThrusterPanel::Create()
    boxSizer2->Add(selectAllButton, 0, wxALIGN_CENTER|wxALL, bsize );
    boxSizer2->Add(removeAllButton, 0, wxALIGN_CENTER|wxALL, bsize );
    
-   staticBoxSizer1->Add( availableThrusterListBox, 0, wxALIGN_CENTER|wxALL, bsize ); 
-   staticBoxSizer2->Add( selectedThrusterListBox, 0, wxALIGN_CENTER|wxALL, bsize );
+   staticBoxSizer1->Add(availableThrusterListBox, 1, wxALIGN_CENTER | wxEXPAND | wxALL, bsize);
+   staticBoxSizer2->Add(selectedThrusterListBox, 1, wxALIGN_CENTER | wxEXPAND | wxALL, bsize);
    
-   boxSizer3->Add( staticBoxSizer1, 0, wxALIGN_CENTER|wxALL, bsize);
+   boxSizer3->Add(staticBoxSizer1, 1, wxALIGN_CENTER | wxEXPAND | wxALL, bsize);
    boxSizer3->Add( boxSizer2, 0, wxALIGN_CENTER|wxALL, bsize);
-   boxSizer3->Add( staticBoxSizer2, 0, wxALIGN_CENTRE|wxALL, bsize);
+   boxSizer3->Add(staticBoxSizer2, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    
-   boxSizer1->Add( boxSizer3, 0, wxALIGN_CENTRE|wxALL, bsize);
+   boxSizer1->Add(boxSizer3, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    
    this->SetAutoLayout( true );  
    this->SetSizer( boxSizer1 );

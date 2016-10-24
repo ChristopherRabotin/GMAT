@@ -3,9 +3,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy Shoan / NASA
 // Created: 2013.11.22
@@ -84,19 +94,21 @@ CCSDSEMReader::CCSDSEMReader(const CCSDSEMReader &copy) :
    versionFieldName      (copy.versionFieldName),
    metaSpecifiesType     (copy.metaSpecifiesType),
    metaDataTypeField     (copy.metaDataTypeField),
-   dataType              (copy.metaDataTypeField),
+   dataType              (copy.dataType),
    currentSegment        (NULL),
    numSegments           (copy.numSegments)
 
 {
-   comments.clear();
    segments.clear();
    numSegments = 0;
    for (unsigned int ii = 0; ii < copy.segments.size(); ii++)
    {
       segments.push_back((copy.segments[ii])->Clone());
    }
+   comments.clear();
    metaMap.clear();
+   comments = copy.comments;
+   metaMap  = copy.metaMap;
 }
 
 // -----------------------------------------------------------------------------
@@ -133,8 +145,10 @@ CCSDSEMReader& CCSDSEMReader::operator=(const CCSDSEMReader &copy)
       segments.push_back((copy.segments[ii])->Clone());
    }
 
-   metaMap  = copy.metaMap;
+   comments.clear();
+   metaMap.clear();
    comments = copy.comments;
+   metaMap  = copy.metaMap;
 
    return *this;
 
@@ -154,6 +168,11 @@ CCSDSEMReader::~CCSDSEMReader()
 
    metaMap.clear();
    comments.clear();
+
+   #ifdef DEBUG_INIT_EM_FILE
+      MessageInterface::ShowMessage("In CCSDSEMReader destructor, closing the ephFile\n");
+   #endif
+   if (ephFile.is_open())  ephFile.close();
 }
 
 // -----------------------------------------------------------------------------
@@ -164,11 +183,16 @@ void CCSDSEMReader::Initialize()
    if (isInitialized) return;
 
    #ifdef DEBUG_INIT_EM_FILE
-      MessageInterface::ShowMessage("Entering CCSDSEMReader::Initialize ...\n");
+      MessageInterface::ShowMessage("Entering CCSDSEMReader::Initialize, with emFile = %s\n",
+            emFile.c_str());
    #endif
    // Check for the existence of the file
    if (!GmatFileUtil::DoesFileExist(emFile))
    {
+      #ifdef DEBUG_INIT_EM_FILE
+         MessageInterface::ShowMessage("In CCSDSEMReader::Initialize, file %s does NOT exist!\n",
+               emFile.c_str());
+      #endif
       std::string errmsg = "Specified ephemeris message file \" ";
       errmsg += emFile + "\" does not exist.\n";
       throw UtilityException(errmsg);
@@ -178,6 +202,9 @@ void CCSDSEMReader::Initialize()
    bool fileParsed = ParseFile();
    if (!fileParsed)
    {
+      #ifdef DEBUG_INIT_EM_FILE
+         MessageInterface::ShowMessage("In CCSDSEMReader::Initialize, ERROR parsing the file!\n");
+      #endif
       std::string errmsg = "There is an error opening or reading the ";
       errmsg += "ephemeris message file \"" + emFile + "\"\n";
       throw UtilityException(errmsg);
@@ -349,18 +376,40 @@ CCSDSEMSegment* CCSDSEMReader::GetSegment(Real epoch)
 // -----------------------------------------------------------------------------
 bool CCSDSEMReader::ParseFile()
 {
+   #ifdef DEBUG_INIT_EM_FILE
+      MessageInterface::ShowMessage("Entering CCSDSEMReader::ParseFile and isInitialized = %s...\n",
+            (isInitialized? "true" : "false"));
+   #endif
    if (isInitialized) return true;
+
+   #ifdef DEBUG_INIT_EM_FILE
+      MessageInterface::ShowMessage("In CCSDSEMReader, about to open %s for reading\n",
+            emFile.c_str());
+   #endif
 
    // Open the file for reading
    std::string   line;
-   std::ifstream ephFile(emFile.c_str());
-   if (!ephFile)  return false;
+   ephFile.open(emFile.c_str(), std::ios_base::in);
+   if (!ephFile.is_open())
+   {
+      #ifdef DEBUG_INIT_EM_FILE
+         MessageInterface::ShowMessage("In CCSDSEMReader::ParseFile, file cannot be opened!\n");
+      #endif
+      return false;
+   }
+   #ifdef DEBUG_INIT_EM_FILE
+      MessageInterface::ShowMessage("In CCSDSEMReader, about to ski white space\n");
+   #endif
 
    // Ignore leading white space
    ephFile.setf(std::ios::skipws);
    // check for an empty file
    if (ephFile.eof())
    {
+      #ifdef DEBUG_INIT_EM_FILE
+         MessageInterface::ShowMessage("In CCSDSEMReader::ParseFile, file appears to be empty!\n");
+      #endif
+      ephFile.close();
       std::string errmsg = "Error reading ephemeris message file \"";
       errmsg += emFile + "\".  ";
       errmsg += "File appears to be empty.\n";
@@ -372,10 +421,14 @@ bool CCSDSEMReader::ParseFile()
    std::string   firstWord, firstAllCaps;
    std::string   eqSign;
 
+   #ifdef DEBUG_PARSE_EM_FILE
+      MessageInterface::ShowMessage("In CCSDSEMReader, about to read the first line\n");
+   #endif
    // read the first line for the version number
    getline(ephFile,line);
    #ifdef DEBUG_PARSE_EM_FILE
       MessageInterface::ShowMessage("In CCSDSEMReader, line= %s\n", line.c_str());
+
    #endif
    std::istringstream lineStr;
    lineStr.str(line);
@@ -517,7 +570,8 @@ bool CCSDSEMReader::ParseFile()
    // Reset the non-comment flag
    nonCommentFound = false;
 
-   bool typeFound = false;
+   bool typeFound     = false;
+   bool getRestOfLine = true;
    if (!metaSpecifiesType)
    {
       typeFound = true;
@@ -594,6 +648,7 @@ bool CCSDSEMReader::ParseFile()
          }
          else
          {
+            getRestOfLine = true;
             if (keyAllCaps == "COMMENT")
             {
                if (nonCommentFound)
@@ -623,14 +678,23 @@ bool CCSDSEMReader::ParseFile()
                      MessageInterface::ShowMessage("In CCSDSEMReader, FOUND dataType = %s\n",
                            dataType.c_str());
                   #endif
-                  typeFound = true;
+                  typeFound     = true;
+                  getRestOfLine = false;  // we already put the value into sVal!!
                }
                nonCommentFound = true;
             }
             // get the rest of the line for the comments or string value
-            getline(lineStr, sVal);
+            #ifdef DEBUG_PARSE_EM_FILE
+               MessageInterface::ShowMessage("In CCSDSEMReader, getting rest of line (%s) '%s'\n",
+                     (getRestOfLine? "true" : "false"), lineStr.str().c_str());
+            #endif
+            if (getRestOfLine) getline(lineStr, sVal);
             // put the string into the proper form
             sVal2 = GmatStringUtil::Trim(sVal, GmatStringUtil::BOTH, true, true);
+            #ifdef DEBUG_PARSE_EM_FILE
+               MessageInterface::ShowMessage("In CCSDSEMReader, trimmed result '%s' to '%s'\n",
+                     sVal.c_str(), sVal2.c_str());
+            #endif
             metaMap.insert(std::make_pair(keyAllCaps, sVal2));
          }
       }
@@ -752,6 +816,9 @@ bool CCSDSEMReader::ParseFile()
       throw UtilityException(errmsg);
    }
 
+   #ifdef DEBUG_INIT_EM_FILE
+      MessageInterface::ShowMessage("In CCSDSEMReader::ParseFile, closing the ephFile\n");
+   #endif
    if (ephFile.is_open())  ephFile.close();
 
    return true;

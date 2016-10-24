@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -27,7 +37,9 @@
 #include "FileUtil.hpp"
 #include "MessageInterface.hpp"
 #include <fstream>
-
+#if wxCHECK_VERSION(3, 0, 0)
+#include <wx/valnum.h>
+#endif
 
 //#define DEBUG_REPORTFILE_PANEL 1
 //#define DEBUG_REPORTFILE_PANEL_LOAD 1
@@ -45,8 +57,10 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
    
    EVT_TEXT(ID_TEXT_CTRL, ReportFileSetupPanel::OnTextChange)
    EVT_TEXT(ID_TEXT, ReportFileSetupPanel::OnTextChange)
+   EVT_TEXT(ID_COMBOBOX, ReportFileSetupPanel::OnTextChange)
    EVT_BUTTON(ID_BUTTON, ReportFileSetupPanel::OnButtonClick)
    EVT_CHECKBOX(ID_CHECKBOX, ReportFileSetupPanel::OnCheckBoxChange)
+   EVT_CHECKBOX(ID_CHECKBOX_FIXEDWIDTH, ReportFileSetupPanel::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, ReportFileSetupPanel::OnComboBoxChange)
 END_EVENT_TABLE()
 
@@ -83,6 +97,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("SpacePoint");
    mObjectTypeList.Add("ImpulsiveBurn");
+   mObjectTypeList.Add("FiniteBurn");
    
    Create();
    Show();
@@ -166,6 +181,11 @@ void ReportFileSetupPanel::ObjectNameChanged(Gmat::ObjectType type,
 void ReportFileSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    mHasBoolDataChanged = true;
+   if (event.GetId() == ID_CHECKBOX_FIXEDWIDTH)
+   {
+	   delimiterComboBox->Enable(!fixedWidthCheckBox->IsChecked());
+	   colWidthTextCtrl->Enable(fixedWidthCheckBox->IsChecked());
+   }
    EnableUpdate(true);
 }
 
@@ -210,13 +230,28 @@ void ReportFileSetupPanel::Create()
       new wxCheckBox(this, ID_CHECKBOX, wxT("Zero Fill"),
                      wxDefaultPosition, wxDefaultSize, 0);
    
+   fixedWidthCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX_FIXEDWIDTH, wxT("Fixed Width"),
+                     wxDefaultPosition, wxDefaultSize, 0);
+   
+   wxStaticText *delimiterText =
+      new wxStaticText(this, -1, wxT("Delimiter"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   delimiterComboBox = new wxComboBox(this, ID_COMBOBOX, wxT("Space"), 
+                                     wxDefaultPosition, wxDefaultSize,  0);
+   delimiterComboBox->Append("Comma");
+   delimiterComboBox->Append("Semicolon");
+   delimiterComboBox->Append("Space");
+   delimiterComboBox->Append("Tab");
+   
    // Solver Iteration ComboBox
    wxStaticText *solverIterLabel =
       new wxStaticText(this, -1, wxT("Solver Iterations"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1),
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize,
                      emptyList, wxCB_READONLY);
    
    // Get Solver Iteration option list from the Subscriber
@@ -230,14 +265,22 @@ void ReportFileSetupPanel::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(35, -1),  0);
+                                     wxDefaultPosition, wxSize(35, -1),  0
+#if wxCHECK_VERSION(3, 0, 0) 
+									 ,wxIntegerValidator<unsigned short>() 
+#endif
+									 );
    
    wxStaticText *precisionText =
       new wxStaticText(this, -1, wxT("Precision"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    precisionTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(35, -1),  0);
+                                     wxDefaultPosition, wxSize(35, -1),  0
+#if wxCHECK_VERSION(3, 0, 0) 
+									 , wxIntegerValidator<unsigned short>() 
+#endif
+									 );
    
    wxFlexGridSizer *option2Sizer = new wxFlexGridSizer(2);
    option2Sizer->Add(writeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -248,8 +291,12 @@ void ReportFileSetupPanel::Create()
    option2Sizer->Add(20, 20);
    option2Sizer->Add(zeroFillCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    option2Sizer->Add(20, 20);
+   option2Sizer->Add(fixedWidthCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    option2Sizer->Add(20, 20);
    option2Sizer->Add(20, 20);
+   option2Sizer->Add(20, 20);
+   option2Sizer->Add(delimiterText, 0, wxALIGN_LEFT|wxALL, bsize);
+   option2Sizer->Add(delimiterComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    option2Sizer->Add(solverIterLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    option2Sizer->Add(mSolverIterComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    option2Sizer->Add(colWidthText, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -332,20 +379,15 @@ void ReportFileSetupPanel::LoadData()
    try
    {
       // load file name data from core engine
-      //Note: Do not use GetStringParameter() since filename may be empty.
-      //      GetPathAndFileName() constructs filename if name is empty
-      // We don't want to write name with path unless user specified the path
-      // in the script, so check for the empty name first (LOJ: 2010.11.10)
+      // if name is empty, use default file name
       std::string filename = reportFile->GetStringParameter("Filename");
       if (filename == "")
-      {
-         std::string fullname = reportFile->GetPathAndFileName();
          filename = reportFile->GetDefaultFileName();
-      }
       
       Integer id;
       
-      mFileTextCtrl->SetValue(wxT(filename.c_str()));
+      //mFileTextCtrl->SetValue(wxT(filename.c_str()));
+      mFileTextCtrl->SetValue(STD_TO_WX_STRING(filename.c_str()));
       
       #if DEBUG_REPORTFILE_PANEL_LOAD
       MessageInterface::ShowMessage
@@ -370,6 +412,26 @@ void ReportFileSetupPanel::LoadData()
       else
          zeroFillCheckBox->SetValue(false);
       
+      id = reportFile->GetParameterID("FixedWidth");
+      if (reportFile->GetBooleanParameter(id))
+         fixedWidthCheckBox->SetValue(true);
+      else
+         fixedWidthCheckBox->SetValue(false);
+      
+      id = reportFile->GetParameterID("Delimiter");
+      wxString aDelimiter;
+      aDelimiter = reportFile->GetStringParameter(id)[0];
+	  if (aDelimiter == " ") 
+		delimiterComboBox->SetValue("Space");
+	  else if (aDelimiter == "\t") 
+		delimiterComboBox->SetValue("Tab");
+	  else if (aDelimiter == ",") 
+		delimiterComboBox->SetValue("Comma");
+	  else if (aDelimiter == ";") 
+		delimiterComboBox->SetValue("Semicolon");
+	  else
+		delimiterComboBox->SetValue(aDelimiter);
+      
       id = reportFile->GetParameterID("SolverIterations");
       
       mSolverIterComboBox->
@@ -387,7 +449,10 @@ void ReportFileSetupPanel::LoadData()
       
       StringArray parameterList = reportFile->GetStringArrayParameter("Add");
       mNumParameters = parameterList.size();
-      
+
+      delimiterComboBox->Enable(!fixedWidthCheckBox->IsChecked());
+	  colWidthTextCtrl->Enable(fixedWidthCheckBox->IsChecked());
+
       #if DEBUG_REPORTFILE_PANEL_LOAD
       MessageInterface::ShowMessage("   mNumParameters=%d\n", mNumParameters);
       #endif
@@ -433,22 +498,46 @@ void ReportFileSetupPanel::SaveData()
        mHasParameterChanged, mHasBoolDataChanged);
    #endif
    
-   canClose = true;
    std::string str;
    Integer width, prec;
+   char delimiter;
    
    //-----------------------------------------------------------------
    // check values from text field
    //-----------------------------------------------------------------
    
    str = colWidthTextCtrl->GetValue();
-   CheckInteger(width, str, "Column Width", "Integer Number > 0");
+   width = reportFile->GetIntegerParameter(reportFile->GetParameterID("ColumnWidth"));
+   canClose = CheckInteger(width, str, "Column Width", "Integer Number > 0");
+   if (!canClose)
+      return;
    
    str = precisionTextCtrl->GetValue();
-   CheckInteger(prec, str, "Precision", "Integer Number > 0");
+   prec = reportFile->GetIntegerParameter(reportFile->GetParameterID("Precision"));
+   canClose = CheckInteger(prec, str, "Precision", "Integer Number > 0");
+   if (!canClose)
+      return;
    
    str = mFileTextCtrl->GetValue();
-   CheckFileName(str, "Filename");
+   canClose = CheckFileName(str, "Filename");
+   if (!canClose)
+      return;
+   
+   str = delimiterComboBox->GetValue();
+   str = GmatStringUtil::ToUpper(str);
+   if (str == "SPACE") 
+     str = " ";
+   else if (str == "TAB") 
+     str = "\t";
+   else if (str == "COMMA") 
+     str = ",";
+   else if (str == "SEMICOLON") 
+     str = ";";
+   else
+	 str = delimiterComboBox->GetValue();
+   canClose = CheckLength(str, "Delimiter", "Length = 1", 1, 1);
+   if (canClose)
+	 delimiter = str[0];
    
    if (!canClose)
       return;
@@ -456,10 +545,10 @@ void ReportFileSetupPanel::SaveData()
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
    //-----------------------------------------------------------------
+   GmatBase *clonedObj = reportFile->Clone();
    try
    {
       Integer id;
-      GmatBase *clonedObj = reportFile->Clone();
       
       if (mHasBoolDataChanged)
       {
@@ -493,8 +582,17 @@ void ReportFileSetupPanel::SaveData()
             clonedObj->SetOnOffParameter(id, "On");
          else
             clonedObj->SetOnOffParameter(id, "Off");
+
+		 id = clonedObj->GetParameterID("FixedWidth");
+         if (fixedWidthCheckBox->IsChecked())
+            clonedObj->SetBooleanParameter(id, true);
+         else
+            clonedObj->SetBooleanParameter(id, false);
       }
-      
+
+      id = clonedObj->GetParameterID("Delimiter");
+      clonedObj->SetStringParameter(id, std::string(1,delimiter));
+
       id = clonedObj->GetParameterID("ColumnWidth");
       clonedObj->SetIntegerParameter(id, width);
       
@@ -516,7 +614,7 @@ void ReportFileSetupPanel::SaveData()
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "Appended .txt to file name '%s'\n", filename.c_str());
          filename = filename + ".txt";
-         mFileTextCtrl->SetValue(wxT(filename.c_str()));
+         mFileTextCtrl->SetValue(STD_TO_WX_STRING(filename.c_str()));
       }
       
       id = clonedObj->GetParameterID("Filename");
@@ -537,7 +635,7 @@ void ReportFileSetupPanel::SaveData()
             clonedObj->TakeAction("Clear");
             for (int i=0; i<mNumParameters; i++)
             {
-               std::string selYName = mSelectedListBox->GetString(i).c_str();
+               std::string selYName = mSelectedListBox->GetString(i).WX_TO_STD_STRING;
                clonedObj->SetStringParameter("Add", selYName, i);
             }
          }
@@ -546,14 +644,15 @@ void ReportFileSetupPanel::SaveData()
       }
       
       reportFile->Copy(clonedObj);
-      delete clonedObj;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
-      return;
    }
+   
+   delete clonedObj;
+   return;
 }
 
 

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Allison Greene
 // Created: 2003/10/08
@@ -37,8 +47,12 @@ namespace GmatTree
       RESOURCE_ICON_GROUND_STATION,
       
       RESOURCE_ICON_HARDWARE,
-      RESOURCE_ICON_TANK,
-      RESOURCE_ICON_THRUSTER,
+      RESOURCE_ICON_CHEMICAL_TANK,
+      RESOURCE_ICON_ELECTRIC_TANK,
+      RESOURCE_ICON_CHEMICAL_THRUSTER,
+      RESOURCE_ICON_ELECTRIC_THRUSTER,
+      RESOURCE_ICON_SOLAR_POWER_SYSTEM,
+      RESOURCE_ICON_NUCLEAR_POWER_SYSTEM,
       RESOURCE_ICON_ANTENNA,
       RESOURCE_ICON_TRANSMITTER,
       RESOURCE_ICON_RECEIVER,
@@ -95,6 +109,7 @@ namespace GmatTree
       RESOURCE_ICON_COORDINATE_SYSTEM,
       
       RESOURCE_ICON_ECLIPSE_LOCATOR,
+      RESOURCE_ICON_CONTACT_LOCATOR,
       
       RESOURCE_ICON_GMAT_FUNCTION,
       RESOURCE_ICON_MATLAB_FUNCTION,
@@ -136,6 +151,7 @@ namespace GmatTree
       MISSION_ICON_BEGIN_FB,
       MISSION_ICON_END_FB,
       MISSION_ICON_REPORT,
+      MISSION_ICON_WRITE,
 
       MISSION_ICON_SET,
       MISSION_ICON_STOP,
@@ -152,6 +168,8 @@ namespace GmatTree
       
       MISSION_ICON_RUN_SIMULATOR,
       MISSION_ICON_RUN_ESTIMATOR,
+
+      MISSION_ICON_FIND_EVENTS,
       MISSION_ICON_DEFAULT,
       
       MISSION_ICON_COUNT,
@@ -164,7 +182,7 @@ namespace GmatTree
       OUTPUT_ICON_CLOSEDFOLDER,
       OUTPUT_ICON_OPENFOLDER,
       OUTPUT_ICON_REPORT_FILE,
-      OUTPUT_ICON_CCSDS_OEM_FILE,
+      OUTPUT_ICON_TEXT_EPHEM_FILE,
       OUTPUT_ICON_ORBIT_VIEW,
       OUTPUT_ICON_GROUND_TRACK_PLOT,
       OUTPUT_ICON_XY_PLOT,
@@ -222,8 +240,11 @@ namespace GmatTree
       GROUND_STATION,
       
       HARDWARE,
-      FUELTANK,
-      THRUSTER,
+      FUELTANK_CHEMICAL,
+      FUELTANK_ELECTRIC,
+      THRUSTER_CHEMICAL,  // need these two as they will have different submenus and icons
+      THRUSTER_ELECTRIC,
+      POWER_SYSTEM,
       SENSOR,
       
       FORMATION,
@@ -308,16 +329,18 @@ namespace GmatTree
       MINIMIZE,
       NON_LINEAR_CONSTRAINT,
 		SAVE,
+		FIND_EVENTS,
       MANAGE_OBJECT,
       TOGGLE,
       PLOT_ACTION,
       XY_PLOT_ACTION,
       REPORT,
+      WRITE_COMMAND,
       CALL_FUNCTION,
       ASSIGNMENT,
       FREE_FORM_SCRIPT,
       SCRIPT_EVENT,
-	  SET,
+      SET,
       OTHER_COMMAND,
       END_OF_COMMAND,
 
@@ -350,9 +373,10 @@ namespace GmatTree
       OUTPUT_BEGIN_REPORT,
       OUTPUT_REPORT,
       OUTPUT_EVENT_REPORT,
-      OUTPUT_CCSDS_OEM_FILE,
+      OUTPUT_TEXT_EPHEM_FILE,
       OUTPUT_END_REPORT,
       OUTPUT_COMPARE_REPORT,
+      OUTPUT_SOLVER_WINDOW,
       END_OF_OUTPUT,
 
       //---------- NO panels will be created

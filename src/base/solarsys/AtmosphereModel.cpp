@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -27,6 +37,8 @@
 #include "GmatConstants.hpp"
 #include "AngleUtil.hpp"            // For lat, long range setting
 #include "CoordinateConverter.hpp"
+#include "StringUtil.hpp"
+#include "FileManager.hpp"
 
 
 #include <cmath>                    // for exp
@@ -37,6 +49,9 @@
 //#define DEBUG_COORDINATE_TRANSFORMS
 //#define DEBUG_CALCULATE_GEOCENTRICS
 //#define DEBUG_CALCULATE_GEODETICS
+//#define DEBUG_FLUX_FILE
+//#define DEBUG_SCHATTEN_SETTINGS
+//#define DUMP_FLUX_DATA
 
 //------------------------------------------------------------------------------
 // static data
@@ -46,7 +61,9 @@ AtmosphereModel::PARAMETER_TEXT[AtmosphereModelParamCount-GmatBaseParamCount] =
 {
    "F107",
    "F107A",
-   "MagneticIndex"                  // In GMAT, the "published" value is K_p.
+   "MagneticIndex",                  // In GMAT, the "published" value is K_p.
+   "CSSISpaceWeatherFile",
+   "SchattenFile"
 };
 
 const Gmat::ParameterType
@@ -54,7 +71,9 @@ AtmosphereModel::PARAMETER_TYPE[AtmosphereModelParamCount-GmatBaseParamCount] =
 {
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE
+   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE
 };
 
 //------------------------------------------------------------------------------
@@ -69,22 +88,23 @@ AtmosphereModel::PARAMETER_TYPE[AtmosphereModelParamCount-GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &name) :
    GmatBase             (Gmat::ATMOSPHERE, typeStr, name),
-   fileReader           (NULL),
+   fluxReader           (NULL),
    solarSystem          (NULL),
    mCentralBody         (NULL),
-   solarFluxFile        (NULL),
-   fileName             (""),        // Set to a default when working
+   obsFileName          (""),        // Set to a default when working
+   predictFileName      (""),
    sunVector            (NULL),
    centralBody          ("Earth"),
    centralBodyLocation  (NULL),
    cbRadius             (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]),
    cbFlattening         (0.0),       // Default is spherical
-   newFile              (false),
-   fileRead             (false),
+   fluxReaderLoaded     (false),
    nominalF107          (150.0),
    nominalF107a         (150.0),
    nominalKp            (3.0),
    kpApConversion       (0),
+   historicalDataSource (0),
+   predictedDataSource  (0),
    mInternalCoordSystem (NULL),
    cbJ2000              (NULL),
    cbFixed              (NULL),
@@ -93,10 +113,20 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
-//   useGeodetic          (false),							// made changes by TUAN NGUYEN
-   useGeodetic          (true),							// made changes by TUAN NGUYEN
+//   useGeodetic          (false),
+   useGeodetic          (true),
    gha                  (0.0),
-   ghaEpoch             (0.0)
+   ghaEpoch             (0.0),
+   historicStart        (-1.0),
+   historicEnd          (-1.0),
+   predictStart         (-1.0),
+   predictEnd           (-1.0),
+   schattenTimingModel  (0),
+   schattenErrorModel   (0),
+   sod                  (0.0),
+   yd                   (0),
+   f107                 (0.0),
+   f107a                (0.0)
 {
    objectTypes.push_back(Gmat::ATMOSPHERE);
    objectTypeNames.push_back("AtmosphereModel");
@@ -108,6 +138,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    angVel[0]      = 0.0;
    angVel[1]      = 0.0;
    angVel[2]      = 7.29211585530e-5;
+
+ //  fluxReader = new SolarFluxReader();
 
    #ifdef CHECK_KP2AP
       MessageInterface::ShowMessage("K_p to A_p conversions:\n");
@@ -126,6 +158,11 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
 //------------------------------------------------------------------------------
 AtmosphereModel::~AtmosphereModel()
 {
+   if(fluxReader != NULL)
+   {
+      delete fluxReader;
+      fluxReader = NULL;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -139,22 +176,23 @@ AtmosphereModel::~AtmosphereModel()
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    GmatBase             (am),
-   fileReader           (NULL),
+   fluxReader           (NULL),
    solarSystem          (am.solarSystem),
    mCentralBody         (am.mCentralBody),
-   solarFluxFile        (NULL),
-   fileName             (am.fileName),
+   obsFileName          (am.obsFileName),
+   predictFileName      (am.predictFileName),
    sunVector            (NULL),
    centralBody          (am.centralBody),
    centralBodyLocation  (NULL),
    cbRadius             (am.cbRadius),
    cbFlattening         (am.cbFlattening),
-   newFile              (false),
-   fileRead             (false),
+   fluxReaderLoaded     (false),
    nominalF107          (am.nominalF107),
    nominalF107a         (am.nominalF107a),
    nominalKp            (am.nominalKp),
    kpApConversion       (am.kpApConversion),
+   historicalDataSource (am.historicalDataSource),
+   predictedDataSource  (am.predictedDataSource),
    mInternalCoordSystem (am.mInternalCoordSystem),
    cbJ2000              (am.cbJ2000),
    cbFixed              (am.cbFixed),
@@ -163,12 +201,27 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
-   useGeodetic          (am.useGeodetic),						// made changes by TUAN NGUYEN
+   useGeodetic          (am.useGeodetic),
    gha                  (0.0),
-   ghaEpoch             (0.0)
+   ghaEpoch             (0.0),
+   historicStart        (am.historicStart),
+   historicEnd          (am.historicEnd),
+   predictStart         (am.predictStart),
+   predictEnd           (am.predictEnd),
+   schattenTimingModel  (am.schattenTimingModel),
+   schattenErrorModel   (am.schattenErrorModel),
+   sod                  (am.sod),
+   yd                   (am.yd),
+   f107                 (am.f107),
+   f107a                (am.f107a)
 {
    parameterCount = AtmosphereModelParamCount;
    nominalAp = ConvertKpToAp(nominalKp);
+/*   if(am.fluxReader != NULL)
+   {
+      fluxReader = new SolarFluxReader();
+    
+   }*/
 }
 
 //------------------------------------------------------------------------------
@@ -189,23 +242,24 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
         
    GmatBase::operator=(am);
    
-   fileReader           = NULL;
    solarSystem          = am.solarSystem;
    mCentralBody         = am.mCentralBody;
-   solarFluxFile        = NULL;
-   fileName             = am.fileName;
+   obsFileName          = am.obsFileName;
+   predictFileName      = am.predictFileName;
    sunVector            = NULL;
    centralBody          = am.centralBody;
    centralBodyLocation  = NULL;
+   fluxReader           = NULL;
    cbRadius             = am.cbRadius;
    cbFlattening         = am.cbFlattening;
-   newFile              = false;
-   fileRead             = false;
+   fluxReaderLoaded     = false;
    nominalF107          = am.nominalF107;
    nominalF107a         = am.nominalF107a;
    nominalKp            = am.nominalKp;
    nominalAp            = ConvertKpToAp(nominalKp);
    kpApConversion       = am.kpApConversion;
+   historicalDataSource = am.historicalDataSource;
+   predictedDataSource  = am.predictedDataSource;
    mInternalCoordSystem = am.mInternalCoordSystem;
    cbJ2000              = am.cbJ2000;
    cbFixed              = am.cbFixed;
@@ -214,12 +268,47 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    geoHeight            = 0.0;
    geoLat               = 0.0;
    geoLong              = 0.0;
-   useGeodetic          = am.useGeodetic;							// made changes by TUAN NGUYEN
+   useGeodetic          = am.useGeodetic;
    gha                  = 0.0;
    ghaEpoch             = 0.0;
+   historicStart        = am.historicStart;
+   historicEnd          = am.historicEnd;
+   predictStart         = am.predictStart;
+   predictEnd           = am.predictEnd;
+   schattenTimingModel  = am.schattenTimingModel;
+   schattenErrorModel   = am.schattenErrorModel;
+
+   sod                  = am.sod;
+   yd                   = am.yd;
+   f107                 = am.f107;
+   f107a                = am.f107a;
+
+   for (Integer i = 0; i < 7; i++)
+      ap[i] = am.ap[i];
 
    return *this;
 }
+
+
+//------------------------------------------------------------------------------
+// bool AtmosphereModel::Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Initialize()
+ * 
+ * @param None
+ * 
+ * @return true
+ */
+//------------------------------------------------------------------------------
+
+bool AtmosphereModel::Initialize()
+{
+   if (fluxReader == NULL)
+      fluxReader = new SolarFluxReader();
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 //  void SetSunVector(Real *sv)
@@ -296,6 +385,21 @@ void AtmosphereModel::SetCbJ2000CoordinateSystem(CoordinateSystem *cs)
 {
    cbJ2000 = cs;
 }
+
+
+// made changes  for bug GMT-5282
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetCbJ2000CoordinateSystem()
+//------------------------------------------------------------------------------
+/**
+ * Gets the body centered J2000 coordinate system.
+ */
+//------------------------------------------------------------------------------
+CoordinateSystem* AtmosphereModel::GetCbJ2000CoordinateSystem()
+{
+   return cbJ2000;
+}
+
 
 //------------------------------------------------------------------------------
 // void SetFixedCoordinateSystem(CoordinateSystem *cs)
@@ -614,6 +718,79 @@ Real AtmosphereModel::ConvertKpToAp(const Real kp)
 }
 
 
+//------------------------------------------------------------------------------
+// void AtmosphereModel::SetInputSource(const std::string &historical,
+//                                      const std::string &predicted)
+//------------------------------------------------------------------------------
+/**
+ * Sets teh sources for Flux and Geomagnetic indices
+ *
+ * @param historical Toggles between constants and CSSI data, using the strings
+ *                   "ConstantFluxAndGeoMag" and "CSSISpaceWeatherFile"
+ * @param predicted Toggles between constants, CSSI, and Schatten data, using
+ *                  the strings "ConstantFluxAndGeoMag", "CSSISpaceWeatherFile",
+ *                  and "SchattenFile"
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetInputSource(const std::string &historical,
+                                     const std::string &predicted)
+{
+   if (historical == "ConstantFluxAndGeoMag")
+      historicalDataSource = 0;
+   else if (historical == "CSSISpaceWeatherFile")
+      historicalDataSource = 1;
+   else
+      throw AtmosphereException("Invalid historical data source " + historical +
+            " selected");
+
+   if (predicted == "ConstantFluxAndGeoMag")
+      predictedDataSource = 0;
+   else if (predicted == "CSSISpaceWeatherFile")
+      predictedDataSource = 1;
+   else if (predicted == "SchattenFile")
+      predictedDataSource = 2;
+   else
+      throw AtmosphereException("Invalid predicted data source " + predicted +
+            " selected");
+}
+
+//------------------------------------------------------------------------------
+// void SetSchattenFlags(const std::string &timing, const std::string &magnitude)
+//------------------------------------------------------------------------------
+/**
+ * Pass-through function for the Schatten predict model selection
+ *
+ * @param timing The Schatten timing model
+ * @param magnitude The Schatten error model
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetSchattenFlags(const std::string &timing,
+                            const std::string &magnitude)
+{
+   #ifdef DEBUG_SCHATTEN_SETTINGS
+      MessageInterface::ShowMessage("AtmosphereModel::SetSchattenFlags"
+            "(%s, %s)\n", timing.c_str(), magnitude.c_str());
+   #endif
+
+   if (timing == "EarlyCycle")
+      schattenTimingModel = -1;
+   if (timing == "NominalCycle")
+      schattenTimingModel = 0;
+   if (timing == "LateCycle")
+      schattenTimingModel = 1;
+
+   if (magnitude == "MinusTwoSigma")
+      schattenErrorModel = -1;
+   if (magnitude == "Nominal")
+      schattenErrorModel = 0;
+   if (magnitude == "PlusTwoSigma")
+      schattenErrorModel = 1;
+
+   if (fluxReader != NULL)
+      fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
+}
+
+
 //-----------------------------------------------------------------------------
 // bool AtmosphereModel::HasWindModel()
 //-----------------------------------------------------------------------------
@@ -769,8 +946,10 @@ bool AtmosphereModel::IsParameterReadOnly(const Integer id) const
    // Since these parameters are handled in the DragForce, make them
    // read only 
    if ((id == NOMINAL_FLUX) || (id == NOMINAL_AVERAGE_FLUX) ||
-       (id == NOMINAL_MAGNETIC_INDEX))
-      return true;
+       (id == NOMINAL_MAGNETIC_INDEX) || (id == SCHATTEN_WEATHER_FILE) ||
+       (id == CSSI_WEATHER_FILE) )
+//      return true;
+      return false;
    
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -936,64 +1115,284 @@ Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
 
 
 //------------------------------------------------------------------------------
-//  void SetSolarFluxFile(const std::string &file)
+// Real GetRealParameter(const Integer id, const Integer index) const
 //------------------------------------------------------------------------------
 /**
- * @param <file> The solar flux file
+ * Call through method since derived classes need it (e.g. MarsGRAM)
+ *
+ * @param id The parameter ID
+ * @param index Index of the requested real number
+ *
+ * @return The array based real parameter requested.
  */
 //------------------------------------------------------------------------------
-void AtmosphereModel::SetSolarFluxFile(const std::string &file)
+Real AtmosphereModel::GetRealParameter(const Integer id,
+      const Integer index) const
 {
-   if (strcmp(fileName.c_str(), file.c_str()) == 0)
-      SetOpenFileFlag(true);
-   else
+   return GmatBase::GetRealParameter(id, index);
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Call through method since derived classes need it (e.g. MarsGRAM)
+ *
+ * @param id The parameter ID
+ * @param value The new parameter value
+ * @param index Index of the requested real number
+ *
+ * @return The new array based real parameter requested.
+ */
+//------------------------------------------------------------------------------
+Real AtmosphereModel::SetRealParameter(const Integer id,
+                                     const Real value,
+                                     const Integer index)
+{
+   return GmatBase::SetRealParameter(id, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets string based values on the model
+ *
+ * @param id The ID of the parameter being set
+ * @param value The new value
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool AtmosphereModel::SetStringParameter(const Integer id,
+      const std::string &value)
+{
+   if (id == CSSI_WEATHER_FILE)
    {
-      fileName = file;
-      SetOpenFileFlag(false);
-   }   
+      if (value != "")
+      {
+         bool headerFound = false;
+         bool startFound = false;
+         bool fileIsValid = false;
+
+         // If the file is a SCHATTEN file, we require 3 tags:
+         // "DATATYPE CSSISPACEWEATHER", "BEGIN OBSERVED", and "END OBSERVED"
+         std::string searchFor = "DATATYPE CSSISPACEWEATHER";
+         std::string line;
+
+         // Does it exist?
+         // Set the file names, possibly with path prefixes
+         FileManager *fm = FileManager::Instance();
+
+         std::string weatherfile = value;
+         if (fm->DoesFileExist(weatherfile) == false)
+            weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
+         if (fm->DoesFileExist(weatherfile) == false)
+            throw SolarSystemException("Cannot open the observed space weather file " +
+                  value + ", nor the file at the location " + weatherfile);
+
+         std::ifstream inStream(weatherfile.c_str());
+
+         // Is is a known format?
+         while (!inStream.eof() && !fileIsValid)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(searchFor) != std::string::npos)
+            {
+               if (!headerFound)
+               {
+                  headerFound = true;
+                  searchFor = "BEGIN OBSERVED";
+               }
+               if (headerFound && !startFound)
+               {
+                  startFound = true;
+                  searchFor = "END OBSERVED";
+               }
+               if (headerFound && startFound)
+               {
+                  fileIsValid = true;
+               }
+            }
+         }
+         inStream.close();
+
+         if (fileIsValid)
+            obsFileName = weatherfile;
+         else
+            throw SolarSystemException("Observed space weather measurement "
+                  "file \"" + value + "\" is in an unknown format");
+      }
+      return true;
+   }
+
+   if (id == SCHATTEN_WEATHER_FILE)
+   {
+      if (value != "")
+      {
+         bool headerFound = false;
+         bool startFound = false;
+         bool fileIsValid = false;
+
+         // If the file is a SCHATTEN file, we require 3 tags:
+         // "PREDICTED SOLAR DATA", "BEGIN_DATA", and "END_DATA"
+         std::string searchFor = "PREDICTED SOLAR DATA";
+         std::string line;
+
+         // Does it exist?
+         FileManager *fm = FileManager::Instance();
+
+         std::string weatherfile = value;
+         if (fm->DoesFileExist(weatherfile) == false)
+            weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
+         if (fm->DoesFileExist(weatherfile) == false)
+            throw SolarSystemException("Cannot open the predicted space weather file " +
+                  value + ", nor the file at the location " + weatherfile);
+
+         std::ifstream inStream(weatherfile.c_str());
+
+         // Is is a known format?
+         while (!inStream.eof() && !fileIsValid)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(searchFor) != std::string::npos)
+            {
+               if (!headerFound)
+               {
+                  headerFound = true;
+                  searchFor = "BEGIN_DATA";
+               }
+               if (headerFound && !startFound)
+               {
+                  startFound = true;
+                  searchFor = "END_DATA";
+               }
+               if (headerFound && startFound)
+               {
+                  fileIsValid = true;
+               }
+            }
+         }
+         inStream.close();
+
+         if (fileIsValid)
+            predictFileName = weatherfile;
+         else
+            throw SolarSystemException("Predicted space weather measurement "
+                  "file \"" + value + "\" is in an unknown format");
+      }
+      return true;
+   }
+
+   return GmatBase::SetStringParameter(id, value);
 }
 
-//------------------------------------------------------------------------------
-// void SetNewFileFlag(bool flag)
-//------------------------------------------------------------------------------
-/**
- * Sets the new file flag
- * 
- * @param <flag> The value for the flag.
- */
-//------------------------------------------------------------------------------
-void AtmosphereModel::SetNewFileFlag(bool flag)
-{
-   newFile = flag;
-}
 
 //------------------------------------------------------------------------------
-// void SetOpenFileFlag(bool flag)
+// std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
- * Sets the file opened flag
- * 
- * @param <flag> The value for the flag.
+ * Retrieves a string based value
+ *
+ * @param id The ID for the requested parameter
+ *
+ * @return The parameter value
  */
 //------------------------------------------------------------------------------
-void AtmosphereModel::SetOpenFileFlag(bool flag)
+std::string AtmosphereModel::GetStringParameter(const Integer id) const
 {
-   fileRead = flag;
+   if (id == CSSI_WEATHER_FILE)
+      return obsFileName;
+
+   if (id == SCHATTEN_WEATHER_FILE)
+      return predictFileName;
+
+   return GmatBase::GetStringParameter(id);
 }
 
+
 //------------------------------------------------------------------------------
-// void CloseFile()
+// std::string GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
- * Closes the solar flux file.
+ * Retrieves a string based parameter using the script label
+ *
+ * @param label The text label for the parameter
+ *
+ * @return The parameter value
  */
 //------------------------------------------------------------------------------
-void AtmosphereModel::CloseFile()
+std::string AtmosphereModel::GetStringParameter(const std::string &label) const
 {
-   if (fileReader->CloseSolarFluxFile(solarFluxFile))
-      fileRead = false;
-   else
-      throw AtmosphereException("Error closing Atmosphere Model data file.\n");
+   return GetStringParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets string based values on the model
+ *
+ * @param label The text label for the parameter
+ * @param value The new value
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool AtmosphereModel::SetStringParameter(const std::string &label,
+      const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// SolarFluxReader* GetFluxReader()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the flux reader for atmosphere data Parameters
+ *
+ * @return The flux reader pointer
+ */
+//------------------------------------------------------------------------------
+SolarFluxReader* AtmosphereModel::GetFluxReader()
+{
+   return fluxReader;
+}
+
+
+//------------------------------------------------------------------------------
+// SolarFluxReader::FluxData GetFluxData(GmatEpoch epoch = -1.0);
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the flux data record for the input epoch
+ *
+ * @param epoch The epoch for teh data,  The default, -1.0, retrieves the
+ *              current record
+ *
+ * @return The internal fDbuffer record
+ */
+//------------------------------------------------------------------------------
+SolarFluxReader::FluxData AtmosphereModel::GetFluxData(GmatEpoch epoch)
+{
+   if (epoch > 0.0)
+      GetInputs(epoch);
+   return fDbuffer;
 }
 
 
@@ -1023,6 +1422,7 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
    CoordinateSystem *j2000ToUse = (cbJ2000 == NULL ? mInternalCoordSystem : cbJ2000);
 
 #ifdef DEBUG_CALCULATE_GEODETICS
+   MessageInterface::ShowMessage("AtmosphereModel::CalculateGeodetics():   cbJ2000 = <%p>    mInternalCoordSystem = <%p>\n", cbJ2000, mInternalCoordSystem);
    if (cbJ2000 == NULL)
 	   MessageInterface::ShowMessage("cbJ2000 == NULL, mInternalCoordSystem <%p,%s>\n", mInternalCoordSystem, mInternalCoordSystem->GetName().c_str());
    else
@@ -1036,7 +1436,8 @@ Real AtmosphereModel::CalculateGeodetics(Real *position, GmatEpoch when,
    #ifdef DEBUG_COORDINATE_TRANSFORMS
       MessageInterface::ShowMessage("Geodetic calculations at epoch %.12lf\n",
             when);
-      MessageInterface::ShowMessage("Internal CS:\n%s\nFixed:\n%s\n",
+      if ((mInternalCoordSystem != NULL)&&(cbFixed != NULL))
+         MessageInterface::ShowMessage("Internal CS:\n%s\nFixed:\n%s\n",
             mInternalCoordSystem->GetGeneratingString(
                   Gmat::NO_COMMENTS).c_str(),
             cbFixed->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
@@ -1158,12 +1559,12 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
    //
    Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
    geoLat = atan2(state[2], rxy);
-//   geoHeight = rxy / cos(geoLat) - cbRadius;		// This equation is not correct for ellipsoid		// made changes by TUAN NGUYEN
+//   geoHeight = rxy / cos(geoLat) - cbRadius;		// This equation is not correct for ellipsoid
 //
-//   Real cs = cos(geoLat);												// made changes by TUAN NGUYEN
-//   Real sn = sin(geoLat);												// made changes by TUAN NGUYEN
-//   Real f = cbFlattening;												// made changes by TUAN NGUYEN
-//   geoHeight = rxy / cs - cbRadius*sqrt(cs*cs + (1-f)*(1-f)*sn*sn);		// made changes by TUAN NGUYEN    Fixed bug GMT-4184
+//   Real cs = cos(geoLat);
+//   Real sn = sin(geoLat);
+//   Real f = cbFlattening;
+//   geoHeight = rxy / cs - cbRadius*sqrt(cs*cs + (1-f)*(1-f)*sn*sn);		// Fixed bug GMT-4184
 
    Real delta = 1.0;
    Real tolerance = 1.0e-7;    // Better than 0.0001 degrees
@@ -1201,6 +1602,182 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
    #endif
 
    return geoHeight;
+}
+
+
+//------------------------------------------------------------------------------
+//  void GetInputs(Real epoch)
+//------------------------------------------------------------------------------
+/**
+ *  Sets the input global data for the model, either from a file or from user
+ *  input constants.
+ *
+ *  @param epoch The current TAIJulian epoch
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::GetInputs(GmatEpoch epoch)
+{
+   #ifdef DEBUG_FLUX_FILE
+      MessageInterface::ShowMessage("GetInputs, %s\n",
+            (fluxReaderLoaded ? "true" : "false"));
+   #endif
+
+   // Process the epoch information
+   Integer iEpoch = (Integer)(epoch);  // Truncate the epoch
+   Integer yearOffset = (Integer)((epoch + 5.5) / GmatTimeConstants::DAYS_PER_YEAR);
+   Integer year   = 1941 + yearOffset;
+   Integer doy = iEpoch - (Integer)(yearOffset * GmatTimeConstants::DAYS_PER_YEAR) + 5;
+
+   sod  = GmatTimeConstants::SECS_PER_DAY * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
+   if (sod < 0.0)
+   {
+      sod += GmatTimeConstants::SECS_PER_DAY;
+      doy -= 1;
+   }
+
+   if (sod > GmatTimeConstants::SECS_PER_DAY)
+   {
+      sod -= GmatTimeConstants::SECS_PER_DAY;
+      doy += 1;
+   }
+   yd = year*1000 + doy;
+
+   if (!fluxReaderLoaded)
+   {
+      std::string theObsFile = "", thePredictFile = "";
+
+      // Only load the files that are needed
+      if (historicalDataSource != 0)
+         theObsFile = obsFileName;
+
+      if (predictedDataSource != 0)
+         thePredictFile = predictFileName;
+
+      if ((historicalDataSource != 0) || (predictedDataSource != 0))
+      {
+         fluxReaderLoaded = fluxReader->LoadFluxData(theObsFile, thePredictFile);
+
+         if (fluxReaderLoaded)
+         {
+            fluxReader->GetEpochs(historicStart, historicEnd, predictStart,
+                  predictEnd);
+
+            // Handle constants for historic data
+            if (historicalDataSource == 0)
+               historicEnd = predictStart;
+   }
+         if (predictedDataSource != 0)
+         {
+            #ifdef DEBUG_SCHATTEN_SETTINGS
+               MessageInterface::ShowMessage("Setting Schatten flags: timing "
+                     "%d, error %d\n", schattenTimingModel, schattenErrorModel);
+            #endif
+
+            fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
+         }
+      }
+      else
+      {
+         // All constants; set the ranges for minimal impact
+         fluxReaderLoaded = true;
+         historicStart = 0.0;
+         // GMAT's epoch is capped here:
+         historicEnd = 58127.5;
+         predictStart = predictEnd = 58127.5;
+      }
+
+      #ifdef DEBUG_FLUX_FILE
+         MessageInterface::ShowMessage("Epoch settings: [%lf -> %lf], "
+               "[%lf -> %lf]\n", historicStart, historicEnd, predictStart,
+               predictEnd);
+      #endif
+    }
+
+   #ifdef DEBUG_FLUX_FILE
+      MessageInterface::ShowMessage("Data loaded; looking for epoch %lf\n", epoch);
+   #endif
+
+   if (fluxReaderLoaded && epoch > 0.0)
+   {
+      if (epoch < historicEnd)
+      {
+         switch(historicalDataSource)
+         {
+         case 1:
+            fDbuffer = fluxReader->GetInputs(epoch);
+            fluxReader->PrepareApData(fDbuffer, epoch);
+            f107 = fDbuffer.obsF107;
+            f107a = fDbuffer.obsCtrF107a;
+      for (Integer i = 0; i < 7; i++)
+                ap[i] = fDbuffer.ap[i];
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("%lf Historic flux: CSSI\n", epoch);
+            #endif
+            break;
+
+         case 0:
+         default:
+            f107 = nominalF107;
+            f107a = nominalF107a;
+            for (Integer i = 0; i < 7; i++)
+               ap[i] = nominalAp;
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("%lf Historic flux: Constants\n", epoch);
+            #endif
+            break;
+   }
+      }
+      else // Later than historic data end
+   {
+         switch(predictedDataSource)
+         {
+         case 1:
+         case 2:
+            fDbuffer = fluxReader->GetInputs(epoch);
+            fluxReader->PrepareApData(fDbuffer, epoch);
+            f107 = fDbuffer.obsF107;
+            f107a = fDbuffer.obsCtrF107a;
+            for (Integer i = 0; i < 7; i++)
+                ap[i] = fDbuffer.ap[i];
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("%lf Predict flux: Schatten\n", epoch);
+            #endif
+            break;
+
+         case 0:
+         default:
+      f107 = nominalF107;
+      f107a = nominalF107a;
+      for (Integer i = 0; i < 7; i++)
+         ap[i] = nominalAp;
+            #ifdef DEBUG_FLUX_FILE
+               MessageInterface::ShowMessage("%lf Predict flux: Constants\n", epoch);
+            #endif
+            break;
+   }
+      }
+   }
+   else  // All constants all the time
+   {
+      f107 = nominalF107;
+      f107a = nominalF107a;
+      for (Integer i = 0; i < 7; i++)
+         ap[i] = nominalAp;
+   }
+
+   #ifdef DUMP_FLUX_DATA
+      MessageInterface::ShowMessage("%.12lf   %lf  %lf    [%lf %lf %lf %lf %lf "
+            "%lf %lf]\n", epoch, f107, f107a, ap[0], ap[1], ap[2], ap[3], ap[4],
+            ap[5], ap[6]);
+   #endif
+
+   #ifdef DEBUG_FLUX_FILE
+      MessageInterface::ShowMessage("Flux data for %s model\n", instanceName.c_str());
+      MessageInterface::ShowMessage("   Epoch:  %.12lf\n", epoch);
+      MessageInterface::ShowMessage("   F10.7:  %lf\n", f107);
+      MessageInterface::ShowMessage("   F10.7a: %lf\n", f107a);
+      MessageInterface::ShowMessage("   Ap:     [%lf %lf %lf %lf %lf %lf %lf]\n", ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
+   #endif
 }
 
 

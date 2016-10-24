@@ -5,9 +5,19 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -123,7 +133,7 @@ void BallisticsMassPanel::Create()
     item2->AddGrowableCol(1);
 
     wxStaticText *dryMassStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Dry "GUI_ACCEL_KEY"Mass"), 
+                            "Dry " GUI_ACCEL_KEY "Mass",
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( dryMassStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -138,7 +148,7 @@ void BallisticsMassPanel::Create()
     item2->Add( dryMassUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *dragCoeffStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Coefficient of "GUI_ACCEL_KEY"Drag"), wxDefaultPosition, 
+                            "Coefficient of " GUI_ACCEL_KEY "Drag", wxDefaultPosition,
                             wxDefaultSize, 0 );
     item2->Add( dragCoeffStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -149,7 +159,7 @@ void BallisticsMassPanel::Create()
     item2->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *reflectCoeffStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Coefficient of "GUI_ACCEL_KEY"Reflectivity"), 
+                            "Coefficient of " GUI_ACCEL_KEY "Reflectivity",
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( reflectCoeffStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -160,7 +170,7 @@ void BallisticsMassPanel::Create()
     item2->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *dragAreaStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Drag "GUI_ACCEL_KEY"Area"), 
+                            "Drag " GUI_ACCEL_KEY "Area",
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( dragAreaStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -174,7 +184,7 @@ void BallisticsMassPanel::Create()
     item2->Add( dragAreaUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *srpAreaStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT(GUI_ACCEL_KEY"SRP Area"), 
+                            GUI_ACCEL_KEY"SRP Area", 
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( srpAreaStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -191,7 +201,7 @@ void BallisticsMassPanel::Create()
     spadFlexSizer->AddGrowableCol(1);
 
     wxStaticText *srpFileStaticText = new wxStaticText( this, ID_TEXT,
-                            wxT(GUI_ACCEL_KEY"SPAD SRP File"),
+                            GUI_ACCEL_KEY"SPAD SRP File",
                             wxDefaultPosition, wxDefaultSize, 0 );
     spadFlexSizer->Add( srpFileStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -201,12 +211,12 @@ void BallisticsMassPanel::Create()
     spadFlexSizer->Add( spadSrpFileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
     spadBrowseButton =
        new wxBitmapButton(this, ID_SPAD_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                          wxSize(buttonWidth, 20));
+                          wxSize(buttonWidth, -1));
     spadBrowseButton->SetToolTip(pConfig->Read(_T("BrowseSPADSRPFileNameHint")));
     spadFlexSizer->Add( spadBrowseButton, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *srpScaleFactorStaticText = new wxStaticText( this, ID_TEXT,
-                            wxT(GUI_ACCEL_KEY"SPAD SRP Scale Factor"),
+                            GUI_ACCEL_KEY"SPAD SRP Scale Factor",
                             wxDefaultPosition, wxDefaultSize, 0 );
     spadFlexSizer->Add( srpScaleFactorStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -392,7 +402,7 @@ void BallisticsMassPanel::SaveData()
 
             wxString str    = spadSrpFileTextCtrl->GetValue();
             theSpadSrpFile  = str.c_str();
-            std::ifstream filename(str.c_str());
+            std::ifstream filename(str.WX_TO_C_STRING);
 
             // Check if the file doesn't exist then stop
             if (!filename)

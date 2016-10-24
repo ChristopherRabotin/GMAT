@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -57,19 +67,19 @@ static const Real TIME_TOL = 1.0e-8;
 
 //------------------------------------------------------------------------------
 // TextEphemFile(const std::string &type, const std::string &name,
-//               const std::string &fileName)
+//               const std::string &fname)
 //------------------------------------------------------------------------------
 TextEphemFile::TextEphemFile(const std::string &type, const std::string &name,
-                             const std::string &fileName, Parameter *firstVarParam) :
-   ReportFile(type, name, fileName, firstVarParam)
+                             const std::string &fname, Parameter *firstVarParam) :
+   ReportFile(type, name, fname, firstVarParam)
 {
    // create Interpolator
    mInterpolator = new CubicSplineInterpolator("InternalInterpolator", 6);
    
    // rename data file name
-   //filename = fileName + ".tempdata$$$";
-   filename = fileName + ".data";
-   mHeaderFileName = fileName;
+   //fileName = fname + ".tempdata$$$";
+   fileName = fname + ".data";
+   mHeaderFileName = fname;
    mEpochFormat = "";
    mCoordSysName = "";
    mIntervalInSec = 0.0;
@@ -710,6 +720,7 @@ void TextEphemFile::WriteTime(Real epoch)
    
    Real time = TimeConverterUtil::Convert(epoch, TimeConverterUtil::A1MJD, 
                                           mEpochSysId, GmatTimeConstants::JD_JAN_5_1941);
+   bool handleLeapSecond = TimeConverterUtil::HandleLeapSecond();
 
    dstream.width(mColWidth[0]);
    dstream.precision(precision);
@@ -723,7 +734,9 @@ void TextEphemFile::WriteTime(Real epoch)
    
    if (mIsGregorian)
    {
-      std::string timeStr = TimeConverterUtil::ConvertMjdToGregorian(time);
+      bool isUTC = ((mEpochSysId == TimeConverterUtil::UTCMJD) ||
+                    (mEpochSysId == TimeConverterUtil::UTC));
+      std::string timeStr = TimeConverterUtil::ConvertMjdToGregorian(time, (isUTC && handleLeapSecond));
       dstream << timeStr << "   ";
    }
    else
@@ -857,15 +870,15 @@ void TextEphemFile::WriteEphemHeader()
    // Open data file
    #if DEBUG_EPHEMFILE_DATA
    MessageInterface::ShowMessage
-      ("TextEphemFile::WriteEphemHeader() filename=%s\n", filename.c_str());
+      ("TextEphemFile::WriteEphemHeader() fileName=%s\n", fileName.c_str());
    #endif
    
-   std::ifstream dataStream(filename.c_str());
+   std::ifstream dataStream(fileName.c_str());
    if (!dataStream.is_open())
    {
       MessageInterface::ShowMessage
          ("*** ERROR *** TextEphemFile::WriteEphemHeader() Fail to open %s\n",
-          filename.c_str());
+          fileName.c_str());
       headerStream.close();
       return;
    }
@@ -886,10 +899,10 @@ void TextEphemFile::WriteEphemHeader()
 //    // It doesn't work!!!
 //    #ifdef __WINDOWS__
 //    // Delete data file
-//    if (system(("rm " + filename).c_str()) == 0)
-//       MessageInterface::ShowMessage("==> Sucessfully removed file:%s\n", filename.c_str());
+//    if (system(("rm " + fileName).c_str()) == 0)
+//       MessageInterface::ShowMessage("==> Sucessfully removed file:%s\n", fileName.c_str());
 //    else
-//       MessageInterface::ShowMessage("==> Removing file:%s was Unsuccessful\n", filename.c_str());
+//       MessageInterface::ShowMessage("==> Removing file:%s was Unsuccessful\n", fileName.c_str());
 //    #endif
 }
 

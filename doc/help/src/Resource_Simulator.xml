@@ -1,0 +1,618 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="Simulator"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Simulator</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>Simulator</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Simulator</refname>
+
+    <refpurpose>Configures the generation of simulated tracking data
+    measurements.</refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>A <guilabel>Simulator</guilabel> configures the generation of
+    simulated tracking data measurements. These measurements can then be used
+    by a <guilabel>BatchEstimatorInv</guilabel> resource as part of an
+    estimation run.</para>
+
+    <para>The <guilabel>Simulator</guilabel> object requires specification of
+    one or more instances of a <guilabel>TrackingFileSet</guilabel> resource
+    which identify the specific tracking data observation strands, data types,
+    desired measurement corrections, and the output tracking data file name.
+    Simulated data will be written in the GMAT Measurement Data (GMD) ASCII
+    tracking data format. You must additionally specify a time span for the
+    simulation run and a time interval between simulated observations.
+    Simulated observations are only generated when a tracking strand meets the
+    visibility constraints of all objects in the strand (for example, the
+    observation must be above the ground station minimum elevation mask).
+    Additionally, you must configure and specify an instance of a
+    <guilabel>Propagator</guilabel> for the simulator. Finally, you can choose
+    to add random Gaussian white noise to the generated measurements or to
+    generate measurements without noise. If the
+    <guilabel>Simulator.AddNoise</guilabel> option is set to On, noise, with
+    the standard deviation specified on each measurement strand’s
+    <guilabel>GroundStation.ErrorModel</guilabel>, is added to the
+    measurements.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="TrackingFileSet"/>, <xref linkend="RunEstimator"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="1.0*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>AddData</guilabel></entry>
+
+            <entry><para>A list of one or more
+            <guilabel>TrackingFileSets</guilabel></para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para><guilabel>TrackingFileSet</guilabel> object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any valid <guilabel>TrackingFileSet</guilabel>
+                    object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>None</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>AddNoise</guilabel></entry>
+
+            <entry><para>If true, adds noise to simulated observations</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true, false, on, off</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>false</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EpochFormat</guilabel></entry>
+
+            <entry><para>Epoch format of both the initial and final
+            epoch</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>STRING_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>A1ModJulian, TAIModJulian, UTCModJulian,
+                    TTModJulian, TDBModJulian, A1Gregorian, TAIGregorian,
+                    TTGregorian, UTCGregorian, TDBGregorian</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>TAIModJulian</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>InitialEpoch</guilabel></entry>
+
+            <entry><para>The initial (start) epoch of the data simulation
+            span. In the GMAT script, the <guilabel>EpochFormat</guilabel>
+            field needs to be set before this field is set. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>STRING_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Gregorian: 04 Oct 1957 12:00:00.000 &lt;= Epoch
+                    &lt;= 28 Feb 2100 00:00:00.000</para>
+
+                    <para>Modified Julian: 6116.0 &lt;= Epoch &lt;=
+                    58127.5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>'21545'</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FinalEpoch</guilabel></entry>
+
+            <entry><para>The final (ending) epoch of the data simulation span.
+            In the GMAT script, the <guilabel>EpochFormat</guilabel> field
+            needs to be set before this field is set. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>STRING_TYPE</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Gregorian: 04 Oct 1957 12:00:00.000 &lt;= Epoch
+                    &lt;= 28 Feb 2100 00:00:00.000</para>
+
+                    <para>Modified Julian: 6116.0 &lt;= Epoch &lt;=
+                    58127.5</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>'21545'</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MeasurementTimeStep</guilabel></entry>
+
+            <entry><para>Specifies time step in seconds between two
+            consecutive simulated observations</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>60</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>seconds</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Propagator</guilabel></entry>
+
+            <entry><para>Name of <guilabel>Propagator</guilabel> object used
+            for calculation</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para><guilabel>Propagator</guilabel> Object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any valid <guilabel>Propagator</guilabel>
+                    object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>None</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Interactions</title>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="2">
+          <colspec colwidth="169*"/>
+
+          <colspec colwidth="831*"/>
+
+          <thead>
+            <row>
+              <entry>Resource</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>TrackingFileSet resource</guilabel></entry>
+
+              <entry><para> Must be created in order to tell the
+              <guilabel>Simulator</guilabel> resource, via the
+              <guilabel>AddData</guilabel> field, which data types will be
+              simulated and to specify the name of the output tracking data
+              file (via <guilabel>FileName</guilabel>)</para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Propagator</guilabel>
+              <guilabel>resource</guilabel></entry>
+
+              <entry> Used by GMAT to generate the simulated orbit</entry>
+            </row>
+
+            <row>
+              <entry><guilabel>RunSimulator command</guilabel></entry>
+
+              <entry><para> Must use the <guilabel>RunSimulator</guilabel>
+              command to actually create the data defined by the
+              <guilabel>Simulator</guilabel> resource</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>The example below illustrates using the simulator to generate DSN
+      range measurements. This example is more detailed than usual as it can
+      actually be run to produce a file, <filename>simData.gmd</filename>,
+      that contains a single range measurement for a fictional DSN ground
+      station. For a more comprehensive example of simulating measurements,
+      see the <xref linkend="Tut_Simulate_DSN_Range_and_Doppler_Data"/>
+      tutorial.</para>
+
+      <programlisting><?db-font-size 75% ?>%Create and Configure Spacecraft
+Create Spacecraft SimSat;
+GMAT SimSat.DateFormat = UTCGregorian;
+GMAT SimSat.Epoch = '19 Aug 2015 00:00:00.000';
+GMAT SimSat.X     = -126544963;      
+GMAT SimSat.Y     = 61978518;       
+GMAT SimSat.Z     = 24133225;     
+GMAT SimSat.VX    = -13.789;
+GMAT SimSat.VY    = -24.673;
+GMAT SimSat.VZ    = -10.662;
+GMAT SimSat.AddHardware = {SatTransponder, SatTranponderAntenna};
+
+%Create and configure RF hardware
+Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
+
+Create Transponder SatTransponder;
+GMAT SatTransponder.PrimaryAntenna = SatTranponderAntenna;
+
+Create Transmitter DSNTransmitter;
+GMAT DSNTransmitter.PrimaryAntenna = DSNTransmitterAntenna;
+GMAT DSNTransmitter.Frequency = 7200;
+
+Create Receiver DSNReceiver;
+GMAT DSNReceiver.PrimaryAntenna = DSNReceiverAntenna;
+
+%Create and configure ground station and related error model
+Create GroundStation DSN;
+GMAT DSN.AddHardware = ...
+  {DSNTransmitter, DSNReceiver, DSNTransmitterAntenna, DSNReceiverAntenna};
+GMAT DSN.ErrorModels = {DSNrange};
+
+Create ErrorModel DSNrange;
+GMAT DSNrange.Type = 'Range_RU';
+GMAT DSNrange.NoiseSigma = 10;
+
+%Define data types
+Create TrackingFileSet simData;
+GMAT simData.AddTrackingConfig = {{DSN,SimSat,DSN}, DSNRange};
+GMAT simData.FileName          = {'simData.gmd'};
+
+%   Create and configure the Simulator object
+Create Propagator prop;
+
+Create Simulator sim;
+GMAT sim.AddData             = {simData};
+GMAT sim.Propagator          = prop;
+GMAT sim.EpochFormat         = UTCGregorian;
+GMAT sim.InitialEpoch        = '19 Aug 2015 08:00:00.000';
+GMAT sim.FinalEpoch          = '19 Aug 2015 08:00:01.000';
+GMAT sim.MeasurementTimeStep = 60;
+GMAT sim.AddNoise            = On;
+
+%  Mission Sequence - run the simulator.
+
+BeginMissionSequence;
+
+RunSimulator sim;</programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

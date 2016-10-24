@@ -4,11 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/01/20
@@ -16,6 +24,7 @@
  * Implements MdiChildXyFrame class for xy plot.
  */
 //------------------------------------------------------------------------------
+#include "gmatwxdefs.hpp"          // for WX_TO_STD_STRING macro
 #include "gmatwxrcs.hpp"
 #include "MdiChildTsFrame.hpp"
 #include "Subscriber.hpp"
@@ -41,6 +50,7 @@
 
 //#define DEBUG_MDI_TS_FRAME
 //#define DEBUG_RENAME
+//#define DEBUG_REDRAW_CURVE
 
 BEGIN_EVENT_TABLE(MdiChildTsFrame, GmatMdiChildFrame)
    EVT_MENU(GmatPlot::MDI_TS_OPEN_PLOT_FILE, MdiChildTsFrame::OnOpenXyPlotFile)
@@ -132,9 +142,9 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
                        wxTAB_TRAVERSAL,//wxPLOT_DEFAULT,
                        plotTitle);
    
-   frame->SetLabel(xAxisTitle.c_str(), TsPlotCanvas::X_LABEL);
-   frame->SetLabel(yAxisTitle.c_str(), TsPlotCanvas::Y_LABEL);
-
+   frame->SetLabel(xAxisTitle, TsPlotCanvas::X_LABEL);
+   frame->SetLabel(yAxisTitle, TsPlotCanvas::Y_LABEL);
+   
    mXyPlot = frame;
    
    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
@@ -200,8 +210,10 @@ int MdiChildTsFrame::ReadXyPlotFile(const wxString &filename)
    double startTime;
    
    if (filename != "")
-   {       
-      inStream.open(filename.c_str());
+   {
+      // Changed to use WX_TO_STD_STRING macro for wx3.0 (LOJ: 2014.08.07)
+      //inStream.open(filename.c_str());
+      inStream.open(filename.WX_TO_C_STRING);
       if (inStream.is_open())
       {
          TsPlotCurve *xCurve = new TsPlotCurve();
@@ -278,7 +290,7 @@ void MdiChildTsFrame::SetPlotTitle(const wxString &title)
    mPlotTitle = title;
    
    if (mXyPlot)
-      mXyPlot->SetLabel(title.c_str(), TsPlotCanvas::PLOT_TITLE);
+      mXyPlot->SetLabel(title, TsPlotCanvas::PLOT_TITLE);
 }
 
 
@@ -343,7 +355,7 @@ void MdiChildTsFrame::AddPlotCurve(Integer curveIndex, const wxString &curveTitl
       #endif
          
       mXyPlot->AddData(curve, penColor);
-      mXyPlot->SetDataName(curveTitle.c_str());
+      mXyPlot->SetDataName(curveTitle);
       
       #ifdef DEBUG_MDI_TS_FRAME
          MessageInterface::ShowMessage
@@ -793,14 +805,33 @@ void MdiChildTsFrame::CurveSettings(bool useLines, Integer lineWidth,
  */
 //------------------------------------------------------------------------------
 void MdiChildTsFrame::RedrawCurve()
-{    
+{
+   #ifdef DEBUG_REDRAW_CURVE
+   MessageInterface::ShowMessage("==========> MdiChildTsFrame::RedrawCurve() entered\n");
+   #endif
    if (mXyPlot)
    {
       Update(); // need Update to show plot as it runs
       
-      mXyPlot->DataUpdate();
+      mXyPlot->DataUpdate(true);
       wxPaintEvent pvt;
       mXyPlot->OnPaint(pvt);
+      
+      // Turning this OFF for Mac for now; this modification makes the XY Plot
+      // go grey at the end of the run
+      #ifndef __WXMAC__
+      // Why OnPaint() is called twice with wx3?
+      // Set the data update flag to true so that OnPaint() will not redraw plots
+      // (LOJ: 2014.10.10 To improve performance with wx3. See GMT-4722)
+      #if wxCHECK_VERSION(3, 0, 0)
+      mXyPlot->DataUpdate(true);
+      #endif
+      #endif
+      
+      #ifdef DEBUG_REDRAW_CURVE
+      MessageInterface::ShowMessage("MdiChildTsFrame::RedrawCurve() calling mXyPlot->Update()\n");
+      #endif
+      
       mXyPlot->Update();
       
       // On linux, this call gives the GUI a time slice to update the plot
@@ -808,6 +839,9 @@ void MdiChildTsFrame::RedrawCurve()
          ::wxYield();
       #endif
    }
+   #ifdef DEBUG_REDRAW_CURVE
+   MessageInterface::ShowMessage("==========> MdiChildTsFrame::RedrawCurve() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -879,7 +913,7 @@ void MdiChildTsFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
       if ( !newTitle )
          return;
       
-      mXyPlot->SetLabel(newTitle.c_str(), TsPlotCanvas::PLOT_TITLE);
+      mXyPlot->SetLabel(newTitle, TsPlotCanvas::PLOT_TITLE);
    }
 }
 
@@ -1061,6 +1095,19 @@ void MdiChildTsFrame::OnClose(wxCloseEvent& event)
    MessageInterface::ShowMessage
       ("MdiChildTsFrame::OnClose() mPlotName='%s' exiting\n", mPlotName.c_str());
    #endif
+}
+
+
+void MdiChildTsFrame::TakeAction(const std::string &action)
+{
+   if (action == "AlwaysRedraw")
+   {
+      mXyPlot->AlwaysDraw(true);
+   }
+   if (action == "RunModeRedraw")
+   {
+      mXyPlot->AlwaysDraw(false);
+   }
 }
 
 

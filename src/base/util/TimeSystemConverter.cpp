@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -34,6 +44,8 @@
 //#define DEBUG_GREGORIAN
 //#define DEBUG_TIME_CONVERT
 //#define DEBUG_VALIDATE_TIME 1
+//#define DEBUG_TIME_TO_UTC
+//#define DEBUG_LEAP_SECOND
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -187,7 +199,12 @@ Real TimeConverterUtil::ConvertToTaiMjd(Integer fromType, Real origValue,
            MessageInterface::ShowMessage(
               "      CVT to TAI, Leap secs count = %.14lf\n", numLeapSecs);
         #endif
-        
+#ifdef DEBUG_TIME_TO_UTC
+       MessageInterface::ShowMessage("NOW attempting to convert UTC time %12.10f to a TAI MJD\n",
+                                     origValue);
+       MessageInterface::ShowMessage(" ------------ adding %12.10f leap seconds\n", numLeapSecs);
+#endif
+       
         return (origValue + (numLeapSecs/GmatTimeConstants::SECS_PER_DAY));
     }
     case TimeConverterUtil::UT1MJD:
@@ -288,9 +305,11 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
    #endif
    #ifdef DEBUG_TIMECONVERTER_DETAILS
       MessageInterface::ShowMessage(
-         "      ** Converting %.18lf from TAI to %s\n", origValue, 
+         "      ********** Converting %.18lf from TAI to %s\n", origValue,
          TIME_SYSTEM_TEXT[toType].c_str());
    #endif
+   
+   isInLeapSecond = false;
    
    switch (toType)
    {
@@ -315,8 +334,12 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
       case TimeConverterUtil::UTCMJD:
       case TimeConverterUtil::UTC:
        {
-          #ifdef DEBUG_TIMECONVERTER_DETAILS
+          //#ifdef DEBUG_TIMECONVERTER_DETAILS
+#ifdef DEBUG_TIME_TO_UTC
              MessageInterface::ShowMessage("      In the 'utc' block\n");
+             MessageInterface::ShowMessage(
+                    "      ****** Converting %.18lf from TAI to %s\n", origValue,
+                    TIME_SYSTEM_TEXT[toType].c_str());
           #endif
           Real offsetValue = 0;
     
@@ -331,6 +354,8 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
              throw TimeFileException
                 ("theLeapSecsFileReader is unknown\n");
           
+          isInLeapSecond = TimeConverterUtil::IsInLeapSecond(origValue);
+          
           Real taiLeapSecs =
              theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
           
@@ -339,7 +364,8 @@ Real TimeConverterUtil::ConvertFromTaiMjd(Integer toType, Real origValue,
              NumberOfLeapSecondsFrom((origValue + offsetValue)
                                      - (taiLeapSecs/GmatTimeConstants::SECS_PER_DAY));
           
-          #ifdef DEBUG_TIMECONVERTER_DETAILS
+          #ifdef DEBUG_TIME_TO_UTC
+             MessageInterface::ShowMessage(">>>>>>>>>>>>>>>>>>> Is it in a leap second??????? %s\n", (isInLeapSecond? " YES!!!!" : "no"));
              MessageInterface::ShowMessage("      offsetValue = %.17lf\n",
                 offsetValue);
              MessageInterface::ShowMessage("      Leap secs: tai = %.17lf, utc = %.17lf\n",
@@ -464,6 +490,42 @@ Real TimeConverterUtil::NumberOfLeapSecondsFrom(Real utcMjd, Real jdOfMjdRef)
    return numLeapSecs;
 }
 
+//---------------------------------------------------------------------------
+// Real GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd, Real jdOfMjdRef)
+//---------------------------------------------------------------------------
+Real TimeConverterUtil::GetFirstLeapSecondMJD(Real fromUtcMjd, Real toUtcMjd,
+                                              Real jdOfMjdRef)
+{
+   #ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage
+      ("GetFirstLeapSecondMJD() entered, fromUtcMjd=%f, toUtcMjd=%f, jdOfMjdRef=%f\n",
+       fromUtcMjd, toUtcMjd, jdOfMjdRef);
+   #endif
+   
+   Real offsetValue = 0;
+   
+   if (jdOfMjdRef != GmatTimeConstants::JD_NOV_17_1858)
+      offsetValue = jdOfMjdRef - GmatTimeConstants::JD_NOV_17_1858;
+   
+   if (theLeapSecsFileReader == NULL)
+      throw TimeFileException
+         ("theLeapSecsFileReader is unknown\n");
+   
+   // look up leap secs from file
+   Real firstUtcMjd =
+      theLeapSecsFileReader->GetFirstLeapSecondMJD(fromUtcMjd + offsetValue,
+                                                    toUtcMjd + offsetValue);
+   
+   firstUtcMjd = firstUtcMjd - (GmatTimeConstants::JD_JAN_5_1941 - GmatTimeConstants::JD_NOV_17_1858);
+   
+   #ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage
+      ("GetFirstLeapSecondMJD() returning %f, offsetValue=%f\n",
+       firstUtcMjd, offsetValue);
+   #endif
+   
+   return firstUtcMjd;
+}
 
 //---------------------------------------------------------------------------
 // void SetEopFile(EopFile *eopFile)
@@ -543,12 +605,15 @@ void TimeConverterUtil::GetTimeSystemAndFormat(const std::string &type,
 
 
 //---------------------------------------------------------------------------
-// std::string ConvertMjdToGregorian(const Real mjd, Integer format = 1)
+// std::string ConvertMjdToGregorian(const Real mjd,
+//                                   bool handleLeapSecond = false,
+//                                   Integer format = 1)
 //---------------------------------------------------------------------------
 /**
  * Converts MJD to Gregorian date format.
  *
  * @param  <mjd>       Input time in MJD
+ * @param  <handleLeapSecond>     Do we need to handle a leap second (UTC only)?
  * @param  <format>    1 = "01 Jan 2000 11:59:28.000"
  *                     2 = "2000-01-01T11:59:28.000"
  *
@@ -556,15 +621,26 @@ void TimeConverterUtil::GetTimeSystemAndFormat(const std::string &type,
  */
 //---------------------------------------------------------------------------
 std::string TimeConverterUtil::ConvertMjdToGregorian(const Real mjd,
-                                                     Integer format)
+                                                     bool       handleLeapSecond,
+                                                     Integer    format)
 {
-   A1Mjd a1Mjd(mjd);
-   A1Date a1Date = a1Mjd.ToA1Date();
+   #ifdef DEBUG_GREGORIAN
+      MessageInterface::ShowMessage(
+            "In ConvertMjdToGregorian ..... handleLeapSecond? %s, input mjd = %12.10f\n",
+            (handleLeapSecond? "true" : "false"), mjd);
+   #endif
+   // Figure out if we need to handle a leap second
+   #ifdef DEBUG_GREGORIAN
+      MessageInterface::ShowMessage("-=-=-= handleLeapSecond = %s\n",
+                                    (handleLeapSecond? "true" : "false"));
+   #endif
+
+   A1Mjd a1Mjd(mjd);   // assumes MJD relative to 1941
+   A1Date a1Date = a1Mjd.ToA1Date(handleLeapSecond);
    GregorianDate gregorianDate(&a1Date, format);
    #ifdef DEBUG_GREGORIAN
        MessageInterface::ShowMessage("------ In ConvertMjdToGregorian\n");
-       MessageInterface::ShowMessage("------ input mjd     = %.18lf\n", mjd);
-       MessageInterface::ShowMessage("------ A1Date        = %s\n", 
+       MessageInterface::ShowMessage("------ A1Date        = %s\n",
           (a1Date.ToPackedCalendarString()).c_str());
        MessageInterface::ShowMessage("------ GregorianDate = %s\n", 
           (gregorianDate.GetDate()).c_str());
@@ -636,6 +712,41 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
    return jules;
 }
 
+//---------------------------------------------------------------------------
+// void Convert(const char *fromType, Real fromMjd,
+//              const char *fromStr, const char *toType,
+//              Real &toMjd, std::string &toStr, Integer format = 1)
+//---------------------------------------------------------------------------
+/*
+ * @see Convert(const std::string &fromType, Real fromMjd, ...)
+ */
+//---------------------------------------------------------------------------
+void TimeConverterUtil::Convert(const char *fromType, Real fromMjd, 
+                                const char *fromStr,
+                                const char *toType, Real &toMjd,
+                                std::string &toStr, Integer format)
+{
+   return Convert(std::string(fromType), fromMjd, std::string(fromStr),
+                  std::string(toType), toMjd, toStr, format);
+}
+
+//---------------------------------------------------------------------------
+// void Convert(const char *fromType, Real fromMjd,
+//              const std::string &fromStr, const std::string &toType,
+//              Real &toMjd, std::string &toStr, Integer format = 1)
+//---------------------------------------------------------------------------
+/*
+ * @see Convert(const std::string &fromType, Real fromMjd, ...)
+ */
+//---------------------------------------------------------------------------
+void TimeConverterUtil::Convert(const char *fromType, Real fromMjd, 
+                                const std::string &fromStr,
+                                const std::string &toType, Real &toMjd,
+                                std::string &toStr, Integer format)
+{
+   return Convert(std::string(fromType), fromMjd, fromStr, toType, toMjd,
+                  toStr, format);
+}
 
 //---------------------------------------------------------------------------
 // void Convert(const std::string &fromType, Real fromMjd,
@@ -669,6 +780,9 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
       ("TimeConverterUtil::Convert() entered fromType=%s, fromMjd=%f, fromStr=%s\n"
        "   toType=%s\n", fromType.c_str(), fromMjd, fromStr.c_str(), toType.c_str());
    #endif
+   
+   bool isUTC     = false;
+   isInLeapSecond = false;
    
    Real fromMjdVal = fromMjd;
    bool convertToModJulian = false;
@@ -771,10 +885,25 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    //-------------------------------------------------------
    // Convert to output format
    //-------------------------------------------------------
+#ifdef DEBUG_TIME_CONVERT
+   MessageInterface::ShowMessage
+   ("TimeConverterUtil::Convert() *** about to convert to the output format ----------\n");
+#endif
    if (toFormat == "ModJulian")
       toStr = GmatStringUtil::ToString(toMjd, timePrecision);
-   else
-      toStr = TimeConverterUtil::ConvertMjdToGregorian(toMjd, format);
+   else  // Gregorian
+   {
+      Integer toTheType   = TimeConverterUtil::GetTimeTypeID(toSystem);
+
+#ifdef DEBUG_TIME_CONVERT
+      MessageInterface::ShowMessage
+      ("****** the type is %d \n", toTheType);
+#endif
+      if ((toTheType == TimeConverterUtil::UTCMJD) || (toTheType == TimeConverterUtil::UTC))
+         isUTC = true;
+      // Figure out if we are in the leap second
+      toStr = TimeConverterUtil::ConvertMjdToGregorian(toMjd, (isUTC && isInLeapSecond), format);
+   }
    
    #ifdef DEBUG_TIME_CONVERT
    MessageInterface::ShowMessage
@@ -954,3 +1083,34 @@ bool TimeConverterUtil::IsValidTimeSystem(const std::string& system)
    return !(find(validFormats.begin(), validFormats.end(), system) ==
          validFormats.end());
 }
+
+//------------------------------------------------------------------------------
+// bool HandleLeapSecond()
+//------------------------------------------------------------------------------
+bool TimeConverterUtil::HandleLeapSecond()
+{
+   return isInLeapSecond;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsInLeapSecond(Real theMjd, Integer epochSystem)
+//------------------------------------------------------------------------------
+bool TimeConverterUtil::IsInLeapSecond(Real theTaiMjd)
+{
+   // Leap Second File reader expects the offset to be 1858
+   Real offsetValue  = GmatTimeConstants::JD_JAN_5_1941 -
+                       GmatTimeConstants::JD_NOV_17_1858;
+
+   #ifdef DEBUG_LEAP_SECOND
+      MessageInterface::ShowMessage(
+                                    "-=-=-= offsetValue = %12.10f\n", offsetValue);
+      MessageInterface::ShowMessage(
+                                    "-=-=-= theTaiMjd   = %12.10f\n", theTaiMjd);
+      MessageInterface::ShowMessage("-=-=-= passing in time of %12.10f\n",
+                                    (theTaiMjd + offsetValue));
+   #endif
+   return theLeapSecsFileReader->IsInLeapSecond(theTaiMjd + offsetValue);
+   
+}
+

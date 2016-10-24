@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -44,7 +54,6 @@
 
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
-#include "EnvParameters.hpp"
 #include "PlanetParameters.hpp"
 #include "Variable.hpp"
 #include "StringVar.hpp"
@@ -353,13 +362,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new DLA(withName);
    if (ofType == "RLA")
       return new RLA(withName);
-
-   // Environmental parameters
-   #ifdef __ENABLE_ATMOS_DENSITY__
-      if (ofType == "AtmosDensity")
-         return new AtmosDensity(withName);
-   #endif
-
+   
    // Planet parameters
    if (ofType == "MHA")
       return new MHA(withName);
@@ -387,6 +390,14 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ImpBurnElements(ofType, withName);   
    if (ofType == "V" || ofType == "N" || ofType == "B")
       return new ImpBurnElements(ofType, withName);
+   
+   // FiniteBurn parameters
+   if (ofType == "TotalMassFlowRate")
+      return new TotalMassFlowRate(ofType, withName);
+   if (ofType == "TotalAcceleration1" || ofType == "TotalAcceleration2" || ofType == "TotalAcceleration3")
+      return new TotalAcceleration(ofType, withName);
+   if (ofType == "TotalThrust1" || ofType == "TotalThrust2" || ofType == "TotalThrust3")
+      return new TotalThrust(ofType, withName);
    
    // Attitude parameters
    if (ofType == "DCM11" || ofType == "DirectionCosineMatrix11")
@@ -490,6 +501,12 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ThrustScaleFactor(withName);
    if (ofType == "GravitationalAccel")
       return new GravitationalAccel(withName);
+   if (ofType == "ThrustMagnitude")
+      return new ThrustMagnitude(withName);
+   if (ofType == "Isp")
+      return new Isp(withName);
+   if (ofType == "MassFlowRate")
+      return new MassFlowRate(withName);
    
    if (ofType == "C1"  || ofType == "C2"  || ofType == "C3"  || ofType == "C4"  ||
        ofType == "C5"  || ofType == "C6"  || ofType == "C7"  || ofType == "C8"  ||
@@ -507,6 +524,14 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
        ofType == "ThrustDirection3")
       return new ThrustDirections(ofType, withName);
    
+   // PowerSystem parameters
+   if (ofType == "TotalPowerAvailable")
+      return new TotalPowerAvailable(withName);
+   if (ofType == "RequiredBusPower")
+      return new RequiredBusPower(withName);
+   if (ofType == "ThrustPowerAvailable")
+      return new ThrustPowerAvailable(withName);
+
    // add others here
    
    MessageInterface::ShowMessage
@@ -713,6 +738,13 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("V");
       creatables.push_back("N");
       creatables.push_back("B");
+      creatables.push_back("TotalMassFlowRate");
+      creatables.push_back("TotalAcceleration1");
+      creatables.push_back("TotalAcceleration2");
+      creatables.push_back("TotalAcceleration3");
+      creatables.push_back("TotalThrust1");
+      creatables.push_back("TotalThrust2");
+      creatables.push_back("TotalThrust3");
       
       // Attitude parameters
       creatables.push_back("DCM11");
@@ -769,6 +801,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("DutyCycle");
       creatables.push_back("ThrustScaleFactor");
       creatables.push_back("GravitationalAccel");
+      creatables.push_back("ThrustMagnitude");
+      creatables.push_back("Isp");
+      creatables.push_back("MassFlowRate");
       
       creatables.push_back("C1");
       creatables.push_back("C2");
@@ -807,7 +842,11 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("ThrustDirection1");
       creatables.push_back("ThrustDirection2");
       creatables.push_back("ThrustDirection3");
-   }
+
+      creatables.push_back("TotalPowerAvailable");
+      creatables.push_back("RequiredBusPower");
+      creatables.push_back("ThrustPowerAvailable");
+}
 }
 
 

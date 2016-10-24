@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -286,43 +296,6 @@ void BranchCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
 }
 
 //------------------------------------------------------------------------------
-// void SetEventLocators(std::vector<EventLocator*> *els)
-//------------------------------------------------------------------------------
-/**
- * Sets up the event location vector for a run.
- *
- * @param els The vector of event locators in the current Sandbox
- */
-//------------------------------------------------------------------------------
-void BranchCommand::SetEventLocators(std::vector<EventLocator*> *els)
-{
-   #ifdef DEBUG_EVENTLOCATION
-      MessageInterface::ShowMessage("Setting event locator pointer <%p> with "
-            "%d members: ", els, (els != NULL ? els->size() : 0));
-   #endif
-   GmatCommand *currentPtr;
-
-   std::vector<GmatCommand*>::iterator node;
-
-   for (node = branch.begin(); node != branch.end(); ++node)
-   {
-      currentPtr = *node;
-      while (currentPtr != this)
-      {
-         currentPtr->SetEventLocators(els);
-         currentPtr = currentPtr->GetNext();
-         if (currentPtr == NULL)
-            throw CommandException("Branch command \"" + generatingString +
-                                   "\" was not terminated!");
-      }
-   }
-   
-   #ifdef DEBUG_EVENTLOCATION
-      MessageInterface::ShowMessage("\n");
-   #endif
-}
-
-//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
@@ -352,8 +325,6 @@ bool BranchCommand::Initialize()
          #ifdef DEBUG_BRANCHCOMMAND_INIT
          ShowCommand("About to initialize child in ", "child=", currentPtr);
          #endif
-         if (events != NULL)
-            currentPtr->SetEventLocators(events);
          if (!currentPtr->Initialize())
                retval = false;
          currentPtr = currentPtr->GetNext();
@@ -545,6 +516,7 @@ bool BranchCommand::Append(GmatCommand *cmd)
 bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    #ifdef DEBUG_BRANCHCOMMAND_INSERT
+   MessageInterface::ShowMessage("BranchCommand::Insert() entered\n");
    ShowCommand("BranchCommand::", "Insert() this = ", this, " next = ", next);
    ShowCommand("BranchCommand::", "Insert() cmd  = ", cmd, " prev = ", prev);
    #endif
@@ -564,8 +536,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
    
    // See if we're supposed to put it at the top of the first branch
    if (prev == this)
-   {
-      
+   {      
       currentOne = branch[0];
       branch[0] = cmd;
       if (newBranch)
@@ -619,10 +590,17 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
    // If we have branches, try to insert there first
    if (!foundHere)
    {
+      #ifdef DEBUG_BRANCHCOMMAND_INSERT
+      MessageInterface::ShowMessage("   ==> Going through branches\n");
+      #endif
       GmatCommand *nc = NULL;
       for (Integer which = 0; which < (Integer)branch.size(); ++which)
       {
          currentOne = branch[which];
+         #ifdef DEBUG_BRANCHCOMMAND_INSERT
+         MessageInterface::ShowMessage("   which = %d\n", which);
+         ShowCommand("BranchCommand::", "current = ", currentOne);
+         #endif
          if (currentOne != NULL)
          {
             nc = currentOne;
@@ -652,8 +630,8 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
    
    #ifdef DEBUG_BRANCHCOMMAND_INSERT
    MessageInterface::ShowMessage
-      ("BranchCommand::Insert() newBranch=%d, foundHere=%d, toShift=%p\n",
-       newBranch, foundHere, toShift);
+      ("BranchCommand::Insert() newBranch=%d, foundHere=%d, hereOrNested=%d, "
+       "toShift=<%p>\n", newBranch, foundHere, hereOrNested, toShift);
    #endif
    
    if (newBranch && foundHere && (toShift != NULL))
@@ -674,9 +652,22 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
             ("In BranchCommand::Insert - error adding Else/ElseIf");
    }
    
-   if (foundHere || hereOrNested) return true;
-
+   
+   if (foundHere || hereOrNested)
+   {
+      #ifdef DEBUG_BRANCHCOMMAND_INSERT
+      ShowCommand("BranchCommand::", "cmd->GetPrevious() = ", cmd->GetPrevious(),
+                  "cmd->GetNext() = ", cmd->GetNext());
+      MessageInterface::ShowMessage("BranchCommand::Insert() returning true\n");
+      #endif
+      return true;
+   }
+   
    // Otherwise, just call the base class method
+   #ifdef DEBUG_BRANCHCOMMAND_INSERT
+   MessageInterface::ShowMessage
+      ("BranchCommand::Insert() returning GmatCommand::Insert()\n");
+   #endif
    return GmatCommand::Insert(cmd, prev);
 } // Insert()
 
@@ -694,6 +685,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
 {
    #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+   MessageInterface::ShowMessage("BranchCommand::Remove() entered\n");
    ShowCommand("BranchCommand::", "Remove() this = ", this, " cmd = ", cmd);
    ShowCommand("BranchCommand::", "Remove() next = ", next);
    #endif
@@ -704,21 +696,34 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
    if (cmd == this)
       return GmatCommand::Remove(cmd);    // Use base method to remove cmd
    
+   // Save previous and next command before remove
+   // (Fix for GMT-4710, LOJ: 2014.09.30)
+   GmatCommand *prevCmd = cmd->GetPrevious();
+   GmatCommand *nextCmd = cmd->GetNext();
    GmatCommand *fromBranch = NULL;
    GmatCommand *current = NULL;
    GmatCommand *tempNext = NULL;
    
+   #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+   ShowCommand("BranchCommand::", "prevCmd = ", prevCmd, "nextCmd = ", nextCmd);
+   MessageInterface::ShowMessage("   ==> Going through branches\n");
+   #endif
+   
    // If we have branches, try to remove there first
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
    {
+      #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+      MessageInterface::ShowMessage("branch = %d\n", which);
+      #endif
+      
       current = branch[which];
       
       if (current != NULL)
       {
          tempNext = current->GetNext();
-      
+         
          #ifdef DEBUG_BRANCHCOMMAND_REMOVE
-         ShowCommand("BranchCommand::", "Remove() current = ", current, ", tempNext = ", tempNext);
+         ShowCommand("BranchCommand::", "Remove() current = ", current, "tempNext = ", tempNext);
          #endif
          
          fromBranch = current->Remove(cmd);
@@ -727,25 +732,33 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
          ShowCommand("BranchCommand::", "Remove() fromBranch = ", fromBranch);
          #endif
          
+         // If first command in the branch is removed, set next command
+         // to be the first command
          if (fromBranch == current)
+         {
+            #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+            MessageInterface::ShowMessage
+               ("   fromBranch == current so setting branch[%d] = <%p><%s>\n",
+                which, tempNext, tempNext->GetTypeName().c_str());
+            #endif
             branch[which] = tempNext;
+         }
          
          if (fromBranch != NULL)
          {
-            // set previous command
             #ifdef DEBUG_BRANCHCOMMAND_REMOVE
-            ShowCommand("BranchCommand::", " Setting previous of ", tempNext,
-                        " to ", fromBranch->GetPrevious());
+            ShowCommand("BranchCommand::", "==> Setting previous of ", nextCmd, " to ", prevCmd);
             #endif
             
-            tempNext->ForceSetPrevious(fromBranch->GetPrevious());
+            nextCmd->ForceSetPrevious(prevCmd);
             
             #ifdef DEBUG_BRANCHCOMMAND_REMOVE
-            MessageInterface::ShowMessage("   Returning fromBranch\n");
+            MessageInterface::ShowMessage
+               ("BranchCommand::Remove() returning fromBranch <%p><%s>\n",
+                fromBranch, fromBranch->GetTypeName().c_str());
             #endif
-            
             return fromBranch;
-         }
+         }         
       }
    }
    
@@ -753,8 +766,9 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
    #ifdef DEBUG_BRANCHCOMMAND_REMOVE
    MessageInterface::ShowMessage
       ("   Not in the branches, so continue with the sequence\n");
+   MessageInterface::ShowMessage
+      ("BranchCommand::Remove() returning GmatCommand::Remove(cmd)\n");
    #endif
-   
    return GmatCommand::Remove(cmd);
 } // Remove()
 
@@ -1233,8 +1247,37 @@ bool BranchCommand::ExecuteBranch(Integer which)
          current = curcmd;
          // check for user interruption here
          if (GmatGlobal::Instance()->GetRunInterrupted())
+         {
+            #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+            MessageInterface::ShowMessage
+               ("Branch command '%s' interrupted by user!", generatingString.c_str());
+            #endif
             throw CommandException
                ("Branch command \"" + generatingString + "\" interrupted!");
+         }
+
+
+         #ifdef __ENABLE_PAUSE_IN_BRANCH_COMMAND__
+         //================================================================
+         // @note: This section is just testing out the run paused by user
+         // while branch command is running. (Still need some work)
+         // Throw exception with "RUN PAUSED" so that Sandbox can handle this
+         // (LOJ: 2014.09.10)
+         Gmat::RunState runState = GmatGlobal::Instance()->GetRunState();
+         #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+         MessageInterface::ShowMessage("   runState = %d\n", runState);
+         #endif
+         
+         if (runState == Gmat::PAUSED)
+         {
+            #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+            MessageInterface::ShowMessage
+               ("Branch command '%s' paused!\n", generatingString.c_str());
+            #endif
+            throw CommandException("RUN PAUSED");
+         }
+         //================================================================
+         #endif
          
          // Check for NULL pointer here
          if (current == NULL)
@@ -1259,6 +1302,8 @@ bool BranchCommand::ExecuteBranch(Integer which)
       {
          // Use exception to remove Visual C++ warning
          e.GetMessageType();
+         // Set as fatal exception so that it can be caught in GmatFunction (LOJ: 2015.01.09)
+         e.SetFatal(true);
          #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
          MessageInterface::ShowMessage
             ("   BranchCommand rethrowing %s\n", e.GetFullMessage().c_str());

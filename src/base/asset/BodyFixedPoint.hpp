@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -30,11 +40,13 @@
 #define BodyFixedPoint_hpp
 
 #include "SpacePoint.hpp"
-//#include "LatLonHgt.hpp"
 #include "BodyFixedStateConverter.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 
+#ifdef __USE_SPICE__
+   #include "SpiceInterface.hpp"
+#endif
 
 class GMAT_API BodyFixedPoint : public SpacePoint
 {
@@ -120,6 +132,8 @@ public:
    virtual void            SetSolarSystem(SolarSystem *ss);
    virtual bool            IsValidID(const std::string &id) = 0;
 
+   virtual bool            InitializeForContactLocation(bool deleteFiles = true);
+
 protected:
    /// The point is attached to this body
    std::string       cBodyName;
@@ -155,20 +169,45 @@ protected:
    A1Mjd             lastStateTime;
    Rvector6          lastState;
 
-   /// Converter helper
-   CoordinateConverter ccvtr;
+   /// Base filename for the SPK and FK kernels
+   std::string       kernelBaseName;
+   /// The SPK kernel written for this Asset
+   std::string       spkName;
+   /// The FK kernel written for this Asset
+   std::string       fkName;
+   /// delete SPK file on destruction?
+   bool              deleteSPK;
+   /// delete FK file on destruction?
+   bool              deleteFK;
+   /// has he NaifID been determined?
+   bool              naifIDDetermined;
+   /// have the kernel names been figured out?
+   bool              kernelNamesDetermined;
+   /// Were the kernels written?
+   bool              kernelsWritten;
 
-   void UpdateBodyFixedLocation();
-
-
-   /// Conversion code used to transform from lat-long-height to body fixed
-//   LatLonHgt      llh;
+   #ifdef __USE_SPICE__
+      SpiceInterface  *spice;
+   #endif
 
    Rvector3       j2000Pos;
    Rvector3       j2000Vel;
    Rvector6       j2000PosVel;
 
-public:
+
+   static Integer gsNaifId;
+
+   /// Converter helper
+   CoordinateConverter ccvtr;
+
+   void UpdateBodyFixedLocation();
+
+   bool WriteSPK(bool deleteFile = true);
+   bool WriteFK(bool deleteFile = true);
+
+   Rvector3 GetTopocentricConversion(const std::string &centralNaifId);
+
+public:  // needs to be public for current GroundStationPanel code to use
    /// Published parameters for body-fixed points
    enum
    {

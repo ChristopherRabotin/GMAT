@@ -73,7 +73,6 @@ GMAT DefaultProp.MinStep = 0.001;
 GMAT DefaultProp.MaxStep = 86400;
 GMAT DefaultProp.MaxStepAttempts = 50;
 GMAT DefaultProp.StopIfAccuracyIsViolated = true;
-%GMAT DefaultProp.StopIfAccuracyIsViolated = true;
 
 %----------------------------------------
 %---------- Burns
@@ -118,11 +117,6 @@ GMAT MOI.GravitationalAccel = 9.810000000000001;
 Create Variable I lowerBound upperBound;
 GMAT lowerBound = -119;
 GMAT upperBound = -117.5;
-
-
-
-
-
 
 %----------------------------------------
 %---------- Solvers

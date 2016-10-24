@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. 
 //
@@ -20,6 +30,7 @@
 
 #include "StringWrapper.hpp"
 #include "ParameterException.hpp"
+#include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -111,6 +122,19 @@ ElementWrapper* StringWrapper::Clone() const
 
 
 //------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return StringWrapper value converted to std::string.
+ */
+//------------------------------------------------------------------------------
+std::string StringWrapper::ToString()
+{
+   return value;
+}
+
+
+//------------------------------------------------------------------------------
 //  Gmat::ParameterType GetDataType() const
 //------------------------------------------------------------------------------
 /**
@@ -175,7 +199,10 @@ bool StringWrapper::SetReal(const Real toValue)
 //------------------------------------------------------------------------------
 std::string StringWrapper::EvaluateString() const
 {
-   return value;
+   // Remove single quotes before returning
+   std::string newValue = GmatStringUtil::RemoveEnclosingString(value, "'");
+   //return value;
+   return newValue;
 }
 
 

@@ -88,10 +88,10 @@
 
       <itemizedlist spacing="normal">
         <listitem>
-          <para>A compatible, licensed version of MATLAB must be installed on
-          the same machine on which GMAT is running. GMAT is tested with the
-          latest version of MATLAB at the time of release, though versions
-          R2006b and newer have been known to work.</para>
+          <para>Install a compatible, licensed version of MATLAB on the same
+          machine on which GMAT is running. GMAT is tested with the latest
+          version of MATLAB at the time of release, though versions R2006b and
+          newer have been known to work.</para>
         </listitem>
 
         <listitem>
@@ -101,30 +101,36 @@
         </listitem>
 
         <listitem>
-          <para>On Windows: <itemizedlist>
+          <para>On Windows:<orderedlist>
               <listitem>
-                <para>The following path (where
+                <para>Add the following path (where
                 <filename><replaceable>MATLAB</replaceable></filename> is the
-                path to the installed version of MATLAB) must be present in
-                the <envar>Path</envar> environment variable. For some older
-                versions of MATLAB, this path must be present before the
-                default Windows paths.</para>
+                path to the installed version of MATLAB) to your
+                <envar>Path</envar> environment variable (either your user
+                variable, or the system variable). If you continue to have
+                trouble, try putting this path at the very beginning of your
+                system path.</para>
 
                 <para><filename><replaceable>MATLAB</replaceable>\bin\win32</filename>
                 (or <filename>win64</filename> for use with 64-bit versions of
                 GMAT)</para>
 
-                <para/>
               </listitem>
 
               <listitem>
-                <para>MATLAB must be registered as a COM server. This is done
-                automatically by the MATLAB installer. To do it manually, open
-                an elevated command window and run the command:
-                <userinput>matlab -regserver</userinput>. Make sure the proper
-                instance of MATLAB is being run by this command.</para>
+                <para>Register MATLAB for use as a COM server by
+                running:</para>
+
+                <para><userinput>matlab -regserver</userinput></para>
+
+                <para>This is done automatically by the MATLAB installer. To
+                do it manually, open an elevated command window and run the
+                command above. Make sure to runn the command in the folder
+                containing the executable you wish to use (i.e.
+                <replaceable>MATLAB</replaceable>\bin\win32 or
+                <replaceable>MATLAB</replaceable>\bin\win64.)</para>
               </listitem>
-            </itemizedlist></para>
+            </orderedlist></para>
         </listitem>
 
         <listitem>

@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="StatisticsAcceptFilter"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>StatisticsAcceptFilter</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>StatisticsAcceptFilter</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>StatisticsAcceptFilter</refname>
+
+    <refpurpose>Allows selection of data subsets for processing by the batch
+    least squares estimator.</refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>The <guilabel>StatisticsAcceptFilter</guilabel> object is used to
+    create criteria for the inclusion of subsets of the available data in the
+    estimation process based on observation frequency, tracker, measurement
+    type, or time. Instances of <guilabel>StatisticsAcceptFilter</guilabel>
+    are specified for use on the <guilabel>DataFilters</guilabel> field of a
+    <guibutton>TrackingFileSet</guibutton> object. A single
+    <guilabel>StatisticsAcceptFilter</guilabel> may employ multiple selection
+    criteria (for example simultaneously thinning different stations or data
+    types by differing intervals). Multiple criteria on a single filter are
+    considered in an AND sense. When multiple criteria are specified on a
+    single filter, an observation must meet all specified criteria to be
+    accepted.</para>
+
+    <para>Multiple <guilabel>StatisticsAcceptFilters</guilabel> with different
+    selection criteria may be specified on a single
+    <guilabel>TrackingFileSet</guilabel>. When multiple filters are specified,
+    these act in an OR sense. Data meeting criteria for any of the specified
+    filters will be accepted.</para>
+
+    <para>See Also <xref linkend="StatisticsRejectFilter"/>, <xref
+    linkend="TrackingFileSet"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="1.0*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>DataTypes</guilabel></entry>
+
+            <entry><para>List of data types</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String Array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Range_RU, Doppler_Hz, or All</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>{All}</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EpochFormat</guilabel></entry>
+
+            <entry><para>Allows user to select format of the epoch</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>UTCGregorian, UTCModJulian, TAIGregorian,
+                    TAIModJulian, TTGregorian, TTModJulian A1Gregorian,
+                    A1ModJulian, TDBGregorian, TDBModJulian</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>TAIModJulian</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>InitialEpoch</guilabel></entry>
+
+            <entry><para>Initial epoch of desired data to process</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any valid epoch</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>earliest day defined in GMAT</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FinalEpoch</guilabel></entry>
+
+            <entry><para>Final epoch of desired data to process</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any valid epoch</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>latest day defined in GMAT</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FileNames</guilabel></entry>
+
+            <entry><para>List of file names (a subset of the relevant
+            <guilabel>TrackingFileSet's</guilabel>
+            <guilabel>FileName</guilabel> field) containing the tracking data.
+            If this field equals From_AddTrackingConfig, then two things
+            happen; (1) All of the files in the relevant
+            <guilabel>TrackingFileSet</guilabel> are used as a starting point,
+            and (2) Of the data in all of the files, only the data defined by
+            the <guilabel>AddTrackingConfig</guilabel> field of the relevant
+            <guilabel>TrackingFileSet</guilabel> are used. </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>StringArray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>valid file name, 'All', or
+                    'From_AddTrackingConfig'</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>{All}</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ObservedObjects</guilabel></entry>
+
+            <entry><para>List of user-created tracked objects (e.g., name of
+            the <guilabel>Spacecraft</guilabel> resource being tracked)</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Object Array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>User defined observed object or 'All'</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>{All}</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Trackers</guilabel></entry>
+
+            <entry><para>List of user-created trackers (e.g., name of the
+            <guilabel>GroundStation</guilabel> resource being used) </para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Object Array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any valid user-created Tracker object (e.g.,
+                    <guilabel>GroundStation</guilabel>) or 'All'</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>{All}</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ThinningFrequency</guilabel></entry>
+
+            <entry><para>If <guilabel>ThinMode</guilabel> is Frequency, the
+            integer 'n' is used to specify that every nth data point should be
+            accepted. For example, 3 specifies that every third data point,
+            meeting all the accept criteria, should be accepted and 1
+            specifies that every data point, meeting all the accept criteria,
+            should be accepted. If <guilabel>ThinMode</guilabel> is Time, the
+            integer 'n' is a number of seconds between accepted observations,
+            using the first available observation as the anchor epoch. For
+            example, a value of 300 means that observations will be accepted
+            every 300 seconds, starting from the first available
+            observation.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Positive Integer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>1</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Depends on <guilabel>ThinMode</guilabel>
+                    value</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ThinMode</guilabel></entry>
+
+            <entry><para>"Frequency" for record count frequency mode and
+            "Time" for time window frequency mode</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>"Frequency" or "Time"</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>Frequency</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>The <guilabel>StatisticsAcceptFilter</guilabel> object should be
+      assigned to the <guilabel>DataFilters</guilabel> field of a
+      <guilabel>TrackingFileSet</guilabel>. This example shows how to create a
+      <guilabel>StatisticsAcceptFilter</guilabel> to sample the data at a
+      frequency of 1:10 (thinning the data to one tenth of its volume).</para>
+
+      <programlisting>Create StatisticsAcceptFilter saf;
+  
+saf.ThinningFrequency = 10;
+
+Create TrackingFileSet estData;
+
+estData.DataFilters = {saf};
+BeginMissionSequence;</programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>The next example will accept all data from station
+      <guilabel>GDS</guilabel> and accept every 5th observation from station
+      <guilabel>CAN</guilabel>. Only data from stations
+      <guilabel>GDS</guilabel> and <guilabel>CAN</guilabel> will be
+      accepted.</para>
+
+      <programlisting>Create StatisticsAcceptFilter saf1;
+Create StatisticsAcceptFilter saf2;
+ 
+Create GroundStation GDS CAN;
+
+saf1.Trackers          = {'GDS'}; 
+saf2.Trackers          = {'CAN'};
+saf2.ThinningFrequency = 5;
+ 
+Create TrackingFileSet estData;
+ 
+estData.DataFilters = {saf1, saf2};
+BeginMissionSequence;</programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>The last example illustrates thinning data by time interval, using
+      a 300-second thinning interval.</para>
+
+      <programlisting>Create StatisticsAcceptFilter saf;
+ 
+saf.ThinMode          = 'Time'; 
+saf.ThinningFrequency = 300;
+ 
+Create TrackingFileSet estData;
+ 
+estData.DataFilters = {saf};
+BeginMissionSequence;</programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

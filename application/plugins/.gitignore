@@ -2,3 +2,5 @@
 /*.exp
 /*.lib
 /*.pdb
+*.so*
+*.dylib

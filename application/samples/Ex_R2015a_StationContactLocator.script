@@ -1,0 +1,102 @@
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft GEOSat;
+GMAT GEOSat.DateFormat = UTCGregorian;
+GMAT GEOSat.Epoch = '01 Jan 2015 11:59:28.000';
+GMAT GEOSat.CoordinateSystem = EarthMJ2000Eq;
+GMAT GEOSat.DisplayStateType = Keplerian;
+GMAT GEOSat.SMA = 7191.938817629017;
+GMAT GEOSat.ECC = 0.02454974900598101;
+GMAT GEOSat.INC = 56.70000000000002;
+GMAT GEOSat.RAAN = 306.6148021947984;
+GMAT GEOSat.AOP = 314.1905515359922;
+GMAT GEOSat.TA = 99.88774933204861;
+
+%----------------------------------------
+%---------- GroundStations
+%----------------------------------------
+
+Create GroundStation myStation;
+GMAT myStation.StateType = Spherical;
+GMAT myStation.Location1 = 28.5383355;
+GMAT myStation.Location2 = 278.6207635;
+GMAT myStation.Location3 = 0;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+Create ImpulsiveBurn DefaultIB;
+GMAT DefaultIB.CoordinateSystem = Local;
+GMAT DefaultIB.Origin = Earth;
+GMAT DefaultIB.Axes = VNB;
+GMAT DefaultIB.Element1 = 0;
+GMAT DefaultIB.Element2 = 0;
+GMAT DefaultIB.Element3 = 0;
+GMAT DefaultIB.DecrementMass = false;
+GMAT DefaultIB.Isp = 300;
+GMAT DefaultIB.GravitationalAccel = 9.810000000000001;
+
+%----------------------------------------
+%---------- EventLocators
+%----------------------------------------
+
+Create ContactLocator ContactLocator1;
+GMAT ContactLocator1.Target = GEOSat;
+GMAT ContactLocator1.Filename = 'ContactLocator1.txt';
+GMAT ContactLocator1.InputEpochFormat = 'TAIModJulian';
+GMAT ContactLocator1.InitialEpoch = '21545';
+GMAT ContactLocator1.StepSize = 300;
+GMAT ContactLocator1.FinalEpoch = '21545.138';
+GMAT ContactLocator1.UseLightTimeDelay = true;
+GMAT ContactLocator1.UseStellarAberration = true;
+GMAT ContactLocator1.WriteReport = true;
+GMAT ContactLocator1.RunMode = Automatic;
+GMAT ContactLocator1.UseEntireInterval = true;
+GMAT ContactLocator1.Observers = {myStation};
+GMAT ContactLocator1.LightTimeDirection = Transmit;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView ThreeDView;
+GMAT ThreeDView.UpperLeft = [ 0.002352941176470588 0 ];
+GMAT ThreeDView.Size = [ 0.5 0.4496021220159151 ];
+GMAT ThreeDView.RelativeZOrder = 1011;
+GMAT ThreeDView.Maximized = false;
+GMAT ThreeDView.Add = {GEOSat, Earth};
+GMAT ThreeDView.ViewPointVector = [ 30000 0 0 ];
+
+
+Create GroundTrackPlot GroundTrackPlot;
+GMAT GroundTrackPlot.UpperLeft = [ 0.002352941176470588 0.4522546419098144 ];
+GMAT GroundTrackPlot.Size = [ 0.5 0.4496021220159151 ];
+GMAT GroundTrackPlot.RelativeZOrder = 1030;
+GMAT GroundTrackPlot.Maximized = false;
+GMAT GroundTrackPlot.Add = {GEOSat, myStation};
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+Propagate DefaultProp(GEOSat) {GEOSat.ElapsedDays = 5};

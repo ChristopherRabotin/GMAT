@@ -5,9 +5,19 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -46,6 +56,7 @@ BEGIN_EVENT_TABLE(GroundStationPanel, wxPanel)
    EVT_TEXT(ID_LOCATION_TEXTCTRL, GroundStationPanel::OnLocationTextChange)
    EVT_TEXT(ID_STATION_ID_TEXTCTRL, GroundStationPanel::OnStationIDTextChange)
 //   EVT_TEXT(ID_HARDWARE_TEXTCTRL, GroundStationPanel::OnHardwareTextChange)
+   EVT_TEXT(ID_ELEVATION_TEXTCTRL, GroundStationPanel::OnElevationTextChange)
    EVT_COMBOBOX(ID_COMBOBOX, GroundStationPanel::OnComboBoxChange)
    EVT_COMBOBOX(ID_STATE_TYPE_COMBOBOX, GroundStationPanel::OnStateTypeComboBoxChange)
    EVT_COMBOBOX(ID_HORIZON_REFERENCE_COMBOBOX, GroundStationPanel::OnHorizonReferenceComboBoxChange)
@@ -126,7 +137,7 @@ void GroundStationPanel::Create()
    //-----------------------------------------------------------------
    // Station ID
    wxStaticText *stationIDLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"ID") );
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"ID" );
    stationIDTextCtrl =
       new wxTextCtrl( this, ID_STATION_ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0 );
    // Since Groundstation is now in plugin, this no longer works:
@@ -135,7 +146,7 @@ void GroundStationPanel::Create()
    
    // Central Body
    wxStaticText *centralBodyLabel =
-      new wxStaticText( this, ID_TEXT, wxT("Central "GUI_ACCEL_KEY"Body"));
+      new wxStaticText( this, ID_TEXT, "Central " GUI_ACCEL_KEY "Body");
    StringArray centralBodyList;
    centralBodyList.push_back("Earth");
    wxArrayString wxCentralBodyLabels = ToWxArrayString(centralBodyList);
@@ -145,33 +156,39 @@ void GroundStationPanel::Create()
 // as central body, un-comment the following code:
 //   centralBodyComboBox = GuiItemManager::GetInstance()->GetCelestialBodyComboBox(this, ID_COMBOBOX,
 //                                                              wxSize(150,-1));
-   centralBodyComboBox->SetToolTip(pConfig->Read(_T((BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::CENTRAL_BODY-BodyFixedPoint::CENTRAL_BODY]+"Hint").c_str())));
+   std::string toolTip = BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::CENTRAL_BODY-BodyFixedPoint::CENTRAL_BODY]+"Hint";
+   centralBodyComboBox->SetToolTip(pConfig->Read(wxString(toolTip.c_str())));
+   // centralBodyComboBox->SetToolTip(pConfig->Read(_T((BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::CENTRAL_BODY-BodyFixedPoint::CENTRAL_BODY]+"Hint").c_str())));
    
    // State Type
    wxStaticText *stateTypeLabel =
-      new wxStaticText( this, ID_TEXT, wxT("State "GUI_ACCEL_KEY"Type"));
+      new wxStaticText( this, ID_TEXT, "State " GUI_ACCEL_KEY "Type");
    StringArray stateTypeList =
        localGroundStation->GetPropertyEnumStrings(BodyFixedPoint::STATE_TYPE);
    wxArrayString wxStateTypeLabels = ToWxArrayString(stateTypeList);
    stateTypeComboBox = 
       new wxComboBox( this, ID_STATE_TYPE_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(120,-1),
                       wxStateTypeLabels, wxCB_DROPDOWN|wxCB_READONLY);
-   stateTypeComboBox->SetToolTip(pConfig->Read(_T((BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::STATE_TYPE-BodyFixedPoint::CENTRAL_BODY]+"Hint").c_str())));
+   toolTip = BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::STATE_TYPE-BodyFixedPoint::CENTRAL_BODY]+"Hint";
+   stateTypeComboBox->SetToolTip(pConfig->Read(wxString(toolTip.c_str())));
+   //stateTypeComboBox->SetToolTip(pConfig->Read(_T((BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::STATE_TYPE-BodyFixedPoint::CENTRAL_BODY]+"Hint").c_str())));
    
    // Horizon Reference
    wxStaticText *horizonReferenceLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Horizon Reference"));
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Horizon Reference");
    StringArray horizonReferenceList =
        localGroundStation->GetPropertyEnumStrings(BodyFixedPoint::HORIZON_REFERENCE);
    wxArrayString wxHorizonReferenceLabels = ToWxArrayString(horizonReferenceList);
    horizonReferenceComboBox = 
       new wxComboBox( this, ID_HORIZON_REFERENCE_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(120,-1),
                       wxHorizonReferenceLabels, wxCB_DROPDOWN|wxCB_READONLY);
-   horizonReferenceComboBox->SetToolTip(pConfig->Read(_T((BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::HORIZON_REFERENCE-BodyFixedPoint::CENTRAL_BODY]+"Hint").c_str())));
+   toolTip = BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::HORIZON_REFERENCE-BodyFixedPoint::CENTRAL_BODY]+"Hint";
+   horizonReferenceComboBox->SetToolTip(pConfig->Read(wxString(toolTip.c_str())));
+   // horizonReferenceComboBox->SetToolTip(pConfig->Read(_T((BodyFixedPoint::PARAMETER_TEXT[BodyFixedPoint::HORIZON_REFERENCE-BodyFixedPoint::CENTRAL_BODY]+"Hint").c_str())));
    
    // Location 1
    location1Label =
-       new wxStaticText( this, ID_TEXT, localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_1).c_str());
+      new wxStaticText( this, ID_TEXT, localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_1).c_str());
    location1TextCtrl =
       new wxTextCtrl( this, ID_LOCATION_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    //location1TextCtrl->SetToolTip(pConfig->Read(wxT(localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_1)+"Hint")));
@@ -221,6 +238,12 @@ void GroundStationPanel::Create()
    stationIDLabel->SetMinSize(wxSize(minLabelSize, stationIDLabel->GetMinHeight()));
    centralBodyLabel->SetMinSize(wxSize(minLabelSize, centralBodyLabel->GetMinHeight()));
 
+   wxStaticText *minElLabel = new wxStaticText(this, ID_TEXT, "Min. Elevation:");
+   minElLabel->SetMinSize(wxSize(minLabelSize, minElLabel->GetMinHeight()));
+   minElevationCtrl = new wxTextCtrl(this, ID_ELEVATION_TEXTCTRL,
+      wxT(""), wxDefaultPosition, wxSize(120, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   wxStaticText *minElUnitLabel = new wxStaticText(this, ID_TEXT, "deg");
+
    //-----------------------------------------------------------------
    // Add to Station ID sizer
    //-----------------------------------------------------------------
@@ -229,7 +252,13 @@ void GroundStationPanel::Create()
    flexGridSizer1->Add(stationIDTextCtrl, ctrlSizeProportion, wxGROW|wxALL, bsize);
    GmatStaticBoxSizer *idSizer = new GmatStaticBoxSizer(wxVERTICAL, this , "");
    idSizer->Add(flexGridSizer1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-      
+
+   wxFlexGridSizer *elevationGridSizer = new wxFlexGridSizer(3, 0, 0);
+   elevationGridSizer->Add(minElLabel, labelSizeProportion, wxALIGN_LEFT | wxALL, bsize);
+   elevationGridSizer->Add(minElevationCtrl, ctrlSizeProportion, wxGROW | wxALL, bsize);
+   elevationGridSizer->Add(minElUnitLabel, unitSizeProportion, wxGROW | wxALL, bsize);
+   idSizer->Add(elevationGridSizer, wxGROW | wxALIGN_CENTRE | wxALL, bsize);
+
    //-----------------------------------------------------------------
    // Add to location properties sizer
    //-----------------------------------------------------------------
@@ -291,6 +320,8 @@ void GroundStationPanel::LoadData()
    // Since Groundstation is now in plugin, this no longer works:
 //      stationIDTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(GroundStation::STATION_ID).c_str()));
       stationIDTextCtrl->SetValue(ToWxString(localGroundStation->GetStringParameter(localGroundStation->GetParameterID("Id")).c_str()));
+      minElevation = localGroundStation->GetRealParameter(localGroundStation->GetParameterID("MinimumElevationAngle"));
+      minElevationCtrl->SetValue(ToWxString(minElevation));
       centralBodyComboBox->SetValue(ToWxString(localGroundStation->GetStringParameter(BodyFixedPoint::CENTRAL_BODY).c_str()));
       currentStateType = localGroundStation->GetStringParameter(BodyFixedPoint::STATE_TYPE);
       stateTypeComboBox->SetValue(ToWxString(currentStateType.c_str()));
@@ -367,14 +398,30 @@ void GroundStationPanel::SaveData()
    {
       // Station ID
       text = stationIDTextCtrl->GetValue().c_str();
-      // Since Groundstation is now in plugin, this no longer works:
-//      localGroundStation->SetStringParameter(GroundStation::STATION_ID, text);
       localGroundStation->SetStringParameter(localGroundStation->GetParameterID("Id"), text);
    }
    catch (BaseException &ex)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
       canClose = false;
+   }
+   try
+   {
+	   // Minimum elevation angle
+	   minElevationCtrl->GetValue().ToCDouble(&minElevation);
+      if ((minElevation <= 90.0) && (minElevation >= -90.0))
+         localGroundStation->SetRealParameter(localGroundStation->GetParameterID("MinimumElevationAngle"), minElevation);
+      else
+      {
+         std::string elstr = minElevationCtrl->GetValue().WX_TO_STD_STRING;
+         CheckRealRange(elstr, minElevation, "MinimumElevationAngle", -90.0, 90.0, true, true, true, true);
+         canClose = false;
+      }
+   }
+   catch (BaseException &ex)
+   {
+	   MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
+	   canClose = false;
    }
    try
    {
@@ -463,13 +510,13 @@ void GroundStationPanel::UpdateControls()
    pConfig->SetPath(wxT("/Ground Station"));
 
    location1Label->SetLabel(localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_1).c_str());
-   location1TextCtrl->SetToolTip(pConfig->Read(_T((localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_1)+"Hint").c_str())));
+   location1TextCtrl->SetToolTip(pConfig->Read(wxString((localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_1)+"Hint").c_str())));
    location1Unit->SetLabel(localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_UNITS_1).c_str());
    location2Label->SetLabel(localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_2).c_str());
-   location2TextCtrl->SetToolTip(pConfig->Read(_T((localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_2)+"Hint").c_str())));
+   location2TextCtrl->SetToolTip(pConfig->Read(wxString((localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_2)+"Hint").c_str())));
    location2Unit->SetLabel(localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_UNITS_2).c_str());
    location3Label->SetLabel(localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_3).c_str());
-   location3TextCtrl->SetToolTip(pConfig->Read(_T((localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_3)+"Hint").c_str())));
+   location3TextCtrl->SetToolTip(pConfig->Read(wxString((localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_LABEL_3)+"Hint").c_str())));
    location3Unit->SetLabel(localGroundStation->GetStringParameter(BodyFixedPoint::LOCATION_UNITS_3).c_str());
 }    
 
@@ -490,6 +537,11 @@ void GroundStationPanel::OnStationIDTextChange(wxCommandEvent &event)
 {
    EnableUpdate(true);
 }    
+
+void GroundStationPanel::OnElevationTextChange(wxCommandEvent &event)
+{
+   EnableUpdate(true);
+}
 
 
 //------------------------------------------------------------------------------
@@ -515,12 +567,12 @@ void GroundStationPanel::OnComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GroundStationPanel::OnStateTypeComboBoxChange(wxCommandEvent &event)
 {
-   std::string sttype       = stateTypeComboBox->GetValue().c_str();
+   std::string sttype       = stateTypeComboBox->GetValue().WX_TO_STD_STRING;
    std::string inputString;
    Real        location1, location2, location3;
    if (sttype != currentStateType)
    {
-      std::string bodyName = centralBodyComboBox->GetValue().c_str();
+      std::string bodyName = centralBodyComboBox->GetValue().WX_TO_STD_STRING;
       // get a pointer to the celestial body
       CelestialBody *body = ss->GetBody(bodyName);
       if (!body)
@@ -582,12 +634,12 @@ void GroundStationPanel::OnStateTypeComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GroundStationPanel::OnHorizonReferenceComboBoxChange(wxCommandEvent &event)
 {
-   std::string horizon       = horizonReferenceComboBox->GetValue().c_str();
+   std::string horizon       = horizonReferenceComboBox->GetValue().WX_TO_STD_STRING;
    std::string inputString;
    Real        location1, location2, location3;
    if (horizon != currentHorizonReference)
    {
-      std::string bodyName = centralBodyComboBox->GetValue().c_str();
+      std::string bodyName = centralBodyComboBox->GetValue().WX_TO_STD_STRING;
       // get a pointer to the celestial body
       CelestialBody *body = ss->GetBody(bodyName);
       if (!body)

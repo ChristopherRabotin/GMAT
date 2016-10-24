@@ -3,9 +3,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy Shoan / NASA
 // Created: 2013.12.11
@@ -204,10 +214,16 @@ Rmatrix33 CCSDSAEMEulerAngleSegment::GetState(Real atEpoch)
 //------------------------------------------------------------------------------
 // Adds an epoch/data pair to the dataStore.
 //------------------------------------------------------------------------------
-bool CCSDSAEMEulerAngleSegment::AddData(Real epoch, Rvector data)
+bool CCSDSAEMEulerAngleSegment::AddData(Real epoch, Rvector data,
+                                        bool justCheckDataSize)
 {
+   #ifdef DEBUG_AEM_EULER_DATA
+   MessageInterface::ShowMessage
+      ("CCSDSAEMEulerAngleSegment::AddData() entered, epoch=%f, dataStore.size()=%d\n",
+       epoch, dataStore.size());
+   #endif
    // First, check for data size and ordering
-   CCSDSAEMSegment::AddData(epoch, data);
+   CCSDSAEMSegment::AddData(epoch, data, justCheckDataSize);
    // We need to store the angles in radians
    Rvector useData(3, data[0] * GmatMathConstants::RAD_PER_DEG,
                       data[1] * GmatMathConstants::RAD_PER_DEG,
@@ -225,6 +241,7 @@ bool CCSDSAEMEulerAngleSegment::AddData(Real epoch, Rvector data)
    dataStore.push_back(newData);
 
    #ifdef DEBUG_AEM_EULER_DATA
+      MessageInterface::ShowMessage("   dataStore.size() = %d\n", dataStore.size());
       MessageInterface::ShowMessage("----> For (Euler Angle) segment number %d, added epoch = "
             "%12.10f and data = %12.10f  %12.10f  %12.10f\n",
             segmentNumber, epoch, useData[0], useData[1], useData[2]);

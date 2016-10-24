@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Allison Greene
 // Created: 2003/08/28
@@ -40,13 +50,14 @@ public:
                 long style);
    
    void SetMainFrame(GmatMainFrame *gmf);
-   void ClearResource(bool leaveScripts);
-   void UpdateResource(bool resetCounter);
+   void ClearResource(bool leaveScripts, bool onlyChildNodes = true);
+   void UpdateResource(bool resetCounter, bool onlyChildNodes = true);
    void SetActiveScript(const wxString &script);
    void AddScript(wxString path);
    bool AddScriptItem(wxString path);
    void PanelObjectChanged( GmatBase *obj );
    void UpdateFormation();
+   void UpdateSpacecraft();
    void UpdateVariable();
    void UpdateRecentFiles(wxString filename);
    void OnAddScript(wxCommandEvent &event);
@@ -123,8 +134,11 @@ protected:
    //void InitializeIcons();
    
    // objects
+   GmatBase* CreateObject(const std::string &objType, const char *objName,
+                          bool createDefault = false);
    GmatBase* CreateObject(const std::string &objType, const std::string &objName,
                           bool createDefault = false);
+   GmatBase* GetObject(const char *name);
    GmatBase* GetObject(const std::string &name);
    void UpdateGuiItem(GmatTree::ItemType itemType);
    
@@ -154,10 +168,11 @@ protected:
    void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true,
                                 bool resetCounter = true);
    void AddUserObjects();
-
+   
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
    void OnItemActivated(wxTreeEvent &event);
+   void OnItemExpanded(wxTreeEvent &event);
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
    void OnRename(wxCommandEvent &event);
@@ -180,8 +195,12 @@ protected:
    void OnAddFormation(wxCommandEvent &event);
    void OnAddGroundStation(wxCommandEvent &event);
    void OnAddSpacecraft(wxCommandEvent &event);
-   void OnAddFuelTank(wxCommandEvent &event);
-   void OnAddThruster(wxCommandEvent &event);
+   void OnAddChemicalFuelTank(wxCommandEvent &event);
+   void OnAddElectricFuelTank(wxCommandEvent &event);
+   void OnAddChemicalThruster(wxCommandEvent &event);
+   void OnAddElectricThruster(wxCommandEvent &event);
+   void OnAddNuclearPowerSystem(wxCommandEvent &event);
+   void OnAddSolarPowerSystem(wxCommandEvent &event);
    void OnAddReportFile(wxCommandEvent &event);
    void OnAddXyPlot(wxCommandEvent &event);
    //void OnAddOpenGlPlot(wxCommandEvent &event);
@@ -266,10 +285,14 @@ protected:
       POPUP_ADD_FORMATION,
       POPUP_ADD_CONSTELLATION,
 
-      POPUP_ADD_HARDWARE,
-      POPUP_ADD_THRUSTER,
-      POPUP_ADD_FUELTANK,
-
+      POPUP_ADD_HARDWARE,  // includes PowerSystem
+      POPUP_ADD_THRUSTER_CHEMICAL,
+      POPUP_ADD_THRUSTER_ELECTRIC,
+      POPUP_ADD_FUELTANK_CHEMICAL,
+      POPUP_ADD_FUELTANK_ELECTRIC,
+      POPUP_ADD_NUCLEAR_POWER_SYSTEM,
+      POPUP_ADD_SOLAR_POWER_SYSTEM,
+      
       POPUP_ADD_PROPAGATOR,
 //      POPUP_ADD_SPK_PROPAGATOR,
       POPUP_ADD_BODY,

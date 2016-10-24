@@ -1,0 +1,77 @@
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft SPC;
+GMAT SPC.DateFormat = UTCGregorian;
+GMAT SPC.Epoch = '15 Jun 2016 12:00:00.000';
+GMAT SPC.CoordinateSystem = EarthMJ2000Eq;
+GMAT SPC.DisplayStateType = Cartesian;
+GMAT SPC.X = 6728.137;
+GMAT SPC.Y = 0;
+GMAT SPC.Z = 0;
+GMAT SPC.VX = 0;
+GMAT SPC.VY = 4.78097433374032;
+GMAT SPC.VZ = 6.0320883756781;
+GMAT SPC.DryMass = 2000;
+GMAT SPC.Cd = 2.1;
+GMAT SPC.Cr = 1.8;
+GMAT SPC.DragArea = 40;
+GMAT SPC.SRPArea = 35;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel ForcesWithSchatten;
+GMAT ForcesWithSchatten.CentralBody = Earth;
+GMAT ForcesWithSchatten.PrimaryBodies = {Earth};
+GMAT ForcesWithSchatten.SRP = Off;
+GMAT ForcesWithSchatten.RelativisticCorrection = Off;
+GMAT ForcesWithSchatten.ErrorControl = RSSStep;
+GMAT ForcesWithSchatten.GravityField.Earth.Degree = 0;
+GMAT ForcesWithSchatten.GravityField.Earth.Order = 0;
+GMAT ForcesWithSchatten.GravityField.Earth.PotentialFile = '../data/gravity/earth/JGM2.cof';
+GMAT ForcesWithSchatten.GravityField.Earth.EarthTideModel = 'None';
+GMAT ForcesWithSchatten.Drag.AtmosphereModel =  NRLMSISE00;
+GMAT ForcesWithSchatten.Drag.HistoricWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT ForcesWithSchatten.Drag.PredictedWeatherSource = 'SchattenFile';
+GMAT ForcesWithSchatten.Drag.SchattenFile = '../data/atmosphere/earth/SchattenPredict.txt';
+GMAT ForcesWithSchatten.Drag.SchattenErrorModel = 'Nominal';
+GMAT ForcesWithSchatten.Drag.SchattenTimingModel = 'NominalCycle';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator PD78;
+GMAT PD78.FM = ForcesWithSchatten;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create ReportFile SPC_Report;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable OutputStepSize i;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+%-----------Begin Propagation and Report Generation--------
+% Propagate based on preset propagation parameters
+% and current stop conditions.
+BeginMissionSequence;
+
+% Output Report file data for each propagation set in the FOR loop
+Report SPC_Report SPC.A1ModJulian SPC.X SPC.Y SPC.Z SPC.VX SPC.VY SPC.VZ;
+For i = 1:288
+  Propagate PD78(SPC) {SPC.ElapsedSecs = 300};
+  Report SPC_Report SPC.A1ModJulian SPC.X SPC.Y SPC.Z SPC.VX SPC.VY SPC.VZ;
+EndFor

@@ -1,0 +1,212 @@
+
+%  This script demonstrates the orbit state conversion from 
+%  cartesian to keplerian using in line math and GMAT's internal
+%  state conversion methods. Both methods use the GMAT Math specs
+%  and should result in nearly identical solutions.
+%
+%  SPH Comments: I only implemented the conversion for elliptic 
+%  inclined orbits, as described in the math spec. 
+%
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+%  Create a s/c
+Create Spacecraft Sat;
+GMAT Sat.DateFormat = TAIModJulian;
+GMAT Sat.Epoch = '21545';
+GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
+GMAT Sat.DisplayStateType = Cartesian;
+GMAT Sat.X = 7100;
+GMAT Sat.Y = 0;
+GMAT Sat.Z = 1300;
+GMAT Sat.VX = 0;
+GMAT Sat.VY = 7.35;
+GMAT Sat.VZ = 1;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create ForceModel Propagator1_ForceModel;
+
+Create Propagator Prop;
+GMAT Prop.FM = Propagator1_ForceModel;
+GMAT Prop.Type = RungeKutta89;
+GMAT Prop.InitialStepSize = 60;
+GMAT Prop.Accuracy = 9.999999999999999e-012;
+GMAT Prop.MinStep = 0.001;
+GMAT Prop.MaxStep = 2700;
+GMAT Prop.MaxStepAttempts = 50;
+GMAT Prop.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+
+Create Array rv[3,1] vv[3,1] hv[3,1] ev[3,1] nv[3,1];
+
+%   Create variables and arrays that are needed in calculations
+Create Variable SMA ECC INC AOP RAAN TA h r v n;
+Create Variable Energy rdotv mu ndote edotr x y z vx vy;
+Create Variable vz pi2 d2r SMAError ECCError INCError RAANError AOPError TAError;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create XYPlot SMAvsTimeINT;
+GMAT SMAvsTimeINT.SolverIterations = Current;
+GMAT SMAvsTimeINT.UpperLeft = [ 0.2877358490566038 0.008816120906801008 ];
+GMAT SMAvsTimeINT.Size = [ 0.3490566037735849 0.4534005037783375 ];
+GMAT SMAvsTimeINT.RelativeZOrder = 454;
+GMAT SMAvsTimeINT.XVariable = Sat.TAIModJulian;
+GMAT SMAvsTimeINT.YVariables = {Sat.SMA};
+GMAT SMAvsTimeINT.ShowGrid = true;
+GMAT SMAvsTimeINT.ShowPlot = true;
+
+Create XYPlot SMAvsTimeScript;
+GMAT SMAvsTimeScript.SolverIterations = Current;
+GMAT SMAvsTimeScript.UpperLeft = [ 0.289622641509434 0.464735516372796 ];
+GMAT SMAvsTimeScript.Size = [ 0.3490566037735849 0.4534005037783375 ];
+GMAT SMAvsTimeScript.RelativeZOrder = 452;
+GMAT SMAvsTimeScript.XVariable = Sat.TAIModJulian;
+GMAT SMAvsTimeScript.YVariables = {SMA};
+GMAT SMAvsTimeScript.ShowGrid = true;
+GMAT SMAvsTimeScript.ShowPlot = true;
+
+Create XYPlot RAANvsTimeINT;
+GMAT RAANvsTimeINT.SolverIterations = Current;
+GMAT RAANvsTimeINT.UpperLeft = [ 0.6424528301886793 0.4659949622166247 ];
+GMAT RAANvsTimeINT.Size = [ 0.3490566037735849 0.4534005037783375 ];
+GMAT RAANvsTimeINT.RelativeZOrder = 448;
+GMAT RAANvsTimeINT.XVariable = Sat.TAIModJulian;
+GMAT RAANvsTimeINT.YVariables = {Sat.RAAN};
+GMAT RAANvsTimeINT.ShowGrid = true;
+GMAT RAANvsTimeINT.ShowPlot = true;
+
+Create XYPlot RAANvsTimeScript;
+GMAT RAANvsTimeScript.SolverIterations = Current;
+GMAT RAANvsTimeScript.UpperLeft = [ 0.6424528301886793 0.01259445843828715 ];
+GMAT RAANvsTimeScript.Size = [ 0.3490566037735849 0.4534005037783375 ];
+GMAT RAANvsTimeScript.RelativeZOrder = 444;
+GMAT RAANvsTimeScript.XVariable = Sat.TAIModJulian;
+GMAT RAANvsTimeScript.YVariables = {RAAN};
+GMAT RAANvsTimeScript.ShowGrid = true;
+GMAT RAANvsTimeScript.ShowPlot = true;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+
+BeginMissionSequence;
+
+BeginScript 'Define Constants'
+   
+   %  Define constants
+   GMAT pi2 = 6.283185307179586;
+   GMAT d2r = .017453292519943295770;
+   GMAT mu = 398600.4415;
+   GMAT SMA = 7191.870446001621;
+   GMAT RAAN = 306.614;
+   
+EndScript;
+
+While 'While ElapsedDays < 1' Sat.ElapsedDays < 1.0
+   
+   Propagate 'Prop One Step' Prop(Sat);
+   
+   %  Compute the keplerian elements using the algorithm in the GMAT Math Spec
+   BeginScript 'Compute Kep Elements'
+      
+      %  Define individual cartesian states
+      GMAT x = Sat.X;
+      GMAT y = Sat.Y;
+      GMAT z = Sat.Z;
+      GMAT vx = Sat.VX;
+      GMAT vy = Sat.VY;
+      GMAT vz = Sat.VZ;
+      
+      GMAT rv(1,1) = x;
+      GMAT rv(2,1) = y;
+      GMAT rv(3,1) = z;
+      GMAT vv(1,1) = vx;
+      GMAT vv(2,1) = vy;
+      GMAT vv(3,1) = vz;
+      
+      %  Calculate the angular momentum and its magnitude
+      GMAT hv(1,1) = y*vz-z*vy;
+      GMAT hv(2,1) = z*vx-x*vz;
+      GMAT hv(3,1) = x*vy-y*vx;
+      GMAT h = sqrt( hv(1,1)^2 +  hv(2,1)^2 +  hv(3,1)^2 );
+      
+      %  Calculate the vector in the direction of the line of nodes
+      GMAT nv(1,1) = -z*vx+x*vz;
+      GMAT nv(2,1) = y*vz-z*vy;
+      GMAT nv(3,1) = 0;
+      GMAT n = sqrt( nv(1,1)^2 +  nv(2,1)^2 +  nv(3,1)^2 );
+      
+      %  Calculate the magnitude of position and velocity
+      GMAT r = sqrt( x^2 +   y^2  + z^2 );
+      GMAT v = sqrt( vx^2 + vy^2 + vz^2 );
+      
+      %  Calculate the eccentricity vector
+      GMAT rdotv = x*vx + y*vy + z*vz;
+      GMAT ev = ( ( v^2 - mu/r )*rv - rdotv*vv  ) / mu;    %  This should make a column vector!!
+      GMAT ECC = sqrt( ev(1,1)^2 +  ev(2,1)^2 +  ev(3,1)^2 );
+      
+      %  Calculate the Energy, SMA and INC
+      GMAT Energy = v^2/2 - mu/r;
+      GMAT SMA = -mu/2/Energy;
+      GMAT INC = acos(hv(3,1)/h);
+      
+      %  Calculate RAAN
+      GMAT RAAN = acos( nv(1,1)/n );
+      %  Fix quadrant
+      If nv(2,1) < 0
+         GMAT RAAN = pi2 - RAAN;
+      EndIf;
+      
+      %  Calculate AOP
+      GMAT ndote = nv(1,1)*ev(1,1) + nv(2,1)*ev(2,1) + nv(3,1)*ev(3,1);
+      GMAT AOP = acos(ndote/(n*ECC));
+      %  Fix quadrant
+      If ev(3,1) < 0
+         GMAT AOP = pi2 - AOP;
+      EndIf;
+      
+      %  Calculate TA
+      GMAT edotr = rv(1,1)*ev(1,1) + rv(2,1)*ev(2,1) + rv(3,1)*ev(3,1);
+      GMAT TA = acos(edotr/(ECC*r));
+      %  Fix quadrant
+      If rdotv < 0
+         GMAT TA = pi2 - TA;
+      EndIf;  % rdotv < 0
+   EndScript;
+   
+   % Convert to degrees and compute diffs
+   BeginScript 'Convert and Compare'
+      
+      %  Convert Angles to degrees
+      GMAT INC = INC/d2r;
+      GMAT RAAN = RAAN/d2r;
+      GMAT AOP = AOP/d2r;
+      GMAT TA = TA/d2r;
+      
+      %  Compute the errors
+      GMAT SMAError = SMA - Sat.SMA;
+      GMAT ECCError = ECC - Sat.ECC;
+      GMAT INCError = INC - Sat.INC;
+      GMAT RAANError = RAAN - Sat.RAAN;
+      GMAT AOPError = AOP  - Sat.AOP;
+      GMAT TAError = TA   - Sat.TA;
+   EndScript;
+
+
+EndWhile;
+
+
+

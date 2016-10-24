@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // Order 124.
@@ -24,6 +34,7 @@
 #include "BurnException.hpp"
 #include "StringUtil.hpp"          // for ToString()
 #include "MessageInterface.hpp"
+#include "ElectricThruster.hpp"  // for Min/MaxUsablePower
 
 //#define DEBUG_RENAME
 //#define DEBUG_BURN_ORIGIN
@@ -32,6 +43,9 @@
 //#define DEBUG_FINITEBURN_SET
 //#define DEBUG_FINITEBURN_INIT
 //#define DEBUG_FINITEBURN_OBJECT
+//#define DEBUG_FINITE_BURN_POWER
+//#define DEBUG_MASS_FLOW
+//#define DEBUG_IS_FIRING
 
 //---------------------------------
 // static data
@@ -43,7 +57,8 @@ FiniteBurn::PARAMETER_TEXT[FiniteBurnParamCount - BurnParamCount] =
 {
    "Thrusters",
    "Tanks",
-   "BurnScaleFactor"
+   "BurnScaleFactor",
+   "ThrottleLogicAlgorithm",
 };
 
 /// Types of the parameters used by finite burns.
@@ -53,6 +68,7 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
    Gmat::OBJECTARRAY_TYPE,
    Gmat::OBJECTARRAY_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 
@@ -70,7 +86,9 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const std::string &nomme) :
-   Burn (Gmat::FINITE_BURN, "FiniteBurn", nomme)
+   Burn (Gmat::FINITE_BURN, "FiniteBurn", nomme),
+   throttleLogicAlgorithm   ("MaxNumberOfThrusters"),
+   isElectricBurn           (false)       // default is Chemical
 {
    objectTypes.push_back(Gmat::FINITE_BURN);
    objectTypeNames.push_back("FiniteBurn");
@@ -102,8 +120,10 @@ FiniteBurn::~FiniteBurn()
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const FiniteBurn& fb) :
-   Burn              (fb),
-   thrusterNames     (fb.thrusterNames)
+   Burn                   (fb),
+   thrusterNames          (fb.thrusterNames),
+   throttleLogicAlgorithm (fb.throttleLogicAlgorithm),
+   isElectricBurn         (fb.isElectricBurn)
 {
    parameterCount = fb.parameterCount;
 }
@@ -127,7 +147,9 @@ FiniteBurn& FiniteBurn::operator=(const FiniteBurn& fb)
       
    Burn::operator=(fb);
    
-   thrusterNames       = fb.thrusterNames;
+   thrusterNames          = fb.thrusterNames;
+   throttleLogicAlgorithm = fb.throttleLogicAlgorithm;
+   isElectricBurn         = fb.isElectricBurn;
    
    return *this;
 }
@@ -176,7 +198,7 @@ void FiniteBurn::SetSpacecraftToManeuver(Spacecraft *sat)
 
 
 //------------------------------------------------------------------------------
-//  bool Fire(Real *burnData, Real epoch)
+//  bool Fire(Real *burnData, Real epoch, bool backwards)
 //------------------------------------------------------------------------------
 /**
  * Fire does not currently perform any action for FiniteBurn objects.  The 
@@ -191,15 +213,17 @@ void FiniteBurn::SetSpacecraftToManeuver(Spacecraft *sat)
  *                     burnData[2]  dVz/dt
  *                     burnData[3]  dM/dt
  * @param <epoch>    Epoch of the burn fire
+ * @param backwards  Flag used by impulsive burns to indicate application as if
+ *                   in a backprop
  *
  * @return true on success; throws on failure.
  */
 //------------------------------------------------------------------------------
-bool FiniteBurn::Fire(Real *burnData, Real epoch)
+bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
 {
    #ifdef DEBUG_FINITEBURN_FIRE
       MessageInterface::ShowMessage
-         ("FiniteBurn::Fire() this<%p>'%s' entered, epoch=%f, spacecraft=<%p>'%s'\n",
+         ("FiniteBurn::Fire() this<%p>'%s' entered, epoch=%.12f, spacecraft=<%p>'%s'\n",
           this, instanceName.c_str(), epoch, spacecraft,
           spacecraft ? spacecraft->GetName().c_str() : "NULL");
    #endif
@@ -213,6 +237,8 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
    // Accumulate the individual accelerations from the thrusters
    Real dm = 0.0, tMass, tOverM, *dir, norm;
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
+   totalAccel[0] = totalAccel[1] = totalAccel[2]  = 0.0;
+   totalThrust[0] = totalThrust[1] = totalThrust[2]  = 0.0;
    Thruster *current;
    
    tMass = spacecraft->GetRealParameter("TotalMass");
@@ -231,6 +257,14 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
        frameBasis[2][0], frameBasis[2][1], frameBasis[2][2]);
    #endif
    
+   // If this FiniteBurn uses electric thrusters, we must compute the throttle
+   // logic based on the total power available to the thrusters
+   if (isElectricBurn)
+   {
+      Real availablePower = spacecraft->GetThrustPower();
+      ComputeThrottleLogic(availablePower);
+   }
+
    for (StringArray::iterator i = thrusterNames.begin(); 
         i != thrusterNames.end(); ++i)
    {
@@ -270,23 +304,53 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
       tOverM = current->thrust * current->thrustScaleFactor *
                current->dutyCycle / (tMass * norm * 1000.0);
       
+      // deltaV is really totalAcceleration (SPH)
       deltaV[0] += dir[0] * tOverM;
       deltaV[1] += dir[1] * tOverM;
       deltaV[2] += dir[2] * tOverM;
       
-      #ifdef DEBUG_FINITE_BURN
+      // Compute thrust magnitude
+      // Now appliedThrustMag is computed in the Thruster (LOJ: 2016.06.27)
+      // Real appliedThrustMag = current->thrust * current->thrustScaleFactor *
+      //    current->dutyCycle;
+      
+      // Add in thrust from this thruster for totalThrust
+      totalThrust[0] += dir[0] / norm * current->appliedThrustMag;
+      totalThrust[1] += dir[1] / norm * current->appliedThrustMag;
+      totalThrust[2] += dir[2] / norm * current->appliedThrustMag;
+      
+      #ifdef DEBUG_FINITEBURN_FIRE
          MessageInterface::ShowMessage("   Thruster %s = %s details:\n", 
             (*i).c_str(), current->GetName().c_str());
          MessageInterface::ShowMessage(
-            "   thrust   = %.15f\n"
-            "       dM   = %.15e\n      Mass  = %.15f\n"
-            "      TSF   = %.15f\n      |Acc| = %.15e\n      "
-            "Acc   = [%.15e   %.15e   %.15e]\n", current->thrust,
-            dm, tMass, current->thrustScaleFactor, tOverM,
-            deltaV[0], deltaV[1], deltaV[2]);
+            "          thrust = %.15f\n"
+            "appliedThrustMag = %.15f\n"
+            "              dM = %.15e\n            Mass = %.15f\n"
+            "             TSF = %.15f\n           |Acc| = %.15e\n"
+            "             Acc = [%.15e   %.15e   %.15e]\n", current->thrust,
+            current->appliedThrustMag, dm, tMass, current->thrustScaleFactor,
+            tOverM, deltaV[0], deltaV[1], deltaV[2]);
       #endif
    }
    
+   // deltaV is in inertial coordinate system, so copy it to deltaVInertial
+   deltaVInertial[0] = deltaV[0];
+   deltaVInertial[1] = deltaV[1];
+   deltaVInertial[2] = deltaV[2];
+   
+   // deltaV is really total acceleration so copy it to totalAccel
+   totalAccel[0] = deltaV[0];
+   totalAccel[1] = deltaV[1];
+   totalAccel[2] = deltaV[2];
+   
+   #ifdef DEBUG_FINITEBURN_FIRE
+   MessageInterface::ShowMessage
+      ("     totalThrust = [%.15e   %.15e   %.15e]\n"
+       "      totalAccel = [%.15e   %.15e   %.15e]\n",
+       totalThrust[0], totalThrust[1], totalThrust[2],
+       totalAccel[0], totalAccel[1], totalAccel[2]);
+   #endif
+
    // Build the acceleration
    burnData[0] = deltaV[0]*frameBasis[0][0] +
                  deltaV[1]*frameBasis[0][1] +
@@ -298,7 +362,10 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
                  deltaV[1]*frameBasis[2][1] +
                  deltaV[2]*frameBasis[2][2];
    burnData[3] = dm;
-   
+
+   // Save total mass flow rate
+   totalMassFlowRate = dm;
+      
    #ifdef DEBUG_FINITEBURN_FIRE
       MessageInterface::ShowMessage(
           "FiniteBurn::Fire() this<%p>'%s' returning\n"
@@ -311,6 +378,74 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool IsFiring()
+//------------------------------------------------------------------------------
+/**
+ * Checks if thruster used in the FiniteBurn is firing and return the status.
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::IsFiring()
+{
+   #ifdef DEBUG_IS_FIRING
+   MessageInterface::ShowMessage
+      ("FiniteBurn::IsFiring() <%p>'%s' entered, thrusterNames.size()=%d, "
+       "spacecraft=<%p>'%s'\n", this, GetName().c_str(), thrusterNames.size(),
+       spacecraft, spacecraft ? spacecraft->GetName().c_str() : "NULL");
+   #endif
+   
+   if (thrusterNames.empty() || spacecraft == NULL)
+   {
+      #ifdef DEBUG_IS_FIRING
+      MessageInterface::ShowMessage
+         ("FiniteBurn::IsFiring() <%p>'%s' returning false, no thrusters or "
+          "spacecaft specified\n", this, GetName().c_str(), isFiring);
+      #endif
+      return false;
+   }
+   
+   Thruster *current = NULL;
+   int firingCount = 0;
+   for (StringArray::iterator i = thrusterNames.begin(); i != thrusterNames.end(); ++i)
+   {
+      #ifdef DEBUG_IS_FIRING
+      MessageInterface::ShowMessage
+         ("   Accessing thruster '%s' from spacecraft <%p>'%s'\n", (*i).c_str(),
+          spacecraft, spacecraft->GetName().c_str());
+      #endif
+      
+      current = (Thruster *)spacecraft->GetRefObject(Gmat::THRUSTER, *i);
+      if (!current)
+         throw BurnException("FiniteBurn::Fire requires thruster named \"" +
+            (*i) + "\" on spacecraft " + spacecraft->GetName());
+      
+      // FiniteBurn class is friend of Thruster class, so we can access
+      // member data directly
+      if (current->thrusterFiring)
+      {
+         #ifdef DEBUG_IS_FIRING
+         MessageInterface::ShowMessage("   Thruster '%s' is firing\n", (*i).c_str());
+         #endif
+         firingCount++;
+      }
+      else
+      {
+         #ifdef DEBUG_IS_FIRING
+         MessageInterface::ShowMessage("   Thruster '%s' is not firing\n", (*i).c_str());
+         #endif
+      }
+   }
+   
+   isFiring = false;
+   if (firingCount > 0)
+      isFiring = true;
+   
+   #ifdef DEBUG_IS_FIRING
+   MessageInterface::ShowMessage
+      ("FiniteBurn::IsFiring() <%p>'%s' returning %d\n", this, GetName().c_str(), isFiring);
+   #endif
+   return isFiring;
+}
 
 //------------------------------------------------------------------------------
 //  std::string GetParameterText(const Integer id) const
@@ -493,6 +628,8 @@ std::string FiniteBurn::GetStringParameter(const Integer id) const
    case BURNORIGIN:
    case BURNAXES:
       return "Deprecated"; // just to ignore
+   case THROTTLE_LOGIC_ALGORITHM:
+      return throttleLogicAlgorithm;
    default:
       break;
    }
@@ -524,6 +661,18 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
    case BURNORIGIN:
    case BURNAXES:
       return true; // just to ignore
+   case THROTTLE_LOGIC_ALGORITHM:
+      if (value != "MaxNumberOfThrusters")
+      {
+         std::string msg =
+            "The value of \"" + value + "\" for field \"ThrottleLogicAlgorithm\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [\"MaxNumberOfThrusters\"]. ";   // will need to add list if other options become available
+
+         throw BurnException(msg);
+      }
+      throttleLogicAlgorithm = value;   // @todo add validation
+      return true;
    default:
       break;
    }
@@ -541,7 +690,28 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
 
 
 //------------------------------------------------------------------------------
-//  Real SetStringParameter(const Integer id, const Real value,
+//  Real SetStringParameter(const Integer id, const char *value,
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a specific std::string element in an array.
+ *
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * @param <index> Index for the element
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::SetStringParameter(const Integer id, const char *value,
+                                    const Integer index)
+{
+   return SetStringParameter(id, std::string(value), index);
+}
+
+
+//------------------------------------------------------------------------------
+//  Real SetStringParameter(const Integer id, const std::string &value,
 //                          const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -898,6 +1068,36 @@ Gmat::ObjectType FiniteBurn::GetPropertyObjectType(const Integer id) const
    }
 }
 
+
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string& action, const std::string& actionData)
+//------------------------------------------------------------------------------
+/**
+ * Triggers internal actions on the finite burn object.
+ *
+ * The GUI uses this method to clear the thruster list.
+ *
+ * @param action The string describing the requested action
+ * @param actionData Ancillary data that may be needed to execute the action.
+ *
+ * @return true if an action was triggered
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::TakeAction(const std::string& action,
+      const std::string& actionData)
+{
+   bool retval = false;
+   if (action == "ClearThrusterList")
+   {
+      thrusterNames.clear();
+      retval = true;
+   }
+   else
+      retval = Burn::TakeAction(action, actionData);
+
+   return retval;
+}
+
 //------------------------------------------------------------------------------
 // bool FiniteBurn::Initialize()
 //------------------------------------------------------------------------------
@@ -948,8 +1148,12 @@ bool FiniteBurn::SetThrustersFromSpacecraft()
    
    // Get thrusters and tanks associated to spacecraft
    ObjectArray thrusterArray = spacecraft->GetRefObjectArray(Gmat::THRUSTER);
-   ObjectArray tankArray = spacecraft->GetRefObjectArray(Gmat::FUEL_TANK);
+   ObjectArray tankArray     = spacecraft->GetRefObjectArray(Gmat::FUEL_TANK);
    
+   isElectricBurn          = false;  // initially assume Chemical burn
+   bool thrusterTypeSet    = false;
+   bool isElectricThruster = false;
+
    // Look up the thruster(s)
    for (ObjectArray::iterator th = thrusterArray.begin(); 
         th != thrusterArray.end(); ++th)
@@ -960,6 +1164,25 @@ bool FiniteBurn::SetThrustersFromSpacecraft()
          // Only act on thrusters assigned to this burn
          if ((*th)->GetName() == *thName)
          {
+            bool isElectricThruster = (*th)->IsOfType("ElectricThruster");
+            if (!thrusterTypeSet)
+            {
+               if (isElectricThruster)
+                  isElectricBurn = true;
+               thrusterTypeSet = true;
+            }
+            else
+            {
+               if ((isElectricBurn  && !isElectricThruster) ||
+                   (!isElectricBurn &&  isElectricThruster))
+               {
+                  std::string errmsg = "Finite Burn ";
+                  errmsg += instanceName + " has a mix of Chemical and ";
+                  errmsg += "Electric thrusters.  Thrusters specified for a ";
+                  errmsg += "finite burn must all be of the same type.\n";
+                  throw BurnException(errmsg);
+               }
+            }
             Integer paramId = (*th)->GetParameterID("Tank");
             StringArray tankNames = (*th)->GetStringArrayParameter(paramId);
             // Setup the tankNames
@@ -1001,3 +1224,107 @@ bool FiniteBurn::SetThrustersFromSpacecraft()
 }
 
 
+bool FiniteBurn::ComputeThrottleLogic(Real powerAvailable)
+{
+   ElectricThruster *current         = NULL;
+   Integer          numThrusters     = (Integer) thrusterNames.size();
+   Real             powerPerThruster = 0.0;
+   #ifdef DEBUG_FINITE_BURN_POWER
+      MessageInterface::ShowMessage
+         ("  Computing throttle logic, Power Available = %12.10f, numThrusters = %d\n",
+               powerAvailable, numThrusters);
+   #endif
+
+   // Save the pointers since we have to access them again at the end
+   std::vector<ElectricThruster*>  electricThrusters;
+   // Save the minimum usable power for each
+   RealArray                       minUsablePowerPerThruster;
+   Real                            minPower = 0.0;
+
+   // First check for errors in accessing the thrusters, and store the
+   // MinimumUsablePower for each
+//   for (StringArray::iterator i = thrusterNames.begin();
+//        i != thrusterNames.end(); ++i)
+   if (throttleLogicAlgorithm == "MaxNumberOfThrusters")
+   {
+      for (Integer ii = 0; ii < numThrusters; ii++)
+      {
+         #ifdef DEBUG_FINITE_BURN_POWER
+            MessageInterface::ShowMessage
+               ("  Computing throttle logic, accessing thruster '%s' from spacecraft <%p>'%s'\n",
+                     thrusterNames.at(ii).c_str(),
+                spacecraft, spacecraft->GetName().c_str());
+         #endif
+
+         // Check to make sure there is not an error accessing this thruster
+         current = (ElectricThruster *)spacecraft->GetRefObject(Gmat::THRUSTER, thrusterNames.at(ii));
+         if (!current)
+            throw BurnException("FiniteBurn::Fire requires thruster named \"" +
+                  thrusterNames.at(ii) + "\" on spacecraft " + spacecraft->GetName());
+         electricThrusters.push_back(current);
+         minPower = current->GetRealParameter(current->GetParameterID("MinimumUsablePower"));
+         minUsablePowerPerThruster.push_back(minPower);
+         #ifdef DEBUG_FINITE_BURN_POWER
+            MessageInterface::ShowMessage
+               ("  Computing throttle logic, minPower for thruster %d = %12.10f\n",
+                     ii, minPower);
+         #endif
+     }
+
+      Integer numToFire       = numThrusters;  // start at the last one
+
+      for (Integer ii = numThrusters-1; ii >= 0; ii--)
+      {
+         powerPerThruster = powerAvailable / numToFire;
+         // Compute mean usable power, if we were to fire numToFire thrusters
+         Real meanMinUsablePower = 0.0;
+         for (unsigned int jj = 0; jj < numToFire; jj++)
+            meanMinUsablePower += minUsablePowerPerThruster.at(ii);
+         meanMinUsablePower /= numToFire;
+         // If we can fire numToFire thrusters with the power available, we're done
+         if (powerPerThruster > meanMinUsablePower)
+            break;
+         // Handle the special case where there is not enough power to fire
+         // any thrusters
+         if ((numToFire == 1) && (powerPerThruster < meanMinUsablePower))
+         {
+            numToFire = 0;
+            break;
+         }
+         numToFire--;
+      }
+      #ifdef DEBUG_FINITE_BURN_POWER
+         MessageInterface::ShowMessage("numToFire = %d, powerPerThruster = %12.10f\n",
+               numToFire, powerPerThruster);
+      #endif
+
+      // Divide the power up across thrusters that should fire
+      for (unsigned int nn = 0; nn < numToFire; nn++)
+      {
+         #ifdef DEBUG_FINITE_BURN_POWER
+            MessageInterface::ShowMessage("Setting power on thruster %d to %12.10f\n",
+                  (Integer) nn, powerPerThruster);
+         #endif
+         electricThrusters.at(nn)->SetPower(powerPerThruster);
+      }
+
+      // Set power to zero for all those that cannot fire
+      for (unsigned int nono = numToFire; nono < numThrusters; nono++)
+      {
+         #ifdef DEBUG_FINITE_BURN_POWER
+            MessageInterface::ShowMessage("Setting power on thruster %d to 0.0f\n",
+                  (Integer) nono);
+         #endif
+         electricThrusters.at(nono)->SetPower(0.0);
+      }
+
+      electricThrusters.clear();
+      minUsablePowerPerThruster.clear();
+   }
+   else
+   {
+      throw BurnException("Unknown value for ThrottleLogicAlgorithm\n");
+   }
+
+   return true;
+}

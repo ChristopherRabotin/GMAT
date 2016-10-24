@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: LaMont Ruley
 // Created: 2004/02/04
@@ -52,6 +62,8 @@ ImpulsiveBurnSetupPanel::ImpulsiveBurnSetupPanel(wxWindow *parent,
        theObject, theObject->GetTypeName().c_str());
    #endif
    
+   useMixRatio = false;
+
    // To set panel object and show warning if object is NULL
    if (SetObject(theObject))
    {
@@ -87,9 +99,9 @@ void ImpulsiveBurnSetupPanel::Create()
    //-----------------------------------------------------------------
    // thrust vector items
    //-----------------------------------------------------------------
-   XLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"1"));
-   YLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"2"));
-   ZLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"3"));
+   XLabel->SetLabel("Element" GUI_ACCEL_KEY "1");
+   YLabel->SetLabel("Element" GUI_ACCEL_KEY "2");
+   ZLabel->SetLabel("Element" GUI_ACCEL_KEY "3");
    XUnitLabel->SetLabel(wxT("km/s"));
    YUnitLabel->SetLabel(wxT("km/s"));
    ZUnitLabel->SetLabel(wxT("km/s"));

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Allison Greene
 // Created: 2003/09/02
@@ -43,6 +53,7 @@
 #include "bitmaps/beginfb.xpm"
 #include "bitmaps/endfb.xpm"
 #include "bitmaps/report.xpm"
+#include "bitmaps/mt_WriteCommand.xpm"
 #include "bitmaps/penup.xpm"
 #include "bitmaps/pendown.xpm"
 #include "bitmaps/optimize.xpm"
@@ -57,6 +68,7 @@
 #include "bitmaps/mt_NonlinearConstraint.xpm"
 #include "bitmaps/mt_RunSimulator.xpm"
 #include "bitmaps/mt_RunEstimator.xpm"
+#include "bitmaps/mt_FindEvents.xpm"   
 
 #include <wx/tipwin.h>
 
@@ -76,6 +88,9 @@
 
 // Should we sort the command list?
 #define __SORT_COMMAND_LIST__
+
+// If we are ready to handle GUI Navigation plugins, enable this
+//#define __ENABLE_NAV_GUI__
 
 // Should we enable multiple mission sequence?
 //#define__ENABLE_MULTIPLE_SEQUENCE__
@@ -215,6 +230,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mViewAll = true;
    mUsingViewLevel = true;
    mIsMissionTreeDocked = true;
+   mEnableShowScript = true;
    mWriteMissionSeq = false;
    mViewLevel = 10;
    
@@ -237,7 +253,13 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
       (cmds, "===> Here is the viewable command list", "   ");
    #endif
    for (unsigned int i = 0; i < cmds.size(); i++)
+   {
+      #ifndef __ENABLE_NAV_GUI__
+      if (cmds[i] == "RunSimulator" || cmds[i] == "RunEstimator")
+         continue;
+      #endif
       mCommandList.Add(cmds[i].c_str());
+   }
    
    // Build commands for view control since MissionTree show ControlFlow commands
    // and Vary, Achieve in sub nodes such as ControlLogic and Target node.
@@ -282,6 +304,18 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    
    // Now this is called from GmatNotebook after MissionTreeToolBar is created
    //AddDefaultMission();
+   
+   // Set default font
+   SetFont(GmatAppData::Instance()->GetFont());
+   
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("In MissionTree() constructor, currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d\n",
+       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
+       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
+   #endif
    
    // for auto-testing of MissionTree actions
    #ifdef __TEST_MISSION_TREE_ACTIONS__
@@ -569,6 +603,13 @@ void MissionTree::SetViewCommands(const wxArrayString &viewCmds)
    UpdateMission(true, false, false);
 }
 
+//------------------------------------------------------------------------------
+// void EnableShowScript(bool flag)
+//------------------------------------------------------------------------------
+void MissionTree::EnableShowScript(bool flag)
+{
+   mEnableShowScript = flag;
+}
 
 //------------------------------------------------------------------------------
 // const wxArrayString& GetCommandList(bool forViewControl = false)
@@ -1046,6 +1087,14 @@ void MissionTree::UpdateCommand()
    
    while (cmd != NULL)
    {
+      #ifndef __ENABLE_NAV_GUI__
+      if (cmd->IsOfType("RunSimulator") || cmd->IsOfType("RunEstimator"))
+      {
+         cmd = cmd->GetNext();
+         continue;
+      }
+      #endif
+      
       node = BuildTreeItem(mMissionSeqSubId, cmd, 0, isLastItemHidden);
       
       if (isLastItemHidden)
@@ -1070,6 +1119,9 @@ void MissionTree::UpdateCommand()
    if (mWriteMissionSeq)
       ShowCommands("After Updating Command Sequence");
    
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   MessageInterface::ShowMessage("MissionTree::UpdateCommand() leaving\n");
+   #endif
 }
 
 
@@ -1100,7 +1152,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
       #if DEBUG_MISSION_TREE
       MessageInterface::ShowMessage
          ("MissionTree::UpdateCommandTree() leaving, command '%s' ignored\n",
-          cmdTypeName.c_str());
+          cmdTypeName.WX_TO_C_STRING);
       #endif
       return mNewTreeId;
    }
@@ -1126,7 +1178,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
       ("MissionTree::UpdateCommandTree() leaving, command <%s>'%s' added to tree\n",
-       cmdTypeName.c_str(), cmd->GetName().c_str());
+       cmdTypeName.WX_TO_C_STRING, cmd->GetName().c_str());
    #endif
    
    return mNewTreeId;
@@ -1288,7 +1340,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
       ("MissionTree::AppendCommand('%s') entered, type = \"%s\" and name = \"%s\"\n",
-       GetItemText(parent).c_str(),  cmd->GetTypeName().c_str(), 
+       GetItemText(parent).WX_TO_C_STRING,  cmd->GetTypeName().c_str(), 
        cmd->GetName().c_str());
    #endif
    
@@ -1305,7 +1357,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
       ("MissionTree::AppendCommand() cmdTypeName='%s', nodeName='%s'\n",
-       cmdTypeName.c_str(), nodeName.c_str());
+       cmdTypeName.WX_TO_C_STRING, nodeName.WX_TO_C_STRING);
    #endif
    // Compose node name
    // Changed node name of End and Else to append parent's name
@@ -1350,7 +1402,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
-      ("   After composing node name, nodeName='%s'\n", nodeName.c_str());
+      ("   After composing node name, nodeName='%s'\n", nodeName.WX_TO_C_STRING);
    #endif
    
    // If a command has no name, replace for GUI name
@@ -1373,7 +1425,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    
    #if DEBUG_APPEND_COMMAND
    MessageInterface::ShowMessage
-      ("   After replacing command name, nodeName='%s'\n", nodeName.c_str());
+      ("   After replacing command name, nodeName='%s'\n", nodeName.WX_TO_C_STRING);
    #endif
    
    node = AppendItem(parent, nodeName, icon, -1,
@@ -2302,7 +2354,7 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("   currCmd='%s'(%p)\n", currCmd->GetTypeName().c_str(), currCmd);
+      ("   currCmd = '%s'(%p)\n", currCmd->GetTypeName().c_str(), currCmd);
    WriteCommand("   ", "prevCmd = ", prevCmd, ", realPrevCmd = ", realPrevCmd);
    #endif
    
@@ -2315,13 +2367,17 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
       ShowCommands("Before Insert: " + cmdTypeName);
       MessageInterface::ShowMessage
          ("InsertBefore('%s') currCmd='%s', addr=%p\n",
-          cmdTypeName.c_str(), currCmd->GetTypeName().c_str(), currCmd);
+          cmdTypeName.WX_TO_C_STRING, currCmd->GetTypeName().c_str(), currCmd);
       
       return;
    }
    
-   // If previous command is BranchCmmand check to see we need to use matching
+   // If previous command is BranchCmmand check to see if we need to use matching
    // BranchEnd as previous command
+   #if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage
+      ("   Checking to see if it needs to use matching BranchEnd as previous command\n");
+   #endif
    if (prevCmd->IsOfType("BranchCommand"))
    {
       // check if first child is current command
@@ -2344,6 +2400,10 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
       GmatCommand *branchCmd = NULL;
       // Get parent branch command if exist
       IsInsideSolverBranch(currId, itemType, solverItemType, branchId, &branchCmd);
+      #if DEBUG_MISSION_TREE_INSERT
+      WriteCommand("   ", "branchCmd = ", branchCmd);
+      #endif
+      
       cmd = CreateCommand(cmdTypeName, branchCmd);
       
       if (cmd != NULL)
@@ -2534,7 +2594,7 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
 {
    #if DEBUG_MISSION_TREE_DELETE
    MessageInterface::ShowMessage
-      ("MissionTree::Delete() entered, cmdName='%s'\n", cmdName.c_str());
+      ("MissionTree::DeleteCommand() entered, cmdName='%s'\n", cmdName.c_str());
    #endif
    
    // Get selected item
@@ -2562,23 +2622,23 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    
    
    // delete from gui interpreter
-   MissionTreeItemData *missionItem = (MissionTreeItemData *)GetItemData(currId);
-   if (missionItem == NULL)
+   MissionTreeItemData *treeItem = (MissionTreeItemData *)GetItemData(currId);
+   if (treeItem == NULL)
    {
       // write error message
       MessageInterface::ShowMessage
          ("\n*** ERROR *** could not delete '%s' due to NULL item\n",
-         cmdName.c_str());
+         cmdName.WX_TO_C_STRING);
       return;
    }
    
-   GmatCommand *theCmd = missionItem->GetCommand();  
+   GmatCommand *theCmd = treeItem->GetCommand();  
    if (theCmd == NULL)
    {
       // write error message
       MessageInterface::ShowMessage
          ("\n*** ERROR *** could not delete '%s' due to NULL command\n",
-         cmdName.c_str());
+         cmdName.WX_TO_C_STRING);
       return;
    }
    
@@ -2604,7 +2664,8 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    if (tmp)
    {
       #if DEBUG_MISSION_TREE_DELETE
-      MessageInterface::ShowMessage("   About to delete <%p>\n", tmp);
+      MessageInterface::ShowMessage
+         ("   About to delete <%p>'%s'\n", tmp, tmp->GetTypeName().c_str());
       #endif
       delete tmp;
       tmp = NULL;
@@ -2661,7 +2722,7 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_DELETE
    MessageInterface::ShowMessage
-      ("MissionTree::Delete() leaving, cmdName='%s'\n", cmdName.c_str());
+      ("MissionTree::DeleteCommand() leaving, cmdName='%s'\n", cmdName.c_str());
    #endif
 }
 
@@ -2850,7 +2911,8 @@ void MissionTree::AddIcons()
    theGuiManager->LoadIcon("beginfb", bitmapType, &bitmaps[++index], beginfb_xpm);
    theGuiManager->LoadIcon("endfb", bitmapType, &bitmaps[++index], endfb_xpm);
    theGuiManager->LoadIcon("report", bitmapType, &bitmaps[++index], report_xpm);
-   
+   theGuiManager->LoadIcon("write", bitmapType, &bitmaps[++index], mt_WriteCommand_xpm);
+
    theGuiManager->LoadIcon("mt_Set", bitmapType, &bitmaps[++index], mt_SetCommand_xpm);
    theGuiManager->LoadIcon("mt_Stop", bitmapType, &bitmaps[++index], mt_Stop_xpm);
    theGuiManager->LoadIcon("penup", bitmapType, &bitmaps[++index], penup_xpm);
@@ -2866,6 +2928,7 @@ void MissionTree::AddIcons()
    
    theGuiManager->LoadIcon("mt_RunSimulator", bitmapType, &bitmaps[++index], mt_RunSimulator_xpm);
    theGuiManager->LoadIcon("mt_RunEstimator", bitmapType, &bitmaps[++index], mt_RunEstimator_xpm);
+   theGuiManager->LoadIcon("mt_FindEvents",   bitmapType, &bitmaps[++index], mt_Default_xpm);  // <<<<<<< need FindEvents bitmap
    theGuiManager->LoadIcon("mt_Default", bitmapType, &bitmaps[++index], mt_Default_xpm);
    
    // Rescale if bitmap size is not 16x16 and use high quality scale (LOJ: 2011.04.22)
@@ -3044,6 +3107,11 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Check(MT_SHOW_DETAIL, mShowDetailedItem);
       menu.Append(MT_SHOW_MISSION_SEQUENCE, wxT("Show Mission Sequence"));
       menu.Append(MT_SHOW_SCRIPT, wxT("Show Script"));
+      
+      // We want to enable/disable these menu items depends on GUI savable/non-savable mode
+      menu.Enable(MT_SHOW_MISSION_SEQUENCE, mEnableShowScript);
+      menu.Enable(MT_SHOW_SCRIPT, mEnableShowScript);
+      
       menu.AppendSeparator();
       menu.Append(MT_MISSION_SUMMARY_ALL, wxT("Mission Summary - All"));
       menu.Append(MT_MISSION_SUMMARY_PHYSICS, wxT("Mission Summary - Physics"));
@@ -3534,7 +3602,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
    if (cmd == NULL)
    {
       MessageInterface::ShowMessage
-         ("**** INTERNAL ERROR **** Command for item '%s' is NULL\n", oldName.c_str());
+         ("**** INTERNAL ERROR **** Command for item '%s' is NULL\n", oldName.WX_TO_C_STRING);
       return;
    }
    
@@ -3636,7 +3704,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
             {
                MessageInterface::ShowMessage
                   ("**** INTERNAL ERROR **** BranchEnd of '%s' not found\n",
-                   newName.c_str());
+                   newName.WX_TO_C_STRING);
             }
          }
       }
@@ -3666,6 +3734,11 @@ void MissionTree::OnRename(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnDelete(wxCommandEvent &event)
 {
+   #if DEBUG_MISSION_TREE_DELETE
+   MessageInterface::ShowMessage
+      ("\n==========> MissionTree::OnDelete() entered, event id = %d\n", event.GetId());
+   #endif
+   
    // get selected item
    wxTreeItemId currId = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(currId);
@@ -3687,6 +3760,10 @@ void MissionTree::OnDelete(wxCommandEvent &event)
 
    DeleteCommand(cmdName);
    
+   #if DEBUG_MISSION_TREE_DELETE
+   MessageInterface::ShowMessage
+      ("==========> MissionTree::OnDelete() leaving\n");
+   #endif
 }
 
 
@@ -4122,6 +4199,8 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
       return GmatTree::MISSION_ICON_ASSIGNMENT;
    if (cmd == "Report")
       return GmatTree::MISSION_ICON_REPORT;
+   if (cmd == "Write")
+      return GmatTree::MISSION_ICON_WRITE;
    if (cmd == "Toggle")
       return GmatTree::MISSION_ICON_TOGGLE;
    if (cmd == "For")
@@ -4172,6 +4251,8 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
       return GmatTree::MISSION_ICON_RUN_SIMULATOR;
    if (cmd == "RunEstimator")
       return GmatTree::MISSION_ICON_RUN_ESTIMATOR;
+   if (cmd == "FindEvents")
+      return GmatTree::MISSION_ICON_FIND_EVENTS;
    
    return GmatTree::MISSION_ICON_DEFAULT;
 }
@@ -4317,10 +4398,14 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::VARY;
    if (cmd == "Save")
       return GmatTree::SAVE;
+   if (cmd == "FindEvents")
+      return GmatTree::FIND_EVENTS;
    if (cmd == "Global")
       return GmatTree::MANAGE_OBJECT;
    if (cmd == "Report")
       return GmatTree::REPORT;
+   if (cmd == "Write")
+      return GmatTree::WRITE_COMMAND;
    if (cmd == "For")
       return GmatTree::FOR_CONTROL;
    if (cmd == "EndFor")
@@ -4395,6 +4480,10 @@ void MissionTree::CreateCommandCounterMap()
       cmdCounterMap.insert(std::make_pair(cmd, 0));
    }
    
+   // Display is now removed from the unviewable list in the CommandFactory
+   // so commented out (LOJ: 2016.01.28)
+   //cmdCounterMap.insert(std::make_pair("Display", 0));  
+   
    // Add command counter that has different display name
    cmdCounterMap.insert(std::make_pair("GMAT", 0));  
    cmdCounterMap.insert(std::make_pair("BeginScript", 0));  
@@ -4412,7 +4501,7 @@ void MissionTree::CreateCommandCounterMap()
    MessageInterface::ShowMessage("===> cmdCounterMap = \n");
    for (std::map<wxString, int>::iterator pos = cmdCounterMap.begin();
         pos != cmdCounterMap.end(); ++pos)
-      MessageInterface::ShowMessage("   '%s'\n", (pos->first).c_str());
+      MessageInterface::ShowMessage("   '%s'\n", (pos->first).WX_TO_C_STRING);
    #endif
 }
 
@@ -4592,7 +4681,7 @@ int MissionTree::GetCommandCounter(GmatCommand *cmd)
 {
    int cmdCounter = 99;
    wxString cmdTypeName = cmd->GetTypeName().c_str();
-      
+   
    // If command found in the map then increment the counter first
    if (cmdCounterMap.find(cmdTypeName) != cmdCounterMap.end())
    {
@@ -4604,7 +4693,7 @@ int MissionTree::GetCommandCounter(GmatCommand *cmd)
       #ifdef DEBUG_COMMAND_COUNTER
       MessageInterface::ShowMessage
          ("**** Cannot increment the counter for the command '%s'. "
-          "It is not found in the map.\n",  cmdTypeName.c_str());
+          "It is not found in the map.\n",  cmdTypeName.WX_TO_C_STRING);
       #endif
    }
    
@@ -4626,7 +4715,7 @@ int MissionTree::GetCommandCounter(GmatCommand *cmd)
 int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
                                  const wxString &msg, const wxString &caption)
 {
-   newName = wxGetTextFromUser(wxT(msg), wxT(caption), oldName, this);
+   newName = wxGetTextFromUser(msg, caption, oldName, this);
    
    // @note
    // There is no way of kwowing whether user entered blank and clicked OK
@@ -4637,7 +4726,7 @@ int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
    
    // Remove leading and trailing white spaces
    newName = newName.Strip(wxString::both);
-   std::string stdNewName = newName.c_str();
+   std::string stdNewName = newName.WX_TO_STD_STRING;
    std::string::size_type index1 = stdNewName.find('\'', 0);
    
    // single quote is not allowd, so check it first
@@ -4645,7 +4734,7 @@ int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "\"%s\" - Single quotes within a command name is not allowed.\n"
-          "Please reenter without single quotes.", newName.c_str());
+          "Please reenter without single quotes.", newName.WX_TO_C_STRING);
       
       return GetNameFromUser(newName, newName, msg, caption);
    }
@@ -4758,7 +4847,7 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, GmatCommand *cmd)
    #if DEBUG_MISSION_TREE_FIND
    MessageInterface::ShowMessage
       ("\nMissionTree::FindChild() entered, parentId=<%s>, cmd=<%s>\n",
-       GetItemText(parentId).c_str(), cmd.c_str());
+       GetItemText(parentId).c_str(), cmd->GetName().c_str());
    #endif
    
    int numChildren = GetChildrenCount(parentId);
@@ -4930,7 +5019,7 @@ bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &
                                        wxTreeItemId &branchId, GmatCommand **branchCmd)
 {
    #if DEBUG_FIND_ITEM_PARENT
-   WriteNode(1, "MissionTree::IsInsideSolverBranch() ", "currId", currId);
+   WriteNode(1, "MissionTree::IsInsideSolverBranch() ", false, "currId", currId);
    #endif
    
    wxTreeItemId parentId = GetItemParent(currId);
@@ -4943,7 +5032,7 @@ bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &
    while (parentId.IsOk() && GetItemText(parentId) != "")
    {
       #if DEBUG_FIND_ITEM_PARENT > 1
-      WriteNode(1, "   ", "parentId", parentId);
+      WriteNode(1, "   ", false, "parentId", parentId);
       #endif
       
       parentItem = (MissionTreeItemData *)GetItemData(parentId);
@@ -4953,7 +5042,7 @@ bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &
       {
          #if DEBUG_FIND_ITEM_PARENT
          WriteNode(1, "MissionTree::IsInsideSolverBranch() returning true ",
-                   "parentId", parentId);
+                   false, "parentId", parentId);
          #endif
          
          solverItemType = parentType;
@@ -5013,7 +5102,7 @@ void MissionTree::ChangeCommandNodeColor(GmatCommand *cmd, wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void MissionTree::ShowCommands(const wxString &msg)
 {
-   MessageInterface::ShowMessage("-------------------->%s\n", msg.c_str());
+   MessageInterface::ShowMessage("-------------------->%s\n", msg.WX_TO_C_STRING);
    
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();;
    
@@ -5090,18 +5179,18 @@ void MissionTree::WriteNode(int itemCount, const std::string &prefix, bool appen
    if (itemCount == 1)
       MessageInterface::ShowMessage
          ("%s%s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).WX_TO_C_STRING : "Unknown Node");
    else if (itemCount == 2)
       MessageInterface::ShowMessage
          ("%s%s = '%s', %s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node",
-          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).c_str() : "Unknown Node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).WX_TO_C_STRING : "Unknown Node",
+          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).WX_TO_C_STRING : "Unknown Node");
    else if (itemCount == 3)
       MessageInterface::ShowMessage
          ("%s%s = '%s', %s = '%s', %s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node",
-          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).c_str() : "Unknown Node",
-          title3.c_str(), itemId3.IsOk() ? GetItemText(itemId3).c_str() : "Unknown Node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).WX_TO_C_STRING : "Unknown Node",
+          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).WX_TO_C_STRING : "Unknown Node",
+          title3.c_str(), itemId3.IsOk() ? GetItemText(itemId3).WX_TO_C_STRING : "Unknown Node");
    if (appendEol)
       MessageInterface::ShowMessage("\n");
 }
@@ -5301,7 +5390,7 @@ void MissionTree::OnPlaybackActions(wxCommandEvent &event)
    if (firstItemId.IsOk())
    {
       #ifdef DEBUG_MISSION_TREE_ACTIONS
-      WriteNode(1, "   ", "firstItemId", firstItemId);
+      WriteNode(1, "   ", false, "firstItemId", firstItemId);
       #endif
    }
    else
@@ -5378,7 +5467,7 @@ void MissionTree::OnPlaybackActions(wxCommandEvent &event)
       
       #ifdef DEBUG_MISSION_TREE_ACTIONS
       wxTreeItemId selId = GetSelection();
-      WriteNode(1, "   ", "GetSelection()", selId);
+      WriteNode(1, "   ", false, "GetSelection()", selId);
       #endif
       
       

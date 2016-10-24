@@ -5,11 +5,19 @@ GMAT_BIN_LOCATION  = ../../../../application/bin
 
 DEBUG_BUILD = 0
 
+ifeq ($(BUILD_64BIT), 1)
+MAC_ARCHITECTURE_FLAGS =
+else
+MAC_ARCHITECTURE_FLAGS = -arch i386
+endif
+
 # Select the base library
 BASE_LIBRARY = GmatBase
 
-SAMPLE_CPP_FLAGS = -fPIC -arch i386 -fno-rtti
-SAMPLE_LINK_FLAGS = -fPIC -arch i386 -fno-rtti
+SAMPLE_CPP_FLAGS = -fPIC -fno-rtti $(MAC_ARCHITECTURE_FLAGS)
+SAMPLE_LINK_FLAGS = -fPIC -fno-rtti $(MAC_ARCHITECTURE_FLAGS)
+#removed
+# -arch i386
 
 # Select the base library
 BASE_LIBRARY = GmatBase

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="Transmitter"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Transmitter</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>Transmitter</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Transmitter</refname>
+
+    <refpurpose>Defines the electronics hardware, attached to a
+    <guilabel>GroundStation</guilabel> resource, that transmits an RF
+    signal.</refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>A ground station needs a <guilabel>Transmitter</guilabel> to
+    transmit the RF signal to both user spacecraft and to navigation
+    spacecraft such as TDRS. A <guilabel>Transmitter</guilabel> is assigned on
+    the <guilabel>AddHardware</guilabel> list of an instance of a
+    <guilabel>GroundStation</guilabel>.</para>
+
+    <para>See Also <xref linkend="GroundStation"/>, <xref
+    linkend="Antenna"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="1.0*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>Frequency</guilabel></entry>
+
+            <entry><para>Transmit frequency</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt;= 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>MHz</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>PrimaryAntenna</guilabel></entry>
+
+            <entry><para><guilabel>Antenna</guilabel> resource used by
+            <guilabel>GroundStation</guilabel> resource to transmit a
+            signal</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para><guilabel>Antenna</guilabel> Object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any <guilabel>Antenna</guilabel> object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>None</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Discussion of how Transmitter frequency is used</title>
+
+      <para>A transmitter will be attached to a
+      <guilabel>GroundStation</guilabel> resource. As discussed in the
+      <guilabel>RunSimulator</guilabel> Help, for the case where a ramp table
+      is not used, the transmit frequency is used directly to calculate the
+      DSN range and Doppler measurements. If a ramp table is specified on the
+      relevant <guilabel>TrackingFileSet</guilabel>, the frequency profile
+      specified in the ramp table is used and the transmitter frequency is
+      ignored.</para>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>Create and configure a <guilabel>Transmitter</guilabel>
+      object</para>
+
+      <programlisting>Create Antenna DSNAntenna;
+Create Transmitter Transmitter1;
+
+Transmitter1.PrimaryAntenna = DSNAntenna;
+Transmitter1.Frequency = 7186.3; 
+
+Create GroundStation DSN
+DSN.AddHardware = {Transmitter1};
+
+BeginMissionSequence;</programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -249,7 +259,7 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
 		// displays chm, not html
 		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
 		sHTML = objLink+".html";
-		objLink = pConfig->Read(_T(objLink+"Keyword"),_T(sHTML));
+		objLink = pConfig->Read(objLink+"Keyword", sHTML);
 
 		if (!theHelpController->DisplaySection(objLink)) 
 			theHelpController->DisplayContents();
@@ -257,22 +267,22 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
 	else
 	{
 	   // get base help link if available
-       baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
-	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
-   
+      baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
+	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.WX_TO_C_STRING);
+      
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
 	   MessageInterface::ShowMessage
 		  ("   objLink = '%s', baseHelpLink = '%s'\n   helpLink = '%s'\n",
 		   objLink.c_str(), baseHelpLink.c_str(), msgBuffer);
 	   #endif
-   
+      
 	   // open separate window to show help
-	   objLink = pConfig->Read(_T(objLink), _T(msgBuffer));
+	   objLink = pConfig->Read(objLink, wxString(&msgBuffer[0]));
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
 	   MessageInterface::ShowMessage("   actual help Link = '%s'\n", objLink.c_str());
 	   #endif
-
-       // if path is relative, try to append it to gmat root 
+      
+      // if path is relative, try to append it to gmat root 
 	   if (GmatFileUtil::IsPathRelative(objLink.c_str()))
 	   {
 			FileManager *fm = FileManager::Instance();

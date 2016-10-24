@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2006/03/29
@@ -85,11 +95,11 @@ void TextEphemFileDialog::Create()
    
    mEphemFileTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(200,20), 0);
+                     wxDefaultPosition, wxSize(200,-1), 0);
    
    mEphemFileBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxSize(60,20), 0);
+                    wxDefaultPosition, wxSize(60,-1), 0);
 
    //----- Interval
    wxStaticText *intervalLabel =
@@ -98,7 +108,7 @@ void TextEphemFileDialog::Create()
    
    mIntervalTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("60"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxSize(80,-1), 0);
    
    wxStaticText *intervalUnitLabel =
       new wxStaticText(this, ID_TEXT, wxT("Seconds"),
@@ -166,11 +176,11 @@ void TextEphemFileDialog::Create()
    #endif
    
    mAddScButton = new wxButton(this, ID_BUTTON, wxT("-->"),
-                               wxDefaultPosition, wxSize(buttonWidth,20), 0);
+                               wxDefaultPosition, wxSize(buttonWidth,-1), 0);
    mRemoveScButton = new wxButton(this, ID_BUTTON, wxT("<--"),
-                                 wxDefaultPosition, wxSize(buttonWidth,20), 0);
+                                 wxDefaultPosition, wxSize(buttonWidth,-1), 0);
    mClearScButton = new wxButton(this, ID_BUTTON, wxT("<="),
-                                wxDefaultPosition, wxSize(buttonWidth,20), 0);
+                                wxDefaultPosition, wxSize(buttonWidth,-1), 0);
 
    
    wxBoxSizer *arrowsSizer = new wxBoxSizer(wxVERTICAL);
@@ -229,13 +239,13 @@ void TextEphemFileDialog::LoadData()
       
       // set default ephemeris  file using spacecraft name
       wxString fname = scName + "_Ephem.txt";
-      mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() + fname);
+      mEphemFileTextCtrl->SetValue(mEphemDirectory + fname);
       
       theOkButton->Enable();
    }
    else
    {
-      mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() +
+      mEphemFileTextCtrl->SetValue(mEphemDirectory +
                                    wxString("/TextEphemHeader.txt"));
       
       theOkButton->Disable();
@@ -346,15 +356,15 @@ void TextEphemFileDialog::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 bool TextEphemFileDialog::CreateTextEphem()
 {
-   std::string ephemFileName = mEphemFileTextCtrl->GetValue().c_str();
+   std::string ephemFileName = mEphemFileTextCtrl->GetValue().WX_TO_STD_STRING;
    
    TextEphemFile *ephemFile = (TextEphemFile*)(theGuiInterpreter->
       CreateSubscriber("TextEphemFile", "TextEphemFile", ephemFileName, false));
    
    // get first spacecraft from the list
-   std::string scName = mSelectedScListBox->GetString(0).c_str();
-   std::string epochFormat = mEpochFormatComboBox->GetValue().c_str();
-   std::string coordSys = mCoordSysComboBox->GetValue().c_str();
+   std::string scName = mSelectedScListBox->GetString(0).WX_TO_STD_STRING;
+   std::string epochFormat = mEpochFormatComboBox->GetValue().WX_TO_STD_STRING;
+   std::string coordSys = mCoordSysComboBox->GetValue().WX_TO_STD_STRING;
 
    // check interval
    Real interval;

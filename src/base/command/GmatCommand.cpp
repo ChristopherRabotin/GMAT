@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General MiHeaderssion Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -22,6 +32,7 @@
 
 #include "GmatCommand.hpp"       // class's header file
 #include "CommandException.hpp"
+#include "Parameter.hpp"
 #include "CoordinateConverter.hpp"
 #include "MessageInterface.hpp"  // MessageInterface
 #include "TimeSystemConverter.hpp"
@@ -30,6 +41,7 @@
 #include "RealUtilities.hpp"
 #include "CalculationUtilities.hpp"
 #include "StateConversionUtil.hpp"
+#include "StringUtil.hpp"
 
 #include <algorithm>             // for find()
 #include <sstream>               // for command summary generation
@@ -50,11 +62,11 @@
 //#define DEBUG_RUN_COMPLETE 1
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_FIND_OBJECT
+//#define DEBUG_OBJECT_MAP
 //#define DEBUG_SEPARATE
 //#define DEBUG_GEN_STRING 1
-//#define DEBUG_IS_FUNCTION
+//#define DEBUG_FUNCTION
 //#define DEBUG_INTERPRET_PREFACE
-//#define DEBUG_CMD_CALLING_FUNCTION
 //#define DEBUG_COMMAND_SUMMARY_STATE
 //#define DEBUG_COMMAND_SUMMARY_REF_DATA
 //#define DEBUG_COMMAND_SUMMARY_TYPE
@@ -62,6 +74,11 @@
 //#define DEBUG_SUMMARY_STRINGS
 //#define DEBUG_DEFSTR
 //#define DEBUG_CMD_SUMMARY
+
+//#ifdef DEBUG_FUNCTION
+#if defined(DEBUG_FUNCTION) || defined(DEBUG_OBJECT_MAP)
+#include "Function.hpp"
+#endif
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -131,13 +148,13 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    next                 (NULL),
    previous             (NULL),
    level                (-1),   // Not set
+   configObjectMap      (NULL),
    objectMap            (NULL),
    globalObjectMap      (NULL),
    solarSys             (NULL),
    triggerManagers      (NULL),
    internalCoordSys     (NULL),
    forces               (NULL),
-   events               (NULL),
    publisher            (NULL),
    streamID             (-1),
    depthChange          (0),
@@ -286,13 +303,13 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    next                 (NULL),
    previous             (NULL),
    level                (-1),   // Not set
+   configObjectMap      (c.configObjectMap),
    objectMap            (c.objectMap),
    globalObjectMap      (c.globalObjectMap),
    solarSys             (c.solarSys),
    triggerManagers      (c.triggerManagers),
    internalCoordSys     (c.internalCoordSys),
    forces               (c.forces),
-   events               (c.events),
    publisher            (c.publisher),
    streamID             (c.streamID),
    depthChange          (c.depthChange),
@@ -355,16 +372,15 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    objects             = c.objects;
    association         = c.association;
    
+   configObjectMap     = c.configObjectMap;
    objectMap           = c.objectMap;
    globalObjectMap     = c.globalObjectMap;
    solarSys            = c.solarSys;
    internalCoordSys    = c.internalCoordSys;
    forces              = c.forces;
-   events              = c.events;
    publisher           = c.publisher;
    generatingString    = c.generatingString;
    streamID            = c.streamID;
-//   comment             = c.comment;
    commandChangedState = c.commandChangedState;
    commandSummary      = c.commandSummary;
    summaryCoordSysName = c.summaryCoordSysName;
@@ -446,6 +462,19 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &useName)
 {
    static std::string empty;
+
+   // Don't write unless object is created from the main script
+   if (!isCreatedFromMainScript)
+   {
+      generatingString = "";
+      #ifdef DEBUG_GENERATING_STRING
+      MessageInterface::ShowMessage
+         ("GmatCommand::GetGeneratingString() just returning blank, it is not "
+          "created from the main script\n");
+      #endif
+      return generatingString;
+   }
+   
    if (generatingString == "") {
       if (typeName == "NoOp")
          return generatingString;
@@ -456,7 +485,7 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    if (mode == Gmat::NO_COMMENTS)
    {
       InsertCommandName(generatingString);      
-	  return generatingString;
+      return generatingString;
    }
    
    
@@ -525,6 +554,13 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 void GmatCommand::SetCurrentFunction(Function *function)
 {
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("GmatCommand::SetCurrentFunction() <%p>[%s]'%s' setting <%p>'%s' to "
+       "currentFunction\n", this, GetTypeName().c_str(),
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), function,
+       function ? function->GetName().c_str() : "NULL");
+   #endif
    currentFunction = function;
 }
 
@@ -555,7 +591,7 @@ Function* GmatCommand::GetCurrentFunction()
 //------------------------------------------------------------------------------
 void GmatCommand::SetCallingFunction(FunctionManager *fm)
 {
-   #ifdef DEBUG_CMD_CALLING_FUNCTION
+   #ifdef DEBUG_FUNCTION
       MessageInterface::ShowMessage(
             "NOW setting calling function on command of type %s\n",
             (GetTypeName()).c_str());
@@ -617,19 +653,24 @@ void GmatCommand::ClearWrappers()
  * @param cmdName The name of the command that is being checked
  * @param ignoreUnsetReference Flag used to control exceptions when the wrapper
  *                             object is not set
+ * @param checkUnsetValue  Flag for checking unset value
+ * @param unsetValue Value used for checking unset value
+ * @param unsetValueMsg The error message to be thrown when value is unset
  */
 //------------------------------------------------------------------------------
 void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                                 Gmat::ParameterType needType,
                                 const std::string &cmdName,
-                                bool ignoreUnsetReference)
+                                bool ignoreUnsetReference,
+                                bool checkUnsetValue, Real unsetValue,
+                                const std::string &unsetValueErrMsg)
 {
    if (forWrapper == NULL)
    {
       std::string cmdEx = "Reference object not set for command " + 
                           cmdName;
       cmdEx += ".\n";
-      throw CommandException(cmdEx);
+      throw CommandException(cmdEx, Gmat::ERROR_);
    }
    bool typeOK = true;
    Gmat::ParameterType baseType;
@@ -653,7 +694,7 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
       {
          std::string errmsg = "Reference not set for \"" + desc;
          errmsg += "\", cannot check for correct data type.";
-         throw CommandException(errmsg);
+         throw CommandException(errmsg, Gmat::ERROR_);
       }
    }
    
@@ -663,7 +704,34 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                   baseStr + "\" on command \"" + cmdName + 
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Object Property (Real), Real Number, Variable, "
-                  "Array Element, or Parameter ]. ");
+                  "Array Element, or Parameter ]. ", Gmat::ERROR_);
+   }
+   
+   if (checkUnsetValue)
+   {
+      try
+      {
+         Real realVal;
+         if (!GmatStringUtil::ToReal(desc, realVal))
+            realVal = forWrapper->EvaluateReal();
+         #ifdef DEBUG_CHECK_UNSET_VALUE
+         MessageInterface::ShowMessage
+            ("In GmatCommand::CheckDataType(), realVal = %g\n", realVal);
+         #endif
+         if (GmatMathUtil::IsEqual(realVal, unsetValue, 1.0e-16))
+            throw CommandException(unsetValueErrMsg, Gmat::ERROR_);
+      }
+      catch (CommandException &ce)
+      {
+         // If exception thrown right above, re-throw
+         throw;
+      }
+      catch (BaseException &be)
+      {
+         throw CommandException("A value of \"" + desc + "\" of base type \"" +
+                  baseStr + "\" on command \"" + cmdName + 
+                  "\" cannot be evaluated.\n", Gmat::ERROR_);
+      }
    }
 }
 
@@ -855,6 +923,20 @@ void GmatCommand::SetupSummary(const std::string &csName, bool entireMission,
 }
 
 //------------------------------------------------------------------------------
+// void SetSummaryName(const char *sumName)
+//------------------------------------------------------------------------------
+/**
+ * Sets the name of the command summary
+ *
+ * @param sumName The name
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetSummaryName(const char *sumName)
+{
+   SetSummaryName(std::string(sumName));
+}
+
+//------------------------------------------------------------------------------
 // void SetSummaryName(const std::string &sumName)
 //------------------------------------------------------------------------------
 /**
@@ -887,6 +969,21 @@ std::string GmatCommand::GetSummaryName()
    return summaryName;
 }
 
+
+//------------------------------------------------------------------------------
+//  void SetObjectMap(ObjectMap *objMap)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Interpre to set the local resource store used by the GmatCommand
+ * for InterpretAction()
+ * 
+ * @param map Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetConfiguredObjectMap(ObjectMap *map)
+{
+   configObjectMap = map;
+}
 
 //------------------------------------------------------------------------------
 //  void SetObjectMap(std::map<std::string, GmatBase *> *map)
@@ -952,23 +1049,6 @@ void GmatCommand::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
 void GmatCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
-}
-
-
-//------------------------------------------------------------------------------
-//  void SetEventLocators(std::vector<EventLocator*> *els)
-//------------------------------------------------------------------------------
-/**
- * Passes the EventLocator collection into the commands that need them
- *
- * @param tf The vector of EventLocators
- *
- * @note The default behavior in the GmatCommands is to ignore the vector.
- */
-//------------------------------------------------------------------------------
-void GmatCommand::SetEventLocators(std::vector<EventLocator*> *els)
-{
-   events = els;
 }
 
 
@@ -1334,6 +1414,25 @@ std::string GmatCommand::GetStringParameter(const std::string &label,
                                             const Integer index) const
 {
    return GetStringParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param value New value for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetStringParameter(const std::string &label, 
+                                     const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
 }
 
 
@@ -2063,6 +2162,11 @@ void GmatCommand::SetRunState(Gmat::RunState newState)
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummary(bool commandCompleted)
 {
+   // Do not build summary if inside a function (LOJ: 2014.12.16)
+   if (currentFunction != NULL)
+      return;
+
+   
    #if DEBUG_BUILD_CMD_SUMMARY
    MessageInterface::ShowMessage
       ("GmatCommand::BuildCommandSummary() %s, commandCompleted=%d, "
@@ -2258,6 +2362,11 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 {
+   // Do not build summary string if inside a function (LOJ: 2014.12.16)
+   if (currentFunction != NULL)
+      return;
+
+   
    #ifdef DEBUG_COMMAND_SUMMARY_TYPE
       MessageInterface::ShowMessage(
             "   Now entering BuildCommandSummaryString with commandCompleted = %s, summaryForEntireMission = %s, missionPhysicsBasedOnly = %s, for command %s of type %s which is %s a physics-based command.\n",
@@ -2554,6 +2663,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             Real utcModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
+            bool handleLeapSecond   = TimeConverterUtil::HandleLeapSecond();
             Real taiModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
@@ -2563,7 +2673,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
             Real tdbModJulEpoch     = TimeConverterUtil::Convert(epochData[i],
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD,
                                       GmatTimeConstants::JD_JAN_5_1941);
-            std::string utcString   = TimeConverterUtil::ConvertMjdToGregorian(utcModJulEpoch);
+            std::string utcString   = TimeConverterUtil::ConvertMjdToGregorian(utcModJulEpoch, handleLeapSecond);
             std::string taiString   = TimeConverterUtil::ConvertMjdToGregorian(taiModJulEpoch);
             std::string ttString    = TimeConverterUtil::ConvertMjdToGregorian(ttModJulEpoch);
             std::string tdbString   = TimeConverterUtil::ConvertMjdToGregorian(tdbModJulEpoch);
@@ -2605,56 +2715,56 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                     << "Keplerian State\n"
                                          << "        ---------------------------           "
                                          << "-------------------------------- \n"
-                    << "        X  = "   << BuildNumber(cartState[0])  << " km     "
-                    << "        SMA  = " << BuildNumber(kepState[0])   << " km\n"
-                    << "        Y  = "   << BuildNumber(cartState[1])  << " km     "
-                    << "        ECC  = " << BuildNumber(kepState[1])   << "\n"
-                    << "        Z  = "   << BuildNumber(cartState[2])  << " km     "
-                    << "        INC  = " << BuildNumber(kepState[2])   << " deg\n"
-                    << "        VX = "   << BuildNumber(cartState[3])  << " km/sec "
-                    << "        RAAN = " << BuildNumber(kepState[3])   << " deg\n"
-                    << "        VY = "   << BuildNumber(cartState[4])  << " km/sec "
-                    << "        AOP  = " << BuildNumber(kepState[4])   << " deg\n"
-                    << "        VZ = "   << BuildNumber(cartState[5])  << " km/sec "
-                    << "        TA   = " << BuildNumber(kepState[5])   << " deg\n"
+                    << "        X  = "   << GmatStringUtil::BuildNumber(cartState[0])  << " km     "
+                    << "        SMA  = " << GmatStringUtil::BuildNumber(kepState[0])   << " km\n"
+                    << "        Y  = "   << GmatStringUtil::BuildNumber(cartState[1])  << " km     "
+                    << "        ECC  = " << GmatStringUtil::BuildNumber(kepState[1])   << "\n"
+                    << "        Z  = "   << GmatStringUtil::BuildNumber(cartState[2])  << " km     "
+                    << "        INC  = " << GmatStringUtil::BuildNumber(kepState[2])   << " deg\n"
+                    << "        VX = "   << GmatStringUtil::BuildNumber(cartState[3])  << " km/sec "
+                    << "        RAAN = " << GmatStringUtil::BuildNumber(kepState[3])   << " deg\n"
+                    << "        VY = "   << GmatStringUtil::BuildNumber(cartState[4])  << " km/sec "
+                    << "        AOP  = " << GmatStringUtil::BuildNumber(kepState[4])   << " deg\n"
+                    << "        VZ = "   << GmatStringUtil::BuildNumber(cartState[5])  << " km/sec "
+                    << "        TA   = " << GmatStringUtil::BuildNumber(kepState[5])   << " deg\n"
                     << "                                      "
-                    << "        MA   = " << BuildNumber(ma) << " deg\n";
+                    << "        MA   = " << GmatStringUtil::BuildNumber(ma) << " deg\n";
                if (isEccentric)
                {
                   data << "                                      "
-                       << "        EA   = " << BuildNumber(ea) << " deg\n";
+                       << "        EA   = " << GmatStringUtil::BuildNumber(ea) << " deg\n";
                }
                else if (isHyperbolic)
                {
                   data << "                                      "
-                       << "        HA   = " << BuildNumber(ha) << " deg\n";
+                       << "        HA   = " << GmatStringUtil::BuildNumber(ha) << " deg\n";
                }
                data << "\n        Spherical State                       "
                     << "Other Orbit Data\n"
                     << "        ---------------------------           "
                     << "--------------------------------\n"
-                    << "        RMAG = "               << BuildNumber(sphStateAZFPA[0])           << " km   "
-                    << "        Mean Motion        = " << BuildNumber(meanMotion, true)           << " deg/sec\n"
-                    << "        RA   = "               << BuildNumber(sphStateAZFPA[1])           << " deg  "
-                    << "        Orbit Energy       = " << BuildNumber(orbitEnergy, false)         << " km^2/s^2\n"
-                    << "        DEC  = "               << BuildNumber(sphStateAZFPA[2])           << " deg  "
-                    << "        C3                 = " << BuildNumber(c3, false)                  << " km^2/s^2\n"
-                    << "        VMAG = "               << BuildNumber(sphStateAZFPA[3])           << " km/s "
-                    << "        Semilatus Rectum   = " << BuildNumber(semilatusRectum, false)     << " km   \n"
-                    << "        AZI  = "               << BuildNumber(sphStateAZFPA[4])           << " deg  "
-                    << "        Angular Momentum   = " << BuildNumber(angularMomentum, false)     << " km^2/s\n"
-                    << "        VFPA = "               << BuildNumber(sphStateAZFPA[5])           << " deg  "
-                    << "        Beta Angle         = " << BuildNumber(betaAngle, false)           << " deg  \n"
-                    << "        RAV  = "               << BuildNumber(sphStateRADEC[4])           << " deg  "
-                    << "        Periapsis Altitude = " << BuildNumber(periAltitude, false)        << " km   \n"
-                    << "        DECV = "               << BuildNumber(sphStateRADEC[5])           << " deg  "
-                    << "        VelPeriapsis       = " << BuildNumber(velPeriapsis, false)        << " km/s\n";
+                    << "        RMAG = "               << GmatStringUtil::BuildNumber(sphStateAZFPA[0])           << " km   "
+                    << "        Mean Motion        = " << GmatStringUtil::BuildNumber(meanMotion, true)           << " deg/sec\n"
+                    << "        RA   = "               << GmatStringUtil::BuildNumber(sphStateAZFPA[1])           << " deg  "
+                    << "        Orbit Energy       = " << GmatStringUtil::BuildNumber(orbitEnergy, false)         << " km^2/s^2\n"
+                    << "        DEC  = "               << GmatStringUtil::BuildNumber(sphStateAZFPA[2])           << " deg  "
+                    << "        C3                 = " << GmatStringUtil::BuildNumber(c3, false)                  << " km^2/s^2\n"
+                    << "        VMAG = "               << GmatStringUtil::BuildNumber(sphStateAZFPA[3])           << " km/s "
+                    << "        Semilatus Rectum   = " << GmatStringUtil::BuildNumber(semilatusRectum, false)     << " km   \n"
+                    << "        AZI  = "               << GmatStringUtil::BuildNumber(sphStateAZFPA[4])           << " deg  "
+                    << "        Angular Momentum   = " << GmatStringUtil::BuildNumber(angularMomentum, false)     << " km^2/s\n"
+                    << "        VFPA = "               << GmatStringUtil::BuildNumber(sphStateAZFPA[5])           << " deg  "
+                    << "        Beta Angle         = " << GmatStringUtil::BuildNumber(betaAngle, false)           << " deg  \n"
+                    << "        RAV  = "               << GmatStringUtil::BuildNumber(sphStateRADEC[4])           << " deg  "
+                    << "        Periapsis Altitude = " << GmatStringUtil::BuildNumber(periAltitude, false)        << " km   \n"
+                    << "        DECV = "               << GmatStringUtil::BuildNumber(sphStateRADEC[5])           << " deg  "
+                    << "        VelPeriapsis       = " << GmatStringUtil::BuildNumber(velPeriapsis, false)        << " km/s\n";
                if (isEccentric)
                {
                   data << "                                       "
-                       << "       VelApoapsis        = " << BuildNumber(velApoapsis, false) << " km/s \n"
+                       << "       VelApoapsis        = " << GmatStringUtil::BuildNumber(velApoapsis, false) << " km/s \n"
                        << "                                       "
-                       << "       Orbit Period       = " << BuildNumber(orbitPeriod, false) << " s    \n";
+                       << "       Orbit Period       = " << GmatStringUtil::BuildNumber(orbitPeriod, false) << " s    \n";
                }
                // add planetodetic parameters, if the origin is a Celestial Body
                // and include hyperbolic parameters, if appropriate
@@ -2664,28 +2774,28 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                        << "Hyperbolic Parameters\n"
                        << "        ---------------------------           "
                        << "--------------------------------\n"
-                       << "        LST       = "      << BuildNumber(lst, false)              << " deg  "
-                       << "   BdotT          = "      << BuildNumber(bDotT, false)            << " km   \n"
-                       << "        MHA       = "      << BuildNumber(mha, false)              << " deg  "
-                       << "   BdotR          = "      << BuildNumber(bDotR, false)            << " km   \n"
-                       << "        Latitude  = "      << BuildNumber(latitude, false)         << " deg  "
-                       << "   B Vector Angle = "      << BuildNumber(bVectorAngle, false)     << " deg  \n"
-                       << "        Longitude = "      << BuildNumber(longitude, false)        << " deg  "
-                       << "   B Vector Mag   = "      << BuildNumber(bVectorMag, false)       << " km   \n"
-                       << "        Altitude  = "      << BuildNumber(altitude, false)         << " km   "
-                       << "   DLA            = "      << BuildNumber(dla, false)              << " deg  \n"
+                       << "        LST       = "      << GmatStringUtil::BuildNumber(lst, false)              << " deg  "
+                       << "   BdotT          = "      << GmatStringUtil::BuildNumber(bDotT, false)            << " km   \n"
+                       << "        MHA       = "      << GmatStringUtil::BuildNumber(mha, false)              << " deg  "
+                       << "   BdotR          = "      << GmatStringUtil::BuildNumber(bDotR, false)            << " km   \n"
+                       << "        Latitude  = "      << GmatStringUtil::BuildNumber(latitude, false)         << " deg  "
+                       << "   B Vector Angle = "      << GmatStringUtil::BuildNumber(bVectorAngle, false)     << " deg  \n"
+                       << "        Longitude = "      << GmatStringUtil::BuildNumber(longitude, false)        << " deg  "
+                       << "   B Vector Mag   = "      << GmatStringUtil::BuildNumber(bVectorMag, false)       << " km   \n"
+                       << "        Altitude  = "      << GmatStringUtil::BuildNumber(altitude, false)         << " km   "
+                       << "   DLA            = "      << GmatStringUtil::BuildNumber(dla, false)              << " deg  \n"
                        << "                                           "
-                       << "   RLA            = "      << BuildNumber(rla, false)              << " deg  \n";
+                       << "   RLA            = "      << GmatStringUtil::BuildNumber(rla, false)              << " deg  \n";
                }
                else
                {
                   data << "\n        Planetodetic Properties \n"
                        << "        ---------------------------\n"
-                       << "        LST       = " << BuildNumber(lst, false)           << " deg\n"
-                       << "        MHA       = " << BuildNumber(mha, false)           << " deg\n"
-                       << "        Latitude  = " << BuildNumber(latitude, false)      << " deg\n"
-                       << "        Longitude = " << BuildNumber(longitude, false)     << " deg\n"
-                       << "        Altitude  = " << BuildNumber(altitude, false)      << " km\n";
+                       << "        LST       = " << GmatStringUtil::BuildNumber(lst, false)           << " deg\n"
+                       << "        MHA       = " << GmatStringUtil::BuildNumber(mha, false)           << " deg\n"
+                       << "        Latitude  = " << GmatStringUtil::BuildNumber(latitude, false)      << " deg\n"
+                       << "        Longitude = " << GmatStringUtil::BuildNumber(longitude, false)     << " deg\n"
+                       << "        Altitude  = " << GmatStringUtil::BuildNumber(altitude, false)      << " km\n";
                }
             }
             else  // origin is NOT a celestial body
@@ -2694,33 +2804,33 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                     << "Spherical State\n"
                                          << "        ---------------------------           "
                                          << "-------------------------------- \n"
-                    << "        X  = "   << BuildNumber(cartState[0])      << " km     "
-                    << "        RMAG = " << BuildNumber(sphStateAZFPA[0])  << " km   \n"
-                    << "        Y  = "   << BuildNumber(cartState[1])      << " km     "
-                    << "        RA   = " << BuildNumber(sphStateAZFPA[1])  << " deg  \n"
-                    << "        Z  = "   << BuildNumber(cartState[2])      << " km     "
-                    << "        DEC  = " << BuildNumber(sphStateAZFPA[2])  << " deg  \n"
-                    << "        VX = "   << BuildNumber(cartState[3])      << " km/sec "
-                    << "        VMAG = " << BuildNumber(sphStateAZFPA[3])  << " km/s \n"
-                    << "        VY = "   << BuildNumber(cartState[4])      << " km/sec "
-                    << "        AZI  = " << BuildNumber(sphStateAZFPA[4])  << " deg  \n"
-                    << "        VZ = "   << BuildNumber(cartState[5])      << " km/sec "
-                    << "        VFPA = " << BuildNumber(sphStateAZFPA[5])  << " deg  \n"
+                    << "        X  = "   << GmatStringUtil::BuildNumber(cartState[0])      << " km     "
+                    << "        RMAG = " << GmatStringUtil::BuildNumber(sphStateAZFPA[0])  << " km   \n"
+                    << "        Y  = "   << GmatStringUtil::BuildNumber(cartState[1])      << " km     "
+                    << "        RA   = " << GmatStringUtil::BuildNumber(sphStateAZFPA[1])  << " deg  \n"
+                    << "        Z  = "   << GmatStringUtil::BuildNumber(cartState[2])      << " km     "
+                    << "        DEC  = " << GmatStringUtil::BuildNumber(sphStateAZFPA[2])  << " deg  \n"
+                    << "        VX = "   << GmatStringUtil::BuildNumber(cartState[3])      << " km/sec "
+                    << "        VMAG = " << GmatStringUtil::BuildNumber(sphStateAZFPA[3])  << " km/s \n"
+                    << "        VY = "   << GmatStringUtil::BuildNumber(cartState[4])      << " km/sec "
+                    << "        AZI  = " << GmatStringUtil::BuildNumber(sphStateAZFPA[4])  << " deg  \n"
+                    << "        VZ = "   << GmatStringUtil::BuildNumber(cartState[5])      << " km/sec "
+                    << "        VFPA = " << GmatStringUtil::BuildNumber(sphStateAZFPA[5])  << " deg  \n"
                     << "                                      "
-                    << "        RAV  = " << BuildNumber(sphStateRADEC[4])  << " deg  \n"
+                    << "        RAV  = " << GmatStringUtil::BuildNumber(sphStateRADEC[4])  << " deg  \n"
                     << "                                      "
-                    << "        DECV = " << BuildNumber(sphStateRADEC[5])  << " deg  \n";
+                    << "        DECV = " << GmatStringUtil::BuildNumber(sphStateRADEC[5])  << " deg  \n";
             }
 
             data << "\n\n        Spacecraft Properties \n"
                  << "        ------------------------------\n"
-                 << "        Cd                    = " << BuildNumber(parmData[i*7],   false, 10) << "\n"
-                 << "        Drag area             = " << BuildNumber(parmData[i*7+1], false, 10) << " m^2\n"
-                 << "        Cr                    = " << BuildNumber(parmData[i*7+2], false, 10) << "\n"
-                 << "        Reflective (SRP) area = " << BuildNumber(parmData[i*7+3], false, 10) << " m^2\n";
+                 << "        Cd                    = " << GmatStringUtil::BuildNumber(parmData[i*7],   false, 10) << "\n"
+                 << "        Drag area             = " << GmatStringUtil::BuildNumber(parmData[i*7+1], false, 10) << " m^2\n"
+                 << "        Cr                    = " << GmatStringUtil::BuildNumber(parmData[i*7+2], false, 10) << "\n"
+                 << "        Reflective (SRP) area = " << GmatStringUtil::BuildNumber(parmData[i*7+3], false, 10) << " m^2\n";
 
-            data << "        Dry mass              = " << BuildNumber(parmData[i*7+4])            << " kg\n";
-            data << "        Total mass            = " << BuildNumber(parmData[i*7+5])            << " kg\n";
+            data << "        Dry mass              = " << GmatStringUtil::BuildNumber(parmData[i*7+4])            << " kg\n";
+            data << "        Total mass            = " << GmatStringUtil::BuildNumber(parmData[i*7+5])            << " kg\n";
 
             Integer numTanks = (Integer) parmData[i*7+6];
             if (numTanks > 0)  data << "\n        Tank masses:\n";
@@ -2730,7 +2840,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
                Integer nameSize = (tankNames.at(kk)).length();
                data << "           " << tankNames.at(MAX_NUM_TANKS*i + kk) << ": ";
                for (Integer mm = 0; mm < 19-nameSize; mm++)  data << " " ;
-               data << BuildNumber(fuelMassData[MAX_NUM_TANKS*i+kk]) << " kg\n";
+               data << GmatStringUtil::BuildNumber(fuelMassData[MAX_NUM_TANKS*i+kk]) << " kg\n";
             }
            data << "\n";
          }    // for i 0 -> satsInMaps
@@ -2774,71 +2884,6 @@ const std::string GmatCommand::BuildMissionSummaryString(const GmatCommand* head
       missionSummary += next->BuildMissionSummaryString(next);
    }
    return missionSummary;
-}
-
-
-//------------------------------------------------------------------------------
-// const std::string BuildNumber(Real value,  bool useExp = false,
-//       Integer length)
-//------------------------------------------------------------------------------
-/**
- * Builds a formatted string containing a Real, so the Real can be serialized to
- * the display
- *
- * @param value  The Real that needs to be serialized
- * @param useExp Use scientific notation
- * @param length The size of the desired string
- *
- * @return The formatted string
- */
-//------------------------------------------------------------------------------
-const std::string GmatCommand::BuildNumber(Real value, bool useExp,
-      Integer length)
-{
-   std::string retval = "Invalid number";
-
-   if (length < 100)
-   {
-      char temp[100], defstr[40];
-      Integer fraction = 1;
-
-      // check for a NaN first
-      if ((!GmatMathUtil::IsEqual(value, 0.0)) &&
-         (GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED)        ||
-          GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED_LARGE)  ||
-          GmatMathUtil::IsNaN(value)))
-      {
-         sprintf(defstr, "%%%ds", length);
-         sprintf(temp, defstr, "NaN");
-      }
-      else
-      {
-         Real shift = GmatMathUtil::Abs(value);
-         if (useExp || (shift > GmatMathUtil::Exp10((Real)length-3)))
-         {
-            fraction = length - 8;
-            sprintf(defstr, "%%%d.%de", length, fraction);
-         }
-         else
-         {
-            while (shift > 10.0)
-            {
-               ++fraction;
-               shift *= 0.1;
-            }
-            fraction = length - 3 - fraction;
-            sprintf(defstr, "%%%d.%dlf", length, fraction);
-         }
-         #ifdef DEBUG_DEFSTR
-            MessageInterface::ShowMessage("defstr = %s\n", defstr);
-            if (fraction < 0) MessageInterface::ShowMessage("   and fraction = %d\n", fraction);
-         #endif
-         sprintf(temp, defstr, value);
-      }
-      retval = temp;
-   }
-
-   return retval;
 }
 
 
@@ -3061,24 +3106,33 @@ void GmatCommand::InsertCommandName(std::string &genString)
 //------------------------------------------------------------------------------
 void GmatCommand::ShowCommand(const std::string &prefix,
                               const std::string &title1, GmatCommand *cmd1,
-                              const std::string &title2, GmatCommand *cmd2)
+                              const std::string &title2, GmatCommand *cmd2,
+                              bool showDetail)
 {
    if (title2 == "")
    {
+      std::string cmdStr1;
+      if (showDetail)
+         cmdStr1 = cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
       MessageInterface::ShowMessage
          ("%s%s: %s<%p><%s>[%s]\n", prefix.c_str(), this->GetTypeName().c_str(),
-          title1.c_str(), cmd1, cmd1 ? cmd1->GetTypeName().c_str() : "NULL",
-          cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
+          title1.c_str(), cmd1, cmd1 ? cmd1->GetTypeName().c_str() : "NULL", cmdStr1.c_str());
    }
    else
    {
+      std::string cmdStr1, cmdStr2;
+      std::string sepStr = "";
+      if (showDetail)
+      {
+         cmdStr1 = cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
+         cmdStr2 = cmd2 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
+         sepStr = "\n";
+      }
       MessageInterface::ShowMessage
-         ("%s%s:\n   %s<%p><%s>[%s]\n   %s<%p><%s>[%s]\n", prefix.c_str(),
+         ("%s%s:\n   %s<%p><%s>[%s]%s   %s<%p><%s>[%s]\n", prefix.c_str(),
           this->GetTypeName().c_str(), title1.c_str(), cmd1,
-          cmd1 ? cmd1->GetTypeName().c_str() : "NULL",
-          cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL",
-          title2.c_str(), cmd2, cmd2 ? cmd2->GetTypeName().c_str() : "NULL",
-          cmd2 ? cmd2->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
+          cmd1 ? cmd1->GetTypeName().c_str() : "NULL", cmdStr1.c_str(), sepStr.c_str(),
+          title2.c_str(), cmd2, cmd2 ? cmd2->GetTypeName().c_str() : "NULL", cmdStr2.c_str());
    }
 }
 
@@ -3091,9 +3145,15 @@ void GmatCommand::ShowWrapper(const std::string &prefix, const std::string &titl
                               ElementWrapper *wrapper)
 {
    MessageInterface::ShowMessage
-      ("%s%s wrapper=<%p>, type=%2d, desc='%s'\n", prefix.c_str(), title.c_str(),
+      ("%s%s wrapper=<%p>, type=%2d, desc='%s'", prefix.c_str(), title.c_str(),
        wrapper, wrapper ? wrapper->GetWrapperType() : -1,
        wrapper ? wrapper->GetDescription().c_str() : "NULL");
+   if (wrapper && wrapper->GetRefObject())
+      MessageInterface::ShowMessage
+         (", refObject=<%p>'%s'\n", wrapper->GetRefObject(),
+          wrapper->GetRefObject()->GetName().c_str());
+   else
+      MessageInterface::ShowMessage("\n");
 }
 
 
@@ -3108,35 +3168,119 @@ void GmatCommand::ShowWrapper(const std::string &prefix, const std::string &titl
 //------------------------------------------------------------------------------
 void GmatCommand::ShowObjectMaps(const std::string &str)
 {
+   #ifdef DEBUG_OBJECT_MAP
    MessageInterface::ShowMessage("%s\n========================================"
          "==============================\n",
        str.c_str());
    MessageInterface::ShowMessage
-      ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>\n",
-       objectMap, globalObjectMap);
+      ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>, "
+       "currentFunction=<%p>'%s'\n", objectMap, globalObjectMap,
+       currentFunction, currentFunction ? currentFunction->GetName().c_str() : "NULL");
+   
+   GmatBase *obj = NULL;
+   GmatBase *paramOwner = NULL;
+   std::string objName;
+   std::string isGlobal;
+   std::string isLocal;
+   std::string paramOwnerType;
+   std::string paramOwnerName;
+   bool isParameter = false;
    
    if (objectMap)
    {
       MessageInterface::ShowMessage
-         ("Here is the local object map for %s:\n", this->GetTypeName().c_str());
+         ("Here is the local object map for %s: '%s'\n", this->GetTypeName().c_str(),
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str());
       for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
            i != objectMap->end(); ++i)
+      {
+         // MessageInterface::ShowMessage
+         //    ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+         //     i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         obj = i->second;
+         objName = i->first;
+         paramOwner = NULL;
+         isParameter = false;
+         isGlobal = "No";
+         isLocal = "No";
+         if (obj)
+         {
+            if (obj->IsGlobal())
+               isGlobal = "Yes";
+            if (obj->IsLocal())
+               isLocal = "Yes";
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               isParameter = true;
+               paramOwner = ((Parameter*)obj)->GetOwner();
+               if (paramOwner)
+               {
+                  paramOwnerType = paramOwner->GetTypeName();
+                  paramOwnerName = paramOwner->GetName();
+               }
+            }
+         }
          MessageInterface::ShowMessage
-            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+            ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+             obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+             isLocal.c_str());
+         if (isParameter)
+            MessageInterface::ShowMessage
+               ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                paramOwnerName.c_str());
+         else
+            MessageInterface::ShowMessage("\n");
+      }
    }
    if (globalObjectMap)
    {
       MessageInterface::ShowMessage
-         ("Here is the global object map for %s:\n", this->GetTypeName().c_str());
+         ("Here is the global object map for %s: '%s'\n", this->GetTypeName().c_str(),
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str());
       for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
            i != globalObjectMap->end(); ++i)
+      {
+         // MessageInterface::ShowMessage
+         //    ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+         //     i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         obj = i->second;
+         objName = i->first;
+         paramOwner = NULL;
+         isParameter = false;
+         isGlobal = "No";
+         isLocal = "No";
+         if (obj)
+         {
+            if (obj->IsGlobal())
+               isGlobal = "Yes";
+            if (obj->IsLocal())
+               isLocal = "Yes";
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               isParameter = true;
+               paramOwner = ((Parameter*)obj)->GetOwner();
+               if (paramOwner)
+               {
+                  paramOwnerType = paramOwner->GetTypeName();
+                  paramOwnerName = paramOwner->GetName();
+               }
+            }
+         }
          MessageInterface::ShowMessage
-            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+            ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+             obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+             isLocal.c_str());
+         if (isParameter)
+            MessageInterface::ShowMessage
+               ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                paramOwnerName.c_str());
+         else
+            MessageInterface::ShowMessage("\n");
+      }
    }
    MessageInterface::ShowMessage("============================================"
          "==========================\n");
+   #endif
 }
 
 
@@ -3295,7 +3439,7 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    #endif
    
    #ifdef DEBUG_OBJECT_MAP
-   ShowObjectMaps();
+   ShowObjectMaps("In GmatCommand::FindObject()");
    #endif
    
    // Check for SolarSystem (loj: 2008.06.25)
@@ -3349,6 +3493,57 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// void HandleReferencesToClones(Parameter *param)
+//------------------------------------------------------------------------------
+void GmatCommand::HandleReferencesToClones(Parameter *param)
+{
+   #ifdef DEBUG_REF_CLONE
+   MessageInterface::ShowMessage
+      ("GmatCommand::HandleReferencesToClones() <%p>'%s' entered, param=<%p>'%s'\n",
+       this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(), param,
+       param ? param->GetName().c_str() : "NULL");
+   #endif
+   
+   if (param == NULL)
+   {
+      #ifdef DEBUG_REF_CLONE
+      MessageInterface::ShowMessage
+         ("GmatCommand::HandleReferencesToClones() <%p>'%s' just exiting, parameter is NULL\n");
+      #endif
+      return;
+   }
+   
+   // Handle external clones
+   // For now, there is only one external clone
+   std::string cloneName = param->GetExternalCloneName(0);
+   GmatCommand *cmd = GetPrevious();
+   while (cmd != NULL)
+   {
+      Integer count = cmd->GetCloneCount();
+      
+      for (Integer index = 0; index < count; ++index)
+      {
+         GmatBase *obj = cmd->GetClone(index);
+         if (obj != NULL)
+         {
+            if (obj->GetName() == cloneName)
+            {
+               param->SetExternalClone(obj);
+               cmd = NULL;
+               break;
+            }
+         }
+      }
+      if (cmd != NULL)
+         cmd = cmd->GetPrevious();
+   }
+   
+   #ifdef DEBUG_REF_CLONE
+   MessageInterface::ShowMessage
+      ("GmatCommand::HandleReferencesToClones() <%p>'%s' exiting\n");
+   #endif
+}
 
 //------------------------------------------------------------------------------
 // bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)

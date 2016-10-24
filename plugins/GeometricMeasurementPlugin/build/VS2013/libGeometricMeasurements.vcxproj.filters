@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{69dd7ddf-ab15-4e48-aa7e-3651be342246}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\measurement">
+      <UniqueIdentifier>{f282ca0a-7438-4256-bc2b-8f0ca4648160}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\factory">
+      <UniqueIdentifier>{1ecbb9b5-0ffa-46d4-98d1-a1a5f7d9a1dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{d15abe32-ca6b-4a1b-8acf-c75336afe6f2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\base\factory\MeasurementFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\GeometricAzEl.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\GeometricRADec.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\GeometricRange.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\GeometricRangeRate.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\base\factory\MeasurementFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\GeometricAzEl.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\GeometricRADec.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\GeometricRange.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\GeometricRangeRate.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\include\geometricmeasurement_defs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

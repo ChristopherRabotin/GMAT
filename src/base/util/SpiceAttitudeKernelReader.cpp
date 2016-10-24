@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under
 // FDSS Task order 28.
@@ -367,7 +377,20 @@ void SpiceAttitudeKernelReader::GetTargetOrientation(const std::string &objectNa
 //   boddef_c(objectNameSPICE, naifIDSPICE);        // CSPICE method to set NAIF ID for an object - is this valid for spacecraft?
    // Convert the time (in TDB) to spacecaft ticks
    SpiceDouble scTime;
+   
+   #ifdef DEBUG_CK_READING
+   // Why VS static build crashes here? (LOJ: 2014.06.27)
+   // In igrf.c, function shellg_0_(),     *b0 = sqrt(bq2); bq2 is NAN
+   MessageInterface::ShowMessage
+      ("   Calling sce2c_c(), naifIDSPICE = %d, etSPICE = %d\n", naifIDSPICE, etSPICE);
+   #endif
+   
    sce2c_c(naifIDSPICE, etSPICE, &scTime);
+
+   #ifdef DEBUG_CK_READING
+   MessageInterface::ShowMessage("   After calling sce2c_c(), scTime = %f\n", scTime);
+   #endif
+   
    if (failed_c())
    {
       ConstSpiceChar option[] = "LONG"; // retrieve long error message, for now

@@ -16,7 +16,6 @@
 #include "TsPlotXYCanvas.hpp"
 #include <sstream>
 #include <algorithm>
-
 #include "MessageInterface.hpp"
 
 //#define DEBUG_INTERFACE
@@ -54,6 +53,7 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
    dc.DrawLine(x0, y0, xm, y0);
    dc.DrawLine(x0, ym, xm, ym);
 
+   
    // Draw the axes with labels  
    int idx, idy;
    double dx, dy, dxval, dyval, fval;
@@ -205,7 +205,8 @@ void TsPlotXYCanvas::DrawLabels(wxDC &dc)
    {
       if (names.size() != 0)
       {
-         for (std::vector<std::string>::iterator i = names.begin(); 
+         //for (std::vector<std::string>::iterator i = names.begin(); 
+         for (std::vector<wxString>::iterator i = names.begin(); 
               i < names.end(); ++i)
          {
             if (i != names.begin())
@@ -227,7 +228,7 @@ void TsPlotXYCanvas::DrawLabels(wxDC &dc)
       // Draw the title
       dc.SetFont(titleFont);
       wxString label;
-      wxString title = _T(plotTitle.c_str());
+      wxString title = plotTitle;
       dc.GetTextExtent(title, &w, &h);
       int xloc = xCenter - w / 2;
       int yloc = (top - h) / 2;
@@ -238,14 +239,14 @@ void TsPlotXYCanvas::DrawLabels(wxDC &dc)
    {
       // Add x-axis label
       dc.SetFont(axisFont);
-      wxString title = _T(xLabel.c_str());
+      wxString title = xLabel.c_str();
       dc.GetTextExtent(title, &w, &h);
       int xloc = xCenter - w / 2;
       int yloc = ht - bottom / 2;
       dc.DrawText(title, xloc, yloc);
 
       // Add y-axis label
-      title = _T(yLabel.c_str());
+      title = yLabel;
       dc.GetTextExtent(title, &w, &h);
       xloc = h / 2;
       yloc = yCenter + w / 2;
@@ -256,6 +257,9 @@ void TsPlotXYCanvas::DrawLabels(wxDC &dc)
 
 void TsPlotXYCanvas::PlotData(wxDC &dc)
 {
+   #ifdef DEBUG_PLOT_DATA
+   MessageInterface::ShowMessage("TsPlotXYCanvas::PlotData() enered\n");
+   #endif
    wxCoord w, h;
    dc.GetSize(&w, &h);
 
@@ -365,11 +369,10 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
             int  markerStyle = (*curve)->GetMarker();
             int  markerSize  = (*curve)->GetMarkerSize();
 
+            bool showErrorBars = (*curve)->UseHiLow();
             for (j = (*curve)->lastPointPlotted;
                  j < (int)((*curve)->abscissa.size())-1; ++j)
             {
-               bool showErrorBars = (*curve)->UseHiLow();
-
                if (j == ccLoc)
                {
                   plotPens[n].SetColour((*curve)->GetColour(ccIndex));
@@ -493,6 +496,9 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
       }
    }
    dc.DestroyClippingRegion();
+   #ifdef DEBUG_PLOT_DATA
+   MessageInterface::ShowMessage("TsPlotXYCanvas::PlotData() leaving\n");
+   #endif
 }
 
 

@@ -1,0 +1,885 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="RunSimulator"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>RunSimulator</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>RunSimulator</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>RunSimulator</refname>
+
+    <refpurpose>Generates simulated navigation measurements</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <title>Script Syntax</title>
+
+    <synopsis>RunSimulator Simulator_InstanceName </synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>The <guilabel>RunSimulator</guilabel> command generates the
+    simulated measurements specified in the user-provided
+    <guilabel>Simulator</guilabel> resource. An output file, with name
+    specified in the <guilabel>Simulator</guilabel> resource is
+    created.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="Simulator"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Content of the Output File for DSN data</title>
+
+      <para>After the <guilabel>RunSimulator</guilabel> command has finished
+      execution, one or more output files, as defined in the specified
+      <guilabel>Simulator</guilabel> object, will be created. Each row of data
+      in an output file contains information about one specific measurement at
+      a given time. The format for a given row of data is described fully in
+      the <xref linkend="TrackingFileSet"/> resource help.</para>
+
+      <para>Currently, GMAT supports two DSN data types, DSN TRK-2-34 type 7
+      (sequential range) and DSN TRK-2-34 type 17 (Total count phase). As
+      shown in the <xref linkend="TrackingFileSet"/> resource help, for a type
+      7 measurement, a row of data has the following GMAT internal file
+      format.</para>
+
+      <programlisting><?db-font-size 50% ?>TAIMJD  DSNRange 9004 [Downlink Station ID] [S/C ID] [Range Observable (RU)] [Uplink Band] [Uplink Freq (Hz)] [Range Modulo (RU)]</programlisting>
+
+      <para>where [Uplink Band] species the frequency band of the transmitting
+      station as shown in the table below.</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <colspec colwidth="226*"/>
+
+          <colspec colwidth="774*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Uplink Band Value</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>0</entry>
+
+              <entry>Unknown or not applicable</entry>
+            </row>
+
+            <row>
+              <entry>1</entry>
+
+              <entry>S-band</entry>
+            </row>
+
+            <row>
+              <entry>2</entry>
+
+              <entry>X-band</entry>
+            </row>
+
+            <row>
+              <entry>3</entry>
+
+              <entry>Ka-band</entry>
+            </row>
+
+            <row>
+              <entry>4</entry>
+
+              <entry>Ku-band</entry>
+            </row>
+
+            <row>
+              <entry>5</entry>
+
+              <entry>L-band</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>and where the [Range Observable (RU)], is calculated according
+      to</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mrow>
+            <m:mi>C</m:mi>
+
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>3</m:mn>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:mi>t</m:mi>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:mi>t</m:mi>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+
+            <m:mo>,</m:mo>
+
+            <m:mtext> mod M             (RU)</m:mtext>
+          </m:mrow>
+        </m:math>
+      </informalequation>
+
+      <para>where</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mn>1</m:mn>
+          </m:msub>
+
+          <m:mo>,</m:mo>
+
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mn>3</m:mn>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Transmission and Reception epoch, respectively</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>f</m:mi>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Ground Station transmit frequency</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mi>C</m:mi>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>transmitter dependent constant (221/1498 for X-band and 1/2 for S-Band)</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mtext>M </m:mtext>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext> length of the ranging code in RU</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <para>As shown in the <xref linkend="TrackingFileSet"/> resource help,
+      for a DSN TRK-2-34 type 17 measurement, a row of data has the following
+      GMAT internal file format.</para>
+
+      <programlisting><?db-font-size 50% ?># TAIMJD_t3e Doppler 9006 [Downlink Station ID] [S/C ID] [Uplink Band] [DopplerCountInterval_seconds] [DopplerMeas_Hz]</programlisting>
+
+      <para>where [Uplink Band] has been previously described and where
+      DopplerMeas_Hz, the Doppler measurement, is calculated according
+      to</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mrow>
+            <m:mi>C</m:mi>
+
+            <m:mo>=</m:mo>
+
+            <m:mo>−</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>M</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mrow>
+                  <m:mo>(</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo>−</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>3</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:mstyle displaystyle="true">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mrow/>
+
+                      <m:mi>s</m:mi>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mrow/>
+
+                      <m:mi>e</m:mi>
+                    </m:msub>
+                  </m:mrow>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>f</m:mi>
+
+                    <m:mi>T</m:mi>
+                  </m:msub>
+
+                  <m:mo stretchy="false">(</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mo stretchy="false">)</m:mo>
+
+                  <m:mi>d</m:mi>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mrow>
+              </m:mrow>
+            </m:mstyle>
+
+            <m:mtext>  =</m:mtext>
+
+            <m:mo>−</m:mo>
+
+            <m:mfrac>
+              <m:mrow>
+                <m:msub>
+                  <m:mi>M</m:mi>
+
+                  <m:mn>2</m:mn>
+                </m:msub>
+
+                <m:mrow>
+                  <m:mo>(</m:mo>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>1</m:mn>
+
+                        <m:mi>e</m:mi>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:mo>−</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mrow>
+                        <m:mn>1</m:mn>
+
+                        <m:mi>s</m:mi>
+                      </m:mrow>
+                    </m:msub>
+                  </m:mrow>
+
+                  <m:mo>)</m:mo>
+                </m:mrow>
+              </m:mrow>
+
+              <m:mrow>
+                <m:mi>D</m:mi>
+
+                <m:mi>C</m:mi>
+
+                <m:mi>I</m:mi>
+              </m:mrow>
+            </m:mfrac>
+
+            <m:msub>
+              <m:mover accent="true">
+                <m:mi>f</m:mi>
+
+                <m:mo>¯</m:mo>
+              </m:mover>
+
+              <m:mi>T</m:mi>
+            </m:msub>
+
+            <m:mtext>    (Hz)</m:mtext>
+          </m:mrow>
+        </m:math>
+      </informalequation>
+
+      <para>where</para>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mi>s</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>,</m:mo>
+
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mrow>
+              <m:mn>1</m:mn>
+
+              <m:mi>e</m:mi>
+            </m:mrow>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>start and end of transmission interval</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>f</m:mi>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>transmit frequency</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mi>M</m:mi>
+
+            <m:mn>2</m:mn>
+          </m:msub>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>Transponder turn around ratio (typically, 240/221 for S-band and 880/749 for X-band)</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:mtext>DCI = </m:mtext>
+
+          <m:mrow>
+            <m:mo>(</m:mo>
+
+            <m:mrow>
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>e</m:mi>
+                </m:mrow>
+              </m:msub>
+
+              <m:mo>−</m:mo>
+
+              <m:msub>
+                <m:mi>t</m:mi>
+
+                <m:mrow>
+                  <m:mn>3</m:mn>
+
+                  <m:mi>s</m:mi>
+                </m:mrow>
+              </m:msub>
+            </m:mrow>
+
+            <m:mo>)</m:mo>
+          </m:mrow>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext> Doppler Count Interval</m:mtext>
+        </m:math>
+      </informalequation>
+
+      <informalequation>
+        <m:math display="block">
+          <m:msub>
+            <m:mover accent="true">
+              <m:mi>f</m:mi>
+
+              <m:mo>¯</m:mo>
+            </m:mover>
+
+            <m:mi>T</m:mi>
+          </m:msub>
+
+          <m:mo>≡</m:mo>
+
+          <m:mfrac>
+            <m:mrow>
+              <m:mstyle displaystyle="true">
+                <m:mrow>
+                  <m:munderover>
+                    <m:mo>∫</m:mo>
+
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>t</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mrow/>
+
+                        <m:mi>s</m:mi>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>t</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mrow/>
+
+                        <m:mi>e</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:munderover>
+
+                  <m:mrow>
+                    <m:msub>
+                      <m:mi>f</m:mi>
+
+                      <m:mi>T</m:mi>
+                    </m:msub>
+
+                    <m:mo stretchy="false">(</m:mo>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:mo stretchy="false">)</m:mo>
+
+                    <m:mi>d</m:mi>
+
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mrow>
+                </m:mrow>
+              </m:mstyle>
+            </m:mrow>
+
+            <m:mrow>
+              <m:mrow>
+                <m:mo>(</m:mo>
+
+                <m:mrow>
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>1</m:mn>
+
+                      <m:mi>e</m:mi>
+                    </m:mrow>
+                  </m:msub>
+
+                  <m:mo>−</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mrow>
+                      <m:mn>1</m:mn>
+
+                      <m:mi>s</m:mi>
+                    </m:mrow>
+                  </m:msub>
+                </m:mrow>
+
+                <m:mo>)</m:mo>
+              </m:mrow>
+            </m:mrow>
+          </m:mfrac>
+
+          <m:mtext> </m:mtext>
+
+          <m:mo>=</m:mo>
+
+          <m:mtext>average transmit frequency </m:mtext>
+        </m:math>
+      </informalequation>
+
+      <para>Note that (t3e - t3s) is known as the Doppler Count Interval and
+      is an input field, <guilabel>SimDopplerCountInterval</guilabel>, for the
+      <guilabel>TrackingFileSet</guilabel> resource.</para>
+
+      <para>When you simulate DSN range or Doppler, you can choose whether or
+      not the frequency from the transmitting <guilabel>Ground
+      Station</guilabel> is Non-ramped or Ramped. If you wish to model ramped
+      data, you must supply an input ramp table. The format of the input ramp
+      table is discussed in the <guilabel><xref
+      linkend="TrackingFileSet"/></guilabel> resource help.</para>
+
+      <para>The table below shows how the values of Uplink Band, C, M2, and
+      transmit frequency are calculated. The second column shows how the
+      Uplink Band, which is included in the output file for both range and
+      Doppler measurements, is calculated. For S-band, a “1” is output and for
+      X-band, a “2” is output.</para>
+
+      <para>The output GMAT Measurement Data (GMD) file contains the
+      observable value which is calculated using the equations shown above.
+      The third column shows how the value of C or M2, which is used to
+      calculate the observation value shown in the GMD file, is
+      calculated.</para>
+
+      <para>Finally, the fourth column shows how the transmit frequency, which
+      shows up directly in the GMD file (for DSN range but not DSN Doppler)
+      and is also used to calculate the observation value given in the GMD
+      file, is calculated.</para>
+
+      <informaltable pgwide="1">
+        <tgroup cols="4">
+          <colspec align="center" colwidth="107*"/>
+
+          <colspec colwidth="261*"/>
+
+          <colspec colwidth="344*"/>
+
+          <colspec colwidth="288*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Measurement Type</entry>
+
+              <entry align="center">Uplink Band</entry>
+
+              <entry align="center">Value of C (Range) or M2 (Doppler) used to
+              calculate Observation</entry>
+
+              <entry align="center">Transmit freq used to calculate
+              Observation</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><emphasis role="bold">Simulate Range without ramp
+              table</emphasis></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon transmitter frequency set by user on
+                    the Transmitter.Frequency field. If freq is in [2000-4000]
+                    MHz, then Uplink Band is S-band. If freq is in [7000-8000]
+                    MHz, then Uplink Band is X-band.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band result shown in previous
+                    column. C=½ for S-band and 221/1498 for X-band.</para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Transponder.TurnAroundRatio has no effect
+                    on C</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Transmitter.frequency (This frequency
+                    will be written to the GMD range file)</para>
+                  </listitem>
+                </itemizedlist></entry>
+            </row>
+
+            <row>
+              <entry><emphasis role="bold">Simulate Range with ramp
+              table</emphasis></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Uplink Band in ramp table takes precedence over both
+                    transmitter frequency set by user and transmit frequency
+                    in ramp table.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band result shown in previous
+                    column. C=½ for S-band and 221/1498 for X-band.</para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Transponder.TurnAroundRatio has no effect
+                    on C</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Ramp Table frequency (This frequency
+                    will be written to the GMD range file)</para>
+                  </listitem>
+                </itemizedlist></entry>
+            </row>
+
+            <row>
+              <entry><emphasis role="bold">Simulate Doppler without ramp
+              table</emphasis></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon transmitter frequency set by user on
+                    the Transmitter.Frequency field. If freq is in [2000-4000]
+                    MHz, then Uplink Band is S-band. If freq is in [7000-8000]
+                    MHz, then Uplink Band is X-band.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>M2=Transponder.TurnAroundRatio</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Transmitter.frequency </para>
+                  </listitem>
+                </itemizedlist></entry>
+            </row>
+
+            <row>
+              <entry><emphasis role="bold">Simulate Doppler with ramp
+              table</emphasis></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Uplink Band in ramp table takes precedence over both
+                    transmitter frequency set by user and transmit frequency
+                    in ramp table.</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para>Set based upon Uplink Band result shown in previous
+                    column. M2=240/221 for S-band and 880/749 for X
+                    band.</para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Value of Transponder.TurnAroundRatio has no effect
+                    on M2</para>
+                  </listitem>
+                </itemizedlist></entry>
+
+              <entry><itemizedlist>
+                  <listitem>
+                    <para><inlineequation>
+                        <m:math display="inline">
+                          <m:msub>
+                            <m:mi>f</m:mi>
+
+                            <m:mi>T</m:mi>
+                          </m:msub>
+                        </m:math>
+                      </inlineequation>=Ramp Table frequency </para>
+                  </listitem>
+                </itemizedlist></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>As discussed in the <xref linkend="Transponder"/> Help, for both
+      ramped and non-ramped data, the turn around ratio set on the
+      <guilabel>Transponder</guilabel> object,
+      <guilabel>Transponder.TurnAroundRatio</guilabel>, will be used to
+      calculate the media corrections needed to determine the value of the
+      simulated range and Doppler measurements.</para>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>Run simulation.</para>
+
+      <programlisting><code>%Perform a simulation
+
+Create Simulator mySim
+
+BeginMissionSequence 
+RunSimulator mySim</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>For a comprehensive example of running a simulation, see the <xref
+      linkend="Tut_Simulate_DSN_Range_and_Doppler_Data"/> tutorial.</para>
+    </informalexample>
+  </refsection>
+</refentry>

@@ -1,12 +1,22 @@
-//$Id: GmatObType.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: GmatObType.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                         GmatObType
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -24,12 +34,19 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "FileManager.hpp"
+#include "MeasurementException.hpp"
+#include "StringUtil.hpp"
 #include <sstream>
 
 
 //#define DEBUG_OBTYPE_CREATION_INITIALIZATION
 //#define DEBUG_FILE_WRITE
+//#define DEBUG_FILE_READ
+//#define DEBUG_FILE_ACCESS
+//#define DEBUG_SIGNAL_READ
 
+
+#define  USE_OLD_GMDFILE_FORMAT
 
 //-----------------------------------------------------------------------------
 // GmatObType(const std::string withName)
@@ -46,7 +63,7 @@ GmatObType::GmatObType(const std::string withName) :
    dataPrecision  (6)
 {
    #ifdef DEBUG_OBTYPE_CREATION_INITIALIZATION
-      MessageInterface::ShowMessage("Creating a GMATInternal obtype\n");
+	  MessageInterface::ShowMessage("Creating a GMATInternal obtype  <%s,%p>\n", GetName().c_str(), this);
    #endif
 
    header = "% GMAT Internal Measurement Data File\n\n";
@@ -79,7 +96,7 @@ GmatObType::GmatObType(const GmatObType& ot) :
    dataPrecision  (ot.dataPrecision)
 {
    #ifdef DEBUG_OBTYPE_CREATION_INITIALIZATION
-      MessageInterface::ShowMessage("Copying a GMATInternal obtype\n");
+	  MessageInterface::ShowMessage("GmatObType copy constructor (a GMATInternal obtype) from <%s,%p> to <%s,%p>\n", ot.GetName().c_str(), &ot, GetName().c_str(), this);
    #endif
 }
 
@@ -98,7 +115,7 @@ GmatObType::GmatObType(const GmatObType& ot) :
 GmatObType& GmatObType::operator=(const GmatObType& ot)
 {
    #ifdef DEBUG_OBTYPE_CREATION_INITIALIZATION
-      MessageInterface::ShowMessage("Assigning one GMATInternal obtype to another\n");
+      MessageInterface::ShowMessage("GmatObType operator = (assigning one GMATInternal obtype to another)\n");
    #endif
 
    if (this != &ot)
@@ -145,9 +162,9 @@ bool GmatObType::Initialize()
    MessageInterface::ShowMessage("GmatObType::Initialize() Executing\n");
 #endif
 
-   bool retval = false;
+   ObType::Initialize();
 
-   return retval;
+   return true;
 }
 
 
@@ -169,12 +186,17 @@ bool GmatObType::Initialize()
 //-----------------------------------------------------------------------------
 bool GmatObType::Open(bool forRead, bool forWrite, bool append)
 {
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("GmatObType::Open(%s, %s, %s) Executing\n",
+   #ifdef DEBUG_FILE_ACCESS
+      MessageInterface::ShowMessage("GmatObType::Open(%s, %s, %s) Executing for \n",
             (forRead ? "true" : "false"),
             (forWrite ? "true" : "false"),
-            (append ? "true" : "false") );
+            (append ? "true" : "false"), this);
    #endif
+   
+   // when theStream open twice the content in theStream is always empty string. Therefore, it needs this verification.
+   if (theStream.is_open())
+      return true;
+
    bool retval = false;
 
    // temporary
@@ -214,8 +236,8 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
       fullPath += streamName;
 
       // Add the .gmd extension if there is no extension in the file
-      UnsignedInt dotLoc = fullPath.find_last_of('.');
-      UnsignedInt slashLoc = fullPath.find_last_of('/');
+      size_t dotLoc = fullPath.find_last_of('.');                    // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
+      size_t slashLoc = fullPath.find_last_of('/');                  // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
       if (slashLoc == std::string::npos)
          slashLoc = fullPath.find_last_of('\\');
 
@@ -229,7 +251,8 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
          MessageInterface::ShowMessage("   Full path is %s, mode = %d\n",
                fullPath.c_str(), mode);
       #endif
-      theStream.open(fullPath.c_str(), mode);
+
+	  theStream.open(fullPath.c_str(), mode);
    }
 
    retval = theStream.is_open();
@@ -237,9 +260,9 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
       theStream << header;
 
    if (retval == false)
-      MessageInterface::ShowMessage(
-            "GMATInternal Data File %s could not be opened\n",
-            streamName.c_str());
+   {
+	  throw MeasurementException("GMATInternal Data File " + streamName + " could not be opened\n");
+   }
    return retval;
 }
 
@@ -279,30 +302,85 @@ bool GmatObType::IsOpen()
 bool GmatObType::AddMeasurement(MeasurementData *md)
 {
    #ifdef DEBUG_FILE_WRITE
-      MessageInterface::ShowMessage("GmatObType::AddMeasurement() Executing\n");
+      MessageInterface::ShowMessage("GmatObType<%p>::AddMeasurement() Executing\n", this);
    #endif
    bool retval = false;
 
    std::stringstream dataLine;
-   char databuffer[20];
-   char epochbuffer[20];
+   char databuffer[200];
+   char epochbuffer[200];
 
    Real taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epoch :
          TimeConverterUtil::ConvertToTaiMjd(md->epochSystem, md->epoch,
                GmatTimeConstants::JD_NOV_17_1858));
 
-   sprintf(epochbuffer, "%17.11lf", taiEpoch);
+   sprintf(epochbuffer, "%18.12lf", taiEpoch);
    dataLine << epochbuffer << "    " << md->typeName
             << "    " << md->type << "    ";
+#ifdef USE_OLD_GMDFILE_FORMAT
+   if (md->type < 9000)
+   {
+      for (UnsignedInt j = 0; j < md->participantIDs.size(); ++j)
+         dataLine << md->participantIDs[j] << "    ";
+   }
+   else
+   {
+      if ((md->participantIDs[0] == md->participantIDs[md->participantIDs.size()-1])&&(md->participantIDs.size() == 3))
+      {
+         // if the first participant and the last participant are the same, write in a list w/o brackets containing all but the last one 
+         for (UnsignedInt j = 0; j < md->participantIDs.size()-1; ++j)
+            dataLine << md->participantIDs[j] << "    ";
+      }
+      else
+      {
+         // otherwise write all participants in signal path as a list inside brackets 
+         dataLine << "{ ";
+         for (UnsignedInt j = 0; j < md->participantIDs.size(); ++j)
+         {
+            dataLine << md->participantIDs[j];
+            if (j < md->participantIDs.size()-1)
+               dataLine << "    ";
+            else
+               dataLine << " }    ";
+         }
+      }
+   }
+
+#else
    for (UnsignedInt j = 0; j < md->participantIDs.size(); ++j)
       dataLine << md->participantIDs[j] << "    ";
+#endif
+
+   if ((md->typeName == "Doppler")||(md->typeName == "Doppler_RangeRate"))
+   {
+      dataLine << md->uplinkBand << "    ";
+      dataLine << md->dopplerCountInterval << "    ";
+   }
+   else if (md->typeName == "TDRSDoppler_HZ")
+   {
+      sprintf(databuffer, "    %.15le    %d    %s    %d   %d   %f",
+         md->tdrsNode4Freq, md->tdrsNode4Band, md->tdrsServiceID.c_str(), md->tdrsDataFlag, md->tdrsSMARID, md->dopplerCountInterval);
+      dataLine << databuffer;
+   }
 
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
-      sprintf(databuffer, "%9.5lf", md->value[k]);
+      if (md->typeName == "DSNRange")
+         sprintf(databuffer, "%20.8lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));      // increasing 6 decimal places to 8 decimal places
+      else
+         sprintf(databuffer, "%20.8lf", md->value[k]);                                        // increasing 6 decimal places to 8 decimal places
       dataLine << databuffer;
       if (k < md->value.size()-1)
          dataLine << "    ";
+   }
+
+   // extended information:
+   if (md->typeName == "DSNRange")
+   {
+      sprintf(databuffer, "    %d    %.15le    %.15le",
+//         md->uplinkBand, md->uplinkFreq, md->rangeModulo);
+         md->uplinkBand, md->uplinkFreqAtRecei, md->rangeModulo);
+      dataLine << databuffer;
    }
 
    theStream << dataLine.str() << "\n";
@@ -311,7 +389,7 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
       MessageInterface::ShowMessage("GmatObType::WriteMeasurement: \"%s\"\n",
             dataLine.str().c_str());
    #endif
-
+   
    // temporary
    retval = true;
 
@@ -334,6 +412,10 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 //-----------------------------------------------------------------------------
 ObservationData* GmatObType::ReadObservation()
 {
+   #ifdef DEBUG_FILE_READ
+      MessageInterface::ShowMessage("GmatObType::ReadObservation() Executing\n");
+   #endif
+
    std::string str;
    std::stringstream theLine;
 
@@ -342,21 +424,30 @@ ObservationData* GmatObType::ReadObservation()
 
    Real defaultNoiseCovariance = 0.1;
 
-   // Skip header and comment lines
-   std::getline (theStream, str);
 
-   while ((str[0] == '%') || (!theStream.eof() && (str == "")))
+   // Do nothing when it is at the end of file
+   if (theStream.eof())
+      return NULL;
+
+   // Read a line when it is not end of file
+   std::getline (theStream, str);
+   
+   // Skip header and comment lines or empty lines
+   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == "") ||
+         (str.length() < 2))
    {
       std::getline(theStream, str);
+
+      // Do nothing when it is at the end of file
+      if (theStream.eof())
+         return NULL;
    }
 
-   if (theStream.eof())
-   {
-      return NULL;
-   }
 
+   // Processing data in the line
    theLine << str;
    currentObs.Clear();
+   currentObs.dataFormat = "GMATInternal";
 
    // format: 21545.05439854615    Range    7000    GS2ID    ODSatID    2713.73185
    Real value;
@@ -375,51 +466,166 @@ ObservationData* GmatObType::ReadObservation()
    theLine >> type;
    currentObs.type = (Gmat::MeasurementType)type;
 
-   switch (currentObs.type)
+   // Verify measurement type
+   StringArray typeList = currentObs.GetAvailableMeasurementTypes();
+   if (find(typeList.begin(), typeList.end(), currentObs.typeName) == typeList.end())
+      throw MeasurementException("Error: GMAT cannot handle observation data with type '" + currentObs.typeName + "'.\n");
+
+
+   // Signal based measurements have types that start at 9000; smaller IDs are
+   // the old code.
+   /// @todo Once ported to signal measurements, remove the code from here:
+   if (type < 9000)
    {
-      case Gmat::GEOMETRIC_RANGE:
-      case Gmat::GEOMETRIC_RANGE_RATE:
-      case Gmat::USN_TWOWAYRANGE:
-      case Gmat::USN_TWOWAYRANGERATE:
-      case Gmat::DSN_TWOWAYRANGE:
-      case Gmat::DSN_TWOWAYDOPPLER:
-         participantSize = 2;
-         dataSize = 1;
-         break;
+      switch (currentObs.type)
+      {
+         case Gmat::GEOMETRIC_RANGE:
+         case Gmat::GEOMETRIC_RANGE_RATE:
+         case Gmat::USN_TWOWAYRANGE:
+         case Gmat::USN_TWOWAYRANGERATE:
+         case Gmat::DSN_TWOWAYRANGE:
+         case Gmat::DSN_TWOWAYDOPPLER:
+            participantSize = 2;
+            dataSize = 1;
+            break;
 
-      case Gmat::TDRSS_TWOWAYRANGE:
-      case Gmat::TDRSS_TWOWAYRANGERATE:
-         participantSize = 3;
-         dataSize = 1;
-         break;
+         case Gmat::TDRSS_TWOWAYRANGE:
+         case Gmat::TDRSS_TWOWAYRANGERATE:
+            participantSize = 3;
+            dataSize = 1;
+            break;
 
-      case Gmat::GEOMETRIC_AZ_EL:
-      case Gmat::GEOMETRIC_RA_DEC:
-      case Gmat::OPTICAL_AZEL:
-      case Gmat::OPTICAL_RADEC:
-         participantSize = 2;
-         dataSize = 2;
-         defaultNoiseCovariance = 0.1;
-         break;
+         case Gmat::GEOMETRIC_AZ_EL:
+         case Gmat::GEOMETRIC_RA_DEC:
+         case Gmat::OPTICAL_AZEL:
+         case Gmat::OPTICAL_RADEC:
+            participantSize = 2;
+            dataSize = 2;
+            defaultNoiseCovariance = 0.1;
+            break;
 
-      default:
-         participantSize = 0;
-         dataSize = 0;
-         break;
+         default:
+            participantSize = 0;
+            dataSize = 0;
+            break;
+      }
+
+      for (Integer i = 0; i < participantSize; ++i)
+      {
+         theLine >> str;
+         currentObs.participantIDs.push_back(str);
+      }
    }
-
-   for (Integer i = 0; i < participantSize; ++i)
+   else
    {
+      #ifdef DEBUG_FILE_READ
+         MessageInterface::ShowMessage("   Processing measurement type %d\n",
+               type);
+      #endif
+#ifdef USE_OLD_GMDFILE_FORMAT
+     participantSize = 2;           // In this version, measurement type is always 2-ways
+#else
+      // In this version, measurement type could be 1, 2, or multiple ways measurement
+      if (!ProcessSignals(str, participantSize, dataSize))
+      {
+         MessageInterface::ShowMessage("Signal based measurement of type %d "
+               "not processed successfully for line %s\n", type, str.c_str());
+      }
+#endif
+
+      if ((currentObs.typeName == "Range_KM")||(currentObs.typeName == "DSNRange")
+         ||(currentObs.typeName == "Doppler_RangeRate")||(currentObs.typeName == "Doppler")
+         ||(currentObs.typeName == "TDRSDoppler_HZ"))
+      {
+         dataSize = 1;
+      }
+
       theLine >> str;
-      currentObs.participantIDs.push_back(str);
+      if (str.substr(0,1) == "{")
+      {
+         if (str.size() == 1)
+            theLine >> str;
+         else
+            str = str.substr(1);
+
+         while(str.substr(str.length()-1) != "}")
+         {
+            currentObs.participantIDs.push_back(str);
+            theLine >> str;
+         }
+         str = str.substr(0,str.length()-1);
+         if (str != "")
+            currentObs.participantIDs.push_back(str);
+      }
+      else
+      {
+         currentObs.participantIDs.push_back(str);
+         std::string str1;
+         theLine >> str1;
+         currentObs.participantIDs.push_back(str1);
+         currentObs.participantIDs.push_back(str);
+      }
    }
+
+
+   //for (Integer i = 0; i < participantSize; ++i)
+   //{
+   //   theLine >> str;
+   //   currentObs.participantIDs.push_back(str);
+   //}
+//#ifdef USE_OLD_GMDFILE_FORMAT
+//   if (type >= 9000)
+//      currentObs.participantIDs.push_back(currentObs.participantIDs[0]);
+//#endif
+
+
+   if (currentObs.typeName == "Range_KM")
+   {
+      currentObs.unit = "km";
+   }
+   else if (currentObs.typeName == "Doppler")
+   {
+      theLine >> currentObs.uplinkBand;
+      theLine >> currentObs.dopplerCountInterval;
+      currentObs.unit = "Hz";
+   }
+   else if (currentObs.typeName == "Doppler_RangeRate")
+   {
+      theLine >> currentObs.uplinkBand;
+      theLine >> currentObs.dopplerCountInterval;
+      currentObs.unit = "km/s";
+   }
+   else if (currentObs.typeName == "TDRSDoppler_HZ")
+   {
+      theLine >> currentObs.tdrsNode4Freq;            // this field is used to received frequency at the return-link TDRS 
+      theLine >> currentObs.tdrsNode4Band;            // this field is used to received frequency band at the return-link TDRS 
+      theLine >> currentObs.tdrsServiceID;            // value of serviceID would be "S1", "S2", or "MA"
+      theLine >> currentObs.tdrsDataFlag;             // TDRS data flag would be 0 or 1
+      theLine >> currentObs.tdrsSMARID;               // TDRS SMAR id
+      theLine >> currentObs.dopplerCountInterval;
+      currentObs.unit = "Hz";
+   }
+
+
 
    for (Integer i = 0; i < dataSize; ++i)
    {
       theLine >> value;
       currentObs.value.push_back(value);
+	   currentObs.value_orig.push_back(value);
    }
 
+   // read extended infor from data record
+   if (currentObs.typeName == "DSNRange")
+   {
+      theLine >> currentObs.uplinkBand;
+//      theLine >> currentObs.uplinkFreq;
+      theLine >> currentObs.uplinkFreqAtRecei;
+      theLine >> currentObs.rangeModulo;
+      currentObs.unit = "RU";
+   }
+
+/*
    Covariance *noise = new Covariance();
    noise->SetDimension(dataSize);
    for (Integer i = 0; i < dataSize; ++i)
@@ -428,6 +634,27 @@ ObservationData* GmatObType::ReadObservation()
       (*noise)(i,i) = defaultNoiseCovariance;
    }
    currentObs.noiseCovariance = noise;
+*/
+   #ifdef DEBUG_FILE_READ
+      MessageInterface::ShowMessage(" %.12lf    %s    %d    ", currentObs.epoch, currentObs.typeName.c_str(), currentObs.type);
+      for (Integer i = 0; i < participantSize; ++i)
+		  MessageInterface::ShowMessage("%s    ", currentObs.participantIDs.at(i).c_str());
+
+      for (Integer i = 0; i < dataSize; ++i)
+		  MessageInterface::ShowMessage("%.12lf    ", currentObs.value.at(i));
+
+      if (currentObs.typeName == "DSNRange")
+      {
+         //MessageInterface::ShowMessage("   %d   %.12le   %.12le", currentObs.uplinkBand, currentObs.uplinkFreq, currentObs.rangeModulo);
+         MessageInterface::ShowMessage("   %d   %.12le   %.12le", currentObs.uplinkBand, currentObs.uplinkFreqAtRecei, currentObs.rangeModulo);
+      }
+      else if ((currentObs.typeName == "Doppler")||(currentObs.typeName == "Doppler_RangeRate"))
+      {
+         MessageInterface::ShowMessage("   %d   %.12le", currentObs.uplinkBand, currentObs.dopplerCountInterval);
+      }
+	   MessageInterface::ShowMessage("\n");
+      MessageInterface::ShowMessage("GmatObType::ReadObservation() End\n");
+   #endif
 
    return &currentObs;
 }
@@ -447,7 +674,7 @@ ObservationData* GmatObType::ReadObservation()
 bool GmatObType::Close()
 {
    #ifdef DEBUG_FILE_WRITE
-      MessageInterface::ShowMessage("GmatObType::Close() Executing\n");
+      MessageInterface::ShowMessage("GmatObType::Close() Executing for %p\n", this);
    #endif
    bool retval = false;
 
@@ -477,6 +704,88 @@ bool GmatObType::Finalize()
       MessageInterface::ShowMessage("GmatObType::Finalize() Executing\n");
    #endif
    bool retval = true;
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool ProcessSignals(const std::string str, Integer& participantSize,
+//       Integer& dataSize)
+//------------------------------------------------------------------------------
+/**
+ * Parses a measurement file line and counts participants and data elements
+ *
+ * @param str The data line from the tracking data file
+ * @param participantSize The counter for participants from the line
+ * @param dataSize The counter for data entries on the line
+ *
+ * @return true if the line was successfully parsed, false if not
+ */
+//------------------------------------------------------------------------------
+bool GmatObType::ProcessSignals(const std::string str, Integer& participantSize,
+      Integer& dataSize)
+{
+   bool retval = false;
+
+   participantSize = 0;
+   dataSize = 0;
+
+   std::stringstream temp(str);
+   std::string field;
+
+   // First 3 fields are already handled
+   for (Integer i = 0; i < 3; ++i)
+   {
+      temp >> field;
+      #ifdef DEBUG_SIGNAL_READ
+         MessageInterface::ShowMessage("   +++ field:  %s\n", field.c_str());
+      #endif
+   }
+
+   // Next set of fields are participants
+   while (temp.eof() == false)
+   {
+      temp >> field;
+      if (GmatStringUtil::IsValidNumber(field, true) == true)
+      {
+         #ifdef DEBUG_SIGNAL_READ
+            MessageInterface::ShowMessage("   +++ Measurement:  %s\n",
+                  field.c_str());
+         #endif
+         ++dataSize;    // Track first data entry!
+         break;
+      }
+
+      #ifdef DEBUG_SIGNAL_READ
+         MessageInterface::ShowMessage("   +++ Participant:  %s\n",
+               field.c_str());
+      #endif
+      ++participantSize;
+   }
+
+   // Then the data
+   while (temp.eof() == false)
+   {
+      temp >> field;
+
+      if (GmatStringUtil::IsValidNumber(field, true) == false)
+         throw MeasurementException("Data line \"" + str + "\" is improperly "
+               "formatted for a GMAT measurement data (gmd) file");
+
+      #ifdef DEBUG_SIGNAL_READ
+         MessageInterface::ShowMessage("   +++ Measurement:  %s\n",
+               field.c_str());
+      #endif
+      ++dataSize;
+   }
+
+   #ifdef DEBUG_SIGNAL_READ
+      MessageInterface::ShowMessage("   ---> %d participants and %d data "
+            "entries\n", participantSize, dataSize);
+   #endif
+
+   if ((participantSize > 0) && (dataSize > 0))
+      retval = true;
 
    return retval;
 }

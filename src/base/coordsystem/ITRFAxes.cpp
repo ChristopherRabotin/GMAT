@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -214,14 +224,26 @@ bool ITRFAxes::Initialize()
    iauFile->Initialize();
 
    // create and initialize EopFile object:
-   if (eop == NULL)
-   {
-	   FileManager* fm = FileManager::Instance();
-	   std::string name = fm->GetFilename("EOP_FILE");
-	   EopFile* eopFile = new EopFile(name);
-	   eopFile->Initialize();
-	   SetEopFile(eopFile);
-   }
+   // wcs 2016.04.28 this is not how we want to do this since we can now override
+   // the EOP filename in the Earth object, so getting the name from the startup
+   // file may not be correct.  This eop pointer should never be NULL anyway, 
+   // since we set the pointer on creation by the Moderator
+//   if (eop == NULL)
+//   {
+//	   FileManager* fm = FileManager::Instance();
+//      // Changed to use FileManager::FindPath() (LOJ: 2014.07.01)
+//	   std::string fileName = fm->GetFilename("EOP_FILE");
+//      std::string fileNameFullPath = fm->FindPath("", "EOP_FILE", true, true, true);
+//      if (fileNameFullPath == "")
+//         throw CoordinateSystemException("**** ERROR **** The EOP file '" + fileName + "' does not exist\n");
+//      
+//	   EopFile* eopFile = new EopFile(fileNameFullPath);
+//      if (eopFile == NULL)
+//         throw CoordinateSystemException("**** ERROR **** Cannot open EOP file '" + fileName + "'\n");
+//      
+//	   eopFile->Initialize();
+//	   SetEopFile(eopFile);
+//   }
 
    isInitialized = true;
 

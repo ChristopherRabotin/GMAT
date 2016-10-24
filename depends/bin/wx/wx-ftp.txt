@@ -1,7 +1,0 @@
-open ftp.wxwidgets.org
-anonymous
-gmat@gsfc.nasa.gov
-cd pub/2.8.12
-binary
-get wxMSW-2.8.12.zip
-quit

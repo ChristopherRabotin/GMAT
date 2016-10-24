@@ -11,15 +11,15 @@ tvhf.Filename = '../samples/SupportFiles/Ex_FileInterface_TVHF.sv'
 tvhf.Format = 'TVHF_ASCII'
 
 % Set up the visualization
-Create OrbitView ov
-ov.Add = {sc, Earth}
-ov.CoordinateSystem = EarthMJ2000Eq
-ov.ViewPointReference = Earth
-ov.ViewPointVector = [ 0 0 2e5 ]
-ov.ViewDirection = Earth
-ov.ViewScaleFactor = 1
-ov.ViewUpCoordinateSystem = EarthMJ2000Eq
-ov.ViewUpAxis = 'Z'
+Create OrbitView EarthView
+EarthView.Add = {sc, Earth}
+EarthView.CoordinateSystem = EarthMJ2000Eq
+EarthView.ViewPointReference = Earth
+EarthView.ViewPointVector = [ 0 0 2e5 ]
+EarthView.ViewDirection = Earth
+EarthView.ViewScaleFactor = 1
+EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq
+EarthView.ViewUpAxis = 'Z'
 
 % The Mission Sequence
 BeginMissionSequence

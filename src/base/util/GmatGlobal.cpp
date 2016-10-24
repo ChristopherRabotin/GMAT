@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -20,6 +30,7 @@
 //------------------------------------------------------------------------------
 
 #include "GmatGlobal.hpp"
+#include "MessageInterface.hpp"
 #include <algorithm>                    // Required for GCC 4.3
 
 //---------------------------------
@@ -53,6 +64,29 @@ GmatGlobal* GmatGlobal::Instance()
       theGmatGlobal = new GmatGlobal;
         
    return theGmatGlobal;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetGmatVersion()
+//------------------------------------------------------------------------------
+std::string GmatGlobal::GetGmatVersion()
+{
+   return gmatVersion;
+}
+
+//------------------------------------------------------------------------------
+// bool IsGmatCompiledIn64Bit()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsGmatCompiledIn64Bit()
+{
+   bool building64bit = true;
+   #ifdef _MSC_VER  // if Microsoft Visual C++
+   #ifndef USE_64_BIT_LONGS
+   building64bit = false;
+   #endif
+   #endif
+   
+   return building64bit;
 }
 
 //------------------------------------------------------------------------------
@@ -219,7 +253,55 @@ void GmatGlobal::SetRunInterrupted(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// Gmat::RunState GetRunState()
+//------------------------------------------------------------------------------
+Gmat::RunState GmatGlobal::GetRunState()
+{
+   return runState;
+}
+
+//------------------------------------------------------------------------------
+// void GmatGlobal::SetRunState(Gmat::RunState rs)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetRunState(Gmat::RunState rs)
+{
+   #ifdef DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("GmatGlobal::SetRunState() setting runstate to %d\n", rs);
+   #endif
+   runState = rs;
+}
+
+//------------------------------------------------------------------------------
+// Gmat::RunState GetDetailedRunState()
+//------------------------------------------------------------------------------
+Gmat::RunState GmatGlobal::GetDetailedRunState()
+{
+   return detailedRunState;
+}
+
+//------------------------------------------------------------------------------
+// void GmatGlobal::SetDetailedRunState(Gmat::RunState drs)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetDetailedRunState(Gmat::RunState drs)
+{
+   #ifdef DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("GmatGlobal::SetDetailedRunState() setting detailedRunstate to %d\n", drs);
+   #endif
+   detailedRunState = drs;
+}
+
+//------------------------------------------------------------------------------
 // Integer GetRunMode()
+//------------------------------------------------------------------------------
+/**
+ * Returns current run mode:
+ *    NORMAL - Normal run
+ *    EXIT_AFTER_RUN - GMAT closes after run complete
+ *    TESTING - GMAT shows extra menu options for testing with plots
+ *    TESTING_NO_PLOTS - GMAT shows extra menu options for testing without plots
+ */
 //------------------------------------------------------------------------------
 Integer GmatGlobal::GetRunMode()
 {
@@ -232,6 +314,12 @@ Integer GmatGlobal::GetRunMode()
 void GmatGlobal::SetRunMode(Integer mode)
 {
    runMode = mode;
+
+   // It is a temporary fix in order to run gression test with runmode = TESTING. 
+   // It needs to improve in the next GMAT release
+   if (runMode == GmatGlobal::TESTING)
+      isTesting = true;
+
    if (runMode == EXIT_AFTER_RUN)
       isBatchMode = true;
 }
@@ -336,6 +424,53 @@ bool GmatGlobal::IsEventLocationAvailable()
    return isEventLocationAvailable;
 }
 
+//------------------------------------------------------------------------------
+// void SetIncludeFoundInScriptResource(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Sets the #Include statement found in the script resouce flag. Normally this
+ * flag is set from the ScriptInterpreter and the ResourceTree retrieves it.
+ *
+ * @param flag Flag that is true if there are #Include statements, false if not
+ */
+//------------------------------------------------------------------------------
+void GmatGlobal::SetIncludeFoundInScriptResource(bool flag)
+{
+   includeFoundInScriptResource = flag;
+}
+
+//------------------------------------------------------------------------------
+// bool GetIncludeFoundInScriptResource()
+//------------------------------------------------------------------------------
+/**
+ * Returns the #Include statement found in the script resouce flag. Normally this
+ * flag is set from the ScriptInterpreter and the ResourceTree retrieves it.
+ *
+ * @return The flag
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::GetIncludeFoundInScriptResource()
+{
+   return includeFoundInScriptResource;
+}
+
+//------------------------------------------------------------------------------
+// bool IsGUISavable()
+//------------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether GUI can be saved or not.
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsGUISavable()
+{
+   // Currently GUI cannot be saved when a main script contains #Include
+   // before the BeginMissinSequence
+   // Are there any other situations GUI cannot be saved?
+   if (includeFoundInScriptResource)
+      return false;
+   else
+      return true;
+}
 
 //------------------------------------------------------------------------------
 // bool IsMissionTreeDebugOn()
@@ -367,6 +502,22 @@ bool GmatGlobal::IsWritingParameterInfo()
 void GmatGlobal::SetWriteParameterInfo(bool flag)
 {
    isWritingParameterInfo = flag;
+}
+
+//------------------------------------------------------------------------------
+// bool IsWritingFilePathInfo()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsWritingFilePathInfo()
+{
+   return isWritingFilePathInfo;
+}
+
+//------------------------------------------------------------------------------
+// void SetWriteFilePathInfo(bool flag)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetWriteFilePathInfo(bool flag)
+{
+   isWritingFilePathInfo = flag;
 }
 
 //------------------------------------------------------------------------------
@@ -714,6 +865,19 @@ void GmatGlobal::ClearHiddenCommands()
    mHiddenCommands.clear();
 }
 
+//------------------------------------------------------------------------------
+// void  IsHiddenCommand(const char *cmd)
+//------------------------------------------------------------------------------
+/*
+ * returns true if this command should not be shown in menu
+ *
+ * @return  true to hide
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsHiddenCommand(const char *cmd)
+{
+   return IsHiddenCommand(std::string(cmd));
+}
 
 //------------------------------------------------------------------------------
 // void  IsHiddenCommand(const std::string &cmd)
@@ -780,16 +944,26 @@ void GmatGlobal::RemoveHiddenCommand(const std::string &cmd)
 //------------------------------------------------------------------------------
 GmatGlobal::GmatGlobal()
 {
+   // Current GMAT version.
+   // @note: Make sure to switch it to the official release number for RC1
+   gmatVersion = "R2016a";
+   
+   isTesting = false;                      // It is a temporary fix in order to run gression test with runmode = TESTING. 
+                                           // It needs to improve in the next GMAT release
+
    isBatchMode = false;
    isNitsClient = false;
    runInterrupted = false;
    isMatlabAvailable = false;
    isMatlabDebugOn = false;
    isEventLocationAvailable = false;
+   includeFoundInScriptResource = false;
    isMissionTreeDebugOn = false;
    isWritingParameterInfo = false;
+   isWritingFilePathInfo = false;
    isWritingGmatKeyword = true;
    runMode = NORMAL;
+   runState = Gmat::IDLE;
    guiMode = NORMAL_GUI;
    plotMode = NORMAL_PLOT;
    matlabMode = SHARED;

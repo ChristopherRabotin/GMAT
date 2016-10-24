@@ -13,7 +13,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "TsPlotCanvas.hpp"
 #include "MessageInterface.hpp"
 #include "TsPlotOptionsDialog.hpp"
@@ -39,6 +38,7 @@ bool TsPlotCanvas::defaultLabels = false;
 
 BEGIN_EVENT_TABLE(TsPlotCanvas, wxWindow)
    EVT_PAINT         (TsPlotCanvas::OnPaint)
+   EVT_SET_FOCUS     (TsPlotCanvas::OnRefresh)
    EVT_SIZE          (TsPlotCanvas::OnSize)
    EVT_MOUSE_EVENTS  (TsPlotCanvas::OnMouseEvent)
    EVT_MENU          (ID_TOGGLE_GRID, TsPlotCanvas::ToggleGrid)
@@ -54,6 +54,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
                            const wxSize& size, long style,
                            const wxString& name) :
    wxWindow       (parent, -1, pos, size, style),
+   runState       (10000),
    left           (80),
    right          (30),
    top            (20),
@@ -64,7 +65,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    axisLabelSize  (12),
    plotPens       (NULL),
    plotDependent  (NULL),
-   xDataName      ("X Data"),
+   //xDataName      ("X Data"),
    filename       ("PlotData.txt"),
    plotTitle      (name),
    xLabel         (""),
@@ -113,12 +114,15 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    hasLegend      (true),
    allowPlotOptions(false),			// Change to true to show options dialog
    initializeLegendLoc (true),
+   alwaysDraw     (false),
    xLabelPrecision(8),
    yLabelPrecision(6),
    plotArea(),  // Fixed unitialized value error
    mouseRect(),
    legendRect(),
-   legendColumns  (1)
+   legendColumns  (1),
+   resized        (false),
+   drawAllCounter (0)
 {
    wxPaintDC dc(this);
 
@@ -163,36 +167,86 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 // wx Message Handlers
 //==============================================================================
 
+void TsPlotCanvas::OnRefresh(wxFocusEvent& ev)
+{
+   #ifdef DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("==> TsPlotCanvas::OnRefresh() entered");
+   #endif
+
+   wxPaintEvent pev;
+   pev.SetEventObject(this);
+   drawAllCounter = 2;
+   ProcessWindowEvent(pev);
+}
+
+
 void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
 {
+   #ifdef DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("==> TsPlotCanvas::OnPaint() entered, dataUpdated = %d\n", dataUpdated);
+   #endif
+   
    // On linux, this line floods the processor with messages.  So for
    // platforms that are not using GTK, refresh here
    #ifndef __WXGTK__
       wxWindow::Refresh(false);
    #endif
+   bool ownedPlotCanvas = true;
+
+   wxRegionIterator upd(GetUpdateRegion());
+   if (upd && dataUpdated == false)
+   {
+      #ifdef DEBUG_REGIONUPDATES
+         MessageInterface::ShowMessage("Update Regions:\n");
+      #endif
+      ++upd;
+      if (upd)
+         resized = true;
+   }
+
+   // Always refresh all in idle state (10000)
+   if (runState == 10000)
+      resized = true;
 
    wxPaintDC dc(this);
    wxCoord w, h;
    dc.GetSize(&w, &h);
+
+   if (drawAllCounter > 0)
+   {
+      resized = true;
+      --drawAllCounter;
+   }
 
    // If the legend is turned on, be sure it can be seen
    if (legendRect.x > w)
       legendRect.x = w - 5;
    if (legendRect.y > h)
       legendRect.y = h - 5;
-
-   bool drawAll = false;
-
-   wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
+   bool drawAll = (resized ? true : false);
+   
+   // wxRegionIterator is not used here so commented out (LOJ: 2014.10.10)
+   //wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
+   #ifdef __WXMAC__
    if (!dataUpdated)
       drawAll = true;
-
+   #endif
+   if (alwaysDraw)
+      drawAll = true;
+   
    Refresh(dc, drawAll);
+   
+   #ifdef DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage("==> TsPlotCanvas::OnPaint() leaving\n");
+   #endif
 }
 
 
 void TsPlotCanvas::OnSize(wxSizeEvent& ev)
 {
+   resized = true;
    initializeLegendLoc = true;
 }
 
@@ -264,7 +318,12 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
       }
       if (event.Dragging())
       {
+         #if wxCHECK_VERSION(3, 0, 0)
+         wxRasterOperationMode logfun = dc.GetLogicalFunction();
+         #else
          int logfun = dc.GetLogicalFunction();
+         #endif
+         
          dc.SetLogicalFunction(wxINVERT);
          if (zooming)
          {
@@ -335,7 +394,11 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
          if (zooming)
          {
             // First clear the rubberband, in case no zoom is made
+            #if wxCHECK_VERSION(3, 0, 0)
+            wxRasterOperationMode logfun = dc.GetLogicalFunction();
+            #else
             int logfun = dc.GetLogicalFunction();
+            #endif
             dc.SetLogicalFunction(wxINVERT);
             dc.DrawLine(mouseRect.x, mouseRect.y, mouseRect.x, oldY);
             dc.DrawLine(mouseRect.x, mouseRect.y, oldX, mouseRect.y);
@@ -388,9 +451,14 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
       top = 30;
    else
       top = 20;
-
+   
    Rescale(dc);
-
+   
+   #if DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("TsPlotCanvas::Refresh() rescaled = %d\n", rescaled);
+   #endif
+   
    // Set region colors
    if (rescaled || drawAll)
    {
@@ -432,7 +500,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
 
    if (hasGrid && (rescaled || drawAll))
       DrawGrid(dc);
-
+   
    PlotData(dc);
 
    if (rescaled || drawAll)
@@ -443,7 +511,8 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
 
    wxEND_DRAWING
    dataUpdated = false;
-
+   resized = false;
+   
    #if DEBUG_TS_CANVAS
    MessageInterface::ShowMessage("TsPlotCanvas::Refresh() leaving\n");
    #endif
@@ -728,8 +797,8 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
 
    for (j = 0; j < labelCount; ++j)
    {
-	  dc.SetTextForeground(data[j]->GetColour(0));
-      label = _T(names[j].c_str());
+      dc.SetTextForeground(data[j]->GetColour(0));
+      label = names[j];
       xloc = legendRect.x + markerReserve + 6;
       yloc = legendRect.y + (h+1)*j + 4;
       dc.DrawText(label, xloc, yloc);
@@ -752,17 +821,17 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
 // Data manipulation methods
 //==============================================================================
 
-void TsPlotCanvas::SetDataName(const std::string &dataName)
+void TsPlotCanvas::SetDataName(const wxString &dataName)
 {
    #ifdef DEBUG_INTERFACE
-      MessageInterface::ShowMessage("Adding data named %s\n", dataName.c_str());
+   MessageInterface::ShowMessage("Adding data named %s\n", dataName.c_str());
    #endif
-
+   
    names.push_back(dataName);
 }
 
 
-void TsPlotCanvas::SetLabel(const std::string &dataName,
+void TsPlotCanvas::SetLabel(const wxString &dataName,
                             const PlotComponents which)
 {
    switch (which)
@@ -1119,7 +1188,7 @@ void TsPlotCanvas::ToggleLegend(wxCommandEvent& event)
 
 void TsPlotCanvas::SetOptions(wxCommandEvent& event)
 {
-   TsPlotOptionsDialog dlg(xName, yName, this, -1, "Plot options");
+   TsPlotOptionsDialog dlg(xName.c_str(),yName.c_str(),this, -1, "Plot options");
    dlg.SetPlotTitle(plotTitle);
    dlg.SetXLabel(xLabel);
    dlg.SetYLabel(yLabel);
@@ -1717,4 +1786,10 @@ double TsPlotCanvas::GetActualXValue(int x, int y)
 double TsPlotCanvas::GetActualYValue(int y, int x)
 {
    return currentYMax - (y - top) / yScale;
+}
+
+void TsPlotCanvas::AlwaysDraw(bool tf)
+{
+   alwaysDraw = tf;
+   runState = alwaysDraw ? 10000 : 10001;
 }

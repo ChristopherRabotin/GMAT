@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="Antenna" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Antenna</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>Antenna</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Antenna</refname>
+
+    <refpurpose>Transmits or receives an RF signal.</refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>A number of GMAT resources, <guilabel>GroundStation</guilabel>,
+    <guilabel>Transponder</guilabel>, <guilabel>Receiver</guilabel>, and
+    <guilabel>Transmitter</guilabel>, use an <guilabel>Antenna</guilabel>
+    resource to transmit and/or receive RF signals.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="GroundStation"/>, <xref linkend="Transponder"/>, <xref
+    linkend="Receiver"/>, <xref linkend="Transmitter"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <para>There are no fields for the <guilabel>Antenna</guilabel>
+    resource.</para>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>This example shows how the <guilabel>Antenna</guilabel> resource
+      is used.</para>
+
+      <programlisting><?db-font-size 75% ?>Create Antenna SatTranponderAntenna DSNReceiverAntenna DSNTransmitterAntenna;
+
+Create Transponder SatTransponder;
+SatTransponder.PrimaryAntenna   = SatTranponderAntenna
+
+Create Spacecraft Sat
+Sat.AddHardware                 = {SatTransponder, SatTranponderAntenna};
+
+Create Transmitter DSNTransmitter
+DSNTransmitter.PrimaryAntenna   = DSNTransmitterAntenna
+
+Create Receiver DSNReceiver
+DSNReceiver.PrimaryAntenna      = DSNReceiverAntenna;
+
+Create GroundStation DSN;
+DSN.AddHardware                 = ...
+ {DSNTransmitter, DSNReceiver, DSNTransmitterAntenna, DSNReceiverAntenna};
+BeginMissionSequence;</programlisting>
+
+      <para>Since the <guilabel>Antenna</guilabel> resource currently has no
+      fields and thus has no function, for this GMAT release, we only need to
+      create one <guilabel>Antenna</guilabel> resource that can be used
+      multiple times. Thus, the example above simplifies as shown
+      below.</para>
+
+      <programlisting>Create Antenna GenericAntenna;
+
+Create Transponder SatTransponder;
+SatTransponder.PrimaryAntenna     = GenericAntenna
+
+Create Spacecraft Sat
+Sat.AddHardware                   = {SatTransponder, GenericAntenna};
+
+Create Transmitter DSNTransmitter
+DSNTransmitter.PrimaryAntenna     = GenericAntenna
+Create Receiver DSNReceiver
+DSNReceiver.PrimaryAntenna        = GenericAntenna;
+
+Create GroundStation DSN;
+DSN.AddHardware                   = ...
+                       {DSNTransmitter, DSNReceiver, GenericAntenna};
+BeginMissionSequence;</programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

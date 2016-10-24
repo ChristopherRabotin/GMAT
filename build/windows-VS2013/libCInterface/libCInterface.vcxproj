@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-wx3-unicode|Win32">
+      <Configuration>Debug-wx3-unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3.0|Win32">
+      <Configuration>Release-wx3.0</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\command\PrepareMissionSequence.hpp" />
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\factory\CCommandFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\include\GmatCFunc_defs.hpp" />
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfacePluginFunctions.hpp" />
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfaceFunctions.hpp" />
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\propagator\DynFunInterface.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\command\PrepareMissionSequence.cpp" />
+    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\factory\CCommandFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfacePluginFunctions.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C3252E26-1167-4F4D-AD89-3926B1AF0C5C}</ProjectGuid>
+    <RootNamespace>libCInterface</RootNamespace>
+    <ProjectName>libCInterface</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <CharacterSet>Unicode</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\bin\</OutDir>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\bin64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <GenerateManifest>false</GenerateManifest>
+    <OutDir>..\..\..\application\bin\</OutDir>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\plugins\CInterfacePlugin\src\include;..\..\..\plugins\CInterfacePlugin\src\command;..\..\..\plugins\CInterfacePlugin\src\factory;..\..\..\plugins\CInterfacePlugin\src\forcemodel;..\..\..\plugins\CInterfacePlugin\src\plugin;..\..\..\plugins\CInterfacePlugin\src\propagator;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\propagator;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\base\interpolator;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\burn;..\..\..\src\base\event;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;CINTERFACE_EXPORTS;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAsManaged>false</CompileAsManaged>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\application\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\plugins\CInterfacePlugin\src\include;..\..\..\plugins\CInterfacePlugin\src\command;..\..\..\plugins\CInterfacePlugin\src\factory;..\..\..\plugins\CInterfacePlugin\src\forcemodel;..\..\..\plugins\CInterfacePlugin\src\plugin;..\..\..\plugins\CInterfacePlugin\src\propagator;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\propagator;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\base\interpolator;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\burn;..\..\..\src\base\event;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;CINTERFACE_EXPORTS;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAsManaged>false</CompileAsManaged>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\application\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\plugins\CInterfacePlugin\src\include;..\..\..\plugins\CInterfacePlugin\src\command;..\..\..\plugins\CInterfacePlugin\src\factory;..\..\..\plugins\CInterfacePlugin\src\forcemodel;..\..\..\plugins\CInterfacePlugin\src\plugin;..\..\..\plugins\CInterfacePlugin\src\propagator;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\propagator;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\base\interpolator;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\burn;..\..\..\src\base\event;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;CINTERFACE_EXPORTS;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAsManaged>false</CompileAsManaged>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\application\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\plugins\CInterfacePlugin\src\include;..\..\..\plugins\CInterfacePlugin\src\command;..\..\..\plugins\CInterfacePlugin\src\factory;..\..\..\plugins\CInterfacePlugin\src\forcemodel;..\..\..\plugins\CInterfacePlugin\src\plugin;..\..\..\plugins\CInterfacePlugin\src\propagator;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\propagator;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\base\interpolator;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\burn;..\..\..\src\base\event;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;CINTERFACE_EXPORTS;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAsManaged>false</CompileAsManaged>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\application\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\plugins\CInterfacePlugin\src\include;..\..\..\plugins\CInterfacePlugin\src\command;..\..\..\plugins\CInterfacePlugin\src\factory;..\..\..\plugins\CInterfacePlugin\src\forcemodel;..\..\..\plugins\CInterfacePlugin\src\plugin;..\..\..\plugins\CInterfacePlugin\src\propagator;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\propagator;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\base\interpolator;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\burn;..\..\..\src\base\event;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <PreprocessorDefinitions>_DYNAMICLINK;CINTERFACE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>call buildMatlabPrototype</Command>
+      <Message>Building MATLAB protype file</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\plugins\CInterfacePlugin\src\include;..\..\..\plugins\CInterfacePlugin\src\command;..\..\..\plugins\CInterfacePlugin\src\factory;..\..\..\plugins\CInterfacePlugin\src\forcemodel;..\..\..\plugins\CInterfacePlugin\src\plugin;..\..\..\plugins\CInterfacePlugin\src\propagator;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\propagator;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\base\interpolator;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\burn;..\..\..\src\base\event;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <PreprocessorDefinitions>_DYNAMICLINK;CINTERFACE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\application\bin64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>call buildMatlabPrototype</Command>
+      <Message>Building MATLAB protype file</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <PostBuildEvent>
+      <Command>call buildMatlabPrototype</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <PostBuildEvent>
+      <Message>Building MATLAB protype file</Message>
+    </PostBuildEvent>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\plugins\CInterfacePlugin\src\include;..\..\..\plugins\CInterfacePlugin\src\command;..\..\..\plugins\CInterfacePlugin\src\factory;..\..\..\plugins\CInterfacePlugin\src\forcemodel;..\..\..\plugins\CInterfacePlugin\src\plugin;..\..\..\plugins\CInterfacePlugin\src\propagator;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\propagator;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\base\interpolator;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\burn;..\..\..\src\base\event;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_DYNAMICLINK;CINTERFACE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

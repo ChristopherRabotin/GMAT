@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Darrel J. Conway
 // Created: 2004/11/08
@@ -37,6 +47,7 @@
 //#define DEBUG_THRUSTER_CONVERT
 //#define DEBUG_THRUSTER_CONVERT_ROTMAT
 //#define DEBUG_BURN_CONVERT_ROTMAT
+//#define DEBUG_SET_POWER
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -46,16 +57,14 @@
 #include "MemoryTracker.hpp"
 #endif
 
+#define RATIO_DEFAULT -1.0
+
 //---------------------------------
 // static data
 //---------------------------------
 
 /// Available local axes labels
 StringArray Thruster::localAxesLabels;
-/// C-coefficient units
-StringArray Thruster::cCoefUnits;
-/// K-coefficient units
-StringArray Thruster::kCoefUnits;
 
 /// Labels used for the thruster element parameters.
 const std::string
@@ -69,14 +78,11 @@ Thruster::PARAMETER_TEXT[ThrusterParamCount - HardwareParamCount] =
    "ThrustScaleFactor",
    "DecrementMass",
    "Tank",
+   "MixRatio",
    "GravitationalAccel",
-   "C1",  "C2",  "C3",  "C4",  "C5",  "C6",  "C7",  "C8",
-   "C9", "C10", "C11", "C12", "C13", "C14", "C15", "C16",
-   
-   "K1",  "K2",  "K3",  "K4",  "K5",  "K6",  "K7",  "K8",
-   "K9", "K10", "K11", "K12", "K13", "K14", "K15", "K16",
-   "C_UNITS",
-   "K_UNITS",
+   "Thrust",
+   "Isp",
+   "MassFlowRate",
 };
 
 /// Types of the parameters used by thrusters.
@@ -91,19 +97,11 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
    Gmat::REAL_TYPE,        // "ThrustScaleFactor"
    Gmat::BOOLEAN_TYPE,     // "DecrementMass"
    Gmat::OBJECTARRAY_TYPE, // "Tank"
+   Gmat::RVECTOR_TYPE,     // "MixRatio"
    Gmat::REAL_TYPE,        // "GravitationalAccel"
-   // C's
-   Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-   // K's
-   Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-   Gmat::STRINGARRAY_TYPE,
-   Gmat::STRINGARRAY_TYPE,
+   Gmat::REAL_TYPE,        // "Thrust"
+   Gmat::REAL_TYPE,        // "Isp"
+   Gmat::REAL_TYPE,        // "MassFlowRate"
 };
 
 
@@ -121,8 +119,8 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
  *       or when new spacecraft is set
  */
 //------------------------------------------------------------------------------
-Thruster::Thruster(std::string nomme) :
-   Hardware             (Gmat::THRUSTER, "Thruster", nomme),
+Thruster::Thruster(const std::string &typeStr, const std::string &nomme) :
+   Hardware             (Gmat::THRUSTER, typeStr, nomme),
    solarSystem          (NULL),
    localCoordSystem     (NULL),
    coordSystem          (NULL),
@@ -134,12 +132,14 @@ Thruster::Thruster(std::string nomme) :
    localAxesName        ("VNB"),
    j2000BodyName        ("Earth"),
    satName              (""),
+   power                (0.0),
    gravityAccel         (9.81),
    dutyCycle            (1.0),
    thrustScaleFactor    (1.0),
    pressure             (1500.0),
    temperatureRatio     (1.0),
    thrust               (500.0),
+   appliedThrustMag     (0.0),
    impulse              (2150.0),
    mDot                 (0.0),
    decrementMass        (false),
@@ -158,15 +158,7 @@ Thruster::Thruster(std::string nomme) :
    inertialDirection[0] = 1.0;
    inertialDirection[1] = 0.0;
    inertialDirection[2] = 0.0;
-   
-   cCoefficients[0]  = 10.0;
-   for (int i=1; i<COEFFICIENT_COUNT; i++)
-      cCoefficients[i] = 0.0;
-   
-   kCoefficients[0]  = 300.0;
-   for (int i=1; i<COEFFICIENT_COUNT; i++)
-      kCoefficients[i] = 0.0;
-   
+
    // Available local axes labels
    // Since it is static data, clear it first
    localAxesLabels.clear();
@@ -174,45 +166,7 @@ Thruster::Thruster(std::string nomme) :
    localAxesLabels.push_back("LVLH");
    localAxesLabels.push_back("MJ2000Eq");
    localAxesLabels.push_back("SpacecraftBody");
-   
-   // C coefficient units
-   cCoefUnits.clear();
-   cCoefUnits.push_back("N");
-   cCoefUnits.push_back("N/kPa");
-   cCoefUnits.push_back("N");
-   cCoefUnits.push_back("N/kPa");
-   cCoefUnits.push_back("N/kPa^2");
-   cCoefUnits.push_back("N/kPa^C7");      
-   cCoefUnits.push_back("None");   
-   cCoefUnits.push_back("N/kPa^C9");
-   cCoefUnits.push_back("None");
-   cCoefUnits.push_back("N/kPa^C11");
-   cCoefUnits.push_back("None");
-   cCoefUnits.push_back("N");
-   cCoefUnits.push_back("None");
-   cCoefUnits.push_back("1/kPa");
-   cCoefUnits.push_back("None");
-   cCoefUnits.push_back("1/kPa");
-   
-   // K coefficient units
-   kCoefUnits.clear();
-   kCoefUnits.push_back("s");
-   kCoefUnits.push_back("s/kPa");
-   kCoefUnits.push_back("s");
-   kCoefUnits.push_back("s/kPa");
-   kCoefUnits.push_back("s/kPa^2");      
-   kCoefUnits.push_back("s/kPa^K7");   
-   kCoefUnits.push_back("None");
-   kCoefUnits.push_back("s/kPa^K9");
-   kCoefUnits.push_back("None");
-   kCoefUnits.push_back("s/kPa^K11");
-   kCoefUnits.push_back("None");
-   kCoefUnits.push_back("s");
-   kCoefUnits.push_back("None");
-   kCoefUnits.push_back("1/kPa");
-   kCoefUnits.push_back("None");
-   kCoefUnits.push_back("1/kPa");
-   
+
    // set parameter write order
    for (Integer i=HardwareParamCount; i <= AXES; i++)
       parameterWriteOrder.push_back(i);
@@ -223,6 +177,9 @@ Thruster::Thruster(std::string nomme) :
    
    for (Integer i=DUTY_CYCLE; i < ThrusterParamCount; i++)
       parameterWriteOrder.push_back(i);
+
+   // Initialize mix ratio for no tanks
+   mixRatio.SetSize(0);
 }
 
 
@@ -235,7 +192,7 @@ Thruster::Thruster(std::string nomme) :
 //------------------------------------------------------------------------------
 Thruster::~Thruster()
 {
-   // delete local coordiante system
+   // delete local coordinate system
    if (usingLocalCoordSys && localCoordSystem)
    {
       #ifdef DEBUG_MEMORY
@@ -276,12 +233,14 @@ Thruster::Thruster(const Thruster& th) :
    localAxesName        (th.localAxesName),
    j2000BodyName        (th.j2000BodyName),
    satName              (th.satName),
+   power                (th.power),
    gravityAccel         (th.gravityAccel),
    dutyCycle            (th.dutyCycle),
    thrustScaleFactor    (th.thrustScaleFactor),
    pressure             (th.pressure),
    temperatureRatio     (th.temperatureRatio),
    thrust               (th.thrust),
+   appliedThrustMag     (th.appliedThrustMag),
    impulse              (th.impulse),
    mDot                 (th.mDot),
    decrementMass        (th.decrementMass),
@@ -291,7 +250,8 @@ Thruster::Thruster(const Thruster& th) :
    usingLocalCoordSys   (th.usingLocalCoordSys),
    isMJ2000EqAxes       (th.isMJ2000EqAxes),
    isSpacecraftBodyAxes (th.isSpacecraftBodyAxes),
-   tankNames            (th.tankNames)
+   tankNames            (th.tankNames),
+   mixRatio             (th.mixRatio)
 {
    #ifdef DEBUG_THRUSTER_CONSTRUCTOR
    MessageInterface::ShowMessage
@@ -305,9 +265,6 @@ Thruster::Thruster(const Thruster& th) :
    inertialDirection[0] = th.inertialDirection[0];
    inertialDirection[1] = th.inertialDirection[1];
    inertialDirection[2] = th.inertialDirection[2];
-   
-   memcpy(cCoefficients, th.cCoefficients, COEFFICIENT_COUNT * sizeof(Real));
-   memcpy(kCoefficients, th.kCoefficients, COEFFICIENT_COUNT * sizeof(Real));
    
    #ifdef DEBUG_THRUSTER_CONSTRUCTOR
    MessageInterface::ShowMessage
@@ -377,6 +334,7 @@ Thruster& Thruster::operator=(const Thruster& th)
    localAxesName       = th.localAxesName;
    j2000BodyName       = th.j2000BodyName;
    satName             = th.satName;
+   power               = th.power;
    
    gravityAccel        = th.gravityAccel;
    dutyCycle           = th.dutyCycle;
@@ -384,6 +342,7 @@ Thruster& Thruster::operator=(const Thruster& th)
    pressure            = th.pressure;
    temperatureRatio    = th.temperatureRatio;
    thrust              = th.thrust;
+   appliedThrustMag    = th.appliedThrustMag;
    impulse             = th.impulse;
    mDot                = th.mDot;
    
@@ -391,9 +350,6 @@ Thruster& Thruster::operator=(const Thruster& th)
    inertialDirection[1]  = th.inertialDirection[1];
    inertialDirection[2]  = th.inertialDirection[2];
    
-   memcpy(cCoefficients, th.cCoefficients, COEFFICIENT_COUNT * sizeof(Real));
-   memcpy(kCoefficients, th.kCoefficients, COEFFICIENT_COUNT * sizeof(Real));
-
    thrusterFiring      = th.thrusterFiring;
    decrementMass       = th.decrementMass;
    constantExpressions = th.constantExpressions;
@@ -405,6 +361,9 @@ Thruster& Thruster::operator=(const Thruster& th)
    
    localAxesLabels     = th.localAxesLabels;
    tankNames           = th.tankNames;
+
+   mixRatio.SetSize(th.mixRatio.GetSize());
+   mixRatio            = th.mixRatio;
    
    // copy tanks
    tanks               = th.tanks;
@@ -416,38 +375,44 @@ Thruster& Thruster::operator=(const Thruster& th)
    return *this;
 }
 
-
-//---------------------------------------------------------------------------
-//  GmatBase* Clone() const
-//---------------------------------------------------------------------------
-/**
- * Provides a clone of this object by calling the copy constructor.
- *
- * @return A GmatBase pointer to the cloned thruster.
- */
-//---------------------------------------------------------------------------
-GmatBase* Thruster::Clone() const
+//------------------------------------------------------------------------------
+// Real GetMassFlowRate()
+//------------------------------------------------------------------------------
+Real Thruster::GetMassFlowRate()
 {
-   return new Thruster(*this);
+   Real mfr = 0.0;
+   if (thrusterFiring)
+      mfr = CalculateMassFlow();
+   return mfr;
 }
 
-
-//---------------------------------------------------------------------------
-//  void Copy(GmatBase* orig)
-//---------------------------------------------------------------------------
-/**
- * Sets this object to match another one.
- *
- * @param orig The original that is being copied.
- *
- * @return A GmatBase pointer to the cloned thruster.
- */
-//---------------------------------------------------------------------------
-void Thruster::Copy(const GmatBase* orig)
+//------------------------------------------------------------------------------
+// Real GetThrustMagnitude()
+//------------------------------------------------------------------------------
+Real Thruster::GetThrustMagnitude()
 {
-   operator=(*((Thruster *)(orig)));
+   Real thrustMag = 0.0;
+   if (thrusterFiring)
+   {
+      CalculateThrustAndIsp();
+      thrustMag = appliedThrustMag;
+   }
+   return thrustMag;
 }
 
+//------------------------------------------------------------------------------
+// Real GetIsp()
+//------------------------------------------------------------------------------
+Real Thruster::GetIsp()
+{
+   Real isp = 0.0;
+   if (thrusterFiring)
+   {
+      CalculateThrustAndIsp();
+      isp = impulse;
+   }
+   return isp;
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -573,13 +538,21 @@ std::string Thruster::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Thruster::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == THRUSTER_FIRING) || id == C_UNITS || id == K_UNITS)
+   if (id == THRUSTER_FIRING)
       return true;
    
    if ((id == ORIGIN || id == AXES))
       if (coordSystemName != "Local")
          return true;
    
+   if (id == THRUST || id == ISP || id == MASS_FLOW_RATE ||
+       id == APPLIED_THRUST_MAG)
+      return true;
+   
+   if (tankNames.size() == 0)
+      if (id == MIXRATIO)
+         return true;
+
    return Hardware::IsParameterReadOnly(id);
 }
 
@@ -629,79 +602,21 @@ Real Thruster::GetRealParameter(const Integer id) const
 {
    switch (id)
    {
-      case C1:
-         return cCoefficients[0];
-      case C2:
-         return cCoefficients[1];
-      case C3:
-         return cCoefficients[2];
-      case C4:
-         return cCoefficients[3];
-      case C5:
-         return cCoefficients[4];
-      case C6:
-         return cCoefficients[5];
-      case C7:
-         return cCoefficients[6];
-      case C8:
-         return cCoefficients[7];
-      case C9:
-         return cCoefficients[8];
-      case C10:
-         return cCoefficients[9];
-      case C11:
-         return cCoefficients[10];
-      case C12:
-         return cCoefficients[11];
-      case C13:
-         return cCoefficients[12];
-      case C14:
-         return cCoefficients[13];
-      case C15:
-         return cCoefficients[14];
-      case C16:
-         return cCoefficients[15];
-
-      case K1:
-         return kCoefficients[0];
-      case K2:
-         return kCoefficients[1];
-      case K3:
-         return kCoefficients[2];
-      case K4:
-         return kCoefficients[3];
-      case K5:
-         return kCoefficients[4];
-      case K6:
-         return kCoefficients[5];
-      case K7:
-         return kCoefficients[6];
-      case K8:
-         return kCoefficients[7];
-      case K9:
-         return kCoefficients[8];
-      case K10:
-         return kCoefficients[9];
-      case K11:
-         return kCoefficients[10];
-      case K12:
-         return kCoefficients[11];
-      case K13:
-         return kCoefficients[12];
-      case K14:
-         return kCoefficients[13];
-      case K15:
-         return kCoefficients[14];
-      case K16:
-         return kCoefficients[15];
-         
       case DUTY_CYCLE:
          return dutyCycle;
       case THRUST_SCALE_FACTOR:
          return thrustScaleFactor;
       case GRAVITATIONAL_ACCELERATION:
          return gravityAccel;
-
+      case THRUST:
+         return thrust;
+      case APPLIED_THRUST_MAG:
+         return appliedThrustMag;
+      case ISP:
+         return impulse;
+      case MASS_FLOW_RATE:
+         return mDot;
+      
       default:
          break;   // Default just drops through
    }
@@ -733,176 +648,6 @@ Real Thruster::SetRealParameter(const Integer id, const Real value)
    
    switch (id) 
    {
-      // Thrust coefficients
-      case C1:
-         return cCoefficients[0] = value;
-      case C2:
-         if (value != 0.0)
-            constantExpressions = false;
-         return cCoefficients[1] = value;
-      case C3:
-         return cCoefficients[2] = value;
-      case C4:
-         if (value != 0.0) 
-            constantExpressions = false;
-         return cCoefficients[3] = value;
-      case C5:
-         if (value != 0.0) 
-            constantExpressions = false;
-         return cCoefficients[4] = value;
-      case C6:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[5] = value;
-      case C7:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[6] = value;
-      case C8:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[7] = value;
-      case C9:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[8] = value;
-      case C10:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[9] = value;
-      case C11:
-         if (value != 0.0)
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[10] = value;
-      case C12:
-         if (value != 0.0)
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[11] = value;
-      case C13:
-         if ((value != 0.0) && (value != 1.0)) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[12] = value;
-      case C14:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return cCoefficients[13] = value;
-      case C15:
-         return cCoefficients[14] = value;
-      case C16:
-         return cCoefficients[15] = value;
-         
-      // Isp Coefficients
-      case K1:
-         return kCoefficients[0] = value;
-      case K2:
-         if (value != 0.0)
-            constantExpressions = false;
-         return kCoefficients[1] = value;
-      case K3:
-         return kCoefficients[2] = value;
-      case K4:
-         if (value != 0.0) 
-            constantExpressions = false;
-         return kCoefficients[3] = value;
-      case K5:
-         if (value != 0.0) 
-            constantExpressions = false;
-         return kCoefficients[4] = value;
-      case K6:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[5] = value;
-      case K7:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[6] = value;
-      case K8:
-         if (value != 0.0)
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[7] = value;
-      case K9:
-         if (value != 0.0)
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[8] = value;
-      case K10:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[9] = value;
-      case K11:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[10] = value;
-      case K12:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[11] = value;
-      case K13:
-         if ((value != 0.0) && (value != 1.0))  
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[12] = value;
-      case K14:
-         if (value != 0.0) 
-         {
-            constantExpressions = false;
-            simpleExpressions = false;
-         }
-         return kCoefficients[13] = value;
-      case K15:
-         return kCoefficients[14] = value;
-      case K16:
-         return kCoefficients[15] = value;
-         
       // Other parameters
       case DUTY_CYCLE:
          if ((value >= 0.0) && (value <= 1.0))
@@ -1027,23 +772,32 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value)
          return true;
       }
    case TANK:
-      if ((tankNames.size() > 0) && (value != tankNames[0]))
-      {
-         std::string errmsg;
-         errmsg =  "The value of \"";
-         errmsg += value;
-         errmsg += "\" on Thruster \"";
-         errmsg += instanceName;
-         errmsg += "\" is not an allowed value.  GMAT does not currently "
-               "support more than one tank per thruster; the thruster is "
-               "already associated with tank \"";
-         errmsg += tankNames[0];
-         errmsg += "\".";
-         throw HardwareException(errmsg);
-      }
       // if not the same name push back
       if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end())
+      {
          tankNames.push_back(value);
+
+         // Size mix ratio vector to match tank count, and fill missing entries
+         if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+         {
+            Rvector temp(mixRatio);
+            mixRatio.SetSize(tankNames.size());
+            if (temp.IsSized())
+            {
+               Integer max = (temp.GetSize() < mixRatio.GetSize() ?
+                  temp.GetSize() : mixRatio.GetSize());
+
+               for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+               {
+                  mixRatio[i] = (i < max ? temp[i] : RATIO_DEFAULT);
+               }
+            }
+         }
+      }
+//      else
+//         throw HardwareException("The same tank cannot be listed twice for " +
+//                     instanceName + "; " + value + " has already been assigned "
+//                     "to the thruster");
       return true;
    default:
       return Hardware::SetStringParameter(id, value);
@@ -1093,17 +847,6 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
    {
    case TANK:
       {
-         if (index > 0)
-         {
-            std::string errmsg;
-            errmsg =  "The value of \"";
-            errmsg += value;
-            errmsg += "\" on Thruster \"";
-            errmsg += instanceName;
-            errmsg += "\" is not an allowed value.  GMAT does not currently "
-                  "support more than one tank per thruster";
-            throw HardwareException(errmsg);
-         }
 
          if (index < (Integer)tankNames.size())
             tankNames[index] = value;
@@ -1111,7 +854,45 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value,
             // Only add the tank if it is not in the list already
             if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end()) 
                tankNames.push_back(value);
+            else
+               throw HardwareException("The same tank cannot be listed "
+                     "multiple times for " + instanceName + "; " + value +
+                     " has been assigned more than once to the thruster");
+
+         // Make certain there are no duplicate names
+         for (Integer i = 0; i < tankNames.size(); ++i)
+         {
+            std::string testName = tankNames[i];
+            for (Integer j = i+1; j < tankNames.size(); ++j)
+            {
+               if (tankNames[j] == testName)
+                  throw HardwareException("The same tank cannot be listed "
+                        "twice for " + instanceName + ", but " + testName +
+                        " is assigned more than one time to the thruster");
+            }
+         }
          
+         // Size mix ratio vector to match tank count, and fill missing entries
+         if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+         {
+            #ifdef DEBUG_TANK_SETTINGS
+               MessageInterface::ShowMessage("Sizing Mix Ratio to %d\n",
+                     tankNames.size());
+            #endif
+            Rvector temp(mixRatio);
+            mixRatio.SetSize(tankNames.size());
+            if (temp.IsSized())
+            {
+               Integer max = (temp.GetSize() < mixRatio.GetSize() ?
+                              temp.GetSize() : mixRatio.GetSize());
+
+               for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+               {
+                  mixRatio[i] = (i < max ? temp[i] : RATIO_DEFAULT);
+               }
+            }
+         }
+
          return true;
       }
    default:
@@ -1136,12 +917,6 @@ const StringArray& Thruster::GetStringArrayParameter(const Integer id) const
 {
    if (id == TANK)
       return tankNames;
-   
-   if (id == C_UNITS)
-      return cCoefUnits;
-   
-   if (id == K_UNITS)
-      return kCoefUnits;
    
    return Hardware::GetStringArrayParameter(id);
 }
@@ -1203,6 +978,190 @@ bool Thruster::SetBooleanParameter(const Integer id, const bool value)
    }
    
    return Hardware::SetBooleanParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves real valued parameter data from vector containers
+ *
+ * @param id The parameter ID
+ * @param index The element index in the vector
+ *
+ * @return The value of the vector element
+ */
+//------------------------------------------------------------------------------
+Real Thruster::GetRealParameter(const Integer id, const Integer index) const
+{
+   if (id == MIXRATIO)
+   {
+      if ((index >= 0) && (index < mixRatio.GetSize()))
+         return mixRatio.GetElement(index);
+      else
+         throw HardwareException("Index out of bounds getting the mix ratio on " +
+               instanceName);
+   }
+   return Hardware::GetRealParameter(id, index);
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value,
+//                       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Set real valued parameter data in vector containers
+ *
+ * @param id The parameter ID
+ * @param value The new parameter element value
+ * @param index The element index in the vector
+ *
+ * @return The value after the setting has occurred
+ */
+//------------------------------------------------------------------------------
+Real Thruster::SetRealParameter(const Integer id, const Real value,
+                                const Integer index)
+{
+   if (id == MIXRATIO)
+   {
+      Integer size = 0;
+      if (mixRatio.IsSized())
+         size = mixRatio.GetSize();
+
+      if ((index < 0) || (index > mixRatio.GetSize()))
+         throw HardwareException("Index out of bounds setting the mix ratio on " +
+               instanceName);
+
+      if (index > tankNames.size() - 1)
+         throw HardwareException("Index out of bounds setting the mix ratio on " +
+               instanceName + "; there are not enough tanks to support the number "
+                     "of indices in the ratio");
+
+      if (value <= 0.0)
+      {
+         std::stringstream msg;
+         msg << "The value " << value << " for field \"MixRatio\" on object \""
+             << instanceName <<  "\" is not an allowed value.\n"
+             << "The allowed values are: [Real number > 0.0]";
+         throw HardwareException(msg.str());
+      }
+
+      if (index == mixRatio.GetSize())
+      {
+         // Rvector deletes array on resize; gymnastics required to compensate
+         Rvector temp(mixRatio);
+         mixRatio.SetSize(index+1);
+         for (Integer i = 0; i < temp.GetSize(); ++i)
+            mixRatio[i] = temp[i];
+      }
+
+      mixRatio[index] = value;
+      return mixRatio[index];
+   }
+
+   return Hardware::SetRealParameter(id, value, index);
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves real valued parameter data from vector containers
+ *
+ * @param label The parameter script string
+ * @param index The element index in the vector
+ *
+ * @return The value of th4e vector element
+ */
+//------------------------------------------------------------------------------
+Real Thruster::GetRealParameter(const std::string &label, const Integer index) const
+{
+   return GetRealParameter(GetParameterID(label), index);
+}
+
+Real Thruster::SetRealParameter(const std::string &label, const Real value,
+                                const Integer index)
+{
+   return SetRealParameter(GetParameterID(label), value, index);
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& GetRvectorParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves real valued vector of data
+ *
+ * @param id The parameter ID
+ *
+ * @return The data vector
+ */
+//------------------------------------------------------------------------------
+const Rvector& Thruster::GetRvectorParameter(const Integer id) const
+{
+   if (id == MIXRATIO)
+   {
+      return mixRatio;
+   }
+   return Hardware::GetRvectorParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const Integer id, const Rvector &value)
+//------------------------------------------------------------------------------
+/**
+ * Set real valued parameter data in vector containers
+ *
+ * @param id The parameter ID
+ * @param value The new parameter vector of values
+ *
+ * @return The vector after the setting has occurred
+ */
+//------------------------------------------------------------------------------
+const Rvector& Thruster::SetRvectorParameter(const Integer id, const Rvector &value)
+{
+   if (id == MIXRATIO)
+   {
+      if ((!mixRatio.IsSized()) || (mixRatio.GetSize() != tankNames.size()))
+         mixRatio.SetSize(tankNames.size());
+      mixRatio = value;
+      return mixRatio;
+   }
+   return Hardware::SetRvectorParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& GetRvectorParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves real valued vector of data
+ *
+ * @param label The script string for the parameter
+ *
+ * @return The data vector
+ */
+//------------------------------------------------------------------------------
+const Rvector& Thruster::GetRvectorParameter(const std::string &label) const
+{
+   return GetRvectorParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const std::string &label,
+//                                    const Rvector &value)
+//------------------------------------------------------------------------------
+/**
+ * Set real valued parameter data in vector containers
+ *
+ * @param label The script string for the parameter
+ * @param value The new parameter vector of values
+ *
+ * @return The vector after the setting has occurred
+ */
+//------------------------------------------------------------------------------
+const Rvector& Thruster::SetRvectorParameter(const std::string &label, const Rvector &value)
+{
+   return SetRvectorParameter(GetParameterID(label), value);
 }
 
 
@@ -1464,27 +1423,34 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       return SetSpacecraft((Spacecraft*)obj);
    }
    
-   if (obj->GetTypeName() == "FuelTank")
+   if (obj->IsOfType("FuelTank"))
    {
       #ifdef DEBUG_THRUSTER_REF_OBJ
          MessageInterface::ShowMessage("   Setting tank \"%s\" on thruster \"%s\"\n",
                                        name.c_str(), instanceName.c_str());
       #endif
       
-      if (tanks.empty())
+//      if (tanks.empty())
+//      {
+//         tanks.push_back((FuelTank*)obj);
+//         #ifdef DEBUG_THRUSTER_REF_OBJ
+//         MessageInterface::ShowMessage
+//            ("   <%p>'%s' added to tank list, now size is %d\n",
+//             obj, obj->GetName().c_str(), tanks.size());
+//         #endif
+//      }
+//      else
+      if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
       {
-         tanks.push_back((FuelTank*)obj);
          #ifdef DEBUG_THRUSTER_REF_OBJ
          MessageInterface::ShowMessage
-            ("   <%p>'%s' added to tank list, now size is %d\n",
-             obj, obj->GetName().c_str(), tanks.size());
+            ("   ------ the tank pointer of name %s was NOT found in the array (of size %d)\n",
+                  name.c_str(), (Integer) tanks.size());
          #endif
-      }
-      else if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
-      {
          // Replace old tank with new one. We don't want to delete the
          // old tank here since Spacecraft owns it (tank is not cloned in the
          // copy constructor)
+         bool replaced = false;
          for (UnsignedInt i=0; i<tanks.size(); i++)
          {
             if (tanks[i]->GetName() == name)
@@ -1495,8 +1461,11 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                    obj->GetName().c_str(), tanks[i], tanks[i]->GetName().c_str());
                #endif
                tanks[i] = (FuelTank*)obj;
+               replaced = true;
             }
          }
+         if (!replaced)
+            tanks.push_back((FuelTank*)obj);
       }
       
       #ifdef DEBUG_THRUSTER
@@ -1556,9 +1525,6 @@ ObjectArray& Thruster::GetRefObjectArray(const Gmat::ObjectType type)
 //---------------------------------------------------------------------------
 ObjectArray& Thruster::GetRefObjectArray(const std::string& typeString)
 {
-//   if ((typeString == "FuelTank") || (typeString == "Tanks"))
-//      return tanks;
-
    return Hardware::GetRefObjectArray(typeString);
 }
 
@@ -1581,15 +1547,32 @@ ObjectArray& Thruster::GetRefObjectArray(const std::string& typeString)
 bool Thruster::TakeAction(const std::string &action,
                           const std::string &actionData)
 {
-   if (action == "ClearTanks") {
-//      if (thrusterFiring)
-//         throw HardwareException("Thruster " + instanceName +
-//            " is attempting to remove fuel tank access during a finite burn");
-
+   if (action == "ClearTanks")
+   {
       tankNames.clear();
       tanks.clear();
+      mixRatio.SetSize(0);
 
       return true;
+   }
+
+   if (action == "CheckMixRatio")
+   {
+      if (mixRatio.GetSize() > 0)
+      {
+         if (mixRatio[mixRatio.GetSize()-1] == RATIO_DEFAULT)
+         {
+            MessageInterface::ShowMessage("Warning: The number of coefficients in "
+                  "the mix ratio does not match the number of tanks used by Thruster "
+                  "%s.  Unset ratio values are set to 1.0\n", instanceName.c_str());
+
+            for (Integer i = 0; i < mixRatio.GetSize(); ++i)
+               if (mixRatio[i] == RATIO_DEFAULT)
+                  mixRatio[i] = 1.0;
+         }
+      }
+	  
+	  return true;
    }
 
    return Hardware::TakeAction(action, actionData);
@@ -1655,6 +1638,17 @@ bool Thruster::Initialize()
    if (!retval)
       return false;
    
+   if (mixRatio.GetSize() == 0)
+   {
+      mixRatio.SetSize(tankNames.size());
+      for (UnsignedInt i = 0; i < tankNames.size(); ++i)
+         mixRatio[i] = 1.0;
+   }
+   else if (mixRatio.GetSize() != tankNames.size())
+      throw HardwareException("Error in configuring tanks: the mix ratio is "
+            "sized differently from the number of tanks used by thruster " +
+            instanceName);
+
    if (!usingLocalCoordSys)
    {
       if (coordSystem == NULL)
@@ -1746,162 +1740,23 @@ bool Thruster::Initialize()
    return retval;
 }
 
-
-//---------------------------------------------------------------------------
-//  bool CalculateThrustAndIsp()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  bool SetPower(Real allocatedPower)
+//------------------------------------------------------------------------------
 /**
- * Evaluates the thrust and specific impulse polynomials.
- *
- * GMAT uses polynomial expressions for the thrust and specific impulse
- * imparted to the spacecraft by thrusters attached to the spacecraft.
- * Both thrust and specific impulse are expressed as functions of pressure
- * and temperature. The pressure and temperature are values obtained
- * from fuel tanks containing the fuel. All measurements in GMAT are
- * expressed in metric units. The thrust, in Newtons, applied by a spacecraft
- * engine is given by
- *
-   \f[
-    F_{T}(P,T) = C_{1}+C_{2}P + \left\{ C_{3}+C_{4}P+C_{5}P^{2}+C_{6}P^{C_{7}}+
-                   C_{8}P^{C_{9}}+C_{10}P^{C_{11}}+
-                   C_{12}C_{13}^{C_{14}P}\right\} \left(\frac{T}{T_{ref}}
-                   \right)^{1+C_{15}+C_{16}P}\f]
- *
- * Pressures are expressed in kilopascals, and temperatures in degrees
- * centigrade. The coefficients C1 - C16 are set by the user. Each coefficient
- * is expressed in units commiserate with the final expression in Newtons;
- * for example, C1 is expressed in Newtons, C2 in Newtons per kilopascal,
- * and so forth.
- *
- * Specific Impulse, measured in sec is expressed using a similar equation:
- *
-   \f[
-    I_{sp}(P,T) = K_{1}+K_{2}P + \left\{ K_{3}+K_{4}P+K_{5}P^{2}+K_{6}P^{K_{7}}+
-                    K_{8}P^{K_{9}}+K_{10}P^{K_{11}}+K_{12}K_{13}^{K_{14}P}\right\}
-         \left(\frac{T}{T_{ref}}\right)^{1+K_{15}+K_{16}P}\f]
- *
- * @return true on successful evaluation.
+ * Sets the allocated power level for the thruster.  This method does not
+ * do much in this base class; it must be overridden in a class that
+ * needs more functionality (e.g. ElectricThruster class).
  */
-//---------------------------------------------------------------------------
-bool Thruster::CalculateThrustAndIsp()
+//------------------------------------------------------------------------------
+bool Thruster::SetPower(Real allocatedPower)
 {
-   if (!thrusterFiring) 
-   {
-      thrust  = 0.0;
-      impulse = 0.0;
-   }
-   else 
-   {
-      if (tanks.empty())
-         throw HardwareException("Thruster \"" + instanceName +
-                                 "\" does not have a fuel tank");
-
-      // Require that the tanks all be at the same pressure and temperature
-      Integer pressID = tanks[0]->GetParameterID("Pressure");
-      Integer tempID = tanks[0]->GetParameterID("Temperature");
-      Integer refTempID = tanks[0]->GetParameterID("RefTemperature");
-
-      pressure = tanks[0]->GetRealParameter(pressID);
-      temperatureRatio = tanks[0]->GetRealParameter(tempID) /
-                         tanks[0]->GetRealParameter(refTempID);
-
-      thrust = cCoefficients[2];
-      impulse = kCoefficients[2];
-
-      if (!constantExpressions) 
-      {
-
-         thrust  += pressure*(cCoefficients[3] + pressure*cCoefficients[4]);
-         impulse += pressure*(kCoefficients[3] + pressure*kCoefficients[4]);
-
-         // For efficiency, if thrust and Isp are simple, don't bother evaluating
-         // higher order terms
-         if (!simpleExpressions) {
-            thrust  += cCoefficients[5] * pow(pressure, cCoefficients[6]) +
-                       cCoefficients[7] * pow(pressure, cCoefficients[8]) +
-                       cCoefficients[9] * pow(pressure, cCoefficients[10]) +
-                       cCoefficients[11] * pow(cCoefficients[12],
-                                              pressure * cCoefficients[13]);
-
-            impulse += kCoefficients[5] * pow(pressure, kCoefficients[6]) +
-                       kCoefficients[7] * pow(pressure, kCoefficients[8]) +
-                       kCoefficients[9] * pow(pressure, kCoefficients[10]) +
-                       kCoefficients[11] * pow(kCoefficients[12],
-                                              pressure * kCoefficients[13]);
-         }
-      }
-      
-//       thrust  *= pow(temperatureRatio, (1.0 + cCoefficients[14] +
-//                      pressure*cCoefficients[15])) * thrustScaleFactor * dutyCycle;
-      thrust  *= pow(temperatureRatio, (1.0 + cCoefficients[14] +
-                     pressure*cCoefficients[15]));
-      impulse *= pow(temperatureRatio, (1.0 + kCoefficients[14] +
-                     pressure*kCoefficients[15]));
-      
-      // Now add the temperature independent pieces
-      thrust  += cCoefficients[0] + cCoefficients[1] * pressure;
-      impulse += kCoefficients[0] + kCoefficients[1] * pressure;
-   }
-   
+#ifdef DEBUG_SET_POWER
+   MessageInterface::ShowMessage(">>>>>>>>>> Setting power for thruster %s to %12.10\n",
+         instanceName.c_str(), allocatedPower);
+#endif
+   power = allocatedPower;
    return true;
-}
-
-
-//---------------------------------------------------------------------------
-//  Real CalculateMassFlow()
-//---------------------------------------------------------------------------
-/**
- * Evaluates the time rate of change of mass due to a thruster firing.
- *
- *  \f[\frac{dm}{dt} = \frac{F_T}{I_{sp}} \f]
- *
- * @return the mass flow rate from this thruster, used in integration.
- */
-//---------------------------------------------------------------------------
-Real Thruster::CalculateMassFlow()
-{
-   if (!thrusterFiring)
-   {
-      #ifdef DEBUG_THRUSTER
-         MessageInterface::ShowMessage("Thruster %s is not firing\n",
-               instanceName.c_str());
-      #endif
-
-      return 0.0;
-   }
-   else
-   {
-      if (tanks.empty())
-         throw HardwareException("Thruster \"" + instanceName +
-                                 "\" does not have a fuel tank");
-
-      // For now, always calculate T and I_sp
-      //if (!constantExpressions) {
-         if (!CalculateThrustAndIsp())
-            throw HardwareException("Thruster \"" + instanceName +
-                                    "\" could not calculate dm/dt");
-         if (impulse == 0.0)
-            throw HardwareException("Thruster \"" + instanceName +
-                                    "\" has specific impulse == 0.0");
-
-         // Mass flows out, so need a negative value here
-         mDot = -thrust / (gravityAccel * impulse);
-
-         // Old code:
-         // mDot = -(thrust/thrustScaleFactor) / (gravityAccel * impulse);
-      //}
-   }
-
-   #ifdef DEBUG_THRUSTER
-      MessageInterface::ShowMessage(
-            "   Thrust = %15lf, Isp = %15lf, gravity accel = %lf, TSF = %lf, "
-            "dutyCycle = %15lf, MassFlow = %15lf T/Isp =  %lf\n",
-            thrust, impulse, gravityAccel, thrustScaleFactor, dutyCycle, mDot, 
-            thrust/impulse);
-   #endif
-
-   
-   return mDot * dutyCycle;
 }
 
 
@@ -1932,7 +1787,7 @@ bool Thruster::SetSpacecraft(Spacecraft *sat)
        localCoordSystem);
    #endif
    
-   // If spcecraft is different
+   // If spacecraft is different
    if (spacecraft != sat)
    {
       spacecraft = sat;

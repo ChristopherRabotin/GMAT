@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -29,8 +39,6 @@
 
 #include "Spacecraft.hpp"
 #include "FormationInterface.hpp"
-#include "RootFinder.hpp"
-
 
 /// A convenient typedef used in this code
 typedef std::vector<GmatBase*> PropObjectArray;
@@ -79,6 +87,8 @@ protected:
    std::vector<StringArray>      propObjectNames;
    /// The objects that are propagated; one PropObjectArray per PropSetup
    std::vector<PropObjectArray*> propObjects;
+   /// The complete set of spacecraft and formations that are propagated
+   ObjectArray                   sats;
 
    /// Flag indicating that the command has been executed once, so that some
    /// pieces of initialization can be skipped
@@ -120,23 +130,6 @@ protected:
    std::vector<Spacecraft *>    satBuffer;
    std::vector<FormationInterface *>     formBuffer;
 
-   // Event location management structures
-   /// Number of active events in the current propagation
-   Integer              activeLocatorCount;
-   /// Indices of the active events
-   std::vector<Integer> activeEventIndices;
-   /// Start index in the previous event buffer for the function data
-   std::vector<Integer> eventStartIndices;
-   /// Values of event location data last time called
-   Real                 *previousEventData;
-   /// Values of event location data in the current call
-   Real                 *currentEventData;
-   /// Values of event location data used while searching
-   Real                 *tempEventData;
-   /// Total number of elements in the data buffers
-   UnsignedInt          eventBufferSize;
-   /// Root finder used in event location
-   RootFinder           *finder;
    /// Flag used to turn off publishing during event location
    bool                 publishOnStep;
 
@@ -150,16 +143,14 @@ protected:
    virtual void         BufferSatelliteStates(bool fillingBuffer = true);
 
    virtual void         SetPropagationProperties(PropagationStateManager *psm);
+   
+   virtual void         SetNames(const std::string& name, 
+                                 StringArray& owners, StringArray& elements);
 
-   virtual void         LocateObjectEvents(const GmatBase *obj,
-                              ObjectArray &els);
-   virtual void         AddLocators(PropagationStateManager *currentPSM,
-                              ObjectArray &els);
-   virtual void         InitializeForEventLocation();
-   virtual void         CheckForEvents();
-   virtual bool         LocateEvent(EventLocator* el, Integer index = 0,
-                              bool forDerivative = false);
-   virtual void         UpdateEventTable(EventLocator* el, Integer index);
+   void                 AddTransientForce(StringArray *sats, ODEModel *p,
+                              PropagationStateManager *propMan);
+   void                 ClearTransientForces();
+
 };
 
 #endif /* PropagationEnabledCommand_hpp */

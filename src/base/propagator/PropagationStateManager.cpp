@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -45,6 +55,8 @@
 //------------------------------------------------------------------------------
 /**
  * Default constructor
+ *
+ * @param size The size of the (initial) propagation state vector
  */
 //------------------------------------------------------------------------------
 PropagationStateManager::PropagationStateManager(Integer size) :
@@ -63,8 +75,6 @@ PropagationStateManager::PropagationStateManager(Integer size) :
 //------------------------------------------------------------------------------
 PropagationStateManager::~PropagationStateManager()
 {
-//   for (StringArray::iterator i = elements.begin(); i != elements.end(); ++i)
-//      delete (i.second());
 }
 
 
@@ -774,6 +784,34 @@ Integer PropagationStateManager::GetCompletionSize(const Integer which)
 
 
 //------------------------------------------------------------------------------
+// Integer GetSTMIndex(Integer forParameterID)
+//------------------------------------------------------------------------------
+/**
+ * Finds the STM row/column index for the ID'd parameter
+ *
+ * @param forParameterID The ID of the parameter
+ *
+ * @return The STM row, or -1 if not in the STM
+ */
+//------------------------------------------------------------------------------
+Integer PropagationStateManager::GetSTMIndex(Integer forParameterID)
+{
+   Integer retval = -1;
+
+   for (UnsignedInt i = 0; i < stmRowMap.size(); ++i)
+   {
+      if (stmRowMap[i] == forParameterID)
+      {
+         retval = i;
+         break;
+      }
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // Integer PropagationStateManager::SortVector()
 //------------------------------------------------------------------------------
 /**
@@ -821,6 +859,27 @@ Integer PropagationStateManager::SortVector()
       }
    #endif
 
+   // Sync up the STMs that are propagated
+   StringArray stmEntries;
+   for (UnsignedInt q = 0; q < objects.size(); ++q)
+   {
+      if (objects[q]->IsOfType(Gmat::SPACECRAFT))
+      {
+         StringArray currentSTMEntries = objects[q]->GetStringArrayParameter("StmElementNames");
+         for (UnsignedInt i = 0; i < currentSTMEntries.size(); ++i)
+         {
+            if (find(stmEntries.begin(), stmEntries.end(), currentSTMEntries[i]) == stmEntries.end())
+               stmEntries.push_back(currentSTMEntries[i]);
+         }
+      }
+   }
+   for (UnsignedInt q = 0; q < objects.size(); ++q)
+   {
+      for (UnsignedInt p = 0; p < stmEntries.size(); ++p)
+         objects[q]->SetStringParameter("StmElementNames", stmEntries[p]);
+   }
+
+
    // First build a list of the property IDs and objects, measuring state size 
    // at the same time
    for (UnsignedInt q = 0; q < objects.size(); ++q)
@@ -837,6 +896,11 @@ Integer PropagationStateManager::SortVector()
                   " on object " + current->GetName() + ", a " +
                   current->GetTypeName());
          size = current->GetPropItemSize(id);
+
+         #ifdef DEBUG_STATE_CONSTRUCTION
+            MessageInterface::ShowMessage("%s has size %d;  ", j->c_str(), size);
+         #endif
+
          if (size <= 0)
             throw PropagatorException("State element " + (*j) +
                   " has size set less than or equal to 0; unable to continue.");
@@ -878,12 +942,14 @@ Integer PropagationStateManager::SortVector()
    val = 0;
    completionIndexList.clear();
    completionSizeList.clear();
+   stmRowMap.clear();
 
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage(
-            "State size is %d()\n", stateSize);
+            "State size is %d\n", stateSize);
    #endif
    
+   // Next build the state
    for (Integer i = 0; i < stateSize; ++i)
    {
       #ifdef DEBUG_STATE_CONSTRUCTION
@@ -946,6 +1012,17 @@ Integer PropagationStateManager::SortVector()
                   "RowLen = %d, %d -> row %2d  col %2d\n", newItem->rowLength, 
                   val, newItem->rowIndex, newItem->colIndex); 
          #endif
+         // While we're here, grab the STM mapping if this is STM
+         if ((newItem->elementID == Gmat::ORBIT_STATE_TRANSITION_MATRIX) &&
+             (newItem->rowIndex == 0))
+         {
+            stmRowMap.push_back(owners[order[i]]->GetStmRowId(newItem->colIndex));
+
+            #ifdef DEBUG_STATE_CONSTRUCTION
+               MessageInterface::ShowMessage("   STM column for %d\n",
+                     stmRowMap[newItem->colIndex]);
+            #endif
+         }
       }
       
       newItem->nonzeroInit = owners[order[i]]->
@@ -961,8 +1038,6 @@ Integer PropagationStateManager::SortVector()
       {
          completionIndexList.push_back(newItem->elementID);
          completionSizeList.push_back(1);       // Or count sizes?
-//         newItem->nonzeroInit = true;
-//         newItem->initialValue = 1.0;
       }
 
       newItem->postDerivativeUpdate = owners[order[i]]->

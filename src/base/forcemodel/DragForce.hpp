@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -76,6 +86,7 @@ public:
    virtual std::string  GetParameterTypeString(const Integer id) const;
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
+   virtual bool         WriteEmptyStringParameter(const Integer id) const;
    
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         GetRealParameter(const std::string &label) const;
@@ -86,7 +97,11 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const Integer id, 
+                                           const char *value);
+   virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const char *value);
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
    virtual Integer      GetIntegerParameter(const Integer id) const;
@@ -117,11 +132,13 @@ public:
    // Special access methods used by drag forces
    bool                 SetInternalAtmosphereModel(AtmosphereModel* atm);
    AtmosphereModel*     GetInternalAtmosphereModel();
+   AtmosphereModel*     GetAtmosphereModel();
+   static std::string   CheckFluxFile(const std::string &filename, bool isHistoric);
    
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity);
+                         Integer quantity, Integer sizeOfType);
 
    // Made public so it can be called for the AtmosDensity parameter
    Real                 GetDensity(Real *state,
@@ -153,10 +170,10 @@ protected:
    AtmosphereModel      *internalAtmos;
    /// Array of densities
    Real                 *density;
-   /// Density model: "High", "Low", or "Mean"							// made changes by TUAN NGUYEN   for GMT-4299
-   std::string			densityModel;									// made changes by TUAN NGUYEN   for GMT-4299
-   /// Inputfile containing all setting parameters for MarsGRAM			// made changes by TUAN NGUYEN   for GMT-4299
-   std::string          inputFile;										// made changes by TUAN NGUYEN   for GMT-4299
+   /// Density model: "High", "Low", or "Mean"
+   std::string          densityModel;
+   /// Inputfile containing all setting parameters for MarsGRAM
+   std::string          inputFile;
    /// Array of products of spacecraft properties
    Real                 *prefactor;
    /// Flag used to determine if data has changed for the prefactors
@@ -194,13 +211,39 @@ protected:
    Integer F107AID;
    /// ID used to set Geomagnetic index
    Integer KPID;
+   /// ID used to set Historic Weather File name
+   Integer cssiWFileID;
+   /// ID used to set Schatten Weather File name
+   Integer schattenWFileID;
 
+   /// Flag indicating if Cd is being estimated
+   bool estimatingCd;
+   /// ID for the CdEpsilon parameter
+   Integer cdEpsilonID;
+   /// Row/Column for the Cd entries in the A-matrix and STM
+   Integer cdEpsilonRow;
+   /// Current value(s) of Cd
+   std::vector<Real> cdEpsilon;
+   /// Initial value(s) of Cd
+   std::vector<Real> cdInitial;
+   /// Flag used to indicate that central differences are used for the A-matrix
+   bool useCentralDifferences;
+   /// Flag used to finite difference the velocity derivatives
+   bool finiteDifferenceDv;
 
    // Optional input parameters used by atmospheric models
    /// Type of input data -- "File" or "Constant"
    std::string          dataType;
-   /// Solar flux file name
-   std::string          fluxFile;
+   /// Historic Weather data type
+   std::string          historicWSource;
+   /// Predicted Weather data type
+   std::string          predictedWSource;
+   /// Default path to the flux files
+   std::string          fluxPath;
+   /// Historic Weather File name
+   std::string          cssiWFile;
+   /// Schatten Weather File name
+   std::string          schattenWFile;
    /// "Current" value of F10.7
    Real                 fluxF107;
    /// Running average of the F10.7
@@ -209,6 +252,10 @@ protected:
    Real                 ap;
    /// Magnetic field index, Kp (user specified)
    Real                 kp;
+   /// Schatten Error Model
+   std::string          schattenErrorModel;
+   /// Schatten Timing Model
+   std::string          schattenTimingModel;
 
    /// Start index for the Cartesian state
    Integer              cartIndex;
@@ -222,13 +269,18 @@ protected:
    Integer              kpApConversion;
 
 
+   // TEMPORARY UNTIL FINITE DIFFERENCING IS IN PLACE
+   /// Flag to only warn once time
+   bool warnSTMMath;
+
+
    
    void                 BuildPrefactors();
    void                 TranslateOrigin(const Real *state, const Real now);
 //   void                 GetDensity(Real *state, Real when = GmatTimeConstants::MJD_OF_J2000);
       
    Real                 CalculateAp(Real kp);
-   
+   Rvector3             Accelerate(Real *theState, GmatEpoch &theEpoch, Real prefactor);
    
    /// Parameter IDs
    enum
@@ -236,10 +288,15 @@ protected:
       ATMOSPHERE_MODEL = PhysicalModelParamCount, 
       ATMOSPHERE_BODY,
       SOURCE_TYPE,
-      FLUX_FILE,
+      HISTORIC_WEATHER_SOURCE,
+      PREDICTED_WEATHER_SOURCE,
+      CSSI_WEATHER_FILE,
+      SCHATTEN_WEATHER_FILE,
       FLUX,
       AVERAGE_FLUX,
       MAGNETIC_INDEX,
+      SCHATTEN_ERROR_MODEL,
+      SCHATTEN_TIMING_MODEL,
       FIXED_COORD_SYSTEM,
       W_UPDATE_INTERVAL,
       KP2AP_METHOD,

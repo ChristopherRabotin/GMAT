@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -36,6 +46,7 @@ static GmatInterface *gmatInt = GmatInterface::Instance();
 //#define DEBUG_OPTIMIZE_CONSTRUCTION
 //#define DEBUG_OPTIMIZE_INIT
 //#define DEBUG_OPTIMIZE_EXEC
+//#define DEBUG_OPTIMIZE_COMMANDS
 //#define DEBUG_STATE_TRANSITIONS
 
 //#ifndef DEBUG_MEMORY
@@ -358,7 +369,11 @@ bool Optimize::SetRefObjectName(const Gmat::ObjectType type,
 bool Optimize::Initialize()
 {
    #ifdef DEBUG_OPTIMIZE_INIT
-      ShowCommand("", "Initialize() this = ", this);
+      ShowCommand("", "Initialize() entered, this = ", this);
+      MessageInterface::ShowMessage
+         ("   theSolver = <%p>[%s]'%s'\n", theSolver,
+          theSolver ? theSolver->GetTypeName().c_str() : "NULL",
+          theSolver ? theSolver->GetName().c_str() : "NULL");
    #endif
    
    GmatBase *mapObj = NULL;
@@ -471,11 +486,26 @@ bool Optimize::Initialize()
       throw SolverException(errorMessage);
    }
 
+   
+   #ifdef DEBUG_OPTIMIZE_EXEC
+   MessageInterface::ShowMessage
+      ("SourceType = '%s', requiresVariables = %d\n",
+       theSolver->GetStringParameter("SourceType").c_str(), theSolver->RequiresVariables());
+   MessageInterface::ShowMessage
+      ("Calling SolverBranchCommand::Initialize()\n");
+   #endif
+   
    bool retval = SolverBranchCommand::Initialize();
-
+   
+   #ifdef DEBUG_OPTIMIZE_EXEC
+   MessageInterface::ShowMessage
+      ("SolverBranchCommand::Initialize() returned %d\n", retval);
+   #endif
+   
    if (retval == true) 
    {
-      if (theSolver->IsSolverInternal())
+      //if (theSolver->IsSolverInternal())
+      if (theSolver->RequiresVariables())
       {
          theSolver->SetIntegerParameter(
                theSolver->GetParameterID("RegisteredVariables"), variableCount);
@@ -485,18 +515,30 @@ bool Optimize::Initialize()
       }
       retval = theSolver->Initialize();
    }
+
    
    // Register callbacks for external optimizers
    if (theSolver->IsOfType("ExternalOptimizer"))
    {
       // NOTE that in the future we may have a callback to/from a non_MATLAB
       // external optimizer
-      if (GmatGlobal::Instance()->IsMatlabAvailable())
-         if (theSolver->GetStringParameter("SourceType") == "MATLAB")
+      if (theSolver->GetStringParameter("SourceType") == "MATLAB")
+      {
+         if (GmatGlobal::Instance()->IsMatlabAvailable())
             gmatInt->RegisterCallbackServer(this);
+      }
+      else if (theSolver->GetStringParameter("SourceType") == "SNOPT")
+      {
+         gmatInt->RegisterCallbackServer(this);
+      }
    }
    
    optimizerInFunctionInitialized = false;
+   
+   #ifdef DEBUG_OPTIMIZE_INIT
+   MessageInterface::ShowMessage("Optimize::Initialize() returning %d\n", retval);
+   #endif
+   
    return retval;
 }
 
@@ -592,8 +634,9 @@ bool Optimize::Execute()
       #endif
 
       if ((theSolver->IsSolverInternal()) || (startMode == RUN_AND_SOLVE))
-      {
+      { 
          theSolver->AdvanceState();
+         theSolver->ReportProgress(listeners, Solver::UNDEFINED_STATE);
       }
 
       if ((theSolver->GetState() == Solver::FINISHED) || 
@@ -605,7 +648,9 @@ bool Optimize::Execute()
          {
             commandComplete    = true;
             theSolver->ReportProgress(Solver::CHECKINGRUN);
+            theSolver->ReportProgress(listeners, Solver::CHECKINGRUN);
             theSolver->ReportProgress(Solver::FINISHED);
+            theSolver->ReportProgress(listeners, Solver::FINISHED);
          }
       }
    }
@@ -671,41 +716,76 @@ bool Optimize::ExecuteCallback()
    #ifdef DEBUG_CALLBACK
       MessageInterface::ShowMessage("Entering Optimize::ExecuteCallback\n");
    #endif
-   // NOTE that in the future we may have a callback to/from a non_MATLAB
-   // external optimizer
 
-   #ifdef __USE_EXTERNAL_OPTIMIZER__
-   if (!optimizer || 
-      (!(theSolver->IsOfType("ExternalOptimizer"))) || 
-      (((ExternalOptimizer*)optimizer)->GetStringParameter("SourceType")
-      != "MATLAB"))
+   // Do we need  this code?
+   // Commented out (LOJ: 2014.08.19)
+   // // NOTE that in the future we may have a callback to/from a non_MATLAB
+   // // external optimizer
+   
+   // #ifdef __USE_EXTERNAL_OPTIMIZER__
+   // if (!optimizer || 
+   //    (!(theSolver->IsOfType("ExternalOptimizer"))) || 
+   //    (((ExternalOptimizer*)optimizer)->GetStringParameter("SourceType")
+   //    != "MATLAB"))
+   // {
+   //    throw CommandException(
+   //    "Optimize::ExecuteCallback not yet implemented for non_MATLAB optimizers");
+   // }
+   // #endif
+      
+   if (!theSolver->IsOfType("ExternalOptimizer"))
    {
       throw CommandException(
-      "Optimize::ExecuteCallback not yet implemented for non_MATLAB optimizers");
+         "Optimize::ExecuteCallback is invalid call for non-ExternalOptimizer");
    }
-   #endif
+   
+   // Check for user interruption here (LOJ: 2014.09.08)
+   if (GmatGlobal::Instance()->GetRunInterrupted())
+   {
+      #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage
+         ("Optimize command '%s' interrupted by user\n", generatingString.c_str());
+      #endif
+      
+      throw CommandException
+         ("Optimize command \"" + generatingString + "\" interrupted!");
+   }
+   
+   std::string sourceType = theSolver->GetStringParameter("SourceType");
+   std::vector<Real> vars;
    
    // Source type is MATLAB
-   if (!GmatGlobal::Instance()->IsMatlabAvailable())
-      throw CommandException("Optimize: ERROR - MATLAB required for Callback");
+   if (sourceType == "MATLAB")
+   {
+      if (!GmatGlobal::Instance()->IsMatlabAvailable())
+         throw CommandException("Optimize: ERROR - MATLAB required for Callback");
+      
+      callbackExecuting = true;
+      // ask Matlab for the value of X
+      Integer n = theSolver->GetIntegerParameter(
+         theSolver->GetParameterID("NumberOfVariables"));
+      
+      //Real X[n];
+      Real *X = new Real[n];
+      
+      // read X values from the callback data string here
+      std::stringstream ins(callbackData.c_str());
+      for (Integer i=0; i<n; i++)
+         ins >> X[i];
+      // Moved to top (LOJ: 2014.08.19)
+      // std::vector<Real> vars;
+      for (Integer i=0;i<n;i++)
+         vars.push_back(X[i]);
+      
+      delete [] X;
+   }
+   // Added SNOPT implementation (LOJ: 2014.08.19)
+   else if (sourceType == "SNOPT")
+   {
+      callbackExecuting = true;
+      vars = callbackRealData;
+   }
    
-   callbackExecuting = true;
-   // ask Matlab for the value of X
-   Integer     n = theSolver->GetIntegerParameter(
-                   theSolver->GetParameterID("NumberOfVariables"));
-   
-   //Real X[n];
-   Real *X = new Real[n];
-   
-   // read X values from the callback data string here
-   std::stringstream ins(callbackData.c_str());
-   for (Integer i=0; i<n; i++)
-      ins >> X[i];
-   std::vector<Real> vars;
-   for (Integer i=0;i<n;i++)
-      vars.push_back(X[i]);
-   
-   delete [] X;
    
    // get the state of the Optimizer
    Solver::SolverState nState = theSolver->GetNestedState(); 
@@ -739,6 +819,7 @@ bool Optimize::ExecuteCallback()
          "Optimize::ExecuteCallback - state is NOMINAL\n");
    #endif
    callbackResults = theSolver->AdvanceNestedState(vars);
+   theSolver->ReportProgress(listeners, Solver::UNDEFINED_STATE);
    ResetLoopData();
 
    #ifdef DEBUG_CALLBACK
@@ -787,6 +868,9 @@ bool Optimize::ExecuteCallback()
    #endif
       
    callbackExecuting = false;
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage("Leaving Optimize::ExecuteCallback\n");
+   #endif
    return true;
 }
 
@@ -801,6 +885,21 @@ bool Optimize::PutCallbackData(std::string &data)
       MessageInterface::ShowMessage("-- callback data are: %s\n", data.c_str());
    #endif
    return true;
+}
+
+//------------------------------------------------------------------------------
+// bool PutCallbackRealData(RealArray &data)
+//------------------------------------------------------------------------------
+bool Optimize::PutCallbackRealData(RealArray &data)
+{
+   callbackRealData = data;
+   #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage("Entering Optimize::PutCallbackRealData\n");
+      MessageInterface::ShowMessage("-- callback data are:\n");
+      for (UnsignedInt i = 0; i < data.size(); i++)
+         MessageInterface::ShowMessage("   data[%d] = %f\n", i, data[i]);
+   #endif
+   return true;   
 }
 
 //------------------------------------------------------------------------------

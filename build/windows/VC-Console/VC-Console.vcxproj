@@ -1,8 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-wx3|Win32">
+      <Configuration>Debug-wx3</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3|Win32">
+      <Configuration>Release-wx3</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
@@ -21,10 +29,22 @@
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -35,12 +55,24 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release-wx3|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release-wx3|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release-wx3|Win32'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
@@ -67,6 +99,64 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;winspool.lib;winmm.lib;shell32.lib;comctl32.lib;ole32.lib;oleaut32.lib;uuid.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;odbc32.lib;opengl32.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\src\gui\app;..\..\..\src\gui\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorsPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorsPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorsPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\station;$(CSPICE_VC32)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>__WIN32__;__WXMSW__;SKIP_DEVIL;__SKIP_MSISE90__;__CONSOLE_APP__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4267;4996;4101;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;winspool.lib;winmm.lib;shell32.lib;comctl32.lib;ole32.lib;oleaut32.lib;uuid.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;odbc32.lib;cspice.lib</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>$(CSPICE_VC32)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(CSPICE_VC32)\include;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\src\gui\app;..\..\..\src\gui\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorsPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorsPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorsPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\station;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>__WIN32__;__WXMSW__;SKIP_DEVIL;__SKIP_MSISE90__;__CONSOLE_APP__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4267;4996;4101;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;winspool.lib;winmm.lib;shell32.lib;comctl32.lib;ole32.lib;oleaut32.lib;uuid.lib;rpcrt4.lib;advapi32.lib;wsock32.lib;odbc32.lib;opengl32.lib;cspice.lib</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <AdditionalLibraryDirectories>$(CSPICE_VC32)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -104,6 +194,7 @@
     <ClCompile Include="..\..\..\src\base\asset\GroundstationInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\CCSDSAttitude.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\Kinematic.cpp" />
     <ClCompile Include="..\..\..\src\base\attitude\NadirPointing.cpp" />
@@ -140,6 +231,7 @@
     <ClCompile Include="..\..\..\src\base\command\EndScript.cpp" />
     <ClCompile Include="..\..\..\src\base\command\EndTarget.cpp" />
     <ClCompile Include="..\..\..\src\base\command\EndWhile.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp" />
     <ClCompile Include="..\..\..\src\base\command\For.cpp" />
     <ClCompile Include="..\..\..\src\base\command\GmatCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\If.cpp" />
@@ -240,7 +332,6 @@
     <ClCompile Include="..\..\..\src\base\factory\StopConditionFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\SubscriberFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp" />
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
@@ -266,6 +357,13 @@
     <ClCompile Include="..\..\..\src\base\function\Function.cpp" />
     <ClCompile Include="..\..\..\src\base\function\FunctionException.cpp" />
     <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalTank.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalThruster.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricTank.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\Interface.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\InterfaceException.cpp" />
@@ -316,10 +414,17 @@
     <ClCompile Include="..\..\..\src\base\math\Tan.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Tanh.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Transpose.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\DelaunayParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ModEquinoctialParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\PlanetodeticParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Asteroid.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\AtmosphereModel.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\Barycenter.cpp" />
@@ -335,9 +440,11 @@
     <ClCompile Include="..\..\..\src\base\solarsys\Planet.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphemException.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystemException.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp" />
@@ -430,6 +537,7 @@
     <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp" />
     <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp" />
     <ClCompile Include="..\..\..\src\base\subscriber\OrbitPlot.cpp" />
@@ -442,11 +550,19 @@
     <ClCompile Include="..\..\..\src\base\util\A1Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\A1Mjd.cpp" />
     <ClCompile Include="..\..\..\src\base\util\AngleUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\AttitudeConversionUtility.cpp" />
     <ClCompile Include="..\..\..\src\base\util\AttitudeUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BaseException.cpp" />
     <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp" />
     <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMSegment.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
     <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
@@ -456,7 +572,6 @@
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GravityFileUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Linear.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MessageInterface.cpp" />
@@ -469,6 +584,8 @@
     <ClCompile Include="..\..\..\src\base\util\Rvector.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector3.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector6.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp" />
     <ClCompile Include="..\..\..\src\base\util\StringUtil.cpp" />
@@ -495,6 +612,7 @@
     <ClInclude Include="..\..\..\src\base\asset\GroundstationInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\CCSDSAttitude.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\Kinematic.hpp" />
     <ClInclude Include="..\..\..\src\base\attitude\NadirPointing.hpp" />
@@ -531,6 +649,7 @@
     <ClInclude Include="..\..\..\src\base\command\EndScript.hpp" />
     <ClInclude Include="..\..\..\src\base\command\EndTarget.hpp" />
     <ClInclude Include="..\..\..\src\base\command\EndWhile.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp" />
     <ClInclude Include="..\..\..\src\base\command\For.hpp" />
     <ClInclude Include="..\..\..\src\base\command\GmatCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\If.hpp" />
@@ -631,7 +750,6 @@
     <ClInclude Include="..\..\..\src\base\factory\StopConditionFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\SubscriberFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp" />
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />
@@ -657,6 +775,13 @@
     <ClInclude Include="..\..\..\src\base\function\Function.hpp" />
     <ClInclude Include="..\..\..\src\base\function\FunctionException.hpp" />
     <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalTank.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalThruster.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricTank.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\interface\Interface.hpp" />
     <ClInclude Include="..\..\..\src\base\interface\InterfaceException.hpp" />
@@ -707,10 +832,17 @@
     <ClInclude Include="..\..\..\src\base\math\Tan.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Tanh.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Transpose.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\DelaunayParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ModEquinoctialParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\PlanetodeticParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\Asteroid.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereException.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereModel.hpp" />
@@ -727,9 +859,11 @@
     <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphemException.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystemException.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp" />
@@ -832,6 +966,7 @@
     <ClInclude Include="..\..\..\src\base\stopcond\StopCondition.hpp" />
     <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp" />
     <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp" />
@@ -846,11 +981,19 @@
     <ClInclude Include="..\..\..\src\base\util\A1Mjd.hpp" />
     <ClInclude Include="..\..\..\src\base\util\AngleUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ArrayTemplate.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\AttitudeConversionUtility.hpp" />
     <ClInclude Include="..\..\..\src\base\util\AttitudeUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BaseException.hpp" />
     <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp" />
     <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMSegment.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp" />
     <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Date.hpp" />
     <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp" />
@@ -862,7 +1005,6 @@
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GravityFileUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Linear.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MessageInterface.hpp" />
@@ -878,6 +1020,8 @@
     <ClInclude Include="..\..\..\src\base\util\Rvector.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector3.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector6.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp" />
     <ClInclude Include="..\..\..\src\base\util\StringUtil.hpp" />

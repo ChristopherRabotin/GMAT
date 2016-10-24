@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -253,8 +263,19 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       
       // Tile plots if TILED_PLOT mode is set from the startup file
       if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
-         GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
-      
+      {
+         // Set wxVERTICAL or wxHORIZONTAL based on main frame width and height
+         // if run mode is TESTING (LOJ: 2015.07.23)
+         wxOrientation tileMode = wxVERTICAL;
+         if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
+         {
+            int w, h;
+            GmatAppData::Instance()->GetMainFrame()->GetActualClientSize(&w, &h, false);
+            if (w < h)
+               tileMode = wxHORIZONTAL;
+         }
+         GmatAppData::Instance()->GetMainFrame()->Tile(tileMode);
+      }
    }
    else
    {
@@ -655,10 +676,21 @@ bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
       for (int i=0; i<MdiGlPlot::numChildren; i++)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
-
-         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
+         
+         if (frame)
          {
-            gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_ORBIT_VIEW);
+            // Delete GL plot by plot name and type
+            GmatTree::ItemType plotType = frame->GetItemType();
+            wxString plotName = frame->GetPlotName();
+            if (plotName.IsSameAs(owner.c_str()))
+            {
+               #if DEBUG_PLOTIF_GL_DELETE
+               MessageInterface::ShowMessage
+                  ("GuiPlotReceiver::DeleteGlPlot() closing child '%s' from the "
+                   "output tab\n", plotName.WX_TO_C_STRING);
+               #endif
+               gmatAppData->GetMainFrame()->CloseChild(owner, plotType);
+            }
          }
       }
    }
@@ -936,9 +968,21 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
       // Do no tile at all (LOj: 2011.09.23)
       //if (!isPresetSizeUsed && plotCount > 5)
       //   GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      // Tile plots if TILED_PLOT mode is set from the startup file
       if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
-         GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
-      
+      {
+         // Set wxVERTICAL or wxHORIZONTAL based on main frame width and height
+         // if run mode is TESTING (LOJ: 2015.07.23)
+         wxOrientation tileMode = wxVERTICAL;
+         if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
+         {
+            int w, h;
+            GmatAppData::Instance()->GetMainFrame()->GetActualClientSize(&w, &h, false);
+            if (w < h)
+               tileMode = wxHORIZONTAL;
+         }
+         GmatAppData::Instance()->GetMainFrame()->Tile(tileMode);
+      }
       frame->RedrawCurve();
    }
    
@@ -1954,6 +1998,42 @@ bool GuiPlotReceiver::ActivateXyPlot(const std::string &plotName)
    return activated;
 }
 
+//------------------------------------------------------------------------------
+// bool GuiPlotReceiver::TakeXYAction(const std::string &plotName,
+//                         const std::string &action)
+//------------------------------------------------------------------------------
+/**
+ *
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+bool GuiPlotReceiver::TakeXYAction(const std::string &plotName,
+                        const std::string &action)
+{
+   bool retval = false;
+   wxString owner = wxString(plotName.c_str());
+
+   MdiChildTsFrame *frame = NULL;
+
+   for (int i = 0; i < MdiTsPlot::numChildren; i++)
+   {
+      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+
+      if (frame)
+      {
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            ((MdiChildTsFrame*)frame)->TakeAction(action);
+            retval = true;
+         }
+      }
+   }
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // bool ComputePlotPositionAndSize(bool isGLPlot, Integer &x, Integer &y, Integer &w, ...)

@@ -3,17 +3,15 @@
 # Set to 0 for Windows, 1 for Linux or Mac - this is needed by the Makefile
 LINUX_MAC = 1
 
-ifeq ($(BUILD_64BIT), 1)
-CSPICE_VER = cspice64
-GMAT_BIN_DIR = bin64
-GMAT_LIB_DIR = lib64
-GMAT_PLUGIN_DIR = plugins64
-MAC_ARCHITECTURE_FLAGS = 
-else
-CSPICE_VER = cspice
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
 GMAT_PLUGIN_DIR = plugins
+
+ifeq ($(BUILD_64BIT), 1)
+CSPICE_VER = cspice64
+MAC_ARCHITECTURE_FLAGS =
+else
+CSPICE_VER = cspice
 MAC_ARCHITECTURE_FLAGS = -arch i386
 endif
 
@@ -64,10 +62,10 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup -fPIC $(MAC_ARCH
 
 # --out-implib
 
-DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \
-                 -finline-functions -funroll-loops -fno-rtti -DNO_GCC_PRAGMA \
-                 -march=pentium -malign-double -fexceptions \
-                 -fexpensive-optimizations
+#DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \
+#                 -finline-functions -funroll-loops -fno-rtti -DNO_GCC_PRAGMA \
+#                 -march=pentium -malign-double -fexceptions \
+#                 -fexpensive-optimizations
 
 ifeq ($(DEBUG_BUILD), 1)
 OPTIMIZATIONS = -fno-strict-aliasing -fno-rtti -fPIC

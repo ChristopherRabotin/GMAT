@@ -5,9 +5,19 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -60,8 +70,10 @@ END_EVENT_TABLE()
 WelcomePanel::WelcomePanel(wxFrame *frame, const wxString& title,
       int x, int y, int w, int h)
 : wxFrame(frame, -1, title, wxPoint(x, y), wxSize(w, h),
-      (wxDEFAULT_FRAME_STYLE & ~ (wxRESIZE_BORDER | wxRESIZE_BOX | wxMAXIMIZE_BOX)) | wxFRAME_FLOAT_ON_PARENT)
-{           
+          // wxRESIZE_BOX is no longer in wxWidgets-3.0
+          //(wxDEFAULT_FRAME_STYLE & ~ (wxRESIZE_BORDER | wxRESIZE_BOX | wxMAXIMIZE_BOX)) | wxFRAME_FLOAT_ON_PARENT)
+          (wxDEFAULT_FRAME_STYLE & ~ (wxRESIZE_BORDER | wxMAXIMIZE_BOX)) | wxFRAME_FLOAT_ON_PARENT)
+{
    SetBackgroundColour(wxNullColour);
    Create();
    CenterOnScreen(wxBOTH);
@@ -114,7 +126,8 @@ void WelcomePanel::Create()
       MessageInterface::ShowMessage
          ("   the iconFile '%s' doesnot exist, so creating default\n", iconFile.c_str());
       #endif
-      aboutButton = new wxBitmapButton(this, -1, NULL, wxDefaultPosition,
+      wxBitmap nullMap;
+      aboutButton = new wxBitmapButton(this, -1, nullMap, wxDefaultPosition,
                            wxSize(200,200));
    }
    
@@ -424,7 +437,7 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
          if (linkIcons.size() > 0)
          {
             aIconNTextSizer = new wxFlexGridSizer(2, 20, 20);
-            std::string fullPath = fm->GetFullPathname("ICON_PATH") + linkIcons[i].c_str();
+            std::string fullPath = fm->GetFullPathname("ICON_PATH") + std::string(linkIcons[i].c_str());
             #ifdef DEBUG_FILL_GROUP
             MessageInterface::ShowMessage("   fullPath='%s'\n", fullPath.c_str());
             #endif
@@ -477,7 +490,9 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
 //------------------------------------------------------------------------------
 void WelcomePanel::OnOpenRecentScript(wxHyperlinkEvent& event)
 {
-   GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(event.GetURL(), event);
+   GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(event.GetURL(),
+                                            event, false);
+   GmatAppData::Instance()->GetMainFrame()->CloseWelcomePanel();  // ****
 }
 
 
@@ -518,7 +533,7 @@ void WelcomePanel::OnOpenHelpLink(wxHyperlinkEvent& event)
 //------------------------------------------------------------------------------
 void WelcomePanel::OnOpenSampleScript(wxHyperlinkEvent& event)
 {
-   std::string sampleDir = event.GetURL().c_str();
+   std::string sampleDir = event.GetURL().WX_TO_STD_STRING;
    std::string appFullPath = GmatFileUtil::GetApplicationPath();
    std::string appDir = GmatFileUtil::ParsePathName(appFullPath, true);
    std::string sampleFullPath = sampleDir;
@@ -534,8 +549,8 @@ void WelcomePanel::OnOpenSampleScript(wxHyperlinkEvent& event)
    
    if (GmatFileUtil::DoesDirectoryExist(sampleFullPath + "/", false))
    {
-      wxString samplePath = sampleFullPath.c_str();
-      wxFileDialog dialog(this, _T("Choose a file"), _T(samplePath), _T(""), _T("*.*"));
+      wxString samplePath = wxString(sampleFullPath.c_str());
+      wxFileDialog dialog(this, _T("Choose a file"), samplePath, _T(""), _T("*.*"));
       if (dialog.ShowModal() == wxID_OK)
       {
          wxString scriptfile;
@@ -594,7 +609,7 @@ wxBitmap WelcomePanel::LoadBitmap( wxString filename, int width, int height )
    else
    {
       MessageInterface::ShowMessage
-         ("*** WARNING *** Can't load image from '%s'\n", filename.c_str());
+         ("*** WARNING *** Can't load image from '%s'\n", filename.WX_TO_C_STRING);
    }
    
    return bitmap;

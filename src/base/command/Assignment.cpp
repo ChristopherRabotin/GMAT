@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -35,6 +45,8 @@
 #include "NumberWrapper.hpp"
 #include "ArrayWrapper.hpp"
 #include "ArrayElementWrapper.hpp"
+#include "ObjectWrapper.hpp"
+#include "StringWrapper.hpp"
 #include "FunctionManager.hpp"
 #include "MessageInterface.hpp"
 #include "ObjectPropertyWrapper.hpp"
@@ -46,7 +58,7 @@
 //#define DEBUG_ASSIGNMENT_SET
 //#define DEBUG_ASSIGNMENT_INIT
 //#define DEBUG_ASSIGNMENT_EXEC
-//#define DEBUG_EQUATION 1
+//#define DEBUG_RUN_MATH_TREE 1
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_FUNCTION 1
 //#define DEBUG_OBJECT_MAP
@@ -438,7 +450,8 @@ bool Assignment::InterpretAction()
    rhs = chunks[1]; 
    
    #ifdef DEBUG_ASSIGNMENT_IA
-   MessageInterface::ShowMessage("Checking if LHS has single quote or invalid brackets\n");
+   MessageInterface::ShowMessage
+      ("Checking if LHS has single quote or invalid brackets\n");
    #endif
    // check if there is single quote in LHS(loj: 2008.07.22)
    if (lhs.find("'") != lhs.npos)
@@ -500,7 +513,38 @@ bool Assignment::InterpretAction()
    
    // If there is still ; then report error since ; should have been removed
    if (!isRhsString && (rhs.find(";") != rhs.npos))
-      throw CommandException("Is there a missing \"%\" for inline comment?");
+   {
+      // Allow ; in the vector form [1; 2; 3]
+      #ifdef DEBUG_ASSIGNMENT_IA
+      MessageInterface::ShowMessage
+         ("   Checking if semicolon is inside [] in <%s>\n", rhs.c_str());
+      #endif
+      // Check for all occurance of semicolon
+      std::string::size_type openPos = rhs.find("[");
+      std::string::size_type closePos = rhs.find("]");
+      bool isSemicolonOutside = false;
+      if (openPos != rhs.npos && closePos != rhs.npos)
+      {
+         unsigned int len = rhs.length();
+         for (unsigned int i = 0; i < len; i++)
+         {
+            if (rhs[i] == ';')
+            {
+               #ifdef DEBUG_ASSIGNMENT_IA
+               MessageInterface::ShowMessage("   ; found at %u\n", i);
+               #endif
+               if (i < openPos && i > closePos)
+               {
+                  isSemicolonOutside = true;
+                  break;
+               }
+            }
+         }
+      }
+      
+      if (isSemicolonOutside)
+         throw CommandException("Is there a missing \"%\" for inline comment?");
+   }
    
    #ifdef DEBUG_ASSIGNMENT_IA
    MessageInterface::ShowMessage("RHS %s a string\n", isRhsString ? "is" : "is not");
@@ -509,20 +553,22 @@ bool Assignment::InterpretAction()
    if (!isRhsString)
    {
       #ifdef DEBUG_ASSIGNMENT_IA
-      MessageInterface::ShowMessage("Calling MathParser::IsEquation()\n");
+      MessageInterface::ShowMessage
+         ("Creating MathParser with configObjectMap = <%p>\nCalling MathParser::IsEquation()\n",
+          configObjectMap);
       #endif
-      MathParser mp = MathParser();
+      MathParser mp = MathParser(configObjectMap);
       if (mp.IsEquation(rhs, false))
       {
          // Parse RHS if equation
-         #ifdef DEBUG_EQUATION
+         #ifdef DEBUG_ASSIGNMENT_IA
          MessageInterface::ShowMessage
             ("Assignment::InterpretAction() %s is an equation\n", rhs.c_str());
          #endif
          
          MathNode *topNode = mp.Parse(rhs);
          
-         #ifdef DEBUG_EQUATION
+         #ifdef DEBUG_ASSIGNMENT_IA
          if (topNode)
             MessageInterface::ShowMessage
                ("   topNode=%s\n", topNode->GetTypeName().c_str());
@@ -534,7 +580,7 @@ bool Assignment::InterpretAction()
          std::string str1 = rhs;
          if (GmatStringUtil::EndsWith(str1, "'"))
          {
-            #ifdef DEBUG_EQUATION
+            #ifdef DEBUG_ASSIGNMENT_IA
             MessageInterface::ShowMessage("   <%s> ends with '\n", str1.c_str());
             #endif
             
@@ -566,6 +612,11 @@ bool Assignment::InterpretAction()
       }
       else // if not an equation, check for unexpected commas on the right-hand-side
       {
+         #ifdef DEBUG_ASSIGNMENT_IA
+         MessageInterface::ShowMessage
+            ("Assignment::InterpretAction() %s is not an equation\n", rhs.c_str());
+         #endif
+         
          // Delete old MathTree and clear mathWrapperMap
          ClearMathTree();        
          
@@ -649,12 +700,13 @@ bool Assignment::Validate()
    bool retval = true;
 
    #ifdef DEBUG_VALIDATION
-      MessageInterface::ShowMessage("\nAssignment::Validate() '%s' entered\n",
-            (lhs + " = " + rhs).c_str());
-      MessageInterface::ShowMessage("Assignment command has lhs = %s, "
-            "rhs = %s\n", lhs.c_str(), rhs.c_str());
-      MessageInterface::ShowMessage("Validate has "
-            "lhsWrapper = %p, rhsWrapper = %p\n", lhsWrapper, rhsWrapper);
+      MessageInterface::ShowMessage
+         ("\nAssignment::Validate() '%s' entered\n", (lhs + " = " + rhs).c_str());
+      MessageInterface::ShowMessage
+         ("Assignment command has lhs = %s, rhs = %s\n", lhs.c_str(), rhs.c_str());
+      MessageInterface::ShowMessage
+         ("Validate has lhsWrapper = <%p>, rhsWrapper = <%p>, mathTree = <%p>\n",
+          lhsWrapper, rhsWrapper, mathTree);
    #endif
    if (lhsWrapper != NULL)
    {
@@ -879,8 +931,21 @@ bool Assignment::Validate()
       {
          if (lhsDataType == Gmat::STRING_TYPE && mathTree)
          {
-            lastErrorMessage = "Right of the equal sign is not valid.";
-            retval = false;
+            // Now it allows string function such as strcat() (LOJ: 2016.02.18)
+            MathNode *topNode = mathTree->GetTopNode();
+            if (topNode && topNode->IsOfType("StringFunction"))
+            {
+               #ifdef DEBUG_VALIDATION
+               MessageInterface::ShowMessage
+                  ("   We now allow string function, so it is valid\n");
+               #endif
+               retval = true;
+            }
+            else
+            {
+               lastErrorMessage = "Right of the equal sign is not valid.";
+               retval = false;
+            }
          }
          else if (mathTree == NULL)
          {
@@ -1006,21 +1071,57 @@ bool Assignment::Initialize()
       
       try
       {
+         // Currently GmatFunction is not allowed in a math eqation
+         StringArray gmatFunctions = mathTree->GetGmatFunctionNames();
+         #ifdef DEBUG_ASSIGNMENT_INIT
+         MessageInterface::ShowMessage
+            ("Assignment command has %d GmatFunctions\n", gmatFunctions.size());
+         for (unsigned int i = 0; i < gmatFunctions.size(); i++)
+            MessageInterface::ShowMessage
+               ("gmatFunctions[%d] = '%s'\n", i, gmatFunctions[i].c_str());
+         #endif
+         
+         
+         // I think I fixed MathParser to parse GmatFunction with math operators,
+         // but if any test fails, set this to 1 (LOJ: 2015.10.02)
+         //===========================================================
+         #if 0
+         //===========================================================
+         if (gmatFunctions.size() > 0)
+         {
+            // If any math operator found with GmatFunction, throw an exception
+            // for GMT-5262 (LOJ: 2015.10.02)
+            if (GmatStringUtil::IsThereMathSymbol(rhs))
+            {
+               #ifdef DEBUG_ASSIGNMENT_INIT
+               MessageInterface::ShowMessage
+                  ("Throwing exception: Using GmatFunction in math equation is not "
+                   "allowed in this release");
+               #endif
+               throw CommandException
+                  ("Using GmatFunction in math equation is not allowed in this release");
+            }
+         }
+         //===========================================================
+         #endif
+         //===========================================================
+         
          if (mathTree->Initialize(objectMap, globalObjectMap))
          {
             try
             {
                if (!topNode->ValidateInputs())
-                  throw CommandException("Failed to validate equation inputs");
+                  throw CommandException("Failed to validate math equation or function inputs");
             }
             catch (BaseException &be)
             {
-               throw CommandException("Failed to validate equation inputs: " + be.GetFullMessage());
+               throw CommandException("Failed to validate math equation or function inputs: " +
+                                      be.GetFullMessage());
             }
          }
          else
          {
-            throw CommandException("Failed to initialize equation");
+            throw CommandException("Failed to initialize math equation or function");
          }
       }
       catch (BaseException &e)
@@ -1065,7 +1166,7 @@ bool Assignment::Execute()
    callCount++;      
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== Assignment::Execute() entered, '%s' Count = %d\n",
+      (">>>>> CALL TRACE: Assignment::Execute() entered, '%s' Count = %d\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
    #endif
    
@@ -1076,6 +1177,9 @@ bool Assignment::Execute()
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
        callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL",
        internalCoordSys);
+   MessageInterface::ShowMessage
+      ("   lhsWrapper=<%p>, rhsWrapper=<%p>, mathTree=<%p>\n", lhsWrapper, rhsWrapper,
+       mathTree);
    #endif
    
    if (lhsWrapper == NULL || (rhsWrapper == NULL && mathTree == NULL))
@@ -1131,8 +1235,18 @@ bool Assignment::Execute()
       {
          // If lhs is object property and is deprecated to remove in the future, ignore
          if (lhsWrapper->GetDataType() == Gmat::UNKNOWN_PARAMETER_TYPE)
+         {
+            #ifdef DEBUG_ASSIGNMENT_EXEC
+            MessageInterface::ShowMessage
+               ("Assignment::Execute() returning false, LHS data type is unknown\n");
+            #endif
             return true;
+         }
          
+         #ifdef DEBUG_ASSIGNMENT_EXEC
+         MessageInterface::ShowMessage
+            ("   Calling ElementWrapper::SetValue() to set value to LHS\n");
+         #endif
          retval = ElementWrapper::SetValue(lhsWrapper, rhsWrapper, solarSys, objectMap,
                                            globalObjectMap, setRefObj);
       }
@@ -1142,14 +1256,28 @@ bool Assignment::Execute()
          ShowObjectMaps("object maps at the start");
          #endif
          
+         #ifdef DEBUG_ASSIGNMENT_EXEC
+         MessageInterface::ShowMessage("   Calling RunMathTree()\n");
+         #endif
+         
          outWrapper = RunMathTree();
+         if (outWrapper->IsOneDimArraySettingAllowed())
+            lhsWrapper->AllowOneDimArraySetting(true);
+         
+         #ifdef DEBUG_ASSIGNMENT_EXEC
+         MessageInterface::ShowMessage
+            ("   Calling ElementWrapper::SetValue() to set value to LHS\n");
+         #endif
          retval = ElementWrapper::SetValue(lhsWrapper, outWrapper, solarSys, objectMap,
                                            globalObjectMap, setRefObj);
       }
       
       // Check if setting object property
+      // Also check if wrapper is a parameter wrapper which may update
+      // a Parameter ref object (Fix for GMT-5247, LOJ: 2015.08.27)
       if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT ||
-          lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT)
+          lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT ||
+          lhsWrapper->GetWrapperType() == Gmat::PARAMETER_WT)
          HandleObjectPropertyChange(lhsWrapper);
       
       #ifdef DEBUG_ASSIGNMENT_EXEC
@@ -1185,6 +1313,11 @@ bool Assignment::Execute()
    }
    catch (BaseException &e)
    {
+      #ifdef DEBUG_ASSIGNMENT_EXEC
+      MessageInterface::ShowMessage
+         ("   ==> Assignment::Execute() Caught Exception: %s\n", e.GetFullMessage().c_str());
+      #endif
+      
       // To make error message format consistent, just add "Command Exception:"
       std::string msg = e.GetFullMessage();
       if (msg.find("Exception") == msg.npos && msg.find("exception") == msg.npos)
@@ -1256,7 +1389,7 @@ bool Assignment::Execute()
    #ifdef DEBUG_TRACE
    clock_t t2 = clock();
    MessageInterface::ShowMessage
-      ("=== Assignment::Execute() exiting, '%s' Count = %d, Run Time: %f seconds\n",
+      (">>>>> CALL TRACE: Assignment::Execute() exiting, '%s' Count = %d, Run Time: %f seconds\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount,
        (Real)(t2-t1)/CLOCKS_PER_SEC);
    #endif
@@ -1331,8 +1464,8 @@ const StringArray& Assignment::GetWrapperObjectNameArray(bool completeSet)
 {
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("Assignment::GetWrapperObjectNameArray() lhs=<%s>, rhs=<%s>\n",
-       lhs.c_str(), rhs.c_str());
+      ("Assignment::GetWrapperObjectNameArray() lhs=<%s>, rhs=<%s>, mathTree=<%p>\n",
+       lhs.c_str(), rhs.c_str(), mathTree);
    #endif
    
    wrapperObjectNames.clear();
@@ -1344,7 +1477,9 @@ const StringArray& Assignment::GetWrapperObjectNameArray(bool completeSet)
       {
          // If LHS has more than 1 dot add to the list and Interpreter::ValidateCommand()
          // will figure out if it is settable Parameter or not.(LOJ: 2009.12.22)
-         if ((GmatStringUtil::NumberOfOccurrences(lhs, '.') > 1) || completeSet)
+         // Changed to use > 0 (LOJ: 2015.02.10)
+         //if ((GmatStringUtil::NumberOfOccurrences(lhs, '.') > 1) || completeSet)
+         if ((GmatStringUtil::NumberOfOccurrences(lhs, '.') > 0) || completeSet)
             wrapperObjectNames.push_back(lhs);
       }
       
@@ -1355,11 +1490,26 @@ const StringArray& Assignment::GetWrapperObjectNameArray(bool completeSet)
    }
    else
    {
-      // Add math node elements to wrapper object names
-      StringArray tmpArray = mathTree->GetRefObjectNameArray(Gmat::PARAMETER);
-      if (tmpArray.size() > 0)
-         wrapperObjectNames.insert(wrapperObjectNames.end(),
-                                   tmpArray.begin(), tmpArray.end());
+      MathNode *topNode = mathTree->GetTopNode();
+      if (topNode && topNode->IsOfType("BuiltinFunction"))
+      {
+         #ifdef DEBUG_WRAPPER_CODE
+         MessageInterface::ShowMessage("   It is a builtin function call\n");
+         #endif
+         // Add math node elements to wrapper object names for string function
+         StringArray tmpArray = mathTree->GetWrapperObjectNameArray();
+         if (tmpArray.size() > 0)
+            wrapperObjectNames.insert(wrapperObjectNames.end(),
+                                      tmpArray.begin(), tmpArray.end());
+      }
+      else
+      {
+         // Add math node elements to ref object names
+         StringArray tmpArray = mathTree->GetRefObjectNameArray(Gmat::PARAMETER);
+         if (tmpArray.size() > 0)
+            wrapperObjectNames.insert(wrapperObjectNames.end(),
+                                      tmpArray.begin(), tmpArray.end());
+      }
       
       #ifdef DEBUG_WRAPPER_CODE
       MessageInterface::ShowMessage("   Got the following from the MathTree:\n");
@@ -1396,8 +1546,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
 {
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("Assignment::SetElementWrapper() toWrapper=<%p>, name='%s'\n   lhs='%s'\n   rhs='%s', "
-       "mathTree=<%p>\n", toWrapper,withName.c_str(), lhs.c_str(), rhs.c_str(), mathTree);
+      ("Assignment::SetElementWrapper() entered, toWrapper=<%p>, name='%s'\n   "
+       "lhs='%s'\n   rhs='%s', mathTree=<%p>\n", toWrapper,withName.c_str(),
+       lhs.c_str(), rhs.c_str(), mathTree);
    #endif
    
    if (toWrapper == NULL)
@@ -1454,7 +1605,14 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
             settabilityError = "The field " +
                   toWrapper->GetDescription() + " cannot be set after "
                   "the Mission Sequence has started";
+            lastErrorMessage = settabilityError;
             omitLHSBecauseOfSettability = true;
+            #ifdef DEBUG_WRAPPER_CODE
+            MessageInterface::ShowMessage
+               ("Assignment::SetElementWrapper() returning false, %s\n",
+                settabilityError.c_str());
+            #endif
+            
             return false;
          }
       }
@@ -1470,7 +1628,13 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
             settabilityError = "Object Assignment is not allowed in "
                   "the Mission Sequence for " + obj->GetTypeName() +
                   " objects";
+            lastErrorMessage = settabilityError;
             omitLHSBecauseOfSettability = true;
+            #ifdef DEBUG_WRAPPER_CODE
+            MessageInterface::ShowMessage
+               ("Assignment::SetElementWrapper() returning false, %s\n",
+                settabilityError.c_str());
+            #endif
             return false;
          }
       }
@@ -1565,9 +1729,12 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
          MessageInterface::ShowMessage("   name '%s' found in mathWrapperMap\n", withName.c_str());
          #endif
          // rhs should always be parameter wrapper, so check first
-         if (withName.find(".") == withName.npos ||
+         // Now string wrapper is allowed such as strcat(a, ' new string') (LOJ: 2016.02.25)
+         if ((withName.find(".") == withName.npos) ||
              (withName.find(".") != withName.npos &&
-              toWrapper->GetWrapperType() == Gmat::PARAMETER_WT))
+              (toWrapper->GetWrapperType() == Gmat::PARAMETER_WT ||
+               toWrapper->GetWrapperType() == Gmat::NUMBER_WT)) ||
+             (toWrapper->GetWrapperType() == Gmat::STRING_WT))
          {
             if (mathWrapperMap[withName] != toWrapper)
             {
@@ -2275,6 +2442,11 @@ void Assignment::ClearMathTree()
 //------------------------------------------------------------------------------
 ElementWrapper* Assignment::RunMathTree()
 {
+   #ifdef DEBUG_RUN_MATH_TREE
+   MessageInterface::ShowMessage
+      ("Assignment::RunMathTree() entered, mathTree=<%p>\n", mathTree);
+   #endif
+   
    if (mathTree == NULL)
       return NULL;
    
@@ -2290,7 +2462,7 @@ ElementWrapper* Assignment::RunMathTree()
    
    if (topNode)
    {
-      #ifdef DEBUG_EQUATION
+      #ifdef DEBUG_RUN_MATH_TREE
       MessageInterface::ShowMessage
          ("Assignment::RunMathTree() topNode=%s, %s\n", topNode->GetTypeName().c_str(),
           topNode->GetName().c_str());
@@ -2298,9 +2470,10 @@ ElementWrapper* Assignment::RunMathTree()
       
       topNode->GetOutputInfo(returnType, numRow, numCol);
       
-      #ifdef DEBUG_ASSIGNMENT_EXEC
+      #ifdef DEBUG_RUN_MATH_TREE
       MessageInterface::ShowMessage
-         ("   returnType=%d, numRow=%d, numCol=%d\n", returnType, numRow, numCol);
+         ("   lhsDataType=%d, returnType=%d, numRow=%d, numCol=%d\n", lhsDataType,
+          returnType, numRow, numCol);
       #endif
       
       if (lhsDataType != returnType)
@@ -2336,16 +2509,18 @@ ElementWrapper* Assignment::RunMathTree()
       
       switch (returnType)
       {
-      case Gmat::REAL_TYPE:
+         case Gmat::REAL_TYPE:
          {
-            #ifdef DEBUG_ASSIGNMENT_EXEC
+            #ifdef DEBUG_RUN_MATH_TREE
             MessageInterface::ShowMessage("   Calling topNode->Evaluate()\n");
             #endif
             
             Real rval = -9999.9999;
             rval = topNode->Evaluate();
             
-            #ifdef DEBUG_ASSIGNMENT_EXEC
+            #ifdef DEBUG_RUN_MATH_TREE
+            MessageInterface::ShowMessage("   Returned %f (%s)\n",
+                              rval, GmatStringUtil::ToString(rval).c_str());
             MessageInterface::ShowMessage("   Returned %f\n", rval);
             MessageInterface::ShowMessage("   Creating NumberWrapper for output\n");
             #endif
@@ -2361,15 +2536,20 @@ ElementWrapper* Assignment::RunMathTree()
             outWrapper->SetReal(rval);
             break;
          }
-      case Gmat::RMATRIX_TYPE:
+         case Gmat::RMATRIX_TYPE:
          {
-            #ifdef DEBUG_ASSIGNMENT_EXEC
-            MessageInterface::ShowMessage("   Calling topNode->MatrixEvaluate()\n");
+            #ifdef DEBUG_RUN_MATH_TREE
+            MessageInterface::ShowMessage
+               ("   MathTree return type is Rmatrix so Calling topNode->MatrixEvaluate()\n");
             #endif
             
             Rmatrix rmat;
             rmat.SetSize(numRow, numCol);
             rmat = topNode->MatrixEvaluate();
+            #ifdef DEBUG_RUN_MATH_TREE
+            MessageInterface::ShowMessage
+               ("   rmat.rows=%d, rmat.cols=%d\n", rmat.GetNumRows(), rmat.GetNumColumns());
+            #endif
             // create Array, this array will be deleted when ArrayWrapper is deleted
             Array *outArray = new Array("ArrayOutput");
             #ifdef DEBUG_MEMORY
@@ -2380,11 +2560,19 @@ ElementWrapper* Assignment::RunMathTree()
             outArray->SetSize(numRow, numCol);
             outArray->SetRmatrix(rmat);
             
-            #ifdef DEBUG_ASSIGNMENT_EXEC
-            MessageInterface::ShowMessage("   Creating ArrayWrapper for output\n");
+            #ifdef DEBUG_RUN_MATH_TREE
+            MessageInterface::ShowMessage
+               ("   Creating ArrayWrapper for output, topNodeType='%s', topNodeName='%s'\n",
+                topNode->GetTypeName().c_str(), topNode->GetName().c_str());
             #endif
             
             outWrapper = new ArrayWrapper();
+            
+            // Allow setting one dimential row or column vector to each other
+            // for Cross() function (LOJ: 2016.03.14)
+            if (topNode->GetTypeName() == "Cross3")
+               outWrapper->AllowOneDimArraySetting(true);
+            
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Add
                (outWrapper, "outWrapper", "Assignment::RunMathTree()",
@@ -2394,11 +2582,65 @@ ElementWrapper* Assignment::RunMathTree()
             outWrapper->SetRefObject(outArray);
             break;
          }
-      default:
-         CommandException ce;
-         ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
-                       "equation is unknown", rhs.c_str(), lhs.c_str());
-         throw ce;
+         case Gmat::OBJECT_TYPE:
+         {
+            #ifdef DEBUG_RUN_MATH_TREE
+            MessageInterface::ShowMessage("   Return type is OBJECT_TYPE\n");
+            MessageInterface::ShowMessage("   Calling topNode->MatrixEvaluate()\n");
+            #endif
+            
+            GmatBase *outObj = topNode->EvaluateObject();
+            
+            if (outObj)
+            {
+               #ifdef DEBUG_RUN_MATH_TREE
+               MessageInterface::ShowMessage("   Creating ObjectWrapper for output\n");
+               #endif
+               outWrapper = new ObjectWrapper();
+               outWrapper->SetDescription(outObj->GetName());
+               outWrapper->SetRefObject(outObj->Clone());
+            }
+            else
+            {
+               CommandException ce;
+               ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
+                             "equation is OBJECT and it is NULL",
+                             rhs.c_str(), lhs.c_str());
+               throw ce;
+            }
+            break;
+         }
+         case Gmat::STRING_TYPE:
+         {
+            #ifdef DEBUG_RUN_MATH_TREE
+            MessageInterface::ShowMessage("   Calling topNode->EvaluateString()\n");
+            #endif
+            
+            std::string strval = topNode->EvaluateString();
+            
+            #ifdef DEBUG_RUN_MATH_TREE
+            MessageInterface::ShowMessage("   Returned '%s'\n", strval.c_str());
+            MessageInterface::ShowMessage("   Creating StringWrapper for output\n");
+            #endif
+            
+            outWrapper = new StringWrapper();
+            #ifdef DEBUG_MEMORY
+            MemoryTracker::Instance()->Add
+               (outWrapper, GmatStringUtil::ToString(rval), "Assignment::RunMathTree()",
+                "outWrapper = new NumberWrapper()");
+            #endif
+            
+            outWrapper->SetDescription(strval);
+            outWrapper->SetString(strval);
+            break;
+         }
+         default:
+         {
+            CommandException ce;
+            ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
+                          "equation or function is unknown", rhs.c_str(), lhs.c_str());
+            throw ce;
+         }
       }
    }
    else
@@ -2406,8 +2648,12 @@ ElementWrapper* Assignment::RunMathTree()
       throw CommandException("RHS is an equation, but top node is NULL\n");
    }
    
-   return outWrapper;
+   #ifdef DEBUG_RUN_MATH_TREE
+   MessageInterface::ShowMessage
+      ("Assignment::RunMathTree() returning, outWrapper=<%p>\n", outWrapper);
+   #endif
    
+   return outWrapper;
 }
 
 //------------------------------------------------------------------------------
@@ -2422,10 +2668,14 @@ void Assignment::HandleObjectPropertyChange(ElementWrapper *lhsWrapper)
    #endif
    
    std::string propName;
+   GmatBase *obj = NULL;
    
    // Get property name
    if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
    {
+      #ifdef DEBUG_PROPERTY_CHANGE
+      MessageInterface::ShowMessage("   The wrapper type is OBJECT_PROPERTY_WT\n");
+      #endif
       StringArray propNames = ((ObjectPropertyWrapper*)lhsWrapper)->GetPropertyNames();
       int propSize = propNames.size();
       
@@ -2441,9 +2691,24 @@ void Assignment::HandleObjectPropertyChange(ElementWrapper *lhsWrapper)
       
       // Get first property name (Why is there more than one property name?)
       propName = propNames[0];
+      obj = lhsWrapper->GetRefObject();
+   }
+   else if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT)
+   {
+      #ifdef DEBUG_PROPERTY_CHANGE
+      MessageInterface::ShowMessage("   The wrapper type is OBJECT_WT\n");
+      #endif
+      obj = lhsWrapper->GetRefObject();
+   }
+   else if (lhsWrapper->GetWrapperType() == Gmat::PARAMETER_WT)
+   {
+      #ifdef DEBUG_PROPERTY_CHANGE
+      MessageInterface::ShowMessage("   The wrapper type is PARAMETER_WT\n");
+      #endif
+      Parameter *param = (Parameter*)lhsWrapper->GetRefObject();
+      obj = param->GetOwner();
    }
    
-   GmatBase *obj = lhsWrapper->GetRefObject();
    if (obj != NULL)
    {
       // Check for the Spacecraft first

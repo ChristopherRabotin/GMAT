@@ -15,8 +15,16 @@ include ../DataInterfaceEnv.mk
 CPP = g++
 
 ifeq ($(MAC_SPECIFIC), 1)
-PLATFORM_FLAGS=-fPIC -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
+ifeq ($(BUILD_64BIT), 1)
+MAC_ARCHITECTURE_FLAGS =
+else
 MAC_ARCHITECTURE_FLAGS = -arch i386
+endif
+
+PLATFORM_FLAGS=-fPIC -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
+#MAC_ARCHITECTURE_FLAGS =
+#removed
+#-arch i386
 
 SHARED_LIB_FLAGS = -dylib -dynamiclib \
                    -undefined dynamic_lookup \
@@ -28,7 +36,7 @@ CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -Wall \
            $(MAC_ARCHITECTURE_FLAGS)
 else
 TARGET = ../lib/libDataInterface$(SHARED_EXTENSION)
-CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -Wall -fPIC
+CPPFLAGS = $(OPTIMIZATIONS) -funroll-loops -fno-rtti -Wall -fPIC
 endif
                  
                    
@@ -83,7 +91,7 @@ $(TARGET): $(OBJECTS)
 else
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../lib
-	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS)
+	$(CPP) $(OBJECTS) -o $(TARGET) $(OPTIMIZATIONS) $(SHARED_LIB_FLAGS)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
 endif
 

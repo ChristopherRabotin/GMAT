@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 // Author: Linda Jun
@@ -158,7 +168,7 @@ void EndFiniteBurnPanel::Create()
    // create burn label
    wxStaticText *burnLabel =
       new wxStaticText(this, ID_TEXT,
-                       wxT(GUI_ACCEL_KEY"Burn"), wxDefaultPosition, wxSize(50, -1));
+                       GUI_ACCEL_KEY"Burn", wxDefaultPosition, wxSize(50, -1));
    
    #ifdef DEBUG_ENDFBPANEL_CREATE
    MessageInterface::ShowMessage
@@ -177,13 +187,13 @@ void EndFiniteBurnPanel::Create()
    
    wxStaticText *satLabel =
       new wxStaticText(this, ID_TEXT,
-                       wxT(GUI_ACCEL_KEY"Spacecraft"), wxDefaultPosition, wxSize(50,-1));
+                       GUI_ACCEL_KEY"Spacecraft", wxDefaultPosition, wxSize(50,-1));
    mSatTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1));
    mSatTextCtrl->SetToolTip(pConfig->Read(_T("SpacecraftHint")));
    
    wxButton *selectSatButton =
-      new wxButton(this, ID_BUTTON, wxT("E"GUI_ACCEL_KEY"dit"), wxDefaultPosition, wxDefaultSize);
+      new wxButton(this, ID_BUTTON, "E" GUI_ACCEL_KEY "dit", wxDefaultPosition, wxDefaultSize);
    selectSatButton->SetToolTip(pConfig->Read(_T("SelectSpacecraftHint")));
    
    
@@ -270,7 +280,7 @@ void EndFiniteBurnPanel::SaveData()
    
    // In case user typed in spacecraft names, get value from textbox and
    // parse by blank or comma
-   std::string scNames = satNames.c_str();
+   std::string scNames = satNames.WX_TO_STD_STRING;
    StringTokenizer st(scNames, " ,");
    StringArray scList = st.GetAllTokens();
    #ifdef DEBUG_ENDFBPANEL_SAVE
@@ -304,7 +314,7 @@ void EndFiniteBurnPanel::SaveData()
          desc = "\" are undefined.\n";
       }
       
-      std::string unknownSc = (ToWxString(ToWxArrayString(result))).c_str();
+      std::string unknownSc = (ToWxString(ToWxArrayString(result))).WX_TO_STD_STRING;
       std::string msg = scLabel + unknownSc + desc;
       MessageInterface::PopupMessage(Gmat::ERROR_, msg);
       canClose = false;

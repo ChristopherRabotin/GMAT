@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\command">
+      <UniqueIdentifier>{850e55eb-0812-4307-ad3b-3fd58445899c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\factory">
+      <UniqueIdentifier>{bfd1d4d6-64a9-41e7-945e-5e65d5a206fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{90fef491-272a-440a-991c-2b958a806437}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{d6e99ed1-f341-4e62-9c44-cb1b218d1a7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\propagator">
+      <UniqueIdentifier>{de2f936a-988a-4bd6-a049-471380460f77}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\include\GmatCFunc_defs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\propagator\DynFunInterface.hpp">
+      <Filter>Source Files\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\command\PrepareMissionSequence.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfaceFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\factory\CCommandFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfacePluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\command\PrepareMissionSequence.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\factory\CCommandFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\CInterfacePlugin\src\plugin\CInterfacePluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

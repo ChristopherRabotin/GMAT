@@ -1,0 +1,48 @@
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft theSat;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create EphemerisFile EphemerisFile1;
+GMAT EphemerisFile1.UpperLeft = [ 0 0 ];
+GMAT EphemerisFile1.Size = [ 0 0 ];
+GMAT EphemerisFile1.RelativeZOrder = 0;
+GMAT EphemerisFile1.Maximized = false;
+GMAT EphemerisFile1.Spacecraft = theSat;
+GMAT EphemerisFile1.Filename = 'EphemerisFile1.e';
+GMAT EphemerisFile1.FileFormat = STK-TimePosVel;
+GMAT EphemerisFile1.EpochFormat = UTCGregorian;
+GMAT EphemerisFile1.InitialEpoch = InitialSpacecraftEpoch;
+GMAT EphemerisFile1.FinalEpoch = FinalSpacecraftEpoch;
+GMAT EphemerisFile1.StepSize = IntegratorSteps;
+GMAT EphemerisFile1.Interpolator = Lagrange;
+GMAT EphemerisFile1.InterpolationOrder = 7;
+GMAT EphemerisFile1.CoordinateSystem = EarthMJ2000Eq;
+GMAT EphemerisFile1.OutputFormat = PC;
+GMAT EphemerisFile1.WriteEphemeris = true;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+Propagate DefaultProp(theSat) {theSat.ElapsedSecs = 12000.0};

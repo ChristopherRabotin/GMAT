@@ -1,0 +1,492 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{6c263896-d7f4-419b-99a7-402eb0ae697a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\command">
+      <UniqueIdentifier>{57bb5d5f-411a-467d-b991-c9137bb5da25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\estimator">
+      <UniqueIdentifier>{b58d911c-9120-479e-a35a-28ebdd915662}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\event">
+      <UniqueIdentifier>{5de3caf9-72f4-408c-b176-bde94458fad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\factory">
+      <UniqueIdentifier>{d912c983-83ac-4618-9254-cc46e2e7675e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hardware">
+      <UniqueIdentifier>{26ca9cf3-0626-4fd2-b07e-1ee540c15188}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\measurement">
+      <UniqueIdentifier>{85af7313-37be-4367-8038-698bb4773493}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\measurementfile">
+      <UniqueIdentifier>{272193dc-bea4-4677-8b93-c55abcd7ddf8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{79bbbf4a-cf87-4dd9-b5c3-be25e4263184}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\trackingsystem">
+      <UniqueIdentifier>{591a5841-f9e6-4cb0-871b-f4d39cc749b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\measurement\Ionosphere">
+      <UniqueIdentifier>{82528111-a1bf-43e8-b762-bf4657aefd69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\measurement\Troposphere">
+      <UniqueIdentifier>{a1e61c86-4e6b-4ab5-8f95-6dbea26388b3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\base\include\estimation_defs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\command\RunEstimator.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\command\RunSimulator.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\EstimationStateManager.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\Estimator.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\EstimatorException.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\ExtendedKalmanInv.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\SequentialEstimator.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\Simulator.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\BatchEstimator.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\BatchEstimatorInv.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\estimator\BatchEstimatorSVD.hpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\event\EventException.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\event\EventManager.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\event\LightTimeCorrection.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\event\Event.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\event\EventData.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\EventFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\MeasurementFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\MeasurementModelFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\ObTypeFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\TrackingDataFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\TrackingSystemFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\DataFileFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\EstimationCommandFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\EstimatorFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\EstimatorHardwareFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\Sensor.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\Signal.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\Transmitter.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\Transponder.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\Antenna.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\Receiver.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\RFHardware.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\MeasurementData.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\MeasurementException.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\MeasurementManager.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\MeasurementModel.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\MediaCorrection.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\OpticalAngles.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\OpticalAzEl.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\PhysicalMeasurement.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\SnTwoWayRange.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\TDRSSTwoWayRange.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\TrackingData.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\TwoWayRange.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\USNTwoWayRange.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\AveragedDoppler.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\CoreMeasurement.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\DSNTwoWayDoppler.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\DSNTwoWayRange.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\EstimationDefs.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Troposphere\Troposphere.hpp">
+      <Filter>Source Files\measurement\Troposphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\cira.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\igrf.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\Ionosphere.hpp">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\iridreg.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\irifun.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\irisub.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\iritec.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\B3_obtype.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\DataFile.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\DataFileAdapter.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\GmatObType.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\ObservationData.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementfile\ObType.hpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingsystem\DSNTrackingSystem.hpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingsystem\OpticalTrackingSystem.hpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingsystem\TDRSSTrackingSystem.hpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingsystem\TrackingSystem.hpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingsystem\TrackingSystemException.hpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingsystem\USNTrackingSystem.hpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\event\EstimationRootFinder.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\command\RunSimulator.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\Estimator.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\EstimatorException.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\ExtendedKalmanInv.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\SequentialEstimator.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\Simulator.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\BatchEstimator.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\BatchEstimatorInv.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\BatchEstimatorSVD.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\estimator\EstimationStateManager.cpp">
+      <Filter>Source Files\estimator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\EventManager.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\LightTimeCorrection.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\Event.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\EventData.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\EventException.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\EventFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\MeasurementFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\MeasurementModelFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\ObTypeFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\TrackingDataFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\TrackingSystemFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\DataFileFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\EstimationCommandFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\EstimatorFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\EstimatorHardwareFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\hardware\Sensor.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\hardware\Signal.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\hardware\Transmitter.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\hardware\Transponder.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\hardware\Antenna.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\hardware\Receiver.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\hardware\RFHardware.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\MeasurementManager.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\MeasurementModel.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\MediaCorrection.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\OpticalAngles.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\OpticalAzEl.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\PhysicalMeasurement.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\SnTwoWayRange.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\TDRSSTwoWayRange.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\TrackingData.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\TwoWayRange.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\USNTwoWayRange.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\AveragedDoppler.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\CoreMeasurement.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\DSNTwoWayDoppler.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\DSNTwoWayRange.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\MeasurementData.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Troposphere\Troposphere.cpp">
+      <Filter>Source Files\measurement\Troposphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\cira.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\igrf.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\Ionosphere.cpp">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\iridreg.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\irifun.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\irisub.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\iritec.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\B3_obtype.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\DataFile.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\DataFileAdapter.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\GmatObType.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\ObservationData.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementfile\ObType.cpp">
+      <Filter>Source Files\measurementfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingsystem\DSNTrackingSystem.cpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingsystem\OpticalTrackingSystem.cpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingsystem\TDRSSTrackingSystem.cpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingsystem\TrackingSystem.cpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingsystem\USNTrackingSystem.cpp">
+      <Filter>Source Files\trackingsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\EstimationRootFinder.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+</Project>

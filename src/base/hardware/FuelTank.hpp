@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Darrel J. Conway
 // Created: 2004/11/08
@@ -19,13 +29,13 @@
 // Order 124.
 //
 /**
- * Class definition for the Fuel Tanks.
+ * Class definition for the Fuel Tank base class.
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef FUELTANK_HPP
-#define FUELTANK_HPP
+#ifndef FuelTank_hpp
+#define FuelTank_hpp
 
 #include "Hardware.hpp"
 
@@ -37,7 +47,7 @@ class GMAT_API FuelTank : public Hardware
 {
 public:
 
-   FuelTank(std::string nomme);
+   FuelTank(const std::string &typeStr, const std::string &nomme);
    virtual ~FuelTank();
    FuelTank(const FuelTank& ft);
    FuelTank&            operator=(const FuelTank& ft);
@@ -62,81 +72,48 @@ public:
    virtual bool         GetBooleanParameter(const Integer id) const;
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value);
-   virtual std::string  GetStringParameter(const Integer id) const;
-   virtual bool         SetStringParameter(const Integer id,
-                                           const std::string &value);
-   virtual std::string  GetStringParameter(const std::string &label) const;
-   virtual bool         SetStringParameter(const std::string &label,
-                                           const std::string &value);
+//   virtual std::string  GetStringParameter(const Integer id) const;
+//   virtual bool         SetStringParameter(const Integer id,
+//                                           const std::string &value);
+//   virtual std::string  GetStringParameter(const std::string &label) const;
+//   virtual bool         SetStringParameter(const std::string &label,
+//                                           const std::string &value);
    
-   // for enumerated strings
-   virtual const StringArray&
-                        GetPropertyEnumStrings(const Integer id) const;
-   virtual const StringArray&
-                        GetPropertyEnumStrings(const std::string &label) const;
+//   // for enumerated strings
+//   virtual const StringArray&
+//                        GetPropertyEnumStrings(const Integer id) const;
+//   virtual const StringArray&
+//                        GetPropertyEnumStrings(const std::string &label) const;
    
-   // required method for all subclasses
-   virtual GmatBase*    Clone() const;
-   virtual void         Copy(const GmatBase* orig);
+//   // required method for all subclasses
+//   virtual GmatBase*    Clone() const;
+//   virtual void         Copy(const GmatBase* orig);
    
    virtual bool         Initialize();
-   virtual bool         Validate();
+   virtual bool         Validate() = 0;
    
+   void                 SetFlowWithoutThruster(bool directFlowAllowed);
+   bool                 NoThrusterNeeded();
+
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    /// Mass of the fuel in the tank
    Real                 fuelMass;
-   /// Tank pressure
-   Real                 pressure;
-   /// Fuel temperature
-   Real                 temperature;
-   /// Reference temperature
-   Real                 refTemperature;
-   /// Tank volume
-   Real                 volume;
-   /// Fuel density
-   Real                 density;
-   /// Flag indicating if the tank is pressure regulated or blow-down
-   bool                 pressureRegulated; // deprecated
    /// Flag indicating if negative fuel mass is allowed
    bool                 allowNegativeFuelMass;
-   /// Pressure model used
-   Integer              pressureModel;
+   /// Flag used to allow direct mass flow, for instance for thrust history file
+   bool                 noThrusterNeeded;
+
+   virtual void         UpdateTank()         = 0;
+   virtual void         DepleteFuel(Real dm) = 0;
    
-   // Parameters used for internal calculations
-   
-   /// Pressurant volume, a calculated parameter
-   Real                 gasVolume;
-   /// Baseline product of the pressure and temperature
-   Real                 pvBase;
-   
-   virtual void         UpdateTank();
-   virtual void         DepleteFuel(Real dm);
-   
-   /// Pressure model list
-   enum
-   {
-      TPM_PRESSURE_REGULATED,
-      TPM_BLOW_DOWN
-   };
-   
-   /// Availabel pressure model list
-   static StringArray   pressureModelList;
-   //static const std::string pressureModelList[2];
 public:
    /// Published parameters for generic fuel tanks
    enum
    {
       ALLOW_NEGATIVE_FUEL_MASS = HardwareParamCount,
       FUEL_MASS,
-      PRESSURE, 
-      TEMPERATURE,
-      REFERENCE_TEMPERATURE,
-      VOLUME,
-      FUEL_DENSITY,
-      PRESSURE_MODEL,
-      PRESSURE_REGULATED,  // deprecated
       FuelTankParamCount
    };
    
@@ -148,4 +125,4 @@ public:
       PARAMETER_TYPE[FuelTankParamCount - HardwareParamCount];
 };
 
-#endif // FUELTANK_HPP
+#endif // FuelTank_hpp

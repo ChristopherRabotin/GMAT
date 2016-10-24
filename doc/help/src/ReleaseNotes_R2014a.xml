@@ -125,7 +125,7 @@ Propagate aProp(aSat) {aSat.ElapsedSecs = 900, OrbitColor = Red}  </code></progr
       <title>New Orbit State Representations</title>
 
       <para>GMAT now supports six new common orbit state representations,
-      developed with support by the Korean Aerospace Research Institute
+      developed with support by the Korea Aerospace Research Institute
       (KARI). The new representations are:<itemizedlist spacing="compact">
           <listitem>
             <para>Long- and short-period Brouwer-Lyddane mean elements
@@ -184,7 +184,7 @@ Propagate aProp(aSat) {aSat.ElapsedSecs = 900, OrbitColor = Red}  </code></progr
       <title>New Attitude Models</title>
 
       <para>GMAT now supports three new kinematic attitude models, developed
-      with support by the Korean Aerospace Research Institute (KARI). The new
+      with support by the Korea Aerospace Research Institute (KARI). The new
       representations are:<itemizedlist spacing="compact">
           <listitem>
             <para>Precessing spinner</para>

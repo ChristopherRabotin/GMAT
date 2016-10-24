@@ -1,0 +1,1033 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\app">
+      <UniqueIdentifier>{597d63d3-d21b-4fff-9aab-84606ac8d510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{034f09b8-6990-4a1c-94da-0fe53552aaae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\asset">
+      <UniqueIdentifier>{1f15c30b-1101-472b-a706-bec4c3991aa0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\burn">
+      <UniqueIdentifier>{ef49114e-adbf-4715-a143-b8f6fc7af6cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\command">
+      <UniqueIdentifier>{e7c15f9e-f9bc-4d52-a5b8-3f4e2901b0e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\controllogic">
+      <UniqueIdentifier>{cb1eb5ad-d231-4fa2-ae4f-24997e2a8e30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\coordsystem">
+      <UniqueIdentifier>{9c22ecea-60d8-4161-8061-b67b883fafc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\forcemodel">
+      <UniqueIdentifier>{64d2776c-bc82-4665-aa17-74713cb1546f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\function">
+      <UniqueIdentifier>{1b7cf9a4-b9a4-4496-8edc-cbf5c745145d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\foundation">
+      <UniqueIdentifier>{ae3beda4-cfef-4d59-8d46-0931c0baefe9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hardware">
+      <UniqueIdentifier>{c12e771c-0097-4cf5-b12e-289a60659206}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mission">
+      <UniqueIdentifier>{09a193d5-2089-47a7-bc9e-9e598173203b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\view">
+      <UniqueIdentifier>{0a84a0cc-0d46-44ea-8621-898fae20c4d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\subscriber">
+      <UniqueIdentifier>{633fed84-7f3a-4f42-a120-c64c7ce031ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\spacecraft">
+      <UniqueIdentifier>{4ea52293-6149-40e7-ab58-f1119cbff57d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solver">
+      <UniqueIdentifier>{04c9a72e-f083-4488-97f0-7f59b31681b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\solarsys">
+      <UniqueIdentifier>{41d10464-0f45-4c36-b8e7-1401268c17a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\resource">
+      <UniqueIdentifier>{5f1465f8-f3b4-4071-b1f3-ca85df876830}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering">
+      <UniqueIdentifier>{7c3a3751-3602-4fbd-8198-e45ca00f0501}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\propagator">
+      <UniqueIdentifier>{0d42554f-b85e-4f25-9901-5fe3c30d0f15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\output">
+      <UniqueIdentifier>{c1881724-ab38-41e9-b3fb-5eff8254158b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\event">
+      <UniqueIdentifier>{0f839534-cf44-479c-b377-e9cde9399d9a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\gui\app\GmatToolBar.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatTreeItemData.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GuiInterpreter.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GuiMessageReceiver.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GuiPlotReceiver.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\InteractiveMatlabDialog.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\MissionTreeItemData.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\ResourceTree.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\RunScriptFolderDialog.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\ScriptPanel.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\SetPathDialog.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\TextEphemFileDialog.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\WelcomePanel.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\AboutDialog.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\CompareFilesDialog.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\CompareTextDialog.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatApp.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatAppData.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatConnection.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatMainFrame.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatMenuBar.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatNotebook.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GmatServer.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupDialog.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupPanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatDialog.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatPanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatSavePanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatStaticBoxSizer.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GuiItemManager.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\MultiPathSetupPanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterCreateDialog.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterSelectDialog.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterSetupPanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ShowScriptDialog.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\ShowSummaryDialog.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\SinglePathSetupPanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\UserInputValidator.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\asset\GroundStationPanel.cpp">
+      <Filter>Source Files\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\burn\FiniteBurnSetupPanel.cpp">
+      <Filter>Source Files\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\burn\ImpulsiveBurnSetupPanel.cpp">
+      <Filter>Source Files\burn</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ScriptEventPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\TargetPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\TogglePanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\VaryPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\AchievePanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\AssignmentPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\BeginFiniteBurnPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\CallFunctionPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\EndFiniteBurnPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\GmatCommandPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ManeuverPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\MinimizePanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\NonlinearConstraintPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\OptimizePanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\PropagatePanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ReportPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\controllogic\ConditionPanel.cpp">
+      <Filter>Source Files\controllogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.cpp">
+      <Filter>Source Files\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.cpp">
+      <Filter>Source Files\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordPanel.cpp">
+      <Filter>Source Files\coordsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\forcemodel\DragInputsDialog.cpp">
+      <Filter>Source Files\forcemodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\function\FunctionSetupPanel.cpp">
+      <Filter>Source Files\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.cpp">
+      <Filter>Source Files\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\MissionTree.cpp">
+      <Filter>Source Files\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp">
+      <Filter>Source Files\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ViewTextDialog.cpp">
+      <Filter>Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ViewTextFrame.cpp">
+      <Filter>Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
+      <Filter>Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPreferences.cpp">
+      <Filter>Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPrintout.cpp">
+      <Filter>Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\FindReplaceDialog.cpp">
+      <Filter>Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotCanvas.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotCurve.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotOptionsDialog.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\ViewCanvas.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTrajFrame.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiGlPlotData.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiTsPlotData.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\OpenGlOptionDialog.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\OpenGlPlotSetupPanel.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewPanel.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\ReportFileSetupPanel.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\TankPanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\ThrusterPanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\VisualModelCanvas.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\VisualModelPanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\AttitudePanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\BallisticsMassPanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\FormationSetupPanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitPanel.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SolverSetupPanel.cpp">
+      <Filter>Source Files\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SolverVariablesPanel.cpp">
+      <Filter>Source Files\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SQPSetupPanel.cpp">
+      <Filter>Source Files\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\DCSetupPanel.cpp">
+      <Filter>Source Files\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SolverCreatePanel.cpp">
+      <Filter>Source Files\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solver\SolverGoalsPanel.cpp">
+      <Filter>Source Files\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\BarycenterPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\LibrationPointPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\UniversePanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Light.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\ModelManager.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\ModelObject.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Rendering.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\Camera.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\GLStars.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\propagator\PropagationConfigPanel.cpp">
+      <Filter>Source Files\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\propagator\PropagatorSelectDialog.cpp">
+      <Filter>Source Files\propagator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\CompareReportPanel.cpp">
+      <Filter>Source Files\output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp">
+      <Filter>Source Files\output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp">
+      <Filter>Source Files\output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\TreeViewOptionDialog.cpp">
+      <Filter>Source Files\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\MissionTreeToolBar.cpp">
+      <Filter>Source Files\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mission\UndockedMissionPanel.cpp">
+      <Filter>Source Files\mission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp">
+      <Filter>Source Files\output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\ManageObjectPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatColorPanel.cpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
+      <Filter>Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\controllogic\ForPanel.cpp">
+      <Filter>Source Files\controllogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\FindEventsPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatTreeItemData.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GuiInterpreter.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GuiMessageReceiver.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GuiPlotReceiver.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\InteractiveMatlabDialog.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\MissionTreeItemData.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\ResourceTree.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\RunScriptFolderDialog.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\ScriptPanel.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\SetPathDialog.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\TextEphemFileDialog.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\WelcomePanel.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\AboutDialog.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\CompareFilesDialog.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\CompareTextDialog.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatApp.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatAppData.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatConnection.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatMainFrame.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatMenuBar.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatNotebook.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GmatServer.hpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\include\ddesetup.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\include\gmatwxdefs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\include\gmatwxrcs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupDialog.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupPanel.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatDialog.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatPanel.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatSavePanel.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatStaticBoxSizer.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GuiItemManager.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\MultiPathSetupPanel.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterCreateDialog.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterSelectDialog.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterSetupPanel.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ShowScriptDialog.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\ShowSummaryDialog.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\SinglePathSetupPanel.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\UserInputValidator.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\asset\GroundStationPanel.hpp">
+      <Filter>Source Files\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\burn\FiniteBurnSetupPanel.hpp">
+      <Filter>Source Files\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\burn\ImpulsiveBurnSetupPanel.hpp">
+      <Filter>Source Files\burn</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ReportPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ScriptEventPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\TargetPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\TogglePanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\VaryPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\AchievePanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\AssignmentPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\BeginFiniteBurnPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\CallFunctionPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\EndFiniteBurnPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\GmatCommandPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ManeuverPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\MinimizePanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\NonlinearConstraintPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\OptimizePanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\PropagatePanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\controllogic\ConditionPanel.hpp">
+      <Filter>Source Files\controllogic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.hpp">
+      <Filter>Source Files\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.hpp">
+      <Filter>Source Files\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordPanel.hpp">
+      <Filter>Source Files\coordsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\forcemodel\DragInputsDialog.hpp">
+      <Filter>Source Files\forcemodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\function\FunctionSetupPanel.hpp">
+      <Filter>Source Files\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.hpp">
+      <Filter>Source Files\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\DecoratedTree.hpp">
+      <Filter>Source Files\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\MissionTree.hpp">
+      <Filter>Source Files\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\FindReplaceDialog.hpp">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ViewTextDialog.hpp">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ViewTextFrame.hpp">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPreferences.hpp">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPrintout.hpp">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotCanvas.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotCurve.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotDefs.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotOptionsDialog.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\ViewCanvas.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTrajFrame.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiGlPlotData.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiTsPlotData.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\OpenGlOptionDialog.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\OpenGlPlotSetupPanel.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewPanel.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\PlotTypes.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\ReportFileSetupPanel.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitPanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\TankPanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\ThrusterPanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\VisualModelCanvas.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\VisualModelPanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\AttitudePanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\BallisticsMassPanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\FormationSetupPanel.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SolverSetupPanel.hpp">
+      <Filter>Source Files\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SolverVariablesPanel.hpp">
+      <Filter>Source Files\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SQPSetupPanel.hpp">
+      <Filter>Source Files\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\DCSetupPanel.hpp">
+      <Filter>Source Files\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SolverCreatePanel.hpp">
+      <Filter>Source Files\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solver\SolverGoalsPanel.hpp">
+      <Filter>Source Files\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\BarycenterPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\LibrationPointPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\UniversePanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Light.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\ModelManager.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\ModelObject.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Rendering.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\Camera.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\GLStars.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\propagator\PropagationConfigPanel.hpp">
+      <Filter>Source Files\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\propagator\PropagatorSelectDialog.hpp">
+      <Filter>Source Files\propagator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\CompareReportPanel.hpp">
+      <Filter>Source Files\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp">
+      <Filter>Source Files\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp">
+      <Filter>Source Files\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\TreeViewOptionDialog.hpp">
+      <Filter>Source Files\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp">
+      <Filter>Source Files\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\MissionTreeToolBar.hpp">
+      <Filter>Source Files\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\mission\UndockedMissionPanel.hpp">
+      <Filter>Source Files\mission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp">
+      <Filter>Source Files\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\ManageObjectPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatColorPanel.hpp">
+      <Filter>Source Files\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\controllogic\ForPanel.hpp">
+      <Filter>Source Files\controllogic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\FindEventsPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\gui\resource\GMAT.ico">
+      <Filter>Resource Files\resource</Filter>
+    </None>
+    <None Include="..\..\..\src\gui\resource\GMATIcon.icns">
+      <Filter>Resource Files\resource</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\src\gui\resource\GmatIcon.rc">
+      <Filter>Resource Files\resource</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\..\..\src\gui\resource\GmatRc.rc">
+      <Filter>Resource Files\resource</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\..\..\src\gui\resource\TrajectoryPlot.rc">
+      <Filter>Resource Files\resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

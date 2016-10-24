@@ -5,9 +5,19 @@
 // GMAT: General Mission Analysis Tool.
 //
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // Order 124.
@@ -380,7 +390,8 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    refBody                 (NULL),
    attitudeConstraintType  ("OrbitNormal"),
    // Additional CCSDS-AEM fields here
-   aemFile                 ("")
+   aemFile                 (""),
+   aemFileFullPath         ("")
 {
    parameterCount = AttitudeParamCount;
    objectTypes.push_back(Gmat::ATTITUDE);
@@ -471,7 +482,8 @@ Attitude::Attitude(const Attitude& att) :
    bodyAlignmentVector     (att.bodyAlignmentVector),
    bodyConstraintVector    (att.bodyConstraintVector),
    // Additional CCSDS-AEM fields here
-   aemFile                 (att.aemFile)
+   aemFile                 (att.aemFile),
+   aemFileFullPath         (att.aemFileFullPath)
 {
 #ifdef DEBUG_ATTITUDE_INIT
    MessageInterface::ShowMessage("New attitude created by copying attitude <%p> of type %s\n",
@@ -547,6 +559,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    bodyConstraintVector    = att.bodyConstraintVector;
    // Additional CCSDS-AEM fields here
    aemFile                 = att.aemFile;
+   aemFileFullPath         = att.aemFileFullPath;
 
    return *this;
 }
@@ -640,6 +653,9 @@ bool Attitude::Initialize()
    MessageInterface::ShowMessage
       ("Attitude::Initialize() this=<%p>'%s' entered, refCS=<%p>\n",
        this, GetName().c_str(), refCS);
+   MessageInterface::ShowMessage
+      ("Attitude::Initialize() isInitialized=%s, needsReinit=%s\n",
+       (isInitialized? "true": "false"), (needsReinit? "true": "false"));
    #endif
    
    if (isInitialized && !needsReinit) return true;
@@ -712,6 +728,11 @@ bool Attitude::Initialize()
    needsReinit           = false;
    inputAttitudeType     = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
    inputAttitudeRateType = GmatAttitude::ANGULAR_VELOCITY_TYPE;
+
+   #ifdef DEBUG_ATTITUDE_INIT
+   MessageInterface::ShowMessage
+      ("Attitude::Initialize() EXITing\n");
+   #endif
    return true;
 }
 
@@ -3110,10 +3131,18 @@ bool Attitude::SetStringParameter(const Integer     id,
    }
    if (id == AEM_FILE_NAME)
    {
-      aemFile = value;
+      if (value != aemFile)
+      {
+         // Get full path from the static GmatBase::GetFullPathFileName() (LOJ: 2014.06.26)
+         std::string aemFileNoPath;
+         aemFileFullPath =
+            GmatBase::GetFullPathFileName(aemFileNoPath, GetName(), value,
+                         "VEHICLE_EPHEM_CCSDS_PATH", true, "", true, true);
+         aemFile = value;
+      }
       return true;
    }
-
+   
    return GmatBase::SetStringParameter(id, value);
 }
 

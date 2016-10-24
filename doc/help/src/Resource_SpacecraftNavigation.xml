@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="SpacecraftNavigation"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>SpacecraftNavigation</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>Spacecraft Navigation</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Spacecraft Navigation</refname>
+
+    <refpurpose>There are a number of <guilabel>Spacecraft</guilabel> fields
+    that are used exclusively to support GMAT's navigation
+    capability.</refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>When using GMAT's navigation capabilities, certain Spacecraft
+    parameters can be "solved-for." As discussed in the <xref
+    linkend="SpacecraftBallisticMass" xrefstyle="select:title"/> section, the
+    <guilabel>Spacecraft</guilabel> ballistic and mass properties include the
+    coefficient of reflectivity, <guilabel>Cr</guilabel>, and the coefficient
+    of drag, <guilabel>Cd</guilabel>. As discussed in the <xref
+    linkend="SpacecraftOrbitState" xrefstyle="select:title"/> section, you can
+    specify the <guilabel>CartesianState</guilabel>, i.e., the
+    <guilabel>X</guilabel>, <guilabel>Y</guilabel>, <guilabel>Z</guilabel>
+    position (km), and the <guilabel>Vx</guilabel>, <guilabel>Vy</guilabel>,
+    <guilabel>Vz</guilabel> velocity (km/s) of a
+    <guilabel>Spacecraft</guilabel>. As part of GMAT's navigation capability,
+    GMAT can ingest measurements and estimate ("solve-for") values for
+    <guilabel>Cr</guilabel>, <guilabel>Cd</guilabel>, and
+    <guilabel>CartesianState</guilabel>.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="BatchEstimatorInv"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="1.0*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>AddHardware</guilabel></entry>
+
+            <entry><para>List of <guilabel>Antenna</guilabel>,
+            <guilabel>Transmitter</guilabel>, <guilabel>Receiver</guilabel>,
+            and <guilabel>Transponder</guilabel> objects attached to a
+            <guilabel>Spacecraft</guilabel> </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para><guilabel>Antenna</guilabel>,
+                    <guilabel>Transmitter</guilabel>,
+                    <guilabel>Receiver</guilabel>, or
+                    <guilabel>Transponder</guilabel> object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any user defined <guilabel>Antenna</guilabel>,
+                    <guilabel>Transmitter</guilabel>,
+                    <guilabel>Receiver</guilabel>, or
+                    <guilabel>Transponder</guilabel> object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>CdSigma</guilabel></entry>
+
+            <entry><para>Standard deviation of the coefficient of
+            reflectivity, <guilabel>Cd</guilabel>. This field is only used if
+            the <guilabel>UseInitialCovariance</guilabel> field of the
+            <guilabel>BatchEstimatorInv</guilabel> resource is set to
+            <code>True</code> and <guilabel>Cd</guilabel> is being solved for.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1e70</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>CrSigma</guilabel></entry>
+
+            <entry><para>Standard deviation of the coefficient of
+            reflectivity, <guilabel>Cr</guilabel>. This field is only used if
+            the <guilabel>UseInitialCovariance</guilabel> field of the
+            <guilabel>BatchEstimatorInv</guilabel> resource is set to
+            <code>True</code> and <guilabel>Cr</guilabel> is being solved for.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>1e70</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EstimationStateType</guilabel></entry>
+
+            <entry><para>Choice of 6-element state type to be solved for.
+            Currently, <code>Cartesian</code> is the only allowed value. This
+            field only has a function if the
+            <guilabel>CartesianState</guilabel> is being solved-for.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Cartesian</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Cartesian</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>OrbitErrorCovariance</guilabel></entry>
+
+            <entry><para>Cartesian State 6x6 error covariance matrix. This
+            field is only used if the
+            <guilabel>UseInitialCovariance</guilabel> of the
+            <guilabel>BatchEstimatorInv</guilabel> resource is set to
+            <code>True</code> and the CartesianState is being solved for.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real Matrix</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>6x6 positive definite symmetric
+                    <guilabel>Array</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>6x6 diagonal matrix with 1e70 in all diagonal
+                    entries.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Covariance matrix where position specified in km and
+                    velocity in km/s. (Thus, first three diagonal elements
+                    have units km^2 and last three diagonal elements have
+                    units (km/s)^2)</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>SolveFors</guilabel></entry>
+
+            <entry><para>List of fields to be solved for. Currently, if
+            anything is solved for, then <guilabel>CartesianState</guilabel>
+            must be included as a solve-for. For example,
+            <guilabel>Cr</guilabel> cannot be the only parameter solved for.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>StringArray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>CartesianState, Cr, Cd</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>Solve for Cr and the spacecraft Cartesian state.</para>
+
+      <programlisting><code>Create Spacecraft Sat
+Create BatchEstimatorInv bat
+Sat.SolveFors = {CartesianState, Cr}
+%User must create a TrackingFileSet
+%and set up bat appropriately
+
+BeginMissionSequence
+RunEstimator bat</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Solve for Cd and the spacecraft Cartesian state assuming that the
+      <emphasis>a priori</emphasis> information is included in the estimation
+      state vector.</para>
+
+      <programlisting><code>Create Spacecraft Sat
+Sat.SolveFors = {CartesianState, Cd}
+
+Create BatchEstimatorInv bat
+bat.UseInitialCovariance= True  
+%User must create a TrackingFileSet
+%and set up bat appropriately
+
+Create Array Initial_6x6_covariance[6,6]
+
+BeginMissionSequence
+Initial_6x6_covariance = ...
+       diag([1e-6 1e70 1e70 1e70 1e70 1e70]) %X pos known very well
+Sat.OrbitErrorCovariance = Initial_6x6_covariance
+Sat.CrSigma = 1e-6   %Cr known very well
+
+RunEstimator bat</code></programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

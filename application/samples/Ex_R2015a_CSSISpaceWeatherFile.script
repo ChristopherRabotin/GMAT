@@ -1,0 +1,63 @@
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft ISS;
+GMAT ISS.DateFormat = UTCGregorian;
+GMAT ISS.Epoch = '01 Jun 2004 12:00:00.000';
+GMAT ISS.CoordinateSystem = EarthMJ2000Eq;
+GMAT ISS.DisplayStateType = Cartesian;
+GMAT ISS.X = -4453.783586;
+GMAT ISS.Y = -5038.203756;
+GMAT ISS.Z = -426.384456;
+GMAT ISS.VX = 3.831888;
+GMAT ISS.VY = -2.887221;
+GMAT ISS.VZ = -6.018232;
+GMAT ISS.DryMass = 1000;
+GMAT ISS.Cd = 2.2;
+GMAT ISS.Cr = 1.2;
+GMAT ISS.DragArea = 20;
+GMAT ISS.SRPArea = 20;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel ForcesWithSchattenFile;
+GMAT ForcesWithSchattenFile.CentralBody = Earth;
+GMAT ForcesWithSchattenFile.PrimaryBodies = {Earth};
+GMAT ForcesWithSchattenFile.Drag.AtmosphereModel = JacchiaRoberts;
+GMAT ForcesWithSchattenFile.Drag.HistoricWeatherSource = 'CSSISpaceWeatherFile';
+GMAT ForcesWithSchattenFile.Drag.PredictedWeatherSource = 'ConstantFluxAndGeoMag';
+GMAT ForcesWithSchattenFile.Drag.CSSISpaceWeatherFile = '../data/atmosphere/earth/CSSI_2004To2026.txt';
+GMAT ForcesWithSchattenFile.Drag.SchattenFile = 'SchattenPredict.txt';
+GMAT ForcesWithSchattenFile.Drag.F107 = 150;
+GMAT ForcesWithSchattenFile.Drag.F107A = 150;
+GMAT ForcesWithSchattenFile.Drag.MagneticIndex = 3;
+GMAT ForcesWithSchattenFile.Drag.SchattenErrorModel = 'Nominal';
+GMAT ForcesWithSchattenFile.Drag.SchattenTimingModel = 'NominalCycle';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator RKV89;
+GMAT RKV89.FM = ForcesWithSchattenFile;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+Create ReportFile ISS_Report;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+
+
+Report ISS_Report ISS.A1ModJulian ISS.X ISS.Y ISS.Z ISS.VX ISS.VY ISS.VZ;
+Propagate RKV89(ISS) {ISS.ElapsedDays = 1};
+Report ISS_Report ISS.A1ModJulian ISS.X ISS.Y ISS.Z ISS.VX ISS.VY ISS.VZ;
+

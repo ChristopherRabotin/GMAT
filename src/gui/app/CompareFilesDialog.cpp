@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2005/12/22
@@ -48,6 +58,7 @@ CompareFilesDialog::CompareFilesDialog(wxWindow *parent)
    : GmatDialog(parent, -1, wxString(_T("CompareFilesDialog")))
 {
    mCompareFiles = false;
+   mSkipBlankLinesForTextCompare = false;
    mSaveCompareResults = false;
    mHasDir1 = false;
    mHasDir2 = false;
@@ -111,19 +122,19 @@ void CompareFilesDialog::Create()
    
    mBaseDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(320,20), 0);
+                     wxDefaultPosition, wxSize(400,-1), 0);
    
    mBaseDirButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxSize(60,20), 0);
+                    wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *baseStringLabel =
       new wxStaticText(this, ID_TEXT, wxT("Compare Files Contain:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mBaseStrTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mBaseString),
-                     wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
+      new wxTextCtrl(this, ID_TEXTCTRL, mBaseString,
+                     wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
    
    wxStaticText *numFilesBaseDirLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of Files:"),
@@ -131,11 +142,11 @@ void CompareFilesDialog::Create()
    
    mNumFilesInBaseDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    mBaseUpdateButton =
       new wxButton(this, ID_BUTTON, wxT("Update"),
-                    wxDefaultPosition, wxSize(50,20), 0);
+                    wxDefaultPosition, wxDefaultSize, 0);
    
    wxFlexGridSizer *baseDirGridSizer = new wxFlexGridSizer(2, 0, 0);
    baseDirGridSizer->Add(mBaseDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
@@ -165,19 +176,19 @@ void CompareFilesDialog::Create()
                      wxDefaultSize, 3, dirArray, wxCB_READONLY);
    mCompareDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(320,20), 0);
+                     wxDefaultPosition, wxSize(400,-1), 0);
    
    mCompareDirButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxSize(60,20), 0);
+                    wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *compareStringLabel =
       new wxStaticText(this, ID_TEXT, wxT("Compare Files Contain:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mCompareStrTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mCompareStrings[0]),
-                     wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
+      new wxTextCtrl(this, ID_TEXTCTRL, mCompareStrings[0],
+                     wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
    
    wxStaticText *numFilesInCompareDirLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of Files:"),
@@ -185,11 +196,11 @@ void CompareFilesDialog::Create()
    
    mNumFilesInCompareDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    mCompareUpdateButton =
       new wxButton(this, ID_BUTTON, wxT("Update"),
-                    wxDefaultPosition, wxSize(50,20), 0);
+                    wxDefaultPosition, wxDefaultSize, 0);
    
 
    //---------- sizer
@@ -222,7 +233,7 @@ void CompareFilesDialog::Create()
    
    mNumDirsToCompareTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *numFilesToCompareLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of Files to Compare:"),
@@ -230,7 +241,7 @@ void CompareFilesDialog::Create()
    
    mNumFilesToCompareTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *toleranceLabel =
       new wxStaticText(this, ID_TEXT, wxT("Tolerance to be Used in Flagging:"),
@@ -238,7 +249,7 @@ void CompareFilesDialog::Create()
    
    mToleranceTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, ToWxString(mTolerance),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    //---------- sizer
    wxFlexGridSizer *numFilesGridSizer = new wxFlexGridSizer(2, 0, 0);
@@ -255,9 +266,13 @@ void CompareFilesDialog::Create()
       numFilesGridSizer->Hide(mToleranceTextCtrl);
    }
    
+   mSkipBlankLinesCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Skip Blank Lines for Text Compare"),
+                     wxDefaultPosition, wxDefaultSize, 0);
+   
    mSaveResultCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Save Compare Results to File"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
+                     wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *saveFileLabel =
       new wxStaticText(this, ID_TEXT, wxT("File Name to Save:"),
@@ -265,11 +280,11 @@ void CompareFilesDialog::Create()
 
    mSaveFileTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(320,20), 0);
+                     wxDefaultPosition, wxSize(400,-1), 0);
    
    mSaveBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxSize(60,20), 0);
+                    wxDefaultPosition, wxDefaultSize, 0);
 
    //---------- sizer
    wxFlexGridSizer *saveGridSizer = new wxFlexGridSizer(2, 0, 0);
@@ -280,6 +295,7 @@ void CompareFilesDialog::Create()
       new GmatStaticBoxSizer(wxVERTICAL, this, "Compare");
    
    compareSizer->Add(numFilesGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareSizer->Add(mSkipBlankLinesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    compareSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    compareSizer->Add(20, 5, 0, wxALIGN_LEFT|wxALL, bsize);
    compareSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -387,13 +403,14 @@ void CompareFilesDialog::SaveData()
    mCompareFiles = true;
    if (mNumFilesToCompare <= 0)
    {
-      wxMessageBox(wxT("There are no specific report files to compare.\n"
-                       "Please check file names to compare."),
-                   wxT("GMAT Warning"));
+      wxMessageBox("There are no specific report files to compare.\n"
+                   "Please check file names to compare.",
+                   "GMAT Warning");
       canClose = false;
       mCompareFiles = false;
    }
    
+   mSkipBlankLinesForTextCompare = mSkipBlankLinesCheckBox->GetValue();
    mSaveCompareResults = mSaveResultCheckBox->GetValue();
    
    #if DEBUG_COMPARE_FILES_DIALOG
@@ -401,8 +418,8 @@ void CompareFilesDialog::SaveData()
       ("CompareFilesDialog::SaveData() mNumFilesToCompare=%d, "
        "mCompareFiles=%d, mTolerance=%e\n   mBaseDirectory=%s, mCompareDirs[0]=%s, "
        "mBaseString=%s, mCompareStrings[0]=%s\n", mNumFilesToCompare, mCompareFiles,
-       mTolerance, mBaseDirectory.c_str(), mCompareDirs[0].c_str(), mBaseString.c_str(),
-       mCompareStrings[0].c_str());
+       mTolerance, mBaseDirectory.WX_TO_C_STRING, mCompareDirs[0].WX_TO_C_STRING,
+       mBaseString.WX_TO_C_STRING, mCompareStrings[0].WX_TO_C_STRING);
    #endif
 }
 
@@ -430,13 +447,15 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
       {
          mBaseDirectory = dialog.GetPath();
          mBaseDirTextCtrl->SetValue(mBaseDirectory);
-         mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareNumericResults.out");
+         mSaveFileName = mBaseDirectory + "/CompareNumericResults.out";
+         mSaveFileTextCtrl->SetValue(mSaveFileName);
+         //mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareNumericResults.out");
          UpdateFileInfo(0, true);
          
          #if DEBUG_COMPARE_FILES_DIALOG
          MessageInterface::ShowMessage
             ("CompareFilesDialog::OnButtonClick() mBaseDirectory=%s\n",
-             mBaseDirectory.c_str());
+             mBaseDirectory.WX_TO_C_STRING);
          #endif
       }
    }
@@ -472,14 +491,17 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
          #if DEBUG_COMPARE_FILES_DIALOG
          MessageInterface::ShowMessage
             ("CompareFilesDialog::OnButtonClick() mCompareDirs[%d]=%s\n",
-             dirIndex, mCompareDirs[dirIndex].c_str());
+             dirIndex, mCompareDirs[dirIndex].WX_TO_C_STRING);
          #endif
       }
    }
    else if (event.GetEventObject() == mBaseUpdateButton)
    {
       // update file info in base directory
+      mBaseDirectory = mBaseDirTextCtrl->GetValue();
       mBaseString = mBaseStrTextCtrl->GetValue();
+      mSaveFileName = mBaseDirectory + "/CompareNumericResults.out";
+      mSaveFileTextCtrl->SetValue(mSaveFileName);
       UpdateFileInfo(0, true);
    }
    else if (event.GetEventObject() == mCompareUpdateButton)
@@ -487,6 +509,7 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
       int dirIndex = mCompareDirsComboBox->GetSelection();
       
       // update file info in compare directory
+      mCompareDirs[dirIndex] = mCompareDirTextCtrl->GetValue();
       mCompareStrings[dirIndex] = mCompareStrTextCtrl->GetValue();
       UpdateFileInfo(dirIndex, false);
    }
@@ -495,7 +518,7 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
       wxString filename =
          wxFileSelector("Choose a file to save", mBaseDirectory, "", "txt",
                         "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
-                        wxSAVE);
+                        wxFD_SAVE); //wxSAVE);
       
       if (!filename.empty())
       {
@@ -503,7 +526,7 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
          
          #if DEBUG_COMPARE_FILES_DIALOG
          MessageInterface::ShowMessage
-            ("CompareFilesDialog::OnButtonClick() savefile=%s\n", filename.c_str());
+            ("CompareFilesDialog::OnButtonClick() savefile=%s\n", filename.WX_TO_C_STRING);
          #endif
       }
       
@@ -553,14 +576,29 @@ void CompareFilesDialog::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CompareFilesDialog::OnTextEnterPress(wxCommandEvent& event)
 {
+   MessageInterface::ShowMessage("==> CompareFilesDialog::OnTextEnterPress() entered\n");
+   
+   wxObject *eventObj = event.GetEventObject();
    int dirIndex = mCompareDirsComboBox->GetSelection();
    
-   if (event.GetEventObject() == mBaseStrTextCtrl)
+   if (eventObj == mBaseDirTextCtrl)
+   {
+      mBaseDirectory = mBaseDirTextCtrl->GetValue();
+      mSaveFileName = mBaseDirectory + "/CompareNumericResults.out";
+      mSaveFileTextCtrl->SetValue(mSaveFileName);
+      UpdateFileInfo(0, true);
+   }
+   else if (eventObj == mCompareDirTextCtrl)
+   {
+      mCompareDirs[dirIndex] = mCompareDirTextCtrl->GetValue();
+      UpdateFileInfo(0, false);
+   }
+   else if (eventObj == mBaseStrTextCtrl)
    {
       mBaseString = mBaseStrTextCtrl->GetValue();
       UpdateFileInfo(0, true);
    }
-   else if (event.GetEventObject() == mCompareStrTextCtrl)
+   else if (eventObj == mCompareStrTextCtrl)
    {
       mCompareStrings[dirIndex] = mCompareStrTextCtrl->GetValue();
       UpdateFileInfo(dirIndex, false);
@@ -621,7 +659,7 @@ wxArrayString CompareFilesDialog::GetFilenamesContain(const wxString &dirname,
    #ifdef DEBUG_COMPARE_FILES_DIALOG
    MessageInterface::ShowMessage
       ("CompareFilesDialog::GetFilenamesContain() entered, dirname = '%s', str = '%s'\n",
-       dirname.c_str(), str.c_str());
+       dirname.WX_TO_C_STRING, str.WX_TO_C_STRING);
    #endif
    
    wxDir dir(dirname);

@@ -1,12 +1,22 @@
-//$Id: RFHardware.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: RFHardware.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                             RFHardware
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Darrel J. Conway
 // Created: 2010/02/22 by Darrel Conway (Thinking Systems)
@@ -19,7 +29,9 @@
  */
 //------------------------------------------------------------------------------
 #include "RFHardware.hpp"
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 
 //------------------------------------------------------------------------------
 // Static data
@@ -111,7 +123,7 @@ RFHardware & RFHardware::operator=(const RFHardware & rfh)
    {
       Sensor::operator=(rfh);
 
-      primaryAntenna 	 = rfh.primaryAntenna;
+      primaryAntenna     = rfh.primaryAntenna;
       primaryAntennaName = rfh.primaryAntennaName;
    }
 
@@ -217,8 +229,8 @@ Gmat::ParameterType RFHardware::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string RFHardware::GetParameterUnit(const Integer id) const
 {
-	if (PRIMARY_ANTENNA)
-		return "";					// It has no unit
+   if (PRIMARY_ANTENNA)
+      return "";
 
    return Sensor::GetParameterUnit(id);
 }
@@ -267,7 +279,13 @@ bool RFHardware::SetStringParameter(const Integer id, const std::string &value)
    switch (id)
    {
    case PRIMARY_ANTENNA:
-        primaryAntennaName = value;
+      if (value == "")
+         throw HardwareException("Error: Name of primary antenna set to " + GetName() + "is an empty string.\n");
+
+      if (!GmatStringUtil::IsValidIdentity(value))
+         throw HardwareException("Error: '" + value + "' set to " + GetName() + ".PrimaryAntenna parameter is an invalid name.\n");
+
+      primaryAntennaName = value;
       return true;
    default:
       return Sensor::SetStringParameter(id, value);
@@ -304,13 +322,13 @@ bool RFHardware::SetStringParameter(const std::string &label,
 GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name)
 {
-        // return primary antenna when it is requested:
-        if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
-        {
-                return (GmatBase*)primaryAntenna;
-        }
+   // return primary antenna when it is requested:
+   if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
+   {
+      return (GmatBase*)primaryAntenna;
+   }
 
-        return Sensor::GetRefObject(type, name);
+   return Sensor::GetRefObject(type, name);
 }
 
 
@@ -331,13 +349,13 @@ GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type,
 bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
-        if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
-        {
-                primaryAntenna = (Antenna *)obj;
-                return true;
-        }
+   if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
+   {
+      primaryAntenna = (Antenna *)obj;
+      return true;
+   }
 
-        return Sensor::SetRefObject(obj, type, name);
+   return Sensor::SetRefObject(obj, type, name);
 }
 
 
@@ -354,6 +372,9 @@ std::string RFHardware::GetRefObjectName(const Gmat::ObjectType type) const
 {
    if ((type == Gmat::HARDWARE)||(type == Gmat::UNKNOWN_OBJECT))
    {
+      if (primaryAntennaName == "")
+         throw HardwareException("Error: value of " + GetName() + ".PrimaryAntenna parameter was not set in GMAT script.\n");
+
       return primaryAntennaName;
    }
 
@@ -377,6 +398,9 @@ const StringArray& RFHardware::GetRefObjectNameArray(const Gmat::ObjectType type
    case Gmat::UNKNOWN_OBJECT:
    case Gmat::HARDWARE:
       refObjectNames.clear();
+      if (primaryAntennaName == "")
+         throw HardwareException("Error: value of " + GetName() + ".PrimaryAntenna was not set in GMAT script.\n");
+
       refObjectNames.push_back(primaryAntennaName);
       return refObjectNames;
         break;
@@ -392,8 +416,8 @@ const StringArray& RFHardware::GetRefObjectNameArray(const Gmat::ObjectType type
 //------------------------------------------------------------------------------
 const ObjectTypeArray& RFHardware::GetRefObjectTypeArray()
 {
-        // Primary antenna is a referenced object of RFHardware. Primary antenna
-        // has type of Gmat:HARDWARE. We define it in refObjectTypes as shown below:
+   // Primary antenna is a referenced object of RFHardware. Primary antenna
+   // has type of Gmat:HARDWARE. We define it in refObjectTypes as shown below:
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::HARDWARE);
    return refObjectTypes;
@@ -407,18 +431,18 @@ const ObjectTypeArray& RFHardware::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 bool RFHardware::HasRefObjectTypeArray()
 {
-        // It has the referenced object type array as it was defined in
-        // RFHardware::GetRefObjectTypeArray() function.
+   // It has the referenced object type array as it was defined in
+   // RFHardware::GetRefObjectTypeArray() function.
    return true;
 }
 
 
 Gmat::ObjectType RFHardware::GetPropertyObjectType(const Integer id) const
 {
-	if (id == PRIMARY_ANTENNA)
-		return Gmat::ANTENNA;
-	else
-		return Gmat::UNKNOWN_OBJECT;
+   if (id == PRIMARY_ANTENNA)
+      return Gmat::ANTENNA;
+   else
+      return Gmat::UNKNOWN_OBJECT;
 }
 
 
@@ -441,10 +465,10 @@ bool RFHardware::Initialize()
 
    if (Sensor::Initialize())
    {
-   	if (primaryAntenna != NULL)
-   		retval = true;
-   	else
-   		MessageInterface::ShowMessage("Primary antenna not set for the %s \"%s\"\n",
+      if (primaryAntenna != NULL)
+         retval = true;
+      else
+         MessageInterface::ShowMessage("Primary antenna not set for the %s \"%s\"\n",
             typeName.c_str(), instanceName.c_str());
    }
 

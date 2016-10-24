@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -38,6 +48,7 @@
 
 #include "GuiInterpreter.hpp"
 #include "Subscriber.hpp"
+#include "EventLocator.hpp"
 #include "ReportFile.hpp"
 #include "FileUtil.hpp"       // for GmatFileUtil::CompareTextLines()
 #include "MessageInterface.hpp"
@@ -81,6 +92,18 @@ OutputTree::OutputTree(wxWindow *parent, const wxWindowID id,
    AddIcons();
    AddDefaultResources();
    
+   // Set default font
+   SetFont(GmatAppData::Instance()->GetFont());
+   
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("In OutputTree() constructor, currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d\n",
+       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
+       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
+   #endif
+   
    theGuiManager->UpdateAll();
 }
 
@@ -116,7 +139,7 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name, bool 
    case GmatTree::OUTPUT_XY_PLOT:
       parentId = mXyPlotItem;
       break;
-   case GmatTree::OUTPUT_CCSDS_OEM_FILE:
+   case GmatTree::OUTPUT_TEXT_EPHEM_FILE:
    case GmatTree::OUTPUT_REPORT:
    case GmatTree::OUTPUT_EVENT_REPORT:
 	{
@@ -131,7 +154,7 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name, bool 
 		}
 		switch (type)
 		{
-         case GmatTree::OUTPUT_CCSDS_OEM_FILE:
+         case GmatTree::OUTPUT_TEXT_EPHEM_FILE:
 				parentId = mEphemFileItem;
 				break;
 			case GmatTree::OUTPUT_REPORT:
@@ -308,10 +331,11 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports, bool removePlo
       else if (objTypeName == "EphemerisFile")
          //&& sub->GetBooleanParameter("WriteEphemeris"))
       {
-         if (sub->GetStringParameter("FileFormat") == "CCSDS-OEM")
+         if ((sub->GetStringParameter("FileFormat") == "CCSDS-OEM") ||
+             (sub->GetStringParameter("FileFormat") == "STK-TimePosVel"))
          {
-            AppendItem(mEphemFileItem, objName, GmatTree::OUTPUT_ICON_CCSDS_OEM_FILE, -1,
-                       new GmatTreeItemData(objName, GmatTree::OUTPUT_CCSDS_OEM_FILE));
+            AppendItem(mEphemFileItem, objName, GmatTree::OUTPUT_ICON_TEXT_EPHEM_FILE, -1,
+                       new GmatTreeItemData(objName, GmatTree::OUTPUT_TEXT_EPHEM_FILE));
          }
       }
       else if (objTypeName == "OrbitView" &&
@@ -801,11 +825,11 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
    {
       MessageInterface::ShowMessage
          ("OutputTree::OnCompareTextLines() The ReportFile: %s is NULL.\n",
-          theSubscriberName.c_str());
+          theSubscriberName.WX_TO_C_STRING);
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report",
@@ -866,11 +890,11 @@ void OutputTree::OnCompareNumericLines(wxCommandEvent &event)
    {
       MessageInterface::ShowMessage
          ("OutputTree::OnCompareNumericLines() The ReportFile: %s is NULL.\n",
-          theSubscriberName.c_str());
+          theSubscriberName.WX_TO_C_STRING);
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report|eph|txt",
@@ -946,11 +970,11 @@ void OutputTree::OnCompareNumericColumns(wxCommandEvent &event)
    {
       MessageInterface::ShowMessage
          ("OutputTree::OnCompareNumericColumns() The ReportFile: %s is NULL.\n",
-          theSubscriberName.c_str());
+          theSubscriberName.WX_TO_C_STRING);
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report|eph|txt",

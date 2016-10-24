@@ -1,12 +1,22 @@
-//$Id: MeasurementFactory.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: MeasurementFactory.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                         MeasurementFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -49,16 +59,21 @@
 CoreMeasurement *MeasurementFactory::CreateMeasurement(
       const std::string & ofType, const std::string & withName)
 {
-   if (ofType == "DSNTwoWayRange")
-      return new DSNTwoWayRange(withName);
-   if (ofType == "DSNTwoWayDoppler")
-      return new DSNTwoWayDoppler(withName);
-   if (ofType == "USNTwoWayRange")
-      return new USNTwoWayRange(withName);
-   if (ofType == "TDRSSTwoWayRange")
-      return new TDRSSTwoWayRange(withName);
-   if (ofType == "OpticalAzEl")
-      return new OpticalAzEl(withName);
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   if (runmode == GmatGlobal::TESTING)
+   {
+      if (ofType == "DSNTwoWayRange")
+         return new DSNTwoWayRange(withName);
+      if (ofType == "DSNTwoWayDoppler")
+         return new DSNTwoWayDoppler(withName);
+      if (ofType == "USNTwoWayRange")
+         return new USNTwoWayRange(withName);
+      if (ofType == "TDRSSTwoWayRange")
+         return new TDRSSTwoWayRange(withName);
+      if (ofType == "OpticalAzEl")
+         return new OpticalAzEl(withName);
+   }
 
    return NULL;
 }
@@ -76,11 +91,16 @@ MeasurementFactory::MeasurementFactory() :
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTwoWayRange");
-      creatables.push_back("DSNTwoWayDoppler");
-      creatables.push_back("USNTwoWayRange");
-      creatables.push_back("TDRSSTwoWayRange");
-      creatables.push_back("OpticalAzEl");
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
+      {
+         creatables.push_back("DSNTwoWayRange");
+         creatables.push_back("DSNTwoWayDoppler");
+         creatables.push_back("USNTwoWayRange");
+         creatables.push_back("TDRSSTwoWayRange");
+         creatables.push_back("OpticalAzEl");
+      }
    }
 }
 
@@ -115,11 +135,16 @@ MeasurementFactory& MeasurementFactory::operator=(
    if (creatables.empty())
 
    {
-      creatables.push_back("DSNTwoWayRange");
-      creatables.push_back("DSNTwoWayDoppler");
-      creatables.push_back("USNTwoWayRange");
-      creatables.push_back("TDRSSTwoWayRange");
-      creatables.push_back("OpticalAzEl");
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
+      {
+         creatables.push_back("DSNTwoWayRange");
+         creatables.push_back("DSNTwoWayDoppler");
+         creatables.push_back("USNTwoWayRange");
+         creatables.push_back("TDRSSTwoWayRange");
+         creatables.push_back("OpticalAzEl");
+      }
    }
 
    return *this;
@@ -140,11 +165,16 @@ MeasurementFactory::MeasurementFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTwoWayRange");
-      creatables.push_back("DSNTwoWayDoppler");
-      creatables.push_back("USNTwoWayRange");
-      creatables.push_back("TDRSSTwoWayRange");
-      creatables.push_back("OpticalAzEl");
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
+      {
+         creatables.push_back("DSNTwoWayRange");
+         creatables.push_back("DSNTwoWayDoppler");
+         creatables.push_back("USNTwoWayRange");
+         creatables.push_back("TDRSSTwoWayRange");
+         creatables.push_back("OpticalAzEl");
+      }
    }
 }
 
@@ -164,10 +194,15 @@ MeasurementFactory::MeasurementFactory(const MeasurementFactory& fact) :
 {
    if (creatables.empty())
    {
-      creatables.push_back("DSNTwoWayRange");
-      creatables.push_back("DSNTwoWayDoppler");
-      creatables.push_back("USNTwoWayRange");
-      creatables.push_back("TDRSSTwoWayRange");
-      creatables.push_back("OpticalAzEl");
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
+      {
+         creatables.push_back("DSNTwoWayRange");
+         creatables.push_back("DSNTwoWayDoppler");
+         creatables.push_back("USNTwoWayRange");
+         creatables.push_back("TDRSSTwoWayRange");
+         creatables.push_back("OpticalAzEl");
+      }
    }
 }

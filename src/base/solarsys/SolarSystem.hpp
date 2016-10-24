@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -72,6 +82,7 @@ public:
    Integer              GetPlanetarySourceId(const std::string &sourceType);
    std::string          GetPlanetarySourceName(const std::string &sourceType);
    std::string          GetCurrentPlanetarySource();
+   const StringArray&   GetSpiceKernelNames();
    void                 SetIsSpiceAllowedForDefaultBodies(const bool allowSpice);
    bool                 IsSpiceAllowedForDefaultBodies() const;
 
@@ -87,7 +98,8 @@ public:
    // method to add a body to the solar system
    bool                 AddBody(CelestialBody* cb);
    // method to return a body of the solar system, given its name
-   CelestialBody*       GetBody(std::string withName);
+   CelestialBody*       GetBody(const char *withName);
+   CelestialBody*       GetBody(const std::string &withName);
    // method to remove a body from the solar system
    bool                 DeleteBody(const std::string &withName);
    /// method to add a special point to the Solar System
@@ -120,6 +132,7 @@ public:
    bool                 SetSourceFile(PlanetaryEphem *src);
    bool                 SetSPKFile(const std::string &spkFile);
    bool                 SetLSKFile(const std::string &lskFile);
+   bool                 SetPCKFile(const std::string &pckFile);
    
    bool                 SetOverrideTimeSystem(bool overrideIt);
    bool                 SetEphemUpdateInterval(Real intvl);
@@ -263,7 +276,8 @@ protected:
       EPHEMERIS_SOURCE, 
       DE_FILE_NAME,
       SPK_FILE_NAME,
-      LSK_FILE_NAME,
+      LSK_FILE_NAME, // deprecated!!!!!!
+      PCK_FILE_NAME,
       OVERRIDE_TIME_SYSTEM,
       EPHEM_UPDATE_INTERVAL,
       SolarSystemParamCount
@@ -296,6 +310,8 @@ private:
    
    DeFile       *theDefaultDeFile;
    
+   StringArray  theSPKKernelNames;
+
    /// list of the celestial bodies that are included in this solar system
    std::vector<CelestialBody*> bodiesInUse;
    
@@ -318,18 +334,24 @@ private:
    std::string  theSPKFilename;
    /// name of the leap second kernel
    std::string  lskKernelName;
+   /// name of the soalr system PCK file
+   std::string  pckKernelName;
    
    /// default values for parameters
    StringArray  default_planetarySourceTypesInUse;  // deprecated!!
    std::string  default_ephemerisSource;
-   std::string  default_DEFilename[3];
-   std::string  default_SPKFilename;
+   std::string  default_DEFilename[4];
+   std::string  default_SPKFilename;               // deprecated!!!!!!
    std::string  default_LSKFilename;
+   std::string  default_PCKFilename;
    bool         default_overrideTimeForAll;
    Real         default_ephemUpdateInterval;
    
+//   Integer     lastLoadedSPKType;
+   std::string lastLoadedSPKFile;
+
    /// method to find a body in the solar system, given its name
-   CelestialBody* FindBody(std::string withName);
+   CelestialBody* FindBody(const std::string &withName);
    // WARNING: The J200Body must be set identically for all objects in a GMAT run;
    // not doing so will give incorrect results.
    // In addition, the setting of a body other than Earth as the J2000Body has
@@ -345,6 +367,13 @@ private:
                                Gmat::DeFileFormat format = Gmat::DE_BINARY);
    // method to set default colors
    void           SetDefaultSpacePointColors(SpacePoint *sp);
+   
+   // method to set solar system body texture map file
+   void           SetTextureMapFile(SpacePoint *sp, const std::string &bodyName);
+   
+   // Deprecated field(s)
+   void           WriteDeprecatedMessage(Integer id) const;
+
    
    /// @todo review the use of the validModels and corresponding constants, e.g. PLANET_ATMOSPHERE_MODELS
    /// default values for CelestialBody data

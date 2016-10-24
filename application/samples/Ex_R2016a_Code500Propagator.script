@@ -1,0 +1,30 @@
+
+Create Spacecraft Sat1;
+GMAT Sat1.DateFormat = UTCGregorian;
+%  Put the Code 500 ephemeris file on the spacecraft
+Sat1.EphemerisName = '../data/vehicle/ephem/code500/DemoLEO-1.ephem';
+
+%  Create the propagator that propagates Code 500 ephemeris files
+Create Propagator Prop500_1;
+Prop500_1.Type = Code500;
+Prop500_1.StartEpoch = 'FromSpacecraft';
+Prop500_1.EpochFormat = 'UTCModJulian';
+Prop500_1.StepSize = 600;
+
+%  Creates some user defined data types
+Create String initialEpoch finalEpoch
+Create Array initialState[6,1] finalState[6,1]
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence;
+
+%  Extract the initial epoch from the ephemeris file so we know when to start propgation
+[initialEpoch, initialState, finalEpoch, finalState] = GetEphemStates('Code500', Sat1, 'UTCGregorian', EarthMJ2000Eq);
+Sat1.Epoch = initialEpoch;
+
+%  Now propagate for one day using the Code 500 ephem propagator
+While Sat1.ElapsedDays < 1
+   Propagate Prop500_1(Sat1);
+EndWhile

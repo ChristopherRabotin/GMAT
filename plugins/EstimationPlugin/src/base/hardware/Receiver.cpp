@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Tuan Dang Nguyen
 // Created: 2010/03/31 by Tuan Dang Nguyen (GSFC-NASA)
@@ -17,6 +27,7 @@
 //------------------------------------------------------------------------------
 
 #include "Receiver.hpp"
+#include "HardwareException.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
@@ -26,20 +37,20 @@
 /// Text strings used to script Receiver properties
 const std::string
 Receiver::PARAMETER_TEXT[ReceiverParamCount - RFHardwareParamCount] =
-   {
-      "FrequencyModel",
-      "CenterFrequency",
-      "Bandwidth",
-   };
+{
+   "FrequencyModel",
+   "CenterFrequency",
+   "Bandwidth",
+};
 
 /// Integer IDs associated with the Receiver properties
 const Gmat::ParameterType
 Receiver::PARAMETER_TYPE[ReceiverParamCount - RFHardwareParamCount] =
-   {
-      Gmat::STRING_TYPE,
-      Gmat::REAL_TYPE,
-      Gmat::REAL_TYPE,
-   };
+{
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+};
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -59,11 +70,11 @@ Receiver::Receiver(const std::string &name):
    RFHardware      ("Receiver", name),
    frequencyModel  ("constant"),
    centerFrequency (0.0),
-   bandwidth       (0.0)
+   bandwidth       (1.0e18)
 {
-   //MessageInterface::ShowMessage("Receiver::Receiver()\n");
    objectTypeNames.push_back("Receiver");
    parameterCount = ReceiverParamCount;
+
    isTransmitted1 = false;
    signal1 = new Signal();
 }
@@ -114,9 +125,9 @@ Receiver& Receiver::operator=(const Receiver& recei)
 {
    if (this != &recei)
    {
-      frequencyModel = recei.frequencyModel;
+      frequencyModel  = recei.frequencyModel;
       centerFrequency = recei.centerFrequency;
-      bandwidth = recei.bandwidth;
+      bandwidth       = recei.bandwidth;
       
       RFHardware::operator=(recei);
    }
@@ -171,7 +182,12 @@ Integer Receiver::GetParameterID(const std::string & str) const
    for (Integer i = RFHardwareParamCount; i < ReceiverParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - RFHardwareParamCount])
+      {
+         if (IsParameterReadOnly(i))
+            throw HardwareException("Error: '" + str + "' parameter was not defined in GMAT Receiver's syntax.\n");
+
          return i;
+      }
    }
 
    return RFHardware::GetParameterID(str);
@@ -253,13 +269,15 @@ std::string Receiver::GetParameterUnit(const Integer id) const
 {
    switch(id)
    {
-   case FREQUENCY_MODEL:
-      return "";                              // It has no unit
-   case CENTER_FREQUENCY:
-   case BANDWIDTH:
-      return "MHz";                           // The units of center frequency and bandwidth are MHz
-   default:
-      break;
+      case FREQUENCY_MODEL:
+         return "";                              // It has no unit
+
+      case CENTER_FREQUENCY:
+      case BANDWIDTH:
+         return "MHz";                           // The units of center frequency and bandwidth are MHz
+
+      default:
+         break;
    }
    
    return RFHardware::GetParameterUnit(id);
@@ -312,6 +330,9 @@ bool Receiver::IsParameterReadOnly(const std::string& label) const
 //------------------------------------------------------------------------------
 bool Receiver::IsParameterReadOnly(const Integer id) const
 {
+   if ((id == FREQUENCY_MODEL)||(id == CENTER_FREQUENCY)||(id == BANDWIDTH))
+      return true;
+
    return RFHardware::IsParameterReadOnly(id);
 }
 
@@ -359,14 +380,21 @@ Real Receiver::SetRealParameter(const Integer id, const Real value)
 {
    switch (id)
    {
+//      case CENTER_FREQUENCY:
+//         if (value >= 0.0)
+//            centerFrequency = value;
+//         return centerFrequency;
+//      case BANDWIDTH:
+//         if (value >= 0.0)
+//            bandwidth = value;
+//         return bandwidth;
+
+//      case HARDWARE_DELAY:
       case CENTER_FREQUENCY:
-         if (value >= 0.0)
-            centerFrequency = value;
-         return centerFrequency;
       case BANDWIDTH:
-         if (value >= 0.0)
-            bandwidth = value;
-         return bandwidth;
+         MessageInterface::ShowMessage("Warning: the script to assign %lf to '%s.%s' parameter was skipped. In the current GMAT version, this parameter is not used.\n", value, GetName().c_str(), GetParameterText(id).c_str());
+         return 0.0;
+
       default:
          break;
    }
@@ -425,10 +453,10 @@ std::string Receiver::GetStringParameter(const Integer id) const
 {
    switch (id)
    {
-   case FREQUENCY_MODEL:
-      return frequencyModel;
-   default:
-      break;
+      case FREQUENCY_MODEL:
+         return frequencyModel;
+      default:
+         break;
    }
    
    return RFHardware::GetStringParameter(id);
@@ -452,11 +480,13 @@ bool Receiver::SetStringParameter(const Integer id,
 {
    switch (id)
    {
-   case FREQUENCY_MODEL:
-      frequencyModel = value;
-      return true;
-   default:
-      break;
+      case FREQUENCY_MODEL:
+//       frequencyModel = value;
+         MessageInterface::ShowMessage("Warning: the script to assign '%s' to '%s.%s' parameter was skipped. In the current GMAT version, this parameter is not used.\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
+         return true;
+
+      default:
+         break;
    }
    
    return RFHardware::SetStringParameter(id, value);
@@ -518,7 +548,7 @@ Real Receiver::GetDelay(Integer whichOne)
    if (whichOne == 0)
       return RFHardware::GetDelay();
    else
-      throw new GmatBaseException("Delay index is out of bound\n");
+      throw HardwareException("Delay index is out of bound\n");
 }
 
 
@@ -539,7 +569,7 @@ bool Receiver::SetDelay(Real delay, Integer whichOne)
       hardwareDelay1 = delay;
       return true;
    default:
-      throw new GmatBaseException("Delay index is out of bound\n");
+      throw HardwareException("Delay index is out of bound\n");
    }
 }
 

@@ -1,12 +1,22 @@
-//$Id: ObType.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: ObType.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                                  ObType
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -25,6 +35,9 @@
 #include "MessageInterface.hpp"
 
 
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_INITIALIZE
+
 //------------------------------------------------------------------------------
 // ObType(const std::string &obType, const std::string &name)
 //------------------------------------------------------------------------------
@@ -42,10 +55,13 @@ ObType::ObType(const std::string &obType, const std::string &name) :
    openForRead       (true),
    openForWrite      (false)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("ObType default constructor <%s,%p>\n", GetName().c_str(), this);
+#endif
+
    objectTypes.push_back(Gmat::OBTYPE);
    objectTypeNames.push_back("ObType");
-
-//   parameterCount = ObTypeParamCount;
+   objectTypeNames.push_back(obType);
 }
 
 
@@ -77,6 +93,9 @@ ObType::ObType(const ObType& ot) :
    openForRead       (ot.openForRead),
    openForWrite      (ot.openForWrite)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("ObType cop constructor from <%s,%p> to <%s,%p>\n", ot.GetName().c_str(), &ot, GetName().c_str(), this);
+#endif
 }
 
 
@@ -93,6 +112,10 @@ ObType::ObType(const ObType& ot) :
 //------------------------------------------------------------------------------
 ObType& ObType::operator=(const ObType& ot)
 {
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("ObType operator =\n");
+#endif
+
    if (this != &ot)
    {
       streamName   = ot.streamName;
@@ -120,6 +143,21 @@ void ObType::SetStreamName(std::string name)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetStreamName()
+//------------------------------------------------------------------------------
+/**
+ * Gets the stream name
+ *
+ * @return	name of the stream
+ */
+//------------------------------------------------------------------------------
+std::string ObType::GetStreamName()
+{
+   return streamName;
+}
+
+
 //-----------------------------------------------------------------------------
 // bool Initialize()
 //-----------------------------------------------------------------------------
@@ -131,6 +169,10 @@ void ObType::SetStreamName(std::string name)
 //-----------------------------------------------------------------------------
 bool ObType::Initialize()
 {
+#ifdef DEBUG_INITIALIZE
+	MessageInterface::ShowMessage("ObType::Initialize()\n");
+#endif
+
    return false;
 }
 

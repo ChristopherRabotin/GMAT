@@ -1,12 +1,22 @@
-//$Id: EstimationRootFinder.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: EstimationRootFinder.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                         EstimationRootFinder
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -133,6 +143,11 @@ void EstimationRootFinder::FixState(Event *thisOne)
    #endif
 
    Real dt = thisOne->GetFixedTimestep();
+
+   #ifdef DEBUG_FIXED_STEP
+         MessageInterface::ShowMessage("   Stepping %.15lf \n", dt);
+   #endif
+
    if (dt != 0.0)
    {
       ODEModel *ode = propagator->GetODEModel();
@@ -140,19 +155,26 @@ void EstimationRootFinder::FixState(Event *thisOne)
             propagator->GetPropStateManager()->GetState()->GetEpoch();
 
       #ifdef DEBUG_FIXED_STEP
-         MessageInterface::ShowMessage("   Stepping %.12lf ", dt);
+	     MessageInterface::ShowMessage("   start Epoch = %.15lf\n",newEpoch); 
+         MessageInterface::ShowMessage("   Stepping %.15lf \n", dt);
       #endif
       // Propagate by dt
       propagator->GetPropagator()->Step(dt);
       // Need fixed time offset here as well
       newEpoch += dt/GmatTimeConstants::SECS_PER_DAY;
       #ifdef DEBUG_FIXED_STEP
-         MessageInterface::ShowMessage("to epoch %.12lf\n", newEpoch);
+         MessageInterface::ShowMessage("to epoch %.15lf\n", newEpoch);
       #endif
       ode->UpdateSpaceObject(newEpoch);
    }
 
    thisOne->FixState();
+
+   #ifdef DEBUG_FIXED_STEP
+      MessageInterface::ShowMessage("EstimationRootFinder::FixState(%s) exit\n",
+            thisOne->GetName().c_str());
+   #endif
+
 }
 
 
@@ -223,23 +245,30 @@ Real EstimationRootFinder::FindRoot(Integer whichOne)
    Real dt = (*events)[whichOne]->GetVarTimestep();
 
    #ifdef DEBUG_ROOT_SEARCH
-      MessageInterface::ShowMessage("   timestep = %.12le\n", dt);
+      MessageInterface::ShowMessage("   fixedtimestep dtFixed = %.15lf\n", dtFixed);
    #endif
 
    // Propagate by dt
    propagator->GetPropagator()->Step(dtFixed + dt);
 
-
    // Need fixed time offset here as well
-   Real newEpoch = (*events)[whichOne]->GetFixedEpoch() + dt/GmatTimeConstants::SECS_PER_DAY;
+   Real oldEpoch = (*events)[whichOne]->GetFixedEpoch();
+   Real newEpoch = oldEpoch + dt/GmatTimeConstants::SECS_PER_DAY;
+   #ifdef DEBUG_ROOT_SEARCH
+      MessageInterface::ShowMessage("                           timestep   dt = %.15lf sec\n", dt);
+	  MessageInterface::ShowMessage("                           timestep   dt = %.15lf\n", dt/GmatTimeConstants::SECS_PER_DAY);
+      MessageInterface::ShowMessage("EstimationRootFinder::FindRoot: oldEpoch = %.12lf\n", oldEpoch);
+      MessageInterface::ShowMessage("EstimationRootFinder::FindRoot: newEpoch = %.12lf\n", newEpoch);
+   #endif
    propagator->GetODEModel()->UpdateSpaceObject(newEpoch);
 
-   #ifdef DEBUG_ROOT_SEARCH
-      Real ef = (*events)[whichOne]->Evaluate();
-      MessageInterface::ShowMessage("   Event function = %.12le at epoch "
-            "%.12lf\n", ef, newEpoch);
-   #endif
+//   #ifdef DEBUG_ROOT_SEARCH
+//      Real ef = (*events)[whichOne]->Evaluate();
+//      MessageInterface::ShowMessage("   Event function = %.12lf at epoch "
+//            "%.15lf\n", ef, newEpoch);
+//   #endif
 
+   rootEpoch = newEpoch;
    return rootEpoch;
 }
 

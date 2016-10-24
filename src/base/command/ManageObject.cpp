@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan
 // Created: 2008.03.12
@@ -24,6 +34,7 @@
 #include "MessageInterface.hpp"
 #include "CommandException.hpp"
 #include "Array.hpp"
+#include "StringUtil.hpp"           // for ParseParameter()
 
 //#define DEBUG_MANAGE_OBJECT
 
@@ -409,8 +420,9 @@ bool ManageObject::Initialize()
 bool ManageObject::InsertIntoGOS(GmatBase *obj, const std::string &withName)
 {
    #ifdef DEBUG_MANAGE_OBJECT
-      MessageInterface::ShowMessage("Entering InsertIntoGOS, with obj = <%p> and name = %s\n",
-            obj, withName.c_str());
+   MessageInterface::ShowMessage
+      ("ManageObject::InsertIntoGOS() entered, obj=<%p>, name='%s', IsGlobal=%d\n",
+       obj, withName.c_str(), obj->IsGlobal());
    #endif
    if (!obj)
    {
@@ -458,22 +470,86 @@ bool ManageObject::InsertIntoGOS(GmatBase *obj, const std::string &withName)
       
       // it is already in there, so we do not need to put this one in; clean it up
       #ifdef DEBUG_MANAGE_OBJECT
-         MessageInterface::ShowMessage(" Create::object %s was already in object store ...\n",
-            withName.c_str());
-         MessageInterface::ShowMessage("  pointer for obj = <%p> and pointer for mapObj = <%p>\n",
-            obj, mapObj);
+      MessageInterface::ShowMessage
+         ("   object %s was already in object store ...\n", withName.c_str());
+      MessageInterface::ShowMessage
+         ("   pointer for obj = <%p> and pointer for mapObj = <%p>\n", obj, mapObj);
       #endif
       if (mapObj != obj) 
       {
          #ifdef DEBUG_MANAGE_OBJECT
-               MessageInterface::ShowMessage(" Create:: object is not the same, though\n",
-                     withName.c_str());
+         MessageInterface::ShowMessage
+            ("ManageObject::InsertIntoGOS() returning false, object<%p> is not "
+             "the same as mapObj<%p>\n", obj, mapObj);
          #endif
          return false;
       }
    }
    else
-      // put it into the GOS
+   {
+      #ifdef DEBUG_MANAGE_OBJECT
+      MessageInterface::ShowMessage
+         ("   Inserting <%p>'%s' into globalObjectMap and setting global flag to true\n",
+          obj, obj->GetName().c_str());
+      #endif
+      // put it into the globalObjectMap
       globalObjectMap->insert(std::make_pair(withName,obj));
+      // Set global flag to true (LOJ: 2015.07.16)
+      obj->SetIsGlobal(true);
+   }
+   
+   #ifdef DEBUG_MANAGE_OBJECT
+   MessageInterface::ShowMessage("   Is object global: %s\n", obj->IsGlobal() ? "yes" : "no");
+   MessageInterface::ShowMessage("   Checking if Parameter should be moved to globalObjectMap\n");
+   #endif
+   
+   // Check for automatic Parameters such as globalSat.x 
+   // If Parameter owner is global, make Parameter global and move it to globalObjectMap
+   // (LOJ: 2015.07.20)
+   StringArray movedObjects;
+   for (ObjectMap::iterator iter = objectMap->begin(); iter != objectMap->end(); ++iter)
+   {
+      std::string objName = iter->first;
+      GmatBase *obj = iter->second;
+      
+      // Check if name indicates a Parameter (i.e it has dot)
+      if (objName.find_first_of('.') != objName.npos)
+      {
+         #ifdef DEBUG_MANAGE_OBJECT
+         MessageInterface::ShowMessage("  ==> '%s' is a Parameter\n", objName.c_str());
+         #endif
+         
+         // Check if Parameter owner is global
+         std::string type, ownerName, dep;
+         GmatStringUtil::ParseParameter(objName, type, ownerName, dep);
+         if (globalObjectMap->find(ownerName) != globalObjectMap->end())
+         {
+            // If it is not already in the GOS, add it
+            if (globalObjectMap->find(objName) == globalObjectMap->end())
+            {
+               #ifdef DEBUG_MANAGE_OBJECT
+               MessageInterface::ShowMessage
+                  ("   Inserting <%p>'%s' into globalObjectMap and setting global flag to true\n",
+                   obj, obj->GetName().c_str());
+               #endif
+               // Put it into the GOS
+               globalObjectMap->insert(std::make_pair(withName,obj));
+               // Set global flag to true
+               obj->SetIsGlobal(true);
+               // Add it to movedObjects
+               movedObjects.push_back(objName);
+            }
+         }
+      }
+   }
+   
+   // Remove from the objectMap
+   for (unsigned int ii = 0; ii < movedObjects.size(); ii++)
+      objectMap->erase(movedObjects.at(ii));
+   movedObjects.clear();  
+   
+   #ifdef DEBUG_MANAGE_OBJECT
+   MessageInterface::ShowMessage("ManageObject::InsertIntoGOS() returning true\n");
+   #endif
    return true;
 }

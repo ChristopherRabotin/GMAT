@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // Order 124.
@@ -109,7 +119,7 @@ void ShowSummaryDialog::Create()
 
    // label for coordinate system
    wxStaticText *coordSysStaticText = new wxStaticText( this, ID_CS_TEXT,
-      wxT(GUI_ACCEL_KEY"Coordinate System"), wxDefaultPosition, wxDefaultSize, 0 );
+      GUI_ACCEL_KEY"Coordinate System", wxDefaultPosition, wxDefaultSize, 0 );
    coordSysComboBox =theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    coordSysComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
 
@@ -150,7 +160,7 @@ void ShowSummaryDialog::Create()
       // increase text size on Windows(loj: 2009.02.05)
       theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                                   wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
-      theSummary->SetFont(GmatAppData::Instance()->GetFont() );
+      theSummary->SetFont(GmatAppData::Instance()->GetScriptFont() );
       theMiddleSizer->Add(coordSizer, 0, wxGROW|wxALL, 3);
       theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
    }
@@ -214,7 +224,7 @@ void ShowSummaryDialog::ResetData()
 //------------------------------------------------------------------------------
 void ShowSummaryDialog::OnComboBoxChange(wxCommandEvent& event)
 {
-   std::string coordSysStr  = coordSysComboBox->GetValue().c_str();
+   std::string coordSysStr  = coordSysComboBox->GetValue().WX_TO_STD_STRING;
    wxString    text         = "Summary not yet available for this panel";
 
    #ifdef DEBUG_CMD_SUMMARY_COMBOBOX
@@ -267,7 +277,7 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
 {
    CoordinateSystem *tmpCS = NULL;
    SpacePoint       *origin = NULL;
-   std::string      currentCS = coordSysComboBox->GetValue().c_str();
+   std::string      currentCS = coordSysComboBox->GetValue().WX_TO_STD_STRING;
    std::string      newCS     = currentCS;
    Integer          sz;
 
@@ -279,7 +289,7 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
    StringArray coordSystemNames;
    wxArrayString csNames = coordSysComboBox->GetStrings();
    for (Integer ii = 0; ii < (Integer) csNames.GetCount(); ii++)
-      coordSystemNames.push_back((csNames.Item(ii)).c_str());
+      coordSystemNames.push_back(std::string((csNames.Item(ii)).c_str()));
    sz = (Integer) coordSystemNames.size();
 
    coordSysComboBox->Clear();

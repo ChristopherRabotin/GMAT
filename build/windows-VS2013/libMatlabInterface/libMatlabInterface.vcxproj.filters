@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\command">
+      <UniqueIdentifier>{262ef4f0-8fd9-419d-b33d-0adef0efda8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\factory">
+      <UniqueIdentifier>{e9d6f9b6-0492-4a4c-b8b4-3680f3c1c79d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\interface">
+      <UniqueIdentifier>{2feae083-a9c4-45a0-931f-c5878fdeb9f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\subscriber">
+      <UniqueIdentifier>{14e01420-d4fb-4482-8d2b-43421d355293}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{045886a5-d3f6-4460-b1ff-d277d72c5655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{97fd02a3-2fff-454a-bb58-eba72c05396f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\function">
+      <UniqueIdentifier>{0c65d706-ba0e-4511-985a-5fc7c046bb68}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabWorkspaceFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\interface\MatlabInterface.cpp">
+      <Filter>Source Files\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin\GmatPluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber\MatlabWorkspace.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.cpp">
+      <Filter>Source Files\function</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabWorkspaceFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\interface\MatlabInterface.hpp">
+      <Filter>Source Files\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin\GmatPluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber\MatlabWorkspace.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\include\matlabinterface_defs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.hpp">
+      <Filter>Source Files\function</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,12 +1,22 @@
-//$Id: Event.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: Event.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                                Event
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Darrel J. Conway
 // Created: 2009/12/04
@@ -28,8 +38,8 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_DATA_STORE
 //#define DEBUG_COORDINATE_SYSTEMS
-
-
+//#define DEBUG_SET_RELATIVITY_CORRECTION
+//#define DEBUG_SET_ETMINUSTAI_CORRECTION
 //------------------------------------------------------------------------------
 // Event::Event(const std::string &type, const std::string &name) :
 //------------------------------------------------------------------------------
@@ -44,7 +54,7 @@ Event::Event(const std::string &type, const std::string &name) :
    GmatBase             (Gmat::EVENT, type, name),
    depth                (2),
    nyquist              (1.0e-99),
-   tolerance            (1.0e-7),
+   tolerance            (1.0e-5),		// (1.0e-7),		// Notice that: when tolerance is small, the result of light time range may oscillate.
    maxAttempts          (50),
    estimatedEpoch       (0.0),
    status               (SEEKING),
@@ -54,7 +64,10 @@ Event::Event(const std::string &type, const std::string &name) :
    stepDirection        (-1.0),         // Step backwards by default
    bufferIndex          (0),
    bufferFillCount      (0),
-   j2k                  (NULL)
+   j2k                  (NULL),
+   useRelativityCorrection (false),
+//   useETMinusTAICorrection (false),
+   solarSystem			(NULL)
 {
 }
 
@@ -96,7 +109,10 @@ Event::Event(const Event& ev) :
    stepDirection        (ev.stepDirection),
    bufferIndex          (0),
    bufferFillCount      (0),
-   j2k                  (NULL)
+   j2k                  (NULL),
+   useRelativityCorrection (ev.useRelativityCorrection),
+//   useETMinusTAICorrection (ev.useETMinusTAICorrection),
+   solarSystem			(ev.solarSystem)
 {
    for (UnsignedInt i = 0; i < ev.participantCS.size(); ++i)
       participantCS.push_back(ev.participantCS[i]);
@@ -128,6 +144,9 @@ Event& Event::operator=(const Event& ev)
       bufferIndex          = 0;
       bufferFillCount      = 0;
       j2k                  = NULL;
+	  useRelativityCorrection = ev.useRelativityCorrection;
+//	  useETMinusTAICorrection = ev.useETMinusTAICorrection;
+	  solarSystem          = ev.solarSystem;
       nyquist              = ev.nyquist;
       tolerance            = ev.tolerance;
       maxAttempts          = ev.maxAttempts;
@@ -185,6 +204,42 @@ bool Event::Initialize()
 
 
 //------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem* ss)
+//------------------------------------------------------------------------------
+/**
+ * Set solar system to this Event object
+ *
+ * @param ss    a pointer to SolarSystem object
+ */
+//------------------------------------------------------------------------------
+void Event::SetSolarSystem(SolarSystem* ss)
+{
+	solarSystem = ss;
+}
+
+//------------------------------------------------------------------------------
+// void SetRelativityCorrection(bool useCorr)
+//------------------------------------------------------------------------------
+/**
+ * Set relativity correct option to this Event object
+ *
+ * @param useCorr    the option to use relativity correction
+ */
+//------------------------------------------------------------------------------
+void Event::SetRelativityCorrection(bool useCorr)
+{
+#ifdef DEBUG_SET_RELATIVITY_CORRECTION
+	MessageInterface::ShowMessage("Start Event::SetRelativityCorrection(%s)\n", (useCorr?"true":"false"));
+#endif
+
+	useRelativityCorrection = useCorr;
+#ifdef DEBUG_SET_RELATIVITY_CORRECTION
+	MessageInterface::ShowMessage("Exit Event::SetRelativityCorrection()\n");
+#endif
+}
+
+
+//------------------------------------------------------------------------------
 // void FixState(GmatBase* obj, bool lockState)
 //------------------------------------------------------------------------------
 /**
@@ -224,8 +279,7 @@ void Event::FixState()
  * @return The epoch
  */
 //-----------------------------------------------------------------------------
-const GmatEpoch Event::GetFixedEpoch()
-{
+GmatEpoch Event::GetFixedEpoch(){
    return fixedEpoch;
 }
 
@@ -332,8 +386,8 @@ bool Event::CheckZero()
    // Implement the epoch guess; the default, here, just linear interpolates
    if (bufferFillCount == 1)
       for (UnsignedInt i = 0; i < value[0].size(); ++i)
-         //if (GmatMathUtil::Abs(value[0][i] < tolerance))  // "at" a zero			// made changes my TUAN NGUYEN
-		 if (GmatMathUtil::Abs(value[0][i]) < tolerance)  // "at" a zero			// made changes my TUAN NGUYEN
+         //if (GmatMathUtil::Abs(value[0][i] < tolerance))  // "at" a zero
+		 if (GmatMathUtil::Abs(value[0][i]) < tolerance)  // "at" a zero
             retval = true;
 
    if (bufferFillCount > 1)
@@ -713,6 +767,7 @@ void Event::StoreParticipantData(Integer whichOne, SpacePoint *obj,
       MessageInterface::ShowMessage("Event(%s)::StoreParticipantData(%d, <%p>, "
             "%.12lf)\n", instanceName.c_str(), whichOne, obj, when);
    #endif
+   participantData[whichOne].cs_origin = obj->GetJ2000Body();
    participantData[whichOne].epoch = when;
    participantData[whichOne].position = obj->GetMJ2000Position(when);
    participantData[whichOne].velocity = obj->GetMJ2000Velocity(when);

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number X-XXXX-X
@@ -42,7 +52,7 @@ public:
    void                 SetShowObject(const std::string &name, bool value);
    
    // methods inherited from Subscriber
-   virtual void         Activate(bool state = true);
+   virtual bool         Activate(bool state = true);
    
    // methods inherited from GmatBase
    virtual bool         Validate();
@@ -139,18 +149,6 @@ public:
    
 protected:
    
-   // methods inherited from the Subscriber
-   /*
-   virtual void         HandleOrbitColorChanged(GmatBase *originator,
-                                                const std::string &newColor,
-                                                const std::string &objName,
-                                                const std::string &desc);
-   virtual void         HandleTargetColorChanged(GmatBase *originator,
-                                                 const std::string &newColor,
-                                                 const std::string &objName,
-                                                 const std::string &desc);
-   */
-   
    CoordinateSystem *mViewCoordSystem;
    
    std::string mOldName;
@@ -178,7 +176,7 @@ protected:
    Integer mNumPointsToRedraw;
    Integer mNumData;
    Integer mNumCollected;
-   bool    mDrawingStatusChanged;
+   Integer mDataAbsentWarningCount;
    
    // arrays for holding distributed data
    RealArray mScXArray;
@@ -187,6 +185,16 @@ protected:
    RealArray mScVxArray;
    RealArray mScVyArray;
    RealArray mScVzArray;
+   
+   // arrays for holding previous distributed data
+   BooleanArray mScPrevDataPresent;
+   RealArray mScPrevEpoch;
+   RealArray mScPrevX;
+   RealArray mScPrevY;
+   RealArray mScPrevZ;
+   RealArray mScPrevVx;
+   RealArray mScPrevVy;
+   RealArray mScPrevVz;
    
    // arrays for holding solver current data
    std::vector<StringArray> mCurrScArray;
@@ -217,8 +225,13 @@ protected:
    
    /// Buffers published spacecraft orbit data
    void                 BufferZeroData(Integer scIndex);
+   void                 BufferPreviousData(Integer scIndex);
    virtual Integer      BufferOrbitData(const Real *dat, Integer len);
-
+   
+   /// Handle absent spacecraft when data is published
+   void                 HandleAbsentData(const std::string &scName,
+                                         Integer scIndex, Real currEpoch);
+   
    /// Returns object string list
    virtual std::string  GetObjectStringList() const;
    

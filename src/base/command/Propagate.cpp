@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -31,8 +41,6 @@
 #include "AngleUtil.hpp"        // for PutAngleInDegRange()
 #include "ColorTypes.hpp"       // for GmatColor::
 #include "MessageInterface.hpp"
-#include "EventLocator.hpp"
-#include "EventModel.hpp"
 #include "RgbColor.hpp"         // for ToIntColor()
 #include <sstream>
 #include <cmath>
@@ -62,6 +70,7 @@
 //#define DEBUG_FINAL_STEP
 //#define DEBUG_EVENTLOCATORS
 //#define DEBUG_CLONES
+//#define DEBUG_CLEAN_STRING
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -293,7 +302,6 @@ Propagate::Propagate(const Propagate &prp) :
    isInitialized = false;
    baseEpoch.clear();
    propagators.clear();
-   sats.clear();
    stopWhen.clear();
    stopSats.clear();
    satBuffer.clear();
@@ -375,7 +383,6 @@ Propagate& Propagate::operator=(const Propagate &prp)
    }
    propagators.clear();
 
-   sats.clear();
    stopWhen.clear();
    stopSats.clear();
    satBuffer.clear();
@@ -1000,7 +1007,7 @@ Integer Propagate::GetParameterID(const std::string &str) const
 Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
 {
    if (id >= GmatCommandParamCount && id < PropagateCommandParamCount)
-      return PARAMETER_TYPE[id - GmatBaseParamCount];
+      return PARAMETER_TYPE[id - GmatCommandParamCount];
 
    return PropagationEnabledCommand::GetParameterType(id);
 }
@@ -1086,6 +1093,22 @@ std::string Propagate::GetStringParameter(const Integer id) const
    return PropagationEnabledCommand::GetStringParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
@@ -2726,7 +2749,7 @@ void Propagate::FindSetupsAndStops(Integer &loc,
       std::string::size_type lastCloseParen = str2.find_last_of(")");
       
       // If syntax is "Propagate Prop(Sat1, {Sat1.ElapsedSecs = 600})",
-      // make it to standard syntanx, i.e "Propagate Prop(Sat1) {Sat1.ElapsedSecs = 600}"
+      // make it to standard syntax, i.e "Propagate Prop(Sat1) {Sat1.ElapsedSecs = 600}"
       // to use TextParser::SeparateAllBrackets(str, "{})
       // Remove last ) after }
       if (lastCloseParen == (str2.size() - 1) && str2[lastCloseParen - 1] == '}')
@@ -2764,10 +2787,11 @@ void Propagate::FindSetupsAndStops(Integer &loc,
          // If it does not starts with {, it is propagator and spacecraft
          if (parts[i][0] != '{')
          {
-            #ifdef DEBUG_PARSING
-            MessageInterface::ShowMessage("   adding prop setups\n");
-            #endif
             parts[i] = GmatStringUtil::Trim(parts[i]);
+            #ifdef DEBUG_PARSING
+            MessageInterface::ShowMessage("   adding prop setup '%s'\n",
+                  parts[i].c_str());
+            #endif
             setupStrings.push_back(parts[i]);
          }
          else
@@ -2889,6 +2913,10 @@ void Propagate::ConfigurePropSetup(std::string &setupDesc)
          "' does not identify any spacecraft for propagation on "
          + "the command line\n" + generatingString);
    prop = setupDesc.substr(0, loc);
+   if (prop == "")
+      throw CommandException("The propsetup string '" + setupDesc +
+         "' does not identify any PropSetup on "
+         + "the command line\n" + generatingString);
    sats = setupDesc.substr(loc);
 
    CleanString(prop);
@@ -3094,7 +3122,14 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
 //------------------------------------------------------------------------------
 void Propagate::CleanString(std::string &theString, const StringArray *extras)
 {
-   UnsignedInt loc, len = theString.length();
+   #ifdef DEBUG_CLEAN_STRING
+      MessageInterface::ShowMessage("In CleanString, theString = %s\n",
+            theString.c_str());
+//      for (Integer ii = 0; ii < extras->size(); ii++)
+//         MessageInterface::ShowMessage("     %d     %s\n", ii, extras->at(ii).c_str());
+   #endif
+   Integer loc;
+   Integer len = (Integer) theString.length();
    bool keepGoing = false;
 
    if (len == 0)
@@ -3103,6 +3138,10 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
    // Clean up the start of the string
    for (loc = 0; loc < len; ++loc)
    {
+      #ifdef DEBUG_CLEAN_STRING
+         MessageInterface::ShowMessage("In CleanString, theString[%d] = %c\n",
+               (Integer) loc, theString[loc]);
+      #endif
       if ((theString[loc] != ' ') && (theString[loc] != '\''))
       {
          if (extras != NULL)
@@ -3116,6 +3155,10 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
       }
    }
    theString = theString.substr(loc);
+   #ifdef DEBUG_CLEAN_STRING
+      MessageInterface::ShowMessage("In CleanString, (substring) theString = %s\n",
+            theString.c_str());
+   #endif
 
    // Clean up the end of the string
    keepGoing = false;
@@ -3134,6 +3177,10 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
       }
    }
    theString = theString.substr(0, loc+1);
+   #ifdef DEBUG_CLEAN_STRING
+      MessageInterface::ShowMessage("At the end of CleanString, (substring) theString = %s\n",
+            theString.c_str());
+   #endif
 }
 
 
@@ -3160,12 +3207,13 @@ bool Propagate::Initialize()
                                     (direction == 1.0?"Forwards":"Backwards"));
    #endif
 
-   PropagationEnabledCommand::Initialize();
+   bool retval = PropagationEnabledCommand::Initialize();
 
    inProgress = false;
    hasFired = false;
+   sats.clear();           // Resetting: PropagationEnabledCommand did this once
+
    UnsignedInt index = 0;
-   sats.clear();
    SpaceObject *so;
    std::string pName;
    GmatBase *mapObj = NULL;
@@ -3362,32 +3410,14 @@ bool Propagate::Initialize()
                #endif
                finiteBurnActive = true;
             }
+            #ifdef DEBUG_FINITE_MANEUVER
+               else
+                  MessageInterface::ShowMessage(
+                        "SpaceObject %s is not maneuvering\n", so->GetName().c_str());
+            #endif
+
             sats.push_back(so);
-
-            // This validation is moved to PrepareToPropagate because there may
-            // be changes made that enable it after the command initialization 
-            //if (sats.size() > 1)
-            //   if (so->GetRealParameter(epochID) !=
-            //         sats[0]->GetRealParameter(epochID))
-            //   {
-            //      std::stringstream errorString;
-            //      errorString.precision(16);
-            //      errorString << "Coupled propagation epoch mismatch between "
-            //                  << sats[0]->GetName()
-            //                  << " (epoch = "
-            //                  << sats[0]->GetRealParameter(epochID)
-            //                  << ") and "
-            //                  << so->GetName()
-            //                  << " (epoch = "
-            //                  << so->GetRealParameter(epochID)
-            //                  << ")";
-            //      throw CommandException(errorString.str());
-            //   }
-
             AddToBuffer(so);
-
-            // Add any locator that uses so to the PSM for step size control
-            LocateObjectEvents(mapObj, els);
 
             if (so->GetType() == Gmat::FORMATION)
                ((FormationInterface*)(so))->BuildState();
@@ -3397,12 +3427,6 @@ bool Propagate::Initialize()
 //               SetNames(so->GetName(), owners, elements);
 //            }
          }
-      }
-
-      if (els.size() != 0)
-      {
-         AddLocators(psm, els);
-         els.clear();
       }
 
       // Check for finite thrusts and update the force model if there are any
@@ -3441,11 +3465,11 @@ bool Propagate::Initialize()
          p->SetSolarSystem(solarSys);
       }
 
-      #ifdef DEBUG_PUBLISH_DATA
-      MessageInterface::ShowMessage
-            ("Propagate::Initialize() '%s' registering published data\n",
-             GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-      #endif
+      // #ifdef DEBUG_PUBLISH_DATA
+      // MessageInterface::ShowMessage
+      //       ("Propagate::Initialize() '%s' registering published data\n",
+      //        GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      // #endif
 
 //      streamID = publisher->RegisterPublishedData(this, streamID, owners,
 //            elements);
@@ -3464,9 +3488,6 @@ bool Propagate::Initialize()
 
       ++index;
    } // End of loop through PropSetups
-
-   // Prepare the locator buffers and data structures
-   InitializeForEventLocation();
 
    // Prep the publisher
    StringArray owners, elements;
@@ -3488,12 +3509,22 @@ bool Propagate::Initialize()
             FillFormation(so, owners, elements);
          else
          {
+            #ifdef DEBUG_PUBLISH_DATA
+            MessageInterface::ShowMessage
+               ("Propagate::Initialize() '%s' setting data labels\n",
+                GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+            #endif
             SetNames(so->GetName(), owners, elements);
          }
       }
    }
-   streamID = publisher->RegisterPublishedData(this, streamID, owners,
-         elements);
+   
+   #ifdef DEBUG_PUBLISH_DATA
+   MessageInterface::ShowMessage
+      ("Propagate::Initialize() '%s' registering published data\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+   streamID = publisher->RegisterPublishedData(this, streamID, owners, elements);
    
    isInitialized = true;
 
@@ -3516,10 +3547,14 @@ bool Propagate::Initialize()
    #if DEBUG_PROPAGATE_INIT
       for (UnsignedInt i=0; i<stopSats.size(); i++)
          MessageInterface::ShowMessage
-            ("   stopSats[%d]=%s\n", i, stopSats[i]->GetName().c_str());
+            ("   stopSats[%d]=<%p>%s, IsStopSatGlobal:%d, IsStopSatLocal:%d\n",
+             i, stopSats[i], stopSats[i]->GetName().c_str(), stopSats[i]->IsGlobal(),
+             stopSats[i]->IsLocal());
       for (UnsignedInt i=0; i<stopWhen.size(); i++)
          MessageInterface::ShowMessage
-            ("   stopWhen[%d]=%s\n", i, stopWhen[i]->GetName().c_str());
+            ("   stopWhen[%d]=<%p>%s, IsStopWhenGlobal:%d, IsStopWhenLocal:%d\n",
+             i, stopWhen[i], stopWhen[i]->GetName().c_str(), stopWhen[i]->IsGlobal(),
+             stopWhen[i]->IsLocal());
    #endif
 
    if ((stopWhen.size() == 0) && !singleStepMode)
@@ -3629,7 +3664,7 @@ bool Propagate::Initialize()
           isInitialized);
    #endif
 
-   return isInitialized;
+   return isInitialized && retval;
 }
 
 //------------------------------------------------------------------------------
@@ -3673,7 +3708,14 @@ void Propagate::FillFormation(SpaceObject *so, StringArray& owners,
       if (el->GetType() == Gmat::FORMATION)
          FillFormation(el, owners, elements);
       else     // Setup spacecraft data descriptions
+      {
+         #ifdef DEBUG_PUBLISH_DATA
+         MessageInterface::ShowMessage
+            ("Propagate::FillFormation() '%s' setting data labels\n",
+             GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+         #endif
          SetNames(el->GetName(), owners, elements);
+      }
    }
 
    ((FormationInterface*)(so))->BuildState();
@@ -3759,10 +3801,9 @@ void Propagate::PrepareToPropagate()
 
       for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {
-         #if DEBUG_PROPAGATE_EXE
+         #if DEBUG_PROPAGATE_INIT
             MessageInterface::ShowMessage
                ("Propagate::PrepareToPropagate() SpaceObject names\n");
-
             MessageInterface::ShowMessage
                ("SpaceObject Count = %d\n", satName[n]->size());
             StringArray *sar = satName[n];
@@ -3770,6 +3811,23 @@ void Propagate::PrepareToPropagate()
             {
                MessageInterface::ShowMessage
                   ("   SpaceObjectName[%d] = %s\n", i, (*sar)[i].c_str());
+            }
+            Propagator *prop = propagators[n]->GetPropagator();
+            ODEModel *om = propagators[n]->GetODEModel();
+            MessageInterface::ShowMessage
+               ("   Propagator = <%p>[%s]'%s'\n", prop,
+                prop ? prop->GetTypeName().c_str() : "NULL",
+                prop ? prop->GetName().c_str() : "NULL");
+            MessageInterface::ShowMessage
+               ("   ODEModel   = <%p>[%s]'%s'\n", om,
+                om ? om->GetTypeName().c_str() : "NULL",
+                om ? om->GetName().c_str() : "NULL");
+            for (Integer i = 0; i < om->GetNumForces(); i++)
+            {
+               PhysicalModel *pm = om->GetForce(i);
+               MessageInterface::ShowMessage
+                  ("   om[%d] = <%p>[%s]'%s'\n", i, pm, pm->GetTypeName().c_str(),
+                   pm->GetName().c_str());
             }
          #endif
 
@@ -4320,7 +4378,6 @@ bool Propagate::Execute()
             // Set segment orbit color (LOJ: 2013.12.16 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
             
-            CheckForEvents();
             break;
          }
 
@@ -4357,7 +4414,6 @@ bool Propagate::Execute()
             // Set segment orbit color (LOJ: 2013.11.29 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
             publisher->Publish(this, streamID, pubdata, dim+1, direction);
-            CheckForEvents();
          }
          else
          {
@@ -5987,338 +6043,347 @@ GmatBase* Propagate::GetClone(Integer cloneIndex)
 
 
 //------------------------------------------------------------------------------
-// void AddTransientForce(StringArray *sats, ForceModel *p,
-//       PropagationStateManager *propMan)
+// MOVED TO PROPAGATIONENABLEDCOMMAND
 //------------------------------------------------------------------------------
-/**
- * Passes transient forces into the ForceModel(s).
- *
- * @param sats The array of satellites used in the ForceModel.
- * @param p    The current ForceModel that is receiving the forces.
- * @param propMan PropagationStateManager for this PropSetup
- */
-//------------------------------------------------------------------------------
-void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
-      PropagationStateManager *propMan)
-{
-   #ifdef DEBUG_TRANSIENT_FORCES
-   MessageInterface::ShowMessage
-      ("Propagate::AddTransientForce() entered, ODEModel=<%p>,"
-       " transientForces=<%p>\n", p, transientForces);
-   #endif
 
-   // Find any transient force that is active and add it to the force model
-   StringArray satsThatManeuver, formationSatsThatManeuver, formsThatManeuver;
-   bool flagMultipleBurns = false;
-
-   for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
-        i != transientForces->end(); ++i)
-   {
-      StringArray tfSats = (*i)->GetRefObjectNameArray(Gmat::SPACECRAFT);
-      // Loop through the spacecraft that go with the force model, and see if
-      // they are in the spacecraft list for the current transient force
-      for (StringArray::iterator current = satnames->begin();
-           current != satnames->end(); ++current)
-      {
-         if (find(tfSats.begin(), tfSats.end(), *current) != tfSats.end())
-         {
-            #ifdef DEBUG_TRANSIENT_FORCES
-            MessageInterface::ShowMessage
-               ("   Adding transientForce <%p>'%s' to ODEModel\n", *i,
-                (*i)->GetName().c_str());
-            #endif
-            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current)
-                  == satsThatManeuver.end())
-               p->AddForce(*i);
-            else
-               flagMultipleBurns = true;
-            satsThatManeuver.push_back(*current);
-            if ((*i)->DepletesMass())
-            {
-               propMan->SetProperty("MassFlow");
-//               propMan->SetProperty("MassFlow",
-//                     (*i)->GetRefObject(Gmat::SPACECRAFT, *current));
-               #ifdef DEBUG_TRANSIENT_FORCES
-                  MessageInterface::ShowMessage("   %s depletes mass\n",
-                        (*i)->GetName().c_str());
-               #endif
-            }
-            break;      // Avoid multiple adds
-         }
-         else
-         {
-            // Check to see if a Formation is masking the Spacecraft, and if so
-            // whine and stop
-            // Find the object that matches the current name
-            GmatBase *obj;
-            for (UnsignedInt i = 0; i < sats.size(); ++i)
-            {
-               if (sats[i]->GetName() == *current)
-               {
-                  obj = sats[i];
-
-                  #ifdef DEBUG_TRANSIENT_FORCES
-                     MessageInterface::ShowMessage("Checking %s\n",
-                           current->c_str());
-                  #endif
-
-                  if (obj->IsOfType(Gmat::FORMATION))
-                  {
-                     StringArray mansats =
-                           ((SpaceObject*)(obj))->GetManeuveringMembers();
-
-                     #ifdef DEBUG_TRANSIENT_FORCES
-                        MessageInterface::ShowMessage("***It's a Formation "
-                              "with %d maneuvering sats\n", mansats.size());
-                     #endif
-
-                     for (UnsignedInt i = 0; i < mansats.size(); ++i)
-                     {
-                        #ifdef DEBUG_TRANSIENT_FORCES
-                           MessageInterface::ShowMessage("   %d: %s is maneuvering\n",
-                                 i, mansats[i].c_str());
-                        #endif
-                        if (find(tfSats.begin(), tfSats.end(), mansats[i]) != tfSats.end())
-                        {
-                           if (find(formationSatsThatManeuver.begin(),
-                                 formationSatsThatManeuver.end(),
-                                 mansats[i]) == formationSatsThatManeuver.end())
-                              formationSatsThatManeuver.push_back(mansats[i]);
-                           if (find(formsThatManeuver.begin(),
-                                 formsThatManeuver.end(), obj->GetName()) ==
-                                       formsThatManeuver.end())
-                              formsThatManeuver.push_back(obj->GetName());
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      }
-   }
-
-   #ifdef DEBUG_TRANSIENT_FORCES
-      MessageInterface::ShowMessage("Found %d sats that maneuver (outside of "
-            "formations):\n", satsThatManeuver.size());
-      for (UnsignedInt i = 0; i < satsThatManeuver.size(); ++i)
-         MessageInterface::ShowMessage("   %s\n", satsThatManeuver[i].c_str());
-   #endif
-
-   if (flagMultipleBurns)
-   {
-      StringArray duplicates;
-      for (StringArray::iterator name = satsThatManeuver.begin();
-            name != satsThatManeuver.end(); ++name)
-      {
-         if (find(name+1, satsThatManeuver.end(), *name) !=
-               satsThatManeuver.end())
-         {
-            if (find(duplicates.begin(), duplicates.end(), *name) ==
-                  duplicates.end())
-               duplicates.push_back(*name);
-         }
-      }
-      std::string errmsg = "The Spacecraft [";
-      for (UnsignedInt i = 0; i < duplicates.size(); ++i)
-      {
-         if (i != 0)
-            errmsg += ", ";
-         errmsg += duplicates[i];
-      }
-      if (duplicates.size() == 1)
-         errmsg += "] has ";
-      else
-         errmsg += "] have ";
-      errmsg += "more than one finite burn active, but GMAT only allows one "
-         "finite burn on a given spacecraft.";
-      throw CommandException(errmsg);
-   }
-
-   if (formationSatsThatManeuver.size() > 0)
-   {
-      std::string whatToSay, formToSay;
-      if (formationSatsThatManeuver.size() == 1)
-         whatToSay = "a maneuvering Spacecraft named \"" +
-                     formationSatsThatManeuver[0] + "\"";
-      else
-      {
-         whatToSay = "maneuvering Spacecraft named ";
-         for (UnsignedInt i = 0; i < formationSatsThatManeuver.size(); ++i)
-         {
-            if (i != 0)
-            {
-               if (formationSatsThatManeuver.size() > 2)
-                  whatToSay += ", ";
-               else
-                  whatToSay += " ";
-               if (i == formationSatsThatManeuver.size()-1)
-                  whatToSay += "and ";
-            }
-            whatToSay += "\"" + formationSatsThatManeuver[i] + "\"";
-         }
-      }
-
-      if (formsThatManeuver.size() == 1)
-         formToSay = "Formation \"" + formsThatManeuver[0] + "\" contains " +
-         whatToSay;
-      else
-      {
-         formToSay = "Formations ";
-         for (UnsignedInt i = 0; i < formsThatManeuver.size(); ++i)
-         {
-            if (i != 0)
-            {
-               if (formsThatManeuver.size() > 2)
-                  formToSay += ", ";
-               else
-                  formToSay += " ";
-               if (i == formsThatManeuver.size()-1)
-                  formToSay += "and ";
-            }
-            formToSay += "\"" + formsThatManeuver[i] + "\"";
-         }
-
-         formToSay += " contain " + whatToSay;
-      }
-
-      throw CommandException("The " + formToSay + ", but GMAT does not support "
-            "finite burn maneuvers inside of Formation objects.");
-   }
-
-   #ifdef DEBUG_TRANSIENT_FORCES
-      ODEModel *fm;
-      PhysicalModel *pm;
-
-      MessageInterface::ShowMessage(
-         "Propagate::AddTransientForces completed; force details:\n");
-      for (std::vector<PropSetup*>::iterator p = propagators.begin();
-           p != propagators.end(); ++p)
-      {
-         fm = (*p)->GetODEModel();
-         if (!fm)
-            throw CommandException("ODEModel not set in PropSetup \"" +
-                                   (*p)->GetName() + "\"");
-         MessageInterface::ShowMessage(
-            "   Forces in %s:\n", fm->GetName().c_str());
-         for (Integer i = 0; i < fm->GetNumForces(); ++i)
-         {
-            pm = fm->GetForce(i);
-            MessageInterface::ShowMessage(
-               "      %15s   %s\n", pm->GetTypeName().c_str(),
-               pm->GetName().c_str());
-         }
-      }
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void ClearTransientForce()
-//------------------------------------------------------------------------------
-/**
- * Removes transient forces from the ForceModel(s) after propagation.
- */
-//------------------------------------------------------------------------------
-void Propagate::ClearTransientForces()
-{
-   #ifdef DEBUG_TRANSIENT_FORCES
-   MessageInterface::ShowMessage
-      ("Propagate::ClearTransientForces() entered, prop.size()=%d\n",
-       propagators.size());
-   #endif
-
-   ODEModel *fm;
-   PhysicalModel *pm;
-
-   // Loop through the forces in each force model, and remove transient ones
-   for (std::vector<PropSetup*>::iterator p = propagators.begin();
-        p != propagators.end(); ++p)
-   {
-      if ((*p)->GetPropagator()->UsesODEModel())
-      {
-         fm = (*p)->GetODEModel();
-         if (!fm)
-            throw CommandException("ForceModel not set in PropSetup \"" +
-                                   (*p)->GetName() + "\"");
-
-         #ifdef DEBUG_TRANSIENT_FORCES
-         MessageInterface::ShowMessage("   ODEModel=<%p>\n", fm);
-         #endif
-         for (Integer i = 0; i < fm->GetNumForces(); ++i)
-         {
-            pm = fm->GetForce(i);
-            #ifdef DEBUG_TRANSIENT_FORCES
-            MessageInterface::ShowMessage
-               ("      Checking if pm<%p>'%s' is transient\n", pm, pm->GetName().c_str());
-            #endif
-            if (pm->IsTransient())
-            {
-               #ifdef DEBUG_TRANSIENT_FORCES
-               MessageInterface::ShowMessage("   calling fm->DeleteForce() for %p\n", pm);
-               #endif
-               fm->DeleteForce(pm->GetName());
-               --i;
-            }
-         }
-      }
-   }
-
-   #ifdef DEBUG_TRANSIENT_FORCES
-      MessageInterface::ShowMessage(
-         "Propagate::ClearTransientForces completed; force details:\n");
-      for (std::vector<PropSetup*>::iterator p = propagators.begin();
-           p != propagators.end(); ++p)
-      {
-         if ((*p)->GetPropagator()->UsesODEModel())
-         {
-            fm = (*p)->GetODEModel();
-            if (!fm)
-               throw CommandException("ForceModel not set in PropSetup \"" +
-                                      (*p)->GetName() + "\"");
-            #ifdef DEBUG_TRANSIENT_FORCES
-            MessageInterface::ShowMessage("   ODEModel=<%p>\n", fm);
-            #endif
-            MessageInterface::ShowMessage(
-               "      Forces in %s:\n", fm->GetName().c_str());
-            for (Integer i = 0; i < fm->GetNumForces(); ++i)
-            {
-               pm = fm->GetForce(i);
-               MessageInterface::ShowMessage(
-                   "      %15s   %s\n", pm->GetTypeName().c_str(),
-                   pm->GetName().c_str());
-             }
-         }
-      }
-   #endif
-}
-
+////------------------------------------------------------------------------------
+//// void AddTransientForce(StringArray *sats, ForceModel *p,
+////       PropagationStateManager *propMan)
+////------------------------------------------------------------------------------
+///**
+// * Passes transient forces into the ForceModel(s).
+// *
+// * @param sats The array of satellites used in the ForceModel.
+// * @param p    The current ForceModel that is receiving the forces.
+// * @param propMan PropagationStateManager for this PropSetup
+// */
+////------------------------------------------------------------------------------
+//void Propagate::AddTransientForce(StringArray *satnames, ODEModel *p,
+//      PropagationStateManager *propMan)
+//{
+//   #ifdef DEBUG_TRANSIENT_FORCES
+//   MessageInterface::ShowMessage
+//      ("Propagate::AddTransientForce() entered, ODEModel=<%p>,"
+//       " transientForces=<%p>\n", p, transientForces);
+//   #endif
+//
+//   // Find any transient force that is active and add it to the force model
+//   StringArray satsThatManeuver, formationSatsThatManeuver, formsThatManeuver;
+//   bool flagMultipleBurns = false;
+//
+//   for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
+//        i != transientForces->end(); ++i)
+//   {
+//      StringArray tfSats = (*i)->GetRefObjectNameArray(Gmat::SPACECRAFT);
+//
+//      // Loop through the spacecraft that go with the force model, and see if
+//      // they are in the spacecraft list for the current transient force
+//      for (StringArray::iterator current = satnames->begin();
+//           current != satnames->end(); ++current)
+//      {
+//         if (find(tfSats.begin(), tfSats.end(), *current) != tfSats.end())
+//         {
+//            #ifdef DEBUG_TRANSIENT_FORCES
+//            MessageInterface::ShowMessage
+//               ("   Adding transientForce <%p>'%s' to ODEModel\n", *i,
+//                (*i)->GetName().c_str());
+//            #endif
+////            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current)
+////                  == satsThatManeuver.end())
+//               p->AddForce(*i);
+////            else
+////               flagMultipleBurns = true;
+//            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current) == satsThatManeuver.end())
+//                  satsThatManeuver.push_back(*current);
+//            if ((*i)->DepletesMass())
+//            {
+//               propMan->SetProperty("MassFlow");
+////               propMan->SetProperty("MassFlow",
+////                     (*i)->GetRefObject(Gmat::SPACECRAFT, *current));
+//               #ifdef DEBUG_TRANSIENT_FORCES
+//                  MessageInterface::ShowMessage("   %s depletes mass\n",
+//                        (*i)->GetName().c_str());
+//               #endif
+//            }
+//            break;      // Avoid multiple adds
+//         }
+//         else
+//         {
+//            // Check to see if a Formation is masking the Spacecraft, and if so
+//            // whine and stop
+//            // Find the object that matches the current name
+//            GmatBase *obj;
+//            for (UnsignedInt i = 0; i < sats.size(); ++i)
+//            {
+//               if (sats[i]->GetName() == *current)
+//               {
+//                  obj = sats[i];
+//
+//                  #ifdef DEBUG_TRANSIENT_FORCES
+//                     MessageInterface::ShowMessage("Checking %s\n",
+//                           current->c_str());
+//                  #endif
+//
+//                  if (obj->IsOfType(Gmat::FORMATION))
+//                  {
+//                     StringArray mansats =
+//                           ((SpaceObject*)(obj))->GetManeuveringMembers();
+//
+//                     #ifdef DEBUG_TRANSIENT_FORCES
+//                        MessageInterface::ShowMessage("***It's a Formation "
+//                              "with %d maneuvering sats\n", mansats.size());
+//                     #endif
+//
+//                     for (UnsignedInt i = 0; i < mansats.size(); ++i)
+//                     {
+//                        #ifdef DEBUG_TRANSIENT_FORCES
+//                           MessageInterface::ShowMessage("   %d: %s is maneuvering\n",
+//                                 i, mansats[i].c_str());
+//                        #endif
+//                        if (find(tfSats.begin(), tfSats.end(), mansats[i]) != tfSats.end())
+//                        {
+//                           if (find(formationSatsThatManeuver.begin(),
+//                                 formationSatsThatManeuver.end(),
+//                                 mansats[i]) == formationSatsThatManeuver.end())
+//                              formationSatsThatManeuver.push_back(mansats[i]);
+//                           if (find(formsThatManeuver.begin(),
+//                                 formsThatManeuver.end(), obj->GetName()) ==
+//                                       formsThatManeuver.end())
+//                              formsThatManeuver.push_back(obj->GetName());
+//                        }
+//                     }
+//                  }
+//               }
+//            }
+//         }
+//      }
+//   }
+//
+//   #ifdef DEBUG_TRANSIENT_FORCES
+//      MessageInterface::ShowMessage("Found %d sats that maneuver (outside of "
+//            "formations):\n", satsThatManeuver.size());
+//      for (UnsignedInt i = 0; i < satsThatManeuver.size(); ++i)
+//         MessageInterface::ShowMessage("   %s\n", satsThatManeuver[i].c_str());
+//   #endif
+//
+//   if (flagMultipleBurns)
+//   {
+//      StringArray duplicates;
+//      for (StringArray::iterator name = satsThatManeuver.begin();
+//            name != satsThatManeuver.end(); ++name)
+//      {
+//         if (find(name+1, satsThatManeuver.end(), *name) !=
+//               satsThatManeuver.end())
+//         {
+//            if (find(duplicates.begin(), duplicates.end(), *name) ==
+//                  duplicates.end())
+//               duplicates.push_back(*name);
+//         }
+//      }
+//      std::string errmsg = "The Spacecraft [";
+//      for (UnsignedInt i = 0; i < duplicates.size(); ++i)
+//      {
+//         if (i != 0)
+//            errmsg += ", ";
+//         errmsg += duplicates[i];
+//      }
+//      if (duplicates.size() == 1)
+//         errmsg += "] has ";
+//      else
+//         errmsg += "] have ";
+//      errmsg += "more than one finite burn active, but GMAT only allows one "
+//         "finite burn on a given spacecraft.";
+//      throw CommandException(errmsg);
+//   }
+//
+//   if (formationSatsThatManeuver.size() > 0)
+//   {
+//      std::string whatToSay, formToSay;
+//      if (formationSatsThatManeuver.size() == 1)
+//         whatToSay = "a maneuvering Spacecraft named \"" +
+//                     formationSatsThatManeuver[0] + "\"";
+//      else
+//      {
+//         whatToSay = "maneuvering Spacecraft named ";
+//         for (UnsignedInt i = 0; i < formationSatsThatManeuver.size(); ++i)
+//         {
+//            if (i != 0)
+//            {
+//               if (formationSatsThatManeuver.size() > 2)
+//                  whatToSay += ", ";
+//               else
+//                  whatToSay += " ";
+//               if (i == formationSatsThatManeuver.size()-1)
+//                  whatToSay += "and ";
+//            }
+//            whatToSay += "\"" + formationSatsThatManeuver[i] + "\"";
+//         }
+//      }
+//
+//      if (formsThatManeuver.size() == 1)
+//         formToSay = "Formation \"" + formsThatManeuver[0] + "\" contains " +
+//         whatToSay;
+//      else
+//      {
+//         formToSay = "Formations ";
+//         for (UnsignedInt i = 0; i < formsThatManeuver.size(); ++i)
+//         {
+//            if (i != 0)
+//            {
+//               if (formsThatManeuver.size() > 2)
+//                  formToSay += ", ";
+//               else
+//                  formToSay += " ";
+//               if (i == formsThatManeuver.size()-1)
+//                  formToSay += "and ";
+//            }
+//            formToSay += "\"" + formsThatManeuver[i] + "\"";
+//         }
+//
+//         formToSay += " contain " + whatToSay;
+//      }
+//
+//      throw CommandException("The " + formToSay + ", but GMAT does not support "
+//            "finite burn maneuvers inside of Formation objects.");
+//   }
+//
+//   #ifdef DEBUG_TRANSIENT_FORCES
+//      ODEModel *fm;
+//      PhysicalModel *pm;
+//
+//      MessageInterface::ShowMessage(
+//         "Propagate::AddTransientForces completed; force details:\n");
+//      for (std::vector<PropSetup*>::iterator p = propagators.begin();
+//           p != propagators.end(); ++p)
+//      {
+//         fm = (*p)->GetODEModel();
+//         if (!fm)
+//            throw CommandException("ODEModel not set in PropSetup \"" +
+//                                   (*p)->GetName() + "\"");
+//         MessageInterface::ShowMessage(
+//            "   Forces in %s:\n", fm->GetName().c_str());
+//         for (Integer i = 0; i < fm->GetNumForces(); ++i)
+//         {
+//            pm = fm->GetForce(i);
+//            MessageInterface::ShowMessage(
+//               "      %15s   %s\n", pm->GetTypeName().c_str(),
+//               pm->GetName().c_str());
+//         }
+//      }
+//   #endif
+//}
 
 //------------------------------------------------------------------------------
-// void SetNames(const std::string& name, StringArray& owners,
-//               StringArray& elements)
+// MOVED TO PROPAGATIONENABLEDCOMMAND
 //------------------------------------------------------------------------------
-/**
- * Sets the parameter names used when publishing Spacecraft data.
- *
- * @param <name>     Name of the Spacecraft that is referenced.
- * @param <owners>   Array of published data identifiers.
- * @param <elements> Individual elements of the published data.
- */
-//------------------------------------------------------------------------------
-void Propagate::SetNames(const std::string& name, StringArray& owners,
-                         StringArray& elements)
-{
-   // Add satellite labels
-   for (Integer i = 0; i < 6; ++i)
-      owners.push_back(name);       // X, Y, Z, Vx, Vy, Vz
 
-   elements.push_back(name+".X");
-   elements.push_back(name+".Y");
-   elements.push_back(name+".Z");
-   elements.push_back(name+".Vx");
-   elements.push_back(name+".Vy");
-   elements.push_back(name+".Vz");
-}
+////------------------------------------------------------------------------------
+//// void ClearTransientForce()
+////------------------------------------------------------------------------------
+///**
+// * Removes transient forces from the ForceModel(s) after propagation.
+// */
+////------------------------------------------------------------------------------
+//void Propagate::ClearTransientForces()
+//{
+//   #ifdef DEBUG_TRANSIENT_FORCES
+//   MessageInterface::ShowMessage
+//      ("Propagate::ClearTransientForces() entered, prop.size()=%d\n",
+//       propagators.size());
+//   #endif
+//
+//   ODEModel *fm;
+//   PhysicalModel *pm;
+//
+//   // Loop through the forces in each force model, and remove transient ones
+//   for (std::vector<PropSetup*>::iterator p = propagators.begin();
+//        p != propagators.end(); ++p)
+//   {
+//      if ((*p)->GetPropagator()->UsesODEModel())
+//      {
+//         fm = (*p)->GetODEModel();
+//         if (!fm)
+//            throw CommandException("ForceModel not set in PropSetup \"" +
+//                                   (*p)->GetName() + "\"");
+//
+//         #ifdef DEBUG_TRANSIENT_FORCES
+//         MessageInterface::ShowMessage("   ODEModel=<%p>\n", fm);
+//         #endif
+//         for (Integer i = 0; i < fm->GetNumForces(); ++i)
+//         {
+//            pm = fm->GetForce(i);
+//            #ifdef DEBUG_TRANSIENT_FORCES
+//            MessageInterface::ShowMessage
+//               ("      Checking if pm<%p>'%s' is transient\n", pm, pm->GetName().c_str());
+//            #endif
+//            if (pm->IsTransient())
+//            {
+//               #ifdef DEBUG_TRANSIENT_FORCES
+//               MessageInterface::ShowMessage("   calling fm->DeleteForce() for %p\n", pm);
+//               #endif
+//               fm->DeleteForce(pm->GetName());
+//               --i;
+//            }
+//         }
+//      }
+//   }
+//
+//   #ifdef DEBUG_TRANSIENT_FORCES
+//      MessageInterface::ShowMessage(
+//         "Propagate::ClearTransientForces completed; force details:\n");
+//      for (std::vector<PropSetup*>::iterator p = propagators.begin();
+//           p != propagators.end(); ++p)
+//      {
+//         if ((*p)->GetPropagator()->UsesODEModel())
+//         {
+//            fm = (*p)->GetODEModel();
+//            if (!fm)
+//               throw CommandException("ForceModel not set in PropSetup \"" +
+//                                      (*p)->GetName() + "\"");
+//            #ifdef DEBUG_TRANSIENT_FORCES
+//            MessageInterface::ShowMessage("   ODEModel=<%p>\n", fm);
+//            #endif
+//            MessageInterface::ShowMessage(
+//               "      Forces in %s:\n", fm->GetName().c_str());
+//            for (Integer i = 0; i < fm->GetNumForces(); ++i)
+//            {
+//               pm = fm->GetForce(i);
+//               MessageInterface::ShowMessage(
+//                   "      %15s   %s\n", pm->GetTypeName().c_str(),
+//                   pm->GetName().c_str());
+//             }
+//         }
+//      }
+//   #endif
+//}
+
+//Moved to PropagationEnabledCommand for GMT-5101 fix (LOJ: 2015.05.14)
+// //------------------------------------------------------------------------------
+// // void SetNames(const std::string& name, StringArray& owners,
+// //               StringArray& elements)
+// //------------------------------------------------------------------------------
+// /**
+//  * Sets the parameter names used when publishing Spacecraft data.
+//  *
+//  * @param <name>     Name of the Spacecraft that is referenced.
+//  * @param <owners>   Array of published data identifiers.
+//  * @param <elements> Individual elements of the published data.
+//  */
+// //------------------------------------------------------------------------------
+// void Propagate::SetNames(const std::string& name, StringArray& owners,
+//                          StringArray& elements)
+// {
+//    // Add satellite labels
+//    for (Integer i = 0; i < 6; ++i)
+//       owners.push_back(name);       // X, Y, Z, Vx, Vy, Vz
+
+//    elements.push_back(name+".X");
+//    elements.push_back(name+".Y");
+//    elements.push_back(name+".Z");
+//    elements.push_back(name+".Vx");
+//    elements.push_back(name+".Vy");
+//    elements.push_back(name+".Vz");
+// }
 
 
 ////------------------------------------------------------------------------------

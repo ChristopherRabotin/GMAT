@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Darrel J. Conway
 // Created: 2004/11/08
@@ -20,8 +30,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef THRUSTER_HPP
-#define THRUSTER_HPP
+#ifndef Thruster_hpp
+#define Thruster_hpp
 
 #include "Hardware.hpp"
 #include "FuelTank.hpp"
@@ -38,17 +48,16 @@ class GMAT_API Thruster : public Hardware
 {
 public:
    
-   static const Integer COEFFICIENT_COUNT = 16;
    static const Integer AXES_COUNT = 4;
    
-   Thruster(std::string nomme);
+   Thruster(const std::string &typeStr, const std::string &nomme);
    virtual ~Thruster();
    Thruster(const Thruster& th);
    Thruster&            operator=(const Thruster& th);
    
-   // required method for all subclasses
-   virtual GmatBase*    Clone() const;
-   virtual void         Copy(const GmatBase* inst);
+   Real                 GetMassFlowRate();
+   Real                 GetThrustMagnitude();
+   Real                 GetIsp();
    
    // Parameter access methods - overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
@@ -73,6 +82,28 @@ public:
    virtual bool         GetBooleanParameter(const Integer id) const;
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value);
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
+   virtual Real         GetRealParameter(const std::string &label,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value,
+                                         const Integer index);
+
+   virtual const Rvector&
+                        GetRvectorParameter(const Integer id) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const Integer id,
+                                            const Rvector &value);
+   virtual const Rvector&
+                        GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const std::string &label,
+                                            const Rvector &value);
+
    
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const; 
@@ -105,7 +136,8 @@ public:
                                    const std::string &actionData = "");
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual bool         Initialize();
-   Real                 CalculateMassFlow();
+   virtual bool         SetPower(Real allocatedPower);
+   virtual Real         CalculateMassFlow() = 0;
    
 protected:
    /// Finite burn instances access thruster data directly
@@ -133,6 +165,8 @@ protected:
    std::string                j2000BodyName;
    /// Name of the Spacecraft that has thruster
    std::string                satName;
+   /// The power allocated to the thruster
+   Real                       power;
    /// Acceleration due to gravity, used to specify Isp in seconds
    Real                       gravityAccel;   
    /// Thrust duty cycle for this thruster
@@ -145,16 +179,14 @@ protected:
    Real                       temperatureRatio;
    /// Most recently calculated thrust
    Real                       thrust;
+   /// Most recently calculated applied thrust magnitude
+   Real                       appliedThrustMag;
    /// Most recently calculated specific impulse
    Real                       impulse;
    /// Most recently calculated mass flow rate
    Real                       mDot;
    /// Thrust direction projected into the inertial coordinate system
    Real                       inertialDirection[3];
-   /// Array of thrust coefficients
-   Real                       cCoefficients[COEFFICIENT_COUNT];
-   /// Array of specific impulse coefficients
-   Real                       kCoefficients[COEFFICIENT_COUNT];
    /// Decrement mass flag
    bool                       decrementMass;
    /// Flag used to turn thruster on or off
@@ -173,16 +205,15 @@ protected:
    StringArray                tankNames;
    /// The tanks
    std::vector<FuelTank *>    tanks;
+   /// The mix ratio for the tank draws
+   Rvector                    mixRatio;
+
    /// Temporary buffer used to get ref objects
    ObjectArray                tempArray;
    
    /// Available local axes labels
    static  StringArray        localAxesLabels;
-   /// C-coefficient units
-   static  StringArray        cCoefUnits;
-   /// K-coefficient units
-   static  StringArray        kCoefUnits;
-   
+
    /// Published parameters for thrusters
    enum
    {
@@ -194,13 +225,12 @@ protected:
       THRUST_SCALE_FACTOR,
       DECREMENT_MASS,
       TANK,
+      MIXRATIO,
       GRAVITATIONAL_ACCELERATION,
-      C1,    C2,    C3,    C4,    C5,    C6,    C7,    C8,    
-      C9,   C10,   C11,   C12,   C13,   C14,   C15,   C16, 
-      K1,    K2,    K3,    K4,    K5,    K6,    K7,    K8,    
-      K9,   K10,   K11,   K12,   K13,   K14,   K15,   K16,
-      C_UNITS,
-      K_UNITS,
+      THRUST,
+      APPLIED_THRUST_MAG,
+      ISP,
+      MASS_FLOW_RATE,
       ThrusterParamCount
    };
    
@@ -211,7 +241,7 @@ protected:
    static const Gmat::ParameterType
                         PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount];
    
-   bool                 CalculateThrustAndIsp();
+   virtual bool         CalculateThrustAndIsp() = 0;
    bool                 SetSpacecraft(Spacecraft *sat);
    
    CoordinateSystem*    CreateLocalCoordinateSystem();
@@ -223,4 +253,4 @@ protected:
    
 };
 
-#endif // THRUSTER_HPP
+#endif // Thruster_hpp

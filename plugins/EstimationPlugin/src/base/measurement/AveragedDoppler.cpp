@@ -1,12 +1,22 @@
-//$Id: AveragedDoppler.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: AveragedDoppler.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                         AveragedDoppler
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under FDSS
 // Task 28
@@ -24,6 +34,7 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "Transponder.hpp"          // For turnaround ratio
+#include "MeasurementException.hpp"
 
 //#define DEBUG_HARDWARE_DELAYS
 
@@ -35,13 +46,15 @@ const std::string
 AveragedDoppler::PARAMETER_TEXT[AveragedDopplerParamCount -
                                 PhysicalMeasurementParamCount] =
 {
-      "AveragingInterval",
+     "AveragingInterval",
+     "BuildInTurnAroundRatio",
 };
 
 const Gmat::ParameterType
 AveragedDoppler::PARAMETER_TYPE[AveragedDopplerParamCount -
                                 PhysicalMeasurementParamCount] =
 {
+      Gmat::REAL_TYPE,
       Gmat::REAL_TYPE,
 };
 
@@ -65,7 +78,8 @@ AveragedDoppler::AveragedDoppler(const std::string &type,
    PhysicalMeasurement        (type, withName),
    tm                         (GmatTimeConstants::MJD_OF_J2000),
    interval                   (1.0),  // 1 sec default interval
-   turnaround                 (1.1)
+   turnaround                 (1.1),
+   M2R                        (0.0)
 {
    objectTypeNames.push_back("AveragedDoppler");
    parameterCount = AveragedDopplerParamCount;
@@ -116,6 +130,7 @@ AveragedDoppler::AveragedDoppler(const AveragedDoppler & ad) :
    tm                         (ad.tm),
    interval                   (ad.interval),
    turnaround                 (ad.turnaround),
+   M2R                        (ad.M2R),
    uplinkLegS                 (ad.uplinkLegS),
    downlinkLegS               (ad.downlinkLegS),
    uplinkLegE                 (ad.uplinkLegE),
@@ -175,6 +190,7 @@ AveragedDoppler& AveragedDoppler::operator=(const AveragedDoppler& ad)
       t3R[1] = ad.t3R[1];
 
       turnaround = ad.turnaround;
+      M2R        = ad. M2R;
 
       uplinkLegS   = ad.uplinkLegS;
       downlinkLegS = ad.downlinkLegS;
@@ -220,6 +236,8 @@ std::string AveragedDoppler::GetParameterUnit(const Integer id) const
 {
    if (id == AveragingInterval)
       return "sec";
+   if (id == BuildInTurnAroundRatio)
+      return "";
    return PhysicalMeasurement::GetParameterUnit(id);
 }
 
@@ -286,6 +304,26 @@ std::string AveragedDoppler::GetParameterTypeString(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method is used to specify a parameter is read only or not.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return   true if parameter read only, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool AveragedDoppler::IsParameterReadOnly(const Integer id) const
+{
+   if (id == BuildInTurnAroundRatio)
+      return true;
+
+   return PhysicalMeasurement::IsParameterReadOnly(id);
+}
+
+
+//------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -300,6 +338,8 @@ Real AveragedDoppler::GetRealParameter(const Integer id) const
 {
    if (id == AveragingInterval)
       return interval;
+   if (id == BuildInTurnAroundRatio)
+      return M2R;
 
    return PhysicalMeasurement::GetRealParameter(id);
 }
@@ -324,6 +364,12 @@ Real AveragedDoppler::SetRealParameter(const Integer id, const Real value)
       if (value > 0.0)
          interval = value;
       return interval;
+   }
+   if (id == BuildInTurnAroundRatio)
+   {
+      if (value > 0.0)
+         M2R = value;
+      return M2R;
    }
 
    return PhysicalMeasurement::SetRealParameter(id, value);
@@ -744,6 +790,14 @@ bool AveragedDoppler::Initialize()
                   "and one other SpacePoint participant; cannot initialize\n");
          }
       }
+
+///// TBD: Should this always be done?
+      // Set options to run relativity and ET-TAI corrections: 
+      uplinkLegS.SetRelativityCorrection(useRelativityCorrection);
+      downlinkLegS.SetRelativityCorrection(useRelativityCorrection);
+      uplinkLegE.SetRelativityCorrection(useRelativityCorrection);
+      downlinkLegE.SetRelativityCorrection(useRelativityCorrection);
+
    }
 
    return retval;
@@ -793,6 +847,15 @@ void AveragedDoppler::InitializeMeasurement()
    index = downlinkLegE.GetParticipantIndex(participants[1]);
    downlinkLegE.AddCoordinateSystem(F2, index);// Participant 2 CS for the event
 
+   // Set solar system for uplinkLeg and downlinkLeg in order to calculate states of paticipants in SSB coordinate system
+   if (solarSystem == NULL)
+	   throw MeasurementException("Error in AveragedDoppler::InitializeMeasurement() due to solar system object is NULL.\n");
+
+   uplinkLegS.SetSolarSystem(solarSystem);
+   downlinkLegS.SetSolarSystem(solarSystem);
+   uplinkLegE.SetSolarSystem(solarSystem);
+   downlinkLegE.SetSolarSystem(solarSystem);
+
    SetupTimeIntervals();
 }
 
@@ -833,6 +896,8 @@ void AveragedDoppler::SetHardwareDelays(bool loadEvents)
       MessageInterface::ShowMessage("   t3e delay:     %.12lf\n", t3delay[1]);
       MessageInterface::ShowMessage("   t3e timetag:   %.12lf\n", t3E[1]);
    #endif
+
+   UpdateHardware();
 
    // Transmitter sits on the 1st participant
    #ifdef DEBUG_HARDWARE_DELAYS
@@ -968,8 +1033,10 @@ void AveragedDoppler::SetHardwareDelays(bool loadEvents)
 void AveragedDoppler::SetupTimeIntervals()
 {
    // Set 2 return epochs used as starting points in lighttime calcs
-   t3E[0] = -interval / 2.0;
-   t3E[1] =  interval / 2.0;
+//   t3E[0] = -interval / 2.0;
+//   t3E[1] =  interval / 2.0;
+   t3E[0] = -interval;							// made changes for requirement to set t3E of End path to be measurement time 
+   t3E[1] =  0.0;
 
    // Set the receive offsets for the downlink signals
    t3R[0] = t3E[0] - t3delay[0];

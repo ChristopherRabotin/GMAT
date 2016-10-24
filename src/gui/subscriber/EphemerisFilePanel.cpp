@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -19,10 +29,11 @@
 //------------------------------------------------------------------------------
 
 #include "EphemerisFilePanel.hpp"
-#include "MessageInterface.hpp"
-#include "bitmaps/OpenFolder.xpm"
+#include "EphemerisFile.hpp"       // for GetProperFileName()
 #include "TimeSystemConverter.hpp"
 #include "DateUtil.hpp"
+#include "MessageInterface.hpp"
+#include "bitmaps/OpenFolder.xpm"
 #include <wx/config.h>
 
 /// wxWidget event mappings for the panel
@@ -37,6 +48,7 @@ END_EVENT_TABLE()
 //#define DEBUG_BUILD_CONTROL
 //#define DEBUG_LOAD_DATA
 //#define DEBUG_SAVE_DATA
+//#define DEBUG_COMBOBOX
 
 //-----------------------------------------
 // public methods
@@ -71,7 +83,7 @@ EphemerisFilePanel::EphemerisFilePanel(wxWindow *parent, const wxString &name)
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "The object named \"%s\" does not exist\n",
-               name.c_str());
+               name.WX_TO_C_STRING);
    }
 }
 
@@ -126,7 +138,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("Spacecraft");
    wxStaticText * spacecraftStaticText =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Spacecraft"),
+      new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Spacecraft"),
             wxDefaultPosition, wxDefaultSize, 0 );
    spacecraftComboBox = (wxComboBox*)BuildControl(this, id);
    spacecraftComboBox->SetToolTip(pConfig->Read(_T("SpacecraftHint")));
@@ -135,7 +147,7 @@ void EphemerisFilePanel::Create()
    
 //   id = mObject->GetParameterID("StateType");
 //   wxStaticText * stateTypeStaticText =
-//      new wxStaticText(this, ID_TEXT, wxT("State T"GUI_ACCEL_KEY"ype"),
+//      new wxStaticText(this, ID_TEXT, wxString("State T" GUI_ACCEL_KEY "ype"),
 //            wxDefaultPosition, wxDefaultSize, 0 );
 //   stateTypeComboBox = (wxComboBox*) BuildControl(this, id);
 //   stateTypeComboBox->SetToolTip(pConfig->Read(_T("StateTypeHint")));
@@ -144,7 +156,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("CoordinateSystem");
    allCoordSystemStaticText =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Coordinate System"),
+      new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Coordinate System"),
             wxDefaultPosition, wxDefaultSize, 0 );
    // BuildControl creates two coordinate systems, one showing all coordiante systems
    // another showing coordinate system with MJ2000Eq axis only
@@ -155,7 +167,7 @@ void EphemerisFilePanel::Create()
    grid1->Add(allCoordSystemComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
    // Add onlyMj2000EqComboBox and hide it
    onlyMJ2000EqStaticText =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Coordinate System"),
+      new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Coordinate System"),
             wxDefaultPosition, wxDefaultSize, 0 );
    grid1->Add(onlyMJ2000EqStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid1->Add(onlyMj2000EqComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -177,7 +189,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("FileFormat");
    wxStaticText * fileFormatStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT("File For"GUI_ACCEL_KEY"mat"),
+      new  wxStaticText(this, ID_TEXT, wxString("File For" GUI_ACCEL_KEY "mat"),
             wxDefaultPosition, wxDefaultSize, 0 );
    fileFormatComboBox = (wxComboBox*) BuildControl(this, id);
    fileFormatComboBox->SetToolTip(pConfig->Read(_T("FileFormatHint")));
@@ -187,13 +199,13 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("Filename");
    wxStaticText * fileNameStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT("File "GUI_ACCEL_KEY"Name"),
+      new  wxStaticText(this, ID_TEXT, wxString("File " GUI_ACCEL_KEY "Name"),
             wxDefaultPosition, wxDefaultSize, 0 );
    fileNameTextCtrl = (wxTextCtrl*) BuildControl(this, id);
    fileNameTextCtrl->SetToolTip(pConfig->Read(_T("FilenameHint")));
    browseButton =
       new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    browseButton->SetToolTip(pConfig->Read(_T("BrowseEphemerisFilenameHint")));
    grid2->Add(fileNameStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid2->Add(fileNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
@@ -201,7 +213,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("Interpolator");
    wxStaticText * interpolatorStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT("Interpolato"GUI_ACCEL_KEY"r"),
+      new  wxStaticText(this, ID_TEXT, wxString("Interpolato" GUI_ACCEL_KEY "r"),
             wxDefaultPosition, wxDefaultSize, 0 );
    interpolatorComboBox = (wxComboBox*) BuildControl(this, id);
    interpolatorComboBox->SetToolTip(pConfig->Read(_T("InterpolatorHint")));
@@ -212,7 +224,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("InterpolationOrder");
    wxStaticText * interpolationOrderStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT("Interpolation "GUI_ACCEL_KEY
+      new  wxStaticText(this, ID_TEXT, wxString("Interpolation " GUI_ACCEL_KEY
             "Order"), wxDefaultPosition, wxDefaultSize, 0 );
    interpolationOrderTextCtrl = (wxTextCtrl*) BuildControl(this, id);
    interpolationOrderTextCtrl->SetToolTip(pConfig->Read(
@@ -224,7 +236,7 @@ void EphemerisFilePanel::Create()
    // StepSize
    id = mObject->GetParameterID("StepSize");
    allStepSizeStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("S"GUI_ACCEL_KEY"tep Size"),
+      new wxStaticText(this, ID_TEXT, wxString("S" GUI_ACCEL_KEY "tep Size"),
                        wxDefaultPosition, wxDefaultSize, 0 );
    allStepSizeComboBox = (wxComboBox*) BuildControl(this, id);
    allStepSizeComboBox->SetToolTip(pConfig->Read(_T("StepSizeHint")));
@@ -234,7 +246,7 @@ void EphemerisFilePanel::Create()
    // StepSize for code 500 takes real numbers only, so create TextCtrl,
    // add to sizer and hide
    numericStepSizeStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("S"GUI_ACCEL_KEY"tep Size"),
+      new wxStaticText(this, ID_TEXT, wxString("S" GUI_ACCEL_KEY "tep Size"),
                        wxDefaultPosition, wxDefaultSize, 0);
    numericStepSizeTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(180,-1),
@@ -255,7 +267,7 @@ void EphemerisFilePanel::Create()
    // OutputFormat
    id = mObject->GetParameterID("OutputFormat");
    wxStaticText *outputFormatStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("O"GUI_ACCEL_KEY"utput Format"),
+      new wxStaticText(this, ID_TEXT, wxString("O" GUI_ACCEL_KEY "utput Format"),
             wxDefaultPosition, wxDefaultSize, 0 );
    outputFormatComboBox = (wxComboBox*) BuildControl(this, id);
    outputFormatComboBox->SetToolTip(pConfig->Read(_T("OutputFormatHint")));
@@ -272,7 +284,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("EpochFormat");
    wxStaticText * epochFormatStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Epoch Format"),
+      new  wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Epoch Format"),
             wxDefaultPosition, wxDefaultSize, 0 );
    epochFormatComboBox = (wxComboBox*) BuildControl(this, id);
    epochFormatComboBox->SetToolTip(pConfig->Read(_T("EpochFormatHint")));
@@ -282,7 +294,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("InitialEpoch");
    wxStaticText * initialEpochStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Initial Epoch"),
+      new  wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Initial Epoch"),
             wxDefaultPosition, wxDefaultSize, 0 );
    initialEpochComboBox = (wxComboBox*) BuildControl(this, id);
    initialEpochComboBox->SetToolTip(pConfig->Read(_T("InitialEpochHint")));
@@ -291,7 +303,7 @@ void EphemerisFilePanel::Create()
    
    id = mObject->GetParameterID("FinalEpoch");
    wxStaticText * finalEpochStaticText =
-      new  wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Final Epoch"),
+      new  wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Final Epoch"),
             wxDefaultPosition, wxDefaultSize, 0 );
    finalEpochComboBox = (wxComboBox*) BuildControl(this, id);
    finalEpochComboBox->SetToolTip(pConfig->Read(_T("FinalEpochHint")));
@@ -338,16 +350,13 @@ void EphemerisFilePanel::LoadData()
       LoadControl("FinalEpoch");
       
       // Show all or only MJ2000Eq coordinate system
-      if (fileFormat == "CCSDS-OEM")
-         ShowAllCoordSystems(true);
-      else
-         ShowAllCoordSystems(false);
+      ShowCoordSystems(fileFormat);
       
       // Show or hide output format
-      if (fileFormat == "Code-500")
-         ShowCode500Items(true);
-      else
-         ShowCode500Items(false);
+      ShowCode500Items(fileFormat);
+      
+      // Show default interpolator; show or hide step size
+      ShowInterpolatorAndStepSize(fileFormat);
       
       outputFormat = outputFormatComboBox->GetValue();
    }
@@ -620,12 +629,12 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    
    if (label == "Spacecraft")
    {
-      valueString = wxT(mObject->GetStringParameter(label).c_str());
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
       spacecraftComboBox->SetValue(valueString);
    }
    else if (label == "CoordinateSystem")
    {
-      valueString = wxT(mObject->GetStringParameter(label).c_str());
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
 
       #ifdef DEBUG_LOAD_DATA
       MessageInterface::ShowMessage
@@ -649,7 +658,7 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
       fileFormatComboBox->SetValue(valueString);
       
       // Set interpolator based on the format, per bug 2219
-      valueString = wxT(mObject->GetStringParameter("Interpolator").c_str());
+      valueString = wxString(mObject->GetStringParameter("Interpolator").c_str());
       interpolatorComboBox->SetValue(valueString);
       // Use the order from the object as well
       valueInteger = mObject->GetIntegerParameter("InterpolationOrder");
@@ -657,7 +666,7 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    }
    else if (label == "Filename")
    {
-      valueString = wxT(mObject->GetStringParameter(label).c_str());
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
       fileNameTextCtrl->SetValue(valueString);
    }
    else if (label == "InterpolationOrder")
@@ -667,7 +676,7 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    }
    else if (label == "StepSize")
    {
-      valueString = wxT(mObject->GetStringParameter(label).c_str());
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
       Real stepSizeReal = ToReal(valueString);
       if (stepSizeReal != 0.0 && stepSizeReal != GmatRealConstants::REAL_UNDEFINED)
          numericStepSizeTextCtrl->SetValue(valueString);
@@ -677,23 +686,23 @@ void EphemerisFilePanel::LoadControl(const std::string &label)
    }
    else if (label == "OutputFormat")
    {
-      valueString = wxT(mObject->GetStringParameter(label).c_str());
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
       outputFormatComboBox->SetValue(valueString);
    }
    else if (label == "EpochFormat")
    {
-      valueString = wxT(mObject->GetStringParameter(label).c_str());
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
       epochFormatComboBox->SetValue(valueString);
       previousEpochFormat = epochFormatComboBox->GetValue();
    }
    else if (label == "InitialEpoch")
    {
-      valueString = wxT(mObject->GetStringParameter(label).c_str());
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
       initialEpochComboBox->SetValue(valueString);
    }
    else if (label == "FinalEpoch")
    {
-      valueString = wxT(mObject->GetStringParameter(label).c_str());
+      valueString = wxString(mObject->GetStringParameter(label).c_str());
       finalEpochComboBox->SetValue(valueString);
    }
    
@@ -742,7 +751,7 @@ void EphemerisFilePanel::SaveControl(const std::string &label)
    {
       // Added check for fileFormat since only coordinate system with MJ2000Eq axis
       // should be shown for format other than CCSDS-OEM (for GMT-4452 fix - LOJ: 2014.04.01)
-      if (fileFormat == "CCSDS-OEM")
+      if (fileFormat == "CCSDS-OEM" || fileFormat == "STK-TimePosVel")
          valueString = allCoordSystemComboBox->GetValue();
       else
          valueString = onlyMj2000EqComboBox->GetValue();
@@ -838,33 +847,33 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
       wxString newFileFormat = fileFormatComboBox->GetValue();
       #ifdef DEBUG_COMBOBOX
       MessageInterface::ShowMessage
-         ("fileFormat=%s, newFileFormat=%s\n", fileFormat.c_str(), newFileFormat.c_str());
+         ("fileFormat=%s, newFileFormat=%s\n", fileFormat.WX_TO_C_STRING,
+          newFileFormat.WX_TO_C_STRING);
       #endif
       if (fileFormat != newFileFormat)
       {
          fileFormat = newFileFormat;
-         if (newFileFormat == "SPK")
-         {
-            interpolatorComboBox->SetValue("Hermite");
-            allStepSizeComboBox->Enable(false);
-         }
-         else if (newFileFormat == "CCSDS-OEM" || newFileFormat == "Code-500")
-         {
-            interpolatorComboBox->SetValue("Lagrange");
-            allStepSizeComboBox->Enable(true);
-         }
+         
+         // Show proper file extension
+         std::string fileName = fileNameTextCtrl->GetValue().WX_TO_STD_STRING;
+         std::string stdFileFormat = fileFormat.WX_TO_STD_STRING;
+         std::string properFileName =
+            ((EphemerisFile*)mObject)->GetProperFileName(fileName, stdFileFormat, false);
+         #ifdef DEBUG_COMBOBOX
+         MessageInterface::ShowMessage
+            ("fileName='%s', stdFileFormat='%s', properFileName='%s'\n", fileName.c_str(),
+             stdFileFormat.c_str(), properFileName.c_str());
+         #endif
+         fileNameTextCtrl->SetValue(wxString(properFileName));
          
          // Show proper coordinate systems based on the format
-         if (newFileFormat == "CCSDS-OEM")
-            ShowAllCoordSystems(true);
-         else
-            ShowAllCoordSystems(false);
+         ShowCoordSystems(fileFormat);
          
          // Show proper fields for Code500 format
-         if (newFileFormat == "Code-500")
-            ShowCode500Items(true);
-         else
-            ShowCode500Items(false);
+         ShowCode500Items(fileFormat);
+         
+         // Show default interpolator; show or hide step size
+         ShowInterpolatorAndStepSize(fileFormat);
          
          EnableUpdate(true);
       }
@@ -918,7 +927,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
 
          try
          {
-            std::string prevFmt = previousEpochFormat.c_str();
+            std::string prevFmt = previousEpochFormat.WX_TO_STD_STRING;
             TimeConverterUtil::ValidateTimeFormat(prevFmt,oldEpoch, true);
 
             if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
@@ -962,7 +971,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
 
          try
          {
-            std::string prevFmt = previousEpochFormat.c_str();
+            std::string prevFmt = previousEpochFormat.WX_TO_STD_STRING;
             TimeConverterUtil::ValidateTimeFormat(prevFmt,oldEpoch, true);
 
             if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
@@ -1076,7 +1085,8 @@ void EphemerisFilePanel::OnBrowse(wxCommandEvent &event)
       
       fileDialog = new wxFileDialog(this, caption, 
                                     defaultDir, defaultFile, 
-                                    wildcard, wxOPEN); 
+                                    wildcard,
+                                    gmatFD_OPEN);
    }
    else
    {
@@ -1099,20 +1109,24 @@ void EphemerisFilePanel::OnBrowse(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void ShowAllCoordSystems(bool show)
+// void ShowCoordSystems(const wxString &fileType)
 //------------------------------------------------------------------------------
-void EphemerisFilePanel::ShowAllCoordSystems(bool show)
+void EphemerisFilePanel::ShowCoordSystems(const wxString &fileType)
 {
+   bool showAll = false;
+   if (fileType == "CCSDS-OEM" || fileType == "STK-TimePosVel")
+      showAll = true;
+   
    #ifdef DEBUG_CS
    MessageInterface::ShowMessage
-      ("EphemerisFilePanel::ShowAllCoordSystems() entered, showAll=%d, fileFormat='%s'\n",
-       show, fileFormat.c_str());
+      ("EphemerisFilePanel::ShowCoordSystems() entered, showAll=%d, fileType='%s'\n",
+       showAll, fileType.c_str());
    #endif
    
-   grid1->Show(allCoordSystemStaticText, show);
-   grid1->Show(allCoordSystemComboBox, show);
-   grid1->Show(onlyMJ2000EqStaticText, !show);
-   grid1->Show(onlyMj2000EqComboBox, !show);
+   grid1->Show(allCoordSystemStaticText, showAll);
+   grid1->Show(allCoordSystemComboBox, showAll);
+   grid1->Show(onlyMJ2000EqStaticText, !showAll);
+   grid1->Show(onlyMj2000EqComboBox, !showAll);
    
    // Commented out for GMT-4452 fix (LOJ: 2014.04.01)
    #if 0
@@ -1131,16 +1145,20 @@ void EphemerisFilePanel::ShowAllCoordSystems(bool show)
    
    #ifdef DEBUG_CS
    MessageInterface::ShowMessage
-      ("EphemerisFilePanel::ShowAllCoordSystems() leaving, showAll=%d, fileFormat='%s'\n",
+      ("EphemerisFilePanel::ShowCoordSystems() leaving, showAll=%d, fileFormat='%s'\n",
        show, fileFormat.c_str());
    #endif
 }
 
 //------------------------------------------------------------------------------
-// void ShowCode500Items(bool show)
+// void ShowCode500Items(const wxString &fileType)
 //------------------------------------------------------------------------------
-void EphemerisFilePanel::ShowCode500Items(bool show)
+void EphemerisFilePanel::ShowCode500Items(const wxString &fileType)
 {
+   bool show = false;
+   if (fileType == "Code-500")
+      show = true;
+   
    // Show or hide all step size
    // Show or hide numeric only step size
    grid2->Show(allStepSizeStaticText, !show);
@@ -1158,5 +1176,23 @@ void EphemerisFilePanel::ShowCode500Items(bool show)
    // Enable or disable output format
    outputFormatComboBox->Enable(show);
    theMiddleSizer->Layout();
+}
+
+//------------------------------------------------------------------------------
+// void ShowInterpolatorAndStepSize(const wxString &fileType)
+//------------------------------------------------------------------------------
+void EphemerisFilePanel::ShowInterpolatorAndStepSize(const wxString &fileType)
+{
+   if (fileType == "SPK")
+   {
+      interpolatorComboBox->SetValue("Hermite");
+      allStepSizeComboBox->Enable(false);
+   }
+   else if (fileType == "CCSDS-OEM" || fileType == "Code-500" ||
+            fileType == "STK-TimePosVel")
+   {
+      interpolatorComboBox->SetValue("Lagrange");
+      allStepSizeComboBox->Enable(true);
+   }
 }
 

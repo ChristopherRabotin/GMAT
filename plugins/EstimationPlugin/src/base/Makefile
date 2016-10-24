@@ -1,4 +1,4 @@
-# $Id: Makefile 1343 2011-03-31 18:47:39Z wshoan@NDC $
+# $Id: Makefile 1343 2011-03-31 18:47:39Z  $
 # Makefile for GMAT's OD Plugin
 # This is the base level makefile 
 #
@@ -20,13 +20,13 @@ ifeq ($(PLATFORM), mac)
 SHARED_EXTENSION = .dylib
 SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup \
                    -L$(GMAT_Code_Location)/base/$(GMAT_LIB_DIR) -l$(BASE_LIBRARY) \
-                    $(MAC_CPP_FLAGS) $(ARCHITECTURE_FLAGS) $(LINK_FLAGS)
+                    $(MAC_CPP_FLAGS) $(ARCHITECTURE_FLAGS) $(LINK_FLAGS) -lxerces-c-3.1
                    
-# -reexport-lGmatBaseNoMatlab -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup
+# -reexport-lGmatBaseNoMatlab -dylib -dynamiclib -Wl -undefined dynamic_lookup
 
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared
+SHARED_LIB_FLAGS = -shared $(LINK_FLAGS) -lxerces-c-3.1
 # No longer in gcc 4.6:  --out-implib
 endif
 
@@ -41,13 +41,22 @@ TARGET = ../../$(GMAT_LIB_DIR)/libGmatEstimation$(SHARED_EXTENSION)
 
 
 ifeq ($(USE_DATAFILE_PLUGIN), 0)
-DATAFILE_INCLUDES = -Imeasurementfile
+DATAFILE_INCLUDES = -Imeasurementfile \
+                    -ItdmReader
 
 DATAFILE_OBJECTS = measurementfile/B3_obtype.o \
                    measurementfile/DataFile.o \
                    measurementfile/ObservationData.o \
                    measurementfile/ObType.o \
                    measurementfile/GmatObType.o \
+                   measurementfile/GmatData.o \
+                   measurementfile/GmatODType.o \
+                   measurementfile/GmatODDopplerType.o \
+                   measurementfile/RampTableData.o \
+                   measurementfile/RampTableType.o \
+                   tdmReader/TdmErrorHandler.o \
+                   tdmReader/TdmObType.o \
+                   tdmReader/TdmReadWriter.o \
                    factory/DataFileFactory.o \
                    factory/ObTypeFactory.o
 else
@@ -63,12 +72,14 @@ endif
 
 ifeq ($(INCLUDE_IONOSPHERE), 1)
 IONOSPHERE_C_OBJECTS = \
-	measurement/Ionosphere/cira.o \
-	measurement/Ionosphere/igrf.o \
-	measurement/Ionosphere/iridreg.o \
-	measurement/Ionosphere/irifun.o \
-	measurement/Ionosphere/iritec.o \
-	measurement/Ionosphere/irisub.o
+#	measurement/Ionosphere/cira.o \
+#	measurement/Ionosphere/igrf.o \
+#	measurement/Ionosphere/iridreg.o \
+#	measurement/Ionosphere/irifun.o \
+#	measurement/Ionosphere/iritec.o \
+#	measurement/Ionosphere/irisub.o \
+#	measurement/Ionosphere/loadfiles.o
+	measurement/Ionosphere/iri2007.o
 IONOSPHERE_CPP_OBJECTS = \
 	measurement/Ionosphere/Ionosphere.o 
 else
@@ -83,21 +94,30 @@ prep:
 	rm -rf $(TARGET)
 
 HEADERS = -Iinclude \
+          -Iadapter \
           -Icommand \
+          -Idatafilter \
+          -Ierrormodel \
           -Iestimator \
           -Ievent \
           -Ifactory \
           -Ihardware \
           -Iplugin \
+          -Ipropagator \
           -Imeasurement \
           -Imeasurement/Ionosphere \
           -Imeasurement/Troposphere \
+          -Imeasurementmodel \
+          -Ireporter \
+          -Isignal \
+          -Itrackingfile \
           -Itrackingsystem \
           $(DATAFILE_INCLUDES) \
           -I$(GMAT_Code_Location)/base/include \
           -I$(GMAT_Code_Location)/base/foundation \
           -I$(GMAT_Code_Location)/base/event \
           -I$(GMAT_Code_Location)/base/executive \
+          -I$(GMAT_Code_Location)/base/asset \
           -I$(GMAT_Code_Location)/base/attitude \
           -I$(GMAT_Code_Location)/base/hardware \
           -I$(GMAT_Code_Location)/base/spacecraft \
@@ -139,8 +159,20 @@ C_OBJECTS = \
 
 CPP_OBJECTS = \
     plugin/GmatPluginFunctions.o \
+    adapter/TrackingDataAdapter.o \
+    adapter/RangeAdapterKm.o \
+    adapter/RangeRateAdapterKps.o \
+    adapter/PointRangeRateAdapterKps.o \
+    adapter/DSNRangeAdapter.o \
+    adapter/DopplerAdapter.o \
+    adapter/GNDopplerAdapter.o \
+    adapter/TDRSDopplerAdapter.o \
     command/RunEstimator.o \
     command/RunSimulator.o \
+    datafilter/DataFilter.o \
+    datafilter/StatisticAcceptFilter.o \
+    datafilter/StatisticRejectFilter.o \
+    errormodel/ErrorModel.o \
     estimator/Estimator.o \
     estimator/BatchEstimator.o \
     estimator/BatchEstimatorInv.o \
@@ -156,12 +188,15 @@ CPP_OBJECTS = \
     event/EventManager.o \
     event/LightTimeCorrection.o \
     event/EstimationRootFinder.o \
+    factory/ErrorModelFactory.o \
     factory/EstimationCommandFactory.o \
+    factory/EstimationDataFilterFactory.o \
     factory/EstimatorFactory.o \
     factory/EventFactory.o \
     factory/EstimatorHardwareFactory.o \
     factory/MeasurementFactory.o \
     factory/MeasurementModelFactory.o \
+    factory/NavPropagatorFactory.o \
     factory/TrackingDataFactory.o \
     factory/TrackingSystemFactory.o \
     hardware/Sensor.o \
@@ -171,11 +206,11 @@ CPP_OBJECTS = \
     hardware/Antenna.o \
     hardware/Receiver.o \
     hardware/Transponder.o \
-    measurementfile/DataFileAdapter.o \
     measurement/CoreMeasurement.o \
     measurement/MediaCorrection.o \
     measurement/MeasurementData.o \
     measurement/MeasurementManager.o \
+    measurement/MeasurementModelBase.o \
     measurement/MeasurementModel.o \
     measurement/PhysicalMeasurement.o \
     measurement/SnTwoWayRange.o \
@@ -188,14 +223,26 @@ CPP_OBJECTS = \
     measurement/USNTwoWayRange.o \
     measurement/OpticalAngles.o \
     measurement/OpticalAzEl.o \
+    measurement/RandomNumber.o \
     measurement/Troposphere/Troposphere.o \
     $(IONOSPHERE_CPP_OBJECTS) \
     $(DATAFILE_OBJECTS) \
+    measurementmodel/MeasureModel.o \
+    propagator/RungeKutta4.o \
+    reporter/ProgressReporter.o \
+    signal/SignalBase.o \
+    signal/SignalData.o \
+    signal/PhysicalSignal.o \
+    trackingfile/TFSMagicNumbers.o \
+    trackingfile/TrackingFileSet.o \
     trackingsystem/TrackingSystem.o \
     trackingsystem/DSNTrackingSystem.o \
     trackingsystem/OpticalTrackingSystem.o \
     trackingsystem/TDRSSTrackingSystem.o \
     trackingsystem/USNTrackingSystem.o
+
+
+#    measurementfile/DataFileAdapter.o \
 
 ifeq ($(PLATFORM), mac)
 $(TARGET) : $(C_OBJECTS) $(CPP_OBJECTS)

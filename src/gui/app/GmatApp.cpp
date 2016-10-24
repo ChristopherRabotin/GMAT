@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -35,17 +45,26 @@
 #include <wx/splash.h>
 #include <wx/image.h>
 #include <wx/config.h>
+#include <wx/log.h>
 
 #include "MessageInterface.hpp"
 #include "PlotInterface.hpp"
+#include "ListenerManagerInterface.hpp"
+#include "GuiListenerManager.hpp"
 #include "GuiMessageReceiver.hpp"
 #include "GuiPlotReceiver.hpp"
 #include "GuiInterpreter.hpp"
 #include "FileUtil.hpp"
 #include "StringUtil.hpp"          // for ToIntegerArray()
 
+// Libpng-1.6 is more stringent about checking ICC profiles than previous versions.
+// You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
+// For now just ignore warning (LOJ: 2014.09.23)
+#define __IGNORE_PNG_WARNING__
+
 //#define DEBUG_GMATAPP
 //#define DEBUG_CMD_LINE
+
 
 // In single window mode, don't have any child windows; use
 // main window.
@@ -69,13 +88,16 @@ GmatApp::GmatApp()
    
    GuiPlotReceiver *thePlotReceiver = GuiPlotReceiver::Instance();
    PlotInterface::SetPlotReceiver(thePlotReceiver);
-   
-   theModerator = (Moderator *)NULL;
-   scriptToRun = "";
-   showMainFrame = true;
-   buildScript = false;
-   runScript = false;
-   runBatch = false;
+
+   GuiListenerManager *theListenerManager = GuiListenerManager::Instance();
+   ListenerManagerInterface::SetListenerManager(theListenerManager);
+
+   theModerator      = (Moderator *)NULL;
+   scriptToRun       = "";
+   showMainFrame     = true;
+   buildScript       = false;
+   runScript         = false;
+   runBatch          = false;
    startMatlabServer = false;
 }
 
@@ -105,12 +127,19 @@ bool GmatApp::OnInit()
    
    try
    {
+      // The only bin directory is set in the FileManager constructor
       GmatAppData *gmatAppData = GmatAppData::Instance();
       FileManager *fm = FileManager::Instance();
       std::string startupFile = fm->GetFullStartupFilePath();
       
-      // continue work on this (loj: 2008.12.04)
-      //@todo: add all files contains gmat_startup_file in
+      #ifdef DEBUG_GMATAPP
+      MessageInterface::ShowMessage
+         ("GmatApp::OnInit() Before Moderator initialization, startupFile = '%s'\n",
+          startupFile.c_str());
+      #endif
+      
+      // Continue work on this (loj: 2008.12.04)
+      //@todo: Add all files contains gmat_startup_file in
       // startup up directory, and show user to select one
       //---------------------------------------------------------
       #ifdef __GET_STARTUP_FILE_FROM_USER__
@@ -140,13 +169,19 @@ bool GmatApp::OnInit()
       #endif
       //---------------------------------------------------------
       
-      // create the Moderator - GMAT executive
+      // Create the Moderator - GMAT executive
       theModerator = Moderator::Instance();
       
-      // initialize the moderator
-      // save current working directory... moderator can change it
+      // Initialize the Moderator.
+      // The Moderator passes startup file to FileManger to read.
+      // Save current working directory... Moderator can change it
       // but we need it when reading command line arguments
-//      std::string cur_dir = GmatFileUtil::GetWorkingDirectory();
+      std::string currDirBeforeInit = fm->GetCurrentWorkingDirectory();
+      #ifdef DEBUG_GMATAPP
+      MessageInterface::ShowMessage
+         ("   curr dir before Moderator init = '%s'\n", currDirBeforeInit.c_str());
+      #endif
+      
       if (theModerator->Initialize(startupFile, true))
       {
          GuiInterpreter *guiInterp = GuiInterpreter::Instance();
@@ -161,6 +196,9 @@ bool GmatApp::OnInit()
          // set default size
          wxSize size = wxSize(800, 600);
          wxPoint position = wxDefaultPosition;
+         #ifdef __WXMAC__
+         position = wxPoint(0,25); // put the main frame in the upper left corner
+         #endif
          
          // for Windows
          #ifdef __WXMSW__
@@ -216,9 +254,8 @@ bool GmatApp::OnInit()
                size = wxSize(windowW, windowH);
             }
          }
-         
          #endif
-
+         // endif for Windows
          
          // The code above broke the Linux scaling.  This is a temporary hack to 
          // repair it.  PLEASE don't use UNIX macros to detect the Mac code!!!
@@ -233,32 +270,53 @@ bool GmatApp::OnInit()
          // Set icon file from the startup file
          gmatAppData->SetIconFile();
          
-//         std::string wd = GmatFileUtil::GetWorkingDirectory();
-//         GmatFileUtil::SetWorkingDirectory(cur_dir);
-         // save current working directory... moderator may have changed it in
-         // ReadStartupFile
-         // but we need old one when reading command line arguments
-         bool pclo = ProcessCommandLineOptions();
-//         GmatFileUtil::SetWorkingDirectory(wd);
-//         if (buildScript && (!GmatFileUtil::DoesFileExist(scriptToRun)) &&
-//             (GmatFileUtil::DoesFileExist(cur_dir+'/'+scriptToRun)))
-//            scriptToRun = cur_dir+'/'+scriptToRun;
+         std::string currDirAfterInit = fm->GetCurrentWorkingDirectory();
+         #ifdef DEBUG_GMATAPP
+         MessageInterface::ShowMessage
+            ("   curr dir after  Moderator init = '%s'\n", currDirAfterInit.c_str());
+         #endif
          
-//         if (!pclo)
-         if (!ProcessCommandLineOptions())
+         fm->SetCurrentWorkingDirectory(currDirBeforeInit);
+         
+         // Save current working directory... Moderator may have changed it in
+         // ReadStartupFile, but we need old one when reading command line arguments
+         
+         // Process command line options
+         bool pclo = ProcessCommandLineOptions();
+         
+         fm->SetCurrentWorkingDirectory(currDirAfterInit);
+         
+         // Build full path script if it has no path
+         if (GmatFileUtil::HasNoPath(scriptToRun))
+             scriptToRun = currDirBeforeInit + fm->GetPathSeparator() + scriptToRun;
+         
+         #ifdef DEBUG_GMATAPP
+         MessageInterface::ShowMessage
+            ("   After processing command line options...\n   Checking full path "
+             "for script to load...\n   scriptToRun = <%s>\n", scriptToRun.c_str());
+         #endif
+         
+         if (!pclo)
             return false;
          
          if (!showMainFrame)
             return false;
          
+         #ifdef __IGNORE_PNG_WARNING__
+         wxLogLevel logLevel = wxLog::GetLogLevel();
+         wxLog::SetLogLevel(0);
+         #endif
          
          if (GmatGlobal::Instance()->GetGuiMode() != GmatGlobal::MINIMIZED_GUI)
-         {
+         {            
             // Initializes all available image handlers.
             ::wxInitAllImageHandlers();
             
+            // Changed to use FileManager::FindPath() (LOJ: 2014.06.26)
             //show the splash screen
-            wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
+            //wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
+            wxString splashFile = fm->FindPath("", "SPLASH_FILE", true, false, true).c_str();
+            
             if (GmatFileUtil::DoesFileExist(splashFile.c_str()))
             {
                std::string ext = GmatFileUtil::ParseFileExtension(splashFile.c_str());
@@ -282,9 +340,10 @@ bool GmatApp::OnInit()
                else
                {
                   MessageInterface::ShowMessage
-                    ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
+                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.WX_TO_C_STRING);
+//                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
                }
-                  // Changed to time out in 4 sec (LOJ: 2009.10.07)
+               // Changed to time out in 4 sec (LOJ: 2009.10.07)
                if (bitmap != NULL)
                {
                   long splashStyle;
@@ -304,17 +363,25 @@ bool GmatApp::OnInit()
             else
             {
                MessageInterface::ShowMessage
-                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
+                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.WX_TO_C_STRING);
             }
          }
          
          wxYield();
+
+         #ifdef DEBUG_GMATAPP
+         MessageInterface::ShowMessage("   Creating GmatMainFrame...\n");
+         #endif
          
          theMainFrame =
             new GmatMainFrame((wxFrame *)NULL, -1,
                               _T("GMAT - General Mission Analysis Tool"),
                               position, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+         
+         #ifdef __IGNORE_PNG_WARNING__
+         wxLog::SetLogLevel(logLevel);
+         #endif
          
          WriteMessage("GMAT GUI successfully launched.\n", "");
          
@@ -356,6 +423,7 @@ bool GmatApp::OnInit()
             theMainFrame->ManageMissionTree();
          }
          
+         // Load or load and run script
          #ifdef DEBUG_CMD_LINE
          MessageInterface::ShowMessage
             ("  buildScript=%d, runScript=%d\n", buildScript, runScript);
@@ -512,7 +580,7 @@ void GmatApp::OnAssertFailure(const wxChar *file, int line, const wxChar *func,
 bool GmatApp::ProcessCommandLineOptions()
 {
    #ifdef DEBUG_CMD_LINE
-   MessageInterface::PutMessage("GmatApp::ProcessCommandLineOptions() entered\n");
+   MessageInterface::PutMessage("\nGmatApp::ProcessCommandLineOptions() entered\n");
    #endif
    
    bool retval = true;
@@ -542,8 +610,9 @@ bool GmatApp::ProcessCommandLineOptions()
          "-x, \t--exit        \t\tExit GMAT after running the specified script\n"
          "    \t              \t\t[has no effect if no script is specified]\n";
    
-   wxString commandLineOptions = wxT(gmatHelp.c_str());
-
+   //wxString commandLineOptions = wxT(gmatHelp.c_str());
+   wxString commandLineOptions = wxString(gmatHelp.c_str());
+   
    #ifdef DEBUG_CMD_LINE
    MessageInterface::PutMessage("argc = %d\n", argc);
    #endif
@@ -553,7 +622,12 @@ bool GmatApp::ProcessCommandLineOptions()
    {
       for (int i = 1; i < argc; ++i)
       {
+         #if wxCHECK_VERSION(3, 0, 0)
+         std::string arg = argv[i].WX_TO_STD_STRING;
+         #else
          std::string arg = argv[i];
+         #endif
+         
          #ifdef DEBUG_CMD_LINE
          MessageInterface::PutMessage("arg = %s\n", arg.c_str());
          #endif
@@ -608,9 +682,9 @@ bool GmatApp::ProcessCommandLineOptions()
             if (find(commands.begin(), commands.end(), "SendMessage") == commands.end())
             {
                wxBusyCursor bc;
-               wxLogError(wxT("GMAT was started as a NITS client, but the "
+               wxLogError("GMAT was started as a NITS client, but the "
                   "NITS plugin was not loaded.\n"
-                  "The error occurred during the initialization.  GMAT will exit."));
+                  "The error occurred during the initialization.  GMAT will exit.");
                wxLog::FlushActive();
                retval = false;
             }
@@ -645,9 +719,13 @@ bool GmatApp::ProcessCommandLineOptions()
             bool isArgValid = false;
             // Remove single quotes before checking
             std::string tempfile = GmatStringUtil::Replace(arg, "'", "");
+            std::string currpath = GmatFileUtil::GetCurrentWorkingDirectory();
+            std::string pathsep  = GmatFileUtil::GetPathSeparator();
             
             #ifdef DEBUG_CMD_LINE
-            MessageInterface::PutMessage("tempfile=<%s>\n", tempfile.c_str());
+            MessageInterface::PutMessage("tempfile = <%s>\n", tempfile.c_str());
+            MessageInterface::PutMessage("currpath = <%s>\n", currpath.c_str());
+            MessageInterface::PutMessage("pathsep  = <%s>\n", pathsep.c_str());
             #endif
             
             // Check for file type association with GMAT on Windows
@@ -659,43 +737,76 @@ bool GmatApp::ProcessCommandLineOptions()
             //#ifdef __WIN32__
             if (GmatFileUtil::DoesFileExist(tempfile))
             {
+               #ifdef DEBUG_CMD_LINE
+               MessageInterface::PutMessage
+                  ("The script file <%s> found, so build full path if needed\n", tempfile.c_str());
+               #endif
+               
                // Set this as script to run
-               scriptToRun = tempfile;
+               // Since it looks in the current directory, build full path script name if needed
+               if (GmatFileUtil::IsPathAbsolute(tempfile))
+               {
+                  #ifdef DEBUG_CMD_LINE
+                  MessageInterface::PutMessage("   It has absolute path\n");
+                  #endif
+                  scriptToRun = tempfile;
+               }
+               else
+               {
+                  #ifdef DEBUG_CMD_LINE
+                  MessageInterface::PutMessage("   It has no absolute path\n");
+                  #endif
+                  scriptToRun = currpath + pathsep + tempfile;
+               }
+               
                buildScript = true;
                isArgValid = true;
                #ifdef DEBUG_CMD_LINE
-               MessageInterface::PutMessage("scriptToRun=<%s>\n", scriptToRun.c_str());
+               MessageInterface::PutMessage("scriptToRun = <%s>\n", scriptToRun.c_str());
                #endif
             }
-//			else
-//			{
-//               #ifdef debug_cmd_line
-//               messageinterface::putmessage("file not found, checking working directory=<%s>\n", tempfile.c_str());
-//               #endif
-//
-//			   std::string currpath = gmatfileutil::getworkingdirectory();
-//			   std::string pathsep  = gmatfileutil::getpathseparator();
-//            tempfile = currpath + pathsep + tempfile;
-//            #ifdef debug_cmd_line
-//            messageinterface::putmessage("new file name=<%s>\n", tempfile.c_str());
-//            #endif
-//			   if (gmatfileutil::doesfileexist(tempfile))
-//			   {
-//				  // set current directory to new path
-//				  gmatfileutil::setworkingdirectory(tempfile);
-//				  // set this as script to run
-//				  scripttorun = tempfile;
-//				  buildscript = true;
-//				  isargvalid = true;
-//			   }
-//			}
+            else
+            {
+               #ifdef DEBUG_CMD_LINE
+               MessageInterface::PutMessage
+                  ("The script file '%s' not found, so checking current directory '%s'\n",
+                   tempfile.c_str(), currpath.c_str());
+               #endif
+               
+               // Set this as script to run
+               // Since it looks in the current directory, build full path script name if needed
+               if (!GmatFileUtil::IsPathAbsolute(tempfile))
+               {
+                  #ifdef DEBUG_CMD_LINE
+                  MessageInterface::PutMessage("   It has no absolute path, so build full path...\n");
+                  #endif
+                  // Set to script name so that it can be displayed in the error message
+                  scriptToRun = currpath + pathsep + tempfile;
+               }
+               
+               #ifdef DEBUG_CMD_LINE
+               MessageInterface::PutMessage("new file name = <%s>\n", scriptToRun.c_str());
+               #endif
+               if (GmatFileUtil::DoesFileExist(scriptToRun))
+               {
+                  // set current directory to new path
+                  GmatFileUtil::SetCurrentWorkingDirectory(scriptToRun);
+                  buildScript = true;
+                  isArgValid = true;
+               }
+               else
+               {
+                  MessageInterface::ShowMessage
+                     ("*** Cannot find the script file '%s'\n", scriptToRun.c_str());
+               }
+            }
             //#endif
             //@todo implement this for mac and linux?
             
             if (!isArgValid)
             {
-               MessageInterface::ShowMessage("The option \"%s\" is not valid.\n", arg.c_str());
-               MessageInterface::ShowMessage(commandLineOptions.c_str());
+               MessageInterface::PutMessage("The option \"%s\" is not valid.\n", arg.c_str());
+               MessageInterface::PutMessage(commandLineOptions.c_str());
                break;
             }
          }
@@ -704,7 +815,8 @@ bool GmatApp::ProcessCommandLineOptions()
    
    #ifdef DEBUG_CMD_LINE
    MessageInterface::PutMessage
-      ("GmatApp::ProcessCommandLineOptions() returning %d, buildScript=%d runScript=%d\n", retval, buildScript, runScript);
+      ("GmatApp::ProcessCommandLineOptions() returning %d, buildScript=%d runScript=%d\n"
+       "   scriptToRun = '%s'\n\n", retval, buildScript, runScript, scriptToRun.c_str());
    #endif
    return retval;
 }
@@ -731,7 +843,9 @@ void GmatApp::BuildAndRunScript(bool runScript)
       #ifdef DEBUG_CMD_LINE
       MessageInterface::ShowMessage("   Building script ...\n");
       #endif
+      #ifndef __WXMAC__
       wxSafeYield();
+      #endif
       builtOk = theMainFrame->BuildScript(scriptToRun.c_str(), true);
    }
    catch (BaseException &e)
@@ -754,7 +868,9 @@ void GmatApp::BuildAndRunScript(bool runScript)
          #ifdef DEBUG_CMD_LINE
          MessageInterface::ShowMessage("   Running script ...\n");
          #endif
+         #ifndef __WXMAC__
          wxSafeYield();
+         #endif
          runStatus = theMainFrame->RunCurrentScript();
          if (runStatus != 1)
          {
@@ -775,17 +891,27 @@ void GmatApp::BuildAndRunScript(bool runScript)
    }
    else
    {
-      WriteMessage("Failed to build the script\n   ", scriptToRun + "\n");
+      if (!builtOk)
+         WriteMessage("Failed to build the script\n   ", scriptToRun + "\n");
    }
    
+   #ifndef __WXMAC__
    wxSafeYield();
+   #endif
    // Close GMAT on option
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::EXIT_AFTER_RUN)
    {
+      #ifdef __LINUX__
+         // Linux needs this to run in the test system successfully
+         exit(0);
+      #endif
+
       //Set auto exit mode to GmatMainFrame
       theMainFrame->SetAutoExitAfterRun(true);
       theMainFrame->Close();
+      #ifndef __WXMAC__
       wxSafeYield();
+      #endif
       #ifdef __LINUX__
       // Linux needs this to complete shutdown
       MessageInterface::ShowMessage("\n");
@@ -810,7 +936,8 @@ void GmatApp::WriteMessage(const std::string &msg1, const std::string &msg2,
 {
    wxDateTime now = wxDateTime::Now();
    wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-   std::string nowStr = wxNowStr.c_str();
+//   std::string nowStr = wxNowStr.c_str();
+   std::string nowStr = wxNowStr.WX_TO_STD_STRING;
    
    MessageInterface::LogMessage(nowStr + msg1 + msg2 + msg3);
 }

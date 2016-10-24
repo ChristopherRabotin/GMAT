@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -131,6 +141,93 @@ ElementWrapper* ObjectPropertyWrapper::Clone() const
    return new ObjectPropertyWrapper(*this);
 }
 
+//------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return ObjectPropertyWrapper value converted to std::string.
+ */
+//------------------------------------------------------------------------------
+std::string ObjectPropertyWrapper::ToString()
+{
+   if (object == NULL)
+      throw ParameterException
+         ("ObjectPropertyWrapper::ToString() The object is NULL");
+   
+   // Get property data type
+   Gmat::ParameterType dataType = GetDataType();
+   std::string retval;
+   
+   switch (dataType)
+   {
+   case Gmat::BOOLEAN_TYPE:
+   {
+      bool bval = EvaluateBoolean();
+      retval = "true";
+      if (!bval)
+         retval = "false";
+      break;
+   }
+   case Gmat::INTEGER_TYPE:
+   {
+      Integer ival = EvaluateInteger();
+      retval = GmatStringUtil::ToString(ival);
+      break;
+   }
+   case Gmat::REAL_TYPE:
+   {
+      Real rval = EvaluateReal();
+      retval = GmatStringUtil::ToString(rval);
+      break;
+   }
+   case Gmat::RMATRIX_TYPE:
+   {
+      Rmatrix rmat = EvaluateArray();
+      retval = rmat.ToString(16);
+      break;
+   }
+   case Gmat::RVECTOR_TYPE:
+   {
+      Rvector rvec = EvaluateRvector();
+      retval = rvec.ToString(16);
+      break;
+   }
+   case Gmat::STRING_TYPE:
+   case Gmat::ENUMERATION_TYPE:
+   case Gmat::COLOR_TYPE:
+   case Gmat::FILENAME_TYPE:
+   {
+      std::string sval = EvaluateString();
+      if (dataType == Gmat::STRING_TYPE || dataType == Gmat::FILENAME_TYPE)
+      {
+         if (!GmatStringUtil::IsEnclosedWith(sval, "'"))
+            sval = "'" + sval + "'";
+      }
+      retval = sval;
+      break;
+   }
+   case Gmat::ON_OFF_TYPE:
+   {
+      std::string sval = EvaluateOnOff();
+      retval = sval;
+      break;
+   }
+   case Gmat::OBJECT_TYPE:
+   {
+      retval = EvaluateString();
+      break;
+   }
+   default:
+   {
+      GmatBaseException be;
+      be.SetDetails("ObjectPropertyWrapper::ToString() the parameter type %d is "
+                    "unknown for \"%s\"", propID, description.c_str());
+      throw be;
+   }
+   }
+   
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetDataType() const
@@ -465,12 +562,88 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
    return true;
 }
 
+//---------------------------------------------------------------------------
+// bool SetArray(const Rmatrix &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Method to set the Rmatrix value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetArray(const Rmatrix &toValue)
+{
+   if (object == NULL)
+      throw ParameterException(
+      "Cannot set value of ObjectProperty - object pointer is NULL\n");
+   
+   try
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::SetArray, about to set value to %s\n", toValue.ToString().c_str());
+      #endif
+      object->SetRmatrixParameter(propID, toValue);
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::SetRmatrix, value has been set to %s\n", toValue.ToString().c_str());
+      #endif
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+      #endif
+      
+      throw;
+   }
+   
+   return true;
+}
+
+//---------------------------------------------------------------------------
+// const Rmatrix& EvaluateArray() const
+//---------------------------------------------------------------------------
+/**
+ * Method to retrieve the Rmatrix value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+const Rmatrix& ObjectPropertyWrapper::EvaluateArray() const
+{
+   if (object == NULL)
+      throw ParameterException(
+      "Cannot set value of ObjectProperty - object pointer is NULL\n");
+   
+   try
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::EvaluateArray, about to get value of %s\n", GetDescription().ToString().c_str());
+      const Rmatrix rmat = object->GetRmatrixParameter(propID);
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::EvaluateArray, value retrieve is %s\n", rmat.ToString(16).c_str());
+      #endif
+      return object->GetRmatrixParameter(propID);
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+      #endif
+      
+      throw;
+   }
+}
 
 //---------------------------------------------------------------------------
 //  bool SetRvector(const Rvector &toValue)
 //---------------------------------------------------------------------------
 /**
- * Method to set the Real value of the wrapped object.
+ * Method to set the Rvector value of the wrapped object.
  *
  * @return true if successful; false otherwise.
  */
@@ -521,7 +694,7 @@ std::string ObjectPropertyWrapper::EvaluateString() const
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::STRING_TYPE || propType == Gmat::ON_OFF_TYPE ||
        propType == Gmat::ENUMERATION_TYPE || propType == Gmat::ENUMERATION_TYPE ||
-       propType == Gmat::FILENAME_TYPE)
+       propType == Gmat::FILENAME_TYPE || propType == Gmat::COLOR_TYPE)
       return object->GetStringParameter(propID);
    else
       throw GmatBaseException
@@ -704,8 +877,7 @@ bool ObjectPropertyWrapper::SetObject(GmatBase *obj)
  * @return The ID
  */
 //------------------------------------------------------------------------------
-const Integer ObjectPropertyWrapper::GetPropertyId()
-{
+Integer ObjectPropertyWrapper::GetPropertyId(){
    return propID;
 }
 

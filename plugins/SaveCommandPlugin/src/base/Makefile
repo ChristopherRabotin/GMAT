@@ -16,7 +16,9 @@ CPP = g++
 
 ifeq ($(MAC_SPECIFIC), 1)
 PLATFORM_FLAGS=-fPIC -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
-MAC_ARCHITECTURE_FLAGS = -arch i386
+#MAC_ARCHITECTURE_FLAGS =
+#removed
+#-arch i386
 
 SHARED_LIB_FLAGS = -dylib -dynamiclib \
                    -undefined dynamic_lookup \

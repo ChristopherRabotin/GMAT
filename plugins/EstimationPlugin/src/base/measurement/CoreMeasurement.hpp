@@ -1,12 +1,22 @@
-//$Id: CoreMeasurement.hpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: CoreMeasurement.hpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                         CoreMeasurement
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -37,7 +47,6 @@
 #include "CoordinateSystem.hpp"
 #include "SolarSystem.hpp"
 
-
 /**
  * GMAT's estimation subsystem represents measurement models using a
  * MeasurementModel container class and measurement primitives that perform the
@@ -57,8 +66,8 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name,
                               const Integer index);
-   virtual bool         SetParticipantHardware(GmatBase *obj,
-                              const std::string &hwName, Integer hwIndex);
+//   virtual bool         SetParticipantHardware(GmatBase *obj,
+//                              const std::string &hwName, Integer hwIndex);
 
    virtual MeasurementData*        GetMeasurementDataPointer();
    virtual std::vector<RealArray>* GetDerivativePointer();
@@ -81,6 +90,10 @@ public:
                                     Integer whichOne);
 
    virtual Integer            GetMeasurementParameterCount() const;
+
+   void                       SetNoise(Rvector* ns);
+
+//   virtual bool               SetParticipantHardwareNames(std::vector<StringArray>& participantHardwareNames);
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
@@ -190,6 +203,8 @@ protected:
    static const Rvector3      yUnit;             // [0,1,0]T
    static const Rvector3      zUnit;             // [0,0,1]T
 
+   /// Measuement noise sigma
+   Rvector*                   noiseSigma;
 
    // Methods
    Integer                    GetParmIdFromEstID(Integer id, GmatBase *obj);
@@ -213,6 +228,7 @@ protected:
    bool                       CheckSat2SatLOS(Rvector3 p1loc, Rvector3 p2loc, SpacePoint *cb);
    bool                       CheckStation2SatLOS(Real a1Epoch, Rvector3 sLoc, SpacePoint *cb);
 
+   bool                       UpdateHardware();
 
    // Used for debug
    virtual void               DumpParticipantStates(const std::string& ref);
@@ -223,7 +239,6 @@ protected:
    {
        CoreMeasurementParamCount = GmatBaseParamCount
    };
-
 };
 
 #endif /* CoreMeasurement_hpp */

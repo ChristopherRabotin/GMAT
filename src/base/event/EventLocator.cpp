@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under NASA Prime
 // Contract NNG10CP02C, Task Order 28
@@ -19,16 +29,35 @@
  */
 //------------------------------------------------------------------------------
 
+#include <stdio.h>
+#include <iostream>
 
 #include "EventLocator.hpp"
 #include "EventException.hpp"
+#include "Spacecraft.hpp"
 #include "FileManager.hpp"      // for GetPathname()
+#include "FileUtil.hpp"
+#include "GmatConstants.hpp"
+#include "StringUtil.hpp"
+#include "TimeSystemConverter.hpp"
+#include "GregorianDate.hpp"
 #include "MessageInterface.hpp"
+#include "RealUtilities.hpp"
+#include "EphemManager.hpp"
 
 
 //#define DEBUG_DUMPEVENTDATA
-//#define DEBUG_EVENTLOCATION
+//#define DEBUG_LOCATE_EVENTS
 //#define DEBUG_EVENT_INITIALIZATION
+//#define DEBUG_OBJECTS
+//#define DEBUG_DATE_FORMAT
+//#define DEBUG_EVENTLOCATOR_OBJECT
+//#define DEBUG_EVENTLOCATOR_WRITE
+//#define DEBUG_EVENTLOCATOR_DATA
+//#define DEBUG_EVENTLOCATOR_SET
+//#define DEBUG_EVENTLOCATOR_GET
+//#define DEBUG_EVENTLOCATOR_COPY
+//#define DEBUG_EVENT_EPOCH_STRING
 
 #ifdef DEBUG_DUMPEVENTDATA
    #include <fstream>
@@ -41,28 +70,52 @@
 const std::string
 EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
 {
-   "Spacecraft",        // SATNAMES,
-   "Tolerance",         // TOLERANCE,
-   "Filename",          // EVENT_FILENAME,
-   "IsActive",          // IS_ACTIVE
-   "ShowPlot",          // SHOW_PLOT
-   "Epoch",             // EPOCH (Read only)
-   "EventFunction"      // EVENT_FUNCTION (Read only)
+   "Spacecraft",           // SATNAME
+   "Filename",             // EVENT_FILENAME
+   "OccultingBodies",      // OCCULTING_BODIES
+   "InputEpochFormat",     // INPUT_EPOCH_FORMAT
+   "InitialEpoch",         // INITIAL_EPOCH
+   "StepSize",             // STEP_SIZE
+   "FinalEpoch",           // FINAL_EPOCH
+   "UseLightTimeDelay",    // USE_LIGHT_TIME_DELAY
+   "UseStellarAberration", // USE_STELLAR_ABERRATION
+   "WriteReport",          // WRITE_REPORT
+   "RunMode",              // RUN_MODE
+   "UseEntireInterval",    // USE_ENTIRE_INTERVAL
 };
 
 const Gmat::ParameterType
 EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
 {
-//   Gmat::STRINGARRAY_TYPE,       // SATNAMES,
-   Gmat::OBJECTARRAY_TYPE,       // SATNAMES,
-   Gmat::REAL_TYPE,              // TOLERANCE,
-   Gmat::FILENAME_TYPE,          // EVENT_FILENAME,
-   Gmat::BOOLEAN_TYPE,           // IS_ACTIVE
-   Gmat::BOOLEAN_TYPE,           // SHOW_PLOT
-   Gmat::REAL_TYPE,              // EPOCH (Read only)
-   Gmat::RVECTOR_TYPE            // EVENT_FUNCTION (Read only)
+   Gmat::OBJECT_TYPE,      // SATNAME
+   Gmat::FILENAME_TYPE,    // EVENT_FILENAME
+   Gmat::OBJECTARRAY_TYPE, // OCCULTING_BODIES
+   Gmat::STRING_TYPE,      // INPUT_EPOCH_FORMAT
+   Gmat::STRING_TYPE,      // INITIAL_EPOCH
+   Gmat::REAL_TYPE,        // STEP_SIZE
+   Gmat::STRING_TYPE,      // FINAL_EPOCH
+   Gmat::BOOLEAN_TYPE,     // USE_LIGHT_TIME_DELAY
+   Gmat::BOOLEAN_TYPE,     // USE_STELLAR_ABERRATION
+   Gmat::BOOLEAN_TYPE,     // WRITE_REPORT
+   Gmat::ENUMERATION_TYPE, // RUN_MODE
+   Gmat::BOOLEAN_TYPE,     // USE_ENTIRE_INTERVAL
 };
 
+const std::string EventLocator::RUN_MODES[3] =
+{
+      "Automatic",
+      "Manual",
+      "Disabled",
+};
+
+const Integer EventLocator::numModes = 3;
+
+const std::string EventLocator::defaultFormat        = "TAIModJulian";
+const Real        EventLocator::defaultInitialEpoch  = 21545;
+const Real        EventLocator::defaultFinalEpoch    = 21545.138;
+
+// Used for light-time calculations
+const Real EventLocator::STEP_MULTIPLE = 0.5;
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -80,22 +133,47 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
  */
 //------------------------------------------------------------------------------
 EventLocator::EventLocator(const std::string &typeStr,
-      const std::string &nomme) :
-   GmatBase       (Gmat::EVENT_LOCATOR, typeStr, nomme),
-   earlyBound     (NULL),
-   lateBound      (NULL),
-   filename       ("LocatedEvents.txt"),
-   efCount        (0),
-   lastData       (NULL),
-   lastEpochs     (NULL),
-   isActive       (true),
-   showPlot       (false),
-   fileWasWritten (false),
-   eventTolerance (1.0e-3),
-   solarSys       (NULL)
+                           const std::string &nomme) :
+   GmatBase                (Gmat::EVENT_LOCATOR, typeStr, nomme),
+   filename                (""),
+   fileWasWritten          (false),
+   useLightTimeDelay       (true),
+   useStellarAberration    (true),
+   writeReport             (true),
+   locatingString          (""),
+   runMode                 ("Automatic"),
+   useEntireInterval       (true),
+   appendReport            (false),
+   epochFormat             ("TAIModJulian"),
+   initialEpoch            ("21545"),        // MUST match initialEp
+   finalEpoch              ("21545.138"),    // MUST match finalEp
+   stepSize                (10.0),
+   initialEp               (defaultInitialEpoch),
+   finalEp                 (defaultFinalEpoch),
+   fromEpoch               (0.0),
+   toEpoch                 (0.0),
+   findStart               (0.0),
+   findStop                (0.0),
+   scStart                 (0.0),
+   scNow                   (0.0),
+   satName                 (""),
+   sat                     (NULL),
+   solarSys                (NULL),
+   em                      (NULL),
+   initialEpochSet         (false),
+   finalEpochSet           (false)
 {
    objectTypes.push_back(Gmat::EVENT_LOCATOR);
    objectTypeNames.push_back("EventLocator");
+
+   filename = instanceName + ".txt";  // default filename
+
+   blockCommandModeAssignment = false;
+
+   occultingBodyNames.clear();
+   occultingBodies.clear();
+   defaultOccultingBodies.clear();
+   // default occulting bodies are set in the leaf classes
 }
 
 
@@ -112,17 +190,12 @@ EventLocator::~EventLocator()
       MessageInterface::ShowMessage("Deleting event locator %s <%p>\n",
             instanceName.c_str(), this);
    #endif
-   if (lastData != NULL)
-      delete [] lastData;
 
-   if (lastEpochs != NULL)
-      delete [] lastEpochs;
-
-   if (earlyBound != NULL)
-      delete [] earlyBound;
-
-   if (lateBound != NULL)
-      delete [] lateBound;
+   if (!occultingBodyNames.empty())
+      occultingBodyNames.clear();
+   if (!occultingBodies.empty())
+      occultingBodies.clear();
+   defaultOccultingBodies.clear();
 }
 
 
@@ -136,47 +209,48 @@ EventLocator::~EventLocator()
  */
 //------------------------------------------------------------------------------
 EventLocator::EventLocator(const EventLocator& el) :
-   GmatBase          (el),
-   filename          (el.filename),
-   efCount           (el.efCount),
-   isActive          (el.isActive),
-   showPlot          (el.showPlot),
-   fileWasWritten    (false),
-   satNames          (el.satNames),
-   targets           (el.targets),
-   eventTolerance    (el.eventTolerance),
-   solarSys          (el.solarSys)
+   GmatBase                (el),
+   filename                (el.filename),
+   fileWasWritten          (false),
+   useLightTimeDelay       (el.useLightTimeDelay),
+   useStellarAberration    (el.useStellarAberration),
+   writeReport             (el.writeReport),
+   runMode                 (el.runMode),
+   locatingString          (el.locatingString),
+   useEntireInterval       (el.useEntireInterval),
+   appendReport            (el.appendReport),
+   epochFormat             (el.epochFormat),
+   initialEpoch            (el.initialEpoch),
+   finalEpoch              (el.finalEpoch),
+   stepSize                (el.stepSize),
+   initialEp               (el.initialEp),
+   finalEp                 (el.finalEp),
+   fromEpoch               (el.fromEpoch),
+   toEpoch                 (el.toEpoch),
+   findStart               (el.findStart),
+   findStop                (el.findStop),
+   scStart                 (el.scStart),
+   scNow                   (el.scNow),
+   satName                 (el.satName),
+   sat                     (NULL),
+   solarSys                (el.solarSys),
+   em                      (NULL),
+   initialEpochSet         (el.initialEpochSet),
+   finalEpochSet           (el.finalEpochSet)
 {
-   if (efCount == 0)
+   occultingBodyNames.clear();
+   occultingBodies.clear();
+   defaultOccultingBodies.clear();
+
+   UnsignedInt sz = el.occultingBodyNames.size();
+   for (UnsignedInt ii = 0; ii < sz; ii++)
+      occultingBodyNames.push_back(el.occultingBodyNames.at(ii));
+   // copy the list of default occulting body names
+   for (unsigned int i = 0; i < (el.defaultOccultingBodies).size(); i++)
    {
-      lastData   = NULL;
-      lastEpochs = NULL;
-      earlyBound = NULL;
-      lateBound  = NULL;
-   }
-   else
-   {
-      lastData   = new Real[efCount];
-      lastEpochs = new Real[efCount];
-      earlyBound = new Real[efCount];
-      lateBound  = new Real[efCount];
+      defaultOccultingBodies.push_back((el.defaultOccultingBodies).at(i));
    }
 
-   for (UnsignedInt i = 0; i < efCount; ++i)
-   {
-      lastData[i]   = el.lastData[i];
-      lastEpochs[i] = el.lastEpochs[i];
-      earlyBound[i] = el.earlyBound[i];
-      lateBound[i]  = el.lateBound[i];
-   }
-
-   // Set unitialized, since the event functions are not yet built
-   #ifdef DEBUG_EVENT_INITIALIZATION
-      MessageInterface::ShowMessage("Event locator copy constructor: changing "
-         "from %s to uninitialized; efCount = %d\n   Original: <%p>, this "
-         "copy: <%p>\n", (initialized ? "initialized" : "uninitialized"), 
-         efCount, &el, this);
-   #endif
    isInitialized    = false;
 }
 
@@ -198,76 +272,60 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
    {
       GmatBase::operator =(el);
 
-      filename       = el.filename;
-      isActive       = el.isActive;
-      showPlot       = el.showPlot;
-      fileWasWritten = el.fileWasWritten;
-      satNames       = el.satNames;
-      targets        = el.targets;
-      eventTolerance = el.eventTolerance;
-      solarSys       = el.solarSys;
+      filename             = el.filename;
+      fileWasWritten       = el.fileWasWritten;
 
-      #ifdef DEBUG_EVENT_INITIALIZATION
-         MessageInterface::ShowMessage("Event locator assignment entered with "
-            "efCount = %d, ef size = %d\n", efCount, eventFunctions.size());
+      useLightTimeDelay    = el.useLightTimeDelay;
+      useStellarAberration = el.useStellarAberration;
+      writeReport          = el.writeReport;
+      runMode              = el.runMode;
+      locatingString       = el.locatingString;
+      useEntireInterval    = el.useEntireInterval;
+      appendReport         = el.appendReport;
+      epochFormat          = el.epochFormat;
+      initialEpoch         = el.initialEpoch;
+      finalEpoch           = el.finalEpoch;
+      stepSize             = el.stepSize;
+      initialEp            = el.initialEp;
+      finalEp              = el.finalEp;
+      fromEpoch            = el.fromEpoch;
+      toEpoch              = el.toEpoch;
+      findStart            = el.findStart;
+      findStop             = el.findStop;
+      scStart              = el.scStart;
+      scNow                = el.scNow;
+      satName              = el.satName;
+      sat                  = el.sat;     // NULL;
+      solarSys             = el.solarSys;
+      em                   = NULL;
+      initialEpochSet      = el.initialEpochSet;
+      finalEpochSet        = el.finalEpochSet;
+
+      occultingBodyNames.clear();
+      occultingBodies.clear();
+      defaultOccultingBodies.clear();
+      #ifdef DEBUG_EVENTLOCATOR_SET
+      MessageInterface::ShowMessage("In EventLocator::operator=, current body names:\n");
+      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", occultingBodyNames.at(ii).c_str());
+      MessageInterface::ShowMessage("In EventLocator::operator=, body names of input are:\n");
+      for (Integer ii = 0; ii < (el.occultingBodyNames).size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", (el.occultingBodyNames.at(ii)).c_str());
       #endif
+      UnsignedInt sz = el.occultingBodyNames.size();
+      for (UnsignedInt ii = 0; ii < sz; ii++)
+         occultingBodyNames.push_back(el.occultingBodyNames.at(ii));
 
-      if (efCount != el.efCount)
+      sz = el.occultingBodies.size();
+      for (UnsignedInt ii = 0; ii < sz; ii++)
+         occultingBodies.push_back(el.occultingBodies.at(ii));
+
+      // copy the list of default occulting body names
+      for (unsigned int i = 0; i < (el.defaultOccultingBodies).size(); i++)
       {
-         #ifdef DEBUG_EVENT_INITIALIZATION
-            MessageInterface::ShowMessage("Event locator assignment efCount "
-               "mismatch: this has %d, that has %d\n", efCount, el.efCount);
-         #endif
-
-         if (eventFunctions.size() != 0)
-         {
-            for (UnsignedInt i = 0; i < eventFunctions.size(); ++i)
-               delete eventFunctions[i];
-            eventFunctions.clear();
-            efCount = el.efCount;
-            #ifdef DEBUG_EVENT_INITIALIZATION
-               MessageInterface::ShowMessage("In event locator assignment "
-                  "operator, changing from %s to uninitialized\n   "
-                  "From: <%p>, to (this): <%p>\n", 
-                  (initialized ? "initialized" : "uninitialized"), &el, this);
-            #endif
-            isInitialized = false;
-         }
-
-         if (lastData != NULL)
-            delete [] lastData;
-         if (lastEpochs != NULL)
-            delete [] lastEpochs;
-         if (earlyBound != NULL)
-            delete [] earlyBound;
-         if (lateBound != NULL)
-            delete [] lateBound;
-
-         if (efCount == 0)
-         {
-            lastData   = NULL;
-            lastEpochs = NULL;
-            earlyBound = NULL;
-            lateBound  = NULL;
-         }
-         else
-         {
-            lastData   = new Real[efCount];
-            lastEpochs = new Real[efCount];
-            earlyBound = new Real[efCount];
-            lateBound  = new Real[efCount];
-         }
+         defaultOccultingBodies.push_back((el.defaultOccultingBodies).at(i));
       }
-
-      // Copy in the array data
-      for (UnsignedInt i = 0; i < efCount; ++i)
-      {
-         lastData[i]   = el.lastData[i];
-         lastEpochs[i] = el.lastEpochs[i];
-         earlyBound[i] = el.earlyBound[i];
-         lateBound[i]  = el.lateBound[i];
-      }
-   }
+}
 
    return *this;
 }
@@ -365,8 +423,6 @@ std::string EventLocator::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool EventLocator::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == IS_ACTIVE) || (id == EPOCH) || (id == EVENT_FUNCTION))
-      return true;
 
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -388,6 +444,28 @@ bool EventLocator::IsParameterReadOnly(const std::string &label) const
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::IsParameterCommandModeSettable(const Integer id) const
+{
+   if ((id == EVENT_FILENAME)      || (id == INPUT_EPOCH_FORMAT)  ||
+       (id == INITIAL_EPOCH)       || (id == FINAL_EPOCH)         ||
+       (id == USE_ENTIRE_INTERVAL) || (id == WRITE_REPORT)          )
+      return true;
+
+   return false;
+}
+
+
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
@@ -402,15 +480,8 @@ bool EventLocator::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 Real EventLocator::GetRealParameter(const Integer id) const
 {
-   if (id == TOLERANCE)
-      return eventTolerance;
-
-   if (id == EPOCH)
-   {
-      if (targets.size() > 0)
-         return targets[0]->GetEpoch();
-      return -1.0;
-   }
+   if (id == STEP_SIZE)
+      return stepSize;
 
    return GmatBase::GetRealParameter(id);
 }
@@ -430,118 +501,24 @@ Real EventLocator::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real EventLocator::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == TOLERANCE)
+   if (id == STEP_SIZE)
    {
       if (value > 0.0)
-         eventTolerance = value;
+      {
+         stepSize = value;
+         return stepSize;
+      }
       else
-         throw EventException(
-               "Located event tolerance value must be a real number > 0.0");
-
-      return eventTolerance;
-   }
-
-   if (id == EPOCH)
-   {
-      return 0.0;
+      {
+         EventException ee("");
+         ee.SetDetails(errorMessageFormat.c_str(),
+               GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+               "StepSize", "Real number > 0");
+         throw ee;
+      }
    }
 
    return GmatBase::SetRealParameter(id, value);
-}
-
-
-//------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id, const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves the value for a real parameter from a vector of Reals
- *
- * @param id The ID of the parameter
- * @param index The index into the vector
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-Real EventLocator::GetRealParameter(const Integer id, const Integer index) const
-{
-   if (id == EVENT_FUNCTION)
-   {
-      Real retval = 0.0;
-      if (index < (Integer)eventFunctions.size())
-      {
-         Real *data = eventFunctions[index]->Evaluate();
-         retval = data[1];
-      }
-      return retval;       // todo Return the event function value
-   }
-   return GmatBase::GetRealParameter(id, index);
-}
-
-
-//------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id, const Integer row,
-//       const Integer col) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves the value for a real parameter from an array of Reals
- *
- * @param id The ID of the parameter
- * @param row The row index into the array
- * @param col The column index into the array
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-Real EventLocator::GetRealParameter(const Integer id, const Integer row,
-                                      const Integer col) const
-{
-   return GmatBase::GetRealParameter(id, row, col);
-}
-
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const Integer id, const Real value,
-//       const Integer index)
-//------------------------------------------------------------------------------
-/**
- * Sets the value for a real parameter in a vector of Reals
- *
- * @param id The ID of the parameter
- * @param value The new value for the parameter
- * @param index The index into the vector
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-Real EventLocator::SetRealParameter(const Integer id, const Real value,
-      const Integer index)
-{
-   if (id == EVENT_FUNCTION)
-      return 0.0;       // todo Return the event function value
-
-   return GmatBase::SetRealParameter(id, value, index);
-}
-
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const Integer id, const Real value, const Integer row,
-//       const Integer col)
-//------------------------------------------------------------------------------
-/**
- * Sets the value for a real parameter in an array of Reals
- *
- * @param id The ID of the parameter
- * @param value The new value for the parameter
- * @param row The row index into the array
- * @param col The column index into the array
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-Real EventLocator::SetRealParameter(const Integer id, const Real value,
-                                      const Integer row, const Integer col)
-{
-   return GmatBase::SetRealParameter(id, value, row, col);
 }
 
 
@@ -580,174 +557,6 @@ Real EventLocator::SetRealParameter(const std::string &label,
 }
 
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const std::string &label, const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves the value for a real parameter from a vector of Reals
- *
- * @param label The script string of the parameter
- * @param index The index into the vector
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-Real EventLocator::GetRealParameter(const std::string &label,
-                                      const Integer index) const
-{
-   return GetRealParameter(GetParameterID(label), index);
-}
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const std::string &label, const Real value,
-//       const Integer index)
-//------------------------------------------------------------------------------
-/**
- * Sets the value for a real parameter in a vector of Reals
- *
- * @param label The script string of the parameter
- * @param value The new value for the parameter
- * @param index The index into the vector
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-Real EventLocator::SetRealParameter(const std::string &label,
-                                      const Real value,
-                                      const Integer index)
-{
-   return SetRealParameter(GetParameterID(label), value, index);
-}
-
-//------------------------------------------------------------------------------
-// Real GetRealParameter(const std::string &label, const Integer row,
-//       const Integer col) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves the value for a real parameter from an array of Reals
- *
- * @param label The script string of the parameter
- * @param row The row index into the array
- * @param col The column index into the array
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-Real EventLocator::GetRealParameter(const std::string &label,
-                                      const Integer row,
-                                      const Integer col) const
-{
-   return GetRealParameter(GetParameterID(label), row, col);
-}
-
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const std::string &label, const Real value,
-//       const Integer row, const Integer col)
-//------------------------------------------------------------------------------
-/**
- * Sets the value for a real parameter in an array of Reals
- *
- * @param label The script string of the parameter
- * @param value The new value for the parameter
- * @param row The row index into the array
- * @param col The column index into the array
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-Real EventLocator::SetRealParameter(const std::string &label,
-                                      const Real value, const Integer row,
-                                      const Integer col)
-{
-   return SetRealParameter(GetParameterID(label), value, row, col);
-}
-
-
-//------------------------------------------------------------------------------
-// const Rvector& GetRvectorParameter(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves an Rvector parameter
- *
- * @param id The parameter's ID
- *
- * #retval The Rvector
- */
-//------------------------------------------------------------------------------
-const Rvector& EventLocator::GetRvectorParameter(const Integer id) const
-{
-   if (id == EVENT_FUNCTION)
-      return functionValues;
-
-   return GmatBase::GetRvectorParameter(id);
-}
-
-
-//------------------------------------------------------------------------------
-// const Rvector& SetRvectorParameter(const Integer id, const Rvector &value)
-//------------------------------------------------------------------------------
-/**
- * Sets an Rvector parameter
- *
- * @param id The parameter's ID
- * @param value The new value for the Rvector
- *
- * #retval The Rvector
- */
-//------------------------------------------------------------------------------
-const Rvector& EventLocator::SetRvectorParameter(const Integer id,
-      const Rvector &value)
-{
-   if (id == EVENT_FUNCTION)
-   {
-      Integer size = (value.GetSize() < functionValues.GetSize() ?
-            value.GetSize() : functionValues.GetSize());
-      for (Integer i = 0; i < size; ++i)
-         functionValues[i] = value[i];
-      return functionValues;
-   }
-
-   return GmatBase::SetRvectorParameter(id, value);
-}
-
-
-//------------------------------------------------------------------------------
-// const Rvector& GetRvectorParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves an Rvector parameter
- *
- * @param label The parameter's script string
- *
- * #retval The Rvector
- */
-//------------------------------------------------------------------------------
-const Rvector& EventLocator::GetRvectorParameter(const std::string &label) const
-{
-   return GetRvectorParameter(GetParameterID(label));
-}
-
-
-//------------------------------------------------------------------------------
-// const Rvector& SetRvectorParameter(const std::string &label,
-//             const Rvector &value)
-//------------------------------------------------------------------------------
-/**
- * Sets an Rvector parameter
- *
- * @param label The parameter's script string
- * @param value The new value for the Rvector
- *
- * #retval The Rvector
- */
-//------------------------------------------------------------------------------
-const Rvector& EventLocator::SetRvectorParameter(const std::string &label,
-      const Rvector &value)
-{
-   return SetRvectorParameter(GetParameterID(label), value);
-}
-
-//------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -760,8 +569,24 @@ const Rvector& EventLocator::SetRvectorParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string EventLocator::GetStringParameter(const Integer id) const
 {
+   if (id == SATNAME)
+      return satName;
    if (id == EVENT_FILENAME)
       return filename;
+   if (id == INPUT_EPOCH_FORMAT)
+      return epochFormat;
+   if (id == INITIAL_EPOCH)
+   {
+//      return initialEpoch;
+      return GetEpochString("INITIAL", epochFormat);
+   }
+   if (id == FINAL_EPOCH)
+   {
+//      return finalEpoch;
+      return GetEpochString("FINAL", epochFormat);
+   }
+   if (id == RUN_MODE)
+      return runMode;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -782,6 +607,15 @@ std::string EventLocator::GetStringParameter(const Integer id) const
 bool EventLocator::SetStringParameter(const Integer id,
       const std::string &value)
 {
+   if (id == SATNAME)
+   {
+      if (value != "")
+      {
+         satName = value;
+         return true;
+      }
+      return false;
+   }
    if (id == EVENT_FILENAME)
    {
       if (value != "")
@@ -791,14 +625,80 @@ bool EventLocator::SetStringParameter(const Integer id,
       }
       return false;
    }
-
-   if (id == SATNAMES)
+   if (id == INPUT_EPOCH_FORMAT)
    {
-      if (find(satNames.begin(), satNames.end(), value) == satNames.end())
+      if (TimeConverterUtil::IsValidTimeSystem(value))
       {
-         satNames.push_back(value);
-         targets.push_back(NULL);
+         epochFormat = value;
+         return true;
       }
+      else
+      {
+         EventException ee("");
+         ee.SetDetails(errorMessageFormat.c_str(),
+                       value.c_str(),
+                       "EpochFormat", "Valid Time Format");
+         throw ee;
+      }
+   }
+   if ((id == INITIAL_EPOCH) || (id == FINAL_EPOCH))
+   {
+      SetEpoch(value, id);
+      return true;
+   }
+
+   if (id == RUN_MODE)
+   {
+      for (Integer jj = 0; jj < numModes; jj++)
+      {
+         if (GmatStringUtil::ToUpper(value) == GmatStringUtil::ToUpper(RUN_MODES[jj]))
+         {
+            runMode = value;
+            return true;
+         }
+      }
+      EventException ee("");
+      std::string allowed = "One of ";
+      for (Integer jj = 0; jj < numModes; jj++)
+      {
+         allowed += RUN_MODES[jj];
+         if (jj != (numModes -1))
+            allowed += ", ";
+      }
+      ee.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            "RunMode", allowed.c_str());
+      throw ee;
+   }
+   if (id == OCCULTING_BODIES)
+   {
+      #ifdef DEBUG_EVENTLOCATOR_SET
+         MessageInterface::ShowMessage("About to set occulting body on EventLocator %s\n",
+               instanceName.c_str());
+         MessageInterface::ShowMessage("Current occulting bodies list:\n");
+         for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+            MessageInterface::ShowMessage("   %s\n", occultingBodyNames.at(ii).c_str());
+      #endif
+      if (value != satName)
+      {
+         if (value != "Sun")
+         {
+            if (find(occultingBodyNames.begin(), occultingBodyNames.end(),
+                  value) == occultingBodyNames.end())
+            occultingBodyNames.push_back(value);
+         }
+         else
+         {
+            MessageInterface::ShowMessage("The Sun was set as an occulting "
+            "body, but Stars cannot occult their own light.  The Sun is being "
+            "excluded from the list of occulters.\n");
+            return false;
+         }
+      }
+      #ifdef DEBUG_EVENTLOCATOR_SET
+         MessageInterface::ShowMessage("And THEN occulting bodies list:\n");
+         for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+            MessageInterface::ShowMessage("   %s\n", occultingBodyNames.at(ii).c_str());
+      #endif
       return true;
    }
 
@@ -821,13 +721,14 @@ bool EventLocator::SetStringParameter(const Integer id,
 std::string EventLocator::GetStringParameter(const Integer id,
       const Integer index) const
 {
-   if (id == SATNAMES)
+
+   if (id == OCCULTING_BODIES)
    {
-      if (index < (Integer)satNames.size())
-         return satNames[index];
+      if ((index >= 0) && (index < (Integer) occultingBodyNames.size()))
+         return occultingBodyNames.at(index);
       else
          throw EventException(
-               "Index out of range when trying to access spacecraft name for " +
+               "Index out of range when trying to access occulting body name for " +
                instanceName);
    }
 
@@ -852,18 +753,29 @@ std::string EventLocator::GetStringParameter(const Integer id,
 bool EventLocator::SetStringParameter(const Integer id,
       const std::string &value, const Integer index)
 {
-   if (id == SATNAMES)
+   if (id == OCCULTING_BODIES)
    {
-      if (index < (Integer)satNames.size())
+      if (find(occultingBodyNames.begin(), occultingBodyNames.end(), value) == occultingBodyNames.end())
       {
-         satNames[index] = value;
-         return true;
+         if (index < (Integer) occultingBodyNames.size())
+         {
+            occultingBodyNames.at(index) = value;
+            return true;
+         }
+         else
+         {
+            occultingBodyNames.push_back(value);
+            return true;
+         }
       }
       else
       {
-         satNames.push_back(value);
-         targets.push_back(NULL);
+         // ignore duplicate occulting body names, for now
          return true;
+//         std::string errmsg = "Occulting Body ";
+//         errmsg += value + " is already in list for EventLocator ";
+//         errmsg += instanceName + ".  Each body must be listed only once.\n";
+//         throw EventException(errmsg);
       }
    }
 
@@ -884,8 +796,17 @@ bool EventLocator::SetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 const StringArray& EventLocator::GetStringArrayParameter(const Integer id) const
 {
-   if (id == SATNAMES)
-      return satNames;
+   #ifdef DEBUG_EVENTLOCATOR_GET
+      MessageInterface::ShowMessage("In EL::GetStringArrayP, occulting bodies are:\n");
+      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", occultingBodyNames.at(ii).c_str());
+   #endif
+   if (id == OCCULTING_BODIES)
+   {
+      if (occultingBodyNames.empty())
+         return defaultOccultingBodies;
+      return occultingBodyNames;
+   }
 
    return GmatBase::GetStringArrayParameter(id);
 }
@@ -941,7 +862,7 @@ std::string EventLocator::GetStringParameter(const std::string &label) const
  */
 //------------------------------------------------------------------------------
 bool EventLocator::SetStringParameter(const std::string &label,
-                                        const std::string &value)
+                                      const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
@@ -1039,10 +960,14 @@ const StringArray& EventLocator::GetStringArrayParameter(
 //------------------------------------------------------------------------------
 bool EventLocator::GetBooleanParameter(const Integer id) const
 {
-   if (id == IS_ACTIVE)
-      return isActive;
-   if (id == SHOW_PLOT)
-      return showPlot;
+   if (id == USE_LIGHT_TIME_DELAY)
+      return useLightTimeDelay;
+   if (id == USE_STELLAR_ABERRATION)
+      return useStellarAberration;
+   if (id == WRITE_REPORT)
+      return writeReport;
+   if (id == USE_ENTIRE_INTERVAL)
+      return useEntireInterval;
 
    return GmatBase::GetBooleanParameter(id);
 }
@@ -1062,57 +987,28 @@ bool EventLocator::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool EventLocator::SetBooleanParameter(const Integer id, const bool value)
 {
-   if (id == IS_ACTIVE)
+   if (id == USE_LIGHT_TIME_DELAY)
    {
-      isActive = value;
-      return isActive;
+      useLightTimeDelay = value;
+      return true;
    }
-   if (id == SHOW_PLOT)
+   if (id == USE_STELLAR_ABERRATION)
    {
-      showPlot = value;
-      return showPlot;
+      useStellarAberration = value;
+      return true;
    }
+   if (id == WRITE_REPORT)
+   {
+      writeReport = value;
+      return true;
+   }
+   if (id == USE_ENTIRE_INTERVAL)
+   {
+      useEntireInterval = value;
+      return true;
+   }
+
    return GmatBase::SetBooleanParameter(id, value);
-}
-
-
-//------------------------------------------------------------------------------
-// bool GetBooleanParameter(const Integer id, const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves the value for a Boolean parameter from a vector of Booleans
- *
- * @param id The ID of the parameter
- * @param index The index into the vector
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-bool EventLocator::GetBooleanParameter(const Integer id,
-      const Integer index) const
-{
-   return GmatBase::GetBooleanParameter(id, index);
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetBooleanParameter(const Integer id, const bool value,
-//       const Integer index)
-//------------------------------------------------------------------------------
-/**
- * Sets the value for a Boolean parameter in a vector of Booleans
- *
- * @param id The ID of the parameter
- * @param value The new value for the parameter
- * @param index The index into the vector
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-bool EventLocator::SetBooleanParameter(const Integer id, const bool value,
-      const Integer index)
-{
-   return GmatBase::SetBooleanParameter(id, value, index);
 }
 
 
@@ -1151,47 +1047,6 @@ bool EventLocator::SetBooleanParameter(const std::string &label,
    return SetBooleanParameter(GetParameterID(label), value);
 }
 
-
-//------------------------------------------------------------------------------
-// bool GetBooleanParameter(const std::string &label, const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves the value for a Boolean parameter from a vector of Booleans
- *
- * @param label The script string of the parameter
- * @param index The index into the vector
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-bool EventLocator::GetBooleanParameter(const std::string &label,
-      const Integer index) const
-{
-   return GetBooleanParameter(GetParameterID(label), index);
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetBooleanParameter(const std::string &label, const bool value,
-//       const Integer index)
-//------------------------------------------------------------------------------
-/**
- * Sets the value for a Boolean parameter in a vector of Booleans
- *
- * @param label The script string of the parameter
- * @param value The new value for the parameter
- * @param index The index into the vector
- *
- * @return The parameter value
- */
-//------------------------------------------------------------------------------
-bool EventLocator::SetBooleanParameter(const std::string &label,
-      const bool value, const Integer index)
-{
-   return SetBooleanParameter(GetParameterID(label), value, index);
-}
-
-
 //------------------------------------------------------------------------------
 // bool TakeAction(const std::string &action, const std::string &actionData)
 //------------------------------------------------------------------------------
@@ -1206,26 +1061,82 @@ bool EventLocator::SetBooleanParameter(const std::string &label,
  */
 //------------------------------------------------------------------------------
 bool EventLocator::TakeAction(const std::string &action,
-      const std::string &actionData)
+                              const std::string &actionData)
 {
+   #ifdef DEBUG_EVENTLOCATOR_SET
+      MessageInterface::ShowMessage("In EL::TakeAction, action = %s and actionData = %s\n",
+            action.c_str(), actionData.c_str());
+   #endif
    if (action == "Clear")
    {
-      if ((actionData == "Spacecraft") || (actionData == ""))
+      if ((actionData == "OccultingBodies") || (actionData == ""))
       {
-         satNames.clear();
-         targets.clear();
+         occultingBodyNames.clear();
+         occultingBodies.clear();
       }
-      return true;
-   }
-
-   if (action == "CheckSubscribers")
-   {
-      isActive = eventTable.IsActive();
       return true;
    }
 
    return GmatBase::TakeAction(action, actionData);
 }
+
+
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType EventLocator::GetPropertyObjectType(const Integer id) const
+{
+   #ifdef DEBUG_OBJECTS
+      MessageInterface::ShowMessage(
+            "EventLocator:: Asking now for the type of object %d\n", id);
+   #endif
+   switch (id)
+   {
+   case SATNAME:
+      return Gmat::SPACECRAFT;
+   case OCCULTING_BODIES:
+      return Gmat::CELESTIAL_BODY;
+   default:
+      return GmatBase::GetPropertyObjectType(id);
+   }
+}
+
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves eumeration symbols of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return list of enumeration symbols
+ */
+//---------------------------------------------------------------------------
+const StringArray& EventLocator::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   switch (id)
+   {
+   case RUN_MODE:
+      enumStrings.clear();
+      for (Integer ii = 0; ii < numModes; ii++)
+         enumStrings.push_back(RUN_MODES[ii]);
+
+      return enumStrings;
+   default:
+      return GmatBase::GetPropertyEnumStrings(id);
+   }
+}
+
+
 
 //------------------------------------------------------------------------------
 // const ObjectTypeArray& GetTypesForList(const Integer id)
@@ -1240,11 +1151,19 @@ bool EventLocator::TakeAction(const std::string &action,
 //------------------------------------------------------------------------------
 const ObjectTypeArray& EventLocator::GetTypesForList(const Integer id)
 {
-   if (id == SATNAMES)
+   listedTypes.clear();  // ??
+   if (id == SATNAME)
    {
       if (find(listedTypes.begin(), listedTypes.end(), Gmat::SPACECRAFT) ==
             listedTypes.end())
          listedTypes.push_back(Gmat::SPACECRAFT);
+      return listedTypes;
+   }
+   if (id == OCCULTING_BODIES)
+   {
+      if (find(listedTypes.begin(), listedTypes.end(), Gmat::CELESTIAL_BODY) ==
+            listedTypes.end())
+         listedTypes.push_back(Gmat::CELESTIAL_BODY);
       return listedTypes;
    }
 
@@ -1280,57 +1199,175 @@ const ObjectTypeArray& EventLocator::GetTypesForList(const std::string &label)
 void EventLocator::SetSolarSystem(SolarSystem *ss)
 {
    solarSys = ss;
-   #ifdef DEBUG_EVENT_INITIALIZATION
-      MessageInterface::ShowMessage("In event locator SetSolarSystem, changing "
-         "from %s to uninitialized\n", (initialized ? "initialized" : 
-         "uninitialized"));
+}
+
+//------------------------------------------------------------------------------
+// virtual bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::HasRefObjectTypeArray()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ *
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& EventLocator::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   refObjectTypes.push_back(Gmat::CELESTIAL_BODY);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetEpoch(std::string ep)
+//------------------------------------------------------------------------------
+/**
+ * Set the epoch.
+ *
+ * @param <ep> The new epoch.
+ *
+ * @return the epoch as an A1MJD Real
+ */
+//------------------------------------------------------------------------------
+void EventLocator::SetEpoch(const std::string &ep, Integer id)
+{
+   #ifdef DEBUG_DATE_FORMAT
+   MessageInterface::ShowMessage
+      ("EventLocator::SetEpoch() Setting %s epoch (%d) for spacecraft %s to \"%s\"\n",
+       (id == INITIAL_EPOCH? "Initial ":"Final "), id, instanceName.c_str(), ep.c_str());
+   #endif
+
+   std::string epochString = "";
+   Real        epochAsReal = 0.0;
+   std::string timeSystem;
+   std::string timeFormat;
+   TimeConverterUtil::GetTimeSystemAndFormat(epochFormat, timeSystem, timeFormat);
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage("epochFormat = %s\n", epochFormat.c_str());
+      MessageInterface::ShowMessage("timeSystem  = %s\n", timeSystem.c_str());
+      MessageInterface::ShowMessage("timeFormat  = %s\n", timeFormat.c_str());
+   #endif
+   if (timeFormat == "ModJulian") // numeric - save and output without quotes
+      epochString = GmatStringUtil::RemoveEnclosingString(ep, "'");
+   else // "Gregorian" - not numeric - save and output with quotes
+   {
+//      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
+//         epochString = GmatStringUtil::AddEnclosingString(ep, "'");
+//      else
+         epochString = ep;
+   }
+
+   #ifdef DEBUG_DATE_FORMAT
+   MessageInterface::ShowMessage
+      ("EventLocator::SetEpoch() Calling EpochToReal with %s\n",
+            epochString.c_str());
+   #endif
+   Real epochIn = -999.999;
+   std::string noQuotes = GmatStringUtil::RemoveEnclosingString(epochString, "'");
+   std::string outStr;
+   TimeConverterUtil::Convert(epochFormat, epochIn, noQuotes,
+                             "A1ModJulian", epochAsReal, outStr);
+   if (id == INITIAL_EPOCH)
+   {
+      initialEpoch    = epochString;
+      initialEp       = epochAsReal;
+      initialEpochSet = true;
+   }
+   else  // FINAL_EPOCH
+   {
+      finalEpoch    = epochString;
+      finalEp       = epochAsReal;
+      finalEpochSet = true;
+   }
+   #ifdef DEBUG_DATE_FORMAT
+   MessageInterface::ShowMessage
+      ("EventLocator::SetEpoch() Setting epoch (A1Mjd) to %12.15f\n",
+      epochAsReal);
+   MessageInterface::ShowMessage
+      ("EventLocator::SetEpoch() Setting epoch (as string) to %s\n",
+            epochString.c_str());
    #endif
 }
 
-
 //------------------------------------------------------------------------------
-// bool SetOrigin(SpacePoint *bod, const std::string &forObject)
+// std::string GetEpochString(const std::string &whichOne  = "INITIAL",
+//                            const std::string &outFormat = "UTCGregorian")
 //------------------------------------------------------------------------------
-/**
- * Sets the origin body used for calculations
- *
- * @param bod The origin point
- * @param forObject The (optional) target that uses that origin.  If the 
- *                  default "" is used, the origin is set on all of the
- *                  event functions
- *
- * @return If the origin was set on at least one event function, false if not
- */
-//------------------------------------------------------------------------------
-bool EventLocator::SetOrigin(SpacePoint *bod, const std::string &forObject)
+std::string EventLocator::GetEpochString(const std::string &whichOne,
+                                         const std::string &outFormat) const
 {
-   bool retval = false;
+#ifdef DEBUG_EVENT_EPOCH_STRING
+   MessageInterface::ShowMessage("In GetEpochString, initialEpoch = %s\n",
+         initialEpoch.c_str());
+   MessageInterface::ShowMessage("In GetEpochString, finalEpoch = %s\n",
+         finalEpoch.c_str());
+#endif
+   Real outMjd = -999.999;
+   std::string outStr;
+   std::string outputFormat = outFormat;
+//   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
 
-   for (UnsignedInt i = 0; i < eventFunctions.size(); ++i)
+   if (whichOne == "INITIAL")
    {
-      EventFunction *theEventFunction = eventFunctions[i];
-
-      // Skip the rest on this pass through the loop if the EF is NULL
-      if (theEventFunction == NULL)
-         continue;
-
-      if (forObject != "")
-      {
-         // Check that the event function uses the passed in object as target
-         if (theEventFunction->GetPrimaryName() != forObject)
-            theEventFunction = NULL;
-      }
-
-      if (theEventFunction != NULL)
-      {
-         theEventFunction->SetOrigin(bod); //lastOrigin);
-         retval = true;
-      }
+      if ((outFormat == defaultFormat) && GmatMathUtil::IsEqual(initialEp, defaultInitialEpoch))
+         outStr =  initialEpoch;
+      else
+         TimeConverterUtil::Convert("A1ModJulian", initialEp, "",
+                                     outputFormat, outMjd, outStr);
    }
+   else if (whichOne == "FINAL")
+   {
+      if ((outFormat == defaultFormat) && GmatMathUtil::IsEqual(finalEp, defaultFinalEpoch))
+         outStr =  finalEpoch;
+      else
+         TimeConverterUtil::Convert("A1ModJulian", finalEp, "",
+                                     outputFormat, outMjd, outStr);
+   }
+   else
+      return "";
 
-   return retval;
+   return outStr;
 }
 
+void EventLocator::SetAppend(bool appendIt)
+{
+   appendReport = appendIt;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of the reference object
+ *
+ * @param type The type of the requested object name; UNKNOWN_OBJECT for any
+ *
+ * @return Object name
+ */
+//------------------------------------------------------------------------------
+std::string EventLocator::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACECRAFT)
+   {
+      return satName;
+   }
+   return GmatBase::GetRefObjectName(type);
+}
 
 //------------------------------------------------------------------------------
 // const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -1347,14 +1384,12 @@ const StringArray& EventLocator::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
    refObjectNames.clear();
-   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACEOBJECT)
-   {
-      // Get ref. objects for requesting type from the parent class
-      GmatBase::GetRefObjectNameArray(type);
+   // Get ref. objects for requesting type from the parent class
+   GmatBase::GetRefObjectNameArray(type);
 
-      // Add ref. objects for requesting type from this class
-      refObjectNames.insert(refObjectNames.begin(), satNames.begin(),
-            satNames.end());
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACECRAFT)
+   {
+      refObjectNames.push_back(satName);
 
       #ifdef DEBUG_EVENTLOCATOR_OBJECT
          MessageInterface::ShowMessage
@@ -1365,11 +1400,35 @@ const StringArray& EventLocator::GetRefObjectNameArray(
             MessageInterface::ShowMessage("   '%s'\n",
                   refObjectNames[i].c_str());
       #endif
-
-      return refObjectNames;
    }
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::CELESTIAL_BODY)
+   {
+      if (occultingBodyNames.empty())
+         // Add ref. objects for requesting type from this class
+         refObjectNames.insert(refObjectNames.begin(), defaultOccultingBodies.begin(),
+               defaultOccultingBodies.end());
+      else
+         // Add ref. objects for requesting type from this class
+         refObjectNames.insert(refObjectNames.begin(), occultingBodyNames.begin(),
+               occultingBodyNames.end());
 
-   return GmatBase::GetRefObjectNameArray(type);
+      #ifdef DEBUG_EVENTLOCATOR_OBJECT
+         MessageInterface::ShowMessage
+            ("EventLocator::GetRefObjectNameArray() this=<%p>'%s' returning %d "
+             "ref. object names\n", this, GetName().c_str(),
+             refObjectNames.size());
+         for (UnsignedInt i=0; i<refObjectNames.size(); i++)
+            MessageInterface::ShowMessage("   '%s'\n",
+                  refObjectNames[i].c_str());
+      #endif
+   }
+   #ifdef DEBUG_EVENTLOCATOR_SET
+      MessageInterface::ShowMessage("refObjectNames = \n");
+      for (Integer ii = 0; ii < refObjectNames.size(); ii++)
+         MessageInterface::ShowMessage("   %s\n", refObjectNames.at(ii).c_str());
+   #endif
+
+   return refObjectNames;
 }
 
 
@@ -1388,19 +1447,63 @@ const StringArray& EventLocator::GetRefObjectNameArray(
  */
 //------------------------------------------------------------------------------
 bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                              const std::string &name)
+                                const std::string &name)
 {
-   for (UnsignedInt i = 0; i < satNames.size(); ++i)
+   if ((satName == name) && (obj->IsOfType(Gmat::SPACECRAFT)))
    {
-      if (satNames[i] == name)
+      sat = (Spacecraft*) obj;
+      return true;
+   }
+   if (obj->IsOfType(Gmat::CELESTIAL_BODY))
+   {
+      // check to see if it's already in the list
+      std::vector<CelestialBody*>::iterator pos =
+         find(occultingBodies.begin(), occultingBodies.end(), obj);
+      if (pos != occultingBodies.end())
       {
-         if (obj->IsOfType(Gmat::SPACEOBJECT))
-         {
-            targets[i] = (SpaceObject*)obj;
-            return true;
-         }
-         return false;
+         #ifdef DEBUG_CP_OBJECT
+         MessageInterface::ShowMessage
+            ("EventLocator::SetRefObject() the body <%p> '%s' already exist, so "
+             "returning true\n", (*pos), name.c_str());
+         #endif
+         return true;
       }
+
+      // If ref object has the same name, reset it
+      pos = occultingBodies.begin();
+      std::string bodyName;
+      bool bodyFound = false;
+      while (pos != occultingBodies.end())
+      {
+         bodyName = (*pos)->GetName();
+         if (bodyName == name)
+         {
+            #ifdef DEBUG_CP_OBJECT
+            MessageInterface::ShowMessage
+               ("EventLocator::SetRefObject() resetting the pointer of body '%s' <%p> to "
+                "<%p>\n", bodyName.c_str(), (*pos), (CelestialBody*)obj);
+            #endif
+
+            (*pos) = (CelestialBody*)obj;
+            bodyFound = true;
+         }
+         ++pos;
+      }
+
+      // If ref object not found, add it
+      if (!bodyFound)
+      {
+         #ifdef DEBUG_CP_OBJECT
+         MessageInterface::ShowMessage
+            ("EventLocator::SetRefObject() this=<%p> '%s', adding <%p> '%s' "
+             "to bodyList for object %s\n", this, GetName().c_str(), obj, name.c_str(),
+             instanceName.c_str());
+         #endif
+
+         occultingBodies.push_back((CelestialBody*) obj);
+      }
+
+      return true;
    }
    return GmatBase::SetRefObject(obj, type, name);
 }
@@ -1431,11 +1534,26 @@ bool EventLocator::RenameRefObject(const Gmat::ObjectType type,
       case Gmat::FORMATION:
       case Gmat::SPACEOBJECT:
       case Gmat::UNKNOWN_OBJECT:
-         for (UnsignedInt i = 0; i < satNames.size(); ++i)
+         if (satName == oldName)
          {
-            if (satNames[i] == oldName)
+            satName = newName;
+            retval = true;
+         }
+         break;
+      case Gmat::CELESTIAL_BODY:
+         for (UnsignedInt ii = 0; ii < occultingBodyNames.size(); ii++)
+         {
+            if (occultingBodyNames.at(ii) == oldName)
             {
-               satNames[i] = newName;
+               occultingBodyNames.at(ii) = newName;
+               retval = true;
+            }
+         }
+         for (UnsignedInt ii = 0; ii < defaultOccultingBodies.size(); ii++)
+         {
+            if (defaultOccultingBodies.at(ii) == oldName)
+            {
+               defaultOccultingBodies.at(ii) = newName;
                retval = true;
             }
          }
@@ -1449,43 +1567,43 @@ bool EventLocator::RenameRefObject(const Gmat::ObjectType type,
 }
 
 
-//------------------------------------------------------------------------------
-// Integer GetOwnedObjectCount()
-//------------------------------------------------------------------------------
-/** 
- * Retrieves the number of owned objects in the event locator
- *
- * @return The owned object count
- */
-//------------------------------------------------------------------------------
-Integer EventLocator::GetOwnedObjectCount()
-{
-   return 1 + eventTable.GetOwnedObjectCount();
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* GetOwnedObject(Integer whichOne)
-//------------------------------------------------------------------------------
-/** 
- * Retrieves an owned objects by index
- *
- * @param whichOne The index of the owned object
- *
- * @return The owned object
- */
-//------------------------------------------------------------------------------
-GmatBase* EventLocator::GetOwnedObject(Integer whichOne)
-{
-   GmatBase *retval = NULL;
-   if (whichOne == 0)
-      retval = &eventTable;
-   else
-      retval = eventTable.GetOwnedObject(whichOne - 1);
-
-   return retval;
-}
-
+////------------------------------------------------------------------------------
+//// Integer GetOwnedObjectCount()
+////------------------------------------------------------------------------------
+///**
+// * Retrieves the number of owned objects in the event locator
+// *
+// * @return The owned object count
+// */
+////------------------------------------------------------------------------------
+//Integer EventLocator::GetOwnedObjectCount()
+//{
+//   return 1 + eventTable.GetOwnedObjectCount();
+//}
+//
+//
+////------------------------------------------------------------------------------
+//// GmatBase* GetOwnedObject(Integer whichOne)
+////------------------------------------------------------------------------------
+///**
+// * Retrieves an owned objects by index
+// *
+// * @param whichOne The index of the owned object
+// *
+// * @return The owned object
+// */
+////------------------------------------------------------------------------------
+//GmatBase* EventLocator::GetOwnedObject(Integer whichOne)
+//{
+//   GmatBase *retval = NULL;
+//   if (whichOne == 0)
+//      retval = &eventTable;
+//   else
+//      retval = eventTable.GetOwnedObject(whichOne - 1);
+//
+//   return retval;
+//}
+//
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -1498,259 +1616,362 @@ GmatBase* EventLocator::GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
 bool EventLocator::Initialize()
 {
-   bool retval = false;
+   bool retval = true;
 
    #ifdef DEBUG_EVENT_INITIALIZATION
       MessageInterface::ShowMessage("Initializing event locator at <%p>\n", this);
+      MessageInterface::ShowMessage("    Initial epoch is \"%s\"\n", initialEpoch.c_str());
+      MessageInterface::ShowMessage("    Final   epoch is \"%s\"\n", finalEpoch.c_str());
    #endif
 
-   StringArray badInits;
-   efCount = eventFunctions.size();
+////      // Make sure the epochs are set and Real epochs computed
+////   SetEpoch(initialEpoch, INITIAL_EPOCH);
+////   SetEpoch(finalEpoch,   FINAL_EPOCH);
+////   #ifdef DEBUG_EVENT_INITIALIZATION
+////      MessageInterface::ShowMessage("Epochs Initialized!!!!\n");
+////   #endif
+//
+//   // Validate inputs here
+//   if (initialEp > finalEp)
+//   {
+//      std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
+//      errmsg += instanceName + ".\n";
+//      throw EventException(errmsg);
+//   }
+//
+//   fromEpoch = initialEp;
+//   toEpoch   = finalEp;
 
-   // Loop through the event functions, evaluating each and storing their data
-   for (UnsignedInt i = 0; i < efCount; ++i)
+   if (!sat)
    {
-      if (eventFunctions[i]->Initialize() == false)
-         badInits.push_back(eventFunctions[i]->GetName());
+      std::string errmsg = "Spacecraft has not been set for EventLocator ";
+      errmsg += instanceName + ".\n";
+      throw EventException(errmsg);
+   }
+   if (!sat->IsOfType("Spacecraft"))
+   {
+      std::string errmsg = "Target must be of type Spacecraft for EventLocator ";
+      errmsg += instanceName + ".\n";
+      throw EventException(errmsg);
+   }
+   if (filename == "")
+   {
+      std::string errmsg = "No filename specified for EventLocator ";
+      errmsg += instanceName + ".\n";
+      throw EventException(errmsg);
+   }
+   // StellarAberration can only be set if LightTimeCorrection is also set
+   if (useStellarAberration && !useLightTimeDelay)
+   {
+      std::string errmsg = "UseLightTimeDelay must be set to true ";
+      errmsg += "when UseStellarAberration is set to true for EventLocator ";
+      errmsg += instanceName + ".\n";
+      throw EventException(errmsg);
    }
 
-   if (badInits.size() == 0)
-      retval = eventTable.Initialize();
-   else
+   /// Get the occulting bodies from the solar system??? OR put them on the ref object list ??  TBD
+   // @todo <<<<<<<<<<  Currently have them in the ref object list
+   if (occultingBodyNames.size() < 1)
    {
-      std::string errorList;
-      for (UnsignedInt i = 0; i < badInits.size(); ++i)
-         errorList = errorList + "   " + badInits[i] + "\n";
-      throw EventException("These event functions failed to initialize:\n" +
-            errorList);
+      // Use default list here
+      for (Integer ii = 0; ii < defaultOccultingBodies.size(); ii++)
+         occultingBodyNames.push_back(defaultOccultingBodies[ii]);
    }
 
-   if (lastData != NULL)
+   if (occultingBodyNames.size() > occultingBodies.size())
    {
-      delete [] lastData;
-      lastData = NULL;
-   }
-   if (lastEpochs != NULL)
-   {
-      delete [] lastEpochs;
-      lastEpochs = NULL;
+      std::string errmsg = "Specified occulting bodies not set for EventLocator ";
+      errmsg += instanceName + ".\n";
+      throw EventException(errmsg);
    }
 
-   if (earlyBound != NULL)
+//   // For now, call this method here to load the planetary PCKs
+//   #ifdef __USE_SPICE__
+//      solarSys->LoadPCKs();
+//   #endif
+
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage(">>> About to tell spacecraft to record its data ...\n");
+   #endif
+   if (runMode != "Disabled")
    {
-      delete [] earlyBound;
-      earlyBound = NULL;
+      // Tell the spacecraft to start recording its data
+      sat->RecordEphemerisData();
    }
-
-   if (lateBound != NULL)
-   {
-      delete [] lateBound;
-      lateBound = NULL;
-   }
-
-   if (efCount > 0)
-   {
-      earlyBound = new Real[efCount];
-      lateBound  = new Real[efCount];
-      lastData   = new Real[efCount * 3];
-      lastEpochs = new GmatEpoch[efCount];
-
-      for (UnsignedInt i = 0; i < efCount; ++i)
-      {
-         lastEpochs[i] = -1.0;
-         earlyBound[i] = 0.0;
-         lateBound [i] = 0.0;
-      }
-
-      if (stateIndices.size() == 0)
-         stateIndices.insert(stateIndices.begin(), efCount, -1);
-      if (associateIndices.size() == 0)
-         associateIndices.insert(associateIndices.begin(), efCount, -1);
-   }
-
-   functionValues.SetSize(efCount);
-   for (UnsignedInt i = 0; i < efCount; ++i)
-      functionValues[i] = 0.0;
 
    fileWasWritten = false;
-   #ifdef DEBUG_EVENT_INITIALIZATION
-      MessageInterface::ShowMessage("In event locator Initialize "
-         "method, changing from %s to initialized; efCount = %d\n", 
-         (initialized ? "initialized" : "uninitialized"), efCount);
-   #endif
-   isInitialized = true;
+   isInitialized  = true;
+
+   scStart = sat->GetEpoch();
 
    return retval;
 }
 
 
 //------------------------------------------------------------------------------
-// Real GetTolerance()
-//------------------------------------------------------------------------------
-/**
- * Retrieves the locator's tolerance setting
- *
- * @return The tolerance
- */
-//------------------------------------------------------------------------------
-Real EventLocator::GetTolerance()
-{
-   return eventTolerance;
-}
-
-
-//------------------------------------------------------------------------------
-// Real *Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates the EventFunctions and returns their values and derivatives.
- *
- * #param atEpoch  The epoch of the desired evaluation.  Set to -1 to pull epoch
- *                 off the participants.
- * #param forState The Cartesian state of the desired evaluation.  Set to -1 to
- *                 pull state off the participants.
- *
- * @return The event function data from the evaluation
- */
-//------------------------------------------------------------------------------
-Real *EventLocator::Evaluate(GmatEpoch atEpoch, Real *forState)
-{
-   #ifdef DEBUG_EVENTLOCATION
-      MessageInterface::ShowMessage("Entered EventLocator::Evaluate for %s, "
-         "efCount = %d\n", instanceName.c_str(), efCount);
-   #endif
-
-   if (isInitialized == false)
-      throw EventException("The event locator " + instanceName + 
-               " is being evaluated in an unitialized state.");
-
-   Real *vals;
-
-   #ifdef DEBUG_EVENTLOCATION
-      MessageInterface::ShowMessage("   Evaluating %d event functions\n", 
-         eventFunctions.size(), instanceName.c_str());
-   #endif
-
-   UnsignedInt i3;
-
-   // Loop through the event functions, evaluating each and storing their data
-   for (UnsignedInt i = 0; i < eventFunctions.size(); ++i)
-   {
-      i3 = i * 3;
-      if (atEpoch == -1.0)
-      {
-         // Evaluate for event location
-         vals = eventFunctions[i]->Evaluate();
-
-         #ifdef DEBUG_DUMPEVENTDATA
-            dumpfile.precision(15);
-            dumpfile << vals[0] << " " << vals[1] << " " << vals[2] << " ";
-         #endif
-      }
-      else
-      {
-         // Evaluate for integration
-         Real *theState = &(forState[associateIndices[i]]);
-         vals = eventFunctions[i]->Evaluate(atEpoch, theState);
-      }
-
-      // Load the returned data into lastData
-      lastData[  i3  ] = vals[0];
-      lastData[i3 + 1] = vals[1];
-      lastData[i3 + 2] = vals[2];
-   }
-
-   #ifdef DEBUG_DUMPEVENTDATA
-      dumpfile << "\n";
-   #endif
-
-   return lastData;
-}
-
-
-//------------------------------------------------------------------------------
-// UnsignedInt GetFunctionCount()
-//------------------------------------------------------------------------------
-/**
- * Determine the number of event functions in the locator
- *
- * @return The number of functions
- */
-//------------------------------------------------------------------------------
-UnsignedInt EventLocator::GetFunctionCount()
-{
-   return eventFunctions.size();
-}
-
-
-//------------------------------------------------------------------------------
-// void BufferEvent(Integer forEventFunction)
-//------------------------------------------------------------------------------
-/**
- * Saves data for an event boundary in the event table
- *
- * @param forEventFunction Index of the function that is to be saved
- */
-//------------------------------------------------------------------------------
-void EventLocator::BufferEvent(Integer forEventFunction)
-{
-   // Build a LocatedEvent structure
-   LocatedEvent *theEvent = new LocatedEvent;
-
-   Real *theData = eventFunctions[forEventFunction]->GetData();
-
-   // Only add if it was not the last event bracketed
-   if ((theData[0] < earlyBound[forEventFunction]) ||
-       (theData[0] > lateBound[forEventFunction]))
-   {
-      theEvent->epoch = theData[0];
-      lastEpochs[forEventFunction] = theEvent->epoch;
-      theEvent->eventValue = theData[1];
-      theEvent->type = eventFunctions[forEventFunction]->GetTypeName();
-      theEvent->participants = eventFunctions[forEventFunction]->GetName();
-      theEvent->boundary = eventFunctions[forEventFunction]->GetBoundaryType();
-      theEvent->isEntry = eventFunctions[forEventFunction]->IsEventEntry();
-
-      #ifdef DEBUG_EVENTLOCATION
-         MessageInterface::ShowMessage("Adding event to event table:\n   "
-               "%-20s%-30s%-15s%15.9lf\n", theEvent->type.c_str(),
-               theEvent->participants.c_str(), theEvent->boundary.c_str(),
-               theEvent->epoch);
-      #endif
-
-      eventTable.AddEvent(theEvent);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void BufferEvent(Real epoch, std::string type, bool isStart)
-//------------------------------------------------------------------------------
-/**
- * Saves data for an event boundary in the event table
- *
- * @param epoch The epoch of the event
- * @param type The event type
- * @param isStart Flag indicating if event is an entry (true) or exit (false)
- *
- * @note: This method is not used in the current code, and not yet implemented
- */
-//------------------------------------------------------------------------------
-void EventLocator::BufferEvent(Real epoch, std::string type, bool isStart)
-{
-   throw EventException("BufferEvent(epoch, type, isStart) is not yet "
-         "supported");
-}
-
-
-//------------------------------------------------------------------------------
-// void ReportEventData()
+// bool ReportEventData(const std::string &reportNotice = "")
 //------------------------------------------------------------------------------
 /**
  * Writes the event data to file and optionally displays the event data plot.
+ * NOTE: this may be able to be an abstract method, when it is implemented in
+ * all of the derived classes (unless there are commonalities that can
+ * be handled here) *******
  */
 //------------------------------------------------------------------------------
-void EventLocator::ReportEventData(const std::string &reportNotice)
+bool EventLocator::ReportEventData(const std::string &reportNotice)
+{
+   // renameFile set to false here because renaming does not work on Windows
+   bool openOK = OpenReportFile(false);
+
+   if (!openOK)
+   {
+      // TBD - do we want to throw an exception or just continue without writing?
+      return false;
+   }
+
+   // Write the data here
+   theReport << "Here is the report for the EventLocator ";
+   theReport << instanceName << "!!!!!!\n";
+
+   theReport.close();
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// void LocateEvents(const std::string &reportNotice = "")
+//------------------------------------------------------------------------------
+/**
+ * Locates events in the selected time range
+ *
+ * @param appendToFile flag specifying whether to append the data to the
+ *                     file (true) or erase the current file and start
+ *                     over (false)
+ * @note  this method assumes that the appendReport flag has been set
+ *        before this call (using SetAppend method)
+ *
+ */
+//------------------------------------------------------------------------------
+void EventLocator::LocateEvents(const std::string &reportNotice)
+{
+   #ifdef DEBUG_EVENTLOCATOR_DATA
+      MessageInterface::ShowMessage("In EL::LocateEvents, about to call ProvideEphemerisData\n");
+   #endif
+
+   if (runMode != "Disabled")
+   {
+      // First, need to validate initial and final epochs here ...
+      //      // Make sure the epochs are set and Real epochs computed
+      //   SetEpoch(initialEpoch, INITIAL_EPOCH);
+      //   SetEpoch(finalEpoch,   FINAL_EPOCH);
+      //   #ifdef DEBUG_EVENT_INITIALIZATION
+      //      MessageInterface::ShowMessage("Epochs Initialized!!!!\n");
+      //   #endif
+
+      /// Get the ephem manager from the spacecraft, if we don't have it already
+      if (!em)
+      {
+         em  = sat->GetEphemManager();
+         if (!em)
+         {
+            std::string errmsg = "ERROR - no EphemManager available for spacecraft ";
+            errmsg += sat->GetName() + "!!\n";
+            throw EventException(errmsg);
+         }
+      }
+
+      // Stop the data recording so that the kernel will be loaded
+      sat->ProvideEphemerisData();
+
+      Real coverageBegin;
+      Real coverageEnd;
+      scNow = sat->GetEpoch();
+      em->GetCoverage(initialEp, finalEp, useEntireInterval, true,
+                      findStart, findStop, coverageBegin, coverageEnd);
+      #ifdef DEBUG_TIME_SPENT
+      Real timeSpent = (Real) (clock() - t);
+      MessageInterface::ShowMessage(" --- time spent in GetCoverage = %12.10f (sec)\n",
+            (timeSpent / CLOCKS_PER_SEC));
+      #endif
+      #ifdef DEBUG_LOCATE_EVENTS
+         MessageInterface::ShowMessage("---- findStart (from ephemManager)  = %12.10f\n", findStart);
+         MessageInterface::ShowMessage("---- findStop (from ephemManager)   = %12.10f\n", findStop );
+      #endif
+      if (GmatMathUtil::IsEqual(findStart,0.0) && GmatMathUtil::IsEqual(findStop,0.0))
+      {
+         // ... in case there were no files to read from, we'll just use the
+         // beginning and current spacecraft times
+         findStart     = scStart;
+         findStop      = scNow;
+         coverageBegin = scStart;
+         coverageEnd   = scNow;
+      }
+      #ifdef DEBUG_LOCATE_EVENTS
+      MessageInterface::ShowMessage("---- findStart      = %12.10f\n", findStart);
+      MessageInterface::ShowMessage("---- findStop       = %12.10f\n", findStop );
+      MessageInterface::ShowMessage("---- coverageBegin  = %12.10f\n", coverageBegin);
+      MessageInterface::ShowMessage("---- coverageEnd    = %12.10f\n", coverageEnd );
+      MessageInterface::ShowMessage("---- initialEp      = %12.10f\n", initialEp);
+      MessageInterface::ShowMessage("---- finalEp        = %12.10f\n", finalEp );
+      #endif
+
+      // Validate inputs here
+      if (initialEp > finalEp)
+      {
+         std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
+         errmsg += instanceName + ".\n";
+         throw EventException(errmsg);
+      }
+      // Validate initialEpoch and finalEpoch against available range of data (coverageBegin:coverageEnd)
+      Real oneMillisecond = (1.0 / GmatTimeConstants::SECS_PER_DAY) / 1000.00;
+      if (!useEntireInterval)
+      {
+         if (initialEpochSet && (initialEp < (coverageBegin - oneMillisecond)))
+         {
+            std::string errmsg = "Initial Epoch must be after the beginning of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (initialEpochSet && (initialEp > (coverageEnd + oneMillisecond)))
+         {
+            std::string errmsg = "Initial Epoch must be before the end of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (finalEpochSet && (finalEp < (coverageBegin - oneMillisecond)))
+         {
+            std::string errmsg = "Final Epoch must be after the beginning of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (finalEpochSet && (finalEp > (coverageEnd + oneMillisecond)))
+         {
+            std::string errmsg = "Final Epoch must be before the end of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+      }
+
+      fromEpoch = initialEp;
+      toEpoch   = finalEp;
+//
+//      // Stop the data recording so that the kernel will be loaded
+//      sat->ProvideEphemerisData();
+
+      // write the 'running'message each time location is performed
+      MessageInterface::ShowMessage(locatingString);
+
+      // Locate events in derived class and store them as you have decided to do so
+      FindEvents();
+      #ifdef DEBUG_EVENTLOCATOR_DATA
+         MessageInterface::ShowMessage("In EL::LocateEvents, after FindEvents.  About to write the report (%s) ...\n",
+               (writeReport? "true":"false"));
+      #endif
+
+      // Write the report
+      // appendReport should already have been set by a call to SetAppend
+      if (writeReport)
+      {
+         bool wasOK = ReportEventData(reportNotice);
+         #ifdef DEBUG_EVENTLOCATOR_DATA
+            MessageInterface::ShowMessage("In EL::LocateEvents, after ReportEventData (wasOK = %s) ...\n",
+                  (wasOK? "true":"false"));
+         #endif
+         if (wasOK) fileWasWritten = true;
+      }
+   }
+   #ifdef DEBUG_EVENTLOCATOR_DATA
+      MessageInterface::ShowMessage("LEAVING EL::LocateEvents ...\n");
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// bool FileWasWritten()
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating if the EventLocation data was written to a file
+ *
+ * @return The fileWasWritten flag.
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::FileWasWritten()
+{
+   return fileWasWritten;
+}
+
+//------------------------------------------------------------------------------
+// bool IsInAutomaticMode()
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating if the EventLocation run mode is "Automatic"
+ *
+ * @return The flag.
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::IsInAutomaticMode()
+{
+   return (runMode == "Automatic");
+}
+
+
+//------------------------------------------------------------------------------
+// Protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//  Real EpochToReal(const std::string &ep)
+//------------------------------------------------------------------------------
+Real EventLocator::EpochToReal(const std::string &ep)
+{
+   Real fromMjd = -999.999;
+   Real outMjd = -999.999;
+   std::string outStr;
+
+   // remove enclosing quotes for the validation and conversion
+   std::string epNoQuote = GmatStringUtil::RemoveEnclosingString(ep, "'");
+
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage
+         ("EventLocator::EpochToReal() Converting from %s to A1ModJulian\n", epochFormat.c_str());
+   #endif
+
+   if (epochFormat.find("Gregorian") != std::string::npos)
+   {
+      if (!GregorianDate::IsValid(epNoQuote))
+      {
+         std::string errmsg = "EventLocator error: epoch ";
+         errmsg += ep + " is not a valid Gregorian date.\n";
+         throw EventException(errmsg);
+      }
+   }
+
+   TimeConverterUtil::Convert(epochFormat, fromMjd, epNoQuote, "A1ModJulian", outMjd,
+                              outStr);
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage
+         ("EventLocator::EpochToReal() Done converting from %s to A1ModJulian\n", epochFormat.c_str());
+   #endif
+
+   if (outMjd == -999.999)
+   {
+      #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage("EventLocator::EpochToReal() oops!  outMjd = -999.999!!\n");
+      #endif
+   }
+   return outMjd;
+}
+
+//------------------------------------------------------------------------------
+//  bool OpenReportFile(bool renameOld = true)
+//------------------------------------------------------------------------------
+bool EventLocator::OpenReportFile(bool renameOld)
 {
    std::string fullFileName;
 
@@ -1770,252 +1991,159 @@ void EventLocator::ReportEventData(const std::string &reportNotice)
    else
       fullFileName = filename;
 
-   fileWasWritten = eventTable.WriteToFile(fullFileName, reportNotice);
-   if (showPlot)
+   std::string withoutExt = "";
+   // Get the file extension (with prepended '.')
+   std::string fileExt = GmatFileUtil::ParseFileExtension(fullFileName, true);
+   if (fileExt == "")
    {
-      if (fileWasWritten)
-         eventTable.ShowPlot();
-      else
-         MessageInterface::ShowMessage("No events were found, so the event "
-               "plot is not displayed.\n");
+      withoutExt = fullFileName;
    }
-}
+   else
+   {
+      std::string::size_type lastDot = fullFileName.find_last_of(".");
+      withoutExt = fullFileName.substr(0, lastDot);
+   }
 
+   bool fileDoesExist = GmatFileUtil::DoesFileExist(fullFileName);
 
-//------------------------------------------------------------------------------
-// bool FileWasWritten()
-//------------------------------------------------------------------------------
-/**
- * Returns a flag indicating if the EventLocation data was written to a file
- *
- * @return The fileWasWritten flag.
- */
-//------------------------------------------------------------------------------
-bool EventLocator::FileWasWritten()
-{
-   return fileWasWritten;
-}
+   #ifdef DEBUG_EVENTLOCATOR_WRITE
+      MessageInterface::ShowMessage("In ReportEventData, fullFileName  = %s\n", fullFileName.c_str());
+      MessageInterface::ShowMessage("                    withoutExt    = %s\n", withoutExt.c_str());
+      MessageInterface::ShowMessage("                    fileDoesExist = %s\n", (fileDoesExist? "true" : "false"));
+   #endif
 
+   if (appendReport)
+      theReport.open(fullFileName.c_str(), std::fstream::out | std::fstream::app);
+   else
+   {
+      // Rename any old existing files here if necessary
+      if (renameOld) // renaming does NOT WORK on Windows, so we will overwrite all the time
+      {
+         if (fileDoesExist)
+         {
+            // Get the FileManager pointer
+            FileManager *fm = FileManager::Instance();
+            Integer     fileCounter = 0;
+            bool        done        = false;
+            std::stringstream fileRename("");
+            Integer     retCode = 0;
+            while (!done)
+            {
+               fileRename.str("");
+               fileRename << withoutExt << "__" << fileCounter << fileExt;
+               #ifdef DEBUG_EVENTLOCATOR_WRITE
+                  MessageInterface::ShowMessage("------>>> Renaming %s to %s\n",
+                        fullFileName.c_str(), fileRename.str().c_str());
+               #endif
+               if (fm->RenameFile(fullFileName, fileRename.str(), retCode))
+               {
+                  done = true;
+               }
+               else
+               {
+                  if (retCode == 0) // if no error from system, but not allowed to overwrite
+                  {
+      //               if (fileCounter < MAX_FILE_RENAMES) // no MAX for now
+                        fileCounter++;
+      //               else
+      //               {
+      //                  reset_c(); // reset failure flag in SPICE
+      //                  std::string errmsg = "Error renaming existing Event Report file  \"";
+      //                  errmsg += fullFileName + "\".  Maximum number of renames exceeded.\n";
+      //                  throw UtilityException(errmsg);
+      //               }
+                  }
+                  else
+                  {
+      //               reset_c(); // reset failure flag in SPICE
+                     std::string errmsg =
+                           "Unknown system error occurred when attempting to "
+                           "rename existing Event Report file \"";
+                     errmsg += fullFileName + "\".\n";
+                     throw EventException(errmsg);
+                  }
+               }
 
-//------------------------------------------------------------------------------
-// void ReportEventStatistics()
-//------------------------------------------------------------------------------
-/**
- * Writes the event data statistics to file.
- */
-//------------------------------------------------------------------------------
-void EventLocator::ReportEventStatistics()
-{
-   throw EventException("ReportEventStatistics() is not yet supported");
-}
+            }
+         }
+      }
+      else // if not renaming, if it already exists, delete it
+      {
+         if (fileDoesExist)
+            remove(fullFileName.c_str());
+      }
+      theReport.open(fullFileName.c_str(), std::fstream::out);
+   }
 
-
-//------------------------------------------------------------------------------
-// Real* GetEventData(std::string type, Integer whichOne)
-//------------------------------------------------------------------------------
-/**
- * Retrieves data for a specified event.
- *
- * @param type The type of the event (Not yet used)
- * @param whichOne Index into the type for the specific event (Not yet used)
- *
- * @return The event data
- */
-//------------------------------------------------------------------------------
-Real* EventLocator::GetEventData(std::string type, Integer whichOne)
-{
-   return lastData;
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateEventTable(SortStyle how)
-//------------------------------------------------------------------------------
-/**
- * Updates the data in the event table, possibly sorting as well
- *
- * @param how The sorting style
- */
-//------------------------------------------------------------------------------
-void EventLocator::UpdateEventTable(SortStyle how)
-{
-   throw EventException("UpdateEventTable(how) is not yet supported");
-}
-
-//------------------------------------------------------------------------------
-// GmatEpoch GetLastEpoch(Integer index)
-//------------------------------------------------------------------------------
-/**
- * Retrieves the last epoch for a given event
- *
- * @param index Index of the event
- *
- * @return The epoch
- *
- * @note: This method may need refactoring.
- */
-//------------------------------------------------------------------------------
-GmatEpoch EventLocator::GetLastEpoch(Integer index)
-{
-   return lastEpochs[index];
-}
-
-//------------------------------------------------------------------------------
-// void SetFoundEventBrackets(Integer index, GmatEpoch early, GmatEpoch late)
-//------------------------------------------------------------------------------
-/**
- * Sets the bracketing epochs in which an event may exist
- *
- * @param early The earliest epoch for the event
- * @param late The latest epoch for the event
- */
-//------------------------------------------------------------------------------
-void EventLocator::SetFoundEventBrackets(Integer index, GmatEpoch early,
-      GmatEpoch late)
-{
-   earlyBound[index] = early;
-   lateBound[index]  = late;
-}
-
-
-//------------------------------------------------------------------------------
-// bool HasAssociatedStateObjects()
-//------------------------------------------------------------------------------
-/**
- * Checks to see if there are state associations in the class
- *
- * @return true if there are associations, false if not.
- */
-//------------------------------------------------------------------------------
-bool EventLocator::HasAssociatedStateObjects()
-{
+   if (!theReport.is_open())
+   {
+      std::string errmsg = "Error creating or opening report file ";
+      errmsg += fullFileName + ", for object \"";
+      errmsg += instanceName + "\".  No event data will be added to the file.\n";
+      MessageInterface::PopupMessage(Gmat::WARNING_, errmsg);
+      return false;
+   }
    return true;
 }
 
-
 //------------------------------------------------------------------------------
-// std::string GetAssociateName(UnsignedInt val)
-//------------------------------------------------------------------------------
-/**
- * Retrieves the name of an object associated with an event function
- *
- * @param val The index to the event function
- *
- * @return The name of the primary associated with that event.
- */
-//------------------------------------------------------------------------------
-std::string EventLocator::GetAssociateName(UnsignedInt val)
-{
-   std::string retval = "";
-   if (val < efCount)
-      retval = eventFunctions[val]->GetPrimaryName();
-   return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetTarget(UnsignedInt forFunction)
+// std::string GetAbcorrString()
 //------------------------------------------------------------------------------
 /**
- * Retrieves the name of the target object
+ * Returns the aberration correction for use in CSPICE calls
  *
- * @param forFunction Index of the event function being referenced
- *
- * @return The name of the target object
+ * @return string representing the selected aberration corrections
  */
 //------------------------------------------------------------------------------
-std::string EventLocator::GetTarget(UnsignedInt forFunction)
+std::string EventLocator::GetAbcorrString()
 {
-   if (forFunction > efCount)
-      throw EventException("Requested event function target is not in the "
-            "locator named " + instanceName);
-
-   return eventFunctions[forFunction]->GetPrimaryName();
+   std::string correction =  "NONE";
+   if (useLightTimeDelay)
+   {
+      correction = "CN";
+      if (useStellarAberration)
+      {
+         correction = correction + "+S";
+      }
+   }
+   return correction;
 }
 
-
-//------------------------------------------------------------------------------
-// StringArray GetDefaultPropItems()
-//------------------------------------------------------------------------------
-/**
- * Returns a list of the types of prop items this class includes
- *
- * @return The list
- */
-//------------------------------------------------------------------------------
-StringArray EventLocator::GetDefaultPropItems()
+CelestialBody* EventLocator::GetCelestialBody(const std::string &withName)
 {
-   StringArray propItems;
-   propItems.push_back("EventFunction");
-   return propItems;
+   Integer sz = (Integer) occultingBodies.size();
+   for (Integer ii = 0; ii < sz; ii++)
+      if (occultingBodies.at(ii)->GetName() == withName)
+         return occultingBodies.at(ii);
+   return NULL;
 }
 
-
-//------------------------------------------------------------------------------
-// Integer SetPropItem(const std::string &propItem)
-//------------------------------------------------------------------------------
-/**
- * Retrieves the ID of the input prop item type, as known in this class
- *
- * @note This method is poorly named.  We should change it to IdentifyPropItem.
- *
- * @param propItem The prop item that needs to be identified
- *
- * @return The type ID of the prop item
- */
-//------------------------------------------------------------------------------
-Integer EventLocator::SetPropItem(const std::string &propItem)
+std::string EventLocator::GetNoEventsString(const std::string &forType)
 {
-   if (propItem == "EventFunction")
-      return Gmat::EVENT_FUNCTION_STATE;
+   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
+   std::string fromGregorian, toGregorian;
+   Real        resultMjd;
+   std::string noEvents;
 
-   return Gmat::UNKNOWN_STATE;
+
+   TimeConverterUtil::Convert("A1ModJulian", findStart, "",
+                              outputFormat, resultMjd, fromGregorian);
+   TimeConverterUtil::Convert("A1ModJulian", findStop, "",
+                              outputFormat, resultMjd, toGregorian);
+
+   noEvents  = "There are no ";
+   noEvents += forType;
+   noEvents += " events in the time interval ";
+   noEvents += fromGregorian + " to " + toGregorian;
+
+   return noEvents;
 }
 
-//------------------------------------------------------------------------------
-// Integer EventLocator::GetPropItemSize(const Integer item)
-//------------------------------------------------------------------------------
-/**
- * Returns the size of the prop item vector needed by this class
- *
- * @param item The ID of the prop item
- *
- * @return The size of the associated prop item
- */
-//------------------------------------------------------------------------------
-Integer EventLocator::GetPropItemSize(const Integer item)
+void EventLocator::SetLocatingString(const std::string &forType)
 {
-   #ifdef DEBUG_EVENT_INITIALIZATION
-      MessageInterface::ShowMessage("Called GetPropItemSize(%d); "
-         "efCount = %d count = %d\n", item, efCount, eventFunctions.size());
-   #endif
-
-   if (item == Gmat::EVENT_FUNCTION_STATE)
-      return efCount;
-
-   return GmatBase::GetPropItemSize(item);
+   locatingString  = "Finding events for ";
+   locatingString += forType + " ";
+   locatingString += instanceName + " ...\n";
+   locatingString += "Celestial body properties are provided by SPICE kernels.\n";
 }
 
-//------------------------------------------------------------------------------
-// void SetStateIndices(UnsignedInt forFunction, Integer index,
-//       Integer associate)
-//------------------------------------------------------------------------------
-/**
- * Sets the indices of the parameters in the state vector for an event function
- *
- * @param forFunction Index of the event function being referenced
- * @param index The location of the event function in the state vector
- * @param associate The index of the start of state data for the target object
- */
-//------------------------------------------------------------------------------
-void EventLocator::SetStateIndices(UnsignedInt forFunction, Integer index,
-      Integer associate)
-{
-   if (forFunction > stateIndices.size())
-      throw EventException("Event locator " + instanceName +
-            "does not have the requested event function (has it been "
-            "initialized?)");
-
-   stateIndices[forFunction]     = index;
-   associateIndices[forFunction] = associate;
-}

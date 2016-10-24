@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -28,26 +38,50 @@
 #include <map>
 #include <vector>
 
+// Example: information of CAN.ErrorModel1.Bias is stored in ListItem such as below
 struct GMAT_API ListItem
 {
+   /**
+    * Name of the object owning the parameter being listed
+    *
+    * For owned clone objects like error models, the model name
+    * (e.g. "ErrorModel1") is stored in objectName.
+    */
    std::string objectName;
+   /// Full heirarchical name of the object (e.g. "CAN.ErrorModel1")
+   std::string objectFullName;
+   /// Name of the object field (e.g. "Bias") for the current item
    std::string elementName;
+   /// Associate used to track cross correlations and referenced objects
    std::string associateName;
+   /// The object holding the list item
    GmatBase*   object;
    // Gmat::StateElementId
+   /// The parameter ID for the list item
    Integer     elementID;
+   /// index of each subelement of parameter
    Integer     subelement;
+   /// Parameter Id for the current (sub)element
    Integer     parameterID;
+   /// Type for the parameter
    Gmat::ParameterType
                parameterType;
-   Integer     rowIndex;      // Used for vectors and arrays
-   Integer     rowLength;     // Used for vectors and arrays
-   Integer     colIndex;      // Used for arrays
+   /// Row index used for the element, when in an array
+   Integer     rowIndex;
+   /// Length of the row for row or array data
+   Integer     rowLength;
+   /// Column index used for the element, when in an array
+   Integer     colIndex;
+   /// Number of elements stored for the item; for arrays, the number of columns (CHECK THIS)
    Integer     length;
-   bool        dynamicObjectProperty;  // Set if property forces object updates
-   bool        nonzeroInit;			   // Indicates initial value != 0.0
-   Real        initialValue;           // Non-zero initial value
-   bool        postDerivativeUpdate;   // true = Post-superposition step needed
+   /// true if property forces object updates
+   bool        dynamicObjectProperty;
+   /// Indicates initial value != 0.0
+   bool        nonzeroInit;
+   /// Non-zero initial value
+   Real        initialValue;
+   /// true = Post-superposition step needed
+   bool        postDerivativeUpdate;
 };
 
 
@@ -67,7 +101,9 @@ struct GMAT_API ListItem
    EXPIMP_TEMPLATE template struct DECLSPECIFIER std::pair<GmatBase*, StringArray>;
    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<std::pair<GmatBase*, StringArray const>>;
    EXPIMP_TEMPLATE template class DECLSPECIFIER std::_Tmap_traits<GmatBase*, StringArray, std::less<GmatBase*>, std::allocator<std::pair<GmatBase*, StringArray const>>, false>;
+#if _MSC_VER < 1700
    EXPIMP_TEMPLATE template class DECLSPECIFIER std::_Tree_nod<std::_Tmap_traits<GmatBase*, StringArray, std::less<GmatBase*>, std::allocator<std::pair<GmatBase*, StringArray const>>, false>>;
+#endif
 //   EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<std::_Tree_nod<std::_Tmap_traits<GmatBase *,StringArray,std::less<GmatBase *>,std::allocator<std::pair<GmatBase *,const StringArray>>,false>>::_Node >;
    EXPIMP_TEMPLATE template class DECLSPECIFIER std::map<GmatBase*, StringArray*>;
    

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan
 // Created: 2004/01/28
@@ -73,7 +83,10 @@
 //#define DEBUG_CB_CARTOGRAPHIC
 //#define DEBUG_CB_DESTRUCT
 //#define DEBUG_CB_EPOCH
-
+//#define DEBUG_TEXTURE_FILE
+//#define DEBUG_3D_MODEL_FILE
+//#define DEBUG_VALIDATION
+//#define DEBUG_CB_GET_STRING_ARRAY
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -130,6 +143,16 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
    "RotationConstant",
    "RotationRate",
    "TextureMapFileName",
+   "TextureMapFullPath",
+   "3DModelFile",
+   "3DModelFileFullPath",
+   "3DModelOffsetX",
+   "3DModelOffsetY",
+   "3DModelOffsetZ",
+   "3DModelRotationX",
+   "3DModelRotationY",
+   "3DModelRotationZ",
+   "3DModelScale",
 };
 
 const Gmat::ParameterType
@@ -148,7 +171,7 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::INTEGER_TYPE,  //"BodyNumber",
    Gmat::INTEGER_TYPE,  //"RefBodyNumber",
    Gmat::BOOLEAN_TYPE,  //"UsePotentialFileFlag",
-   Gmat::STRING_TYPE,   //"PotentialFileName",
+   Gmat::FILENAME_TYPE, //"PotentialFileName",
    Gmat::RVECTOR_TYPE,  //"AngularVelocity",
    Gmat::REAL_TYPE,     //"HourAngle",
    Gmat::STRING_TYPE,   //"AtmosphereModelName",
@@ -172,7 +195,17 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::REAL_TYPE,     //"SpinAxisDECRate", 
    Gmat::REAL_TYPE,     //"RotationConstant", 
    Gmat::REAL_TYPE,     //"RotationRate", 
-   Gmat::STRING_TYPE,   //"TextureMapFileName"
+   Gmat::FILENAME_TYPE, //"TextureMapFileName"
+   Gmat::FILENAME_TYPE, //"TextureMapFullPath"
+   Gmat::FILENAME_TYPE, //"3DModelFileName"
+   Gmat::FILENAME_TYPE, //"3DModelFileFullPath"
+   Gmat::REAL_TYPE,     //"3DModelOffsetX"
+   Gmat::REAL_TYPE,     //"3DModelOffsetY"
+   Gmat::REAL_TYPE,     //"3DModelOffsetZ"
+   Gmat::REAL_TYPE,     //"3DModelRotationX"
+   Gmat::REAL_TYPE,     //"3DModelRotationY"
+   Gmat::REAL_TYPE,     //"3DModelRotationZ"
+   Gmat::REAL_TYPE,     //"3DModelScale"
 };
 
 const Real    CelestialBody::dDot                       = 1.0;
@@ -212,6 +245,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    theSourceFile      (NULL),
    usePotentialFile   (false),
    potentialFileName  (""),
+   potentialFileNameFullPath (""),
    hourAngle          (0.0),
    atmModel           (NULL),
    atmModelType       ("None"),
@@ -234,7 +268,18 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    naifIdSet          (false),
    naifName           (name),
    textureMapFileName ("GenericCelestialBody.jpg"),
-   msgWritten         (false)
+   textureMapFullPath ("GenericCelestialBody.jpg"),
+   view3dModelFileName     (""),
+   view3dModelFileFullPath (""),
+   view3dModelId        (-1),
+   view3dModelOffsetX   (0.0),
+   view3dModelOffsetY   (0.0),
+   view3dModelOffsetZ   (0.0),
+   view3dModelRotationX (0.0),
+   view3dModelRotationY (0.0),
+   view3dModelRotationZ (0.0),   
+   view3dModelScale     (10.0),
+   msgWritten           (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -249,16 +294,23 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
       models[i].push_back("None");
 
    // try to find the texture map file
-   if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
-   {
-      std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
-      textureMapFileName = textureLoc + textureMapFileName;
-   }
-
+   // if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+   // {
+   //    std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+   //    textureMapFileName = textureLoc + textureMapFileName;
+   // }
+   
+   // Call SetTextureMapFileName() to use FileManager::FindPath() (LOJ: 2014.06.18)
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage("1 Calling SetTextureMapFileName()\n");
+   #endif
+   SetTextureMapFileName(textureMapFileName);
+   
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    orbitSpiceKernelNames.clear();
    
@@ -271,6 +323,11 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    // want to include the Create line either.  This will not be true for user-defined
    // bodies
    cloaking = true;
+
+//   // Set the SPICE_FRAME_ID default - we don't want to do this, as the user
+//   // has to set this for user-defined bodies
+//   std::string nameUpper = GmatStringUtil::ToUpper(name);
+//   spiceFrameID        = "IAU_" + nameUpper;
 
    #ifdef DEBUG_CB_CONSTRUCTOR
    MessageInterface::ShowMessage
@@ -307,6 +364,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    theSourceFile      (NULL),
    usePotentialFile   (false),
    potentialFileName  (""),
+   potentialFileNameFullPath (""),
    hourAngle          (0.0),
    atmModel           (NULL),
    atmModelType       ("None"),
@@ -329,7 +387,18 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    naifIdSet          (false),
    naifName           (name),
    textureMapFileName ("GenericCelestialBody.jpg"),
-   msgWritten         (false)
+   textureMapFullPath ("GenericCelestialBody.jpg"),
+   view3dModelFileName     (""),
+   view3dModelFileFullPath (""),
+   view3dModelId        (-1),
+   view3dModelOffsetX   (0.0),
+   view3dModelOffsetY   (0.0),
+   view3dModelOffsetZ   (0.0),
+   view3dModelRotationX (0.0),
+   view3dModelRotationY (0.0),
+   view3dModelRotationZ (0.0),   
+   view3dModelScale     (10.0),
+   msgWritten           (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -340,13 +409,20 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
 
    mass        = mu / GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    polarRadius = (1.0 - flattening) * equatorialRadius;
-
+   
    // try to find the texture map file
-   if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
-   {
-      std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
-      textureMapFileName = textureLoc + textureMapFileName;
-   }
+   // if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+   // {
+   //    std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+   //    textureMapFileName = textureLoc + textureMapFileName;
+   // }
+   
+   // Call SetTextureMapFileName() to use FileManager::FindPath() (LOJ: 2014.06.18)
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage("2 Calling SetTextureMapFileName()\n");
+   #endif
+   SetTextureMapFileName(textureMapFileName);
+   
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i].push_back("None");
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
@@ -354,6 +430,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    orbitSpiceKernelNames.clear();
    
@@ -398,6 +475,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    theSourceFile       (cBody.theSourceFile), // ????????????????
    usePotentialFile    (cBody.usePotentialFile),
    potentialFileName   (cBody.potentialFileName),
+   potentialFileNameFullPath (cBody.potentialFileNameFullPath),
    hourAngle           (cBody.hourAngle),
    atmModel            (NULL),
    atmModelType        (cBody.atmModelType),
@@ -407,7 +485,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    default_mu                    (cBody.default_mu),
    default_posVelSrc             (cBody.default_posVelSrc),
    default_centralBodyName       (cBody.default_centralBodyName),
-   default_orbitSpiceKernelNames      (cBody.default_orbitSpiceKernelNames),
+   default_orbitSpiceKernelNames (cBody.default_orbitSpiceKernelNames),
    default_rotationSrc           (cBody.default_rotationSrc), 
    default_twoBodyEpoch          (cBody.default_twoBodyEpoch),
    default_twoBodyKepler         (cBody.default_twoBodyKepler),
@@ -416,8 +494,6 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    default_textureMapFileName    (cBody.default_textureMapFileName),
    order               (cBody.order),
    degree              (cBody.degree),
-//   sij                 (cBody.sij),
-//   cij                 (cBody.cij),
    twoBodyFormat       (cBody.twoBodyFormat),
    twoBodyStateType    (cBody.twoBodyStateType),
    twoBodyEpoch        (cBody.twoBodyEpoch),
@@ -439,7 +515,18 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    naifIdSet           (cBody.naifIdSet),
    naifName            (cBody.naifName),
    textureMapFileName  (cBody.textureMapFileName),
-   msgWritten          (cBody.msgWritten)
+   textureMapFullPath  (cBody.textureMapFullPath),
+   view3dModelFileName     (cBody.view3dModelFileName),
+   view3dModelFileFullPath (cBody.view3dModelFileFullPath),
+   view3dModelId        (cBody.view3dModelId),
+   view3dModelOffsetX   (cBody.view3dModelOffsetX),
+   view3dModelOffsetY   (cBody.view3dModelOffsetY),
+   view3dModelOffsetZ   (cBody.view3dModelOffsetZ),
+   view3dModelRotationX (cBody.view3dModelRotationX),
+   view3dModelRotationY (cBody.view3dModelRotationY),
+   view3dModelRotationZ (cBody.view3dModelRotationZ),   
+   view3dModelScale     (cBody.view3dModelScale),
+   msgWritten           (cBody.msgWritten)
 {
    state                  = cBody.state;
    stateTime              = cBody.stateTime;
@@ -449,6 +536,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    
    if (cBody.atmModel)
@@ -515,9 +603,11 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    #ifdef __USE_SPICE__
    kernelReader        = cBody.kernelReader;
    mainSPK             = cBody.mainSPK;
+   mainPCK             = cBody.mainPCK;
    #endif
    usePotentialFile    = cBody.usePotentialFile;
    potentialFileName   = cBody.potentialFileName;
+   potentialFileNameFullPath = cBody.potentialFileNameFullPath;
    angularVelocity     = cBody.angularVelocity;
    hourAngle           = cBody.hourAngle;
    atmModelType        = cBody.atmModelType;
@@ -584,8 +674,21 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    
    naifIdSet           = cBody.naifIdSet;
    naifName            = cBody.naifName;
+   
    textureMapFileName  = cBody.textureMapFileName;
-   msgWritten          = cBody.msgWritten;
+   textureMapFullPath  = cBody.textureMapFullPath;
+   view3dModelFileName     = cBody.view3dModelFileName;
+   view3dModelFileFullPath = cBody.view3dModelFileFullPath;
+   view3dModelId        = cBody.view3dModelId;
+   view3dModelScale     = cBody.view3dModelScale;
+   view3dModelOffsetX   = cBody.view3dModelOffsetX;
+   view3dModelOffsetY   = cBody.view3dModelOffsetY;
+   view3dModelOffsetZ   = cBody.view3dModelOffsetZ;
+   view3dModelRotationX = cBody.view3dModelRotationX;
+   view3dModelRotationY = cBody.view3dModelRotationY;
+   view3dModelRotationZ = cBody.view3dModelRotationZ;   
+   view3dModelScale     = cBody.view3dModelScale;
+   msgWritten           = cBody.msgWritten;
    
    for (Integer i=0;i<6;i++)  prevState[i] = cBody.prevState[i];
 
@@ -617,30 +720,31 @@ CelestialBody::~CelestialBody()
       delete atmModel;
    }
    #ifdef __USE_SPICE__
-   // unload the kernel(s) from the SpiceKernelReader
-      if (kernelReader != NULL)
-      {
-         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
-         {
-            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
-            {
-               #ifdef DEBUG_CB_SPICE
-                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
-                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
-               #endif
-               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
-               {
-                  #ifdef DEBUG_CB_SPICE
-                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
-                  #endif
-                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
-                  #ifdef DEBUG_CB_SPICE
-                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
-                  #endif
-               }
-            }
-         }
-      }
+   UnloadKernels(true, true, true, false);
+   // unload the kernel(s) from the SpiceKernelReader  // @todo  ADD the other kernels here
+//      if (kernelReader != NULL)
+//      {
+//         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
+//         {
+//            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
+//            {
+//               #ifdef DEBUG_CB_SPICE
+//                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+//                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
+//               #endif
+//               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
+//               {
+//                  #ifdef DEBUG_CB_SPICE
+//                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+//                  #endif
+//                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
+//                  #ifdef DEBUG_CB_SPICE
+//                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
+//                  #endif
+//               }
+//            }
+//         }
+//      }
    #endif
    #ifdef DEBUG_CB_DESTRUCT
       MessageInterface::ShowMessage(" Exiting CelestialBody destructor for body %s .........\n", instanceName.c_str());
@@ -791,7 +895,7 @@ Rvector6 CelestialBody::GetLastState()
  * initial state time.
  */
 //------------------------------------------------------------------------------
-const Real CelestialBody::GetFirstStateTime()
+Real CelestialBody::GetFirstStateTime()
 {
    Real retval = -999.0;
    switch (posVelSrc)
@@ -805,7 +909,9 @@ const Real CelestialBody::GetFirstStateTime()
             // Make sure we are looking for coverage in the main SPK kernel as well
             StringArray allKernels = orbitSpiceKernelNames;
             mainSPK                = theSolarSystem->GetStringParameter("SPKFilename");
+            mainPCK                = theSolarSystem->GetStringParameter("PCKFilename");
             if (mainSPK != "")  allKernels.push_back(mainSPK);
+            if (mainPCK != "")  allKernels.push_back(mainPCK);  // correct?
             #ifdef DEBUG_CB_SPICE
                MessageInterface::ShowMessage("Calling GetCoverage with naifId = %d\n", naifId);
                MessageInterface::ShowMessage("   and allKernels are: \n");
@@ -874,10 +980,11 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 //      case Gmat::TWO_BODY_PROPAGATION :   // 2012.01.24 - wcs - disallow for now
 //         state = ComputeTwoBody(atTime);
 //         break;
-      // DE405, DE421, and DE424 read data from theSourceFile
+      // DE405, DE421,DE424, and DE430 read data from theSourceFile
       case Gmat::DE405 :
       case Gmat::DE421 :
       case Gmat::DE424 :
+//      case Gmat::DE430 :
       {
          if (!theSourceFile)
          {
@@ -1044,6 +1151,21 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
           outState     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
           break;
 
+//      case Gmat::DE430 :
+//          if (!theSourceFile)
+//          {
+//             throw PlanetaryEphemException(
+//                   "DE 430 file requested, but no file specified");
+//          }
+//          #ifdef DEBUG_GET_STATE
+//          MessageInterface::ShowMessage
+//             ("   In <%p> '%s', Calling theSourceFile(%s)->GetPosVel(%d, %f, %s)\n",
+//              this, GetName().c_str(), (theSourceFile->GetName()).c_str(), bodyNumber, atTime.GetReal(),
+//              overrideTime ? "true" : "false");
+//          #endif
+//          outState     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
+//          break;
+//
       case Gmat::SPICE :
       #ifdef __USE_SPICE__
          if (!spiceSetupDone) SetUpSPICE();
@@ -1156,7 +1278,8 @@ Real CelestialBody::GetGravitationalConstant()
          {
             MessageInterface::LogMessage
                ("For body %s, using mu (%.18f) from file \"%s\"\n",
-                instanceName.c_str(), mu, potentialFileName.c_str());
+                //instanceName.c_str(), mu, potentialFileName.c_str());
+                instanceName.c_str(), mu, potentialFileNameFullPath.c_str());
             
             isFirstTimeMu = false;
          }
@@ -1168,7 +1291,7 @@ Real CelestialBody::GetGravitationalConstant()
       {
          MessageInterface::LogMessage
             ("For body %s, not using potential file, so using default mu (%.18f)\n",
-             instanceName.c_str(), mu, potentialFileName.c_str());
+             instanceName.c_str(), mu);
          
          isFirstTimeMu = false;
       }
@@ -1207,7 +1330,8 @@ Real CelestialBody::GetEquatorialRadius()
                MessageInterface::ShowMessage
                   ("For body %s, cannot read file \"%s\", so using default eq. radius"
                    " (%.18f)\n", instanceName.c_str(),
-                   potentialFileName.c_str(), default_equatorialRadius);
+                   //potentialFileName.c_str(), default_equatorialRadius);
+                   potentialFileNameFullPath.c_str(), default_equatorialRadius);
                
                isFirstTimeRadius = false;
             }
@@ -1221,7 +1345,8 @@ Real CelestialBody::GetEquatorialRadius()
          {
             MessageInterface::ShowMessage
                ("For body %s, using eq. radius (%.18f) from file \"%s\"\n",
-                instanceName.c_str(), equatorialRadius, potentialFileName.c_str());
+                //instanceName.c_str(), equatorialRadius, potentialFileName.c_str());
+                instanceName.c_str(), equatorialRadius, potentialFileNameFullPath.c_str());
          
             isFirstTimeRadius = false;
          }
@@ -1233,7 +1358,7 @@ Real CelestialBody::GetEquatorialRadius()
       {
          MessageInterface::LogMessage
             ("For body %s, not using potential file, so using default eq. radius (%.18f)\n",
-             instanceName.c_str(), equatorialRadius, potentialFileName.c_str());
+             instanceName.c_str(), equatorialRadius);
          
          isFirstTimeRadius = false;
       }
@@ -1452,84 +1577,6 @@ Real  CelestialBody::GetHourAngle(A1Mjd atTime)
    return hourAngle;
 }
 
-////------------------------------------------------------------------------------
-////  const Rmatrix& GetHarmonicCoefficientsSij()
-////------------------------------------------------------------------------------
-///**
-// * This method returns the spherical harmonic coefficients sij for the body.  It
-// * will read the potential file if that is requested.
-// *
-// * @return sij spherical harmonic coefficients for the body.
-// *
-// *
-// * @exception <SolarSystemException> thown if there is an error getting the data.
-// */
-////------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetHarmonicCoefficientsSij()
-//{
-//   return sij;
-//}
-//
-////------------------------------------------------------------------------------
-////  const Rmatrix& GetHarmonicCoefficientsCij()
-////------------------------------------------------------------------------------
-///**
-// * This method returns the spherical harmonic coefficients cij for the body.  It
-// * will read the potential file if that is requested.
-// *
-// * @return cij spherical harmonic coefficients for the body.
-// *
-// * @exception <SolarSystemException> thown if there is an error getting the data.
-// */
-////------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetHarmonicCoefficientsCij()
-//{
-//   return cij;
-//}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix& GetCoefDriftS()
-//------------------------------------------------------------------------------
-/**
- * This method returns the dSbar coefficient drift matrix for the body.  It
- * will read the potential file if that is requested.
- *
- * @return dSbar  coefficient drift matrix for the body.
- *
- * @exception <SolarSystemException> thown if there is an error getting the data.
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetCoefDriftS()
-//{
-//   if ((usePotentialFile == true) & (!potentialFileRead))
-//   {
-//      bool OK = ReadPotentialFile();
-//      if (!OK) throw SolarSystemException("Unable to read potential file");
-//   }
-//   return dSbar;
-//}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix& GetCoefDriftC()
-//------------------------------------------------------------------------------
-/**
- * This method returns the dCbar coefficient drift matrix for the body.  It
- * will read the potential file if that is requested.
- *
- * @return dCbar  coefficient drift matrix for the body.
- *
- * @exception <SolarSystemException> thown if there is an error getting the data.
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetCoefDriftC()
-//{
-//   if ((usePotentialFile == true) & (!potentialFileRead))
-//   {
-//      bool OK = ReadPotentialFile();
-//      if (!OK) throw SolarSystemException("Unable to read potential file");
-//   }
-//   return dCbar;
-//}
 
 //------------------------------------------------------------------------------
 // Integer GetDegree()
@@ -1954,6 +2001,15 @@ bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
          throw SolarSystemException(errmsg);
       }
    }
+//   if (pvSrc == Gmat::DE430)
+//   {
+//      if (userDefined)
+//      {
+//         std::string errmsg = "DE430 file option not available for user-defined body ";
+//         errmsg += instanceName + "\n";
+//         throw SolarSystemException(errmsg);
+//      }
+//   }
    if (pvSrc == Gmat::SPICE)
    {
       if ((!userDefined) && (!allowSpice))
@@ -2233,19 +2289,6 @@ bool CelestialBody::SetDegree(Integer toDegree)
    return true;
 }
 
-//bool CelestialBody::SetHarmonicCoefficientsSij(const Rmatrix &coeffSij)
-//{
-//   sij                 = coeffSij;
-//   return true;
-//}
-//
-//bool CelestialBody::SetHarmonicCoefficientsCij(const Rmatrix &coeffCij)
-//{
-//   cij                 = coeffCij;
-//   return true;
-//}
-
-
 
 //------------------------------------------------------------------------------
 //  bool SetAtmosphereModelType(std::string toAtmModelType)
@@ -2470,8 +2513,8 @@ bool CelestialBody::SetRotationDataSource(Gmat::RotationDataSource src)
 bool CelestialBody::SetUserDefined(bool userDefinedBody)
 {
    // make sure source makes sense
-   if ((userDefinedBody) && ((posVelSrc == Gmat::DE405) ||(posVelSrc == Gmat::DE421 ||
-	    (posVelSrc == Gmat::DE424))))
+   if ((userDefinedBody) && ((posVelSrc == Gmat::DE405) ||(posVelSrc == Gmat::DE421) ||
+	    (posVelSrc == Gmat::DE424)))   //  || (posVelSrc == Gmat::DE430)))
 	{
       posVelSrc = Gmat::SPICE;
 //      posVelSrc = Gmat::TWO_BODY_PROPAGATION; // 2012.01.24 - wcs - disallowed for now
@@ -2503,6 +2546,42 @@ bool CelestialBody::SetUserDefined(bool userDefinedBody)
    cloaking = false;
 
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string Get3dViewModelFile()
+//------------------------------------------------------------------------------
+std::string CelestialBody::Get3dViewModelFile()
+{
+   return view3dModelFileName;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string Get3dViewModelFileFullPath()
+//------------------------------------------------------------------------------
+std::string CelestialBody::Get3dViewModelFileFullPath()
+{
+   return view3dModelFileFullPath;
+}
+
+
+//------------------------------------------------------------------------------
+// int Get3dViewModelId()
+//------------------------------------------------------------------------------
+int CelestialBody::Get3dViewModelId()
+{
+   return view3dModelId;
+}
+
+
+//------------------------------------------------------------------------------
+// void Set3dViewModelId(int id)
+//------------------------------------------------------------------------------
+void CelestialBody::Set3dViewModelId(int id)
+{
+   view3dModelId = id;
 }
 
 
@@ -2729,62 +2808,6 @@ Rvector CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) cons
 }
 
 
-//------------------------------------------------------------------------------
-//  bool SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
-//                             Real bodyPolarRad, Real bodyMu,
-//                             Integer coeffSize, Rmatrix& bodySij,
-//                             Rmatrix& bodyCij);
-//------------------------------------------------------------------------------
-/**
- * This method sets the physical parameters for the body.
- *
- * @param <bodyMass>     mass (kg) of the body.
- * @param <bodyMEqRad>   equatorial radius (km) of the body.
- * @param <bodyPolarRad> polar radius (km) of the body.
- * @param <bodyMu>       gravitational constant (km^3/s^2) of the body.
- * @param <coeffSize>    size of Sij and Cij for the body.
- * @param <bodySij>      coefficients Sij for the body (coeffSize x coeffSize).
- * @param <bodyCij>      coefficients Cij for the body (coeffSize x coeffSize).
- *
- * @return flag indicating success of the method.
- *
- * @exception <SolarSystemException> thrown if there is an error in the
- *                                   input data.
- */
-//------------------------------------------------------------------------------
-//bool CelestialBody::SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
-//                                          Real bodyPolarRad, Real bodyMu,
-//                                          Integer coeffSize, Rmatrix &bodySij,
-//                                          Rmatrix &bodyCij)
-//{
-//   // add data checks later <-
-//   mass             = bodyMass;
-//   equatorialRadius = bodyEqRad;
-//   polarRadius      = bodyPolarRad;
-//   mu               = bodyMu;
-//   coefficientSize  = coeffSize;
-//   Integer r,c;
-//   try
-//   {
-//      bodySij.GetSize(r,c);
-//      sij = bodySij;
-//   }
-//   catch (TableTemplateExceptions::IllegalSize& tte)
-//   {
-//      throw SolarSystemException("Sij input to body has no dimensions.");
-//   }
-//   try
-//   {
-//      bodyCij.GetSize(r,c);
-//      cij = bodyCij;
-//   }
-//   catch (TableTemplateExceptions::IllegalSize& tte)
-//   {
-//      throw SolarSystemException("Cij input to body has no dimensions.");
-//   }
-//   return true;
-//}
-
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
@@ -2802,6 +2825,10 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 {
    if (id >= SpacePointParamCount && id < CelestialBodyParamCount)
       return PARAMETER_TEXT[id - SpacePointParamCount];
+
+   // Override the PCK kernel names
+   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return "PlanetarySpiceKernelName";
+
    return SpacePoint::GetParameterText(id);
 }
 
@@ -2819,13 +2846,25 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer CelestialBody::GetParameterID(const std::string &str) const
 {
+   #ifdef DEBUG_CB_GET_STRING_ARRAY
+      MessageInterface::ShowMessage("In CB::GetParameterID, str = %s\n",
+            str.c_str());
+   #endif
    for (Integer i = SpacePointParamCount; i < CelestialBodyParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - SpacePointParamCount])
          return i;
    }
-   
-   return SpacePoint::GetParameterID(str);
+   if (str == "PlanetarySpiceKernelName")
+      return ATTITUDE_SPICE_KERNEL_NAME;
+   else if (str == "AttitudeSpiceKernelName")
+   {
+      std::string errmsg = "\"AttitudeSpiceKernelName\" not a valid field for a Celestial Body.  ";
+      errmsg += "Please use \"PlanetarySpiceKernelName\".\n";
+      throw SolarSystemException(errmsg);
+   }
+   else
+      return SpacePoint::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -2916,7 +2955,15 @@ Real CelestialBody::GetRealParameter(const Integer id) const
    if (id == SPIN_AXIS_DEC_RATE)      return orientation[3];
    if (id == ROTATION_CONSTANT)       return orientation[4];
    if (id == ROTATION_RATE)           return orientation[5];
-
+   
+   if (id == VIEW_3D_MODEL_OFFSET_X)   return view3dModelOffsetX;
+   if (id == VIEW_3D_MODEL_OFFSET_Y)   return view3dModelOffsetY;
+   if (id == VIEW_3D_MODEL_OFFSET_Z)   return view3dModelOffsetZ;
+   if (id == VIEW_3D_MODEL_ROTATION_X) return view3dModelRotationX;
+   if (id == VIEW_3D_MODEL_ROTATION_Y) return view3dModelRotationY;
+   if (id == VIEW_3D_MODEL_ROTATION_Z) return view3dModelRotationZ;
+   if (id == VIEW_3D_MODEL_SCALE)      return view3dModelScale;
+   
    return SpacePoint::GetRealParameter(id);
 }
 
@@ -2976,6 +3023,70 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       hourAngle           = value;
       return true;
    }
+   if (id == VIEW_3D_MODEL_OFFSET_X)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelOffsetX = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_OFFSET_Y)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelOffsetY = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_OFFSET_Z)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelOffsetZ = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_ROTATION_X)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelRotationX = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_ROTATION_Y)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelRotationY = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_ROTATION_Z)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelRotationZ = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_SCALE)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelScale = value;
+         return true;
+      }
+      return false;
+   }
+   
    // 2012.01/24 - wcs - two body propagation disallowed for now
    if ((id == TWO_BODY_INITIAL_EPOCH) || (id == TWO_BODY_SMA)  || (id == TWO_BODY_ECC) ||
        (id == TWO_BODY_INC)           || (id == TWO_BODY_RAAN) || (id == TWO_BODY_AOP) ||
@@ -3213,6 +3324,12 @@ Integer CelestialBody::SetIntegerParameter(const Integer id,
 //------------------------------------------------------------------------------
 std::string CelestialBody::GetStringParameter(const Integer id) const
 {
+   #ifdef DEBUG_GET_STRING
+   MessageInterface::ShowMessage
+      ("CelestialBody::GetStringParameter() '%s' entered, id = %d, textureMapFileName = '%s'\n",
+       GetName().c_str(), id, textureMapFileName.c_str());
+   #endif
+   
    if (id == BODY_TYPE)             return Gmat::BODY_TYPE_STRINGS[bodyType];
    if (id == POS_VEL_SOURCE)        return Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc];
 
@@ -3230,7 +3347,10 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
    if (id == ORIENTATION_DATE_FORMAT)  return orientationDateFormat;
    
    if (id == TEXTURE_MAP_FILE_NAME)    return textureMapFileName;
-
+   if (id == TEXTURE_MAP_FULL_PATH)    return textureMapFullPath;
+   if (id == VIEW_3D_MODEL_FILE_NAME)       return view3dModelFileName;
+   if (id == VIEW_3D_MODEL_FILE_FULL_PATH)  return view3dModelFileFullPath;
+   
    return SpacePoint::GetStringParameter(id);
 }
 
@@ -3331,6 +3451,12 @@ bool CelestialBody::SetStringParameter(const Integer id,
          errmsg += instanceName + "\"\n";
          throw SolarSystemException(errmsg);
       }
+//      else if (userDefined && (value == "DE430"))
+//      {
+//         std::string errmsg = "DE430 not allowed as ephemeris source for user-defined body \"";
+//         errmsg += instanceName + "\"\n";
+//         throw SolarSystemException(errmsg);
+//      }
       else if ((!userDefined) && !allowSpice && (value == "SPICE"))
       {
          std::string errmsg = "SPICE not allowed as ephemeris source for default body \"";
@@ -3347,13 +3473,24 @@ bool CelestialBody::SetStringParameter(const Integer id,
    }
    if (id == POTENTIAL_FILE_NAME)
    {
-      if (!(GmatFileUtil::DoesFileExist(value)))
+      // Changed to use GmatBase::GetFullPathFileName()
+      std::string potFile = GmatStringUtil::ToUpper(instanceName) + "_POT_FILE";
+      potentialFileNameFullPath =
+         GmatBase::GetFullPathFileName(potentialFileName, GetName(), value, potFile, true,
+                                       "", false, true);
+      #ifdef DEBUG_CB_SET_STRING
+      MessageInterface::ShowMessage
+         ("   potentialFileNameFullPath = '%s'\n", potentialFileNameFullPath.c_str());
+      #endif
+      // if (!(GmatFileUtil::DoesFileExist(value)))
+      if (potentialFileNameFullPath == "")
       {
          SolarSystemException sse;
          sse.SetDetails(errorMessageFormat.c_str(),
                         value.c_str(), "PotentialFileName", "File must exist");
          throw sse;
       }
+      
       potentialFileName = value;
       return true;
    }
@@ -3449,33 +3586,71 @@ bool CelestialBody::SetStringParameter(const Integer id,
 
    if (id == TEXTURE_MAP_FILE_NAME)
    {
-      textureMapFileName = value;
-      if (!GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+      // Check for texture map file has changed to avoid duplicate waring message
+      // from the FileManager (LOJ: 2014.08.27)
+      if (textureMapFileName != value)
       {
-         std::string oldTextureFile = textureMapFileName;
-         std::string textureLoc     = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
-         textureMapFileName         = textureLoc + textureMapFileName;
-         if (oldTextureFile != "")
-         {
-            if (GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
-            {
-               MessageInterface::ShowMessage
-                  ("*** WARNING *** The texture file '%s' does not exist, \n"
-                   "    so using the texture file '%s' using the path specified in the startup file.\n",
-                   oldTextureFile.c_str(), textureMapFileName.c_str(), instanceName.c_str());
-            }
-            else
-            {
-               std::string errmsg = "Texture map \"";
-               errmsg += oldTextureFile + "\" specified for body \"";
-               errmsg += instanceName + "\" cannot be found.\n";
-               throw SolarSystemException(errmsg);
-            }
-         }
+         // Find find from the FileManager (LOJ: 2014.06.18)
+         textureMapFileName = value;
+         #ifdef DEBUG_TEXTURE_FILE
+         MessageInterface::ShowMessage
+            ("3 Calling SetTextureMapFileName() textureMapFileName = '%s'\n", textureMapFileName.c_str());
+         #endif
+         SetTextureMapFileName(textureMapFileName, true);
       }
+      
+      // Question: Do we want to throw an exception during the setting?
+      #if 0
+      if (textureMapFullPath == "")
+      {
+         std::string errmsg = "Texture map \"";
+         errmsg += textureMapFileName + "\" specified for body \"";
+         errmsg += instanceName + "\" cannot be found.\n";
+         throw SolarSystemException(errmsg);
+      }
+      #endif
+      
+      // if (!GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+      // {
+      //    std::string oldTextureFile = textureMapFileName;
+      //    std::string textureLoc     = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+      //    textureMapFileName         = textureLoc + textureMapFileName;
+      //    if (oldTextureFile != "")
+      //    {
+      //       if (GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+      //       {
+      //          MessageInterface::ShowMessage
+      //             ("*** WARNING *** The texture file '%s' does not exist, \n"
+      //              "    so using the texture file '%s' using the path specified in the startup file.\n",
+      //              oldTextureFile.c_str(), textureMapFileName.c_str(), instanceName.c_str());
+      //       }
+      //       else
+      //       {
+      //          std::string errmsg = "Texture map \"";
+      //          errmsg += oldTextureFile + "\" specified for body \"";
+      //          errmsg += instanceName + "\" cannot be found.\n";
+      //          throw SolarSystemException(errmsg);
+      //       }
+      //    }
+      // }
       return true;
    }
-
+   
+   if (id == VIEW_3D_MODEL_FILE_NAME)
+   {
+      if (view3dModelFileName != value)
+      {
+         view3dModelFileName = value;
+         #ifdef DEBUG_TEXTURE_FILE
+         MessageInterface::ShowMessage
+            ("3 Calling Set3dModelFileName() view3dModelFileName = '%s'\n", view3dModelFileName.c_str());
+         #endif
+         Set3dModelFileName(view3dModelFileName, true);
+      }
+      
+      return true;
+   }
+   
    return SpacePoint::SetStringParameter(id, value);
 }
    
@@ -3664,96 +3839,7 @@ const Rvector& CelestialBody::SetRvectorParameter(const std::string &label,
    return SetRvectorParameter(GetParameterID(label), value);
 }
 
-//------------------------------------------------------------------------------
-//  const Rmatrix&  GetRmatrixParameter(const Integer id)
-//------------------------------------------------------------------------------
-/**
- * This method gets the Rmatrix parameter value, given the input
- * parameter ID.
- *
- * @param <id> ID for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetRmatrixParameter(const Integer id) const
-//{
-//   if (id == SIJ)               return sij;
-//   if (id == CIJ)               return cij;
-//   
-//   return SpacePoint::GetRmatrixParameter(id);
-//}
 
-//------------------------------------------------------------------------------
-//  const Rmatrix&  SetRmatrixParameter(const Integer id, const Rmatrix& value)
-//------------------------------------------------------------------------------
-/**
- * This method sets the Rmatrix parameter value, given the input
- * parameter ID.
- *
- * @param <id>    ID for the requested parameter.
- * @param <value> Rmatrix value for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::SetRmatrixParameter(const Integer id,
-//                                                  const Rmatrix &value)
-//{
-//   if (id == SIJ) 
-//   {
-//      sij = value;
-//      return true;
-//   }
-//   if (id == CIJ)
-//   {
-//      cij = value;
-//      return true;
-//   }
-//
-//   return SpacePoint::SetRmatrixParameter(id,value);
-//}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix&  GetRmatrixParameter(const std::string &label)
-//------------------------------------------------------------------------------
-/**
- * This method gets the Rmatrix parameter value, given the input
- * parameter ID.
- *
- * @param <label> string ID for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetRmatrixParameter(const std::string &label) const
-//{
-//   return GetRmatrixParameter(GetParameterID(label));
-//}
-
-//------------------------------------------------------------------------------
-//  const Rmatrix&  SetRmatrixParameter(const std::string &label,
-//                                      const Rmatrix& value)
-//------------------------------------------------------------------------------
-/**
- * This method sets the Rmatrix parameter value, given the input
- * parameter ID.
- *
- * @param <label> string ID for the requested parameter.
- * @param <value> Rmatrix value for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::SetRmatrixParameter(const std::string &label,
-//                                                  const Rmatrix &value)
-//{
-//   return SetRmatrixParameter(GetParameterID(label), value);
-//}
 
 //------------------------------------------------------------------------------
 //  const StringArray&   GetStringArrayParameter((const Integer id) const
@@ -3971,9 +4057,9 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
    // that may change when/if we add the reading of PCK kernels for body orientation data
 //   if (id == NAIF_ID_REFERENCE_FRAME)  return false;
 
-   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return true;  // attitude for bodies (PCK) are TBD
+//   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return true;
+//   if (id == FRAME_SPICE_KERNEL_NAME)     return true;
    if (id == SC_CLOCK_SPICE_KERNEL_NAME)  return true;
-   if (id == FRAME_SPICE_KERNEL_NAME)     return true;  // for now
 
    // 2012.01.24 - wcs - disallow TWO_BODY_PROPAGATION for now
    if ((id == TWO_BODY_DATE_FORMAT)   || (id == TWO_BODY_STATE_TYPE) ||
@@ -3985,6 +4071,9 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
       return true;
    }
 
+   if (id == TEXTURE_MAP_FULL_PATH || id == VIEW_3D_MODEL_FILE_FULL_PATH)
+      return true;
+   
    return SpacePoint::IsParameterReadOnly(id);
 }
 
@@ -4101,11 +4190,116 @@ bool CelestialBody::IsParameterEqualToDefault(const Integer id) const
       return (default_orientation == orientation);
    }
    if (id == TEXTURE_MAP_FILE_NAME)
-   {
       return (default_textureMapFileName == textureMapFileName);
-   }
+   if (id == VIEW_3D_MODEL_FILE_NAME)
+      return (view3dModelFileName == "");
+   if (id == VIEW_3D_MODEL_OFFSET_X)
+      return view3dModelOffsetX == 0.0;
+   if (id == VIEW_3D_MODEL_OFFSET_Y)
+      return view3dModelOffsetY == 0.0;
+   if (id == VIEW_3D_MODEL_OFFSET_Z)
+      return view3dModelOffsetZ == 0.0;
+   if (id == VIEW_3D_MODEL_ROTATION_X)
+      return view3dModelRotationX == 0.0;
+   if (id == VIEW_3D_MODEL_ROTATION_Y)
+      return view3dModelRotationY == 0.0;
+   if (id == VIEW_3D_MODEL_ROTATION_Z)
+      return view3dModelRotationZ == 0.0;
+   if (id == VIEW_3D_MODEL_SCALE)
+      return view3dModelScale == 10.0;
    
    return SpacePoint::IsParameterEqualToDefault(id);
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::IsParameterValid(const Integer id,
+                                     const std::string &value)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsParameterValid() entered, id=%d, value='%s'\n", id, value.c_str());
+   #endif
+   bool retval = true;
+   Real realval;
+   lastErrorMessage = "";
+   
+   if (id == VIEW_3D_MODEL_OFFSET_X || id == VIEW_3D_MODEL_OFFSET_Y || id == VIEW_3D_MODEL_OFFSET_Y ||
+       id == VIEW_3D_MODEL_ROTATION_X || id == VIEW_3D_MODEL_ROTATION_Y || id == VIEW_3D_MODEL_ROTATION_Z ||
+       id == VIEW_3D_MODEL_SCALE)
+   {
+      if (GmatStringUtil::ToReal(value, realval))
+      {
+         retval = IsRealParameterValid(id, realval, false);
+      }
+      else
+      {
+         retval = false;
+         lastErrorMessage = "*** ERROR *** The value of " + value + " for field \"" +
+            GetParameterText(id) + "\" on object \"" + instanceName + "\" is not valid.  "
+            "The allowed values are Real number.\n";
+      }
+   }
+   else if (id == TEXTURE_MAP_FILE_NAME)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("   Validating TEXTURE_MAP_FILE_NAME\n");
+      #endif
+      if (value == "" || value == "GenericCelestialBody.jpg")
+         retval = true;
+      else if (!SetTextureMapFileName(value, false, true))
+         retval = false;
+   }
+   else if (id == VIEW_3D_MODEL_FILE_NAME)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("   Validating VIEW_3D_MODEL_FILE_NAME\n");
+      #endif
+      if (value == "")
+         retval = true;
+      else if (!Set3dModelFileName(value, false, true))
+         retval = false;
+   }
+   
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsParameterValid() returning %d\n", retval);
+   #endif
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::IsParameterValid(const std::string &label,
+                                     const std::string &value)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsParameterValid() entered, label='%s', value='%s'\n",
+       label.c_str(), value.c_str());
+   #endif
+   return IsParameterValid(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+bool CelestialBody::WriteEmptyStringParameter(const Integer id) const
+{
+   if (id == VIEW_3D_MODEL_FILE_NAME)
+      return true;
+   else
+      return SpacePoint::WriteEmptyStringParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -4305,7 +4499,10 @@ bool CelestialBody::DeterminePotentialFileNameFromStartup()
    {
       FileManager *fm = FileManager::Instance();
       std::string potfile = GmatStringUtil::ToUpper(instanceName) + "_POT_FILE";
-      std::string filename = fm->GetFullPathname(potfile);
+      
+      // Use FileManager::FindPath() for potential file (LOJ: 2014.06.25)
+      //std::string filename = fm->GetFullPathname(potfile);
+      std::string filename = fm->FindPath("", potfile, true);
       
       #if DEBUG_CELESTIAL_BODY
       MessageInterface::ShowMessage
@@ -4338,17 +4535,20 @@ bool CelestialBody::DeterminePotentialFileNameFromStartup()
 bool CelestialBody::ReadPotentialFile()
 {
    if (potentialFileRead) return true;
-   if (potentialFileName == "") return false;
+   //if (potentialFileName == "") return false;
+   if (potentialFileNameFullPath == "") return false;
    
    Integer fileDeg, fileOrd;
    try
    {
-      if (!GravityFileUtil::GetFileInfo(potentialFileName, fileDeg, fileOrd, mu,
-                                    equatorialRadius))
+      //if (!GravityFileUtil::GetFileInfo(potentialFileName, fileDeg, fileOrd, mu,
+      if (!GravityFileUtil::GetFileInfo(potentialFileNameFullPath, fileDeg, fileOrd, mu,
+                                        equatorialRadius))
       {
          throw SolarSystemException
             ("Error reading mu and equatorial radius of " + instanceName
-             + " from "+ potentialFileName);
+             //+ " from "+ potentialFileName);
+             + " from "+ potentialFileNameFullPath);
       }
    }
    catch (BaseException &e)
@@ -4725,8 +4925,12 @@ bool CelestialBody::SetUpSPICE()
       MessageInterface::ShowMessage("   posVelSrc = %s\n", Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc].c_str());
       if (kernelReader == NULL)
          MessageInterface::ShowMessage("   kernelReader is NULL\n");
+      if (theSolarSystem == NULL)
+         MessageInterface::ShowMessage("   theSolarSystem is NULL\n");
    #endif
-   if (posVelSrc != Gmat::SPICE) return false;
+   // Need to do this each time, even if the source is not SPICE, because we may
+   // be doing Event Location (which currently uses SPICE each time).  2015.08.28 WCS
+//   if (posVelSrc != Gmat::SPICE) return false;
    if (kernelReader == NULL) kernelReader = theSolarSystem->GetSpiceOrbitKernelReader();
    if (kernelReader == NULL)
    {
@@ -4739,6 +4943,7 @@ bool CelestialBody::SetUpSPICE()
          MessageInterface::ShowMessage("   kernelReader is STILL NULL\n");
    #endif
    mainSPK = theSolarSystem->GetStringParameter("SPKFilename");
+   mainPCK = theSolarSystem->GetStringParameter("PCKFilename");
    if (orbitSpiceKernelNames.empty())
    {
       if (mainSPK == "")
@@ -4758,103 +4963,116 @@ bool CelestialBody::SetUpSPICE()
          }
       }
    }
-   // make sure the "main" Solar System Kernel(s) are loaded first - DONE in SolarSystem
+   // make sure the "main" Solar System Kernel(s) are loaded first!!!
    theSolarSystem->LoadSpiceKernels();
-   // now load the spice kernels specified for this body
-   for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
-   {
-      #ifdef DEBUG_CB_SPICE
-         char *path=NULL;
-         size_t size = 0;
-         path=getcwd(path,size);
-         MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
-         MessageInterface::ShowMessage("   now checking %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
-      #endif
-      if (!(kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii))))
-      {
-         try
-         {
-            kernelReader->LoadKernel(orbitSpiceKernelNames.at(ii));
-            #ifdef DEBUG_CB_SPICE
-               MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
-                     (orbitSpiceKernelNames.at(ii)).c_str());
-            #endif
-         }
-         catch (UtilityException &ue)
-         {
-            #ifdef DEBUG_CB_SPICE
-               MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
-            #endif
-            // try again with path name if no path found
-            std::string spkName = orbitSpiceKernelNames.at(ii);
-            if (spkName.find("/") == spkName.npos &&
-                spkName.find("\\") == spkName.npos)
-            {
-               std::string spkPath =
-                  FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
-               spkName = spkPath + spkName;
-               try
-               {
-                  #ifdef DEBUG_CB_SPICE
-                     MessageInterface::ShowMessage("   now attempting to load %s ...\n", spkName.c_str());
-                  #endif
-                  kernelReader->LoadKernel(spkName);
-                  #ifdef DEBUG_CB_SPICE
-                  MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
-                     spkName.c_str());
-                  #endif
-               }
-               catch (UtilityException &)
-               {
-                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
-                     (spkName.c_str()));
-                  throw; // rethrow the exception, for now
-               }
-            }
-            else
-            {
-               MessageInterface::ShowMessage("ERROR loading kernel %s\n",
-                  (orbitSpiceKernelNames.at(ii).c_str()));
-               throw; // rethrow the exception, for now
-            }
-         }
-      }
-   }
+
+   // Call SpacePoint method to load the specified kernels - we want orbit,
+   // attitude (pck), and frame kernels loaded for celestial bodies
+   LoadNeededKernels(true, true, true, false);
+
+//   // now load the spice kernels specified for this body
+//   for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
+//   {
+//      #ifdef DEBUG_CB_SPICE
+//         char *path=NULL;
+//         size_t size = 0;
+//         path=getcwd(path,size);
+//         MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+//         MessageInterface::ShowMessage("   now checking %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
+//      #endif
+//      if (!(kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii))))
+//      {
+//         try
+//         {
+//            kernelReader->LoadKernel(orbitSpiceKernelNames.at(ii));
+//            #ifdef DEBUG_CB_SPICE
+//               MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
+//                     (orbitSpiceKernelNames.at(ii)).c_str());
+//            #endif
+//         }
+//         catch (UtilityException &ue)
+//         {
+//            #ifdef DEBUG_CB_SPICE
+//               MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+//            #endif
+//            // try again with path name if no path found
+//            std::string spkName = orbitSpiceKernelNames.at(ii);
+//            if (spkName.find("/") == spkName.npos &&
+//                spkName.find("\\") == spkName.npos)
+//            {
+//               // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+//               //std::string spkPath =
+//               //   FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+//               std::string spkPath =
+//                  FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+//               spkName = spkPath + spkName;
+//               try
+//               {
+//                  #ifdef DEBUG_CB_SPICE
+//                     MessageInterface::ShowMessage("   now attempting to load %s ...\n", spkName.c_str());
+//                  #endif
+//                  kernelReader->LoadKernel(spkName);
+//                  #ifdef DEBUG_CB_SPICE
+//                  MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
+//                     spkName.c_str());
+//                  #endif
+//               }
+//               catch (UtilityException &)
+//               {
+//                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+//                     (spkName.c_str()));
+//                  throw; // rethrow the exception, for now
+//               }
+//            }
+//            else
+//            {
+//               MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+//                  (orbitSpiceKernelNames.at(ii).c_str()));
+//               throw; // rethrow the exception, for now
+//            }
+//         }
+//      }
+//   }
    // get the NAIF Id from the Spice Kernel(s)   @todo - should this be moved to SpacePoint?
    if (!naifIdSet)
    {
-      // SPICE calls Earth's moon "Moon" ; GMAT calls Earth's moon "Luna"
-      Integer spiceNaifId; 
-      if (instanceName == SolarSystem::MOON_NAME)
-         spiceNaifId = kernelReader->GetNaifID("MOON"); 
-      else if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
-         spiceNaifId = kernelReader->GetNaifID("SSB");
-      else
+      // WCS as of 2016.06.13 we don't want to override with the NAIF ID from the file IF
+      // the user has set a value.  We only want to set the NAIF ID if the
+      // user did NOT set one for the body.
+      if (naifId == UNDEFINED_NAIF_ID)
       {
-            spiceNaifId = kernelReader->GetNaifID(instanceName, false);
-            // if not found with the instanceName, try using the NAIF ID
-            if (spiceNaifId == 0)   // SSB is 0, but that's handled above
-            {
-               std::stringstream ss("");
-               ss << naifId;
-               naifName = ss.str();
-               spiceNaifId = naifId;
-            }
-            else
-            {
-               naifName = instanceName;
-            }
-      }
-      
-      if ((naifId != UNDEFINED_NAIF_ID) && (spiceNaifId != naifId))
-      {
+         // SPICE calls Earth's moon "Moon" ; GMAT calls Earth's moon "Luna"
+         Integer spiceNaifId; 
+         if (instanceName == SolarSystem::MOON_NAME)
+            spiceNaifId = kernelReader->GetNaifID("MOON"); 
+         else if (instanceName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+            spiceNaifId = kernelReader->GetNaifID("SSB");
+         else
+         {
+               spiceNaifId = kernelReader->GetNaifID(instanceName, false);
+               // if not found with the instanceName, try using the NAIF ID
+               if (spiceNaifId == 0)   // SSB is 0, but that's handled above
+               {
+                  std::stringstream ss("");  // @todo - revisit this code 
+                  ss << naifId;
+                  naifName = ss.str();
+                  spiceNaifId = naifId;
+               }
+               else
+               {
+                  naifName = instanceName;
+               }
+         }
+         
          std::stringstream ss("");
-         ss << "Overriding input NAIF ID for body \"" << instanceName <<
-               "\" with NAIF ID (" << spiceNaifId << ") from SPICE kernel.\n";
-         //         MessageInterface::PopupMessage(Gmat::WARNING_, ss.str());
+         ss << "NAIF ID for body \"" << instanceName << "\" was unset.  Setting to " <<
+               "NAIF ID (" << spiceNaifId << ") retrieved from SPICE kernel.\n";
          MessageInterface::ShowMessage(ss.str().c_str());
+            
+         naifId    = spiceNaifId;
       }
-      naifId    = spiceNaifId;
+      // The user set a value (or we are using the default value for the
+      // built-in bodies)
       naifIdObserver = kernelReader->GetNaifID(j2000BodyName, false);
       naifIdSet = true;
    }
@@ -4885,6 +5103,621 @@ bool CelestialBody::NeedsOnlyMainSPK()
 }
 
 //------------------------------------------------------------------------------
+// bool IsRealParameterValid(Integer id, Real realval, bool throwError = true)
+//------------------------------------------------------------------------------
+/**
+ * Chekcs if input real value is valid.
+ *
+ * @param id  The Parameter ID
+ * @param realval The real value
+ * @param throwError  Throws an exception if this flag is true [true]
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::IsRealParameterValid(Integer id, Real realval, bool throwError)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsRealParameterValid() entered, id=%d, realval=%f\n", id, realval);
+   #endif
+   
+   bool retval = true;
+   lastErrorMessage = "";
+   
+   if (id == VIEW_3D_MODEL_OFFSET_X || id == VIEW_3D_MODEL_OFFSET_Y || id == VIEW_3D_MODEL_OFFSET_Y)
+   {
+      if (realval < -3.5 || realval > 3.5)
+         retval = false;
+      
+      if (retval == false)
+      {
+         std::string strval = GmatStringUtil::ToString(realval, GetDataPrecision());
+         lastErrorMessage = "*** ERROR *** The value of " + strval + " for field \"" + GetParameterText(id) +
+            "\" on object \"" + instanceName + "\" is out of bounds.  "
+            "The allowed values are: [-3.5 <= Real <= 3.5].\n";
+      }
+   }
+   else if (id == VIEW_3D_MODEL_ROTATION_X || id == VIEW_3D_MODEL_ROTATION_Y || id == VIEW_3D_MODEL_ROTATION_Z)
+   {
+      if (realval < -180.0 || realval > 180.0)
+         retval = false;
+      
+      if (retval == false)
+      {
+         std::string strval = GmatStringUtil::ToString(realval, GetDataPrecision());
+         lastErrorMessage = "*** ERROR *** The value of " + strval + " for field \"" + GetParameterText(id) +
+            "\" on object \"" + instanceName + "\" is out of bounds.  "
+            "The allowed values are: [-180 <= Real <= 180].\n";
+      }
+   }
+   else if (id == VIEW_3D_MODEL_SCALE)
+   {
+      if (realval < 0.001 || realval > 1000)
+         retval = false;
+      
+      if (retval == false)
+      {
+         std::string strval = GmatStringUtil::ToString(realval, GetDataPrecision());
+         lastErrorMessage = "*** ERROR *** The value of " + strval + " for field \"" + GetParameterText(id) +
+            "\" on object \"" + instanceName + "\" is out of bounds.  "
+            "The allowed values are: [0.001 <= Real <= 1000].\n";
+      }
+   }
+   
+   if (retval == false && throwError)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage
+         ("CelestialBody::IsRealParameterValid() throwing error:\n",
+          lastErrorMessage.c_str());
+      #endif
+      throw SolarSystemException(lastErrorMessage);
+   }
+   
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsRealParameterValid() returning %d\n", retval);
+   #endif
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool SetTextureMapFileName(const std::string &filename, bool writeWarning = false,
+//                            bool validateOnly = false)
+//------------------------------------------------------------------------------
+/**
+ * Sets full texture file name. If filename is non-blank and does not exist, it
+ * will throw an exception. If filename is generic texture file name or blank, it
+ * will set to generic texture file name.
+ *
+ * @return true if input fileName is valid texture file, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetTextureMapFileName(const std::string &fileName, bool writeWarning,
+                                          bool validateOnly)
+{
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("\nCelestialBody::SetTextureMapFileName() '%s' entered\n   fileName = '%s'\n   "
+       "writeWarning = %d, validateOnly = %d\n", GetName().c_str(), fileName.c_str(),
+       writeWarning, validateOnly);
+   #endif
+   
+   bool retval = true;
+   lastErrorMessage = "";
+   FileManager *fm = FileManager::Instance();
+   std::string actualFile = fileName;
+   std::string actualPath;
+   std::string bodyName = GetName();
+   bool success = fm->GetTextureMapFile(fileName, bodyName, bodyName, actualFile, actualPath, writeWarning);
+   lastErrorMessage = fm->GetLastFilePathMessage() + " texture map file";
+   
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("   After call to fm->GetTextureMapFile(), success = %d\n   lastErrorMessage = '%s'\n",
+       success, lastErrorMessage.c_str());
+   #endif
+   
+   if (success)
+   {
+      if (!validateOnly)
+      {
+         textureMapFileName = actualFile;
+         textureMapFullPath = actualPath;
+      }
+   }
+   else
+   {
+      retval = false;
+      textureMapFullPath = "";
+      std::string errMsg = lastErrorMessage;
+      lastErrorMessage = "**** ERROR *** " + lastErrorMessage;
+      if (writeWarning && !validateOnly)
+         throw SolarSystemException(errMsg);
+   }
+   
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("   textureMapFileName = '%s'\n   textureMapFullPath = '%s'\n",
+       textureMapFileName.c_str(), textureMapFullPath.c_str());
+   MessageInterface::ShowMessage
+      ("CelestialBody::SetTextureMapFileName() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Set3dModelFileName(const std::string &filename, bool writeWarning = false,
+//                        bool validateOnly = false)
+//------------------------------------------------------------------------------
+/**
+ * Sets full model file name. If filename is non-blank and does not exist, it
+ * will throw an exception. If filename is blank, it will do nothing since
+ * model file is optional.
+ *
+ * @return true if input fileName is valid texture file, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::Set3dModelFileName(const std::string &fileName, bool writeWarning,
+                                       bool validateOnly)
+{
+   #ifdef DEBUG_3D_MODEL_FILE
+   MessageInterface::ShowMessage
+      ("\nCelestialBody::Set3dModelFileName() '%s' entered\n   fileName = '%s'\n   "
+       "writeWarning = %d, validateOnly = %d\n", GetName().c_str(), fileName.c_str(),
+       writeWarning, validateOnly);
+   #endif
+   
+   if (fileName == "")
+   {
+      if (!validateOnly)
+         view3dModelFileFullPath = "";
+      
+      #ifdef DEBUG_3D_MODEL_FILE
+      MessageInterface::ShowMessage
+      ("   view3dModelFileName = '%s'\n   view3dModelFileFullPath = '%s'\n",
+       view3dModelFileName.c_str(), view3dModelFileFullPath.c_str());
+      MessageInterface::ShowMessage
+         ("CelestialBody::Set3dModelFileName() returning true, fileName is blank and it's OK\n");
+      #endif
+      
+      return true;
+   }
+   
+   bool retval = true;
+   lastErrorMessage = "";
+   FileManager *fm = FileManager::Instance();
+   std::string actualFile = fileName;
+   std::string actualPath;
+   std::string bodyName = GetName();
+   bool success = fm->GetBody3dModelFile(fileName, bodyName, bodyName, actualFile, actualPath, writeWarning);
+   lastErrorMessage = fm->GetLastFilePathMessage() + " 3d model file";
+   
+   #ifdef DEBUG_3D_MODEL_FILE
+   MessageInterface::ShowMessage
+      ("   After call to fm->GetModelFile(), success = %d\n   lastErrorMessage = '%s'\n",
+       success, lastErrorMessage.c_str());
+   #endif
+   
+   if (success)
+   {
+      if (!validateOnly)
+      {
+         view3dModelFileName = actualFile;
+         view3dModelFileFullPath = actualPath;
+      }
+   }
+   else
+   {
+      retval = false;
+      view3dModelFileFullPath = "";
+      std::string errMsg = lastErrorMessage;
+      lastErrorMessage = "**** ERROR *** " + lastErrorMessage;
+      if (writeWarning && !validateOnly)
+         throw SolarSystemException(errMsg);
+   }
+   
+   #ifdef DEBUG_3D_MODEL_FILE
+   MessageInterface::ShowMessage
+      ("   view3dModelFileName = '%s'\n   view3dModelFileFullPath = '%s'\n",
+       view3dModelFileName.c_str(), view3dModelFileFullPath.c_str());
+   MessageInterface::ShowMessage
+      ("CelestialBody::Set3dModelFileName() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
-// none
+
+
+bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
+                                      bool frame,  bool scClock)
+{
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   INLoadNeededKernels, size of attitudeSpiceKernelNames = %d\n",
+         (Integer) attitudeSpiceKernelNames.size());
+#endif
+
+#ifdef __USE_SPICE__
+   if (orbit)
+   {
+      for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
+      {
+         bool isItLoaded = kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii));
+         #ifdef DEBUG_CB_SPICE
+            char *path=NULL;
+            size_t size = 0;
+            path=getcwd(path,size);
+            MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+            MessageInterface::ShowMessage("   now checking Orbit file %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
+            MessageInterface::ShowMessage("   is it already loaded? %s\n", (isItLoaded? "YES!!!" : "no"));
+         #endif
+         if (!isItLoaded)
+         {
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   %s IS NOT already loaded!!!\n", orbitSpiceKernelNames.at(ii).c_str());
+#endif
+            try
+            {
+               kernelReader->LoadKernel(orbitSpiceKernelNames.at(ii));
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   CB::LNK -- spice has loaded file %s\n",
+                        (orbitSpiceKernelNames.at(ii)).c_str());
+               #endif
+            }
+            catch (UtilityException &ue)
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+               #endif
+               // try again with path name if no path found
+               std::string spkName = orbitSpiceKernelNames.at(ii);
+               if (spkName.find("/") == spkName.npos &&
+                   spkName.find("\\") == spkName.npos)
+               {
+                  // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+                  //std::string spkPath =
+                  //   FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+                  std::string spkPath =
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   In CB, spkPath returned was %s ...\n", spkPath.c_str());
+#endif
+                  spkName = spkPath + spkName;
+                  try
+                  {
+                     #ifdef DEBUG_CB_SPICE
+                        MessageInterface::ShowMessage("   now attempting to load %s ...\n", spkName.c_str());
+                     #endif
+                     kernelReader->LoadKernel(spkName);
+                     #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        spkName.c_str());
+                     #endif
+                  }
+                  catch (UtilityException &)
+                  {
+                     MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                        (spkName.c_str()));
+                     throw; // rethrow the exception, for now
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                     (orbitSpiceKernelNames.at(ii).c_str()));
+                  throw; // rethrow the exception, for now
+               }
+            }
+         }
+         #ifdef DEBUG_CB_SPICE
+         else
+         {
+            MessageInterface::ShowMessage("   %s was already loaded, so not loaded!!!\n", orbitSpiceKernelNames.at(ii).c_str());
+         }
+         #endif
+
+      }
+   }
+   if (attitude)
+   {
+      for (unsigned int ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
+      {
+         #ifdef DEBUG_CB_SPICE
+            char *path=NULL;
+            size_t size = 0;
+            path=getcwd(path,size);
+            MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+            MessageInterface::ShowMessage("   now checking Planetary file %s ...\n", attitudeSpiceKernelNames.at(ii).c_str());
+         #endif
+         if (!(kernelReader->IsLoaded(attitudeSpiceKernelNames.at(ii))))
+         {
+            try
+            {
+               kernelReader->LoadKernel(attitudeSpiceKernelNames.at(ii));
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        (attitudeSpiceKernelNames.at(ii)).c_str());
+               #endif
+            }
+            catch (UtilityException &ue)
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+               #endif
+               // try again with path name if no path found
+               std::string pckName = attitudeSpiceKernelNames.at(ii);
+               if (pckName.find("/") == pckName.npos &&
+                   pckName.find("\\") == pckName.npos)
+               {
+                  std::string pckPath =
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+                  pckName = pckPath + pckName;
+                  try
+                  {
+                     #ifdef DEBUG_CB_SPICE
+                        MessageInterface::ShowMessage("   now attempting to load %s ...\n", pckName.c_str());
+                     #endif
+                     kernelReader->LoadKernel(pckName);
+                     #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        pckName.c_str());
+                     #endif
+                  }
+                  catch (UtilityException &)
+                  {
+                     MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                        (pckName.c_str()));
+                     throw; // rethrow the exception, for now
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                     (attitudeSpiceKernelNames.at(ii).c_str()));
+                  throw; // rethrow the exception, for now
+               }
+            }
+         }
+      }
+   }
+   if (frame)
+   {
+      for (unsigned int ii = 0; ii < frameSpiceKernelNames.size(); ii++)
+      {
+         #ifdef DEBUG_CB_SPICE
+            char *path=NULL;
+            size_t size = 0;
+            path=getcwd(path,size);
+            MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+            MessageInterface::ShowMessage("   now checking Frame file %s ...\n", frameSpiceKernelNames.at(ii).c_str());
+         #endif
+         if (!(kernelReader->IsLoaded(frameSpiceKernelNames.at(ii))))
+         {
+            try
+            {
+               kernelReader->LoadKernel(frameSpiceKernelNames.at(ii));
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        (frameSpiceKernelNames.at(ii)).c_str());
+               #endif
+            }
+            catch (BaseException &ue)
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+               #endif
+               // try again with path name if no path found
+               std::string fkName = frameSpiceKernelNames.at(ii);
+               if (fkName.find("/") == fkName.npos &&
+                   fkName.find("\\") == fkName.npos)
+               {
+                  std::string fkPath =
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+                  fkName = fkPath + fkName;
+                  try
+                  {
+                     #ifdef DEBUG_CB_SPICE
+                        MessageInterface::ShowMessage("   now attempting to load %s ...\n", fkName.c_str());
+                     #endif
+                     kernelReader->LoadKernel(fkName);
+                     #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        fkName.c_str());
+                     #endif
+                  }
+                  catch (UtilityException &)
+                  {
+                     MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                        (fkName.c_str()));
+                     throw; // rethrow the exception, for now
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                     (frameSpiceKernelNames.at(ii).c_str()));
+                  throw; // rethrow the exception, for now
+               }
+            }
+         }
+      }
+   }
+   if (scClock)
+   {
+      for (unsigned int ii = 0; ii < scClockSpiceKernelNames.size(); ii++)
+      {
+         #ifdef DEBUG_CB_SPICE
+            char *path=NULL;
+            size_t size = 0;
+            path=getcwd(path,size);
+            MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+            MessageInterface::ShowMessage("   now checking ScClock file %s ...\n", scClockSpiceKernelNames.at(ii).c_str());
+         #endif
+         if (!(kernelReader->IsLoaded(scClockSpiceKernelNames.at(ii))))
+         {
+            try
+            {
+               kernelReader->LoadKernel(scClockSpiceKernelNames.at(ii));
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        (scClockSpiceKernelNames.at(ii)).c_str());
+               #endif
+            }
+            catch (UtilityException &ue)
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+               #endif
+               // try again with path name if no path found
+               std::string scClockName = scClockSpiceKernelNames.at(ii);
+               if (scClockName.find("/") == scClockName.npos &&
+                   scClockName.find("\\") == scClockName.npos)
+               {
+                  std::string scClockPath =
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+                  scClockName = scClockPath + scClockName;
+                  try
+                  {
+                     #ifdef DEBUG_CB_SPICE
+                        MessageInterface::ShowMessage("   now attempting to load %s ...\n", scClockName.c_str());
+                     #endif
+                     kernelReader->LoadKernel(scClockName);
+                     #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        scClockName.c_str());
+                     #endif
+                  }
+                  catch (UtilityException &)
+                  {
+                     MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                        (scClockName.c_str()));
+                     throw; // rethrow the exception, for now
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                     (scClockSpiceKernelNames.at(ii).c_str()));
+                  throw; // rethrow the exception, for now
+               }
+            }
+         }
+      }
+   }
+#endif
+   return true;
+}
+
+bool CelestialBody::UnloadKernels(bool orbit,  bool attitude,
+                                  bool frame,  bool scClock)
+{
+#ifdef __USE_SPICE__
+   if (kernelReader)
+   {
+      if (orbit)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
+         {
+            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (attitude)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < attitudeSpiceKernelNames.size(); kk++)
+         {
+            if ((attitudeSpiceKernelNames.at(kk) != "") && (attitudeSpiceKernelNames.at(kk) != mainPCK))
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (attitudeSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(attitudeSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(attitudeSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (attitudeSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (frame)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < frameSpiceKernelNames.size(); kk++)
+         {
+            if (frameSpiceKernelNames.at(kk) != "")
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (frameSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(frameSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(frameSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (frameSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (scClock)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < scClockSpiceKernelNames.size(); kk++)
+         {
+            if (scClockSpiceKernelNames.at(kk) != "")
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (scClockSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(scClockSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(scClockSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (scClockSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+   }
+#endif
+   return true;
+}
+

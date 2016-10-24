@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\gravitymodel\PolyhedronBody.cpp">
+      <Filter>Source Files\gravitymodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\gravitymodel\PolyhedronGravityModel.cpp">
+      <Filter>Source Files\gravitymodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\PolyhedronGravityModelFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\base\include\polyhedrongravitymodel_defs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\gravitymodel\PolyhedronBody.hpp">
+      <Filter>Source Files\gravitymodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\gravitymodel\PolyhedronGravityModel.hpp">
+      <Filter>Source Files\gravitymodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\PolyhedronGravityModelFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{74df4e05-7a59-4ef1-83da-cfd33e974009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{a95cfaa2-3043-4ad5-842e-48066441e034}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{adae99a9-3502-4be0-817b-11d2c26d8aaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{968ecaaa-dfcb-4c36-9ee6-cf39ebe47426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\factory">
+      <UniqueIdentifier>{bee8ab03-b495-478f-8591-0e86d748d3d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gravitymodel">
+      <UniqueIdentifier>{87b156f0-8eb1-44a1-94c9-d4297f9c653f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{34f3deb6-c040-4a01-9d93-520283a7cc4b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

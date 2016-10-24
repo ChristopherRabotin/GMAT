@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -1026,9 +1036,47 @@ Rmatrix Rmatrix::Inverse() const
 
    if (rowsD != colsD)
       throw Rmatrix::NotSquare();
+
+   Rmatrix A = *this;
+
+   // Verify information matrix is a diagonal matrix
+   bool isDiagonal = true;
+   for (Integer i = 0; i < A.GetNumRows(); ++i)
+   {
+      for (Integer j = i; j < A.GetNumColumns(); ++j)
+      {
+         if ((i != j) && (A.GetElement(i, j) != 0.0))
+         {
+            isDiagonal = false;
+            break;
+         }
+      }
+      if (!isDiagonal)
+         break;
+   }
+
+   if (isDiagonal)
+   {
+      // Verify all diagonal elements not zero
+      for (Integer i = 0; i < A.GetNumRows(); ++i)
+         if (A.GetElement(i, i) == 0.0)
+            throw Rmatrix::IsSingular();
+
+      // Take inverse all elements on diagonal
+      Real val;
+      for (Integer i = 0; i < this->GetNumRows(); ++i)
+      {
+         val = 1.0 / A.GetElement(i, i);
+         A.SetElement(i, i, val);
+      }
+
+      return A;
+   }
+
+
    //int dummy_marker = 4;
    int IndexRange = rowsD;
-   Rmatrix A = *this;
+   
    ArrayTemplate<bool> PivotAllowed(IndexRange);
    ArrayTemplate<int> PivotRowList(IndexRange), PivotColumnList(IndexRange);
    Real PivotElement;

@@ -9,7 +9,7 @@ VERSION = dev
 # Standard targets
 #
 
-all: installer-internal installer-public zip-internal zip-public
+all: installer-internal zip-internal installer-public zip-public
 
 clean:
 	rm -fr gmat-internal gmat-public *.exe *.zip uninstall.nsh
@@ -41,7 +41,7 @@ installer-internal: gmat.nsi assemble-internal
 	cp -p gmat-internal/GMAT/bin/gmat_startup_file.txt \
 	    gmat-internal/GMAT/bin/gmat_startup_file.wmatlab.txt
 	sed '/libMatlabInterface/s/^\( *PLUGIN\) /#\1/g' \
-	    gmat-internal/GMAT/bin/gmat_startup_file.txt \
+	    gmat-internal/GMAT/bin/gmat_startup_file.wmatlab.txt \
 	    | sed '/libFminconOptimizer/s/^\( *PLUGIN\) /#\1/g' \
 	    | unix2dos \
 	    > gmat-internal/GMAT/bin/gmat_startup_file.txt
@@ -55,7 +55,7 @@ installer-public: gmat.nsi assemble-public
 	cp -p gmat-public/GMAT/bin/gmat_startup_file.txt \
 	    gmat-public/GMAT/bin/gmat_startup_file.wmatlab.txt
 	sed '/libMatlabInterface/s/^\( *PLUGIN\) /#\1/g' \
-	    gmat-public/GMAT/bin/gmat_startup_file.txt \
+	    gmat-public/GMAT/bin/gmat_startup_file.wmatlab.txt \
 	    | sed '/libFminconOptimizer/s/^\( *PLUGIN\) /#\1/g' \
 	    | unix2dos \
 	    > gmat-public/GMAT/bin/gmat_startup_file.txt
@@ -85,7 +85,7 @@ gmat-win-i586-$(VERSION).zip: gmat-public/GMAT/bin/GMAT.exe
 	    && zip -r9 ../$@ GMAT
 
 gmat-internal/GMAT/bin/GMAT.exe:
-	../assemblegmat.sh -d gmat-internal/GMAT -t full-release
+	./assemblegmat.sh -d gmat-internal/GMAT -t full-release
 
 gmat-public/GMAT/bin/GMAT.exe:
-	../assemblegmat.sh -d gmat-public/GMAT -t public-release
+	./assemblegmat.sh -d gmat-public/GMAT -t public-release

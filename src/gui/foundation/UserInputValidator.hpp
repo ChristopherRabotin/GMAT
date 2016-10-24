@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -40,10 +50,23 @@ public:
    bool CheckFileName(const std::string &str, const std::string &field,
                       bool onlyMsg = false);
    
+   bool CheckLength(const std::string &str, const std::string &field,
+                    const std::string &expLength,
+                    const Integer min, const Integer max);
+
+   bool CheckReal(Real &rvalue, const char *str,
+                  const std::string &field, const std::string &expRange,
+                  bool onlyMsg = false, bool checkRange = false, 
+                  bool positive = false, bool zeroOk = false);
    bool CheckReal(Real &rvalue, const std::string &str,
                   const std::string &field, const std::string &expRange,
                   bool onlyMsg = false, bool checkRange = false, 
                   bool positive = false, bool zeroOk = false);
+   
+   bool CheckInteger(Integer &ivalue, const char *str,
+                     const std::string &field, const std::string &expRange,
+                     bool onlyMsg = false, bool checkRange = false,
+                     bool positive = false, bool zeroOk = false);
    
    bool CheckInteger(Integer &ivalue, const std::string &str,
                      const std::string &field, const std::string &expRange,
@@ -56,6 +79,11 @@ public:
                           bool checkLower = true, bool checkUpper = true,
                           bool includeLower = false,
                           bool includeUpper = false);
+   
+   bool CheckVariable(const char *varName, ObjectTypeArray ownerTypes,
+                      const std::string &field, const std::string &expRange,
+                      bool allowNumber = true, bool allowNonPlottable = false,
+                      bool allowObjectProperty = false, bool allowWholeArray = false);
    
    bool CheckVariable(const std::string &varName, ObjectTypeArray ownerTypes,
                       const std::string &field, const std::string &expRange,

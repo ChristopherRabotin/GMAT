@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-Unicode|Win32">
+      <Configuration>Release-Unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{08D5533A-5E01-4AA2-B5A2-FC43A03DC566}</ProjectGuid>
+    <RootNamespace>libNewParameters</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-Unicode|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-Unicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)lib\debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>libNewParameters</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-Unicode|Win32'">
+    <OutDir>$(SolutionDir)lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>libNewParameters</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-Unicode|Win32'">
+    <TargetName>libNewParameters</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-Unicode|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\parameter;..\..\src\base\plugin;..\..\..\..\..\GmatDevelopment\src\base\include;..\..\..\..\..\GmatDevelopment\src\base\foundation;..\..\..\..\..\GmatDevelopment\src\base\asset;..\..\..\..\..\GmatDevelopment\src\base\attitude;..\..\..\..\..\GmatDevelopment\src\base\burn;..\..\..\..\..\GmatDevelopment\src\base\coordsystem;..\..\..\..\..\GmatDevelopment\src\base\factory;..\..\..\..\..\GmatDevelopment\src\base\forcemodel;..\..\..\..\..\GmatDevelopment\src\base\hardware;..\..\..\..\..\GmatDevelopment\src\base\parameter;..\..\..\..\..\GmatDevelopment\src\base\solarsys;..\..\..\..\..\GmatDevelopment\src\base\solver;..\..\..\..\..\GmatDevelopment\src\base\spacecraft;..\..\..\..\..\GmatDevelopment\src\base\subscriber;..\..\..\..\..\GmatDevelopment\src\base\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>_MBCS;NEW_PARAMETER_EXPORTS;_DYNAMICLINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\..\GmatDevelopment\application\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>Copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)..\..\..\..\..\..\GmatDevelopment\application\debug\plugins\proprietary</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying $(TargetName) into place</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\parameter;..\..\src\base\plugin;..\..\..\..\..\GmatDevelopment\src\base\include;..\..\..\..\..\GmatDevelopment\src\base\foundation;..\..\..\..\..\GmatDevelopment\src\base\asset;..\..\..\..\..\GmatDevelopment\src\base\attitude;..\..\..\..\..\GmatDevelopment\src\base\burn;..\..\..\..\..\GmatDevelopment\src\base\coordsystem;..\..\..\..\..\GmatDevelopment\src\base\factory;..\..\..\..\..\GmatDevelopment\src\base\forcemodel;..\..\..\..\..\GmatDevelopment\src\base\hardware;..\..\..\..\..\GmatDevelopment\src\base\parameter;..\..\..\..\..\GmatDevelopment\src\base\solarsys;..\..\..\..\..\GmatDevelopment\src\base\solver;..\..\..\..\..\GmatDevelopment\src\base\spacecraft;..\..\..\..\..\GmatDevelopment\src\base\subscriber;..\..\..\..\..\GmatDevelopment\src\base\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>NEW_PARAMETER_EXPORTS;_DYNAMICLINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\..\..\GmatDevelopment\application\bin</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>Copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)..\..\..\..\..\GmatDevelopment\application\plugins\proprietary</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying $(TargetName) into place</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-Unicode|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\parameter;..\..\src\base\plugin;..\..\..\..\..\GmatDevelopment\src\base\include;..\..\..\..\..\GmatDevelopment\src\base\foundation;..\..\..\..\..\GmatDevelopment\src\base\asset;..\..\..\..\..\GmatDevelopment\src\base\attitude;..\..\..\..\..\GmatDevelopment\src\base\burn;..\..\..\..\..\GmatDevelopment\src\base\coordsystem;..\..\..\..\..\GmatDevelopment\src\base\factory;..\..\..\..\..\GmatDevelopment\src\base\forcemodel;..\..\..\..\..\GmatDevelopment\src\base\hardware;..\..\..\..\..\GmatDevelopment\src\base\parameter;..\..\..\..\..\GmatDevelopment\src\base\solarsys;..\..\..\..\..\GmatDevelopment\src\base\solver;..\..\..\..\..\GmatDevelopment\src\base\spacecraft;..\..\..\..\..\GmatDevelopment\src\base\subscriber;..\..\..\..\..\GmatDevelopment\src\base\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PreprocessorDefinitions>NEW_PARAMETER_EXPORTS;_DYNAMICLINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\..\..\GmatDevelopment\application\bin</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>Copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)..\..\..\..\GmatDevelopment\application\plugins</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying $(TargetName) into place</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\base\factory\NewParameterFactory.hpp" />
+    <ClInclude Include="..\..\src\base\include\newparameter_defs.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\FMAcceleration.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\FMDensity.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\OdeData.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\OdeReal.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\SolverData.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\SolverReal.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\SolverState.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\SolverStatus.hpp" />
+    <ClInclude Include="..\..\src\base\parameter\SolverString.hpp" />
+    <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\base\factory\NewParameterFactory.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\FMAcceleration.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\FMDensity.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\OdeData.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\OdeReal.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\SolverData.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\SolverReal.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\SolverState.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\SolverStatus.cpp" />
+    <ClCompile Include="..\..\src\base\parameter\SolverString.cpp" />
+    <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

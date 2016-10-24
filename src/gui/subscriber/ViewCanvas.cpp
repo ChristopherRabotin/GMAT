@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2010/04/19
@@ -15,6 +25,7 @@
  */
 //------------------------------------------------------------------------------
 #include "ViewCanvas.hpp"
+#include "gmatwxdefs.hpp"          // for WX_TO_STD_STRING, STD_TO_WX_STRING macros
 #include "MdiGlPlotData.hpp"       // for GmatPlot::MAX_SCS
 #include "Spacecraft.hpp"
 #include "ModelManager.hpp"
@@ -29,6 +40,10 @@
 #include "MessageInterface.hpp"
 #include "AttitudeConversionUtility.hpp"
 
+// Libpng-1.6 is more stringent about checking ICC profiles than previous versions.
+// You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
+// For now just ignore warning (LOJ: 2014.09.23)
+#define __IGNORE_PNG_WARNING__
 
 //http://www.opengl.org/resources/features/KilgardTechniques/oglpitfall/
 // When you desire high-quality texture mapping, you will typically specify a
@@ -52,7 +67,7 @@
 //#define DEBUG_DRAWING_MODE
 //#define DEBUG_OBJECT 2
 //#define DEBUG_DATA_BUFFERRING 1
-//#define DEBUG_UPDATE 1
+//#define DEBUG_UPDATE 2
 //#define DEBUG_UPDATE_OBJECT 1
 //#define DEBUG_UPDATE_VIEW 1
 //#define DEBUG_DRAW 1
@@ -140,7 +155,8 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mPlotName = name;
    mGlInitialized = false;
    mViewPointInitialized = false;
-   mModelsAreLoaded = false;
+   mSatModelsAreLoaded = false;
+   mOtherModelsAreLoaded = false;
    mIsNewFrame = true;
    
    // Performance
@@ -174,6 +190,7 @@ ViewCanvas::ViewCanvas(wxWindow *parent, wxWindowID id,
    mNeedVelocity = false;
    mNeedAttitude = false;
    mNeedEcliptic = false;
+   mIgnoreTimeSequence = false;
    
    // drawing options
    mDrawWireFrame = false;
@@ -831,6 +848,12 @@ void ViewCanvas::TakeAction(const std::string &action)
       // We don't want to connect to new point so set it to false
       mIsDrawing[mLastIndex] = false;
    }
+   else if (action == "IgnoreTimeSequence")
+   {
+      // This is indicates not to check for time in order
+      // This will allow showing unsynchronized propagation
+      mIgnoreTimeSequence = true;
+   }
    
    #ifdef DEBUG_TAKE_ACTION
    MessageInterface::ShowMessage
@@ -910,8 +933,8 @@ void ViewCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
    MessageInterface::ShowMessage
       ("===========================================================================\n");
    MessageInterface::ShowMessage
-      ("ViewCanvas::UpdatePlot() plot=%s, time=%f, mNumData=%d, mScCount=%d, "
-       "solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n", GetName().c_str(),
+      ("ViewCanvas::UpdatePlot() plot='%s', time=%f, mNumData=%d, mScCount=%d, "
+       "solving=%d, solverOption=%d, drawing=%d, inFunction=%d\n", GetName().WX_TO_C_STRING,
        time, mNumData, mScCount, solving, solverOption, drawing, inFunction);
    ColorMap::const_iterator iter = orbitColorMap.begin();
    #endif
@@ -1094,9 +1117,8 @@ void ViewCanvas::SetDrawingMode()
    // as its 'front' for lighting and culling purposes
    glFrontFace(GL_CCW);
    
-   // Enable face culling, so that polygons facing away (defines by front face)
-   // from the viewer aren't drawn (for efficiency).
-   glEnable(GL_CULL_FACE);
+   // Disable face culling so that backwards models (like Mir) will work
+   glDisable (GL_CULL_FACE);
    
    // Enable OpenGL to use glColorMaterial() to get material properties
    glEnable(GL_COLOR_MATERIAL);
@@ -1174,7 +1196,8 @@ void ViewCanvas::ResetPlotInfo()
    mInFunction = false;
    
    mWriteRepaintDisalbedInfo = true;
-   mModelsAreLoaded = false;
+   mSatModelsAreLoaded = false;
+   mOtherModelsAreLoaded = false;
    
    // Initialize view
    if (mUseInitialViewPoint)
@@ -1497,7 +1520,7 @@ void ViewCanvas::ComputeRingBufferIndex()
          MessageInterface::ShowMessage
             ("*** WARNING *** %s: '%s' exceed the maximum data points, now "
              "showing %d most recent data points.\n", utcGregorian.c_str(),
-             mPlotName.c_str(), MAX_DATA);
+             mPlotName.WX_TO_C_STRING, MAX_DATA);
          mWriteWarning = false;
       }
       
@@ -1598,7 +1621,7 @@ bool ViewCanvas::LoadBodyTextures()
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadBodyTextures() '%s' entered, mObjectCount=%d\n",
-       mPlotName.c_str(), mObjectCount);
+       mPlotName.WX_TO_C_STRING, mObjectCount);
    #endif
    
    //--------------------------------------------------
@@ -1614,7 +1637,7 @@ bool ViewCanvas::LoadBodyTextures()
       
       #if DEBUG_TEXTURE
 		MessageInterface::ShowMessage
-			("   object = '%s', map id = %d\n", mObjectNames[i].c_str(),
+			("   object = '%s', map id = %d\n", mObjectNames[i].WX_TO_C_STRING,
 			 mTextureIdMap[mObjectNames[i]]);
       #endif
 		
@@ -1623,7 +1646,7 @@ bool ViewCanvas::LoadBodyTextures()
          #if DEBUG_TEXTURE > 1
          MessageInterface::ShowMessage
             ("ViewCanvas::LoadBodyTextures() object=<%p>'%s'\n",
-             mObjectArray[i], mObjectNames[i].c_str());
+             mObjectArray[i], mObjectNames[i].WX_TO_C_STRING);
          #endif
          
          mTextureIdMap[mObjectNames[i]] =
@@ -1634,7 +1657,7 @@ bool ViewCanvas::LoadBodyTextures()
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadBodyTextures() '%s' leaving, mObjectCount=%d\n",
-       mPlotName.c_str(), mObjectCount);
+       mPlotName.WX_TO_C_STRING, mObjectCount);
    #endif
    
    return true;   
@@ -1651,6 +1674,11 @@ bool ViewCanvas::LoadBodyTextures()
 //------------------------------------------------------------------------------
 GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
 {
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLogLevel logLevel = wxLog::GetLogLevel();
+   wxLog::SetLogLevel(0);
+   #endif
+   
    GLuint texId = UNINIT_TEXTURE;
    std::string textureFile;
    
@@ -1660,8 +1688,8 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::BindTexture() '%s' entered, objName='%s', textureFile = '%s'\n",
-       mPlotName.c_str(), objName.c_str(), textureFile.c_str());
+      ("ViewCanvas::BindTexture() '%s' entered, objName='%s'\n   textureFile = '%s'\n",
+       mPlotName.WX_TO_C_STRING, objName.WX_TO_C_STRING, textureFile.c_str());
    #endif
    
    try
@@ -1673,7 +1701,11 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          {
             std::string oldTextureFile = textureFile;
             CelestialBody *body = (CelestialBody*) obj;
-            textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
+            textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFullPath"));
+            #if DEBUG_TEXTURE
+            MessageInterface::ShowMessage
+               ("   texture fullpath from the body = '%s'\n", textureFile.c_str());
+            #endif
             if (oldTextureFile != "")
             {
                MessageInterface::ShowMessage
@@ -1681,21 +1713,31 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
                    "    so using the texture file '%s' from the body '%s'.\n",
                    oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
             }
-            // If texture file does not exist, try with default path from the startup file
-            if (!GmatFileUtil::DoesFileExist(textureFile.c_str()))
+            
+            FileManager *fm = FileManager::Instance();
+            // Changed to use FileManager::FindPath() (LOJ: 2014.07.08)
+            std::string textureLoc = fm->FindPath(textureFile, "TEXTURE_PATH", true, false, false);
+            if (textureLoc == "")
             {
-               oldTextureFile = textureFile;
-               FileManager *fm = FileManager::Instance();
-               std::string textureLoc = fm->GetFullPathname("TEXTURE_PATH");
-               textureFile = textureLoc + textureFile;
-               if (oldTextureFile != "")
-               {
-                  MessageInterface::ShowMessage
-                     ("*** WARNING *** The texture file '%s' does not exist, \n"
-                      "    so using the texture file '%s' using the path specified in the startup file.\n",
-                      oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
-               }
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The texture file '%s' does not exist\n", textureFile.c_str());
             }
+            
+            // // If texture file does not exist, try with default path from the startup file
+            // if (!GmatFileUtil::DoesFileExist(textureFile.c_str()))
+            // {
+            //    oldTextureFile = textureFile;
+            //    FileManager *fm = FileManager::Instance();
+            //    std::string textureLoc = fm->GetFullPathname("TEXTURE_PATH");
+            //    textureFile = textureLoc + textureFile;
+            //    if (oldTextureFile != "")
+            //    {
+            //       MessageInterface::ShowMessage
+            //          ("*** WARNING *** The texture file '%s' does not exist, \n"
+            //           "    so using the file '%s' \n    from the path specified in the startup file.\n",
+            //           oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
+            //    }
+            // }
          }
       }
       else if (obj->IsOfType(Gmat::SPACECRAFT) ||
@@ -1712,7 +1754,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          if (GmatFileUtil::DoesDirectoryExist(iconLoc.c_str(), false))
          {
             if (obj->IsOfType(Gmat::SPACECRAFT))
-                textureFile = iconLoc + "Spacecraft.png";
+               textureFile = iconLoc + "Spacecraft.png";
             else
                textureFile = iconLoc + "rt_GroundStation.png";
          }
@@ -1750,7 +1792,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          {
             MessageInterface::ShowMessage
                ("*** WARNING *** ViewCanvas::BindTexture() Cannot load texture "
-                "image for '%s' from '%s'\n", objName.c_str(), textureFile.c_str());
+                "image for '%s' from '%s'\n", objName.WX_TO_C_STRING, textureFile.c_str());
          }
          texId = UNINIT_TEXTURE;
       }
@@ -1762,14 +1804,18 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
       {
          MessageInterface::ShowMessage
             ("*** WARNING *** ViewCanvas::BindTexture() Cannot bind texture "
-             "image for %s.\n%s\n", objName.c_str(), e.GetFullMessage().c_str());
+             "image for %s.\n%s\n", objName.WX_TO_C_STRING, e.GetFullMessage().c_str());
       }
    }
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::BindTexture() '%s' leaving, objName='%s', texId=%d\n",
-		 mPlotName.c_str(), objName.c_str(), texId);
+		 mPlotName.WX_TO_C_STRING, objName.WX_TO_C_STRING, texId);
+   #endif
+   
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLog::SetLogLevel(logLevel);
    #endif
    
    return texId;
@@ -1792,7 +1838,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
    #if DEBUG_LOAD_IMAGE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadImage() '%s' entered\n   file='%s', objUsingIcon=%d\n",
-       mPlotName.c_str(), fileName.c_str(), objUsingIcon);
+       mPlotName.WX_TO_C_STRING, fileName.c_str(), objUsingIcon);
    #endif
    
    if (fileName == "")
@@ -1902,7 +1948,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
       #if DEBUG_LOAD_IMAGE
       MessageInterface::ShowMessage
          ("ViewCanvas::LoadImage() '%s' returning true, mipmapsStatus=%d\n",
-          mPlotName.c_str(), mipmapsStatus);
+          mPlotName.WX_TO_C_STRING, mipmapsStatus);
       #endif
       
       return true;
@@ -1912,7 +1958,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
       #if DEBUG_LOAD_IMAGE
       MessageInterface::ShowMessage
          ("ViewCanvas::LoadImage() '%s' returning false, mipmapsStatus=%d\n",
-          mPlotName.c_str(), mipmapsStatus);
+          mPlotName.WX_TO_C_STRING, mipmapsStatus);
       #endif
       return false;
    }
@@ -2034,18 +2080,24 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadSpacecraftModels() '%s' entered, writeWarning = %d, mGlInitialized = %d, "
-       "mModelsAreLoaded = %d, mScCount = %d\n", mPlotName.c_str(), writeWarning, mGlInitialized,
-       mModelsAreLoaded, mScCount);
+       "mSatModelsAreLoaded = %d, mScCount = %d\n", mPlotName.WX_TO_C_STRING, writeWarning,
+       mGlInitialized, mSatModelsAreLoaded, mScCount);
    #endif
    
    // Add this here to see if it works on Linux loading spacecraft 3ds model (LOJ: 2012.08.01)
    wxPaintDC dc(this);
    if (!SetGLContext("in ViewCanvas::LoadSpacecraftModels()"))
+   {
+      #if DEBUG_LOAD_MODEL
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadSpacecraftModels() '%s' returning false, SetGLContext() failed\n");
+      #endif
       return false;
+   }
    
    if (mGlInitialized)
    {
-      if (!mModelsAreLoaded)
+      if (!mSatModelsAreLoaded)
       {
          ModelManager *mm = ModelManager::Instance();
 			
@@ -2077,27 +2129,36 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 					}
 					else
 					{
+                  std::string modelFullPath = sat->GetModelFileFullPath();
                   #ifdef DEBUG_LOAD_MODEL
 						MessageInterface::ShowMessage
-							("   Loading model file from the spacecraft <%p>'%s'\n   modelFile='%s', "
-							 "modelID=%d\n",  sat, sat->GetName().c_str(), sat->modelFile.c_str(),
-							 sat->modelID);
+							("   Loading model file from the spacecraft <%p>'%s'\n   modelFile = '%s', "
+							 "modelID = %d\n",  sat, sat->GetName().c_str(), modelFullPath.c_str(),
+							 sat->GetModelId());
 				      #endif
                   
-						if (sat->modelFile != "" && sat->modelID == -1)
+                  // If fullpaht is blank, try with model file name
+                  if (modelFullPath == "")
+                  {
+                     modelFullPath = sat->GetModelFile();
+                  }
+                  
+						if (modelFullPath != "" && sat->GetModelId() == -1)
 						{
-							wxString modelPath(sat->modelFile.c_str());
-							if (GmatFileUtil::DoesFileExist(modelPath.c_str()))
+							if (GmatFileUtil::DoesFileExist(modelFullPath))
 							{                        
-                        #ifdef DEBUG_LOAD_MODEL
-								MessageInterface::ShowMessage("   Calling mm->LoadModel(), mm=<%p>\n", mm);
-                        #endif
-                        std::string mP = modelPath.c_str();
-                        sat->modelID = mm->LoadModel(mP);
-                        numModelLoaded++;
+                        int modelId = mm->LoadModel(modelFullPath);
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage
-									("   Successfully loaded model '%s', numModelLoaded = %d\n", modelPath.c_str(),
+                           ("   modelId %d returned from mm->LoadModel(), mm=<%p>\n", modelId, mm);
+                        #endif
+                        
+                        sat->SetModelId(modelId);
+                        numModelLoaded++;
+                        
+                        #ifdef DEBUG_LOAD_MODEL
+								MessageInterface::ShowMessage
+									("   Successfully loaded model '%s', numModelLoaded = %d\n", modelFullPath.c_str(),
                             numModelLoaded);
                         #endif
 							}
@@ -2106,9 +2167,9 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
                         if (writeWarning)
                         {
                            MessageInterface::ShowMessage
-                              ("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
+                              ("*** WARNING *** Cannot load the model file for spacecraft '%s'.\n    "
                                "The file '%s' does not exist.\n", sat->GetName().c_str(),
-                               modelPath.c_str());
+                               modelFullPath.c_str());
                         }
 							}
 						}
@@ -2121,19 +2182,124 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
             ("   numModelLoaded = %d, mScCount = %d\n", numModelLoaded, mScCount);
 			#endif
          
-			// Set mModelsAreLoaded to true if it went through all models
+			// Set mSatModelsAreLoaded to true if it went through all models
 			if (numModelLoaded == mScCount)
-				mModelsAreLoaded = true;
+				mSatModelsAreLoaded = true;
       }
    }
    
    #if DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadSpacecraftModels() '%s' leaving, mGlInitialized = %d, "
-       "mModelsAreLoaded = %d\n", mPlotName.c_str(), mGlInitialized, mModelsAreLoaded);
+       "mSatModelsAreLoaded = %d\n", mPlotName.WX_TO_C_STRING, mGlInitialized,
+       mSatModelsAreLoaded);
    #endif
    
-   return mModelsAreLoaded;
+   return mSatModelsAreLoaded;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool LoadOtherObjectModels(bool writeWarning)
+//------------------------------------------------------------------------------
+/**
+ * Loads celestial body model specified in the body object.
+ *
+ * @param  writeWarning  If true, writes warning if failed to load models
+ */
+//------------------------------------------------------------------------------
+bool ViewCanvas::LoadOtherObjectModels(bool writeWarning)
+{
+   #if DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadOtherObjectModels() '%s' entered, writeWarning = %d, "
+       "mGlInitialized = %d, mOtherModelsLoaded = %d\n", mPlotName.WX_TO_C_STRING,
+       writeWarning, mGlInitialized, mOtherModelsAreLoaded);
+   #endif
+   
+   // Add this here to see if it works on Linux loading spacecraft 3ds model (LOJ: 2012.08.01)
+   wxPaintDC dc(this);
+   if (!SetGLContext("in ViewCanvas::LoadOtherObjectModels()"))
+   {
+      #if DEBUG_LOAD_MODEL
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadOtherObjectModels() '%s' returning false, SetGLContext() failed\n");
+      #endif
+      return false;
+   }
+   
+   if (mGlInitialized)
+   {
+      if (!mOtherModelsAreLoaded)
+      {
+         ModelManager *mm = ModelManager::Instance();
+			
+			int numModelLoaded = 0;
+         
+         for (int obj = 0; obj < mObjectCount; obj++)
+         {
+            CelestialBody *body = (CelestialBody*)mObjectArray[obj];
+            
+            // If object pointer is not NULL and is a CelestialBody, check for 3D model
+            if (mObjectArray[obj] != NULL && mObjectArray[obj]->IsOfType(Gmat::CELESTIAL_BODY))
+            {
+               CelestialBody *body = (CelestialBody*)mObjectArray[obj];
+               
+               std::string modelFullPath = body->Get3dViewModelFileFullPath();
+               #ifdef DEBUG_LOAD_MODEL
+               MessageInterface::ShowMessage
+                  ("   Loading model file from the body <%p>'%s'\n   modelFile = '%s', "
+                   "modelID = %d\n",  body, body->GetName().c_str(), modelFullPath.c_str(),
+                   body->Get3dViewModelId());
+				   #endif
+               
+               // If model file is not empty and model has not already loaded
+               if (modelFullPath != "" && body->Get3dViewModelId() == -1)
+               {
+                  if (GmatFileUtil::DoesFileExist(modelFullPath))
+                  {                        
+                     int modelId = mm->LoadModel(modelFullPath);
+                     #ifdef DEBUG_LOAD_MODEL
+                     MessageInterface::ShowMessage
+                        ("   modelId %d returned from mm->LoadModel(), mm=<%p>\n", modelId, mm);
+                     #endif
+                     
+                     body->Set3dViewModelId(modelId);
+                     numModelLoaded++;
+                     
+                     #ifdef DEBUG_LOAD_MODEL
+                     MessageInterface::ShowMessage
+                        ("   Successfully loaded model '%s', numModelLoaded = %d\n", modelFullPath.c_str(),
+                         numModelLoaded);
+                     #endif
+                  }
+                  else
+                  {
+                     if (writeWarning)
+                     {
+                        MessageInterface::ShowMessage
+                           ("*** WARNING *** Cannot load the model file for spacecraft '%s'.\n    "
+                            "The file '%s' does not exist.\n", body->GetName().c_str(),
+                            modelFullPath.c_str());
+                     }
+                  }
+               }
+            }
+         }
+         
+			// Set mOtherModelsAreLoaded to true since some bodies do not have models
+         mOtherModelsAreLoaded = true;
+      }
+   }
+   
+   #if DEBUG_LOAD_MODEL
+   MessageInterface::ShowMessage
+      ("ViewCanvas::LoadOtherObjectModels() '%s' leaving, mGlInitialized = %d, "
+       "mOtherModelsAreLoaded = %d\n", mPlotName.WX_TO_C_STRING, mGlInitialized,
+       mOtherModelsAreLoaded);
+   #endif
+   
+   return mOtherModelsAreLoaded;
 }
 
 
@@ -2239,12 +2405,12 @@ void ViewCanvas::UpdateSpacecraftData(const Real &time,
    MessageInterface::ShowMessage
       ("ViewCanvas::UpdateSpacecraftData() entered, time=%f, mNumData=%d, mScCount=%d\n"
        "   mIsSolving=%d, solverOption=%d, mDrawSolverData=%d, mGlInitialized=%d, "
-       "mModelsAreLoaded=%d\n", time, mNumData, mScCount, mIsSolving, solverOption,
-       mDrawSolverData, mGlInitialized, mModelsAreLoaded);
+       "mSatModelsAreLoaded=%d\n", time, mNumData, mScCount, mIsSolving, solverOption,
+       mDrawSolverData, mGlInitialized, mSatModelsAreLoaded);
    #endif
    
    // Load spacecraft models
-   if (!mModelsAreLoaded)
+   if (!mSatModelsAreLoaded)
       LoadSpacecraftModels(false);
    
    //-------------------------------------------------------
@@ -2386,6 +2552,13 @@ void ViewCanvas::UpdateOtherData(const Real &time)
    bool viewRotMatComputed = false;
    bool eclipticRotMatComputed = false;
    
+   // Load celestial body models
+   if (!mOtherModelsAreLoaded)
+      LoadOtherObjectModels(false);
+   
+   //-------------------------------------------------------
+   // update celestial body's position
+   //-------------------------------------------------------
    for (int obj = 0; obj < mObjectCount; obj++)
    {
       SpacePoint *otherObj = mObjectArray[obj];
@@ -2422,9 +2595,9 @@ void ViewCanvas::UpdateOtherData(const Real &time)
             //LOJ: 2013.11.25
             // Set orbit or target color
             if (mIsSolving)
-               mObjectOrbitColor[colorIndex] = mObjectTargetColorMap[objName.c_str()];
+               mObjectOrbitColor[colorIndex] = mObjectTargetColorMap[objName.WX_TO_STD_STRING];
             else
-               mObjectOrbitColor[colorIndex] = mObjectOrbitColorMap[objName.c_str()];
+               mObjectOrbitColor[colorIndex] = mObjectOrbitColorMap[objName.WX_TO_STD_STRING];
             
             Rvector6 objMjEqState;
             try
@@ -3100,12 +3273,13 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
    GlColorType *color = (GlColorType*)&textColor;
    glColor3ub(color->red, color->green, color->blue);
    glRasterPos2i(xpos, ypos);
-   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
+   //glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
+   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.WX_TO_C_STRING);
    
    if (label3 != "")
    {
       glRasterPos2i(xpos, 50);
-      glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.c_str());
+      glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.WX_TO_C_STRING);
    }
    
    if (showCS)
@@ -3113,7 +3287,7 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
       // Prepend space before coordinate system name (Bug 2318 fix)
       wxString viewCsName = "  " + mViewCoordSysName;
       glRasterPos2i(xpos, ypos+20);
-      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.c_str());
+      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.WX_TO_C_STRING);
    }
    
    glEnable(GL_LIGHTING);
@@ -3142,7 +3316,7 @@ void ViewCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
    GlColorType *color = (GlColorType*)&textColor;
    glColor3ub(color->red, color->green, color->blue);
    glRasterPos2i(xpos, ypos);
-   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.c_str());
+   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.WX_TO_C_STRING);
    
    SetupProjection();
 }

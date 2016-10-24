@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -161,8 +171,10 @@ void GuiMessageReceiver::ShowMessage(const std::string &msgString)
       appData->GetMessageTextCtrl()->AppendText(wxString(msgString.c_str()));
       // Added since text in the message window are not always scrolled down,
       // such as debug message from the panel or dialog (LOJ: 2009.03.20)
+      // wxWidgets-3.0 does not require page down (LOJ: 2014.09.15)
+      #ifdef __USE_WX28__
       appData->GetMessageTextCtrl()->PageDown();
-      appData->GetMessageTextCtrl()->Update();
+      #endif
    }
    LogMessage(msgString);   
 }
@@ -223,7 +235,13 @@ void GuiMessageReceiver::ShowMessage(const char *msg, ...)
    
    GmatAppData *appData = GmatAppData::Instance();
    if (appData->GetMessageTextCtrl() != NULL)
+   {
       appData->GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
+      // wxWidgets-3.0 does not require page down (LOJ: 2014.09.15)
+      #ifdef __USE_WX28__
+      appData->GetMessageTextCtrl()->PageDown();
+      #endif
+   }
    
    LogMessage(std::string(msgBuffer));
 
@@ -280,15 +298,15 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::stri
       switch (msgType)
       {
       case Gmat::ERROR_:
-         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+         (void)wxMessageBox(wxString(msg.c_str()),
                             wxT("GMAT Error"));
          break;
       case Gmat::WARNING_:
-         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+         (void)wxMessageBox(wxString(msg.c_str()),
                             wxT("GMAT Warning"));
          break;
       case Gmat::INFO_:
-         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+         (void)wxMessageBox(wxString(msg.c_str()),
                             wxT("Information"));
          break;
       default:
@@ -369,15 +387,15 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char *msg
       switch (msgType)
       {
       case Gmat::ERROR_:
-         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+         (void)wxMessageBox(wxString(msgBuffer),
                             wxT("GMAT Error"));
          break;
       case Gmat::WARNING_:
-         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+         (void)wxMessageBox(wxString(msgBuffer),
                             wxT("GMAT Warning"));
          break;
       case Gmat::INFO_:
-         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+         (void)wxMessageBox(wxString(msgBuffer),
                             wxT("Information"));
          break;
       default:
@@ -448,6 +466,8 @@ std::string GuiMessageReceiver::GetLogFileName()
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::LogMessage(const std::string &msg)
 {
+   if (!logEnabled) return;
+
    std::cout << msg;
    
    if (logEnabled)
@@ -491,6 +511,8 @@ void GuiMessageReceiver::LogMessage(const std::string &msg)
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::LogMessage(const char *msg, ...)
 {
+   if (!logEnabled) return;
+
    short    ret;
    short    size;
    va_list  marker;
@@ -538,13 +560,27 @@ void GuiMessageReceiver::LogMessage(const char *msg, ...)
 /**
  * Turns logging on or off.
  * 
- * @param flag The new loggign state -- true enables logging, and false disables 
+ * @param flag The new logging state -- true enables logging, and false disables 
  *             it.  The logging state is idempotent.
  */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::SetLogEnable(bool flag)
 {
    logEnabled = flag;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetLogEnable()
+//------------------------------------------------------------------------------
+/**
+* returns if logging is on or off.
+*
+*/
+//------------------------------------------------------------------------------
+bool GuiMessageReceiver::GetLogEnable()
+{
+   return logEnabled;
 }
 
 

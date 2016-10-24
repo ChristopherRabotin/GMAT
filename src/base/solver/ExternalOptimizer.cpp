@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -35,14 +45,14 @@ const std::string
 ExternalOptimizer::PARAMETER_TEXT[ExternalOptimizerParamCount -OptimizerParamCount] =
 {
    "FunctionPath",
-   "SourceType",
+   //"SourceType",
 };
 
 const Gmat::ParameterType
 ExternalOptimizer::PARAMETER_TYPE[ExternalOptimizerParamCount - OptimizerParamCount] =
 {
    Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   //Gmat::STRING_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -55,15 +65,18 @@ ExternalOptimizer::PARAMETER_TYPE[ExternalOptimizerParamCount - OptimizerParamCo
 ExternalOptimizer::ExternalOptimizer(std::string type, std::string name) :
    Optimizer               (type, name), 
    functionPath            (""),
-   sourceType              ("MATLAB"),
+   //sourceType              ("MATLAB"),
    sourceReady             (false),
    inSource                (NULL),
    inSourceServer          (NULL)
  {
    objectTypeNames.push_back("ExternalOptimizer");
    parameterCount = ExternalOptimizerParamCount;
-   
+
+   sourceType = "MATLAB";
    isInternal = false;
+   requiresVariables = false;
+   needsServerStartup = true;
 }
 
 
@@ -81,7 +94,7 @@ ExternalOptimizer::~ExternalOptimizer()
 ExternalOptimizer::ExternalOptimizer(const ExternalOptimizer &opt) :
    Optimizer               (opt),
    functionPath            (opt.functionPath),
-   sourceType              (opt.sourceType),
+   //sourceType              (opt.sourceType),
    sourceReady             (false),
    inSource                (opt.inSource),
    inSourceServer          (opt.inSourceServer)
@@ -101,7 +114,7 @@ ExternalOptimizer& ExternalOptimizer::operator=(const ExternalOptimizer& opt)
    Optimizer::operator=(opt);
    
    functionPath        = opt.functionPath;
-   sourceType          = opt.sourceType;
+   //sourceType          = opt.sourceType;
    sourceReady         = opt.sourceReady;
    inSource            = opt.inSource;
    inSourceServer      = opt.inSourceServer;
@@ -249,9 +262,9 @@ std::string ExternalOptimizer::GetStringParameter(const Integer id) const
 {
     if (id == FUNCTION_PATH)
         return functionPath;
-    if (id == SOURCE_TYPE)
-        return sourceType;
-        
+    // if (id == SOURCE_TYPE)
+    //     return sourceType;
+    
     return Optimizer::GetStringParameter(id);
 }
 
@@ -272,19 +285,21 @@ std::string ExternalOptimizer::GetStringParameter(const Integer id) const
 bool ExternalOptimizer::SetStringParameter(const Integer id,
                                            const std::string &value)
 {
-    if (id == FUNCTION_PATH) 
-    {
-        functionPath = value; 
-        return true;
-    }
-    if (id == SOURCE_TYPE) 
-    {
-        sourceType = value;  // currently, only MATLAB allowed
-        return true;
-    }
-        
-    
-    return Optimizer::SetStringParameter(id, value);
+   if (id == FUNCTION_PATH) 
+   {
+      functionPath = value; 
+      return true;
+   }
+   // if (id == SOURCE_TYPE) 
+   // {
+   //    // currently, only MATLAB allowed
+   //    // Derived SNOPT from the ExternalOptimizer (LOJ: 2014.08.19)
+   //    sourceType = value;  
+   //    return true;
+   // }
+   
+   
+   return Optimizer::SetStringParameter(id, value);
 }
 // compiler complained again - so here they are ....
 std::string ExternalOptimizer::GetStringParameter(const std::string& label) const

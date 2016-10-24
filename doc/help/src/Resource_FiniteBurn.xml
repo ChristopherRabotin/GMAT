@@ -42,7 +42,7 @@
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="FuelTank"/>, <xref linkend="Thruster"/>, <xref
     linkend="Spacecraft"/>, <xref linkend="BeginFiniteBurn"/>, <xref
-    linkend="EndFiniteBurn"/></para>
+    linkend="EndFiniteBurn"/>, <xref linkend="CalculationParameters"/></para>
   </refsection>
 
   <refsection>
@@ -64,7 +64,7 @@
 
         <tbody>
           <row>
-            <entry><guilabel>Thruster</guilabel></entry>
+            <entry><guilabel>Thrusters</guilabel></entry>
 
             <entry><para>The <guilabel>Thruster</guilabel> field allows the
             selection of which <guilabel>Thruster</guilabel>, from a list of
@@ -78,7 +78,7 @@
             <guilabel>FiniteBurn</guilabel> resource. In a script command, an
             empty list, e.g., <literal>FiniteBurn1.Thruster={}</literal>, is
             allowed but is of limited utility since the GUI will automatically
-            associate a <guilabel>Thruster</guilabel>, if one has been
+            associate a <guilabel>ChemicalThruster</guilabel>, if one has been
             created, with the <guilabel>FiniteBurn</guilabel>. This field
             cannot be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
@@ -93,8 +93,11 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Any <guilabel>Thruster</guilabel> created by
-                    user</para>
+                    <para>A list of <guilabel>Thrusters</guilabel> created by
+                    user. Can be a list of
+                    <guibutton>ChemicalThruster</guibutton><guibutton>s</guibutton>
+                    or <guibutton>ElectricThrusters</guibutton> but you cannot
+                    mix chemical and electric thrusters.</para>
                   </listitem>
                 </varlistentry>
 
@@ -139,7 +142,9 @@
             finite burn thrust direction. This field has no affect. The finite
             burn thrust direction, as specified in the
             <guilabel>Thruster</guilabel> resource, is always given in
-            <literal>Cartesian</literal> format. </para> <variablelist>
+            <literal>Cartesian</literal> format. Note: You can use GMAT
+            scripting to covert from other representations to Cartesian and
+            then set the Cartesian format.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -224,12 +229,12 @@
       <para>To perform a finite burn, the <guilabel>FiniteBurn</guilabel>
       resource itself and a number of related resources and commands must be
       properly configured. You must associate a specific
-      <guilabel>Thruster</guilabel> hardware resource with a created
+      <guilabel>ChemicalThruster</guilabel> hardware resource with a created
       <guilabel>FiniteBurn</guilabel>. You must associate a specific
-      <guilabel>FuelTank</guilabel> hardware resource with the chosen
-      <guilabel>Thruster</guilabel>. Finally, you must attach both the chosen
-      <guilabel>Thruster</guilabel> and <guilabel>FuelTank</guilabel> to the
-      desired <guilabel>Spacecraft</guilabel>. See the example below for
+      <guilabel>ChemicalTank</guilabel> hardware resource with the chosen
+      <guilabel>ChemicalThruster</guilabel>. Finally, you must attach both the
+      chosen <guilabel>Thruster</guilabel>s and <guilabel>Tanks</guilabel> to
+      the desired <guilabel>Spacecraft</guilabel>. See the example below for
       additional details.</para>
     </refsection>
 
@@ -237,9 +242,7 @@
       <title>FiniteBurn Using Multiple Thrusters</title>
 
       <para>Using the GUI, a <guilabel>FiniteBurn</guilabel> resource must be
-      associated with exactly one <guilabel>Thruster</guilabel>. Future GMAT
-      GUI versions will allow multiple thrusters to be attached to a single
-      <guilabel>FiniteBurn</guilabel> resource.</para>
+      associated with exactly one <guilabel>Thruster</guilabel>.</para>
 
       <para>Using the scripting interface, one can assign multiple thrusters
       to a single <guilabel>FiniteBurn</guilabel> resource.</para>
@@ -276,22 +279,23 @@
 
             <entry><para> As discussed in the <guilabel>Remarks</guilabel>,
             every <guilabel>FiniteBurn</guilabel> resource must be associated
-            with at least one <guilabel>Thruster</guilabel>. Any
-            <guilabel>Thruster</guilabel> created in the resource tree can be
-            incorporated into a <guilabel>FiniteBurn.</guilabel>
-            </para></entry>
+            with at least one <guilabel>ChemicalThruster</guilabel> or
+            <guilabel>ElectricThruster</guilabel>. Any thruster created in the
+            resource tree can be incorporated into a
+            <guilabel>FiniteBurn</guilabel> but thruster types cannot be
+            mixed.</para></entry>
           </row>
 
           <row>
-            <entry><guilabel>FuelTank resource</guilabel></entry>
+            <entry><guilabel>ChemicalTank resource</guilabel></entry>
 
             <entry><para> To perform a finite burn, a
-            <guilabel>FuelTank</guilabel> must be attached to the
-            <guilabel>Spacecraft</guilabel>. (A <guilabel>FuelTank</guilabel>
-            is needed to provide pressure and temperature data used when
-            modeling the thrust and specific impulse. A
-            <guilabel>FuelTank</guilabel> is also needed if you want to model
-            mass depletion.) </para></entry>
+            <guilabel>Tank</guilabel> must be attached to the
+            <guilabel>Spacecraft</guilabel>. (A
+            <guilabel>ChemicalTank</guilabel> is needed to provide pressure
+            and temperature data used when modeling the thrust and specific
+            impulse. A <guilabel>Tank</guilabel> is also needed if you want to
+            model mass depletion.) </para></entry>
           </row>
 
           <row>
@@ -316,33 +320,55 @@
         </tbody>
       </tgroup>
     </informaltable>
+
+    <refsection>
+      <title>Reporting FiniteBurn Parameters</title>
+
+      <para>GMAT now supports finite burn parameters that report the thrust
+      component data for a finite burn. The parameters include total thrust
+      from all thrusters in the three coordinate directions, the total
+      acceleration from all thrusters in the three coordinate directions, and
+      the total mass flow rate from all thrusters. Currently, by default the
+      total thrust and total acceleration parameters in the three coordinate
+      directions are reported only in the J2000 system and do not support any
+      other coordinate system dependency. Furthermore, you can now also report
+      out any thruster's individual parameters such as thrust magnitude, Isp
+      and mass flow rate. See the <xref linkend="CalculationParameters"/>
+      reference for definitions of these finite burn and thruster specific
+      parameters. Also see the <xref linkend="FiniteBurn_Examples"
+      xrefstyle="select:title"/> section for an example that shows how to
+      report the finite burn and individual thruster specific parameters to a
+      report file.</para>
+    </refsection>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="FiniteBurn_Examples">
     <title>Examples</title>
 
     <informalexample>
-      <para>Create a default <guilabel>Spacecraft</guilabel> and
-      <guilabel>FuelTank</guilabel> Resource; Create a default
-      <guilabel>Thruster</guilabel> that allows for fuel depletion from the
-      default <guilabel>FuelTank</guilabel>; Attach
-      <guilabel>FuelTank</guilabel> and <guilabel>Thruster</guilabel> to the
+      <para>Configure a chemical finite burn. Create a default
+      <guilabel>Spacecraft</guilabel> and <guilabel>ChemicalTank</guilabel>
+      Resource; Create a default <guilabel>ChemicalThruster</guilabel> that
+      allows for fuel depletion from the default
+      <guilabel>ChemicalTank</guilabel>; Attach
+      <guilabel>ChemicalTank</guilabel> and
+      <guilabel>ChemicalThruster</guilabel> to the
       <guilabel>Spacecraft</guilabel>; Create default
       <guilabel>ForceModel</guilabel> and <guilabel>Propagator</guilabel>;
       Create a <guilabel>Finite Burn</guilabel> that uses the default thruster
       and apply a 30 minute finite burn to the spacecraft.</para>
 
-      <programlisting>% Create a default Spacecraft and FuelTank Resource
+      <programlisting>% Create a default Spacecraft and ChemicalTank Resource
 Create Spacecraft DefaultSC
-Create FuelTank FuelTank1
+Create ChemicalTank FuelTank1
 
-% Create a default Thruster.  Allow for fuel depletion from 
-% the default FuelTank.
-Create Thruster Thruster1
+% Create a default ChemicalThruster.  Allow for fuel depletion from 
+% the default ChemicalTank.
+Create ChemicalThruster Thruster1
 Thruster1.DecrementMass = true
 Thruster1.Tank = {FuelTank1}
 
-%  Attach FuelTank and Thruster to the spacecraft
+%  Attach ChemicalTank and ChemicalThruster to the spacecraft
 DefaultSC.Thrusters = {Thruster1}
 DefaultSC.Tanks = {FuelTank1}
 
@@ -361,6 +387,57 @@ BeginMissionSequence
 BeginFiniteBurn FiniteBurn1(DefaultSC)
 Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 1800}
 EndFiniteBurn FiniteBurn1(DefaultSC)  </programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>This example shows how to report finite burn parameters such as
+      total acceleration (from all thrusters), total thrust (from all
+      thrusters) in the three coordinate directions. We also report total mass
+      flow rate from all thrusters. Additionally, individual thruster specific
+      parameters such as thruster mass flow rate, thrust magnitude and
+      thruster Isp are also reported. Note that in the generated report, all
+      finite burn and thruster parameters are reported as zeros when thrusters
+      are not turned on.</para>
+
+      <programlisting>Create Spacecraft aSat
+
+Create ChemicalTank aFuelTank
+
+Create ChemicalThruster aThruster
+aThruster.DecrementMass = true
+aThruster.Tank = {aFuelTank}
+aThruster.C1 = 1000  % Constant Thrust
+aThruster.K1 = 300 % Constant Isp
+
+aSat.Thrusters = {aThruster}
+aSat.Tanks = {aFuelTank}
+
+Create ForceModel aFM
+aFM.CentralBody = Earth
+aFM.PointMasses = {Earth}
+
+Create Propagator aProp
+aProp.FM = aFM
+
+Create FiniteBurn aFB
+aFB.Thrusters = {aThruster}
+
+Create ReportFile rf
+rf.Add = {aSat.UTCGregorian, aFB.TotalAcceleration1, aFB.TotalAcceleration2, ...
+aFB.TotalAcceleration3, aFB.TotalMassFlowRate, aFB.TotalThrust1, ...
+aFB.TotalThrust2, aFB.TotalThrust3, aSat.aThruster.MassFlowRate, ...
+aSat.aThruster.ThrustMagnitude, aSat.aThruster.Isp}
+
+BeginMissionSequence
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}
+
+% Do a Finite-Burn for 1800 Secs
+BeginFiniteBurn aFB(aSat)
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1800}
+EndFiniteBurn aFB(aSat)
+
+Propagate aProp(aSat) {aSat.ElapsedSecs = 1000}</programlisting>
     </informalexample>
   </refsection>
 </refentry>

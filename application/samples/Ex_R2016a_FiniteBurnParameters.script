@@ -1,0 +1,60 @@
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft DefaultSC;
+GMAT DefaultSC.Tanks = {ChemicalTank1, ChemicalTank2};
+GMAT DefaultSC.Thrusters = {ChemicalThruster1};
+
+%----------------------------------------
+%---------- Hardware Components
+%----------------------------------------
+
+Create ChemicalTank ChemicalTank1;
+Create ChemicalTank ChemicalTank2;
+
+Create ChemicalThruster ChemicalThruster1;
+GMAT ChemicalThruster1.DecrementMass = true;
+%  Attach the thruster to two different tanks
+GMAT ChemicalThruster1.Tank = {ChemicalTank1, ChemicalTank2};
+%  Specify to draw twice as much fuel from Tank 1. 
+GMAT ChemicalThruster1.MixRatio = [ 2 1 ];
+
+Create FiniteBurn FiniteBurn1;
+GMAT FiniteBurn1.Thrusters = {ChemicalThruster1};
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView DefaultOrbitView;
+GMAT DefaultOrbitView.Add = {DefaultSC, Earth};
+
+Create ReportFile ReportFile1;
+
+%  Report data on mass flow rante and thrust magnitude on per thruster basis, and total acceleration and thrust from all thrusters
+GMAT ReportFile1.Add = {DefaultSC.A1ModJulian, DefaultSC.ChemicalThruster1.MassFlowRate, DefaultSC.ChemicalThruster1.Isp,...
+ DefaultSC.ChemicalThruster1.ThrustMagnitude, FiniteBurn1.TotalAcceleration1, FiniteBurn1.TotalAcceleration2,...
+ FiniteBurn1.TotalAcceleration3, FiniteBurn1.TotalMassFlowRate, FiniteBurn1.TotalThrust1, ...
+ FiniteBurn1.TotalThrust2, FiniteBurn1.TotalThrust3};
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+
+BeginFiniteBurn FiniteBurn1(DefaultSC)
+Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 12000.0};

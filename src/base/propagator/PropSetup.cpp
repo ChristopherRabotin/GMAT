@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -219,8 +229,8 @@ PropSetup::PropSetup(const PropSetup &ps) :
    
    #ifdef DEBUG_PROPSETUP
    MessageInterface::ShowMessage
-      ("PropSetup::PropSetup(copy) exiting, Propagator=<%p><%s> '%s'\n   "
-       "ODEModel=<%p><%s> '%s'\n", mPropagator,
+      ("PropSetup::PropSetup(copy) exiting\n   Propagator=<%p><%s> '%s'\n   "
+       "   ODEModel=<%p><%s> '%s'\n", mPropagator,
        mPropagator ? mPropagator->GetTypeName().c_str() : "NULL",
        mPropagator ? mPropagator->GetName().c_str() : "NULL", mODEModel,
        mODEModel ? mODEModel->GetTypeName().c_str() : "NULL",
@@ -249,6 +259,8 @@ PropSetup& PropSetup::operator= (const PropSetup &ps)
       return *this;
    
    GmatBase::operator=(ps);
+   
+   ownedObjectCount = ps.ownedObjectCount;
    
    // PropSetup data
    mInitialized = false;
@@ -412,6 +424,12 @@ void PropSetup::SetPropagator(Propagator *propagator, bool fromGUI)
 
    if (mPropagator->UsesODEModel() == false)
       DeleteOwnedObject(ODE_MODEL, true);
+   
+   #ifdef DEBUG_PROPSETUP_SET
+   MessageInterface::ShowMessage
+      ("PropSetup::SetPropagator() this=<%p> '%s' leaving, mPropagator=<%p>, "
+       "propagator=<%p>\n", this, GetName().c_str(), mPropagator, propagator);
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -427,9 +445,9 @@ void PropSetup::SetODEModel(ODEModel *odeModel)
 {
    #ifdef DEBUG_PROPSETUP_SET
    MessageInterface::ShowMessage
-      ("PropSetup::SetODEModel() this=<%p> '%s' entered, mODEModel=<%p>, "
-       "odeModel=<%p> '%s'\n", this, GetName().c_str(), mODEModel, odeModel,
-       odeModel->GetName().c_str());
+      ("PropSetup::SetODEModel() this=<%p> '%s' entered, mODEModel=<%p>'%s', "
+       "odeModel=<%p>'%s'\n", this, GetName().c_str(), mODEModel, mODEModel->GetName().c_str(),
+       odeModel, odeModel->GetName().c_str());
    #endif
    
    DeleteOwnedObject(ODE_MODEL, true);
@@ -1591,7 +1609,7 @@ void PropSetup::ClonePropagator(Propagator *prop)
    {
       mPropagatorName = "";
       mPropagator = (Propagator *)(prop->Clone());
-      mPropagator->SetName(instanceName);
+      mPropagator->SetName(instanceName+"_Clone"); //LOJ: Appended _Clone to name (2014.12.16)
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (mPropagator, mPropagatorName, "PropSetup::ClonePropagator()",
@@ -1702,7 +1720,7 @@ void PropSetup::DeleteOwnedObject(Integer id, bool forceDelete)
       #ifdef DEBUG_PROPSETUP_DELETE
       MessageInterface::ShowMessage
          ("   mODEModel=<%p>, mODEModelName='%s'\n",
-          mODEModel, mODEModelName.c_str());
+          mODEModel, mODEModel ? mODEModel->GetName().c_str() : "NULL");
       #endif
       if (mODEModel != NULL)
       {

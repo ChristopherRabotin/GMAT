@@ -5,8 +5,18 @@
 // GMAT: General Mission Analysis Tool
 //
 // Copyright (c) 2002-2012 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -34,6 +44,7 @@
 //#define DEBUG_EDITORPANEL_CREATE
 //#define DEBUG_EDITORPANEL_LOAD
 //#define DEBUG_EDITORPANEL_CLOSE
+//#define DEBUG_EDITORPANEL_SAVE
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -208,7 +219,7 @@ void EditorPanel::LoadData()
    
    #ifdef DEBUG_EDITORPANEL_LOAD
    MessageInterface::ShowMessage
-      ("   '%s' %sexist\n", mScriptFilename.c_str(), mFileExists ? "" : "does not ");
+      ("   '%s' %sexist\n", mScriptFilename.WX_TO_C_STRING, mFileExists ? "" : "does not ");
    #endif
    
    theSaveAsButton->Enable(true);
@@ -234,6 +245,12 @@ void EditorPanel::LoadData()
  */
 void EditorPanel::SaveData()
 {
+   #ifdef DEBUG_EDITORPANEL_SAVE
+   MessageInterface::ShowMessage
+      ("EditorPanel::SaveData() entered\n   mScriptFilename='%s'\n   "
+       "mFilename='%s'\n", mScriptFilename.WX_TO_C_STRING, mFilename.WX_TO_C_STRING);
+   #endif
+   
    GmatAppData *gmatAppData = GmatAppData::Instance();
 
    if (mScriptFilename != mFilename)
@@ -246,8 +263,16 @@ void EditorPanel::SaveData()
       mScriptFilename = mFilename;
    }
 
+   #ifdef DEBUG_EDITORPANEL_SAVE
+   MessageInterface::ShowMessage("   Calling mEditor->SaveFile(mScriptFilename)\n");
+   #endif
+   
    mEditor->SaveFile(mScriptFilename);
    gmatAppData->GetMainFrame()->SetActiveChildDirty(false);
+   
+   #ifdef DEBUG_EDITORPANEL_SAVE
+   MessageInterface::ShowMessage("EditorPanel::SaveData() leaving\n");
+   #endif
 }
 
 
@@ -262,8 +287,8 @@ void EditorPanel::SaveData()
  */
 void EditorPanel::OnTextOverMaxLen(wxCommandEvent& event)
 {
-   wxMessageBox(wxT("Text control is already filled up to the maximum length.\n"
-                    "The extra input will be discarded."),
+   wxMessageBox(gmatwxT("Text control is already filled up to the maximum length.\n"
+                        "The extra input will be discarded."),
                 wxT("GMAT Warning"));
 }
 

@@ -1,0 +1,309 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-wx3-unicode|Win32">
+      <Configuration>Debug-wx3-unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3.0|Win32">
+      <Configuration>Release-wx3.0</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{42E2094B-A3CC-4CA2-9FA1-85FA018507C5}</ProjectGuid>
+    <RootNamespace>libMatlabInterface</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <CharacterSet>Unicode</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\..\application\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\..\application\plugins64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <IncludePath>C:\Program Files (x86)\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\MATLAB\R2011a\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetExt>.dll</TargetExt>
+    <IncludePath>C:\Program Files\MATLAB\R2013a\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\MATLAB\R2013a\extern\lib\win64\microsoft;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Program Files (x86)\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <IncludePath>C:\Program Files (x86)\MATLAB\R2011a\extern\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Program Files (x86)\MATLAB32\R2010b\extern\include;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <IncludePath>C:\Program Files (x86)\MATLAB32\R2010b\extern\include;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>C:\Program Files (x86)\MATLAB\R2011a\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\debug\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <LibraryPath>C:\Program Files (x86)\MATLAB\R2011a\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\debug\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2010b\extern\lib\win32\microsoft;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\bin64\debug64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <LibraryPath>C:\Program Files (x86)\MATLAB32\R2010b\extern\lib\win32\microsoft;C:\Program Files %28x86%29\MATLAB\R2009b-32bit\extern\lib\win32\microsoft;$(LibraryPath)</LibraryPath>
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\bin64\debug64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <OutDir>..\..\..\application\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\MATLAB\R2011a\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;MATLAB_EXPORTS;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libeng.lib;libmx.lib;libmat.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\application\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\MATLAB\R2014a\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;MATLAB_EXPORTS;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libeng.lib;libmx.lib;libmat.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\application\debug;C:\Program Files %28x86%29\MATLAB\R2014a\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;MATLAB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4231;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libeng.lib;libmx.lib;libmat.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\application\bin64\debug64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;MATLAB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4231;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libeng.lib;libmx.lib;libmat.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\application\bin64\debug64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\MATLAB\R2013a\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;MATLAB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;C:\Program Files %28x86%29\MATLAB\R2013a\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libeng.lib;libmx.lib;libmat.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;MATLAB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\application\bin64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libeng.lib;libmx.lib;libmat.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\MATLAB\R2014b\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_DYNAMICLINK;MATLAB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;C:\Program Files %28x86%29\MATLAB\R2014b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libeng.lib;libmx.lib;libmat.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.cpp" />
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabWorkspaceFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.cpp" />
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\interface\MatlabInterface.cpp" />
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin\GmatPluginFunctions.cpp" />
+    <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber\MatlabWorkspace.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\command\CallMatlabFunction.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\CallMatlabFunctionFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabFunctionFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabWorkspaceFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\include\matlabinterface_defs.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\interface\MatlabInterface.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\plugin\GmatPluginFunctions.hpp" />
+    <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber\MatlabWorkspace.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

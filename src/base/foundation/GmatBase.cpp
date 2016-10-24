@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -38,19 +48,22 @@
 
 #include "GmatBase.hpp"
 #include "GmatGlobal.hpp"  // for GetDataPrecision(), IsWritingGmatKeyword()
+#include "Moderator.hpp"
 #include <sstream>         // for StringStream
 #include "StringUtil.hpp"
-
+#include "FileManager.hpp" // for FindPath()
+#include "FileUtil.hpp"    // for ParseFileName()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
-//#define DEBUG_COMMENTS
+//#define DEBUG_COMMENT_LINE
 //#define DEBUG_COMMENTS_ATTRIBUTE
 //#define DEBUG_GENERATING_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_WRITE_PARAM
 //#define DEBUG_CLOAKING
 //#define DEBUG_WRAPPER_REF
+//#define DEBUG_FILE_PATH
 
 /// Set the static "undefined" parameters
 //const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
@@ -114,10 +127,12 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "Parameter",     "Variable",         "Array",            "String",           "StopCondition",
    "Solver",        "Subscriber",       "ReportFile",       "XYPlot",           "OrbitView",
    "EphemerisFile", "PropSetup",        "Function",         "FuelTank",         "Thruster",
+   "ChemicalThruster", "ElectricThruster","ChemicalTank", "ElectricTank",       "PowerSystem",
+   "SolarPowerSystem", "NuclearPowerSystem",
    "Hardware",      "CoordinateSystem", "AxisSystem",       "Attitude",         "MathNode",
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
-   "MeasurementModel","CoreMeasurement","TrackingData",     "TrackingSystem",   "DataStream",       
-   "DataFile",      "ObType",           "Interface",        "MediaCorrection",  "Sensor",     
+   "MeasurementModel","CoreMeasurement","ErrorModel",       "TrackingData",     "TrackingSystem",   "DataStream",
+   "DataFile",      "ObType",           "DataFilter",        "Interface",        "MediaCorrection",  "Sensor",
    "RFHardware",    "Antenna",          "UnknownObject"
 };
 /**
@@ -139,11 +154,13 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
    false,     true,      true,      false,     false,
+   false,     false,     false,     false,     false,
+   false,     false,
    false,     true,      false,     false,     false,
    false,     false,     false,     false,     false,
-   false,     false,     false,     false,     false,
-   false,     false,     false,     false,     false,
-   false,     false,     false,
+   false,     false,     false,     false,     false,     false,
+   false,     false,     false,     false,     false,     false,
+   false,     false,     false
 };
 
 
@@ -173,6 +190,10 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    parameterCount             (GmatBaseParamCount),
    typeName                   (typeStr),
    instanceName               (nomme),
+   instanceFullName           (nomme),
+   scriptCreatedFrom          (""),
+   isCreatedFromMainScript    (true),
+   forceGenerateObjectString  (false),
    type                       (typeId),
    ownedObjectCount           (0),
    isInitialized              (false),
@@ -182,7 +203,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    showPrefaceComment         (true),
    showInlineComment          (true),
    cloaking                   (false),
-   blockCommandModeAssignment (true)
+   blockCommandModeAssignment (true),
+   writeEmptyStringArray      (false)
 {
    attributeCommentLines.clear();
    attributeInlineComments.clear();
@@ -255,6 +277,10 @@ GmatBase::GmatBase(const GmatBase &a) :
     typeName                  (a.typeName),
     //instanceName    ("CopyOf"+a.instanceName),
     instanceName              (a.instanceName),
+    instanceFullName          (a.instanceFullName),
+    scriptCreatedFrom         (a.scriptCreatedFrom),
+    isCreatedFromMainScript   (a.isCreatedFromMainScript),
+    forceGenerateObjectString (a.forceGenerateObjectString),
     type                      (a.type),
     ownedObjectCount          (a.ownedObjectCount),
     generatingString          (a.generatingString),
@@ -279,7 +305,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     covarianceList            (a.covarianceList),
     covarianceIds             (a.covarianceIds),
     covarianceSizes           (a.covarianceSizes),
-    covariance                (a.covariance)
+    covariance                (a.covariance),
+    writeEmptyStringArray     (a.writeEmptyStringArray)
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -307,6 +334,9 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    typeName                  = a.typeName;
    // We don't want to copy instanceName (loj: 2008.02.15)
    //instanceName              = a.instanceName;
+   scriptCreatedFrom         = a.scriptCreatedFrom;
+   isCreatedFromMainScript   = a.isCreatedFromMainScript;
+   forceGenerateObjectString = a.forceGenerateObjectString;
    type                      = a.type;
    ownedObjectCount          = a.ownedObjectCount;
    generatingString          = a.generatingString;
@@ -334,6 +364,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    covarianceIds             = a.covarianceIds;
    covarianceSizes           = a.covarianceSizes;
    covariance                = a.covariance;
+   writeEmptyStringArray     = a.writeEmptyStringArray;
 
    return *this;
 }
@@ -353,9 +384,20 @@ Gmat::ObjectType GmatBase::GetType() const
    return type;
 }
 
+//---------------------------------------------------------------------------
+//  bool SetName(const char *who, const std::string &oldName = "")
+//---------------------------------------------------------------------------
+/**
+ * @see SetName(const std::string &who, const std::string &oldName)
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetName(const char *who, const std::string &oldName)
+{
+   return SetName(std::string(who), oldName);
+}
 
 //---------------------------------------------------------------------------
-//  bool SetName(std::string &who, const std;:string &oldName = "")
+//  bool SetName(const std::string &who, const std::string &oldName = "")
 //---------------------------------------------------------------------------
 /**
 * Set the name for this instance.
@@ -622,6 +664,25 @@ const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
    // Changed to return empty array (LOJ: 2010.05.13)
    refObjectNames.clear();
    return refObjectNames;
+}
+
+//---------------------------------------------------------------------------
+//  bool SetRefObjectName(const Gmat::ObjectType type, const char *name)
+//---------------------------------------------------------------------------
+/**
+ * Sets the name of the reference object.  (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
+                                const char *name)
+{
+   return SetRefObjectName(type, std::string(name));
 }
 
 //---------------------------------------------------------------------------
@@ -966,6 +1027,10 @@ Integer GmatBase::GetOwnedObjectCount()
 //---------------------------------------------------------------------------
 GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
 {
+   MessageInterface::ShowMessage
+      ("GmatBase::GetOwnedObject() entered, this=<%p>'%s', whichOne = %d\n",
+       this, this->GetName().c_str(), whichOne);
+   
    throw GmatBaseException
       ("No owned objects for this instance \"" + instanceName + "\" of type \"" +
        typeName + "\"");
@@ -1012,7 +1077,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
 }
 
 //------------------------------------------------------------------------------
-//  bool GetIsGlobal()
+//  bool tIsGlobal()
 //------------------------------------------------------------------------------
 /**
  * Method to return the isGlobal flag for an object.
@@ -1020,7 +1085,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
  * @return value of isGlobal flag (i.e. whether or not this object is Global)
  */
 //------------------------------------------------------------------------------
-bool GmatBase::GetIsGlobal() const
+bool GmatBase::IsGlobal() const
 {
    return isGlobal;
 }
@@ -1166,6 +1231,14 @@ bool GmatBase::IsCallbackExecuting()
 // bool PutCallbackData(std::string &data)
 //---------------------------------------------------------------------------
 bool GmatBase::PutCallbackData(std::string &data)
+{
+   return false;
+}
+
+//---------------------------------------------------------------------------
+// bool PutCallbackRealData(RealArray &data)
+//---------------------------------------------------------------------------
+bool GmatBase::PutCallbackRealData(RealArray &data)
 {
    return false;
 }
@@ -1527,10 +1600,44 @@ bool GmatBase::IsParameterEqualToDefault(const std::string &label) const
 }
 
 //---------------------------------------------------------------------------
+//  bool IsParameterValid(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter value is valid.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return true if the parameter value is valid, false if not
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsParameterValid(const Integer id,
+                                const std::string &value)
+{
+   return true;
+}
+
+//---------------------------------------------------------------------------
+//  bool IsParameterValid(const std::string &label, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter value is valid.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter value is valid, false if not
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsParameterValid(const std::string &label,
+                                const std::string &value)
+{
+   return IsParameterValid(GetParameterID(label), value);
+}
+
+//---------------------------------------------------------------------------
 //  bool IsParameterVisible(const Integer id) const
 //---------------------------------------------------------------------------
 /**
- * Checks to see if the requested parameter is visible from the GUI
+ * Checks to see if the requested parameter is visible from the GUI.
  *
  * @param <id> ID for the parameter.
  *
@@ -1546,7 +1653,7 @@ bool GmatBase::IsParameterVisible(const Integer id) const
 //  bool IsParameterVisible(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
- * Checks to see if the requested parameter is visible from the GUI
+ * Checks to see if the requested parameter is visible from the GUI.
  *
  * @param <label> Description for the parameter.
  *
@@ -1663,6 +1770,32 @@ const StringArray& GmatBase::GetPropertyEnumStrings(const std::string &label) co
 bool GmatBase::CanAssignStringToObjectProperty(const Integer id) const
 {
    return true;    // default
+}
+
+
+//---------------------------------------------------------------------------
+// bool IsSquareBracketAllowedInSetting(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating whether or not a value with square bracket can be
+ * assigned to the specified object property.
+ *
+ * @param <id> ID for the property.
+ *
+ * @return true, if a value with square bracket can be assigned; false otherwise
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsSquareBracketAllowedInSetting(const Integer id) const
+{
+   Gmat::ParameterType type = GetParameterType(id);
+   if ((type == Gmat::BOOLEANARRAY_TYPE) ||
+       (type == Gmat::INTARRAY_TYPE) ||
+       (type == Gmat::UNSIGNED_INTARRAY_TYPE) ||
+       (type == Gmat::RVECTOR_TYPE) ||
+       (type == Gmat::RMATRIX_TYPE))
+      return true;
+   else
+      return false;
 }
 
 
@@ -2206,6 +2339,23 @@ std::string GmatBase::GetStringParameter(const Integer id) const
                            instanceName + "\"");
 }
 
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
+
 
 //---------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const std::string &value)
@@ -2252,6 +2402,28 @@ std::string GmatBase::GetStringParameter(const Integer id,
    throw GmatBaseException("Cannot get string parameter with ID " +
                            idString.str() + " and index " + indexString.str() +
                            " on " + typeName + " named \"" + instanceName + "\"");
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value,
+//                          const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new string for this parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free
+ *              version to add the value to the end of the array.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetStringParameter(const Integer id, const char *value,
+                                  const Integer index)
+{
+   return SetStringParameter(id, std::string(value), index);
 }
 
 
@@ -2379,14 +2551,29 @@ bool GmatBase::SetOnOffParameter(const Integer id, const std::string &value)
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetCommentLine() const
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::GetCommentLine() returning '%s'\n", commentLine.c_str());
+   #endif
    return commentLine;
 }
 
 //---------------------------------------------------------------------------
 //  void SetCommentLine(const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets comment line. Comment line starts with % sign.
+ * ex) %--- This is comment line
+ *     Create Spacecraft sat;
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetCommentLine(const std::string &comment)
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetCommentLine() <%p><%s>'%s' setting commentLine to <%s>\n",
+       this, typeName.c_str(), instanceName.c_str(), comment.c_str());
+   #endif
    commentLine = comment;
 }
 
@@ -2401,8 +2588,18 @@ const std::string GmatBase::GetInlineComment() const
 //---------------------------------------------------------------------------
 //  void SetInlineComment(const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets inline comment. Inline comment starts with % sign after GMAT statement.
+ * ex) Create Spacecraft sat; %--- This is inline comment
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetInlineComment(const std::string &comment)
 {
+   #ifdef DEBUG_COMMENT_LINE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetInlineComment() <%p><%s>'%s' setting inlineComment to <%s>\n",
+       this, typeName.c_str(), instanceName.c_str(), comment.c_str());
+   #endif
    inlineComment = comment;
 }
 
@@ -2411,6 +2608,11 @@ void GmatBase::SetInlineComment(const std::string &comment)
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetAttributeCommentLine(Integer index)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::GetAttributeCommentLine() <%p><%s>'%s' entered, index=%d\n",
+       this, typeName.c_str(), instanceName.c_str(), index);
+   #endif
    if (index >= (Integer)attributeCommentLines.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
@@ -2432,9 +2634,22 @@ const std::string GmatBase::GetAttributeCommentLine(Integer index)
 //---------------------------------------------------------------------------
 //  void SetAttributeCommentLine(Integer index, const std::string &comment)
 //---------------------------------------------------------------------------
+/**
+ * Sets attribute comment line. Attribute comment line starts with % sign
+ % before object property setting.
+ * ex) %--- This is attribute comment line
+ *     sat.X = 7000;
+ */
+//---------------------------------------------------------------------------
 void GmatBase::SetAttributeCommentLine(Integer index,
                                        const std::string &comment)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetAttributeCommentLine() <%p><%s>'%s' entered, index=%d, "
+       "comment=<%s>\n", this, typeName.c_str(), instanceName.c_str(), index,
+       comment.c_str());
+   #endif
    if (index >= (Integer)attributeCommentLines.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
@@ -2455,6 +2670,12 @@ void GmatBase::SetAttributeCommentLine(Integer index,
 
 //---------------------------------------------------------------------------
 //  const std::string GetInlineAttributeComment(Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Sets inline attribute comment. Attribute inline comment starts with % sign
+ % after object property setting.
+ * ex) sat.X = 7000; %--- This is attribute inline comment
+ */
 //---------------------------------------------------------------------------
 const std::string GmatBase::GetInlineAttributeComment(Integer index)
 {
@@ -2483,6 +2704,13 @@ const std::string GmatBase::GetInlineAttributeComment(Integer index)
 void GmatBase::SetInlineAttributeComment(Integer index,
                                          const std::string &comment)
 {
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
+   MessageInterface::ShowMessage
+      ("GmatBase::SetInlineAttributeComment() <%p><%s>'%s' entered, index=%d, "
+       "comment=<%s>\n", this, typeName.c_str(), instanceName.c_str(), index,
+       comment.c_str());
+   #endif
+   
    if (index >= (Integer)attributeInlineComments.size())
    {
       #ifdef DEBUG_COMMENTS_ATTRIBUTE
@@ -3107,6 +3335,25 @@ std::string GmatBase::GetStringParameter(const std::string &label) const
 }
 
 //---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetStringParameter(const std::string &label,
+                                  const char *value)
+{
+   Integer id = GetParameterID(label);
+   return SetStringParameter(id, std::string(value));
+}
+
+//---------------------------------------------------------------------------
 //  bool SetStringParameter(const std::string &label, const std::string &value)
 //---------------------------------------------------------------------------
 /**
@@ -3419,6 +3666,35 @@ const ObjectTypeArray& GmatBase::GetTypesForList(const std::string &label)
    return GetTypesForList(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringArray
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag specifying whether or not to write out a StringArray to
+ * the script even if it is empty
+ *
+ * @param id    ID of the parameter
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::WriteEmptyStringArray(Integer id)
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringParameter
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag specifying whether or not to write out a string to
+ * the script even if it is empty
+ *
+ * @param id    ID of the parameter
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::WriteEmptyStringParameter(const Integer id) const
+{
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // const std::string& GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -3448,6 +3724,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       ("   showPrefaceComment=%d, commentLine=<%s>\n   showInlineComment=%d "
        "inlineComment=<%s>\n",  showPrefaceComment, commentLine.c_str(),
        showInlineComment, inlineComment.c_str());
+   MessageInterface::ShowMessage("   isCreatedFromMainScript=%d\n", isCreatedFromMainScript);
    #endif
 
    // don't write anything for cloaked objects, unless we're in SHOW_SCRIPT mode
@@ -3457,14 +3734,30 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       return generatingString;
    }
    
+   // Don't write unless object is created from the main script
+   if (mode != Gmat::SHOW_SCRIPT && !isCreatedFromMainScript)
+   {
+      if (!forceGenerateObjectString)
+      {
+         generatingString = "";
+         #ifdef DEBUG_GENERATING_STRING
+         MessageInterface::ShowMessage
+            ("GmatBase::GetGeneratingString() just returning blank, it is not "
+             "created from the main script\n");
+         #endif
+         return generatingString;
+      }
+   }
+   
    std::stringstream data;
    bool writeGmatKeyword = GmatGlobal::Instance()->IsWritingGmatKeyword();
    
    data.precision(GetDataPrecision()); // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
    
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
-       (mode == Gmat::SHOW_SCRIPT) || (mode == Gmat::NO_COMMENTS))
+   if ((mode == Gmat::SCRIPTING)   || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT) || (mode == Gmat::NO_COMMENTS)  ||
+       (mode == Gmat::OBJECT_EXPORT))
       inMatlabMode = false;
    if (mode == Gmat::MATLAB_STRUCT || mode == Gmat::EPHEM_HEADER)
       inMatlabMode = true;
@@ -3475,18 +3768,21 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       nomme = instanceName;
 
    if (mode == Gmat::SCRIPTING    || mode == Gmat::SHOW_SCRIPT ||
-       mode == Gmat::EPHEM_HEADER || mode == Gmat::NO_COMMENTS)
+       mode == Gmat::EPHEM_HEADER || mode == Gmat::NO_COMMENTS ||
+       mode == Gmat::OBJECT_EXPORT)
    {
       std::string tname = typeName;
       if (tname == "PropSetup")
          tname = "Propagator";
+      else if (tname == "DataFilter")
+         tname = objectTypeNames[objectTypeNames.size() - 1];
 
       if (mode == Gmat::EPHEM_HEADER)
       {
          data << tname << " = " << "'" << nomme << "';\n";
          preface = "";
       }
-      else if (mode == Gmat::NO_COMMENTS)
+      else if ((mode == Gmat::NO_COMMENTS) || (mode == Gmat::OBJECT_EXPORT))
       {
          #ifdef DEBUG_GENERATING_STRING
          MessageInterface::ShowMessage("==> Do not show comments\n");
@@ -3779,6 +4075,100 @@ Integer GmatBase::GetTimePrecision()
    return GmatGlobal::Instance()->GetTimePrecision();
 }
 
+//------------------------------------------------------------------------------
+// static std::string GmatBase::GetFullPathFileName(std::string &outFileName,
+//        const std::string &objName, const std::string &fileName,
+//        const std::string &fileType, bool forInput, const std::string &fileExt = "",
+//        bool writeWarning = false, bool writeInfo = false)
+//------------------------------------------------------------------------------
+/**
+ * Static method for getting full path file name for given file name and file type.
+ * This method calls FileManager::FindPath() so it is call-through function.
+ *
+ * @param  outFileName  The file name without path to be returned.  This file name
+ *                      is built only if input file name is blank
+ * @param  inFileName   The requested file name
+ *                      Enter blank name if default name to be used for the file type
+ * @param  typeName     The file type name of the input file
+ * @param  forInput     Set to true if filename is for input
+ * @param  fileExt      File extension to be used for default filename
+ * @param  writeWarning Set to true if warning should be written when no path found
+ * @param  writeInfo    Set to true if information should be written for output path
+ *
+ * @return full path name using search order
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatBase::GetFullPathFileName(std::string &outFileName,
+                                          const std::string &objName,
+                                          const std::string &inFileName,
+                                          const std::string &fileType, bool forInput,
+                                          const std::string &fileExt, bool writeWarning,
+                                          bool writeInfo)
+{
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("\nGmatBase::GetFullPathFileName() entered, objName='%s', inFileName='%s', fileType='%s', "
+       "forInput=%d, fileExt='%s', writeWarning=%d, writeInfo=%d\n", objName.c_str(),
+       inFileName.c_str(), fileType.c_str(), forInput, fileExt.c_str(), writeWarning, writeInfo);
+   #endif
+   
+   std::string fname = inFileName;
+   
+   // If file is for output and input file name is blank, build outFileName
+   if (!forInput && fname == "")
+   {
+      fname = objName + fileExt;
+      outFileName = fname;
+   }
+   
+   std::string fullPath =
+      FileManager::Instance()->FindPath(fname, fileType, forInput, writeWarning, writeInfo);
+   
+   // If file is for input and input file name is blank, build outFileName
+   if (forInput && fname == "")
+   {
+      outFileName = GmatFileUtil::ParseFileName(fullPath);
+   }
+   
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("GmatBase::GetFullPathFileName() returning outFileName='%s', fullPath='%s'\n",
+       outFileName.c_str(), fullPath.c_str());
+   #endif
+   
+   return fullPath;
+}
+
+//------------------------------------------------------------------------------
+// static std::string WriteObjectInfo(const std::string &title, GmatBase *obj,
+//                                    bool addEol = true)
+//------------------------------------------------------------------------------
+std::string GmatBase::WriteObjectInfo(const std::string &title, GmatBase *obj,
+                                      bool addEol)
+{
+   std::stringstream objStream;
+   char buff[20];  // was 10]; but that was too small
+   sprintf(buff, "<%p>", obj);
+   objStream << title << buff;
+   
+   if (obj)
+   {
+      objStream << "[" << obj->GetTypeName() << "]" << "'" << obj->GetName() << "'";
+      objStream << ", IsGlobal:" << (obj->IsGlobal() ? "true" : "false") << ", IsLocal():"
+                << (obj->IsLocal() ? "true" : "false");
+   }
+   else
+   {
+      objStream << "[NULL]'NULL'";
+   }
+   
+   if (addEol)
+      objStream << "\n";
+   
+   return objStream.str();
+}
+
 
 // todo: comments
 Integer GmatBase::GetPropItemID(const std::string &whichItem)
@@ -3833,7 +4223,7 @@ Integer GmatBase::SetEstimationParameter(const std::string &param)
 // Integer GmatBase::GetEstimationParameterID(const std::string &param)
 //------------------------------------------------------------------------------
 /**
- * This method...
+ * This method builds the parameter ID used in the estimation subsystem
  *
  * @param param The text name of the estimation parameter
  *
@@ -3856,6 +4246,15 @@ Integer GmatBase::GetEstimationParameterID(const std::string &param)
    return id;
 }
 
+std::string GmatBase::GetParameterNameForEstimationParameter(const std::string &parmName)
+{
+   return parmName;
+}
+
+std::string GmatBase::GetParameterNameFromEstimationParameter(const std::string &parmName)
+{
+   return parmName;
+}
 
 //------------------------------------------------------------------------------
 // bool GmatBase::IsEstimationParameterValid(Integer id)
@@ -3886,6 +4285,81 @@ Integer GmatBase::GetEstimationParameterSize(Integer id)
 Real* GmatBase::GetEstimationParameterValue(Integer id)
 {
    return NULL;
+}
+
+
+//---------------------------------------------------------------------------
+// void SetScriptCreatedFrom(const std::string &script)
+//---------------------------------------------------------------------------
+/**
+ * Sets script name where this object is created from.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetScriptCreatedFrom(const std::string &script)
+{
+   scriptCreatedFrom = script;
+}
+
+//---------------------------------------------------------------------------
+// std::string GetScriptCreatedFrom()
+//---------------------------------------------------------------------------
+/**
+ * Retrieves script name where this object is created from.
+ */
+//---------------------------------------------------------------------------
+std::string GmatBase::GetScriptCreatedFrom()
+{
+   return scriptCreatedFrom;
+}
+
+//---------------------------------------------------------------------------
+// void SetIsCreatedFromMainScript(bool flag)
+//---------------------------------------------------------------------------
+/**
+ * Sets flag indicating this object is created from the main script.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetIsCreatedFromMainScript(bool flag)
+{
+   isCreatedFromMainScript = flag;
+}
+
+//---------------------------------------------------------------------------
+// bool IsCreatedFromMainScript()
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating this object is created from the main script.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsCreatedFromMainScript()
+{
+   return isCreatedFromMainScript;
+}
+
+//---------------------------------------------------------------------------
+// void SetForceGenerateObjectString(bool flag)
+//---------------------------------------------------------------------------
+/**
+ * Sets flag indicating to generate object string even though it is not
+ * created from the main script.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetForceGenerateObjectString(bool flag)
+{
+   forceGenerateObjectString = flag;
+}
+
+//---------------------------------------------------------------------------
+// bool GetForceGenerateObjectString()
+//---------------------------------------------------------------------------
+/**
+ * Returns flag indicating to generate object string even though it is not
+ * created from the main script.
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::GetForceGenerateObjectString()
+{
+   return forceGenerateObjectString;
 }
 
 
@@ -4094,7 +4568,9 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                WriteParameterValue(id, value);
                if (value.str() != "")
                {
-                  std::string attCmtLn = GetAttributeCommentLine(id);
+                  std::string attCmtLn = "";
+                  if (mode != Gmat::OBJECT_EXPORT)
+                     attCmtLn = GetAttributeCommentLine(id);
 
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                      (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
@@ -4108,8 +4584,8 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                             << " = " << value.str() << ";";
 
                   // overwrite tmp variable for attribute cmt line
-                  attCmtLn = GetInlineAttributeComment(id);
-                  
+                  if (mode != Gmat::OBJECT_EXPORT)
+                     attCmtLn = GetInlineAttributeComment(id);
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                       (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn << "\n";
@@ -4146,7 +4622,11 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          ("   id %d has owned object of type name <%s> and name \"%s\"\n", i,
           ownedObject->GetTypeName().c_str(), ownedObject->GetName().c_str());
       #endif
-      
+
+      // Skip writing out owned Amosphere models.  A better solution for the
+      // special case bits here should be implemented.
+      if (ownedObject->IsOfType(Gmat::ATMOSPHERE)) continue;
+
       // if owned object is a propagator, don't append the propagator name
       if (ownedObject->GetType() != Gmat::PROPAGATOR)
       {
@@ -4197,9 +4677,11 @@ void GmatBase::WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
                                      std::stringstream &stream)
 {   
    StringArray sar = GetStringArrayParameter(id);
-   if (sar.size() > 0)
+   if ((sar.size() > 0) || WriteEmptyStringArray(id))
    {
-      std::string attCmtLn = GetAttributeCommentLine(id);
+      std::string attCmtLn = "";
+      if (mode != Gmat::OBJECT_EXPORT)
+         attCmtLn = GetAttributeCommentLine(id);
       
       if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                                (mode == Gmat::OWNED_OBJECT) ||
@@ -4223,7 +4705,8 @@ void GmatBase::WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
             arrayStream << "'";
       }
       
-      attCmtLn  = GetInlineAttributeComment(id);
+      if (mode != Gmat::OBJECT_EXPORT)
+         attCmtLn  = GetInlineAttributeComment(id);
       
       if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
                                (mode == Gmat::OWNED_OBJECT) ||
@@ -4311,8 +4794,21 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    case Gmat::FILENAME_TYPE:
    case Gmat::STRING_TYPE:
       {
+         // Check if empty string parameter can be written (LOJ: 2015.01.30)
+         bool writeString = false;
          std::string strVal = GetStringParameter(id);
-         if (inMatlabMode || (!inMatlabMode && strVal != ""))
+         if (inMatlabMode)
+            writeString = true;
+         else if (strVal != "")
+            writeString = true;
+         else if (WriteEmptyStringParameter(id))
+            writeString = true;
+         
+         #ifdef DEBUG_WRITE_PARAM
+         MessageInterface::ShowMessage("   writeString = %d\n", writeString);
+         #endif
+         //if (inMatlabMode || (!inMatlabMode && strVal != ""))
+         if (writeString)
             stream << "'" << strVal << "'";
          
          break;
@@ -4469,6 +4965,26 @@ Rmatrix* GmatBase::GetParameterSTM(Integer parameterId)
    return NULL;
 }
 
+
+//------------------------------------------------------------------------------
+// Integer GmatBase::GetStmRowId(const Integer forRow)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID associated with a given row/column of the STM
+ *
+ * Note that since the STM is of the form d(r(t)) / d(r(t_o)), the numerator
+ * setting for each row matches the denominator setting for each column.
+ *
+ * @param forRow The associated row (for the numerator) or column (denominator)
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+Integer GmatBase::GetStmRowId(const Integer forRow)
+{
+   return -1;
+}
+
 //------------------------------------------------------------------------------
 // Integer HasParameterCovariances(Integer parameterId)
 //------------------------------------------------------------------------------
@@ -4557,3 +5073,57 @@ bool GmatBase::IsParameterCommandModeSettable(const Integer id) const
 {
    return false;
 }
+
+
+const std::string GmatBase::GetFullName()
+{
+   return instanceFullName;
+}
+
+
+bool GmatBase::SetFullName(const std::string name)
+{
+   instanceFullName = name;
+   return true;
+}
+
+
+ObjectMap GmatBase::GetConfiguredObjectMap()
+{
+   return Moderator::Instance()->GetSandbox()->GetObjectMap();
+}
+
+
+GmatBase* GmatBase::GetConfiguredObject(const std::string &name)
+{
+   return Moderator::Instance()->GetInternalObject(name);
+}
+
+
+const StringArray GmatBase::GetListOfObjects(Gmat::ObjectType type)
+{
+   ObjectMap objMap = GetConfiguredObjectMap();
+   StringArray nameList;
+   for (ObjectMap::iterator i = objMap.begin(); i != objMap.end(); ++i)
+   {
+      if ((*i).second->IsOfType(type))
+         nameList.push_back((*i).first);
+   }
+
+   return nameList;
+}
+
+
+const StringArray GmatBase::GetListOfObjects(const std::string &typeName)
+{
+   ObjectMap objMap = GetConfiguredObjectMap();
+   StringArray nameList;
+   for (ObjectMap::iterator i = objMap.begin(); i != objMap.end(); ++i)
+   {
+      if ((*i).second->IsOfType(typeName))
+         nameList.push_back((*i).first);
+   }
+
+   return nameList;
+}
+

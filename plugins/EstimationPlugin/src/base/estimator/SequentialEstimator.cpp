@@ -1,12 +1,22 @@
-//$Id: SequentialEstimator.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: SequentialEstimator.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                         SequentialEstimator
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -300,7 +310,14 @@ void SequentialEstimator::CompleteInitialization()
 
    // Now load up the observations
    measManager.PrepareForProcessing();
-   measManager.LoadObservations();
+//   measManager.LoadObservations();
+   UnsignedInt numRec = measManager.LoadObservations();
+   if (numRec == 0)
+     throw EstimatorException("No observation data is used for estimation\n");
+
+///// Make more generic?
+   measManager.LoadRampTables();
+
 
    // First measurement epoch is the epoch of the first measurement.  Duh.
    nextMeasurementEpoch = measManager.GetEpoch();
@@ -329,11 +346,11 @@ void SequentialEstimator::CompleteInitialization()
    if (showAllResiduals)
    {
       StringArray plotMeasurements;
-      for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
+      for (UnsignedInt i = 0; i < modelNames.size(); ++i)
       {
          plotMeasurements.clear();
-         plotMeasurements.push_back(measurementNames[i]);
-         std::string plotName = instanceName + "_" + measurementNames[i] +
+         plotMeasurements.push_back(modelNames[i]);
+         std::string plotName = instanceName + "_" + modelNames[i] +
                "_Residuals";
          BuildResidualPlot(plotName, plotMeasurements);
       }

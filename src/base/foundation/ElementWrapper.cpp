@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -54,7 +64,8 @@ const Real ElementWrapper::UNDEFINED_REAL = -999.99;
 //---------------------------------------------------------------------------
 ElementWrapper::ElementWrapper() :
    description  (""),
-   wrapperType  (Gmat::NUMBER_WT)
+   wrapperType  (Gmat::NUMBER_WT),
+   allowOneDimArraySetting (false)
 {
 }
 
@@ -71,7 +82,8 @@ ElementWrapper::ElementWrapper() :
 ElementWrapper::ElementWrapper(const ElementWrapper &er) :
    description    (er.description),
    refObjectNames (er.refObjectNames),
-   wrapperType    (er.wrapperType)
+   wrapperType    (er.wrapperType),
+   allowOneDimArraySetting (er.allowOneDimArraySetting)
 {
 }
 
@@ -91,9 +103,10 @@ const ElementWrapper& ElementWrapper::operator=(const ElementWrapper &er)
    if (&er == this)
       return *this;
 
-   description    = er.description;
-   refObjectNames = er.refObjectNames;
-   wrapperType    = er.wrapperType;
+   description             = er.description;
+   refObjectNames          = er.refObjectNames;
+   wrapperType             = er.wrapperType;
+   allowOneDimArraySetting = er.allowOneDimArraySetting;
 
    return *this;
 }
@@ -127,6 +140,25 @@ std::string ElementWrapper::ToString()
        "type %d, description of \"%s\"", wrapperType, description.c_str());
    throw be;
 }
+
+
+//---------------------------------------------------------------------------
+// void AllowOneDimArraySetting(bool allow)
+//---------------------------------------------------------------------------
+void ElementWrapper::AllowOneDimArraySetting(bool allow)
+{
+   allowOneDimArraySetting = allow;
+}
+
+
+//---------------------------------------------------------------------------
+// bool IsOneDimArraySettingAllowed()
+//---------------------------------------------------------------------------
+bool ElementWrapper::IsOneDimArraySettingAllowed()
+{
+   return allowOneDimArraySetting;
+}
+
 
 //------------------------------------------------------------------------------
 // virtual ElementWrapper* Clone() const
@@ -396,7 +428,8 @@ std::string ElementWrapper::EvaluateString() const
 bool ElementWrapper::SetString(const std::string &toValue)
 {
    throw GmatBaseException(
-      "In ElementWrapper, SetString() method not valid for wrapper of non-String type.\n");
+      "Cannot set string \"" + toValue + "\" to non-String type. In ElementWrapper, SetString() "
+      "method not valid for wrapper of non-String type.\n");
 }
 
 //---------------------------------------------------------------------------
@@ -606,11 +639,14 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
       
       #ifdef DEBUG_EW_SET_VALUE
       MessageInterface::ShowMessage
-         ("   ==> Now assign \"%s\" to \"%s\", rhsObj=<%p>, sval='%s'\n",
-          lhs.c_str(), rhs.c_str(), rhsObj, sval.c_str());
+         ("   ==> Now assign \"%s\" to \"%s\", rhsObj=<%p>[%s]'%s', sval='%s'\n",
+          lhs.c_str(), rhs.c_str(), rhsObj, rhsObj ? rhsObj->GetTypeName().c_str() : "NULL",
+          rhsObj ? rhsObj->GetName().c_str() : "NULL", sval.c_str());
       #endif
       
-      // Now assign to RHS
+      //==============================================================
+      // Now set value to LHS
+      //==============================================================
       switch (lhsDataType)
       {
       case Gmat::BOOLEAN_TYPE:
@@ -718,6 +754,9 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             break;
          }
       case Gmat::RMATRIX_TYPE:
+         #ifdef DEBUG_EW_SET_VALUE
+         MessageInterface::ShowMessage("   lhs is Rmatrix type\n");
+         #endif
          if (rhsDataType == Gmat::RMATRIX_TYPE ||
              rhsDataType == Gmat::RVECTOR_TYPE)
          {
@@ -818,8 +857,17 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             // Handle special case for "DefaultFM.Drag = None;"
             if (rhsDataType == Gmat::STRING_TYPE)
             {
+               GmatBase *lhsObj = lhsWrapper->GetRefObject();
+               
                #ifdef DEBUG_EW_SET_VALUE
-               MessageInterface::ShowMessage("   calling lhsWrapper->SetString(rhs)\n");
+               MessageInterface::ShowMessage
+                  ("   lhsObj=<%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n", lhsObj,
+                   lhsObj ? lhsObj->GetTypeName().c_str() : "NULL",
+                   lhsObj ? lhsObj->GetName().c_str() : "NULL",
+                   lhsObj ? lhsObj->IsGlobal() : -999,
+                   lhsObj ? lhsObj->IsLocal() : -999);
+               MessageInterface::ShowMessage
+                  ("   rhsObj is NULL, calling lhsWrapper->SetString(rhs)\n");
                #endif
                
                // Show more meaningful message
@@ -827,10 +875,29 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
                {
                   lhsWrapper->SetString(rhs);
                }
-               catch (BaseException &)
+               catch (BaseException &be)
                {
-                  // Show more meaningful message from the wrapper ref object (LOJ: 2011.02.17)
-                  throw;
+                  // Will this fix GMT-5336 Case_2.script error? (LOJ: 2015.10.03)
+                  // If function output is not declared and it is global object
+                  // ignore exception
+                  // sample script:
+                  // function [MAVEN] = Case_2()
+                  // %%Create Spacecraft MAVEN;
+                  // BeginMissionSequence;
+                  // Global MAVEN
+                  if (lhsObj != NULL && lhsObj->IsGlobal() && !(lhsObj->IsLocal()))
+                  {
+                     #ifdef DEBUG_EW_SET_VALUE
+                     MessageInterface::ShowMessage
+                        ("==> lhsObj is global so ignoring exception '%s'\n",
+                         be.GetFullMessage().c_str());
+                     #endif
+                  }
+                  else
+                  {
+                     // Show more meaningful message from the wrapper ref object (LOJ: 2011.02.17)
+                     throw;
+                  }
                }
             }
             // Handle case like "XYPlot1.IndVar = sat.A1ModJulian;"
@@ -849,6 +916,11 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             if (setRefObj)
             {
                #ifdef DEBUG_EW_SET_VALUE
+               GmatBase *lhsObj = lhsWrapper->GetRefObject();
+               MessageInterface::ShowMessage
+                  ("   lhsObj=<%p>[%s]'%s'\n", lhsObj,
+                   lhsObj ? lhsObj->GetTypeName().c_str() : "NULL",
+                   lhsObj ? lhsObj->GetName().c_str() : "NULL");
                MessageInterface::ShowMessage("   calling lhsWrapper->SetObject(rhsObj)\n");
                #endif
                lhsWrapper->SetObject(rhsObj);

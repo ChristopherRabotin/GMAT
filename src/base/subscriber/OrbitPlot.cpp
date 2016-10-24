@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number X-XXXXX-X
@@ -33,10 +43,16 @@
 
 
 #define __REMOVE_OBJ_BY_SETTING_FLAG__
+// If following flag is not defined, it will set data to zero for
+// unpublished object
+//#define __USE_PREVIOUS_DATA_FOR_UNPUBLISHED_OBJ__
+// Show one-time warning if plotting object data is absent when data is published
+#define __SHOW_WARNING_FOR_UNPUBLISHED_OBJ__
 
 //#define DEBUG_COLOR
+//#define DEBUG_ABSENT_DATA
 //#define DBGLVL_INIT 2
-//#define DBGLVL_DATA 2
+//#define DBGLVL_DATA 1
 //#define DBGLVL_DATA_LABELS 1
 //#define DBGLVL_UPDATE 2
 //#define DBGLVL_ADD 1
@@ -94,6 +110,7 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    // GmatBase data
    parameterCount = OrbitPlotParamCount;
    objectTypeNames.push_back("OrbitPlot");
+   objectTypeNames.push_back("Plot");
    
    mViewCoordSystem = NULL;
    
@@ -105,6 +122,7 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    mNumPointsToRedraw = 0;
    mNumData = 0;
    mNumCollected = 0;
+   mDataAbsentWarningCount = 0;
    
    mScNameArray.clear();
    mObjectNameArray.clear();
@@ -114,13 +132,21 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    mDrawOrbitArray.clear();
    mDrawObjectArray.clear();
    mAllSpArray.clear();
-   
    mScXArray.clear();
    mScYArray.clear();
    mScZArray.clear();
    mScVxArray.clear();
    mScVyArray.clear();
    mScVzArray.clear();
+   mScPrevDataPresent.clear();
+   mScPrevEpoch.clear();
+   mScPrevX.clear();
+   mScPrevY.clear();
+   mScPrevZ.clear();
+   mScPrevVx.clear();
+   mScPrevVy.clear();
+   mScPrevVz.clear();
+   
    mDrawOrbitMap.clear();
    mShowObjectMap.clear();
    
@@ -177,6 +203,15 @@ OrbitPlot::OrbitPlot(const OrbitPlot &plot)
    mScVxArray = plot.mScVxArray;
    mScVyArray = plot.mScVyArray;
    mScVzArray = plot.mScVzArray;
+   mScPrevDataPresent = plot.mScPrevDataPresent;
+   mScPrevEpoch = plot.mScPrevEpoch;
+   mScPrevX = plot.mScPrevX;
+   mScPrevY = plot.mScPrevY;
+   mScPrevZ = plot.mScPrevZ;
+   mScPrevVx = plot.mScPrevVx;
+   mScPrevVy = plot.mScPrevVy;
+   mScPrevVz = plot.mScPrevVz;
+   
    mDrawOrbitMap = plot.mDrawOrbitMap;
    mShowObjectMap = plot.mShowObjectMap;
    
@@ -187,6 +222,7 @@ OrbitPlot::OrbitPlot(const OrbitPlot &plot)
    
    mNumData = plot.mNumData;
    mNumCollected = plot.mNumCollected;
+   mDataAbsentWarningCount = plot.mDataAbsentWarningCount;
 }
 
 
@@ -233,6 +269,15 @@ OrbitPlot& OrbitPlot::operator=(const OrbitPlot& plot)
    mScVxArray = plot.mScVxArray;
    mScVyArray = plot.mScVyArray;
    mScVzArray = plot.mScVzArray;
+   mScPrevDataPresent = plot.mScPrevDataPresent;
+   mScPrevEpoch = plot.mScPrevEpoch;
+   mScPrevX = plot.mScPrevX;
+   mScPrevY = plot.mScPrevY;
+   mScPrevZ = plot.mScPrevZ;
+   mScPrevVx = plot.mScPrevVx;
+   mScPrevVy = plot.mScPrevVy;
+   mScPrevVz = plot.mScPrevVz;
+   
    mDrawOrbitMap = plot.mDrawOrbitMap;
    mShowObjectMap = plot.mShowObjectMap;
    
@@ -243,6 +288,7 @@ OrbitPlot& OrbitPlot::operator=(const OrbitPlot& plot)
    
    mNumData = plot.mNumData;
    mNumCollected = plot.mNumCollected;
+   mDataAbsentWarningCount = plot.mDataAbsentWarningCount;
    
    return *this;
 }
@@ -333,7 +379,7 @@ void OrbitPlot::SetShowObject(const std::string &name, bool value)
  * This methods is called from the Toggle command.
  */
 //------------------------------------------------------------------------------
-void OrbitPlot::Activate(bool state)
+bool OrbitPlot::Activate(bool state)
 {
    #ifdef DEBUG_ACTIVATE
    MessageInterface::ShowMessage
@@ -341,7 +387,7 @@ void OrbitPlot::Activate(bool state)
        this, GetName().c_str(), state, isInitialized);
    #endif
    
-   Subscriber::Activate(state);
+   return Subscriber::Activate(state);
 }
 
 
@@ -572,6 +618,7 @@ bool OrbitPlot::TakeAction(const std::string &action,
    }
    else if (action == "Finalize")
    {
+      // This action is usually called when GMAT function finalizes
       PlotInterface::DeleteGlPlot(instanceName);
    }
    else if (action == "PenUp")
@@ -1293,8 +1340,8 @@ const StringArray& OrbitPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
-      ("OrbitPlot::GetRefObjectNameArray() returning %d names for type:%d\n",
-       refObjectNames.size(), type);
+      ("OrbitPlot::GetRefObjectNameArray() returning %d names for type:%d typeName:%s\n",
+       refObjectNames.size(), type, GmatBase::GetObjectTypeString(type).c_str());
    for (unsigned int i=0; i<refObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
    #endif
@@ -1669,6 +1716,14 @@ bool OrbitPlot::ClearSpacePointList()
    mScVxArray.clear();
    mScVyArray.clear();
    mScVzArray.clear();
+   mScPrevDataPresent.clear();
+   mScPrevEpoch.clear();
+   mScPrevX.clear();
+   mScPrevY.clear();
+   mScPrevZ.clear();
+   mScPrevVx.clear();
+   mScPrevVy.clear();
+   mScPrevVz.clear();
    
    mDefaultOrbitColorMap.clear();
    mDefaultTargetColorMap.clear();
@@ -1677,6 +1732,7 @@ bool OrbitPlot::ClearSpacePointList()
    mScCount = 0;
    mObjectCount = 0;
    mNonStdBodyCount = 0;
+   mDataAbsentWarningCount = 0;
    
    return true;
 }
@@ -1749,6 +1805,14 @@ bool OrbitPlot::RemoveSpacePoint(const std::string &name)
       mScVxArray.erase(mScVxArray.begin());
       mScVyArray.erase(mScVyArray.begin());
       mScVzArray.erase(mScVzArray.begin());
+      mScPrevDataPresent.erase(mScPrevDataPresent.begin());
+      mScPrevEpoch.erase(mScPrevEpoch.begin());
+      mScPrevX.erase(mScPrevX.begin());
+      mScPrevY.erase(mScPrevY.begin());
+      mScPrevZ.erase(mScPrevZ.begin());
+      mScPrevVx.erase(mScPrevVx.begin());
+      mScPrevVy.erase(mScPrevVy.begin());
+      mScPrevVz.erase(mScPrevVz.begin());
       
       mScCount = mScNameArray.size();
             
@@ -1911,6 +1975,14 @@ void OrbitPlot::BuildDynamicArrays()
             mScVxArray.push_back(0.0);
             mScVyArray.push_back(0.0);
             mScVzArray.push_back(0.0);
+            mScPrevDataPresent.push_back(false);
+            mScPrevEpoch.push_back(0.0);
+            mScPrevX.push_back(0.0);
+            mScPrevY.push_back(0.0);
+            mScPrevZ.push_back(0.0);
+            mScPrevVx.push_back(0.0);
+            mScPrevVy.push_back(0.0);
+            mScPrevVz.push_back(0.0);
             
             // Add to all object list
             mObjectNameArray.push_back(mAllSpNameArray[i]);                  
@@ -1962,20 +2034,24 @@ void OrbitPlot::BuildDynamicArrays()
 void OrbitPlot::ClearDynamicArrays()
 {
    mObjectNameArray.clear();
-   //mOrbitColorArray.clear();
-   //mTargetColorArray.clear();
    mObjectArray.clear();
    mDrawOrbitArray.clear();
    mDrawObjectArray.clear();
    mScNameArray.clear();
-   //mScOrbitColorArray.clear();
-   //mScTargetColorArray.clear();
    mScXArray.clear();
    mScYArray.clear();
    mScZArray.clear();
    mScVxArray.clear();
    mScVyArray.clear();
    mScVzArray.clear();
+   mScPrevDataPresent.clear();
+   mScPrevEpoch.clear();
+   mScPrevX.clear();
+   mScPrevY.clear();
+   mScPrevZ.clear();
+   mScPrevVx.clear();
+   mScPrevVy.clear();
+   mScPrevVz.clear();
 }
 
 
@@ -2045,6 +2121,74 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
 {
    if (len == 0)
       return true;
+   
+   // Skip data if data publishing command such as Propagate is inside a function
+   // and this OrbitPlot is not a global nor a local object (i.e declared in the main script)
+   // (LOJ: 2015.08.17)
+   if (currentProvider && currentProvider->TakeAction("IsInFunction"))
+   {
+      #ifdef DEBUG_FUNCTION_DATA
+      MessageInterface::ShowMessage
+         ("   Data is published from the function, '%s' IsGlobal:%s, IsLocal:%s\n",
+          GetName().c_str(), IsGlobal() ? "Yes" : "No", IsLocal() ? "Yes" : "No");
+      #endif
+      
+      bool skipData = false;
+      // Check for spacepoints if data should be skipped or not
+      for (int i=0; i<mAllSpCount; i++)
+      {
+         SpacePoint *sp = mAllSpArray[i];
+         #ifdef DEBUG_FUNCTION_DATA
+         MessageInterface::ShowMessage
+            ("   mAllSpNameArray[%d]=<%p>'%s'\n", i, mAllSpArray[i],
+             mAllSpNameArray[i].c_str());
+         #endif
+         
+         if (sp)
+         {
+            #ifdef DEBUG_FUNCTION_DATA
+            MessageInterface::ShowMessage
+               ("   sp = <%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+                sp, sp->GetTypeName().c_str(), sp->GetName().c_str(),
+                sp->IsGlobal(), sp->IsLocal());
+            #endif
+            
+            // Skip data if OrbitPlot is global and spacepoint is local
+            if (IsGlobal() && sp->IsLocal())
+            {
+               #ifdef DEBUG_FUNCTION_DATA
+               MessageInterface::ShowMessage
+                  ("   Skip data since '%s' is global and spacepoint is local\n",
+                   GetName().c_str());
+               #endif
+               skipData = true;
+               break;
+            }
+            // Skip data if spacepoint is not a global nor a local object
+            else if (!(sp->IsGlobal()) && !(sp->IsLocal()))
+            {
+               #ifdef DEBUG_FUNCTION_DATA
+               MessageInterface::ShowMessage
+                  ("   Skip data since spacepoint is not a global nor a local object\n");
+               #endif
+               skipData = true;
+               break;
+            }
+         }
+      }
+      
+      if (skipData)
+      {
+         #ifdef DEBUG_FUNCTION_DATA
+         MessageInterface::ShowMessage
+            ("OrbitPlot::Update() this=<%p>'%s' just returning true\n   data is "
+             "from a function and spacepoint is not a global nor a local object\n",
+             this, GetName().c_str());
+         #endif
+         return true;
+      }
+   }
+   
    
    mNumData++;
    
@@ -2179,6 +2323,28 @@ void OrbitPlot::BufferZeroData(Integer scIndex)
    mScVzArray[scIndex] = 0.0;
 }
 
+//------------------------------------------------------------------------------
+// void BufferPreviousData(Integer scIndex)
+//------------------------------------------------------------------------------
+/**
+ * Fills spacecraft state with zero
+ */
+//------------------------------------------------------------------------------
+void OrbitPlot::BufferPreviousData(Integer scIndex)
+{
+   #if DBGLVL_DATA
+   MessageInterface::ShowMessage
+      ("===> OrbitPlot::BufferPreviousData() setting to previous data\n   scIndex=%d, "
+       "prev x,y,z: %f, %f, %f\n", scIndex, mScPrevX[scIndex], mScPrevY[scIndex],
+       mScPrevZ[scIndex]);
+   #endif
+   mScXArray[scIndex] = mScPrevX[scIndex];
+   mScYArray[scIndex] = mScPrevY[scIndex];
+   mScZArray[scIndex] = mScPrevZ[scIndex];
+   mScVxArray[scIndex] = mScPrevVx[scIndex];
+   mScVyArray[scIndex] = mScPrevVy[scIndex];
+   mScVzArray[scIndex] = mScPrevVz[scIndex];
+}
 
 //------------------------------------------------------------------------------
 // Integer BufferOrbitData(const Real *dat, Integer len)
@@ -2192,8 +2358,8 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
 {
    #if DBGLVL_DATA
    MessageInterface::ShowMessage
-      ("OrbitPlot::BufferOrbitData() '%s' entered, len=%d\n", GetName().c_str(),
-       len);
+      ("OrbitPlot::BufferOrbitData() <%p>'%s' entered, len=%d, epoch=%.12f, mNumData=%d\n",
+       this, GetName().c_str(), len, dat[0], mNumData);
    #endif
    
    //------------------------------------------------------------
@@ -2253,31 +2419,22 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
       
       scIndex++;
       
-      // If any of index not found, fill with zeros and continue with the next spacecraft
+      // If any of index not found, handle absent data and continue with the next spacecraft
       if (idX  == -1 || idY  == -1 || idZ  == -1 ||
           idVx == -1 || idVy == -1 || idVz == -1)
       {
-         BufferZeroData(scIndex);
+         HandleAbsentData(mScNameArray[i], scIndex, dat[0]);
+         mScPrevDataPresent[scIndex] = false;
          continue;
       }
-
-      // DJC: A fix in the Propagate command corrects the error that made this filter
-      // necessary, so commenting it out:
       
-      // If data epoch is before the spacecraft initial epoch,
-      // fill with zeros and continue with the next spacecraft
-//      if (dat[0] < mScInitialEpochMap[mScNameArray[i]])
-//      {
-//         BufferZeroData(scIndex);
-//         continue;
-//      }
       
       // Buffer actual data
       
       #if DBGLVL_DATA
       MessageInterface::ShowMessage
-         ("   %s, epoch = %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(), dat[0],
-          dat[idX], dat[idY], dat[idZ]);
+         ("   %s, sat='%s', epoch = %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(),
+          mScNameArray[i].c_str(), dat[0], dat[idX], dat[idY], dat[idZ]);
       #endif
       
       // If distributed data coordinate system is different from view
@@ -2321,6 +2478,16 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
          mScVzArray[scIndex] = dat[idVz];
       }
       
+      // Save old data for next time
+      mScPrevDataPresent[scIndex] = true;
+      mScPrevEpoch[scIndex] = dat[0];
+      mScPrevX[scIndex] = mScXArray[scIndex];
+      mScPrevY[scIndex] = mScYArray[scIndex];
+      mScPrevZ[scIndex] = mScZArray[scIndex];
+      mScPrevVx[scIndex] = mScVxArray[scIndex];
+      mScPrevVy[scIndex] = mScVyArray[scIndex];
+      mScPrevVz[scIndex] = mScVzArray[scIndex];
+      
       #if DBGLVL_DATA
       MessageInterface::ShowMessage
          ("   after buffering, scNo=%d, scIndex=%d, X,Y,Z = %f, %f, %f\n",
@@ -2363,6 +2530,113 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
    return 1;
 }
 
+//------------------------------------------------------------------------------
+// void HandleAbsentData(Integer scIndex, Real currEpoch)
+//------------------------------------------------------------------------------
+void OrbitPlot::HandleAbsentData(const std::string &scName, Integer scIndex,
+                                 Real currEpoch)
+{
+   #ifdef DEBUG_ABSENT_DATA
+   MessageInterface::ShowMessage
+      ("=> OrbitPlot::HandleAbsentData() entered, scName='%s', scIndex=%d, "
+       "currEpoch=%.12f\n", scName.c_str(), scIndex, currEpoch);
+   MessageInterface::ShowMessage
+      ("   '%s' data not present so buffering with zero or previous data\n"
+       "   currEpoch=%.12f, mScCount=%d, mNumData=%d, mScPrevDataPresent[%d]=%s, "
+       "prevEpoch[%d]=%.12f\n", scName.c_str(), currEpoch, mScCount,
+       mNumData, scIndex, mScPrevDataPresent[scIndex] == true ? "true" : "false",
+       scIndex, mScPrevEpoch[scIndex]);
+   #endif
+   
+   // If __USE_PREVIOUS_DATA_FOR_UNPUBLISHED_OBJ__ is defined, use previous
+   // data if object is not published with data (see GMT-5650)
+   #ifdef __USE_PREVIOUS_DATA_FOR_UNPUBLISHED_OBJ__
+   bool useZeroForDataAbsent = false;
+   BufferPreviousData(scIndex);
+   // Send one time flag to plots to ignore time order
+   PlotInterface::TakeGlAction(instanceName, "IgnoreTimeSequence");
+   #else
+   bool useZeroForDataAbsent = true;
+   BufferZeroData(scIndex);
+   #endif
+   
+   // Display warning message about data cannot be displayed correctly
+   // Check if data are on and off
+   // If status is solving or solved pass, skip message
+   if (runstate == Gmat::SOLVING || runstate == Gmat::SOLVEDPASS)
+   {
+      #ifdef DEBUG_ABSENT_DATA
+      MessageInterface::ShowMessage
+         ("   => Status is solving, so skip warning message\n");
+      #endif
+   }
+   else if (mNumData > 2)
+   {
+      // Check if time is ordered in forward or backward
+      if (currEpoch < mScPrevEpoch[scIndex] || mScPrevDataPresent[scIndex])
+      {
+         // If spacecraft going backward and previous data not present, skip message
+         if (currEpoch < mScPrevEpoch[scIndex] && !mScPrevDataPresent[scIndex])
+         {
+            #ifdef DEBUG_ABSENT_DATA
+            MessageInterface::ShowMessage
+               ("   => Spacecraft is going backward and previous data not "
+                "present, so skip warning message\n");
+            #endif
+         }
+         // If current time and previous time is the same, skip message
+         else if (currEpoch == mScPrevEpoch[scIndex])
+         {
+            #ifdef DEBUG_ABSENT_DATA
+            MessageInterface::ShowMessage
+               ("   => Current and previous times are the same, so skip warning message\n");
+            #endif
+         }
+         else
+         {
+            #ifdef __SHOW_WARNING_FOR_UNPUBLISHED_OBJ__
+            if (mDataAbsentWarningCount < (mScCount * 10))
+            {
+               bool writeWarning = true;
+               mDataAbsentWarningCount++;
+               
+               // If first time warning and previous data not present, skip message
+               if (mScPrevDataPresent[scIndex] && mDataAbsentWarningCount == 1)
+               {
+                  writeWarning = false;
+                  #ifdef DEBUG_ABSENT_DATA
+                  MessageInterface::ShowMessage
+                     ("   => First time warning and previous data not present, "
+                      "so skip warning message\n");
+                  #endif
+               }
+               
+               if (writeWarning)
+               {
+                  std::string dataValueMsg = "previous data";
+                  if (useZeroForDataAbsent)
+                     dataValueMsg = "zero";
+                  
+                  MessageInterface::ShowMessage
+                     ("*** WARNING *** Drawing object '%s' has no data published at "
+                      "epoch %.12f so data is set to %s. Plot cannot be displayed "
+                      "correctly when drawing object is not time ordered or data is zero. "
+                      "Last data published at %.12f.\n", scName.c_str(), currEpoch,
+                      dataValueMsg.c_str(), mScPrevEpoch[scIndex]);
+                  if (mDataAbsentWarningCount == (mScCount * 10))
+                     MessageInterface::ShowMessage("*** MAXIMUM WARNING message reached.\n");
+               }
+            }
+            #endif
+         }
+      }
+   }
+   #ifdef DEBUG_ABSENT_DATA
+   MessageInterface::ShowMessage
+      ("OrbitPlot::HandleAbsentData() leaving, scName='%s', scIndex=%d, "
+       "currEpoch=%.12f\n", scName.c_str(), scIndex, currEpoch);
+   #endif
+}
 
 //------------------------------------------------------------------------------
 // void WriteCoordinateSystem(CoordinateSystem *cs, const std::string &label = "")

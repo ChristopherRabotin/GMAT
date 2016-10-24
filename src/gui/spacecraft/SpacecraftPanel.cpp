@@ -5,9 +5,19 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -56,9 +66,22 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage
       ("SpacecraftPanel::SpacecraftPanel() entered. scName='%s', theGuiInterpreter=<%p>\n",
-       scName.c_str(), theGuiInterpreter);
+       scName.WX_TO_C_STRING, theGuiInterpreter);
    #endif
    
+   spacecraftNotebook = NULL;
+   actuatorNotebook = NULL;
+   actuators = NULL;
+   sensors = NULL;
+   theBallisticMassPanel = NULL;
+   theOrbitPanel = NULL;
+   theTankPanel = NULL;
+   theThrusterPanel = NULL;
+   theAttitudePanel = NULL;
+   theVisualModelPanel = NULL;
+   theSpicePanel = NULL;
+   thePwrSysPanel = NULL;
+
    theSpacecraft =
       (Spacecraft*)theGuiInterpreter->GetConfiguredObject(std::string(scName.c_str()));
    
@@ -81,10 +104,16 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
 SpacecraftPanel::~SpacecraftPanel()
 {
    #if DEBUG_SPACECRAFT_PANEL
-   MessageInterface::ShowMessage("SpacecraftPanel::~SpacecraftPanel() entered\n");
+   MessageInterface::ShowMessage
+      ("SpacecraftPanel::~SpacecraftPanel() entered, deleting currentSpacecraft <%p>\n",
+       currentSpacecraft);
    #endif
    
    delete currentSpacecraft;
+   
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::~SpacecraftPanel() leaving\n");
+   #endif
 }
 
 //-------------------------------
@@ -143,20 +172,20 @@ void SpacecraftPanel::Create()
    //wx*Panel
    sensors = NULL;
 //   sensors = new wxPanel( spacecraftNotebook, -1 );
-   
+
    theOrbitPanel = new OrbitPanel
       (this, spacecraftNotebook, currentSpacecraft, theSolarSystem);
    
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   OrbitPanel created\n");
    #endif
-   
+
    theAttitudePanel = new AttitudePanel
       (this, spacecraftNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   AttitudePanel created\n");
    #endif
-   
+
    theBallisticMassPanel = new BallisticsMassPanel
       (this, spacecraftNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
@@ -174,31 +203,46 @@ void SpacecraftPanel::Create()
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   ThrusterPanel created\n");
    #endif
+
+   thePwrSysPanel = new PowerSystemPanel
+      (this, spacecraftNotebook, currentSpacecraft);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   PwrSysPanel created\n");
+   #endif
+
    #ifdef __USE_SPICE__
       theSpicePanel = new SpicePanel
          (this, spacecraftNotebook, currentSpacecraft);
-   #endif
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   SpicePanel created\n");
+   #endif
    #endif
 
    theVisualModelPanel = new VisualModelPanel
       (this, spacecraftNotebook, currentSpacecraft, theSolarSystem);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   VisualModelPanel created\n");
+   #endif
    
    // Adding panels to notebook
-   actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
    spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
    spacecraftNotebook->AddPage( theAttitudePanel, wxT("Attitude") );
    spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
 //   spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
    spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
+   spacecraftNotebook->AddPage( thePwrSysPanel, wxT("Power System") );
    #ifdef __USE_SPICE__
       spacecraftNotebook->AddPage( theSpicePanel, wxT("SPICE") );
    #endif
+   actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
    spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
    spacecraftNotebook->AddPage( theVisualModelPanel , wxT("Visualization") );
-   
+
    theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
+   
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::Create() leaving\n");
+   #endif
 }
 
 
@@ -224,6 +268,7 @@ void SpacecraftPanel::LoadData()
       theAttitudePanel->LoadData();
       theBallisticMassPanel->LoadData();
       theTankPanel->LoadData();
+      thePwrSysPanel->LoadData();
       #ifdef __USE_SPICE__
          theSpicePanel->LoadData();
       #endif
@@ -241,6 +286,9 @@ void SpacecraftPanel::LoadData()
       // this is needed for the Mac, as the VisualModelCanvas was messing up the other tabs
       theVisualModelPanel->CanvasOn(false);
       theVisualModelPanel->CanvasOn(true);
+   #endif
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::LoadData() leaving\n");
    #endif
 }
 
@@ -309,6 +357,9 @@ void SpacecraftPanel::SaveData()
    if (theThrusterPanel->IsDataChanged())
       theThrusterPanel->SaveData();
    
+   if (thePwrSysPanel->IsDataChanged())
+      thePwrSysPanel->SaveData();
+
    // copy the current info into theSpacecraft
    theSpacecraft->Copy(currentSpacecraft);
    #ifdef DEBUG_SPACECRAFT_CLONE_AND_COPY
@@ -334,6 +385,7 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
    theTankPanel->LoadData();
    theThrusterPanel->LoadData();
    theAttitudePanel->LoadData();
+   thePwrSysPanel->LoadData();
    #ifdef __USE_SPICE__
       theSpicePanel->LoadData();
    #endif

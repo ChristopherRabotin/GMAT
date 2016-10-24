@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -419,31 +429,28 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
    if (fillSTM)
    {
       // Setting all zeroes for now
-      Real aTilde[36];
+      Integer stmSize = stmRowCount * stmRowCount;
+      Real *aTilde;
+      aTilde = new Real[stmSize];
+
       Integer element;
       for (Integer i = 0; i < stmCount; ++i)
       {
-         Integer i6 = stmStart + i * 36;
+         Integer ix, i6 = stmStart + i * stmRowCount*stmRowCount;
 
          // Calculate A-tilde
-         aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
-         aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
-         aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
-         aTilde[ 9] = aTilde[10] = aTilde[11] =
-         aTilde[12] = aTilde[13] = aTilde[14] =
-         aTilde[15] = aTilde[16] = aTilde[17] =
-         aTilde[18] = aTilde[19] = aTilde[20] =
-         aTilde[21] = aTilde[22] = aTilde[23] =
-         aTilde[24] = aTilde[25] = aTilde[26] =
-         aTilde[27] = aTilde[28] = aTilde[29] =
-         aTilde[30] = aTilde[31] = aTilde[32] =
-         aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
-
-         for (Integer j = 0; j < 6; j++)
+         for (Integer j = 0; j < stmRowCount; ++j)
          {
-            for (Integer k = 0; k < 6; k++)
+            ix = j * stmRowCount;
+            for (Integer k = 0; k < stmRowCount; ++k)
+               aTilde[ix+k] = 0.0;
+         }
+
+         for (Integer j = 0; j < stmRowCount; j++)
+         {
+            for (Integer k = 0; k < stmRowCount; k++)
             {
-               element = j * 6 + k;
+               element = j * stmRowCount + k;
                #ifdef DEBUG_DERIVATIVES
                   MessageInterface::ShowMessage("------ deriv[%d] = %12.10f\n", (i6+element), aTilde[element]);
                #endif
@@ -451,35 +458,34 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
             }
          }
       }
+
+	  delete [] aTilde;
    }
    if (fillAMatrix)
    {
       // Setting all zeroes for now
-      Real aTilde[36];
+      Integer stmSize = stmRowCount * stmRowCount;
+      Real *aTilde;
+      aTilde = new Real[stmSize];
+
       Integer element;
-      for (Integer i = 0; i < aMatrixCount; ++i)
+      for (Integer i = 0; i < stmCount; ++i)
       {
-         Integer i6 = aMatrixStart + i * 36;
+         Integer ix, i6 = stmStart + i * stmRowCount*stmRowCount;
 
          // Calculate A-tilde
-         aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
-         aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
-         aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
-         aTilde[ 9] = aTilde[10] = aTilde[11] =
-         aTilde[12] = aTilde[13] = aTilde[14] =
-         aTilde[15] = aTilde[16] = aTilde[17] =
-         aTilde[18] = aTilde[19] = aTilde[20] =
-         aTilde[21] = aTilde[22] = aTilde[23] =
-         aTilde[24] = aTilde[25] = aTilde[26] =
-         aTilde[27] = aTilde[28] = aTilde[29] =
-         aTilde[30] = aTilde[31] = aTilde[32] =
-         aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
-
-         for (Integer j = 0; j < 6; j++)
+         for (Integer j = 0; j < stmRowCount; ++j)
          {
-            for (Integer k = 0; k < 6; k++)
+            ix = j * stmRowCount;
+            for (Integer k = 0; k < stmRowCount; ++k)
+               aTilde[ix+k] = 0.0;
+         }
+
+         for (Integer j = 0; j < stmRowCount; j++)
+         {
+            for (Integer k = 0; k < stmRowCount; k++)
             {
-               element = j * 6 + k;
+               element = j * stmRowCount + k;
                #ifdef DEBUG_DERIVATIVES
                   MessageInterface::ShowMessage("------ deriv[%d] = %12.10f\n", (i6+element), aTilde[element]);
                #endif
@@ -487,6 +493,8 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
             }
          }
       }
+
+      delete [] aTilde;
    }
 
    return true;
@@ -880,12 +888,14 @@ bool RelativisticCorrection::SupportsDerivative(Gmat::StateElementId id)
  * @param id State Element ID for the derivative type
  * @param index Starting index in the state vector for this type of derivative
  * @param quantity Number of objects that supply this type of data
+ * @param sizeOfType For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of rows or columns in the STM
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
-                                      Integer quantity)
+                                      Integer quantity, Integer sizeOfType)
 {
    bool retval = false;
 
@@ -903,6 +913,7 @@ bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
 
@@ -910,6 +921,7 @@ bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
 

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -78,6 +88,9 @@ END_EVENT_TABLE()
 GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButton)
    : wxPanel(parent)
 {
+   // Set default font
+   SetFont(GmatAppData::Instance()->GetFont());
+   
    theOkButton = NULL;
    theApplyButton = NULL;
    theCancelButton = NULL;
@@ -191,7 +204,7 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
    #endif
 
    mObject = NULL;
-
+      
    // shortcut keys
    wxAcceleratorEntry entries[3];
    entries[0].Set(wxACCEL_NORMAL,  WXK_F1, ID_BUTTON_HELP);
@@ -440,12 +453,12 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		MessageInterface::ShowMessage
 			("GmatPanel::OnHelp() theHelpController=<%p>\n   "
 			"File to display=%s\n", theHelpController,
-			s);
+			s.c_str());
 		#endif
 		// displays chm, not html
 		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
 		sHTML = s+".html";
-		s = pConfig->Read(_T(s+"Keyword"),_T(sHTML));
+		s = pConfig->Read(s+"Keyword", sHTML);
 
 		if (!theHelpController->DisplaySection(s)) 
 			theHelpController->DisplayContents();
@@ -454,18 +467,18 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 	{
 		// get base help link if available
 		baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
-		sprintf( msgBuffer, baseHelpLink.c_str(), s.c_str());
+		sprintf( msgBuffer, baseHelpLink.c_str(), s.WX_TO_C_STRING);
 		#ifdef DEBUG_GMATPANEL
 		  MessageInterface::ShowMessage
 			 ("GmatPanel::OnHelp() Default Help Link=%s\n", msgBuffer);
 		#endif
 
 		// open separate window to show help
-		s = pConfig->Read(_T(s),_T(msgBuffer));
+      s = pConfig->Read(s, wxString(&msgBuffer[0]));
 		#ifdef DEBUG_GMATPANEL
 		  MessageInterface::ShowMessage
 			 ("GmatPanel::OnHelp() Web Page=<%s>\n",
-			  s);
+			  s.c_str());
 		#endif
 
 		// if path is relative, try to append it to gmat root 

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -30,9 +40,6 @@
 #include <algorithm>               // for find(), distance()
 
 //#define DBGLVL_INIT 1
-//#define DBGLVL_DATA 1
-//#define DBGLVL_DATA_LABELS 1
-//#define DBGLVL_ADD 1
 //#define DBGLVL_OBJ 2
 //#define DBGLVL_PARAM 2
 //#define DBGLVL_PARAM_STRING 2
@@ -378,8 +385,8 @@ bool OrbitView::Initialize()
    if (theInternalCoordSystem == NULL)
    {
       active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The 3DView named \"%s\" will be turned off. "
+      MessageInterface::ShowMessage
+         ("*** WARNING *** The 3DView named \"%s\" will be turned off. "
           "It has a NULL internal coordinate system pointer.\n", GetName().c_str());
       return false;
    }
@@ -592,7 +599,7 @@ bool OrbitView::Initialize()
          //--------------------------------------------------------
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
-            ("   Calling PlotInterface::InitializeGlPlot()\n");
+            ("   Calling PlotInterface::InitializeGlPlot() and setting isInitialized to true\n");
          #endif
          PlotInterface::InitializeGlPlot(instanceName);
          
@@ -791,6 +798,16 @@ bool OrbitView::IsParameterReadOnly(const Integer id) const
    return OrbitPlot::IsParameterReadOnly(id);
 }
 
+//---------------------------------------------------------------------------
+// bool IsSquareBracketAllowedInSetting(const Integer id) const
+//---------------------------------------------------------------------------
+bool OrbitView::IsSquareBracketAllowedInSetting(const Integer id) const
+{
+   if (id == VIEW_DIRECTION || id == VIEWPOINT_VECTOR || id == VIEWPOINT_REFERENCE)
+      return true;
+   else
+      return OrbitPlot::IsSquareBracketAllowedInSetting(id);
+}
 
 //------------------------------------------------------------------------------
 // bool IsParameterCommandModeSettable(const Integer id) const
@@ -1272,6 +1289,15 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value)
    }
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool OrbitView::SetStringParameter(const std::string &label,
+                                   const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)
@@ -1550,6 +1576,11 @@ const ObjectTypeArray& OrbitView::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   #if DBGLVL_OBJ
+   MessageInterface::ShowMessage
+      ("OrbitView::GetRefObjectNameArray() '%s' entered, type:%d typeName:%s\n",
+       GetName().c_str(), type, GmatBase::GetObjectTypeString(type).c_str());
+   #endif
    refObjectNames.clear();
    refObjectNames = OrbitPlot::GetRefObjectNameArray(type);
    
@@ -1596,9 +1627,16 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
          ("mViewPointRefType=%s, mViewPointVecType=%s, mViewDirectionType=%s\n",
           mViewPointRefType.c_str(), mViewPointVecType.c_str(), mViewDirectionType.c_str());
       #endif
-            
-      refObjectNames.insert(refObjectNames.end(), mAllSpNameArray.begin(),
-                            mAllSpNameArray.end());
+
+      // Do not add same name
+      for (unsigned int i = 0; i < mAllSpNameArray.size(); i++)
+      {
+         if (find(refObjectNames.begin(), refObjectNames.end(),
+                  mAllSpNameArray[i]) == refObjectNames.end())
+         {
+            refObjectNames.push_back(mAllSpNameArray[i]);
+         }
+      }
       
       if (mViewCoordSysName != mViewUpCoordSysName)
          refObjectNames.push_back(mViewUpCoordSysName);
@@ -1627,7 +1665,8 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
-      ("OrbitView::GetRefObjectNameArray() returning for type:%d\n", type);
+      ("OrbitView::GetRefObjectNameArray() '%s' returning for type:%d typeName:%s\n",
+       GetName().c_str(), type, GmatBase::GetObjectTypeString(type).c_str());
    for (unsigned int i=0; i<refObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
    #endif
@@ -2050,7 +2089,19 @@ bool OrbitView::Distribute(const Real *dat, Integer len)
    }
    
    if (!active || mScCount <= 0)
+   {
+      #if DBGLVL_UPDATE
+      if (!active)
+         MessageInterface::ShowMessage
+            ("==> OrbitView::Distribute() '%s' just returning ture, it is not active\n",
+             instanceName.c_str());
+      else
+         MessageInterface::ShowMessage
+            ("==> OrbitView::Distribute() '%s' just returning ture, no spacecraft to plot\n",
+             instanceName.c_str());
+      #endif
       return true;
+   }
    
    // test isEndOfRun first
    if (isEndOfRun)
@@ -2074,7 +2125,7 @@ bool OrbitView::Distribute(const Real *dat, Integer len)
       return true;
    
    
-   #if DBGLVL_DATA
+   #if DBGLVL_UPDATE
    MessageInterface::ShowMessage("%s, len=%d\n", GetName().c_str(), len);
    for (int i=0; i<len; i++)
       MessageInterface::ShowMessage("%.11f  ", dat[i]);

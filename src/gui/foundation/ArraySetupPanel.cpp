@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/12/30
@@ -40,6 +50,9 @@ BEGIN_EVENT_TABLE(ArraySetupPanel, GmatPanel)
    EVT_TEXT(ID_TEXTCTRL, ArraySetupPanel::OnTextUpdate)
    EVT_TEXT_ENTER(ID_TEXTCTRL, ArraySetupPanel::OnTextEnter)
    EVT_GRID_CELL_CHANGE(ArraySetupPanel::OnGridCellChange)
+   #if wxCHECK_VERSION(3, 0, 0)
+   EVT_GRID_TABBING(ArraySetupPanel::OnGridTabbing)
+   #endif
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -95,11 +108,11 @@ void ArraySetupPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT(" X "), wxDefaultPosition, wxDefaultSize, 0);
    
    mArrNameTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0);
    mArrRowTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,-1), 0);
    mArrColTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,-1), 0);
    
    wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    
@@ -133,7 +146,7 @@ void ArraySetupPanel::Create()
                      0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
    
    mArrValTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(100,20), 0);
+                                     wxDefaultPosition, wxSize(100,-1), 0);
    mUpdateButton =
       new wxButton(this, ID_BUTTON, wxT("Update"),
                    wxDefaultPosition, wxDefaultSize, 0);
@@ -151,26 +164,28 @@ void ArraySetupPanel::Create()
    mArrGrid =
       new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(300,157), wxWANTS_CHARS);
    
-   mArrGrid->SetRowLabelSize(20);
+   mArrGrid->SetRowLabelSize(40);
    mArrGrid->SetColLabelSize(20);
    mArrGrid->SetScrollbars(5, 8, 15, 15);
    mArrGrid->EnableEditing(true);
-   
+   #if wxCHECK_VERSION(3, 0, 0)
+   mArrGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
    wxBoxSizer *arrValBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrValBoxSizer->Add(singleValBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   arrValBoxSizer->Add(mArrGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   arrValBoxSizer->Add(mArrGrid, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
    GmatStaticBoxSizer *arrStaticBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Array");
    arrStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   arrStaticBoxSizer->Add(arrValBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   arrStaticBoxSizer->Add(arrValBoxSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   pageBoxSizer->Add(arrStaticBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(arrStaticBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(pageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(pageBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
 
 }
 
@@ -274,7 +289,7 @@ void ArraySetupPanel::LoadData()
       }
       catch (BaseException &e)
       {
-         wxLogError(wxT(e.GetFullMessage().c_str()));
+         wxLogError(wxString(e.GetFullMessage().c_str()));
          wxLog::FlushActive();
       }
    }
@@ -435,6 +450,14 @@ void ArraySetupPanel::UpdateCellValue()
    }   
 }
 
+//------------------------------------------------------------------------------
+// bool CheckCellValue(Real &rval, int row, int col, const char *str)
+//------------------------------------------------------------------------------
+bool ArraySetupPanel::CheckCellValue(Real &rval, int row, int col,
+                                     const char *str)
+{
+   return CheckCellValue(rval, row, col, std::string(str));
+}
 
 //------------------------------------------------------------------------------
 // bool CheckCellValue(Real &rval, int row, int col, const std::string &str)
@@ -458,4 +481,32 @@ bool ArraySetupPanel::CheckCellValue(Real &rval, int row, int col,
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnGridTabbing(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user tabs in the grid
+ *
+ * @param  event   grid event to handle
+ */
+//------------------------------------------------------------------------------
+void ArraySetupPanel::OnGridTabbing(wxGridEvent& event)
+{
+    int row = event.GetRow();
+    int col = event.GetCol();
+    if (!event.ShiftDown() &&
+        (row == (mArrGrid->GetNumberRows() - 1)) &&
+        (col == (mArrGrid->GetNumberCols() - 1)))
+    {
+        mArrGrid->Navigate( wxNavigationKeyEvent::IsForward );
+    }
+    else if (event.ShiftDown() &&
+        (row == 0) &&
+        (col == 0))
+    {
+        mArrGrid->Navigate( wxNavigationKeyEvent::IsBackward );
+    }
+    else
+        event.Skip();
+} 
 

@@ -1,5 +1,5 @@
 <NotepadPlus>
-    <UserLang name="GMAT" ext="script, gmf" udlVersion="2.1">
+    <UserLang name="GMAT" ext="script gmf" udlVersion="2.1">
         <Settings>
             <Global caseIgnored="no" allowFoldOfComments="no" foldCompact="no" forcePureLC="0" decimalSeparator="0" />
             <Prefix Keywords1="no" Keywords2="no" Keywords3="no" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
@@ -26,7 +26,7 @@
             <Keywords name="Folders in comment, close"></Keywords>
             <Keywords name="Keywords1">Array Barycenter CoordinateSystem DifferentialCorrector EphemerisFile FileInterface FiniteBurn FminconOptimizer ForceModel Formation FuelTank GroundStation GroundTrackPlot ImpulsiveBurn LibrationPoint MatlabFunction OrbitView Propagator ReportFile SolarSystem Spacecraft String Thruster Variable VF13ad XYPlot Asteroid Comet Planet Moon</Keywords>
             <Keywords name="Keywords2">Achieve BeginMissionSequence BeginFiniteBurn BeginScript CallMatlabFunction ClearPlot Create EndFiniteBurn For If GMAT Maneuver MarkPoint NonlinearConstraint Optimize PenDown PenUp Propagate Report Set Stop Target Toggle Vary While</Keywords>
-            <Keywords name="Keywords3"></Keywords>
+            <Keywords name="Keywords3">Include Write BatchEstimatorInv Simulator ErrorModel StatisticsAcceptFilter StatisticsRejectFilter TrackingDataSet RunEstimator RunSimulator</Keywords>
             <Keywords name="Keywords4"></Keywords>
             <Keywords name="Keywords5"></Keywords>
             <Keywords name="Keywords6"></Keywords>

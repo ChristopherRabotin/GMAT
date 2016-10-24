@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Waka Waktola
 // Created: 2005/01/13
@@ -34,28 +44,39 @@ END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
 // ThrusterCoefficientDialog(wxWindow *parent, wxWindowID id, 
-//                           const wxString &title, GmatBase *obj,
-//                           const std::string &type)
+//                           const wxString &title, GmatBase *obj,Integer numCoefs,
+//                           const RealArray &coefs1, const RealArray &coefs2);
 //------------------------------------------------------------------------------
 ThrusterCoefficientDialog::
 ThrusterCoefficientDialog(wxWindow *parent, wxWindowID id, 
-                          const wxString &title, GmatBase *obj,
-                          const wxString &type, const RealArray &coefsCOrK)
-   : GmatDialog(parent, id, title, obj, wxDefaultPosition, wxDefaultSize)
+        const wxString &title, GmatBase *obj, Integer numCoefs,
+        const RealArray &coefs1, const RealArray &coefs2)
+: GmatDialog(parent, id, title, obj, wxDefaultPosition, wxDefaultSize)
 {
-   coefType      = type;
-   theObject     = obj;
-   coefsModified = false;
+   theObject      = obj;
+   isElectric     = theObject->IsOfType("ElectricThruster");
+   coefsCount     = numCoefs;
+   coefs1Modified = false;
+   coefs2Modified = false;
+
+   coefs1Names.clear();
+   coefs2Names.clear();
+
+   coefs1Values.clear();
+   coefs2Values.clear();
    
-   coefNames.clear();
-   coefValues.clear();
+   coefs1Values   = coefs1;
+   coefs2Values   = coefs2;
    
-   coefValues    = coefsCOrK;
    #ifdef DEBUG_COEFS
-      MessageInterface::ShowMessage("In TCD constructor, size of coefs array is %d\n", (Integer) coefValues.size());
-      for (unsigned int ii = 0; ii < coefValues.size(); ii++)
-         MessageInterface::ShowMessage("coefValues[%d] = %lf\n", ii, coefValues.at(ii));
+   MessageInterface::ShowMessage("In TCD constructor, size of 1st coefs array is %d\n", (Integer) coefs1Values.size());
+   for (unsigned int ii = 0; ii < coefs1Values.size(); ii++)
+   MessageInterface::ShowMessage("coefs1Values[%d] = %lf\n", ii, coefs1Values.at(ii));
+   MessageInterface::ShowMessage("In TCD constructor, size of K coefs array is %d\n", (Integer) coefs2Values.size());
+   for (unsigned int ii = 0; ii < coefs2Values.size(); ii++)
+   MessageInterface::ShowMessage("coefs2Values[%d] = %lf\n", ii, coefs2Values.at(ii));
    #endif
+
 
    if (obj != NULL)
    {
@@ -69,33 +90,69 @@ ThrusterCoefficientDialog(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 void ThrusterCoefficientDialog::Create()
 {
-   coefGrid =
-      new wxGrid( this, ID_GRID, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
-   
-   coefCount = Thruster::COEFFICIENT_COUNT;
-   
-   coefGrid->EnableDragGridSize(false);
-   coefGrid->EnableDragColSize(false);
-   coefGrid->CreateGrid(coefCount, 3);
-   coefGrid->SetRowLabelSize(0);
-   coefGrid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
-   
-   coefGrid->SetColLabelValue(0, _T("Coefficient"));
-   coefGrid->SetColSize(0, 70);
-   coefGrid->SetColLabelValue(1, _T("Value"));
-   coefGrid->SetColSize(1, 135);
-   coefGrid->SetColLabelValue(2, _T("Unit"));
-   coefGrid->SetColSize(2, 80);
-   
+   coefNotebook = new
+      wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition,
+                  wxDefaultSize, wxGROW );
+
+   coefGrid1 =
+      new wxGrid( coefNotebook, ID_GRID1, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
+
+   coefGrid1->EnableDragGridSize(false);
+   coefGrid1->EnableDragColSize(false);
+   coefGrid1->CreateGrid(coefsCount, 3);
+   coefGrid1->SetRowLabelSize(0);
+   coefGrid1->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+
+   coefGrid1->SetColLabelValue(0, _T("Coefficient"));
+   coefGrid1->SetColSize(0, 115);
+   coefGrid1->SetColLabelValue(1, _T("Value"));
+   coefGrid1->SetColSize(1, 135);
+   coefGrid1->SetColLabelValue(2, _T("Unit"));
+   coefGrid1->SetColSize(2, 80);
+
    // The first and third columns are read only
-   for (int i=0; i<coefCount; i++)
+   for (int i=0; i<coefsCount; i++)
    {
-      coefGrid->SetReadOnly(i, 0);
-      coefGrid->SetReadOnly(i, 2);
+      coefGrid1->SetReadOnly(i, 0);
+      coefGrid1->SetReadOnly(i, 2);
    }
-   
-   // wxSizers   
-   theMiddleSizer->Add(coefGrid, 0, wxALIGN_CENTRE|wxGROW|wxALL, 3);
+
+
+   coefGrid2 =
+      new wxGrid( coefNotebook, ID_GRID2, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
+
+   coefGrid2->EnableDragGridSize(false);
+   coefGrid2->EnableDragColSize(false);
+   coefGrid2->CreateGrid(coefsCount, 3);
+   coefGrid2->SetRowLabelSize(0);
+   coefGrid2->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+
+   coefGrid2->SetColLabelValue(0, _T("Coefficient"));
+   coefGrid2->SetColSize(0, 115);
+   coefGrid2->SetColLabelValue(1, _T("Value"));
+   coefGrid2->SetColSize(1, 135);
+   coefGrid2->SetColLabelValue(2, _T("Unit"));
+   coefGrid2->SetColSize(2, 80);
+
+   // The first and third columns are read only
+   for (int i=0; i<coefsCount; i++)
+   {
+      coefGrid2->SetReadOnly(i, 0);
+      coefGrid2->SetReadOnly(i, 2);
+   }
+
+   if (isElectric)
+   {
+      coefNotebook->AddPage( coefGrid1, wxT("Thrust Coefficients") );
+      coefNotebook->AddPage( coefGrid2, wxT("Mass Flow Coefficients") );
+   }
+   else
+   {
+      coefNotebook->AddPage( coefGrid1, wxT("Thrust Coefficients") );
+      coefNotebook->AddPage( coefGrid2, wxT("Impulse Coefficients") );
+   }
+
+   theMiddleSizer->Add(coefNotebook, 1, wxALIGN_CENTRE|wxGROW|wxALL, 5);
 }
 
 //------------------------------------------------------------------------------
@@ -103,51 +160,76 @@ void ThrusterCoefficientDialog::Create()
 //------------------------------------------------------------------------------
 void ThrusterCoefficientDialog::LoadData()
 {
-   Integer paramID = 0;
-   int coefCount = Thruster::COEFFICIENT_COUNT;
+   #ifdef DEBUG_COEFS_LOAD
+      MessageInterface::ShowMessage(
+            "In ThrusterConfigDialog::LoadData ..., coefsCount = %d\n",
+            coefsCount);
+   #endif
 
-   std::stringstream cStrings("");
-   std::stringstream kStrings("");
+   std::stringstream c1Strings("");
+   std::stringstream c2Strings("");
 
-   if (coefType == "C")
+   coefs1Names.clear();
+   coefs2Names.clear();
+
+   std::string coefs1Label;
+   std::string coefs2Label;
+   StringArray coefs1Units;
+   StringArray coefs2Units;
+
+   if (isElectric)
    {
-      std::stringstream cStrings("");
-      for (Integer ii = 0; ii < coefCount; ii++)
-      {
-         cStrings << "C" << ii + 1;
-         coefNames.push_back(cStrings.str());
-         cStrings.str("");
-      }
-
-      paramID = theObject->GetParameterID("C_UNITS");
-      StringArray coefUnits = theObject->GetStringArrayParameter(paramID);
-      
-      for (Integer i = 0; i < coefCount; i++)
-      {
-         coefGrid->SetCellValue(i, 0, coefNames[i].c_str());
-         coefGrid->SetCellValue(i, 1, wxVariant(coefValues[i]));
-         coefGrid->SetCellValue(i, 2, coefUnits[i].c_str());
-      }
+      coefs1Units = theObject->GetStringArrayParameter("T_UNITS");
+      coefs2Units = theObject->GetStringArrayParameter("MF_UNITS");
+      coefs1Label = "ThrustCoeff";
+      coefs2Label = "MassFlowCoeff";
    }
-   else if (coefType == "K")
+   else
    {
-      std::stringstream kStrings("");
-      for (Integer ii = 0; ii < coefCount; ii++)
-      {
-         kStrings << "K" << ii + 1;
-         coefNames.push_back(kStrings.str());
-         kStrings.str("");
-      }
-      
-      paramID = theObject->GetParameterID("K_UNITS");
-      StringArray coefUnits = theObject->GetStringArrayParameter(paramID);
-      
-      for (Integer i = 0; i < coefCount; i++)
-      {
-         coefGrid->SetCellValue(i, 0, coefNames[i].c_str());
-         coefGrid->SetCellValue(i, 1, wxVariant(coefValues[i]));
-         coefGrid->SetCellValue(i, 2, coefUnits[i].c_str());
-      }
+      coefs1Units = theObject->GetStringArrayParameter("C_UNITS");
+      coefs2Units = theObject->GetStringArrayParameter("K_UNITS");
+      coefs1Label = "C";
+      coefs2Label = "K";
+   }
+
+   for (Integer ii = 0; ii < coefsCount; ii++)
+   {
+      c1Strings << coefs1Label << ii + 1;
+      coefs1Names.push_back(c1Strings.str());
+      c1Strings.str("");
+
+      c2Strings << coefs2Label << ii + 1;
+      coefs2Names.push_back(c2Strings.str());
+      c2Strings.str("");
+      #ifdef DEBUG_COEFS_LOAD
+         MessageInterface::ShowMessage(
+               "In TCDialog::LoadData, coefs1Names[%d] = %s, units = %s\n",
+               ii, coefs1Names.at(ii).c_str(), coefs1Units.at(ii).c_str());
+         MessageInterface::ShowMessage(
+               "In TCDialog::LoadData, coefs2Names[%d] = %s, units = %s\n",
+               ii, coefs2Names.at(ii).c_str(), coefs2Units.at(ii).c_str());
+      #endif
+   }
+
+   for (Integer jj = 0; jj < coefsCount; jj++)
+   {
+      #ifdef DEBUG_COEFS_LOAD
+         MessageInterface::ShowMessage(
+               "In TCDialog::LoadData, %d, setting name = %s,value = %12.10f, units = %s\n",
+               jj, coefs1Names[jj].c_str(), coefs1Values[jj], coefs1Units[jj].c_str() );
+      #endif
+      coefGrid1->SetCellValue(jj, 0, coefs1Names[jj].c_str());
+      coefGrid1->SetCellValue(jj, 1, wxVariant(coefs1Values[jj]));
+      coefGrid1->SetCellValue(jj, 2, coefs1Units[jj].c_str());
+
+      #ifdef DEBUG_COEFS_LOAD
+         MessageInterface::ShowMessage(
+               "In TCDialog::LoadData, %d, setting name = %s,value = %12.10f, units = %s\n",
+               jj, coefs2Names[jj].c_str(), coefs2Values[jj],coefs2Units[jj].c_str() );
+      #endif
+      coefGrid2->SetCellValue(jj, 0, coefs2Names[jj].c_str());
+      coefGrid2->SetCellValue(jj, 1, wxVariant(coefs2Values[jj]));
+      coefGrid2->SetCellValue(jj, 2, coefs2Units[jj].c_str());
    }
 }
 
@@ -158,7 +240,7 @@ void ThrusterCoefficientDialog::SaveData()
 {
    #ifdef DEBUG_COEF_SAVE
    MessageInterface::ShowMessage
-      ("ThrusterCoefficientDialog::SaveData() entered\n");
+      ("ThrusterConfigDialog::SaveData() entered\n");
    #endif
    
    canClose = true;
@@ -168,22 +250,48 @@ void ThrusterCoefficientDialog::SaveData()
    std::string input = "";
    Real cellValue;
    bool cellValueOK = false;
-   for (int i = 0; i < coefCount; i++)
+   // C
+   for (int i = 0; i < coefsCount; i++)
    {
-      field = coefGrid->GetCellValue(i, 0).c_str();
-      input = coefGrid->GetCellValue(i, 1).c_str();
+      field = coefGrid1->GetCellValue(i, 0).c_str();
+      input = coefGrid1->GetCellValue(i, 1).c_str();
       #ifdef DEBUG_COEF_SAVE
          MessageInterface::ShowMessage("   %s = '%s'\n", field.c_str(), input.c_str());
       #endif
       cellValueOK = CheckReal(cellValue, input, field, "Real Number");
       #ifdef DEBUG_COEF_SAVE
-         MessageInterface::ShowMessage("   check real is %s, cellValue = %lf, coefValues[%d] = %lf\n",
-               (cellValueOK? "true" : "false"), cellValue, (Integer) i, coefValues.at(i));
+         MessageInterface::ShowMessage("   check real is %s, cellValue = %lf, coefs1Values[%d] = %lf\n",
+               (cellValueOK? "true" : "false"), cellValue, (Integer) i, coefs1Values.at(i));
       #endif
       if (cellValueOK)
       {
-         if (cellValue != coefValues.at(i))  coefsModified = true;
-         coefValues.at(i) = cellValue;
+         if (cellValue != coefs1Values.at(i))  coefs1Modified = true;
+         coefs1Values.at(i) = cellValue;
+      }
+      else
+      {
+         canClose = false;
+      }
+   }
+
+   cellValueOK = false;
+   // K
+   for (int i = 0; i < coefsCount; i++)
+   {
+      field = coefGrid2->GetCellValue(i, 0).c_str();
+      input = coefGrid2->GetCellValue(i, 1).c_str();
+      #ifdef DEBUG_COEF_SAVE
+         MessageInterface::ShowMessage("   %s = '%s'\n", field.c_str(), input.c_str());
+      #endif
+      cellValueOK = CheckReal(cellValue, input, field, "Real Number");
+      #ifdef DEBUG_COEF_SAVE
+         MessageInterface::ShowMessage("   check real is %s, cellValue = %lf, coefs2Values[%d] = %lf\n",
+               (cellValueOK? "true" : "false"), cellValue, (Integer) i, coefs2Values.at(i));
+      #endif
+      if (cellValueOK)
+      {
+         if (cellValue != coefs2Values.at(i))  coefs2Modified = true;
+         coefs2Values.at(i) = cellValue;
       }
       else
       {
@@ -191,6 +299,7 @@ void ThrusterCoefficientDialog::SaveData()
       }
    }
    
+
    if (!canClose)
    {
       ResetData();
@@ -199,7 +308,7 @@ void ThrusterCoefficientDialog::SaveData()
    
    #ifdef DEBUG_COEF_SAVE
    MessageInterface::ShowMessage
-      ("ThrusterCoefficientDialog::SaveData() exiting\n");
+      ("ThrusterConfigDialog::SaveData() exiting\n");
    #endif
 }  
 
@@ -208,6 +317,7 @@ void ThrusterCoefficientDialog::SaveData()
 //------------------------------------------------------------------------------
 void ThrusterCoefficientDialog::ResetData()
 {
-   coefsModified = false;
+   coefs1Modified = false;
+   coefs2Modified = false;
 }     
 

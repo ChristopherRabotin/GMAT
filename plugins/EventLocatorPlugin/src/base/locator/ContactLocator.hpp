@@ -1,21 +1,33 @@
-//$Id: ContactLocator.hpp 2264 2012-04-05 22:12:37Z djconway@NDC $
+//$Id: ContactLocator.hpp 2264 2012-04-05 22:12:37Z  $
 //------------------------------------------------------------------------------
 //                           ContactLocator
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under NASA Prime
 // Contract NNG10CP02C, Task Order 28
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Nov 7, 2011
+// Updated: 2015  Wendy Shoan / GSFC and Yeerang Lim/KAIST
 //
 /**
- * Definition of the ...
+ * Definition of the ContactLocator
+ * Updates based on prototype by Joel Parker / GSFC
  */
 //------------------------------------------------------------------------------
 
@@ -25,14 +37,15 @@
 
 
 #include "EventLocator.hpp"
-#include "Contact.hpp"
+#include "EventLocatorDefs.hpp"
+#include "ContactResult.hpp"
 
 
 /**
  * Event locator used for station contact events
  *
  * This class manages station contacts for a set of target SpaceObjects
- * (typically Spacecraft).  COntact events require that two types of event
+ * (typically Spacecraft).  Contact events require that two types of event
  * function be satisfied: an elevation function, placing the target above the
  * station's horizon, and (zero or more) line-of-sight event functions, ensuring
  * that there is no obstructing object between the station and the target.
@@ -42,7 +55,7 @@
  * which has untested initialization but is missing the reference object
  * methods.
  */
-class ContactLocator : public EventLocator
+class LOCATOR_API ContactLocator : public EventLocator
 {
 public:
    ContactLocator(const std::string &name);
@@ -84,13 +97,40 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
 
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
+   virtual const ObjectTypeArray&
+                        GetTypesForList(const Integer id);
+   virtual const ObjectTypeArray&
+                        GetTypesForList(const std::string &label);
+
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name);
+
+   virtual bool         HasRefObjectTypeArray();
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
+
+
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName);
 
+   virtual bool         TakeAction(const std::string &action,
+                                   const std::string &actionData = "");
+
+
    virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    virtual bool         Initialize();
-   virtual void         ClearContacts();
+   virtual bool         ReportEventData(const std::string &reportNotice = "");
 
    DEFAULT_TO_NO_CLONES
 
@@ -99,19 +139,18 @@ protected:
    StringArray stationNames;
    /// Collection of stations
    ObjectArray stations;
-   /// List of line of sight obstructors
-   StringArray bodyNames;
-   /// Collection of bodies
-   ObjectArray bodies;
+   /// Light time Direction
+   std::string lightTimeDirection;
 
-   /// The Contact event functions
-   std::vector<Contact*>     contacts;
+   // The stored results
+   std::vector<ContactResult*> contactResults;
+
 
    /// Published parameters for contact locators
     enum
     {
        STATIONS = EventLocatorParamCount,
-       BODIES,
+       LIGHT_TIME_DIRECTION,
        ContactLocatorParamCount
     };
 
@@ -121,6 +160,11 @@ protected:
     /// burn parameter types
     static const Gmat::ParameterType
        PARAMETER_TYPE[ContactLocatorParamCount - EventLocatorParamCount];
+
+    static const std::string LT_DIRECTIONS[2];
+
+    virtual void         FindEvents();
+    virtual std::string  GetAbcorrString();
 };
 
 #endif /* ContactLocator_hpp */

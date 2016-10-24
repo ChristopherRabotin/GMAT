@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under
 // FDSS Task order 28.
@@ -82,9 +92,12 @@ SpiceAttitude::SpiceAttitude(const std::string &attName) :
    ck.clear();
    sclk.clear();
    fk.clear();
- }
+   ckFullPath.clear();
+   sclkFullPath.clear();
+   fkFullPath.clear();
+}
 
- //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  SpiceAttitude(const SpiceAttitude &att)
 //------------------------------------------------------------------------------
 /**
@@ -104,9 +117,15 @@ SpiceAttitude::SpiceAttitude(const SpiceAttitude& att) :
    ck.clear();
    sclk.clear();
    fk.clear();
-   ck   = att.ck;
-   sclk = att.sclk;
-   fk   = att.fk;
+   ckFullPath.clear();
+   sclkFullPath.clear();
+   fkFullPath.clear();
+   ck           = att.ck;
+   sclk         = att.sclk;
+   fk           = att.fk;
+   ckFullPath   = att.ckFullPath;
+   sclkFullPath = att.sclkFullPath;
+   fkFullPath   = att.fkFullPath;
    #ifdef __USE_SPICE__
       reader = (att.reader)->Clone();
    #endif
@@ -133,12 +152,18 @@ SpiceAttitude& SpiceAttitude::operator=(const SpiceAttitude& att)
    ck.clear();
    sclk.clear();
    fk.clear();
+   ckFullPath.clear();
+   sclkFullPath.clear();
+   fkFullPath.clear();
    scName         = att.scName;
    naifId         = att.naifId;
    refFrameNaifId = att.refFrameNaifId;
    ck             = att.ck;
    sclk           = att.sclk;
    fk             = att.fk;
+   ckFullPath     = att.ckFullPath;
+   sclkFullPath   = att.sclkFullPath;
+   fkFullPath     = att.fkFullPath;
    #ifdef __USE_SPICE__
       if (reader) delete reader;
       reader         = (att.reader)->Clone();
@@ -161,6 +186,9 @@ SpiceAttitude::~SpiceAttitude()
    ck.clear();
    sclk.clear();
    fk.clear();
+   ckFullPath.clear();
+   sclkFullPath.clear();
+   fkFullPath.clear();
 }
 
 
@@ -194,32 +222,43 @@ bool SpiceAttitude::Initialize()
       throw AttitudeException(errmsg);
    }
    if (sclk.empty())
-    {
-       std::string errmsg = "Error - no SCLK clock kernel(s) set on SpiceAttitude for object ";
-       errmsg += scName + "\n";
-       throw AttitudeException(errmsg);
-    }
+   {
+      std::string errmsg = "Error - no SCLK clock kernel(s) set on SpiceAttitude for object ";
+      errmsg += scName + "\n";
+      throw AttitudeException(errmsg);
+   }
    if (fk.empty())
-    {
+   {
       std::string warnmsg = "Warning - no FK frame kernel(s) set on SpiceAttitude for object ";
       warnmsg += scName + ".  A Frame Kernel may be necessary.\n";
       MessageInterface::ShowMessage(warnmsg.c_str());
-    }
-
+   }
+   
    #ifdef __USE_SPICE__
       // Load the CK kernel(s)
-      for (StringArray::iterator j = ck.begin(); j != ck.end(); ++j)
+      // Changed to use full path names (LOJ: 2014.06.27)
+      //for (StringArray::iterator j = ck.begin(); j != ck.end(); ++j)
+      for (StringArray::iterator j = ckFullPath.begin(); j != ckFullPath.end(); ++j)
       {
+         #ifdef DEBUG_SPICE_ATTITUDE
+         MessageInterface::ShowMessage("   ckFullPath = '%s'\n", (*j).c_str());
+         #endif
          reader->LoadKernel(*j);
       }
       // Load the SCLK kernel(s)
-      for (StringArray::iterator j = sclk.begin(); j != sclk.end(); ++j)
+      for (StringArray::iterator j = sclkFullPath.begin(); j != sclkFullPath.end(); ++j)
       {
+         #ifdef DEBUG_SPICE_ATTITUDE
+         MessageInterface::ShowMessage("   sclkFullPath = '%s'\n", (*j).c_str());
+         #endif
          reader->LoadKernel(*j);
       }
       // Load the FK kernel(s), if any
-      for (StringArray::iterator j = fk.begin(); j != fk.end(); ++j)
+      for (StringArray::iterator j = fkFullPath.begin(); j != fkFullPath.end(); ++j)
       {
+         #ifdef DEBUG_SPICE_ATTITUDE
+         MessageInterface::ShowMessage("   fkFullPath = '%s'\n", (*j).c_str());
+         #endif
          reader->LoadKernel(*j);
       }
    #endif
@@ -249,6 +288,9 @@ bool SpiceAttitude::Initialize()
       throw AttitudeException(errmsg);
    }
 
+   #ifdef DEBUG_SPICE_ATTITUDE
+      MessageInterface::ShowMessage("Leaving SpiceAttitude::Initialize\n");
+   #endif
 
    return true;
 }
@@ -582,11 +624,16 @@ bool SpiceAttitude::SetStringParameter(const Integer id,
                                        const std::string &value,
                                        const Integer index)
 {
+   if (isInitialized)
+      return true;
+   
    #ifdef DEBUG_SPICE_ATTITUDE_GET_SET
       MessageInterface::ShowMessage(
-            "Entering SetStringParameter with id = %d, value = \"%s\", index = %d\n",
+            "\nEntering SetStringParameter with id = %d, value = \"%s\", index = %d\n",
             id, value.c_str(), index);
    #endif
+   // Changed to save full path kernel names (LOJ: 2014.06.27)
+   // We may need to show full path in the GUI as a hint in a future
    if (id == ATTITUDE_KERNEL_NAME)
    {
       if ((index < 0) || (index > (Integer) ck.size()))
@@ -595,8 +642,24 @@ bool SpiceAttitude::SetStringParameter(const Integer id,
          errmsg += scName +  " - index out-of-bounds.\n";
          throw AttitudeException(errmsg);
       }
-      if (index == (Integer) ck.size())  ck.push_back(value);
-      else                               ck.at(index) = value;
+      std::string fnNoPath;
+      std::string fnFullPath = GmatBase::GetFullPathFileName(fnNoPath, GetName(), value,
+                     "VEHICLE_EPHEM_SPK_PATH", true, "", true, true);
+      
+      // Check for non-existent file
+      if (fnFullPath == "")
+         throw AttitudeException("The spice attitude kernel '" + value + "' does not exist");
+      
+      if (index == (Integer) ck.size())
+      {
+         ck.push_back(value);
+         ckFullPath.push_back(fnFullPath);
+      }
+      else
+      {
+         ck.at(index) = value;
+         ckFullPath.at(index) = fnFullPath;
+      }
       return true;
    }
    if (id == SC_CLOCK_KERNEL_NAME)
@@ -607,8 +670,25 @@ bool SpiceAttitude::SetStringParameter(const Integer id,
          errmsg += scName + " - index out-of-bounds.\n";
          throw AttitudeException(errmsg);
       }
-      if (index == (Integer) sclk.size())  sclk.push_back(value);
-      else                                 sclk.at(index) = value;
+      
+      std::string fnNoPath;
+      std::string fnFullPath = GmatBase::GetFullPathFileName(fnNoPath, GetName(), value,
+                     "VEHICLE_EPHEM_SPK_PATH", true, "", true, true);
+      
+      // Check for non-existent file
+      if (fnFullPath == "")
+         throw AttitudeException("The spice sc clock kernel '" + value + "' does not exist");
+      
+      if (index == (Integer) sclk.size())
+      {
+         sclk.push_back(value);
+         sclkFullPath.push_back(fnFullPath);
+      }
+      else
+      {
+         sclk.at(index) = value;
+         sclkFullPath.at(index) = fnFullPath;
+      }
       return true;
    }
    if (id == FRAME_KERNEL_NAME)
@@ -619,8 +699,25 @@ bool SpiceAttitude::SetStringParameter(const Integer id,
          errmsg += scName +  " - index out-of-bounds.\n";
          throw AttitudeException(errmsg);
       }
-      if (index == (Integer) fk.size())  fk.push_back(value);
-      else                               fk.at(index) = value;
+      
+      std::string fnNoPath;
+      std::string fnFullPath = GmatBase::GetFullPathFileName(fnNoPath, GetName(), value,
+                     "VEHICLE_EPHEM_SPK_PATH", true, "", true, true);
+      
+      // Check for non-existent file
+      if (fnFullPath == "")
+         throw AttitudeException("The spice frame kernel '" + value + "' does not exist");
+      
+      if (index == (Integer) fk.size())
+      {
+         fk.push_back(value);
+         fkFullPath.push_back(fnFullPath);
+      }
+      else
+      {
+         fk.at(index) = value;
+         fkFullPath.at(index) = fnFullPath;
+      }
       return true;
    }
    return Attitude::SetStringParameter(id, value, index);

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -94,14 +104,20 @@ namespace GmatMathUtil
    Real    GMAT_API Log10(Real x);          // Base 10 Logarithm of x
    Real    GMAT_API Log(Real x, Real base); // Base <base> Logarithm of x
    Real    GMAT_API Log(Real x, Integer base);
+
+   Real    GMAT_API Rand(Real lowerBound = 0.0, Real upperBound = 1.0);
+   Real    GMAT_API Randn(Real mean = 0.0, Real stdev = 1.0);
+   void    GMAT_API SetSeed(UnsignedInt seed);
    
-   void    GMAT_API SetSeed(Integer initialSeed1, Integer initialSeed2); 
-   void    GMAT_API GetSeed(Integer& initialSeed1, Integer& initialSeed2);
-   //loj:void    GMAT_API SetSeedByClock();
-   Real    GMAT_API Number(Real lowerBound=0.0, Real upperBound=1.0); 
-   Real    GMAT_API GaussianNumber(Real mu= 0.0, Real sigma=1.0); 
-   Real    GMAT_API Ran();
-   void    GMAT_API SetRanKey(Real k=0.0); 
+   // Commented out. These are not used in anywhere. (LOJ: 2016.04.20)
+   // void    GMAT_API SetSeed(Integer initialSeed1, Integer initialSeed2); 
+   // void    GMAT_API GetSeed(Integer& initialSeed1, Integer& initialSeed2);
+   // //loj:void    GMAT_API SetSeedByClock();
+   // Real    GMAT_API Number(Real lowerBound=0.0, Real upperBound=1.0); 
+   // Real    GMAT_API GaussianNumber(Real mu= 0.0, Real sigma=1.0); 
+   // Real    GMAT_API Ran();
+   // void    GMAT_API SetRanKey(Real k=0.0);
+   
    //loj:Real    GMAT_API Cot(Real x);
    Real    GMAT_API Cbrt(Real x);
    Real    GMAT_API Sqrt(Real x);

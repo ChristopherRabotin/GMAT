@@ -32,10 +32,11 @@
     surface of a <guilabel>CelestialBody</guilabel>. There are several state
     representations available for defining the location of a ground station
     including Cartesian and spherical. This resource cannot be modified in the
-    Mission Sequence.</para>
+    mission sequence.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="CoordinateSystem"/>, <xref linkend="Color"/></para>
+    linkend="ContactLocator"/>, <xref linkend="CoordinateSystem"/>, <xref
+    linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="GroundStation_Resource_Fields">
@@ -56,6 +57,65 @@
         </thead>
 
         <tbody>
+          <row>
+            <entry><guilabel>AddHardware</guilabel></entry>
+
+            <entry><para>List of all <guilabel>Transmitter</guilabel>,
+            <guilabel>Receiver</guilabel>, and <guilabel>Antenna</guilabel>
+            hardware used by ground station</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Object Array</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Each element in the list has to be a valid
+                    <guilabel>Transmitter</guilabel>,
+                    <guilabel>Receiver</guilabel>, or
+                    <guilabel>Antenna</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>None</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
           <row>
             <entry><guilabel>Altitude</guilabel></entry>
 
@@ -168,6 +228,124 @@
           </row>
 
           <row>
+            <entry><guilabel>DataSource</guilabel></entry>
+
+            <entry><para>Source of where to get
+            <guilabel>Temperature</guilabel>, <guilabel>Pressure</guilabel>,
+            <guilabel>Humidity</guilabel>, and
+            <guilabel>MinimumElevationAngle</guilabel>. If the value is
+            Constant, then the values of these parameters, as set in the
+            <guilabel>GroundStation</guilabel> resource, remain constant for
+            all relevant measurements. Currently, the value of Constant is the
+            only allowed value. </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Constant</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>Constant</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ErrorModels</guilabel></entry>
+
+            <entry><para>User-defined list of <guilabel>ErrorModel</guilabel>
+            objects that describe the measurement error models used for this
+            <guilabel>GroundStation</guilabel>.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>StringList</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any valid user-defined
+                    <guilabel>ErrorModel</guilabel> resource</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>None</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>HorizonReference</guilabel></entry>
 
             <entry><para>The system used for the horizon.
@@ -225,10 +403,68 @@
           </row>
 
           <row>
+            <entry><guilabel>Humidity</guilabel></entry>
+
+            <entry><para>Humidity at ground station used to calculate
+            tropospheric correction. GMAT only uses this value if
+            <guilabel>DataSource</guilabel> is set to Constant.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>0.0 &lt;= Real
+                    &lt;=100.0</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>55</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>percentage</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>Id</guilabel></entry>
 
-            <entry><para>The Id of the <guilabel>GroundStation</guilabel> used
-            in estimation and measurement modelling..</para><variablelist>
+            <entry><para>Id of the <guilabel>GroundStation</guilabel> used in
+            simulation and estimation</para><variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -241,8 +477,8 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para>Must begin with a letter; may contain letters,
-                    integers, dashes, underscores</para>
+                    <para>May contain letters, integers, dashes,
+                    underscores</para>
                   </listitem>
                 </varlistentry>
 
@@ -275,6 +511,61 @@
 
                   <listitem>
                     <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>IonosphereModel</guilabel></entry>
+
+            <entry><para>Specification of ionospheric model used in the light
+            time calculations.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>'None', 'IRI2007'</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>'None'</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -588,6 +879,69 @@
           </row>
 
           <row>
+            <entry><guilabel>MinimumElevationAngle</guilabel></entry>
+
+            <entry><para>Minimum elevation angle constraint for use with
+            <guilabel>ContactLocator</guilabel>. For navigation related
+            processing, this is minimum elevation angle for signal transmitted
+            from spacecraft to ground station. During simulation, this is the
+            minimum elevation angle required in order for data to be output.
+            During estimation, this is the minimum elevation angle required
+            for data to be used to calculate an estimate. GMAT only uses this
+            value if <guilabel>DataSource</guilabel> is set to Constant.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>-90 ≤ <guilabel>MinimumElevationAngle</guilabel> ≤
+                    90</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>7</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>deg</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>OrbitColor</guilabel></entry>
 
             <entry><para>Allows you to select available colors for a
@@ -648,6 +1002,63 @@
 
                   <listitem>
                     <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Pressure</guilabel></entry>
+
+            <entry><para>Air pressure at ground station used to calculate
+            tropospheric correction. GMAT only uses this value if
+            <guilabel>DataSource</guilabel> is set to Constant.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>Real &gt;0.0</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>1013.5</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>hPa</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
                   </listitem>
                 </varlistentry>
               </variablelist></entry>
@@ -775,6 +1186,119 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+
+          <row>
+            <entry><guilabel>Temperature</guilabel></entry>
+
+            <entry><para>Air temperature at ground station used to calculate
+            tropospheric correction. GMAT only uses this value if
+            <guilabel>DataSource</guilabel> is set to Constant.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>Real &gt;0.0</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set, get</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>295.1</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>Kelvin</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>TroposphereModel</guilabel></entry>
+
+            <entry><para>Specification of tropospheric model used in the light
+            time calculations.</para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><guilabel>'None',
+                    'HopfieldSaastamoinen'</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>'None'</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -802,7 +1326,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_GroundStation_Default2.png"
-                     scalefit="1" width="60%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -846,7 +1370,7 @@
         <imageobject>
           <imagedata align="center" contentdepth="100%"
                      fileref="files/images/Resource_GroundStation_Ellipsoid2.png"
-                     scalefit="1" width="60%"/>
+                     scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
     </screenshot>
@@ -877,8 +1401,8 @@
       fields are used to set colors on a ground station facility. See the
       <xref linkend="GroundStation_Resource_Fields" xrefstyle="select:title"/>
       section to read more about these two fields. Also See <xref
-      linkend="Color"/> documentation for discussion and examples on
-      how to set colors on a ground station facility.</para>
+      linkend="Color"/> documentation for discussion and examples on how to
+      set colors on a ground station facility.</para>
     </refsection>
   </refsection>
 
@@ -935,6 +1459,32 @@ aGroundStation.Location1   = 2260.697433050543
 aGroundStation.Location2   = 2260.697433050542
 aGroundStation.Location3   = 5500.485954732006
 </code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Configure a <guilabel>GroundStation</guilabel> that, when used for
+      navigation, will model how the RF signal is refracted in the atmosphere.
+      </para>
+
+      <programlisting><code>Create GroundStation aGroundStation
+aGroundStation.IonosphereModel       = 'IRI2007';
+aGroundStation.TroposphereModel      = 'HopfieldSaastamoinen';
+
+BeginMissionSequence;</code></programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>Attach a <guilabel>Transmitter</guilabel> and
+      <guilabel>Receiver</guilabel> resource to a
+      <guilabel>GroundStation.</guilabel></para>
+
+      <programlisting><code>Create Transmitter Transmitter1
+Create Receiver Receiver1
+
+Create GroundStation aGroundStation;
+aGroundStation.AddHardware = {Transmitter1, Receiver1};
+
+BeginMissionSequence;</code></programlisting>
     </informalexample>
   </refsection>
 </refentry>

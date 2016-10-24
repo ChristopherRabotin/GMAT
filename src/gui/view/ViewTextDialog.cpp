@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -38,17 +48,17 @@ END_EVENT_TABLE()
 /**
  * Constructor
  *
- * @param parent		Parent wxWindow for the dialog.
- * @param title			Title for the dialog.
- * @param isEditable	Is text in dialog editable or read-only
- * @param pos			window position
- * @param size			window size
- * @param style			window style
+ * @param parent		 Parent wxWindow for the dialog.
+ * @param title       Title for the dialog.
+ * @param isEditable	 Is text in dialog editable or read-only
+ * @param pos			 window position
+ * @param size			 window size
+ * @param style	    window style
  */
 //------------------------------------------------------------------------------
 ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
                                bool isEditable, const wxPoint &pos,
-                               const wxSize &size, long style)
+                               const wxSize &size, const wxFont &font, long style)
    : wxDialog(parent, -1, title, pos, size, style, title)
 {
    isTextEditable = isEditable;
@@ -81,7 +91,8 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
    
    if (!isTextEditable)
       theText->SetMaxLength(320000);
-   //theText->SetFont( GmatAppData::GetFont());
+   //theText->SetFont( GmatAppData::Instance()->GetFont());
+   theText->SetFont(font);
    
    // add items to middle sizer
    theMiddleSizer = new wxBoxSizer(wxVERTICAL);

@@ -1,0 +1,32 @@
+
+%  Define the location of the EOP file
+Earth.EopFileName = '../data/planetary_coeff/eopc04_08.62-now'
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft DefaultSC;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView DefaultOrbitView;
+GMAT DefaultOrbitView.Add = {DefaultSC, Earth};
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 12000.0};

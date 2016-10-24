@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -57,6 +67,7 @@
 #include "EopFile.hpp"
 #include "ItrfCoefficientsFile.hpp"
 #include "LeapSecsFileReader.hpp"
+#include "IFileUpdater.hpp"
 // plug-in code
 #include "DynamicLibrary.hpp"
 #include "TriggerManager.hpp"
@@ -76,7 +87,9 @@ class GMAT_API Moderator
 public:
 
    static Moderator* Instance();
-   bool Initialize(const std::string &startupFile = "", bool isFromGui = false);
+   bool Initialize(const std::string &startupFile = "", bool isFromGui = false,
+         const std::string &suffix = "", const StringArray *forEntries = NULL);
+   bool UpdateDataFiles();
    void Finalize();
    void SetRunReady(bool flag = true);
    void SetShowFinalState(bool flag = true);
@@ -240,8 +253,9 @@ public:
    PropSetup* GetPropSetup(const std::string &name);
    
    // MeasurementModel
-   MeasurementModel* CreateMeasurementModel(const std::string &name);
-   MeasurementModel* GetMeasurementModel(const std::string &name);
+   MeasurementModelBase* CreateMeasurementModel(const std::string &type,
+         const std::string &name);
+   MeasurementModelBase* GetMeasurementModel(const std::string &name);
    
    // TrackingSystem
    TrackingSystem* CreateTrackingSystem(const std::string &type,
@@ -270,7 +284,8 @@ public:
 
    // EventLocator
    EventLocator* CreateEventLocator(const std::string &type,
-                            const std::string &name);
+                                    const std::string &name,
+                                    bool createDefault = false);
    EventLocator* GetEventLocator(const std::string &name);
 
    // Interpolator
@@ -370,8 +385,9 @@ public:
    std::string GetPotentialFileName(const std::string &fileType);
    
    // Getting file names
-   // This will eventually replace Get*FileName() above (loj: 7/7/05)
-   std::string GetFileName(const std::string &fileType);
+   std::string GetFileName(const std::string &fileType, bool getFullpath = false,
+                           bool forInput = true, bool writeWarning = false,
+                           bool writeInfo = false);
    
    // Mission
    bool LoadDefaultMission();
@@ -386,13 +402,16 @@ public:
    
    // Sandbox
    void ClearAllSandboxes();
+   Sandbox* GetSandbox(Integer sandboxNum = 1);
    GmatBase* GetInternalObject(const std::string &name, Integer sandboxNum = 1);
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
    Gmat::RunState GetUserInterrupt();
    Gmat::RunState GetRunState();
+   Gmat::RunState GetDetailedRunState(Integer sandboxNum = 1);
    
    // Script
+   std::string GetMainScriptFileName();
    bool InterpretScript(const std::string &filename, bool readBack = false,
                         const std::string &newPath = "");
    bool InterpretScript(std::istringstream *ss, bool clearObjs);
@@ -436,6 +455,8 @@ private:
    
    // Object map
    GmatBase* FindObject(const std::string &name);
+   void AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
+                                  Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT);
    bool AddObject(GmatBase *obj);
    void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
                                    bool forFunction,
@@ -447,20 +468,22 @@ private:
    const StringArray& GetSequenceStarters();
    
    // Default objects
-   Spacecraft* GetDefaultSpacecraft();
-   PropSetup*  GetDefaultPropSetup();
-   Burn*       GetDefaultBurn(const std::string &type);
-   Hardware*   GetDefaultHardware(const std::string &type);
-   Solver*     GetDefaultBoundaryValueSolver();
-   Solver*     GetDefaultOptimizer();
-   Subscriber* GetDefaultSubscriber(const std::string &type,
+   Spacecraft*   GetDefaultSpacecraft();
+   PropSetup*    GetDefaultPropSetup();
+   Burn*         GetDefaultBurn(const std::string &type);
+   Hardware*     GetDefaultHardware(const std::string &type);
+   Solver*       GetDefaultBoundaryValueSolver();
+   Solver*       GetDefaultOptimizer();
+   EventLocator* GetDefaultEventLocator();
+   Subscriber*   GetDefaultSubscriber(const std::string &type,
                                     bool addObjects = true,
                                     bool createIfNoneFound = true);
-   Parameter*  GetDefaultX();
-   Parameter*  GetDefaultY();
+   Parameter*    GetDefaultX();
+   Parameter*    GetDefaultY();
    StopCondition* CreateDefaultStopCondition();
    
    // Sandbox
+   void AddFunctionToGlobalObjectMap(Function *func);
    void AddSolarSystemToSandbox(Integer index);
    void AddTriggerManagersToSandbox(Integer index);
    void AddInternalCoordSystemToSandbox(Integer index);
@@ -474,8 +497,10 @@ private:
    // For Debug
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
+   void ShowMissionSequence(const std::string &msg = "");
    void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
-   
+   std::string WriteObjectInfo(const std::string &title, GmatBase *obj,
+                               bool addEol = true);
    Moderator();
    virtual ~Moderator();
    
@@ -487,11 +512,14 @@ private:
    bool showFinalState;
    bool loadSandboxAndPause;
    Integer objectManageOption;
+   Integer currentSandboxNumber;
+   std::string mainScriptFileName;
    std::vector<Sandbox*> sandboxes;
    std::vector<TriggerManager*> triggerManagers;
    std::vector<GmatCommand*> commands;
    
    ObjectMap *objectMapInUse;
+   ObjectMap *previousObjectMap;
    Function *currentFunction;
    ObjectArray unmanagedFunctions;
    
@@ -514,10 +542,15 @@ private:
    LeapSecsFileReader *theLeapSecsFile;
    Interface *theMatlabInterface;
    Gmat::RunState runState;
-
+   Gmat::RunState detailedRunState;
+   
    // Dynamic library data table
    std::map<std::string, DynamicLibrary*>   userLibraries;
    std::vector<Gmat::PluginResource*>  userResources;
+
+   // Thruster related
+   static bool thrusterDeprecateMsgWritten;
+   static bool fuelTankDeprecateMsgWritten;
 };
 
 #endif // Moderator_hpp

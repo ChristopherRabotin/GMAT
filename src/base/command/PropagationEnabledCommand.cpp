@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -25,10 +35,6 @@
 
 #include "ODEModel.hpp"
 #include "PropagationStateManager.hpp"
-#include "EventLocator.hpp"
-#include "Brent.hpp"
-#include "EventModel.hpp"
-
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
@@ -36,6 +42,7 @@
 //#define DEBUG_PUBLISH_DATA
 //#define DEBUG_EVENTLOCATORS
 //#define DEBUG_EVENT_MODEL_FORCE
+//#define DEBUG_TRANSIENT_FORCES
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -70,12 +77,6 @@ PropagationEnabledCommand::PropagationEnabledCommand(const std::string &typeStr)
    transientForces      (NULL),
    j2kState             (NULL),
    pubdata              (NULL),
-   activeLocatorCount   (0),
-   previousEventData    (NULL),
-   currentEventData     (NULL),
-   tempEventData        (NULL),
-   eventBufferSize      (0),
-   finder               (NULL),
    publishOnStep        (true)
 {
    objectTypeNames.push_back("PropagationEnabledCommand");
@@ -110,18 +111,6 @@ PropagationEnabledCommand::~PropagationEnabledCommand()
 
    if (pubdata)
       delete [] pubdata;
-
-   if (previousEventData != NULL)
-      delete [] previousEventData;
-
-   if (currentEventData != NULL)
-      delete [] currentEventData;
-
-   if (tempEventData != NULL)
-      delete [] tempEventData;
-
-   if (finder != NULL)
-      delete finder;
 }
 
 
@@ -146,20 +135,13 @@ PropagationEnabledCommand::PropagationEnabledCommand(
    transientForces      (NULL),
    j2kState             (NULL),
    pubdata              (NULL),
-   activeLocatorCount   (0),
-   previousEventData    (NULL),
-   currentEventData     (NULL),
-   tempEventData        (NULL),
-   eventBufferSize      (0),
-   finder               (NULL),
    publishOnStep        (true)
 {
    isInitialized = false;
    propagatorNames = pec.propagatorNames;
    for (UnsignedInt i = 0; i < pec.propObjectNames.size(); ++i)
       propObjectNames.push_back(pec.propObjectNames[i]);
-
-   activeEventIndices.clear();
+   sats.clear();
 }
 
 
@@ -197,32 +179,14 @@ PropagationEnabledCommand& PropagationEnabledCommand::operator=(
             i != propagators.end(); ++i)
          delete (*i);
       propagators.clear();
+      sats.clear();
+
       propagatorNames = pec.propagatorNames;
       for (UnsignedInt i = 0; i < pec.propObjectNames.size(); ++i)
          propObjectNames.push_back(pec.propObjectNames[i]);
 
-      activeLocatorCount  = 0;
-      if (previousEventData != NULL)
-         delete [] previousEventData;
-      previousEventData = NULL;
-
-      if (currentEventData != NULL)
-         delete [] currentEventData;
-      currentEventData = NULL;
-
-      if (tempEventData != NULL)
-         delete [] tempEventData;
-      tempEventData = NULL;
-
       transientForces = NULL;
-      eventBufferSize = 0;
       publishOnStep   = true;
-
-      if (finder != NULL)
-      {
-         delete finder;
-         finder = NULL;
-      }
    }
 
    return *this;
@@ -260,24 +224,34 @@ void PropagationEnabledCommand::SetTransientForces(std::vector<PhysicalModel*> *
 //------------------------------------------------------------------------------
 bool PropagationEnabledCommand::Initialize()
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage
+         ("PropagationEnabledCommand::Initialize() '%s' entered\n",
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      MessageInterface::ShowMessage("  Size of propName is %d\n",
+            propagatorNames.size());
+      for (UnsignedInt ind = 0; ind < propagatorNames.size(); ++ind)
+         MessageInterface::ShowMessage("     %d:  %s\n",
+               ind, propagatorNames[ind].c_str());
+
+      MessageInterface::ShowMessage("  Direction is %s\n",
+            (direction == 1.0?"Forwards":"Backwards"));
+   #endif
+
    bool retval = false;
 
    if (GmatCommand::Initialize())
    {
       inProgress = false;
       hasFired = false;
-//      UnsignedInt index = 0;
+      sats.clear();
 
       for (std::vector<PropObjectArray*>::iterator o = propObjects.begin();
             o != propObjects.end(); ++o)
-      {
          delete (*o);
-      }
-      propObjects.clear();
 
-//      SpaceObject *so;
+      propObjects.clear();
       std::string pName;
-//      GmatBase *mapObj = NULL;
 
       //// Ensure that we are using fresh objects when buffering stops
       EmptyBuffer();
@@ -346,6 +320,8 @@ bool PropagationEnabledCommand::Initialize()
          owners.push_back("All");
          elements.push_back("All.epoch");
 
+         bool finiteBurnActive = false;
+
          for (StringArray::iterator j = names.begin(); j != names.end(); ++j)
          {
             GmatBase *obj = FindObject(*j);
@@ -367,20 +343,36 @@ bool PropagationEnabledCommand::Initialize()
                SpaceObject *so = (SpaceObject*)obj;
                if (epochID == -1)
                   epochID = so->GetParameterID("A1Epoch");
-//               if (so->IsManeuvering())
-//                  finiteBurnActive = true;
+               if (so->IsManeuvering())
+               {
+                  #ifdef DEBUG_TRANSIENT_FORCES
+                     MessageInterface::ShowMessage("PEC detected that %s is "
+                           "maneuvering\n", so->GetName().c_str());
+                  #endif
+                  finiteBurnActive = true;
+               }
+               #ifdef DEBUG_TRANSIENT_FORCES
+                  else
+                     MessageInterface::ShowMessage("PEC detected that %s is "
+                           "not maneuvering\n", so->GetName().c_str());
+               #endif
 
+               sats.push_back(so);
                AddToBuffer(so);
 
-               // Add any locator that uses so to the PSM for step size control
-               LocateObjectEvents(obj, els);
-
-//               if (so->GetType() == Gmat::FORMATION)
-//                  FillFormation(so, owners, elements);
-//               else
-//               {
-//                  SetNames(so->GetName(), owners, elements);
-//               }
+               // Uncommented out SetNames() for GMT-5101 fix (LOJ: 2015.05.14)
+               if (so->GetType() == Gmat::FORMATION)
+               {
+                  // FillFormation(so, owners, elements);
+               }
+               else
+               {
+                  #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage
+                     ("   Setting data labels for '%s'\n", so->GetName().c_str());
+                  #endif
+                  SetNames(so->GetName(), owners, elements);
+               }
             }
             #ifdef DEBUG_INITIALIZATION
                else
@@ -389,10 +381,16 @@ bool PropagationEnabledCommand::Initialize()
             #endif
          }
 
-         if (els.size() != 0)
+         // Check for finite thrusts and update the force model if there are any
+         if (finiteBurnActive == true)
          {
-            AddLocators(currentPSM, els);
-            els.clear();
+            if (currentODE != NULL)
+               AddTransientForce(&(propObjectNames[i]), currentODE, currentPSM);
+            else
+               MessageInterface::ShowMessage("Spacecraft is performing a "
+                     "finite maneuver but also propagating with an ephemeris "
+                     "propagator; no independent maneuvering will be "
+                     "performed.\n"); //, satName[index].c_str());
          }
 
          // Provide opportunity for derived cmds to set propagation properties
@@ -606,7 +604,12 @@ bool PropagationEnabledCommand::PrepareToPropagate()
                "   PrepareToPropagate() in hasFired state\n");
       #endif
 
-//      // Handle the transient forces
+      // Handle the transient forces
+      for (UnsignedInt i = 0; i < p.size(); ++i)
+         if (fm[i] != NULL)
+            AddTransientForce(&(propObjectNames[i]), fm[i], psm[i]);
+
+
 //      for (std::vector<PropObjectArray*>::iterator poa = propObjects.begin();
 //           poa != propObjects.end(); ++poa)
 //      {
@@ -680,23 +683,8 @@ bool PropagationEnabledCommand::PrepareToPropagate()
                "PropagationEnabledCommand::PrepareToPropagate() first entry\n");
       #endif
 
-//      // Set the prop state managers for the PropSetup ODEModels
-//      for (std::vector<PropSetup*>::iterator i=propagators.begin();
-//            i != propagators.end(); ++i)
-//      {
-//         #ifdef DEBUG_INITIALIZATION
-//            MessageInterface::ShowMessage(
-//                  "   Setting PSM on ODEModel for propagator %s\n",
-//                  (*i)->GetName().c_str());
-//         #endif
-//
-//         ODEModel *ode = (*i)->GetODEModel();
-//         if (ode != NULL)    // Only do this for the PropSetups that integrate
-//            ode->SetPropStateManager((*i)->GetPropStateManager());
-//      }
-//
-//      // Initialize the subsystem
-//      Initialize();
+      // Reinitialize the subsystem to pick up transients and other updates
+      Initialize();
 
       // Loop through the PropSetups and build the models
       #ifdef DEBUG_INITIALIZATION
@@ -726,6 +714,8 @@ bool PropagationEnabledCommand::PrepareToPropagate()
       fm.clear();
       psm.clear();
       baseEpoch.clear();
+	   currEpoch.clear();				// fix bug #1 of ticket GMT-4314
+	   elapsedTime.clear();          // fix bug #1 of ticket GMT-4314
 
       for (UnsignedInt n = 0; n < propagators.size(); ++n)
       {
@@ -790,10 +780,10 @@ bool PropagationEnabledCommand::PrepareToPropagate()
 
    publisher->Publish(this, streamID, pubdata, dim+1, direction);
 
-#ifdef DEBUG_INITIALIZATION
-   MessageInterface::ShowMessage(
-         "PropagationEnabledCommand::PrepareToPropagate() finished\n");
-#endif
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage(
+            "PropagationEnabledCommand::PrepareToPropagate() finished\n");
+   #endif
 
    return retval;
 }
@@ -882,6 +872,9 @@ bool PropagationEnabledCommand::Step(Real dt)
             " failed to take a good final step (size = " + size + ")\n");
       }
 
+      #ifdef DEBUG_PROP_STEPS
+         MessageInterface::ShowMessage("%.12lf ", dt);
+      #endif
       ++current;
    }
 
@@ -895,7 +888,16 @@ bool PropagationEnabledCommand::Step(Real dt)
       // Update spacecraft epoch, without argument the spacecraft epoch
       // won't get updated for consecutive Propagate command
       fm[i]->UpdateSpaceObject(currEpoch[i]);
+
+      #ifdef DEBUG_PROP_STEPS
+         MessageInterface::ShowMessage("  ---> elapsed time = %.12lf, epoch "
+               "%.12lf", elapsedTime[i], currEpoch[i]);
+      #endif
    }
+
+   #ifdef DEBUG_PROP_STEPS
+      MessageInterface::ShowMessage("\n");
+   #endif
 
    if (publishOnStep)
    {
@@ -1143,581 +1145,348 @@ void PropagationEnabledCommand::BufferSatelliteStates(bool fillingBuffer)
 }
 
 
-void PropagationEnabledCommand::LocateObjectEvents(const GmatBase *obj,
-                           ObjectArray &els)
-{
-   #ifdef DEBUG_EVENTLOCATORS
-      MessageInterface::ShowMessage("LocateObjectEvents called for %s\n",
-            obj->GetName().c_str());
-   #endif
-   if (events == NULL)
-      return;
-   if (events->size() == 0)
-      return;
-
-   std::string objName = obj->GetName();
-
-   // Walk through the events and see if any use this body as the target
-   for (UnsignedInt i = 0; i < events->size(); ++i)
-   {
-      UnsignedInt fc = events->at(i)->GetFunctionCount();
-      for (UnsignedInt j = 0; j < fc; ++j)
-      {
-         if (events->at(i)->GetTarget(j) == objName)
-         {
-            #ifdef DEBUG_EVENTLOCATORS
-               MessageInterface::ShowMessage("      %s uses %s\n",
-                     events->at(i)->GetName().c_str(), objName.c_str());
-            #endif
-            if (find(els.begin(), els.end(), events->at(i)) == els.end())
-               els.push_back(events->at(i));
-            break;
-         }
-      }
-   }
-}
-
-
-void PropagationEnabledCommand::AddLocators(PropagationStateManager *currentPSM,
-                           ObjectArray &els)
-{
-   #ifdef DEBUG_EVENTLOCATORS
-      MessageInterface::ShowMessage("AddLocators called with %d locators\n",
-            els.size());
-   #endif
-   for (UnsignedInt i = 0; i < els.size(); ++i)
-      currentPSM->SetObject(els[i]);
-}
-
-
 //------------------------------------------------------------------------------
-// void InitializeForEventLocation()
+// void AddTransientForce(StringArray *satnames, ForceModel *p,
+//       PropagationStateManager *propMan)
 //------------------------------------------------------------------------------
 /**
- * Prepares the event location functions to seek event boundaries
+ * Passes transient forces into the ForceModel(s).
+ *
+ * @param satnames The array of satellites used in the ForceModel.
+ * @param p        The current ForceModel that is receiving the forces.
+ * @param propMan  PropagationStateManager for this PropSetup
  */
 //------------------------------------------------------------------------------
-void PropagationEnabledCommand::InitializeForEventLocation()
+void PropagationEnabledCommand::AddTransientForce(StringArray *satnames,
+      ODEModel *p, PropagationStateManager *propMan)
 {
-   if (events == NULL)
-   {
-      #ifdef DEBUG_EVENTLOCATORS
-         MessageInterface::ShowMessage("Initializing with no event locator "
-               "pointer\n");
-      #endif
-      return;
-   }
-
-   #ifdef DEBUG_EVENTLOCATORS
-      MessageInterface::ShowMessage("Initializing with %d event locators\n",
-            events->size());
+   #ifdef DEBUG_TRANSIENT_FORCES
+   MessageInterface::ShowMessage
+      ("PropagationEnabledCommand::AddTransientForce() entered, ODEModel=<%p>,"
+       " transientForces=<%p>\n", p, transientForces);
    #endif
 
-   activeLocatorCount = 0;
-   activeEventIndices.clear();
-   eventStartIndices.clear();
-   eventBufferSize = 0;
+   // Find any transient force that is active and add it to the force model
+   StringArray satsThatManeuver, formationSatsThatManeuver, formsThatManeuver;
+   bool flagMultipleBurns = false;
 
-   for (UnsignedInt i = 0; i < events->size(); ++i)
+   for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
+        i != transientForces->end(); ++i)
    {
-      if (events->at(i)->GetBooleanParameter("IsActive"))
+      StringArray tfSats = (*i)->GetRefObjectNameArray(Gmat::SPACECRAFT);
+
+      // Loop through the spacecraft that go with the force model, and see if
+      // they are in the spacecraft list for the current transient force
+      for (StringArray::iterator current = satnames->begin();
+           current != satnames->end(); ++current)
       {
-         ++activeLocatorCount;
-         activeEventIndices.push_back(i);
-
-         // Data for the Locator starts at the end of the current size
-         eventStartIndices.push_back(eventBufferSize);
-         // Each function returns 3 datum
-         eventBufferSize += events->at(i)->GetFunctionCount() * 3;
-      }
-   }
-   #ifdef DEBUG_EVENTLOCATORS
-      MessageInterface::ShowMessage("Found %d active event locators\n",
-            activeLocatorCount);
-   #endif
-
-   if (currentEventData != NULL)
-   {
-      delete [] currentEventData;
-      currentEventData = NULL;
-   }
-   if (previousEventData != NULL)
-   {
-      delete [] previousEventData;
-      previousEventData = NULL;
-   }
-   if (tempEventData != NULL)
-   {
-      delete [] tempEventData;
-      tempEventData = NULL;
-   }
-
-   if ((eventBufferSize != 0) /*&& (propagators.size() > 0)*/)
-   {
-      currentEventData = new Real[eventBufferSize];
-      previousEventData = new Real[eventBufferSize];
-      tempEventData = new Real[eventBufferSize];
-
-      // Load the initial data used in event location
-      Integer dataIndex;
-      for (Integer i = 0; i < activeLocatorCount; ++i)
-      {
-         Real *data = events->at(activeEventIndices[i])->Evaluate();
-         dataIndex = eventStartIndices[i];
-         UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
-         for (UnsignedInt j = 0; j < fc*3; ++j)
-            previousEventData[dataIndex + j] = data[j];
-      }
-
-      if (finder != NULL)
-         delete finder;
-      finder = new Brent;
-
-      /// @todo: be sure the EM is added to force models 
-      for (UnsignedInt index = 0; index < propagators.size(); ++index)
-      {
-         if (propagators[index]->GetPropagator()->UsesODEModel())
+         if (find(tfSats.begin(), tfSats.end(), *current) != tfSats.end())
          {
-            #ifdef DEBUG_EVENT_MODEL_FORCE
-               MessageInterface::ShowMessage("   Adding event model to %s\n",
-                     propagators[index]->GetName().c_str());
+            #ifdef DEBUG_TRANSIENT_FORCES
+            MessageInterface::ShowMessage
+               ("   Adding transientForce <%p>'%s' to ODEModel\n", *i,
+                (*i)->GetName().c_str());
             #endif
-
-            // Changed paradigm here -- event model belongs to ODEModel
-            EventModel *em = new EventModel();
-            em->SetEventLocators(events);
-            propagators[index]->GetODEModel()->AddForce(em);
-
-            // Refresh ODE model mapping, since a new force was added
-            #ifdef DEBUG_EVENT_MODEL_FORCE
-               MessageInterface::ShowMessage("   Building model from map\n");
-            #endif
-            //if (propagators[index]->GetODEModel()->BuildModelFromMap() == false)
-            //   throw CommandException("Unable to assemble the ODE "
-            //         "model  after adding an Event Model");
-         }
-      }
-   }
-   else
-   {
-      currentEventData = NULL;
-      previousEventData = NULL;
-      tempEventData = NULL;
-   }
-
-   #ifdef DEBUG_EVENT_MODEL_FORCE
-      MessageInterface::ShowMessage("PropagationEnabledCommand::"
-         "InitializeForEventLocation finished\n");
-   #endif
-}
-
-//------------------------------------------------------------------------------
-// void CheckForEvents()
-//------------------------------------------------------------------------------
-/**
- * Looks for a sign change in event function values and derivative values
- */
-//------------------------------------------------------------------------------
-void PropagationEnabledCommand::CheckForEvents()
-{
-   #ifdef DEBUG_EVENTLOCATORS
-      MessageInterface::ShowMessage("In CheckForEvents: events = <%p> "
-         "ActiveLocatorCount = %d Running = %d Solved = %d current = %d\n",
-         events, activeLocatorCount, Gmat::RUNNING, Gmat::SOLVEDPASS, 
-         currentRunState);
-   #endif
-   if (events == NULL)
-   {
-      #ifdef DEBUG_EVENTLOCATORS
-         MessageInterface::ShowMessage("Checking for events with no event "
-               "locator pointer\n");
-      #endif
-      return;
-   }
-
-
-   Integer dataIndex;
-   // First evaluate the event functions
-   for (Integer i = 0; i < activeLocatorCount; ++i)
-   {
-      Real *data = events->at(activeEventIndices[i])->Evaluate();
-      dataIndex = eventStartIndices[i];
-      UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
-      for (UnsignedInt j = 0; j < fc*3; ++j)
-         currentEventData[dataIndex + j] = data[j];
-   }
-
-   // Check function values
-   for (UnsignedInt i = 1; i < eventBufferSize; i += 3)
-   {
-      if (currentEventData[i] * previousEventData[i] <= 0.0)
-      {
-         #ifdef DEBUG_EVENTLOCATORS
-            MessageInterface::ShowMessage("Event function sign change "
-                  "detected\n   Transition from %lf to %lf at index %d, epoch "
-                  "[%12lf %12lf]\n", previousEventData[i], currentEventData[i],
-                  i, previousEventData[i-1], currentEventData[i-1]);
-            MessageInterface::ShowMessage("Relevant data:\n   Epochs:  "
-               "%16.10lf %16.10lf\n   Values:  %16.12lf %16.12lf\n   Derivs:  "
-               "%16.12lf, %16.12lf\n", currentEventData[i-1], 
-               previousEventData[i-1], currentEventData[i], 
-               previousEventData[i], currentEventData[i+1], 
-               previousEventData[i+1]);
-         #endif
-
-         Integer index;
-         for (index = 0; index < (Integer)(events->size()) - 1; ++index)
-         {
-            if (index + 1 < (Integer)events->size())
-               if ((Integer)i < activeEventIndices[index+1])
-                  break;
-         }
-
-         Integer functionIndex = (Integer)(i/3) - activeEventIndices[index];
-
-         #ifdef DEBUG_EVENTLOCATORS
-            MessageInterface::ShowMessage("i = %d gives function %d on "
-                  "locator %d\n", i, functionIndex, index);
-         #endif
-
-         #ifdef DEBUG_EVENT_LOCATORS
-            bool found = true; // for now; use to indicate refinements later
-         #endif
-         LocateEvent(events->at(index), functionIndex);
-
-         #ifdef DEBUG_EVENT_LOCATORS
-            if (found)
+//            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current)
+//                  == satsThatManeuver.end())
+               p->AddForce(*i);
+//            else
+//               flagMultipleBurns = true;
+            if (find(satsThatManeuver.begin(), satsThatManeuver.end(), *current) == satsThatManeuver.end())
+                  satsThatManeuver.push_back(*current);
+            if ((*i)->DepletesMass())
             {
-               MessageInterface::ShowMessage("Found an event on locator %s "
-                     "index %d\n",events->at(index)->GetTypeName().c_str(),
-                     functionIndex);
+               propMan->SetProperty("MassFlow");
+//               propMan->SetProperty("MassFlow",
+//                     (*i)->GetRefObject(Gmat::SPACECRAFT, *current));
+               #ifdef DEBUG_TRANSIENT_FORCES
+                  MessageInterface::ShowMessage("   %s depletes mass\n",
+                        (*i)->GetName().c_str());
+               #endif
             }
-         #endif
-      }
-   }
-
-   // Check derivative values
-   for (UnsignedInt i = 2; i < eventBufferSize; i += 3)
-   {
-      // For now, skip derivative checks.  Remove this line when code is ready
-      continue;
-      
-      // Sanity check: if fn value signs differ, the value locator should have 
-      // caught the current case and the derivative check is irrelevant
-      if (currentEventData[i-1] * previousEventData[i-1] <= 0.0)
-         continue;
-
-      // Proceed if derivative sign change was found
-      if (currentEventData[i] * previousEventData[i] <= 0.0)
-      {
-         #ifdef DEBUG_EVENTLOCATORS
-            MessageInterface::ShowMessage("Event function derivative sign "
-                  "change detected\n   Transition from %lf to %lf at index %d, "
-                  "epoch %12lf\n", currentEventData[i], previousEventData[i], i,
-                  currentEventData[i-2]);
-            MessageInterface::ShowMessage("Relevant data:\n   Epochs:  "
-               "%16.10lf %16.10lf\n   Values:  %16.12lf %16.12lf\n   Derivs:  "
-               "%16.12lf, %16.12lf\n", currentEventData[i-2], 
-               previousEventData[i-2], currentEventData[i-1], 
-               previousEventData[i-1], currentEventData[i], 
-               previousEventData[i]);
-         #endif
-
-         // Apply the filtering logic
-         bool findDerivativeZero = true;
-         Real functionValue, earliestDeriv;
-
-         // Set decision data based on time flow direction
-         if (currentEventData[i-2] > previousEventData[i-2])
-         {
-            functionValue = previousEventData[i-1];
-            earliestDeriv = previousEventData[i];
+            break;      // Avoid multiple adds
          }
          else
          {
-            functionValue = currentEventData[i-1];
-            earliestDeriv = currentEventData[i];
-         }
-
-         if ((earliestDeriv > 0.0) && (functionValue > 0.0))
-            findDerivativeZero = false;
-         if ((earliestDeriv < 0.0) && (functionValue < 0.0))
-            findDerivativeZero = false;
-
-         // Only proceed if a function zero might exist
-         if (findDerivativeZero)
-         {
-            Integer index;
-            for (index = 0; index < (Integer)(events->size()) - 1; ++index)
+            // Check to see if a Formation is masking the Spacecraft, and if so
+            // whine and stop
+            // Find the object that matches the current name
+            GmatBase *obj;
+            for (UnsignedInt i = 0; i < sats.size(); ++i)
             {
-               if (index + 1 < (Integer)events->size())
-                  if ((Integer)i < activeEventIndices[index+1])
-                     break;
-            }
-
-            Integer functionIndex = (Integer)(i/3) - activeEventIndices[index];
-
-            #ifdef DEBUG_EVENTLOCATORS
-               MessageInterface::ShowMessage("i = %d gives function %d on "
-                     "locator %d\n", i, functionIndex, index);
-            #endif
-
-            #ifdef DEBUG_EVENT_LOCATORS
-               bool found = true; // for now; use to indicate refinements later
-            #endif
-
-            // Find the derivative zero
-            LocateEvent(events->at(index), functionIndex, true);
-
-            #ifdef DEBUG_EVENT_LOCATORS
-               if (found)
+               if (sats[i]->GetName() == *current)
                {
-                  MessageInterface::ShowMessage("Found an event on locator %s "
-                        "index %d\n",events->at(index)->GetTypeName().c_str(),
-                        functionIndex);
+                  obj = sats[i];
+
+                  #ifdef DEBUG_TRANSIENT_FORCES
+                     MessageInterface::ShowMessage("Checking %s\n",
+                           current->c_str());
+                  #endif
+
+                  if (obj->IsOfType(Gmat::FORMATION))
+                  {
+                     StringArray mansats =
+                           ((SpaceObject*)(obj))->GetManeuveringMembers();
+
+                     #ifdef DEBUG_TRANSIENT_FORCES
+                        MessageInterface::ShowMessage("***It's a Formation "
+                              "with %d maneuvering sats\n", mansats.size());
+                     #endif
+
+                     for (UnsignedInt i = 0; i < mansats.size(); ++i)
+                     {
+                        #ifdef DEBUG_TRANSIENT_FORCES
+                           MessageInterface::ShowMessage("   %d: %s is maneuvering\n",
+                                 i, mansats[i].c_str());
+                        #endif
+                        if (find(tfSats.begin(), tfSats.end(), mansats[i]) != tfSats.end())
+                        {
+                           if (find(formationSatsThatManeuver.begin(),
+                                 formationSatsThatManeuver.end(),
+                                 mansats[i]) == formationSatsThatManeuver.end())
+                              formationSatsThatManeuver.push_back(mansats[i]);
+                           if (find(formsThatManeuver.begin(),
+                                 formsThatManeuver.end(), obj->GetName()) ==
+                                       formsThatManeuver.end())
+                              formsThatManeuver.push_back(obj->GetName());
+                        }
+                     }
+                  }
                }
-            #endif
-         }
-      }
-   }
-
-   // Move current to previous
-   memcpy(previousEventData, currentEventData, eventBufferSize*sizeof(Real));
-}
-
-
-//------------------------------------------------------------------------------
-// bool LocateEvent(EventLocator* el, Integer index)
-//------------------------------------------------------------------------------
-/**
- * Seeks event boundaries given bracketing in the event function value
- *
- * @param el The EventLocator that holds the triggered event
- * @param index The index to the event in the locator that was triggered
- *
- * @return true if an event zero was found
- */
-//------------------------------------------------------------------------------
-bool PropagationEnabledCommand::LocateEvent(EventLocator* el, Integer index,
-         bool forDerivative)
-{
-   bool eventFound = false;
-   Integer valueOffset = (forDerivative ? 2 : 1);
-
-   if (events == NULL)
-   {
-      #ifdef DEBUG_EVENTLOCATORS
-         MessageInterface::ShowMessage("LocateEvent called; event locator "
-               "pointer not set\n");
-      #endif
-
-      // TBD: Throw here?
-      MessageInterface::ShowMessage("PropagationEnabledCommand::LocateEvent "
-            "was called unexpectedly; no EventLocators have been set\n");
-
-      return false;
-   }
-
-   if ((currentRunState == Gmat::RUNNING) ||
-       (currentRunState == Gmat::SOLVEDPASS))
-   {
-
-      #ifdef DEBUG_EVENTLOCATORS
-         // Linear interpolate to guess the epoch
-         Real bounds[2], epochs[2];
-         bounds[0] = previousEventData[index*3+1];
-         bounds[1] = currentEventData[index*3+1];
-
-         epochs[0] = previousEventData[index*3];
-         epochs[1] = currentEventData[index*3];
-
-         Real zero = epochs[0] - bounds[0] * (epochs[1] - epochs[0]) /
-               (bounds[1] - bounds[0]);
-
-         MessageInterface::ShowMessage("Zero ~ at %12lf for locator %s function "
-            "index %d\n", zero, el->GetName().c_str(), index);
-      #endif
-
-      // Preserve the current state data
-      Real propDir = direction;
-      BufferSatelliteStates(true);
-      bool wasPublishing = publishOnStep;
-      publishOnStep = false;
-
-      Integer stepsTaken = 0;
-      Integer maxStepsAllowed = 31;  // 2^31 = 2.14e10
-
-      // Build an estimate of machine precision for the independent variable
-    //  Real machineEpochPrecision   = currentEventData[epochIndex];
-      Real lastEpoch = currentEventData[index*3], currentStep, desiredEpoch;
-
-      // Prepare the RootFinder
-      Real brackets[2];
-      brackets[0] = previousEventData[index*3];
-      brackets[1] = currentEventData[index*3];
-      finder->Initialize(previousEventData[index*3],
-            previousEventData[index*3+valueOffset], currentEventData[index*3],
-            currentEventData[index*3+valueOffset]);
-
-      Real elapsedSeconds = 0.0;
-
-      // Loop until (1) the maximum number of steps is taken, (2) the step
-      // tolerance is at the numerical precision of the data, or (3) the step
-      // achieves the step tolerance
-   //   Real locateTolerance = el->GetTolerance() * GmatTimeConstants::DAYS_PER_SEC;
-      Real locateTolerance = el->GetTolerance();
-   //   // Variable used to get the time step measure from the search algorithm
-   //   Real stepDifference;
-
-      do
-      {
-         // Get the step desired
-         desiredEpoch = finder->GetStep();
-         currentStep = (desiredEpoch - lastEpoch) * GmatTimeConstants::SECS_PER_DAY;
-
-         // Take the step
-         std::vector<Propagator*>::iterator current = p.begin();
-         // Step all of the propagators by the input amount
-         while (current != p.end())
-         {
-            (*current)->SetAsFinalStep(true);
-            bool isForward = (*current)->PropagatesForward();
-            if (!(*current)->Step(currentStep))
-            {
-               char size[32], lbound[32], ubound[32];
-               std::sprintf(size, "%.12lf", currentStep);
-               std::sprintf(lbound, "%.12lf", (brackets[0] < brackets[1] ? 
-                  brackets[0] : brackets[1]));
-               std::sprintf(ubound, "%.12lf",  (brackets[0] > brackets[1] ? 
-                  brackets[0] : brackets[1]));
-               throw CommandException("In PropagationEnabledCommand::"
-                  "LocateEvent, Propagator " + (*current)->GetName() +
-                  " failed to take a good final step (size = " + size + 
-                  "); Epoch bounds: [" + lbound + ", " + ubound + "]\n");
-
             }
-            (*current)->SetAsFinalStep(false);
-            (*current)->SetForwardPropagation(isForward);
-
-            ++current;
          }
-
-         // todo: This loop will miss propagators that do not have force models
-         for (UnsignedInt i = 0; i < fm.size(); ++i)
-         {
-            // events and orbit related parameters use spacecraft for data
-            Real elapsedTime;
-
-            if (fm[i])
-               elapsedTime = fm[i]->GetTime();
-            else
-               elapsedTime = p[i]->GetTime();
-
-            GmatEpoch tempEpoch = baseEpoch[i] + elapsedTime /
-               GmatTimeConstants::SECS_PER_DAY;
-
-            // Update spacecraft epoch, without argument the spacecraft epoch
-            // won't get updated for consecutive Propagate command
-            if (fm[i])
-               fm[i]->UpdateSpaceObject(tempEpoch);
-            else
-               p[i]->UpdateSpaceObject(tempEpoch);
-         }
-
-         elapsedSeconds += currentStep;
-
-         // Evaluate the function and buffer it
-         // First evaluate the event functions
-         for (Integer i = 0; i < activeLocatorCount; ++i)
-         {
-            Real *data = events->at(activeEventIndices[i])->Evaluate();
-            Integer dataIndex = eventStartIndices[i];
-            UnsignedInt fc = events->at(activeEventIndices[i])->GetFunctionCount();
-            for (UnsignedInt j = 0; j < fc*3; ++j)
-               tempEventData[dataIndex + j] = data[j];
-         }
-
-         #ifdef DEBUG_EVENT_LOCATION
-            MessageInterface::ShowMessage("ElapsedSecs = %.12lf; Passing in new "
-                  "data: %12lf %.12lf\n", elapsedSeconds, tempEventData[index*3],
-                  tempEventData[index*3+1]);
-         #endif
-
-         finder->SetValue(tempEventData[index*3], tempEventData[index*3+valueOffset]);
-   //      stepDifference = finder->GetStepMeasure();
-
-         lastEpoch = tempEventData[index*3];
-         ++stepsTaken;
       }
-      while ((stepsTaken < maxStepsAllowed) &&
-             (GmatMathUtil::Abs(tempEventData[index*3+valueOffset]) > locateTolerance));
-   //   while ((stepsTaken < maxStepsAllowed) && (stepDifference > locateTolerance));
-   //
-   //         &&
-   //          (GmatMathUtil::Abs(currentStep) > GmatTimeConstants::MJD_EPOCH_PRECISION * 10.0));
+   }
 
-      if ((GmatMathUtil::Abs(tempEventData[index*3+valueOffset]) < locateTolerance) &&
-          (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
-         eventFound = true;
+   #ifdef DEBUG_TRANSIENT_FORCES
+      MessageInterface::ShowMessage("Found %d sats that maneuver (outside of "
+            "formations):\n", satsThatManeuver.size());
+      for (UnsignedInt i = 0; i < satsThatManeuver.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", satsThatManeuver[i].c_str());
+   #endif
 
-   //   if ((stepDifference < locateTolerance) &&
-   //       (GmatMathUtil::Abs(tempEventData[index*3] - el->GetLastEpoch(index)) > 1.0 / 86400.0))
-   //      eventFound = true;
-
-      // End of temporary section
-
-      if (forDerivative && eventFound)
+   if (flagMultipleBurns)
+   {
+      StringArray duplicates;
+      for (StringArray::iterator name = satsThatManeuver.begin();
+            name != satsThatManeuver.end(); ++name)
       {
-         #ifdef DEBUG_EVENTLOCATORS
-            MessageInterface::ShowMessage("Zero of derivative located at "
-               "%.12lf\n", tempEventData[index*3]);
-         #endif
-         derivativeEpoch = tempEventData[index*3];
-         return true;
+         if (find(name+1, satsThatManeuver.end(), *name) !=
+               satsThatManeuver.end())
+         {
+            if (find(duplicates.begin(), duplicates.end(), *name) ==
+                  duplicates.end())
+               duplicates.push_back(*name);
+         }
       }
-
-      if (eventFound)
+      std::string errmsg = "The Spacecraft [";
+      for (UnsignedInt i = 0; i < duplicates.size(); ++i)
       {
-         #ifdef DEBUG_EVENTLOCATORS
-            MessageInterface::ShowMessage("Found an event for function "
-               "index %d\n", index);
-         #endif
-         UpdateEventTable(el, index);
-         GmatEpoch start, end;
-         finder->GetBrackets(start, end);
-         el->SetFoundEventBrackets(index, start, end);
+         if (i != 0)
+            errmsg += ", ";
+         errmsg += duplicates[i];
       }
-      #ifdef DEBUG_EVENTLOCATORS
+      if (duplicates.size() == 1)
+         errmsg += "] has ";
+      else
+         errmsg += "] have ";
+      errmsg += "more than one finite burn active, but GMAT only allows one "
+         "finite burn on a given spacecraft.";
+      throw CommandException(errmsg);
+   }
+
+   if (formationSatsThatManeuver.size() > 0)
+   {
+      std::string whatToSay, formToSay;
+      if (formationSatsThatManeuver.size() == 1)
+         whatToSay = "a maneuvering Spacecraft named \"" +
+                     formationSatsThatManeuver[0] + "\"";
       else
       {
-         // Linear interpolate to guess the epoch
-         MessageInterface::ShowMessage("No zero found for locator %s function "
-               "index %d; steps taken = %d\n", el->GetName().c_str(), index,
-               stepsTaken);
+         whatToSay = "maneuvering Spacecraft named ";
+         for (UnsignedInt i = 0; i < formationSatsThatManeuver.size(); ++i)
+         {
+            if (i != 0)
+            {
+               if (formationSatsThatManeuver.size() > 2)
+                  whatToSay += ", ";
+               else
+                  whatToSay += " ";
+               if (i == formationSatsThatManeuver.size()-1)
+                  whatToSay += "and ";
+            }
+            whatToSay += "\"" + formationSatsThatManeuver[i] + "\"";
+         }
       }
-      #endif
 
-      // Preserve the current state data
-      BufferSatelliteStates(false);
-      publishOnStep = wasPublishing;
+      if (formsThatManeuver.size() == 1)
+         formToSay = "Formation \"" + formsThatManeuver[0] + "\" contains " +
+         whatToSay;
+      else
+      {
+         formToSay = "Formations ";
+         for (UnsignedInt i = 0; i < formsThatManeuver.size(); ++i)
+         {
+            if (i != 0)
+            {
+               if (formsThatManeuver.size() > 2)
+                  formToSay += ", ";
+               else
+                  formToSay += " ";
+               if (i == formsThatManeuver.size()-1)
+                  formToSay += "and ";
+            }
+            formToSay += "\"" + formsThatManeuver[i] + "\"";
+         }
 
-      direction = propDir;
+         formToSay += " contain " + whatToSay;
+      }
+
+      throw CommandException("The " + formToSay + ", but GMAT does not support "
+            "finite burn maneuvers inside of Formation objects.");
    }
 
-   return eventFound;
-}
+   #ifdef DEBUG_TRANSIENT_FORCES
+      ODEModel *fm;
+      PhysicalModel *pm;
 
-
-void PropagationEnabledCommand::UpdateEventTable(EventLocator* el, Integer index)
-{
-   #ifdef DEBUG_EVENTLOCATORS
-      MessageInterface::ShowMessage("Adding event %d on locator %s to the "
-            "table\n", index, el->GetName().c_str());
+      MessageInterface::ShowMessage(
+         "PropagationEnabledCommand::AddTransientForces completed; force details:\n");
+      for (std::vector<PropSetup*>::iterator p = propagators.begin();
+           p != propagators.end(); ++p)
+      {
+         fm = (*p)->GetODEModel();
+         if (!fm)
+            throw CommandException("ODEModel not set in PropSetup \"" +
+                                   (*p)->GetName() + "\"");
+         MessageInterface::ShowMessage(
+            "   Forces in %s:\n", fm->GetName().c_str());
+         for (Integer i = 0; i < fm->GetNumForces(); ++i)
+         {
+            pm = fm->GetForce(i);
+            MessageInterface::ShowMessage(
+               "      %15s   %s\n", pm->GetTypeName().c_str(),
+               pm->GetName().c_str());
+         }
+      }
    #endif
-   el->BufferEvent(index);
 }
 
 
-//void PropagationEnabledCommand::UpdateEventTable(EventLocator* el, LocatedEvent *le)
-//{
-//}
+//------------------------------------------------------------------------------
+// void ClearTransientForce()
+//------------------------------------------------------------------------------
+/**
+ * Removes transient forces from the ForceModel(s) after propagation.
+ */
+//------------------------------------------------------------------------------
+void PropagationEnabledCommand::ClearTransientForces()
+{
+   #ifdef DEBUG_TRANSIENT_FORCES
+   MessageInterface::ShowMessage
+      ("PropagationEnabledCommand::ClearTransientForces() entered, prop.size()=%d\n",
+       propagators.size());
+   #endif
+
+   ODEModel *fm;
+   PhysicalModel *pm;
+
+   // Loop through the forces in each force model, and remove transient ones
+   for (std::vector<PropSetup*>::iterator p = propagators.begin();
+        p != propagators.end(); ++p)
+   {
+      if ((*p)->GetPropagator()->UsesODEModel())
+      {
+         fm = (*p)->GetODEModel();
+         if (!fm)
+            throw CommandException("ForceModel not set in PropSetup \"" +
+                                   (*p)->GetName() + "\"");
+
+         #ifdef DEBUG_TRANSIENT_FORCES
+         MessageInterface::ShowMessage("   ODEModel=<%p>\n", fm);
+         #endif
+         for (Integer i = 0; i < fm->GetNumForces(); ++i)
+         {
+            pm = fm->GetForce(i);
+            #ifdef DEBUG_TRANSIENT_FORCES
+            MessageInterface::ShowMessage
+               ("      Checking if pm<%p>'%s' is transient\n", pm, pm->GetName().c_str());
+            #endif
+            if (pm->IsTransient())
+            {
+               #ifdef DEBUG_TRANSIENT_FORCES
+               MessageInterface::ShowMessage("   calling fm->DeleteForce() for %p\n", pm);
+               #endif
+               fm->DeleteForce(pm->GetName());
+               --i;
+            }
+         }
+      }
+   }
+
+   #ifdef DEBUG_TRANSIENT_FORCES
+      MessageInterface::ShowMessage(
+         "PropagationEnabledCommand::ClearTransientForces completed; force details:\n");
+      for (std::vector<PropSetup*>::iterator p = propagators.begin();
+           p != propagators.end(); ++p)
+      {
+         if ((*p)->GetPropagator()->UsesODEModel())
+         {
+            fm = (*p)->GetODEModel();
+            if (!fm)
+               throw CommandException("ForceModel not set in PropSetup \"" +
+                                      (*p)->GetName() + "\"");
+            #ifdef DEBUG_TRANSIENT_FORCES
+            MessageInterface::ShowMessage("   ODEModel=<%p>\n", fm);
+            #endif
+            MessageInterface::ShowMessage(
+               "      Forces in %s:\n", fm->GetName().c_str());
+            for (Integer i = 0; i < fm->GetNumForces(); ++i)
+            {
+               pm = fm->GetForce(i);
+               MessageInterface::ShowMessage(
+                   "      %15s   %s\n", pm->GetTypeName().c_str(),
+                   pm->GetName().c_str());
+             }
+         }
+      }
+   #endif
+}
+
+
+//Moved from PropagateCommand for GMT-5101 fix (LOJ: 2015.05.14)
+//------------------------------------------------------------------------------
+// void SetNames(const std::string& name, StringArray& owners,
+//               StringArray& elements)
+//------------------------------------------------------------------------------
+/**
+ * Sets the parameter names used when publishing Spacecraft data.
+ *
+ * @param <name>     Name of the Spacecraft that is referenced.
+ * @param <owners>   Array of published data identifiers.
+ * @param <elements> Individual elements of the published data.
+ */
+//------------------------------------------------------------------------------
+void PropagationEnabledCommand::SetNames(const std::string& name, StringArray& owners,
+                         StringArray& elements)
+{
+   // Add satellite labels
+   for (Integer i = 0; i < 6; ++i)
+      owners.push_back(name);       // X, Y, Z, Vx, Vy, Vz
+
+   elements.push_back(name+".X");
+   elements.push_back(name+".Y");
+   elements.push_back(name+".Z");
+   elements.push_back(name+".Vx");
+   elements.push_back(name+".Vy");
+   elements.push_back(name+".Vz");
+   
+   #ifdef DEBUG_PUBLISH_DATA
+   MessageInterface::ShowMessage
+      ("PropagationEnabledCommand::SetNames() Setting data labels:\n");
+   for (unsigned int i = 0; i < elements.size(); i++)
+      MessageInterface::ShowMessage("%s ", elements[i].c_str());
+   MessageInterface::ShowMessage("\n");
+   #endif
+}
+

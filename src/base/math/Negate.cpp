@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -114,7 +124,19 @@ bool Negate::ValidateInputs()
    if (leftNode == NULL)
       throw MathException("Negate() - Missing input arguments.\n");
    
-   // it can be any type
+   Integer type1, row1, col1; // Left node
+
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+
+   // it can be any numeric type
+   if ((type1 != Gmat::REAL_TYPE) && (type1 != Gmat::RMATRIX_TYPE))
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type1] + ") for negation operator.\n";
+      throw MathException(errmsg);
+   }
+
    return true;
    //return leftNode->ValidateInputs();
 }

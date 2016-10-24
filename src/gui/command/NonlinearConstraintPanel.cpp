@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -102,7 +112,7 @@ void NonlinearConstraintPanel::Create()
                        wxDefaultPosition, wxSize(60, -1), 0);
    wxString comparisons[] = { wxT("<="), wxT(">="), wxT("=") };
    mComparisonComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(comparisons[0]), wxDefaultPosition,
+         new wxComboBox(this, ID_COMBO, wxString(comparisons[0]), wxDefaultPosition,
                         wxSize(45,-1), 3, comparisons,
                         wxCB_DROPDOWN|wxCB_READONLY);
 
@@ -187,22 +197,22 @@ void NonlinearConstraintPanel::LoadData()
       if (loadedSolverName == "")
          mSolverComboBox->SetSelection(0);
       else
-         mSolverComboBox->SetStringSelection(wxT(loadedSolverName.c_str()));
+         mSolverComboBox->SetStringSelection(wxString(loadedSolverName.c_str()));
 
       std::string loadedVariableName = mNonlinearConstraintCommand->
          GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintArg1"));
 
-      mLHSTextCtrl->SetValue(wxT(loadedVariableName.c_str()));
+      mLHSTextCtrl->SetValue(wxString(loadedVariableName.c_str()));
 
       std::string operatorStr = mNonlinearConstraintCommand->
          GetStringParameter(mNonlinearConstraintCommand->GetParameterID("Operator"));
       
-      mComparisonComboBox->SetStringSelection(wxT(operatorStr.c_str()));
+      mComparisonComboBox->SetStringSelection(wxString(operatorStr.c_str()));
 
       std::string loadedValue = mNonlinearConstraintCommand->
          GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintArg2"));
 
-      mRHSTextCtrl->SetValue(wxT(loadedValue.c_str()));
+      mRHSTextCtrl->SetValue(wxString(loadedValue.c_str()));
       
       //Real tolValue = mNonlinearConstraintCommand->
        //  GetRealParameter(mNonlinearConstraintCommand->GetParameterID("Tolerance"));

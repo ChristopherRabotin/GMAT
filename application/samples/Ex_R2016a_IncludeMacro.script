@@ -1,0 +1,14 @@
+
+
+%  Load the propagator from an external file
+#Include '.\Ex_IncludeFile.script'
+
+Create Spacecraft DefaultSC;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+
+Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 12000.0};

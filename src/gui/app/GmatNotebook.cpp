@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Allison Greene
 // Created: 2003/08/28
@@ -21,6 +31,10 @@
 #include "UndockedMissionPanel.hpp"
 #include "MessageInterface.hpp"
 
+// Libpng-1.6 is more stringent about checking ICC profiles than previous versions.
+// You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
+// For now just ignore warning (LOJ: 2014.09.23)
+#define __IGNORE_PNG_WARNING__
 
 //#define DEBUG_NOTEBOOK
 //#define DEBUG_RESTORE
@@ -63,7 +77,9 @@ GmatNotebook::GmatNotebook(wxWindow *parent, wxWindowID id,
    mMissionPagePanel = NULL;
    mUndockedMissionPanel = NULL;
    mMissionTreeToolBar = NULL;
-
+   
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
    // Create and add Resource, Mission, and Output Tabs
    wxPanel *panel = (wxPanel *)NULL;
    #ifdef DEBUG_NOTEBOOK
@@ -134,6 +150,11 @@ void GmatNotebook::CreateUndockedMissionPanel()
       ("   mUndockedMissionPanel=<%p>\n", mUndockedMissionPanel);
    #endif
    
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLogLevel logLevel = wxLog::GetLogLevel();
+   wxLog::SetLogLevel(0);
+   #endif
+   
    // Create panel as MDIChildFrame
    GmatTreeItemData item("Mission", GmatTree::MISSION_TREE_UNDOCKED);
    item.SetTitle("Mission");
@@ -148,6 +169,10 @@ void GmatNotebook::CreateUndockedMissionPanel()
    mMissionPagePanel = NULL;
    missionTree = NULL;
    mMissionTreeToolBar = NULL;
+   
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLog::SetLogLevel(logLevel);
+   #endif
    
    #ifdef DEBUG_UNDOCK_MISSION_PAGE
    MessageInterface::ShowMessage
@@ -164,6 +189,11 @@ void GmatNotebook::RestoreMissionPage()
 {
    #ifdef DEBUG_RESTORE
    MessageInterface::ShowMessage("GmatNotebook::RestoreMissionPage() entered\n");
+   #endif
+   
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLogLevel logLevel = wxLog::GetLogLevel();
+   wxLog::SetLogLevel(0);
    #endif
    
    if (mMissionPagePanel)
@@ -191,6 +221,10 @@ void GmatNotebook::RestoreMissionPage()
    #endif
    mUndockedMissionPanel = NULL;
    
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLog::SetLogLevel(logLevel);
+   #endif
+   
    #ifdef DEBUG_RESTORE
    MessageInterface::ShowMessage("GmatNotebook::RestoreMissionPage() leaving\n");
    #endif
@@ -217,7 +251,7 @@ wxPanel *GmatNotebook::CreateResourcePage()
    
    resourceTree = new ResourceTree(panel, -1, wxDefaultPosition,
                                    wxDefaultSize, style);
-   
+      
    // set to GmatAppData
    GmatAppData::Instance()->SetResourceTree(resourceTree);
    

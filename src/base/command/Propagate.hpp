@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -116,6 +126,8 @@ public:
                                             const Integer value);
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id, 
+                                           const char *value);
+   virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value);
    virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value,
@@ -183,10 +195,6 @@ protected:
    /// ID for the spacecraft epoch parameter
    Integer                      epochID;
    
-   /// The spacecraft and formations that are propagated
-   ObjectArray                  sats;
-//   /// Flag indicating a formation was detected
-//   bool                         hasFormation;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
    /// The time step that we need to interpolate across
@@ -307,9 +315,9 @@ protected:
    /// Array of allowed propagation modes
    static std::string      PropModeList[PropModeCount];
 
-   
-   virtual void            SetNames(const std::string& name, 
-                                    StringArray& owners, StringArray& elements);
+   //Moved to PropagationEnabledCommand for GMT-5101 fix (LOJ: 2015.05.14)
+   // virtual void            SetNames(const std::string& name, 
+   //                                  StringArray& owners, StringArray& elements);
    virtual void            CheckForOptions(Integer &loc, 
                                            std::string& generatingString);
 
@@ -332,9 +340,12 @@ protected:
    virtual bool            TakeAStep(Real propStep = 0.0);
    
    
-   void                    AddTransientForce(StringArray *sats, ODEModel *p,
-                                 PropagationStateManager *propMan);
-   void                    ClearTransientForces();
+//------------------------------------------------------------------------------
+// MOVED TO PROPAGATIONENABLEDCOMMAND
+//------------------------------------------------------------------------------
+//   void                    AddTransientForce(StringArray *sats, ODEModel *p,
+//                                 PropagationStateManager *propMan);
+//   void                    ClearTransientForces();
    
    bool                    CheckFirstStepStop(Integer i);
    

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -26,11 +36,13 @@
 #include <sstream>
 #include <iomanip>
 #include "gmatdefs.hpp"
+//#include "GmatGlobal.hpp"
 #include "EopFile.hpp"
 #include "TimeTypes.hpp"
 #include "UtilityException.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
+#include "TimeSystemConverter.hpp"
 
 //#define DEBUG_OFFSET
 //#define DEBUG_EOP_READ
@@ -119,6 +131,7 @@ const EopFile& EopFile::operator=(const EopFile &eopF)
    lastOffset    = eopF.lastOffset;
    lastIndex     = eopF.lastIndex;
    isInitialized = eopF.isInitialized;
+
    return *this;
 }
 
@@ -132,8 +145,11 @@ const EopFile& EopFile::operator=(const EopFile &eopF)
 //---------------------------------------------------------------------------
 EopFile::~EopFile()
 {
-   delete polarMotion;
-   delete ut1UtcOffsets;
+   #ifdef DEBUG_EOP_INITIALIZE
+      MessageInterface::ShowMessage("--- DESTRUCTING EOPFILE\n");
+   #endif
+   if (polarMotion)   delete polarMotion;
+   if (ut1UtcOffsets) delete ut1UtcOffsets;
 }
 
 
@@ -159,8 +175,26 @@ void EopFile::Initialize()
       throw UtilityException("Error opening EopFile " + 
                              eopFileName);
    eopFile.setf(std::ios::skipws);
+   
+   // Delete the old data if a file has already been read
+   if (tableSz > 0)
+   {
+      #ifdef DEBUG_EOP_INITIALIZE
+         MessageInterface::ShowMessage("--- deleting OLD polarMotion and ut1UtcOffsets and resetting ...\n");
+      #endif
+      delete polarMotion;
+      delete ut1UtcOffsets;
+      
+      polarMotion   = new Rmatrix(MAX_TABLE_SIZE,4);
+      ut1UtcOffsets = new Rmatrix(MAX_TABLE_SIZE,2);
+      tableSz       = 0;
+   }
+   
    if (eopFType == GmatEop::EOP_C04)
    {
+      #ifdef DEBUG_EOP_INITIALIZE
+         MessageInterface::ShowMessage("--- attempting to read file %s ...\n", eopFileName.c_str());
+      #endif
       // read up to the first data line
       bool startNow = false;
       std::string   firstWord;
@@ -255,6 +289,24 @@ void EopFile::Initialize()
    previousIndex = lastIndex;
    
    isInitialized = true;
+//   // Set the pointer on the GmatGlobal
+//   GmatGlobal::Instance()->SetEopFile(this);
+}
+
+
+//---------------------------------------------------------------------------
+//  void ResetEopFile(const std::string &toName, 
+//                    GmatEop::EopFileType toType = GmatEop::EOP_C04)
+//---------------------------------------------------------------------------
+void EopFile::ResetEopFile(const std::string &toName, 
+                           GmatEop::EopFileType toType)
+{
+   if (eopFileName != toName)
+   {
+      eopFileName   = toName;
+      eopFType      = toType;
+      isInitialized = false;
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -377,6 +429,8 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
 //---------------------------------------------------------------------------
 Rmatrix EopFile::GetPolarMotionData()
 {
+   if (!isInitialized)  Initialize();
+   
    return Rmatrix(*polarMotion);
 }
 
@@ -506,3 +560,17 @@ bool EopFile::IsBlank(const char* aLine)
    return true;
 }
 
+
+void EopFile::GetTimeRage(Real& timeMin, Real& timeMax)
+{
+   static RealArray ra;
+   const Real *data = polarMotion->GetDataVector();
+   Integer col = polarMotion->GetNumColumns();
+   Integer row = polarMotion->GetNumRows();
+   Real timeUtcMjdMin = data[0] - GmatTimeConstants::JD_JAN_5_1941;                       // unit: UTCMjd w.r.t ref GmatTimeConstants::JD_JAN_5_1941
+   Real timeUtcMjdMax = data[(tableSz - 1)*col] - GmatTimeConstants::JD_JAN_5_1941;       // unit: UTCMjd w.r.t ref GmatTimeConstants::JD_JAN_5_1941
+   timeMin = TimeConverterUtil::Convert(timeUtcMjdMin, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);    // unit: A1Mjd
+   timeMax = TimeConverterUtil::Convert(timeUtcMjdMax, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);    // unit: A1Mjd
+
+   //MessageInterface::ShowMessage("timeMin = %lf A1Mjd    timeMax = %lf A1Mjd\n", timeMin, timeMax);
+}

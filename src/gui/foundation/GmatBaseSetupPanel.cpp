@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -20,7 +30,7 @@
 
 #include "GmatBaseSetupPanel.hpp"
 #include "MessageInterface.hpp"
-#include "FileManager.hpp"         // for GetPathname()
+#include "FileManager.hpp"         // for GetAbsPathname()
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
 #include <wx/config.h>
@@ -38,6 +48,8 @@
 //#define DEBUG_LOAD
 //#define DEBUG_SAVE
 //#define DEBUG_CREATE_CONTROL
+//#define DEBUG_CREATE_GROUPS
+//#define DEBUG_LOAD_LAYOUT
 //#define DEBUG_BUILD_CONTROL
 //#define DEBUG_REFRESH
 //#define DEBUG_REFRESH_PROPERTY
@@ -90,7 +102,7 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
    #ifdef DEBUG_CREATE
    MessageInterface::ShowMessage
       ("\nGmatBaseSetupPanel::Constructor() entered, name='%s', mObject=<%p>\n",
-       name.c_str(), mObject);
+       name.WX_TO_C_STRING, mObject);
    #endif
 	reloadOnComboBoxChange = reloadOnCBChange;
    clbNumber = 0;
@@ -103,7 +115,7 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
    else
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The object named \"%s\" does not exist\n", name.c_str());
+         (Gmat::WARNING_, "The object named \"%s\" does not exist\n", name.WX_TO_C_STRING);
    }
 
 }
@@ -166,6 +178,9 @@ void GmatBaseSetupPanel::Create()
 SizerMapType* GmatBaseSetupPanel::CreateGroups(wxFlexGridSizer *mainSizer,
                                                wxFileConfig *config)
 {
+   #ifdef DEBUG_CREATE_GROUPS
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateGroups() entered\n");
+   #endif
    SizerMapType *groups = new SizerMapType;
    wxString groupName;
    wxSizer *sizer;
@@ -180,6 +195,10 @@ SizerMapType* GmatBaseSetupPanel::CreateGroups(wxFlexGridSizer *mainSizer,
    bool bCont = config->GetFirstGroup(groupName, dummy);
    while (bCont)
    {
+      #ifdef DEBUG_CREATE_GROUPS
+      MessageInterface::ShowMessage("   groupName='%s'\n", groupName.WX_TO_C_STRING);
+      #endif
+      
       // if not Main group, then it is a group/sizer
       if ((groupName != "main") && (config->Read("/"+groupName+"/Type", &groupProp)))
       {
@@ -212,11 +231,14 @@ SizerMapType* GmatBaseSetupPanel::CreateGroups(wxFlexGridSizer *mainSizer,
    }
 
    // create an ordered list of groups
+   #ifdef DEBUG_CREATE_GROUPS
+   MessageInterface::ShowMessage("   Creating an orderd list of groups\n");
+   #endif
    StringArray groupNames;
    for (item = groups->begin(); item != groups->end(); ++item)
    {
 		groupName = item->first;
-		groupNames.push_back(groupName.Lower().c_str());
+		groupNames.push_back(std::string(groupName.Lower().c_str()));
 
    }
    SortGroups(&groupNames, config);
@@ -224,6 +246,9 @@ SizerMapType* GmatBaseSetupPanel::CreateGroups(wxFlexGridSizer *mainSizer,
    // now, for all the groups, add them to their parent
    for (unsigned int i = 0; i < groupNames.size(); i++)
    {
+      #ifdef DEBUG_CREATE_GROUPS
+      MessageInterface::ShowMessage("   groupNames[%d]='%s'\n", i, groupNames[i].c_str());
+      #endif
       item = groups->find(groupNames[i].c_str());
       groupName = item->first;
       sizer = (wxSizer *) item->second;
@@ -243,6 +268,9 @@ SizerMapType* GmatBaseSetupPanel::CreateGroups(wxFlexGridSizer *mainSizer,
       else
          mainSizer->Add(sizer, 0, wxALL|wxALIGN_LEFT|wxEXPAND, border);
    }
+   #ifdef DEBUG_CREATE_GROUPS
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateGroups() returning groups\n");
+   #endif
    return groups;
 }
 
@@ -354,8 +382,10 @@ void GmatBaseSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void GmatBaseSetupPanel::CreateControls(wxFlexGridSizer *mainSizer, GmatBase *theObject)
 {
-   #ifdef DEBUGCREATE_CONTROL
-   MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateControls() entered\n");
+   #ifdef DEBUG_CREATE_CONTROL
+   MessageInterface::ShowMessage
+      ("GmatBaseSetupPanel::CreateControls() entered, theObject=<%p>[%s]'%s'\n", theObject,
+       theObject->GetTypeName().c_str(), theObject->GetName().c_str());
    #endif
    
    wxFileConfig *pConfig;
@@ -363,9 +393,7 @@ void GmatBaseSetupPanel::CreateControls(wxFlexGridSizer *mainSizer, GmatBase *th
    StringArray propertyNames;
    std::vector<wxString> propertyGroups;
    
-   #ifdef DEBUGCREATE_CONTROL
-   //MessageInterface::PopupMessage
-   //   (Gmat::INFO_, "Creating controls for %s...\n", theObject->GetTypeName().c_str());
+   #ifdef DEBUG_CREATE_CONTROL
    MessageInterface::ShowMessage
       ("Creating controls for %s...\n", theObject->GetTypeName().c_str());
    #endif
@@ -381,7 +409,7 @@ void GmatBaseSetupPanel::CreateControls(wxFlexGridSizer *mainSizer, GmatBase *th
    Integer propertyCount = theObject->GetParameterCount();
    for (Integer i = 0; i < propertyCount; ++i)
    {
-      #ifdef DEBUGCREATE_CONTROL
+      #ifdef DEBUG_CREATE_CONTROL
       if (theObject->IsParameterReadOnly(i))
          MessageInterface::ShowMessage
            ("   ParameterText(%d)='%s' (ReadOnly=True)\n", i, theObject->GetParameterText(i).c_str());
@@ -399,6 +427,10 @@ void GmatBaseSetupPanel::CreateControls(wxFlexGridSizer *mainSizer, GmatBase *th
    
    delete pConfig;
    delete groups;
+   
+   #ifdef DEBUG_CREATE_CONTROL
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateControls() leaving\n");
+   #endif
 }
 
 
@@ -418,18 +450,19 @@ void GmatBaseSetupPanel::CreateControls(GmatBase *theObject, Integer index,
                                         wxControl **aUnit, wxFileConfig *config)
 {
    #ifdef DEBUG_CREATE_CONTROL
-   MessageInterface::ShowMessage("\nGmatBaseSetupPanel::CreateControls() entered\n");
+   MessageInterface::ShowMessage
+      ("\nGmatBaseSetupPanel::CreateControls() entered, index=%d\n", index);
    #endif
    
    wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
-    #if __WXMAC__
+   #if __WXMAC__
    int buttonWidth = 40;
-    #else
+   #else
    int buttonWidth = 25;
-    #endif
+   #endif
    std::string labelText;
    // set the path to the section that contains the parameter's items
-   config->SetPath(wxT(("/"+theObject->GetParameterText(index)).c_str()));
+   config->SetPath(wxString(("/"+theObject->GetParameterText(index)).c_str()));
    labelText = GetParameterLabel(theObject, index, config);
    labelText = AssignAcceleratorKey(labelText);
    
@@ -441,19 +474,24 @@ void GmatBaseSetupPanel::CreateControls(GmatBase *theObject, Integer index,
    *aControl = BuildControl(this, theObject, index, labelText, config);
    (*aControl)->Enable(theObject->IsParameterEnabled(index));
    
-   if (theObject->GetParameterType(index) == Gmat::FILENAME_TYPE)
+   Gmat::ParameterType pt = theObject->GetParameterType(index);
+   if (pt == Gmat::FILENAME_TYPE)
    {
       *aUnit =
          new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                            wxSize(buttonWidth, 20));
+                            wxSize(buttonWidth, -1));
+	  //BrowseButtonWildcard = BMP and GIF files (*.bmp;*.gif)|*.bmp;*.gif|PNG files (*.png)|*.png|All Files (*.*)|*.*;
+      idInfoMap[(wxObject *) *aUnit] = config->Read(_T("BrowseButtonWildcard"), "All Files (*.*)|*.*");
+      (*aUnit)->SetToolTip(config->Read(_T("BrowseButtonHint")));
    }
    else
       *aUnit =
          new wxStaticText(this, ID_TEXT,
-                          wxT(GetParameterUnit(theObject, index, config).c_str()));
+                          wxString(GetParameterUnit(theObject, index, config).c_str()));
    
    #ifdef DEBUG_CREATE_CONTROL
-   MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateControls() leaving\n");
+   MessageInterface::ShowMessage
+      ("GmatBaseSetupPanel::CreateControls() leaving, index=%d\n", index);
    #endif
 }
 
@@ -473,6 +511,9 @@ void GmatBaseSetupPanel::CreateProperties(wxFlexGridSizer *mainSizer,
                                           GmatBase *theObject, StringArray *propertyNames,
                                           SizerMapType *groups, wxFileConfig *config)
 {
+   #ifdef DEBUG_CREATE
+   MessageInterface::ShowMessage("\nGmatBaseSetupPanel::CreateProperties() entered\n");
+   #endif
    Integer j = 0;
    Integer i = 0;
    wxString groupProp;
@@ -524,7 +565,7 @@ void GmatBaseSetupPanel::CreateProperties(wxFlexGridSizer *mainSizer,
       itemSizer->Add(propertyControls[j], 0, wxALL|wxALIGN_LEFT, border);
       itemSizer->Add(propertyUnits[j], 0, wxALL|wxALIGN_LEFT, border);
       // set the path to the section that contains the parameter's items
-      config->SetPath(wxT(("/"+(*propertyNames)[j])).c_str());
+      config->SetPath(STD_TO_WX_STRING(("/"+(*propertyNames)[j])).WX_TO_STD_STRING);
       groupProp = "Parent";
       doDefaultAction = !(config->Read(groupProp, &groupProp));
       if (!doDefaultAction)
@@ -607,7 +648,10 @@ void GmatBaseSetupPanel::CreateProperties(wxFlexGridSizer *mainSizer,
    
    
    NormalizeLabels( *propertyNames, propertyGroups, propertyDescriptors, propertyControls, propertyUnits );
-
+   
+   #ifdef DEBUG_CREATE
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateProperties() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -660,7 +704,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
       break;
    case Gmat::BOOLEAN_TYPE:
       {
-         wxCheckBox *cbControl = new wxCheckBox( this, ID_CHECKBOX, wxT(label.c_str()));
+         wxCheckBox *cbControl = new wxCheckBox( this, ID_CHECKBOX, wxString(label.c_str()));
          cbControl->SetToolTip(config->Read(_T("Hint")));
          control = cbControl;
       }
@@ -771,7 +815,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
                StringArray objs = theGuiInterpreter->GetListOfObjects(types[i]);
                for (UnsignedInt j = 0; j < objs.size(); ++j)
                {
-                  theList.Add(wxT(objs[j].c_str()));
+                  theList.Add(wxString(objs[j].c_str()));
                }
             }
             control = new wxCheckListBox(parent, ID_CHECKLISTBOX+clbNumber, wxDefaultPosition,
@@ -849,11 +893,25 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
 {
    #ifdef DEBUG_LOAD_CONTROL
    MessageInterface::ShowMessage
-      ("GmatBaseSetupPanel::LoadControl() entered, label = '%s'\n", label.c_str());
+      ("\nGmatBaseSetupPanel::LoadControl() entered, label = '%s'\n", label.c_str());
    #endif
-
+   
    Integer paramId = theObject->GetParameterID(label);
    Gmat::ParameterType paramType = theObject->GetParameterType(paramId);
+   
+   #ifdef DEBUG_LOAD_CONTROL
+   MessageInterface::ShowMessage("   paramId=%d, paramType=%d\n", paramId, paramType);
+   #endif
+   
+   if (controlMap.find(paramId) == controlMap.end())
+   {
+      #ifdef DEBUG_LOAD_CONTROL
+      MessageInterface::ShowMessage
+         ("GmatBaseSetupPanel::LoadControl() just leaving, wxControl not found for "
+          "label:'%s', paramId:%d\n", label.c_str(), paramId);
+      #endif
+      return;
+   }
    
    wxControl *theControl = controlMap[paramId];
    wxString valueString;
@@ -862,30 +920,32 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
    {
       case Gmat::ON_OFF_TYPE:
          ((wxComboBox*)(theControl))->
-            SetValue(wxT(theObject->GetOnOffParameter
-                         (theObject->GetParameterID(label)).c_str()));
+            SetValue(wxString(theObject->GetOnOffParameter(paramId).c_str()));
          break;
       case Gmat::BOOLEAN_TYPE:
-          ((wxCheckBox*) theControl)->SetValue(theObject->
-                GetBooleanParameter(theObject->GetParameterID(label)));
+         #ifdef DEBUG_LOAD_CONTROL
+         MessageInterface::ShowMessage("   It is BOOLEAN_TYPE\n");
+         #endif
+         ((wxCheckBox*) theControl)->SetValue(theObject->GetBooleanParameter(paramId));
          break;
       case Gmat::REAL_TYPE:
          {
-            Real val = theObject->GetRealParameter(
-                  theObject->GetParameterID(label));
+            Real val = theObject->GetRealParameter(paramId);
             std::stringstream valstr;
             valstr.precision(16);
             valstr << val;
             std::string cvtr = valstr.str();
-            valueString << wxT(cvtr.c_str());
+            valueString << wxString(cvtr.c_str());
             ((wxTextCtrl*)theControl)->ChangeValue(valueString);
          }
          break;
 
       case Gmat::INTEGER_TYPE:
          {
-            Integer val = theObject->GetIntegerParameter(
-                  theObject->GetParameterID(label));
+            #ifdef DEBUG_LOAD_CONTROL
+            MessageInterface::ShowMessage("   It is INTEGER_TYPE\n");
+            #endif
+            Integer val = theObject->GetIntegerParameter(paramId);
             valueString << val;
             ((wxTextCtrl*)theControl)->ChangeValue(valueString);
          }
@@ -893,13 +953,13 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
 
       case Gmat::FILENAME_TYPE:
       case Gmat::STRING_TYPE:
-         valueString = wxT(theObject->GetStringParameter(label).c_str());
+         valueString = wxString(theObject->GetStringParameter(label).c_str());
          ((wxTextCtrl*)theControl)->ChangeValue(valueString);
 			((wxTextCtrl*)theControl)->SetInsertionPointEnd();
          break;
          
       case Gmat::OBJECT_TYPE:
-         valueString = (theObject->GetStringParameter(theObject->GetParameterID(label))).c_str();
+         valueString = (theObject->GetStringParameter(paramId)).c_str();
          #ifdef DEBUG_LOAD_CONTROL
          MessageInterface::ShowMessage("   valueString = '%s'\n", valueString.c_str());
          #endif         
@@ -931,7 +991,7 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
             wxString theList;
             for (UnsignedInt i = 0; i < strings.size(); i++)
             {
-               theList += wxT(strings[i].c_str());
+               theList += wxString(strings[i].c_str());
                if (i < strings.size() - 1)
                   theList += wxT(", ");
             }
@@ -940,7 +1000,13 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
          }
       case Gmat::ENUMERATION_TYPE:
          {
-            valueString = (theObject->GetStringParameter(theObject->GetParameterID(label))).c_str();
+            #ifdef DEBUG_LOAD_CONTROL
+            MessageInterface::ShowMessage("   It is ENUMERATION_TYPE\n");
+            #endif
+            valueString = (theObject->GetStringParameter(paramId)).c_str();
+            #ifdef DEBUG_LOAD_CONTROL
+            MessageInterface::ShowMessage("   valueString='%s'\n", valueString.c_str());
+            #endif
             wxComboBox *cb = (wxComboBox*)theControl;
             cb->SetValue(valueString);
             
@@ -950,6 +1016,9 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
             break;
          }
       default:
+         #ifdef DEBUG_LOAD_CONTROL
+         MessageInterface::ShowMessage("===> This type is not handled yet\n");
+         #endif
          break;
    }
    #ifdef DEBUG_LOAD_CONTROL
@@ -1051,7 +1120,7 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
          {
             if (clb->IsChecked(i))
             {
-               std::string objName =  clb->GetString(i).c_str();
+               std::string objName =  clb->GetString(i).WX_TO_STD_STRING;
                #ifdef DEBUG_SAVE_CONTROL
                MessageInterface::ShowMessage("   objName = '%s'\n", objName.c_str());
                #endif
@@ -1067,7 +1136,7 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
          wxString theList;
          for (UnsignedInt i = 0; i < strings.size(); i++)
          {
-            theList += wxT(strings[i].c_str());
+            theList += wxString(strings[i].c_str());
             if (i < strings.size() - 1)
                theList += wxT(", ");
          }
@@ -1161,48 +1230,54 @@ std::string GmatBaseSetupPanel::AssignAcceleratorKey(std::string text)
 //------------------------------------------------------------------------------
 bool GmatBaseSetupPanel::GetLayoutConfig(GmatBase *theObject, wxFileConfig **config)
 {
-    std::string configPath;
-    // get the GUI_CONFIG_PATH
-    FileManager *fm = FileManager::Instance();
-    try
-    {
-       configPath = fm->GetAbsPathname(FileManager::GUI_CONFIG_PATH);
-    }
-    catch (UtilityException &e)
-    {
-       MessageInterface::ShowMessage
-          ("GmatBaseSetupPanel:Create() error occurred!\n%s\n",
-           e.GetFullMessage().c_str());
-       configPath = "";
-    }
-    
-    std::string filename = configPath+theObject->GetTypeName()+".ini";
-    bool configFileExists = GmatFileUtil::DoesFileExist(filename);
-    
-    // Do we need to show this message?
-    // Commented out for now (LOJ: 2011.09.09)
-    #ifdef DEBUG_LOAD_LAYOUT
-    static bool loadMessageWritten = false;
-    if (!loadMessageWritten)
-    {
-       if (configFileExists)
-          MessageInterface::ShowMessage
-             ("GmatBaseSetupPanel:Attempting to load layout from file: %s\n",
-              filename.c_str());
-       else
-          MessageInterface::ShowMessage
-             ("GmatBaseSetupPanel:Unable to find layout file: %s\n",
-              filename.c_str());
-       loadMessageWritten = true;
-    }
-    #endif
-    
-    *config = new wxFileConfig(wxEmptyString, wxEmptyString,
-                               (filename).c_str(),
-                               wxEmptyString, wxCONFIG_USE_LOCAL_FILE |
-                               wxCONFIG_USE_RELATIVE_PATH );
-    return configFileExists;
-    
+   #ifdef DEBUG_LOAD_LAYOUT
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::GetLayoutConfig() entered\n");
+   #endif
+   std::string configPath;
+   // get the GUI_CONFIG_PATH
+   FileManager *fm = FileManager::Instance();
+   try
+   {
+      configPath = fm->GetAbsPathname(FileManager::GUI_CONFIG_PATH);
+   }
+   catch (UtilityException &e)
+   {
+      MessageInterface::ShowMessage
+         ("GmatBaseSetupPanel:Create() error occurred!\n%s\n",
+          e.GetFullMessage().c_str());
+      configPath = "";
+   }
+   
+   std::string configFileName = configPath+theObject->GetTypeName()+".ini";
+   bool configFileExists = GmatFileUtil::DoesFileExist(configFileName);
+   
+   // Do we need to show this message?
+   // Commented out for now (LOJ: 2011.09.09)
+   #ifdef DEBUG_LOAD_LAYOUT
+   static bool loadMessageWritten = false;
+   if (!loadMessageWritten)
+   {
+      if (configFileExists)
+         MessageInterface::ShowMessage
+            ("GmatBaseSetupPanel:Attempting to load layout from file: %s\n",
+             configFileName.c_str());
+      else
+         MessageInterface::ShowMessage
+            ("GmatBaseSetupPanel:Unable to find layout file: %s\n",
+             configFileName.c_str());
+      loadMessageWritten = true;
+   }
+   #endif
+   
+   *config = new wxFileConfig(wxEmptyString, wxEmptyString,
+                              (configFileName).c_str(),
+                              wxEmptyString, wxCONFIG_USE_LOCAL_FILE |
+                              wxCONFIG_USE_RELATIVE_PATH );
+   #ifdef DEBUG_LOAD_LAYOUT
+   MessageInterface::ShowMessage
+      ("GmatBaseSetupPanel::GetLayoutConfig() returning %d\n", configFileExists);
+   #endif
+   return configFileExists;
 }
 
 
@@ -1225,8 +1300,8 @@ std::string GmatBaseSetupPanel::GetParameterLabel(GmatBase *theObject, Integer i
    
    // first, see if the parameter is in the object's INI file
    // set the path to the section that contains the parameter's items
-   config->SetPath(wxT(("/"+text).c_str()));
-   if (config->Read(wxT("Label"), &str))
+   config->SetPath(wxString(("/"+text).c_str()));
+   if (config->Read("Label", &str))
    {
       titleText = str.c_str();
       return titleText;
@@ -1278,9 +1353,9 @@ std::string GmatBaseSetupPanel::GetParameterUnit(GmatBase *theObject, Integer i,
    
    // first, see if the parameter is in the object's INI file
    // set the path to the section that contains the parameter's items
-   config->SetPath(wxT(("/"+text).c_str()));
-   if (config->Read(wxT("Unit"), &str))
-      return str.c_str();
+   config->SetPath(wxString(("/"+text).c_str()));
+   if (config->Read("Unit", &str))
+      return std::string(str.c_str());
    else
       return theObject->GetParameterUnit(i);
 }
@@ -1300,7 +1375,11 @@ void GmatBaseSetupPanel::OnBrowseButton(wxCommandEvent& event)
    wxBitmapButton *bb = (wxBitmapButton *) event.GetEventObject();
    wxTextCtrl *control = (wxTextCtrl *) bb->GetPrevSibling();
    wxString oldname = control->GetValue();
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+   std::string wildCard = "All Files (*.*)|*.*";
+   if (idInfoMap.find((wxObject *) bb) != idInfoMap.end())
+	 wildCard = idInfoMap.find((wxObject *) bb)->second;
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), 
+	   wildCard);
    
    if (dialog.ShowModal() == wxID_OK)
    {
@@ -1609,6 +1688,10 @@ void GmatBaseSetupPanel::NormalizeLabels( StringArray propertyNames,
                       std::vector<wxControl*> propertyControls,
                       std::vector<wxControl*> propertyUnits )
 {
+   #ifdef DEBUG_CONTROL
+   MessageInterface::ShowMessage("GmatBaseSetupPanel::NormalizeLabels() entered\n");
+   #endif
+   
    // initialize all groups with a max size
    SizerSizeType labelSizes, unitSizes;
    SizerSizeType::iterator sizeItem;
@@ -1650,6 +1733,10 @@ void GmatBaseSetupPanel::NormalizeLabels( StringArray propertyNames,
       sizeItem = unitSizes.find(propertyGroups[j].Lower());
       propertyUnits[j]->SetMinSize(wxSize(((int) sizeItem->second), propertyUnits[j]->GetMinHeight()));
    }
+   
+   #ifdef DEBUG_CONTROL
+   MessageInterface::ShowMessage("==> GmatBaseSetupPanel::NormalizeLabels() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1770,7 +1857,7 @@ void GmatBaseSetupPanel::RefreshProperty(GmatBase *theObject, Integer index, wxC
    #endif
    
    // set the path to the section that contains the parameter's items
-   config->SetPath(wxT(("/"+labelText).c_str()));
+   config->SetPath(wxString(("/"+labelText).c_str()));
    
    // refresh value
    LoadControl(theObject, labelText);
@@ -1790,7 +1877,7 @@ void GmatBaseSetupPanel::RefreshProperty(GmatBase *theObject, Integer index, wxC
    }
    
    // refresh units
-   control->GetNextSibling()->SetLabel(wxT(GetParameterUnit(theObject, index, config).c_str()));
+   control->GetNextSibling()->SetLabel(wxString(GetParameterUnit(theObject, index, config).c_str()));
    
    #ifdef DEBUG_REFRESH_PROPERTY
    MessageInterface::ShowMessage("GmatBaseSetupPanel::RefreshProperty() leaving\n");

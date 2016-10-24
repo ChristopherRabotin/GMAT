@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
 // MOMS Task order 124.
@@ -56,6 +66,14 @@ using namespace GmatMathConstants;      // for RAD_PER_ARCSEC, etc.
 //#define DEBUG_TIME_CALC
 //#define DEBUG_ROT_MATRIX
 
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -87,6 +105,8 @@ BodySpinSunAxes::BodySpinSunAxes(const std::string &itsName) :
    parameterCount = BodySpinSunAxesParamCount;
 
    needsCBOrigin  = true;
+   usesPrimary    = GmatCoordinate::NOT_USED;
+   usesSecondary  = GmatCoordinate::NOT_USED;
 }
 
 
@@ -146,17 +166,6 @@ BodySpinSunAxes::~BodySpinSunAxes()
    MessageInterface::ShowMessage("BodySpinSunAxes::~BodySpinSunAxes()   destruction.\n");
 #endif
 
-}
-
-
-GmatCoordinate::ParameterUsage BodySpinSunAxes::UsesPrimary() const
-{
-   return GmatCoordinate::NOT_USED;
-}
-
-GmatCoordinate::ParameterUsage BodySpinSunAxes::UsesSecondary() const
-{
-   return GmatCoordinate::NOT_USED;
 }
 
 GmatCoordinate::ParameterUsage BodySpinSunAxes::UsesXAxis() const
@@ -337,11 +346,11 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Rvector3 vR    = vSun / rMag;
    Rvector3 xDot  = vR - x * (x * vR);
 
-//   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFK5), x) +						// fix bug GMT-3465;  made change by TUAN NGUYEN
-//                    Cross((fixedToMJ2000 * spinaxisFK5), xDot);						// fix bug GMT-3465;  made change by TUAN NGUYEN
-   Rvector3 spinaxisFixed =  fixedToMJ2000.Transpose()*spinaxisFK5;						// fix bug GMT-3465;  made change by TUAN NGUYEN
-   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFixed), x) +						// fix bug GMT-3465;  made change by TUAN NGUYEN
-                    Cross(spinaxisFK5, xDot);											// fix bug GMT-3465;  made change by TUAN NGUYEN
+//   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFK5), x) +						// fix bug GMT-3465
+//                    Cross((fixedToMJ2000 * spinaxisFK5), xDot);						   // fix bug GMT-3465
+   Rvector3 spinaxisFixed =  fixedToMJ2000.Transpose()*spinaxisFK5;						// fix bug GMT-3465
+   Rvector3 yTmp  = Cross((fixedToMJ2000Dot * spinaxisFixed), x) +						// fix bug GMT-3465
+                    Cross(spinaxisFK5, xDot);											      // fix bug GMT-3465
    Rvector3 yDot  = (yTmp / yMag) - y * (y * (yTmp / yMag));
 
    Rvector3 zDot  = Cross(xDot, y) + Cross(x, yDot);
@@ -373,7 +382,21 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #endif
 
    if (mj2kcs != NULL)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (mj2kcs, "mj2kcs", "BodySpinSunAxes::CalculateRotationMatrix()",
+          "deleting localCoordSystem");
+      #endif
       delete mj2kcs;
+   }
    if (bfcs != NULL)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (bfcs, "bfcs", "BodySpinSunAxes::CalculateRotationMatrix()",
+          "deleting localCoordSystem");
+      #endif
       delete bfcs;
+   }
 }

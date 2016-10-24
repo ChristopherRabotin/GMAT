@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 // $Copyright$
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
@@ -26,6 +36,7 @@
 #include "FileManager.hpp"
 #include "ViewTextDialog.hpp"
 #include "FileUtil.hpp"            // for GmatFileUtil::DoesFileExist()
+#include "GmatGlobal.hpp"          // for GetGmatVersion()
 #include <wx/hyperlink.h>
 #include <wx/statline.h>
 #include <wx/gdicmn.h>
@@ -65,16 +76,24 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    #ifdef DEBUG_ICONFILE
    MessageInterface::ShowMessage("AboutDialog::AboutDialog() entered\n");
    #endif
+   
+   // Write info message once per GMAT session
+   static bool writeInfo = true;
    wxBitmap bitmap;
    wxBitmapButton *aboutButton;
    
+   // Use FileManager::FindPath() for GMATAboutIcon file (LOJ: 2014.07.02)
+   
    // if icon file available, use it
    FileManager *fm = FileManager::Instance();
-   std::string iconFile = (fm->GetFullPathname("ICON_PATH") + "GMATAboutIcon.png");
+   //std::string iconFile = (fm->GetFullPathname("ICON_PATH") + "GMATAboutIcon.png");
+   std::string iconFile = fm->FindPath("GMATAboutIcon.png", "ICON_PATH", true, false, writeInfo);
+   writeInfo = false;
+   
    #ifdef DEBUG_ICONFILE
    MessageInterface::ShowMessage("   About iconFile='%s'\n", iconFile.c_str());
    #endif
-   if (fm->DoesFileExist(iconFile))
+   if (iconFile != "")
    {
       //bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_JPEG);
       bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_PNG);
@@ -90,7 +109,8 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    {
       MessageInterface::ShowMessage
          ("About GMAT icon file '%s' does not exist.\n", iconFile.c_str());
-      aboutButton = new wxBitmapButton(this, -1, NULL, wxDefaultPosition,
+      wxBitmap nullBitmap;
+      aboutButton = new wxBitmapButton(this, -1, nullBitmap, wxDefaultPosition,
                                        wxSize(100, 100));
    }
    
@@ -120,7 +140,13 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    gmatText->SetOwnForegroundColour(gmatColor);
    
    // Release number
-   wxString releaseNumber = "Version: 2014a";
+   std::string version = GmatGlobal::Instance()->GetGmatVersion();
+   wxString releaseNumber = STD_TO_WX_STRING(version);
+   bool is64bit = GmatGlobal::Instance()->IsGmatCompiledIn64Bit();
+   wxString gmatCompiledBitSize = " (64-bit)";
+   if (!is64bit)
+      gmatCompiledBitSize = " (32-bit)";
+   releaseNumber = releaseNumber + gmatCompiledBitSize;
    wxStaticText *releaseText = new wxStaticText(this, -1, releaseNumber);
    
    // Build date
@@ -135,7 +161,8 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    #endif
    
    // Set font
-   font1.SetWeight(wxFONTWEIGHT_LIGHT);
+   //font1.SetWeight(wxFONTWEIGHT_LIGHT);
+   font1.SetWeight(wxFONTWEIGHT_NORMAL);
    releaseText->SetFont(font1);
    buildText->SetFont(font1);
    
@@ -179,6 +206,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    //use = use + " - Uses Perl Compatible Regular Expressions\n";
    use = use + " - Uses JPL SPICE Library\n";
    use = use + " - Uses IAU SOFA Library\n";
+   use = use + " - Uses Apache Xerces 3.1\n";
    use = use + " - Planetary images courtesy of JPL/Caltech/USGS, Celestia \n";
    use = use + "   Motherlode, Bjorn Jonsson, and NASA World Wind";
    wxStaticText *useText = new wxStaticText(this, -1, use);

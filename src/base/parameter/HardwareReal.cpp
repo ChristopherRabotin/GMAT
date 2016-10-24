@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -22,16 +32,19 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_REF_OBJECT 1
 
 //------------------------------------------------------------------------------
 // HardwareReal(const std::string &name, const std::string &typeStr, 
-//              GmatBase *obj, const std::string &desc, const std::string &unit)
+//              GmatBase *obj, const std::string &desc, const std::string &unit,
+//              bool isSettable)
 //------------------------------------------------------------------------------
 HardwareReal::HardwareReal(const std::string &name, const std::string &typeStr, 
                            Gmat::ObjectType ownerType, Gmat::ObjectType ownedObjType,
-                           GmatBase *obj, const std::string &desc, const std::string &unit)
+                           GmatBase *obj, const std::string &desc, const std::string &unit,
+                           bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             GmatParam::ATTACHED_OBJ, ownerType, false, true, true, true, ownedObjType),
+             GmatParam::ATTACHED_OBJ, ownerType, false, isSettable, true, true, ownedObjType),
      SpacecraftData(name)
 {
    AddRefObject(obj);
@@ -96,7 +109,7 @@ bool HardwareReal::AddRefObject(GmatBase *obj, bool replaceName)
 {
    if (obj != NULL)
    {
-      #if DEBUG_ATTITUDEREAL
+      #if DEBUG_REF_OBJECT
       MessageInterface::ShowMessage
          ("HardwareReal::AddRefObject() obj->GetName()=%s, type=%d\n",
           obj->GetName().c_str(), obj->GetType());
@@ -250,11 +263,15 @@ GmatBase* HardwareReal::GetRefObject(const Gmat::ObjectType type,
 bool HardwareReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                 const std::string &name)
 {
-   #if DEBUG_ATTITUDEREAL
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
       ("HardwareReal::SetRefObject() setting type=%d, name=%s to %s\n",
        type, name.c_str(), this->GetName().c_str());
    #endif
+   
+   // Set owner object for Parameter here (LOJ: 2015.09.30)
+   if (obj->GetName() == mParamOwnerName)
+      SetOwner(obj);
    
    return SpacecraftData::SetRefObject(obj, type, name);
 }

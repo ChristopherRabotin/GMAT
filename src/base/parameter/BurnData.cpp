@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -15,7 +25,7 @@
 // Created: 2005/05/27
 //
 /**
- * Implements ImpulsiveBurn related data class.
+ * Implements Burn related data class.
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -28,7 +38,6 @@
 
 //#define DEBUG_BURNDATA_INIT 1
 //#define DEBUG_BURNDATA_CONVERT 1
-//#define DEBUG_BURNDATA_RUN 1
 //#define DEBUG_BURNDATA_SET 1
 //#define DEBUG_BURNDATA_GET
 //#define DEBUG_BURNDATA_COORD_CONVERT
@@ -43,6 +52,7 @@ const std::string
 BurnData::VALID_OBJECT_TYPE_LIST[BurnDataObjectCount] =
 {
    "ImpulsiveBurn",
+   "FiniteBurn",
    "SolarSystem",
    "CoordinateSystem",
    "Spacecraft"
@@ -64,11 +74,11 @@ const Real BurnData::BURN_TOL            = 1.0e-10;
  * Constructor.
  */
 //------------------------------------------------------------------------------
-BurnData::BurnData(const std::string &name,
+BurnData::BurnData(const std::string &name, const std::string &typeName,
                    const Gmat::ObjectType paramOwnerType)
-   : RefData(name, paramOwnerType)
+   : RefData(name, typeName, paramOwnerType)
 {
-   mImpBurn                   = NULL;
+   mBurn                      = NULL;
    mSpacecraft                = NULL;
    mSolarSystem               = NULL;
    mOrigin                    = NULL;
@@ -97,7 +107,7 @@ BurnData::BurnData(const std::string &name,
 BurnData::BurnData(const BurnData &copy)
    : RefData(copy)
 {
-   mImpBurn                   = copy.mImpBurn;
+   mBurn                      = copy.mBurn;
    mSpacecraft                = copy.mSpacecraft;
    mSolarSystem               = copy.mSolarSystem;
    mOrigin                    = copy.mOrigin;
@@ -127,7 +137,7 @@ BurnData& BurnData::operator= (const BurnData& right)
    
    RefData::operator=(right);
       
-   mImpBurn                   = right.mImpBurn;
+   mBurn                      = right.mBurn;
    mSpacecraft                = right.mSpacecraft;
    mSolarSystem               = right.mSolarSystem;
    mOrigin                    = right.mOrigin;
@@ -162,19 +172,39 @@ BurnData::~BurnData()
 //------------------------------------------------------------------------------
 Real BurnData::GetReal(Integer item)
 {
+   #ifdef DEBUG_BURNDATA_GET
+   MessageInterface::ShowMessage
+      ("BurnData::GetReal() <%p> entered, mActualParamName='%s', mParamOwnerName='%s', "
+       "mParamOwnerType='%s'\n   mParamDepName='%s', item=%d, mBurn=<%p>, mIsParamCSDep=%d\n",
+       this, mActualParamName.c_str(), mParamOwnerName.c_str(),
+       GmatBase::GetObjectTypeString(mParamOwnerType).c_str(), mParamDepName.c_str(),
+       item, mBurn, mIsParamCSDep);
+   #endif
+   
    ///@todo convert internal DeltaV to Parameter CoordinateSystem.
-   if (mImpBurn == NULL)
+   if (mBurn == NULL)
       InitializeRefObjects();
    
-   if (mImpBurn == NULL)
+   if (mBurn == NULL)
    {
       MessageInterface::ShowMessage
          ("Cannot find Burn object so returning %f\n", BURN_REAL_UNDEFINED);
       return BURN_REAL_UNDEFINED;
    }
+
    
+   Real lastFireEpoch = mBurn->GetEpochAtLastFire();
+   #ifdef DEBUG_BURNDATA_GET
+   MessageInterface::ShowMessage
+      ("   lastFireEpoch=%.12f, fired=%d\n", lastFireEpoch, mBurn->HasFired());
+   #endif
+   
+   Real result;
    if (mIsParamCSDep)
    {
+      #ifdef DEBUG_BURNDATA_GET
+      MessageInterface::ShowMessage("It is a CS dependent Parameter\n");
+      #endif
       if ((mInternalCoordSystem == NULL) ||
           (mOutCoordSystem == NULL))
       {
@@ -184,35 +214,38 @@ Real BurnData::GetReal(Integer item)
          errmsg            += mActualParamName + "\"\n";
          throw ParameterException(errmsg);
       }
-
-      if (!mImpBurn->HasFired())
+      
+      if (!mBurn->HasFired())
       {
          if (!firstTimeHasntFiredWarning)
          {
-            std::string errmsg = "Warning: Impulsive Burn ";
-            errmsg += mImpBurn->GetName() + " has not fired, so returning \"0\" ";
-            errmsg += "for maneuver parameter.\n";
-            MessageInterface::ShowMessage(errmsg);
+            Real burnEpoch = mBurn->GetEpochAtLastFire();
+            // Now Burn object can be ImpulsiveBurn or FiniteBurn so format accordingly
+            std::string burnTypeName = GmatBase::GetObjectTypeString(mParamOwnerType);
+            std::string errmsg = "*** WARNING *** " + burnTypeName + " \"";
+            errmsg += mBurn->GetName() + "\" has not fired";
+            std::string errmsg2 = ", so returning \"0\" for " + mActualParamName + " Parameter.\n";
+            MessageInterface::ShowMessage("%s at epoch: %f%s", errmsg.c_str(), burnEpoch, errmsg2.c_str());
             firstTimeHasntFiredWarning = true;
          }
          return 0.0;
       }
+      
       // we need to do conversions and check for epochs here
       // write a warning of the epoch of the maneuver does not match the
       // epoch of the participants in the coordinate system
       // this part has been removed/postponed  WCS 2013.07.01
-//      Real burnEpoch = mImpBurn->GetEpochAtLastFire();
+//      Real burnEpoch = mBurn->GetEpochAtLastFire();
 //      ObjectArray objs =  mOurCoordSystem->GetSpacePointParticipants();
 
-      Real burnEpoch = mImpBurn->GetEpochAtLastFire();
-      Real *burnDeltaV;
-      burnDeltaV = mImpBurn->GetDeltaVInertial();
+      Real burnEpoch = mBurn->GetEpochAtLastFire();
+      Real *burnDeltaV = mBurn->GetDeltaVInertial();
       Rvector6 burnState(0.0,0.0,0.0, burnDeltaV[0], burnDeltaV[1], burnDeltaV[2]);
       #ifdef DEBUG_BURNDATA_GET
       MessageInterface::ShowMessage(
-            "In BurnData::GetReal, burnEpoch = %le, burnDeltaV = %le %le %le\n",
-            burnEpoch, burnDeltaV[0],burnDeltaV[1],burnDeltaV[2]);
-      MessageInterface::ShowMessage("      and burnState = %s\n",
+            "In BurnData::GetReal, burnEpoch = %le, burnDeltaVInertial = %le %le %le\n",
+            burnEpoch, burnDeltaV[0], burnDeltaV[1], burnDeltaV[2]);
+      MessageInterface::ShowMessage("      and burnStateInertial = %s\n",
             burnState.ToString().c_str());
       MessageInterface::ShowMessage(
             "      mInternalCoordSystem = %s, mOutCoordSystem = %s\n",
@@ -238,11 +271,14 @@ Real BurnData::GetReal(Integer item)
       switch (item)
       {
       case ELEMENT1:
-         return burnOut[3];
+         result = burnOut[3];
+         break;
       case ELEMENT2:
-         return burnOut[4];
+         result = burnOut[4];
+         break;
       case ELEMENT3:
-         return burnOut[5];
+         result = burnOut[5];
+         break;
       default:
          throw ParameterException("BurnData::GetReal() Unknown ELEMENT id: " +
                                   GmatRealUtil::ToString(item));
@@ -250,22 +286,84 @@ Real BurnData::GetReal(Integer item)
    }
    else
    {
+      #ifdef DEBUG_BURNDATA_GET
+      MessageInterface::ShowMessage("   It is not a CS dependent Parameter\n");
+      #endif
+      
       // if there is no dependency object, then return the values from the
       // burn in the burn coordinate system
       switch (item)
       {
       case ELEMENT1:
-         return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element1"));
+         result = mBurn->GetRealParameter(mBurn->GetParameterID("Element1"));
+         break;
       case ELEMENT2:
-         return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element2"));
+         result = mBurn->GetRealParameter(mBurn->GetParameterID("Element2"));
+         break;
       case ELEMENT3:
-         return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element3"));
+         result = mBurn->GetRealParameter(mBurn->GetParameterID("Element3"));
+         break;
+      case TOTAL_MASS_FLOW_RATE:
+         result = mBurn->GetTotalMassFlowRate();
+         break;
+      case TOTAL_ACCEL1:
+      case TOTAL_ACCEL2:
+      case TOTAL_ACCEL3:
+      {
+         Real *accel = mBurn->GetTotalAcceleration();
+         #ifdef DEBUG_BURNDATA_GET
+         MessageInterface::ShowMessage
+            ("   totalAccel = [%.15e %.15e %.15e]\n", accel[0], accel[1], accel[2]);
+         #endif
+         switch (item)
+         {
+         case TOTAL_ACCEL1:
+            result = accel[0];
+            break;
+         case TOTAL_ACCEL2:
+            result = accel[1];
+            break;
+         case TOTAL_ACCEL3:
+            result = accel[2];
+            break;
+         }
+         break;
+      }
+      case TOTAL_THRUST1:
+      case TOTAL_THRUST2:
+      case TOTAL_THRUST3:
+      {
+         Real *thrust = mBurn->GetTotalThrust();
+         #ifdef DEBUG_BURNDATA_GET
+         MessageInterface::ShowMessage
+            ("   totalThrust = [%.15e %.15e %.15e]\n", thrust[0], thrust[1], thrust[2]);
+         #endif
+         switch (item)
+         {
+         case TOTAL_THRUST1:
+            result = thrust[0];
+            break;
+         case TOTAL_THRUST2:
+            result = thrust[1];
+            break;
+         case TOTAL_THRUST3:
+            result = thrust[2];
+            break;
+         }
+         break;
+      }
       default:
          throw ParameterException("BurnData::GetReal() Unknown ELEMENT id: " +
                                   GmatRealUtil::ToString(item));
       }
    }
-
+   
+   #ifdef DEBUG_BURNDATA_GET
+   MessageInterface::ShowMessage
+      ("BurnData::GetReal() <%p> returning %.12f for Parameter '%s'\n", this,
+       result, mActualParamName.c_str());
+   #endif
+   return result;
 }
 
 
@@ -280,16 +378,16 @@ void BurnData::SetReal(Integer item, Real rval)
    #endif
    
    ///@todo convert internal DeltaV to Parameter CoordinateSystem.
-   if (mImpBurn == NULL)
+   if (mBurn == NULL)
       InitializeRefObjects();
    
-   if (mImpBurn == NULL)
+   if (mBurn == NULL)
    {
       MessageInterface::ShowMessage
          ("Cannot find Burn object so returning %f\n", BURN_REAL_UNDEFINED);
    }
    
-   std::string csName = mImpBurn->GetStringParameter(mImpBurn->GetParameterID("CoordinateSystem"));
+   std::string csName = mBurn->GetStringParameter(mBurn->GetParameterID("CoordinateSystem"));
 //   if (mIsParamCSDep)
    if (mIsParamCSDep && (mOutCoordSystem->GetName() != csName))
    {
@@ -298,7 +396,7 @@ void BurnData::SetReal(Integer item, Real rval)
                     "requires values to be in its own coordinate system (setting "
                     "values in different coordinate systems will be implemented in "
                     "future builds)",  mActualParamName.c_str(),
-                    mImpBurn->GetName().c_str());
+                    mBurn->GetName().c_str());
       throw pe;
    }
 
@@ -306,13 +404,13 @@ void BurnData::SetReal(Integer item, Real rval)
    switch (item)
    {
    case ELEMENT1:
-      mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element1"), rval);
+      mBurn->SetRealParameter(mBurn->GetParameterID("Element1"), rval);
       break;
    case ELEMENT2:
-      mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element2"), rval);
+      mBurn->SetRealParameter(mBurn->GetParameterID("Element2"), rval);
       break;
    case ELEMENT3:
-      mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element3"), rval);
+      mBurn->SetRealParameter(mBurn->GetParameterID("Element3"), rval);
       break;
    default:
       throw ParameterException("BurnData::SetReal() Unknown ELEMENT id: " +
@@ -370,9 +468,12 @@ void BurnData::InitializeRefObjects()
       ("BurnData::InitializeRefObjects() entered.\n");
    #endif
    
-   mImpBurn = (ImpulsiveBurn*)FindFirstObject(VALID_OBJECT_TYPE_LIST[IMPULSIVE_BURN]);
+   mBurn = (Burn*)FindFirstObject(VALID_OBJECT_TYPE_LIST[IMPULSIVE_BURN]);
+   // If ImpulsiveBurn object not found, try FiniteBurn
+   if (mBurn == NULL)
+      mBurn = (Burn*)FindFirstObject(VALID_OBJECT_TYPE_LIST[FINITE_BURN]);
    
-   if (mImpBurn == NULL)
+   if (mBurn == NULL)
    {
       // just write a message
       #if DEBUG_BURNDATA_INIT
@@ -394,37 +495,50 @@ void BurnData::InitializeRefObjects()
 //       throw ParameterException
 //          ("BurnData::InitializeRefObjects() Cannot find SolarSystem object\n");
    
-    if (mInternalCoordSystem == NULL)
-    {
-       std::string errmsg = "**** ERROR **** Missing, invalid, or ";
-       errmsg            += "nonexistent internal CoordinateSystem object, ";
-       errmsg            += "for parameter \"" + mActualParamName + "\"\n";
-       throw ParameterException(errmsg);
-    }
-
+   if (mInternalCoordSystem == NULL)
+   {
+      std::string errmsg = "**** ERROR **** Missing, invalid, or ";
+      errmsg            += "nonexistent internal CoordinateSystem object, ";
+      errmsg            += "for parameter \"" + mActualParamName + "\"\n";
+      throw ParameterException(errmsg);
+   }
+   
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
       ("BurnData::InitializeRefObjects() Found internal coordinate system\n");
    #endif
    
-    mOutCoordSystem =
-       (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
-   
-    if (mOutCoordSystem == NULL)
-    {
-       std::string errmsg = "**** ERROR **** Missing, invalid, or ";
-       errmsg            += "nonexistent output CoordinateSystem object, ";
-       errmsg            += "for parameter \"" + mActualParamName + "\"\n";
-       throw ParameterException(errmsg);
-    }
+   std::string outCoordSysName = FindFirstObjectName(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
-      ("BurnData::InitializeRefObjects() Found OUT coordinate system\n");
+      ("BurnData::InitializeRefObjects() looking for output coordinate system: '%s'\n",
+       outCoordSysName.c_str());
    #endif
-
+   
+   // Check for blank coordinate system first (LOJ: 2015.02.11)
+   if (outCoordSysName == "")
+      mOutCoordSystem = NULL;
+   else
+   {
+      mOutCoordSystem =
+         (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
+      
+      if (mOutCoordSystem == NULL)
+      {
+         std::string errmsg = "**** ERROR **** Missing, invalid, or ";
+         errmsg            += "nonexistent output CoordinateSystem object, ";
+         errmsg            += "for parameter \"" + mActualParamName + "\"\n";
+         throw ParameterException(errmsg);
+      }
+      #if DEBUG_BURNDATA_INIT
+      MessageInterface::ShowMessage
+         ("BurnData::InitializeRefObjects() Found OUT coordinate system\n");
+      #endif
+   }
+   
 //    // get Burn CoordinateSystem
-//    std::string csName = mImpBurn->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-//    CoordinateSystem *cs = (CoordinateSystem*)mImpBurn->
+//    std::string csName = mBurn->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+//    CoordinateSystem *cs = (CoordinateSystem*)mBurn->
 //       GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
 //
 //    if (!cs)
@@ -439,8 +553,8 @@ void BurnData::InitializeRefObjects()
    
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
-      ("BurnData::InitializeRefObjects() mImpBurn=%s(%p)\n",
-       mImpBurn->GetName().c_str(), mImpBurn);
+      ("BurnData::InitializeRefObjects() mBurn=%s(%p)\n",
+       mBurn->GetName().c_str(), mBurn);
    #endif
 }
 

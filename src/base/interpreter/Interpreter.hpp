@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Darrel J. Conway
 // Created: 2003/08/28
@@ -100,15 +110,18 @@ public:
                                       const std::string &depName = "");
    
    const StringArray& GetListOfObjects(Gmat::ObjectType type);
+   const StringArray& GetListOfObjects(const char *typeName);
    const StringArray& GetListOfObjects(const std::string &typeName);
    const StringArray& GetListOfViewableSubtypesOf(Gmat::ObjectType type);
    const StringArray& GetListOfViewableCommands();
    
+   GmatBase* GetConfiguredObject(const char *name);
    GmatBase* GetConfiguredObject(const std::string &name);
+   GmatBase* FindObject(const char *name, const std::string &ofType = "");
    GmatBase* FindObject(const std::string &name, const std::string &ofType = "");
    GmatBase* CreateObject(const std::string &type, const std::string &name,
                           Integer manage = 1, bool createDefault = false,
-                          bool includeLineOnError = true);
+                          bool includeLineOnError = true, bool showWarning = true);
    
    void SetConfiguredObjectMap();
    void SetSolarSystemInUse(SolarSystem *ss);
@@ -127,7 +140,9 @@ public:
    void SetHeaderComment(const std::string &comment){headerComment = comment;}
    void SetFooterComment(const std::string &comment){footerComment = comment;}
    
+   bool IsObjectType(const char *type);
    bool IsObjectType(const std::string &type);
+   bool IsCommandType(const char *type);
    bool IsCommandType(const std::string &type);
    
    Gmat::ObjectType GetObjectType(const std::string &type);
@@ -164,6 +179,7 @@ public:
    virtual void UpdateView(Integer type = 7);
    virtual void CloseCurrentProject();
    virtual void StartMatlabServer();
+   virtual void ResetIconFile();
    
    Interface* GetMatlabInterface();
    bool OpenMatlabEngine();
@@ -184,6 +200,15 @@ protected:
    ScriptReadWriter  *theReadWriter;
    TextParser        theTextParser;
    
+   /// Name of the current script file being read (main or include file)
+   std::string  currentScriptBeingRead;
+   /// Fullpath file of the last include file detected
+   std::string lastIncludeFile;
+   /// Fullpath file of the last BeginMissionSequence detected
+   std::string lastFileHasBMS;
+   /// Flag indicating if resource or command created from include files
+   bool         isReadingIncludeFile;
+   
    bool         inCommandMode;
    bool         inRealCommandMode;
    bool         beginMissionSeqFound;
@@ -198,6 +223,9 @@ protected:
    bool         hasFunctionDefinition;
    Function     *currentFunction;
    
+   /// Flag used to handle Python function call detection
+   bool isPythonFunction;
+
    /// For handling delayed blocks
    StringArray  delayedBlocks;
    StringArray  delayedBlockLineNumbers;
@@ -310,10 +338,11 @@ protected:
    bool ParseVariableExpression(Parameter *var, const std::string &exp);
    
    // for error handling
-   void HandleError(const BaseException &e, bool writeLine = true, bool warning = false);
+   void HandleError(const BaseException &e, bool writeLine = true, bool isWarning = false,
+                    bool showWarning = true);
    void HandleErrorMessage(const BaseException &e, const std::string &lineNumber,
                            const std::string &line, bool writeLine = true,
-                           bool warning = false);
+                           bool isWarning = false, bool showWarning = true);
    
    // for branch command checking
    bool IsBranchCommand(const std::string &str);
@@ -329,11 +358,6 @@ protected:
    bool FinalPass();
    bool FinalPassSubscribers();
    
-   // for debug
-   void WriteStringArray(const std::string &title1, const std::string &title2,
-                         const StringArray &parts);
-   void WriteForceModel(GmatBase *obj);
-   
    // for GamtFunction handling
    bool CheckFunctionDefinition(const std::string &funcPathAndName,
                                 GmatBase *function, bool fullCheck = true);
@@ -345,7 +369,13 @@ protected:
          *accumulatedErrors = NULL);
 
    bool ValidateSolverCmdLevels(GmatCommand *bc, Integer cmdLevel);
-
+   
+   // for debug
+   void WriteStringArray(const std::string &title1, const std::string &title2,
+                         const StringArray &parts);
+   void WriteForceModel(GmatBase *obj);
+   void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
+   
 private:
       
    StringArray   commandList;
@@ -359,6 +389,7 @@ private:
    StringArray   functionList;
    StringArray   hardwareList;
    StringArray   measurementList;
+   StringArray   measurementModelList;
    StringArray   trackingSystemList;
    StringArray   obtypeList;
    StringArray   odeModelList;
@@ -372,7 +403,9 @@ private:
    StringArray   celestialBodyList;
    StringArray   eventLocatorList;
    StringArray   interfaceList;
-   
+   StringArray   errorModelList;
+   StringArray   dataFilterList;
+
    StringArray   matlabFunctionNames;
    
    static StringArray   allObjectTypeList;

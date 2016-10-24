@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -38,10 +48,12 @@ public:
    void Finalize();
    
    //----- running object
+   GmatBase* GetRunningObject(const char *name);
    GmatBase* GetRunningObject(const std::string &name);
    
    //----- factory
    const StringArray& GetListOfAllFactoryItems();
+   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const char *qualifier);
    const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier = "");
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    std::string GetStringOfAllFactoryItems(Gmat::ObjectType type);
@@ -50,9 +62,12 @@ public:
    //----- configuration
    std::string GetNewName(const std::string &name, Integer startCount);
    GmatBase* AddClone(const std::string &name, std::string &newName);
+   bool RenameObject(Gmat::ObjectType type, const char *oldName,
+                     const char *newName);
    bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
                      const std::string &newName);
    bool RemoveObject(Gmat::ObjectType type, const std::string &name);
+   bool RemoveObjectIfNotUsed(Gmat::ObjectType type, const char *name);
    bool RemoveObjectIfNotUsed(Gmat::ObjectType type, const std::string &name);
    bool HasConfigurationChanged(Integer sandboxNum = 1);
    void ConfigurationChanged(GmatBase *obj, bool tf);
@@ -61,6 +76,10 @@ public:
                                   Integer sandboxNum = 1);
    
    // General Object
+   GmatBase* CreateObject(const char *type, const std::string &name,
+                          Integer manage = 1, bool createDefault = false);
+   GmatBase* CreateObject(const char *type, const char *name,
+                          Integer manage = 1, bool createDefault = false);
    GmatBase* CreateObject(const std::string &type, const std::string &name,
                           Integer manage = 1, bool createDefault = false);
    
@@ -72,6 +91,7 @@ public:
    
    // Parameter
    bool IsParameter(const std::string &type);
+   Parameter* GetParameter(const char *name);
    Parameter* GetParameter(const std::string &name);
    virtual Parameter* CreateParameter(const std::string &type,
                                       const std::string &name,
@@ -104,13 +124,18 @@ public:
    std::string GetPotentialFileName(const std::string &fileType);
    
    // Getting file names
-   std::string GetFileName(const std::string &fileType);
+   std::string GetFileName(const std::string &fileType, bool getFullpath = false,
+                           bool forInput = true, bool writeWarning = false,
+                           bool writeInfo = false);
    
    // StopCondition
    GmatBase* CreateStopCondition(const std::string &type,
                                  const std::string &name);
    
    // Command
+   GmatCommand* CreateDefaultCommand(const char *type,
+                                     const std::string &name = "",
+                                     GmatCommand *refCmd = NULL);
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name = "",
                                      GmatCommand *refCmd = NULL);
@@ -134,8 +159,11 @@ public:
    void ClearAllSandboxes();
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
+   Gmat::RunState GetDetailedRunState(Integer sandboxNum = 1);
    
    // Script
+   bool InterpretScript(const char *filename, bool readBack = false,
+                        const char *newPath = "");
    bool InterpretScript(const std::string &filename, bool readBack = false,
                         const std::string &newPath = "");
    bool SaveScript(const std::string &filename,
@@ -149,6 +177,7 @@ public:
    virtual void NotifyRunCompleted();
    virtual void UpdateView(Integer type = 7);
    virtual void CloseCurrentProject();
+   virtual void ResetIconFile();
    
    void UpdateResourceTree();
    void UpdateMissionTree();

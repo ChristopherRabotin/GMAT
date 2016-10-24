@@ -32,7 +32,8 @@
   <refsynopsisdiv>
     <title>Script Syntax</title>
 
-    <synopsis><literal>Target</literal> <replaceable>SolverName</replaceable> [<literal>{</literal>[<literal>SolveMode =</literal> <replaceable>value</replaceable>], [<literal>ExitMode =</literal> <replaceable>value</replaceable>]<literal>}</literal>]
+    <synopsis><literal>Target</literal> <replaceable>SolverName</replaceable> [<literal>{</literal>[<literal>SolveMode =</literal> <replaceable>value</replaceable>], [<literal>ExitMode =</literal> <replaceable>value</replaceable>],
+                    [<literal>ShowProgressWindow =</literal> <replaceable>value</replaceable>]<literal>}</literal>]
       <replaceable>Vary command</replaceable> …
       <replaceable>script statement</replaceable> …
       <replaceable>Achieve command</replaceable> …
@@ -192,6 +193,53 @@
                     <para>
                       <guilabel>DiscardAndContinue</guilabel>
                     </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Required</term>
+
+                  <listitem>
+                    <para>no</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ShowProgressWindow</guilabel></entry>
+
+            <entry><para>Flag to indicate if solver progress window should be
+            displayed. </para> <variablelist>
+                <varlistentry>
+                  <term>Accepted Data Types</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true,false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>true</para>
                   </listitem>
                 </varlistentry>
 
@@ -382,6 +430,20 @@
         </imageobject>
       </mediaobject>
     </screenshot>
+
+    <para>If you set <guilabel>ShowProgressWindow</guilabel> to true, then a
+    dynamic display is shown during targeting that contains values of
+    variables and constraints as shown below.</para>
+
+    <screenshot>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_Target_SolverStatusWindow.png"
+                     scalefit="1" width="100%"/>
+        </imageobject>
+      </mediaobject>
+    </screenshot>
   </refsection>
 
   <refsection xml:id="Target_Remarks">
@@ -568,10 +630,10 @@ Report aReport aDC.SolverStatus aDC.SolverState</code></programlisting>
 
       <programlisting><code>Create Spacecraft DefaultSC
 Create Propagator DefaultProp
-Create Thruster Thruster1
+Create ChemicalThruster Thruster1
 GMAT Thruster1.C1 = 1000
 GMAT Thruster1.DecrementMass = true
-Create FuelTank FuelTank1
+Create ChemicalTank FuelTank1
 GMAT Thruster1.Tank = {FuelTank1}
 Create FiniteBurn FiniteBurn1
 GMAT FiniteBurn1.Thrusters = {Thruster1}

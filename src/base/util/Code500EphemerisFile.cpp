@@ -5,8 +5,18 @@
 // GMAT: General Mission Analysis Tool
 //
 // Copyright (c) 2002-2013 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -40,6 +50,9 @@
 #include "UtilityException.hpp"      // for UtilityException
 #include "MessageInterface.hpp"
 
+#include "A1Mjd.hpp"
+#include "DateUtil.hpp"
+
 //#define DEBUG_OPEN
 //#define DEBUG_INIT
 //#define DEBUG_SET
@@ -53,6 +66,7 @@
 //#define DEBUG_UNPACK_HEADERS
 //#define DEBUG_UNPACK_DATA
 //#define DEBUG_TIME_CONVERSION
+//#define DEBUG_INITIAL_FINAL
 
 //---------------------------------
 // static data
@@ -104,7 +118,7 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
    mSourceId    = sourceId;
    mCentralBody = centralBody;
    mFileMode    = fileMode;
-   
+   mCentralBodyIndicator = -99.99;
    if (mFileMode == 1)
    {
       mInputFileName = fileName;
@@ -123,6 +137,8 @@ Code500EphemerisFile::Code500EphemerisFile(const std::string &fileName, double s
    }
    
    mPrecNutIndicator = 1.0; // hardcoded
+   a1StartEpoch = 0.0;
+   a1EndEpoch   = 0.0;
 
    Initialize();
    
@@ -166,6 +182,7 @@ Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef)
    mTimeSystem = ef.mTimeSystem;
    mSourceId = ef.mSourceId;
    mCentralBody = ef.mCentralBody;
+   mCentralBodyIndicator = ef.mCentralBodyIndicator;
    mFileMode = ef.mFileMode;
    mInputFileFormat = ef.mInputFileFormat;
    mOutputFileFormat = ef.mOutputFileFormat;
@@ -173,6 +190,8 @@ Code500EphemerisFile::Code500EphemerisFile(const Code500EphemerisFile &ef)
    mOutputFileName = ef.mOutputFileName;
    mInputYearFormat = ef.mInputYearFormat;
    mOutputYearFormat = ef.mOutputYearFormat;
+   a1StartEpoch = ef.a1StartEpoch;
+   a1EndEpoch = ef.a1EndEpoch;
    
    Initialize();
 }
@@ -193,6 +212,7 @@ Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile
       mTimeSystem = ef.mTimeSystem;
       mSourceId = ef.mSourceId;
       mCentralBody = ef.mCentralBody;
+      mCentralBodyIndicator = ef.mCentralBodyIndicator;
       mFileMode = ef.mFileMode;
       mInputFileFormat = ef.mInputFileFormat;
       mOutputFileFormat = ef.mOutputFileFormat;
@@ -200,6 +220,8 @@ Code500EphemerisFile& Code500EphemerisFile::operator=(const Code500EphemerisFile
       mOutputFileName = ef.mOutputFileName;
       mInputYearFormat = ef.mInputYearFormat;
       mOutputYearFormat = ef.mOutputYearFormat;
+      a1StartEpoch = ef.a1StartEpoch;
+      a1EndEpoch = ef.a1EndEpoch;
       
       Initialize();
       return *this;
@@ -261,8 +283,9 @@ void Code500EphemerisFile::Initialize()
    mDataRecWriteCounter = 2; // data record starts at 3
    mLastDataRecRead = 2;
    mLastStateIndexRead = -1;
+   mNumberOfRecordsInFile = -1;
    
-   mSentinelData = 9.99999999999999e15;
+   mSentinelData = 9.999999999999999e15;
    mSentinelsFound = false;
    mGregorianOfDUTRef = "18 Sep 1957 00:00:00.000";
    mRefTimeForDUT_YYMMDD = 570918.0;
@@ -270,6 +293,8 @@ void Code500EphemerisFile::Initialize()
    mTimeIntervalBetweenPointsSecs = 0.0;
    mLeapSecsStartOutput = 0.0;
    mLeapSecsEndOutput = 0.0;
+   mStartUtcMjd = 0.0;
+   mEndUtcMjd = 0.0;
    mLeapSecsInput = 0.0;
    
    //mCentralBodyMu = 0.0;
@@ -295,7 +320,8 @@ void Code500EphemerisFile::Initialize()
    }
    
    #ifdef DEBUG_INIT
-   MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() leaving\n");
+   MessageInterface::ShowMessage("Code500EphemerisFile::Initialize() leaving, "
+         "mCentralBody = %s\n", mCentralBody.c_str());
    #endif
 }
 
@@ -365,16 +391,19 @@ bool Code500EphemerisFile::OpenForRead(const std::string &fileName, int fileForm
          mSwapInputEndian = true;
    }
    
+   std::streampos fsize = mEphemFileIn.tellg();
+   mEphemFileIn.seekg(0, std::ios::end);
+   fsize = mEphemFileIn.tellg() - fsize;
+   mEphemFileIn.seekg(std::ios_base::beg);
+   mNumberOfRecordsInFile = (unsigned long)fsize / RECORD_SIZE;
+   
    if (logOption == 1)
    {
       // Write out size of the file
-      std::streampos fsize = mEphemFileIn.tellg();
-      mEphemFileIn.seekg(0, std::ios::end);
-      fsize = mEphemFileIn.tellg() - fsize;
-      mEphemFileIn.seekg(std::ios_base::beg);
       MessageInterface::ShowMessage
          ("Code500EphemerisFile::OpenForRead() \n   ephem file: '%s'\n"
-          "   size in bytes = %lu\n", fileName.c_str(), (unsigned long)fsize);
+          "   size in bytes = %lu, number of records = %d\n", fileName.c_str(),
+          (unsigned long)fsize, mNumberOfRecordsInFile);
    }
    
    #ifdef DEBUG_OPEN
@@ -457,10 +486,138 @@ void Code500EphemerisFile::CloseForWrite()
 
 
 //------------------------------------------------------------------------------
+// bool GetInitialAndFinalStates(Real &initialEpoch, Real &finalEpoch, 
+//         Rvector6 &initialState, Rvector6 &finalState, std::string &centralBody,
+//         std::string &coordSystem, Integer &coordSysIndicator)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves inital and final epochs and states from the input Code500 ephemeris file.
+ * It also retrieves central body and coordinate system on the file. It assumes
+ * that input file is already opened successfully.
+ *
+ * @param initialEpoch  Initial epoch on the file
+ * @param finalEpoch    Final epoch on the file
+ * @param initialState  Initial state on the file
+ * @param finalState    Final state on the file
+ * @param centralBody   Central body on the file
+ * @param coordSystem   Coordinate system on the file
+ *                      ("2000" for J2000, "INER" for true of reference, "MEAN" for B1950)
+ * @param coordSysIndicator  Coordinate system indicator
+ *                      (2 = Mean of 1950, 3 = True of reference, 4 = J2000)
+ * 
+ */
+//------------------------------------------------------------------------------
+bool Code500EphemerisFile::GetInitialAndFinalStates(Real &initialEpoch, Real &finalEpoch,
+                                                    Rvector6 &initialState, Rvector6 &finalState,
+                                                    std::string &centralBody, std::string &coordSystem,
+                                                    Integer &coordSysIndicator)
+{
+   #ifdef DEBUG_INITIAL_FINAL
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::GetInitialAndFinalState() entered\n");
+   MessageInterface::ShowMessage("   mNumberOfRecordsInFile = %d\n", mNumberOfRecordsInFile);
+   #endif
+   
+   // For initial and final epoch/state
+   #ifdef DEBUG_INITIAL_FINAL
+   ReadHeader1(1);
+   #else
+   ReadHeader1();
+   #endif
+
+   // For initial state
+   ReadDataAt(1);
+   int i = 0;
+   double posDult, velDult;
+   for (int j = 0; j < 3; j++)
+   {
+      posDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      mInitialState[j] = posDult * DUL_TO_KM;
+   }
+   for (int j = 3; j < 6; j++)
+   {
+      velDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      mInitialState[j] = velDult * DUL_DUT_TO_KM_SEC;
+   }
+   
+   // For final state
+   ReadDataAt(mNumberOfRecordsInFile-2);
+   i = mLastStateIndexRead;
+   posDult, velDult;
+   for (int j = 0; j < 3; j++)
+   {
+      posDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
+      mFinalState[j] = posDult * DUL_TO_KM;
+   }
+   for (int j = 3; j < 6; j++)
+   {
+      velDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
+      mFinalState[j] = velDult * DUL_DUT_TO_KM_SEC;
+   }
+   
+   #ifdef DEBUG_INITIAL_FINAL
+   MessageInterface::ShowMessage
+      ("   a1StartEpoch = %.12f\n   a1EndEpoch   = %.12f\n", a1StartEpoch, a1EndEpoch);
+   MessageInterface::ShowMessage
+      ("   initialState = %s\n   finalState   = %s\n", mInitialState.ToString().c_str(),
+       mFinalState.ToString().c_str());
+   #endif
+   
+   initialEpoch = a1StartEpoch;
+   finalEpoch   = a1EndEpoch;
+   initialState = mInitialState;
+   finalState   = mFinalState;
+   
+   // Set central body
+   // 1.0 = Earth, 2.0 = Moon, 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter, 6.0 = Saturn, 
+   // 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury, 11.0 = Venus
+   if (mCentralBodyIndicator == 1.0)
+      centralBody = "Earth";
+   else if (mCentralBodyIndicator == 2.0)
+      centralBody = "Moon";
+   else if (mCentralBodyIndicator == 3.0)
+      centralBody = "Sun";
+   else if (mCentralBodyIndicator == 4.0)
+      centralBody = "Mars";
+   else if (mCentralBodyIndicator == 5.0)
+      centralBody = "Jupiter";
+   else if ( mCentralBodyIndicator == 6.0)
+      centralBody = "Saturn";
+   else if (mCentralBodyIndicator == 7.0)
+      centralBody = "Uranus";
+   else if (mCentralBodyIndicator == 8.0)
+      centralBody = "Neptune";
+   else if (mCentralBodyIndicator == 9.0)
+      centralBody = "Pluto";
+   else if (mCentralBodyIndicator == 10.0)
+      centralBody = "Mercury";
+   else if (mCentralBodyIndicator == 11.0)
+      centralBody = "Venus";
+   else
+      centralBody = "Unknown";
+   
+   // Set coordiante system
+   // "2000" for J2000, "INER" for true of reference, "MEAN" for B1950
+   coordSystem = mCoordSystem;
+   // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
+   coordSysIndicator = mCoordSystemIndicator;
+   
+   #ifdef DEBUG_INITIAL_FINAL
+   MessageInterface::ShowMessage
+      ("   centralBody = '%s', coordSystem = '%s', coordSysIndicator = %d\n",
+       centralBody.c_str(), coordSystem.c_str(), coordSysIndicator);
+   MessageInterface::ShowMessage
+      ("Code500EphemerisFile::GetInitialAndFinalState() returning true\n");
+   #endif
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // bool ReadHeader1(int logOption = 0)
 //------------------------------------------------------------------------------
 /**
- * Unpacks heder 1 record and log values to log file on option.
+ * Unpacks header 1 record and log values to log file on option.
  *
  * @param  logOption  0 = no log, 1 = log all header data
  */
@@ -487,7 +644,73 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
    if (logOption == 1)
       UnpackHeader1();
    
+   // Save the data used by the Code500 propagator in GMAT compatible formats
+   double yyymmddStart = ReadDoubleField(&mEphemHeader1.startDateOfEphem_YYYMMDD);
+   if (mInputYearFormat == 2)
+      yyymmddStart = yyymmddStart - 19000000;
+   double secsOfDayStart = ReadDoubleField(&mEphemHeader1.startSecondsOfDay);
+
+   Real startDate = mEphemHeader1.startDateOfEphem_YYYMMDD;
+   Real startSecs = mEphemHeader1.startSecondsOfDay;
+   Real endDate   = mEphemHeader1.endDateOfEphem_YYYMMDD;
+   Real endSecs   = mEphemHeader1.endSecondsOfDay;
+
+   Integer year   = (Integer)(startDate / 10000);
+   Integer month  = (Integer)((startDate - year * 10000) / 100);
+   Integer day    = (Integer)(startDate - year * 10000 - month * 100);
+   year += 1900;
+   Integer hour   = (Integer)(startSecs / 3600);
+   Integer minute = (Integer)((startSecs - hour * 3600) / 60);
+   Real second    = startSecs - hour * 3600 - minute * 60;
+   GmatEpoch epoch = ModifiedJulianDate(year, month, day, hour, minute, second);
+
+   year   = (Integer)(endDate / 10000);
+   month  = (Integer)((endDate - year * 10000) / 100);
+   day    = (Integer)(endDate - year * 10000 - month * 100);
+   year += 1900;
+   hour   = (Integer)(endSecs / 3600);
+   minute = (Integer)((endSecs - hour * 3600) / 60);
+   second = endSecs - hour * 3600 - minute * 60;
+   GmatEpoch epochend = ModifiedJulianDate(year, month, day, hour, minute, second);
+
+   if (mInputTimeSystem == 1.0)
+   {
+      a1StartEpoch = epoch;
+      a1EndEpoch   = epochend;
+   }
+   else if (mInputTimeSystem == 2.0) // UTC
+   {
+      a1StartEpoch = TimeConverterUtil::Convert(epoch, TimeConverterUtil::UTCMJD,
+            TimeConverterUtil::A1MJD);
+      a1EndEpoch = TimeConverterUtil::Convert(epochend, TimeConverterUtil::UTCMJD,
+            TimeConverterUtil::A1MJD);
+   }
+   
+   // Save central body and coordinate system needed by GetInitialAndFinalState()
+   mCentralBodyIndicator = mEphemHeader1.centralBodyIndicator;
+   std::string coordSystemStr = mEphemHeader1.coordSystemIndicator1;
+   mCoordSystem = coordSystemStr.substr(0,4);
+   mCoordSystemIndicator = mEphemHeader1.coordSystemIndicator2;
+   
+   // Save initial state needed by GetInitialAndFinalState()
+   for (int i = 0; i < 3; i++)
+   {
+      double posDult = ReadDoubleField(&mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
+      // Save initial position
+      mInitialState[i] = posDult * DUL_TO_KM;
+   }
+   for (int i = 3; i < 6; i++)
+   {
+      double velDult = ReadDoubleField(&mEphemHeader1.cartesianElementsAtEpoch_DULT[i]);
+      // Save initial velocity
+      mInitialState[i] = velDult * DUL_DUT_TO_KM_SEC;
+   }
+   
+   
    #ifdef DEBUG_READ_HEADERS
+   MessageInterface::ShowMessage("A.1 Start Epoch: %.12lf\n", a1StartEpoch);
+   MessageInterface::ShowMessage("A.1 End Epoch:   %.12lf\n", a1EndEpoch);
+
    MessageInterface::ShowMessage
       ("Code500EphemerisFile::ReadHeader1() returning true, mInputTimeSystem=%d\n",
        mInputTimeSystem);
@@ -500,7 +723,7 @@ bool Code500EphemerisFile::ReadHeader1(int logOption)
 // bool ReadHeader2(int logOption = 0)
 //------------------------------------------------------------------------------
 /**
- * Unpacks heder 2 record and log values to log file on option.
+ * Unpacks header 2 record and log values to log file on option.
  *
  * @param  logOption  0 = no log, 1 = log all header data
  */
@@ -520,6 +743,23 @@ bool Code500EphemerisFile::ReadHeader2(int logOption)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// void GetStartAndEndEpochs(GmatEpoch &startEpoch, GmatEpoch &endEpoch)
+//------------------------------------------------------------------------------
+/**
+ * Accesses the start and end epochs as contained in the header data
+ *
+ * @param startEpoch The start epoch
+ * @param endEpoch The end epoch
+ */
+//------------------------------------------------------------------------------
+void Code500EphemerisFile::GetStartAndEndEpochs(GmatEpoch &startEpoch,
+      GmatEpoch &endEpoch, std::vector<EphemData> **records)
+{
+   startEpoch = a1StartEpoch;
+   endEpoch   = a1EndEpoch;
+   *records = &ephemRecords;
+}
 
 //------------------------------------------------------------------------------
 // bool ReadDataAt(int dataRecNumber, int logOption = 0)
@@ -1092,9 +1332,15 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
    
    double startMjd = 0.0;
    if (mOutputTimeSystem == 1) // A1 time system
+   {
       startMjd = a1Mjd.GetReal();
+      mStartUtcMjd = ToUtcModJulian(a1Mjd);
+   }
    else  // UTC time system
+   {
       startMjd = ToUtcModJulian(a1Mjd);
+      mStartUtcMjd = startMjd;
+   }
    
    mLeapSecsStartOutput = TimeConverterUtil::NumberOfLeapSecondsFrom(startMjd);
    #ifdef DEBUG_SET
@@ -1128,7 +1374,7 @@ void Code500EphemerisFile::SetEphemerisStartTime(const A1Mjd &a1Mjd)
    #ifdef DEBUG_SET
    if (mOutputYearFormat == 2)
       yyymmdd = yyymmdd - 19000000;
-   std::string ymdhms = ToYearMonthDayHourMinSec(yymmdd, secsOfDay);
+   std::string ymdhms = ToYearMonthDayHourMinSec(yyymmdd, secsOfDay);
    MessageInterface::ShowMessage("startYYYYMMDDHHMMSSsss = %s\n", ymdhms.c_str());
    DebugDouble("mEphemHeader1.startTimeOfEphemeris_DUT = %f\n", startDut, mSwapOutputEndian);
    MessageInterface::ShowMessage("Code500EphemerisFile::SetEphemerisStartTime() leaving\n");
@@ -1152,9 +1398,15 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    
    double endMjd = 0.0;
    if (mOutputTimeSystem == 1) // A1 time system
+   {
       endMjd = a1Mjd.GetReal();
+      mEndUtcMjd = ToUtcModJulian(a1Mjd);
+   }
    else  // UTC time system
+   {
       endMjd = ToUtcModJulian(a1Mjd);
+      mEndUtcMjd = endMjd;
+   }
    
    // Leap seconds info
    mLeapSecsEndOutput = TimeConverterUtil::NumberOfLeapSecondsFrom(endMjd);
@@ -1164,9 +1416,30 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    
    if ((mLeapSecsEndOutput - mLeapSecsStartOutput) > 0)
    {
-      mEphemHeader1.leapSecondIndicator = 1;
-      mEphemHeader1.utcTimeAdjustment_SEC = mLeapSecsEndOutput - mLeapSecsStartOutput;
-      // @todo Compute time of leap second occurrs using LeapSecsFileReader
+      // Find out UTC date and time of the first leap second occurred between start and end time
+      double firstUtcMjd = TimeConverterUtil::GetFirstLeapSecondMJD(mStartUtcMjd, mEndUtcMjd);
+      
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage("firstUtcMjd       = %.12f\n", firstUtcMjd);
+      #endif
+      if (firstUtcMjd != -1.0)
+      {
+         double ymd, hms;
+         ToYYYMMDDHHMMSS(firstUtcMjd, ymd, hms);
+         // Add a couple of seconds to avoid noise at the leap second date boundary
+         Real firstUtcMjd2 = firstUtcMjd + (2.0/86400);
+         Real firstA1Mjd = TimeConverterUtil::Convert(firstUtcMjd2, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);
+         double a1UtcOffsetInSecs = (firstA1Mjd - firstUtcMjd2) * 86400.0;
+         #ifdef DEBUG_SET
+         MessageInterface::ShowMessage("firstUtcMjd+2sec  = %.12f\n", firstUtcMjd2);
+         MessageInterface::ShowMessage("firstA1Mjd        = %.12f\n", firstA1Mjd);
+         MessageInterface::ShowMessage("a1UtcOffsetInSecs = %.12f\n", a1UtcOffsetInSecs);
+         #endif
+         WriteIntegerField(&mEphemHeader1.leapSecondIndicator, 2); // 1 = no leap second occurs, 2 = leap second occurs
+         WriteDoubleField(&mEphemHeader1.dateOfLeapSeconds_YYYMMDD, ymd);
+         WriteDoubleField(&mEphemHeader1.timeOfLeapSeconds_HHMMSS,  hms);
+         WriteDoubleField(&mEphemHeader1.utcTimeAdjustment_SEC,     a1UtcOffsetInSecs);
+      }
    }
    
    double yyymmdd = ToYYYMMDD(endMjd);
@@ -1185,7 +1458,7 @@ void Code500EphemerisFile::SetEphemerisEndTime(const A1Mjd &a1Mjd)
    if (mOutputYearFormat == 2)
       yyymmdd = yyymmdd - 19000000;
    std::string ymdhms = ToYearMonthDayHourMinSec(yyymmdd, secsOfDay);
-   MessageInterface::ShowMessage(("endYYYYMMDDHHMMSSsss. = %s\n", ymdhms.c_str());
+   MessageInterface::ShowMessage("endYYYYMMDDHHMMSSsss. = %s\n", ymdhms.c_str());
    DebugDouble("mEphemHeader1.endDateOfEphem_YYYMMDD = %f\n", mEphemHeader1.endDateOfEphem_YYYMMDD, mSwapOutputEndian);
    DebugDouble("mEphemHeader1.endTimeOfEphemeris_DUT = %f\n", mEphemHeader1.endTimeOfEphemeris_DUT, mSwapOutputEndian);
    MessageInterface::ShowMessage("Code500EphemerisFile::SetEphemerisEndTime() leaving\n");
@@ -1389,23 +1662,18 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
       return;
    }
    
-   //std::string mLastDataRecStartGreg;
-   //std::string mLastDataRecEndGreg;
    double startMjd = 0.0;
-   //double endMjd = 0.0;
    if (mOutputTimeSystem == 1) // A1 time system
    {
       mLastDataRecStartGreg = ToA1Gregorian(*start);
       mLastDataRecEndGreg = ToA1Gregorian(*end);
       startMjd = start->GetReal();
-      //endMjd = end->GetReal();
    }
    else  // UTC time system
    {
       mLastDataRecStartGreg = ToUtcGregorian(*start);
       mLastDataRecEndGreg = ToUtcGregorian(*end);
       startMjd = ToUtcModJulian(*start);
-      //endMjd = ToUtcModJulian(*end);
    }
    
    // Write data record
@@ -1454,7 +1722,8 @@ void Code500EphemerisFile::WriteDataRecord(bool canFinalize)
    WriteDoubleField(&mEphemData.firstStateVector_DULT[5], stateDULT[5]);
    
    #ifdef DEBUG_WRITE_DATA_SEGMENT
-   DebugDouble("mEphemData.firstStateVector_DULT[0]  =% 1.15e\n", mEphemData.firstStateVector_DULT[0], mSwapOutputEndian);
+   DebugDouble("mEphemData.firstStateVector_DULT[0]  =% 1.15e\n",
+               mEphemData.firstStateVector_DULT[0], mSwapOutputEndian);
    #endif
    
    // Write state 2 through numPoints,
@@ -1683,6 +1952,7 @@ void Code500EphemerisFile::UnpackHeader1()
    DebugDouble("refTimeForDUT_YYMMDD                = % f\n", mEphemHeader1.refTimeForDUT_YYMMDD, swap);
    MessageInterface::ShowMessage("coordSystemIndicator1               = '%s'\n", coordSystemStr.substr(0,4).c_str());
    DebugInteger("coordSystemIndicator2               = %d\n", mEphemHeader1.coordSystemIndicator2, swap);
+   DebugInteger("coordSystemIndicator2               = %d\n", mCoordSystemIndicator, swap);
    MessageInterface::ShowMessage("orbitTheory                         = '%s'\n", orbitTheoryStr.substr(0,8).c_str());
    double timeIntervalDUT = ReadDoubleField(&mEphemHeader1.timeIntervalBetweenPoints_DUT);
    DebugDouble("timeIntervalBetweenPoints_DUT       = % f\n", timeIntervalDUT);
@@ -1726,7 +1996,7 @@ void Code500EphemerisFile::UnpackHeader1()
       DebugDouble("cartesianElementsAtEpoch_DULT[%d]    = % 1.15e\n", i, velDult, false);
       DebugDouble("cartesianElementsAtEpoch_KMSE[%d].   = % 1.15e\n", i, velDult * DUL_DUT_TO_KM_SEC, false);
    }
-
+   
    double rval = ReadDoubleField(&mEphemHeader1.startTimeOfEphemeris_DUT);
    DebugDouble("startTimeOfEphemeris_DUT            = % f\n", rval, false);
    DebugDouble("startTimeOfEphemeris_DAY.           = % f\n", rval * DUT_TO_DAY, false);
@@ -1744,7 +2014,10 @@ void Code500EphemerisFile::UnpackHeader1()
    DebugDouble("atmosphericDragPerturbIndicator     = % f\n", mEphemHeader1.atmosphericDragPerturbIndicator, swap);
    DebugDouble("dateOfInitiationOfEphemComp_YYYMMDD = % f\n", mEphemHeader1.dateOfInitiationOfEphemComp_YYYMMDD, swap);
    DebugDouble("timeOfInitiationOfEphemComp_HHMMSS  = % f\n", mEphemHeader1.timeOfInitiationOfEphemComp_HHMMSS, swap);
-   DebugDouble("utcTimeAdjustment_SEC               = % f\n", mEphemHeader1.utcTimeAdjustment_SEC, swap);
+   DebugInteger("leapSecondIndicator                 = % d\n", mEphemHeader1.leapSecondIndicator, swap);
+   DebugDouble("dateOfLeapSeconds_YYYMMDD           = % f\n", mEphemHeader1.dateOfLeapSeconds_YYYMMDD, swap);
+   DebugDouble("dateOfLeapSeconds_HHMMSS            = % f\n", mEphemHeader1.timeOfLeapSeconds_HHMMSS, swap);
+   DebugDouble("utcTimeAdjustment_SEC               = % .9f\n", mEphemHeader1.utcTimeAdjustment_SEC, swap);
    
    MessageInterface::ShowMessage("======================================== End of Header1\n");
 }
@@ -1779,12 +2052,10 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
 {
    if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
       MessageInterface::ShowMessage
-         ("======================================== Begin of data record %d\n", recNum);
+         ("======================================== Begin of data record %d\nmSentinelsFound = %s\n",
+          recNum, mSentinelsFound ? "true" : "false");
    
    bool swap = mSwapInputEndian;
-   MessageInterface::ShowMessage
-      ("mSwapInputEndian = %d, mSentinelsFound=%d\n", mSwapInputEndian, mSentinelsFound);
-   
    double sentinels[50];
    sentinels[0] = ReadDoubleField(&mEphemData.dateOfFirstEphemPoint_YYYMMDD);
    sentinels[1] = ReadDoubleField(&mEphemData.dayOfYearForFirstEphemPoint);
@@ -1815,9 +2086,9 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
    for (int j = 0; j < 3; j++)
    {
       sentinels[4+j] = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      posDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
       if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
       {
-         posDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
          DebugDouble("firstStateVector_DULT[%d]        = % 1.15e\n", j, posDult, false);
          DebugDouble("firstStateVector_KMSE[%d].       = % 1.15e\n", j, posDult * DUL_TO_KM, false);
       }
@@ -1827,9 +2098,9 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
    for (int j = 3; j < 6; j++)
    {
       sentinels[4+j] = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
+      velDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
       if ((logOption > 1) || (logOption == 1 && recNum == 1) || (logOption == 1 && mSentinelsFound))
       {
-         velDult = ReadDoubleField(&mEphemData.firstStateVector_DULT[j]);
          DebugDouble("firstStateVector_DULT[%d]        = % 1.15e\n", j, velDult, false);
          DebugDouble("firstStateVector_KMSE[%d].       = % 1.15e\n", j, velDult * DUL_DUT_TO_KM_SEC, false);
       }
@@ -1845,9 +2116,9 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       
       for (int j = 0; j < 3; j++)
       {
+         posDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
          if (logOption >= 2)
          {           
-            posDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
             DebugDouble("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, posDult, false);
             DebugDouble("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, posDult * DUL_TO_KM, false);
          }
@@ -1855,9 +2126,9 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       
       for (int j = 3; j < 6; j++)
       {
+         velDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
          if (logOption >= 2)
          {
-            velDult = ReadDoubleField(&mEphemData.stateVector2Thru50_DULT[i][j]);
             DebugDouble("stateVector2Thru50_DULT[%2d][%2d] = % 1.15e\n", i, j, velDult, false);
             DebugDouble("stateVector2Thru50_KMSE[%2d][%2d].= % 1.15e\n", i, j, velDult * DUL_DUT_TO_KM_SEC, false);
          }
@@ -1972,6 +2243,8 @@ void Code500EphemerisFile::UnpackDataRecord(int recNum, int logOption)
       MessageInterface::ShowMessage
          ("======================================== End of data record %d\n", recNum);
    }
+
+   ephemRecords.push_back(mEphemData);
 }
 
 
@@ -2023,6 +2296,68 @@ void Code500EphemerisFile::ConvertEbcdicToAscii(char *ebcdic, char *ascii, int n
       asc = EbcdicToAscii(ebc);
       ascii[i] = (char)asc;
    }
+}
+
+
+//------------------------------------------------------------------------------
+// Real Code500EphemerisFile::GetTimeSystem()
+//------------------------------------------------------------------------------
+/**
+ * Returns the time system as set mOutputTimeSystem
+ *
+ * @return The real number value for the time system setting
+ */
+//------------------------------------------------------------------------------
+Real Code500EphemerisFile::GetTimeSystem()
+{
+   return mOutputTimeSystem;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string Code500EphemerisFile::GetCentralBody()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of the central body
+ *
+ * @return The central body name
+ */
+//------------------------------------------------------------------------------
+std::string Code500EphemerisFile::GetCentralBody()
+{
+   // Default to body used in the constructor call
+   std::string retval = mCentralBody;
+
+   // Find central body name from central body indicator
+   // 1.0 = Earth, 2.0 = Luna(Earth Moon), 3.0 = Sun, 4.0 = Mars, 5.0 = Jupiter,
+   // 6.0 = Saturn, 7.0 = Uranus, 8.0 = Neptune, 9.0 = Pluto, 10.0 = Mercury,
+   // 11.0 = Venus
+   if (mCentralBodyIndicator == 1.0)
+      retval = "Earth";
+   if (mCentralBodyIndicator == 2.0)
+      retval = "Luna";
+   if (mCentralBodyIndicator == 3.0)
+      retval = "Sun";
+   if (mCentralBodyIndicator == 4.0)
+      retval = "Mars";
+   if (mCentralBodyIndicator == 5.0)
+      retval = "Jupiter";
+   if (mCentralBodyIndicator == 6.0)
+      retval = "Saturn";
+   if (mCentralBodyIndicator == 7.0)
+      retval = "Uranus";
+   if (mCentralBodyIndicator == 8.0)
+      retval = "Neptune";
+   if (mCentralBodyIndicator == 9.0)
+      retval = "Pluto";
+   if (mCentralBodyIndicator == 10.0)
+      retval = "Mercury";
+   if (mCentralBodyIndicator == 11.0)
+      retval = "Venus";
+
+   // Should we also set mCentralBody here?  Not sure why it wasn't set on read.
+
+   return retval;
 }
 
 

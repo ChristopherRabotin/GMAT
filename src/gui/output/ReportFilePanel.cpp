@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -40,12 +50,13 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// ReportFilePanel(wxWindow *parent)
+// ReportFilePanel(wxWindow *parent, wxString reportName)
 //------------------------------------------------------------------------------
 /**
  * Constructs ReportFilePanel object.
  *
  * @param <parent> parent window.
+ * @param <reportName> report object name
  *
  */
 //------------------------------------------------------------------------------
@@ -72,7 +83,7 @@ ReportFilePanel::ReportFilePanel(wxWindow *parent, wxString reportName)
       // show error message
       MessageInterface::ShowMessage
          ("**** ERROR **** ReportFilePanel:Create() the running ReportFile "
-          "\"%s\" is NULL\n", reportName.c_str());
+          "\"%s\" is NULL\n", reportName.WX_TO_C_STRING);
    }
    
 }
@@ -106,7 +117,7 @@ void ReportFilePanel::Create()
                         wxMouseEventHandler(ReportFilePanel::OnRightMouseDown), NULL, this);
    
    // set font
-   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetScriptFont() );
    // create popup menu
    mPopupMenu = new wxMenu();
    mPopupMenu->Append(ID_MENU_COPY, "Copy\tCtrl+C");
@@ -167,19 +178,26 @@ void ReportFilePanel::Show()
 //------------------------------------------------------------------------------
 void ReportFilePanel::LoadData()
 {
-   std::string filename = theReport->GetStringParameter("Filename");
+   //std::string fullPathFileName = theReport->GetStringParameter("Filename");
+   std::string fullPathFileName = theReport->GetStringParameter("FullPathFileName");
    
    wxFile *file = new wxFile();
-   bool mFileExists = file->Exists(filename.c_str());
+   bool mFileExists = file->Exists(fullPathFileName.c_str());
    
    #ifdef DEBUG_REPORT_FILE_PANEL
    MessageInterface::ShowMessage
-      ("===> %p, ReportFilePanel::LoadData() filename=%s, mFileExists=%d\n",
-       theReport, filename.c_str(), mFileExists);
+      ("===> %p, ReportFilePanel::LoadData() mReportName='%s', fullPathFileName='%s', mFileExists=%d\n",
+       theReport, mReportName.c_str(), fullPathFileName.c_str(), mFileExists);
    #endif
    
    if (mFileExists)
-      mFileContentsTextCtrl->LoadFile(filename.c_str());
+   {
+      // Append full path filename to title (LOJ: 2014.06.20)
+      std::string fPath = " - " + fullPathFileName;
+      wxString newTitle = mReportName + fPath.c_str();
+      ((wxMDIChildFrame*)(theParent->GetParent()))->SetTitle(newTitle.c_str());
+      mFileContentsTextCtrl->LoadFile(fullPathFileName.c_str());
+   }
    else
       mFileContentsTextCtrl->SetValue("");
    

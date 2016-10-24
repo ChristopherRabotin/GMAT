@@ -1,12 +1,22 @@
-//$Id: Event.hpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: Event.hpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                         ClassName
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -68,8 +78,7 @@ public:
    virtual Real Evaluate() = 0;
    virtual void FixState(GmatBase* obj, bool LockState = false);
    virtual void FixState();
-   virtual const GmatEpoch GetFixedEpoch();
-   virtual Real GetFixedTimestep();
+   virtual GmatEpoch GetFixedEpoch();   virtual Real GetFixedTimestep();
    virtual Real GetVarTimestep();
    virtual void SetFixedTimestep(Real step);
    virtual void SetVarTimestep(Real step);
@@ -84,6 +93,9 @@ public:
    virtual const Rvector3& GetPosition(GmatBase* forParticipant);
    virtual const Rvector3& GetVelocity(GmatBase* forParticipant);
    virtual EventData& GetEventData(GmatBase* forParticipant);
+
+   virtual void SetSolarSystem(SolarSystem* ss);
+   virtual void SetRelativityCorrection(bool useCorr);
 
 protected:
    /// The names of the participants active in the Event
@@ -108,18 +120,18 @@ protected:
    /// Maximum number of attempts that will be tried when locating this event
    Real                 maxAttempts;
    /// The current estimate of the epoch for the event
-   Real                 estimatedEpoch;
+   Real                 estimatedEpoch;					// unit: second
    /// An array of epoch that have been found for the event
    RealArray            foundEpochs;
    /// The current status of this event
    EventStatus          status;
 
    /// The epoch of the fixed elements in the event calculation
-   GmatEpoch            fixedEpoch;
+   GmatEpoch            fixedEpoch;						// unit: a1Mjd
    /// The time step to the epoch of the fixed elements
-   Real                 fixedTime;
+   Real                 fixedTime;						// unit: second
    /// The estimated time to the Event from the initial epoch
-   Real                 varTime;
+   Real                 varTime;						// unit: second
    /// The direction that the step needs to take
    Real                 stepDirection;
 
@@ -136,6 +148,10 @@ protected:
    /// Converter to convert different frames
    CoordinateConverter  converter;
 
+   /// Solar system which is used for calculating state in solar system barycenter inertial coordinate system
+   SolarSystem         *solarSystem;
+   /// Flags to indicate using relativity correction
+   bool                useRelativityCorrection;
 
    virtual void EvaluateNyquist();
    virtual void CalculateTimestepEstimate();

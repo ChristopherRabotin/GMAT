@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -32,11 +42,11 @@
 #include "StationDefs.hpp"
 #include "SpacePoint.hpp"
 #include "GroundstationInterface.hpp"
-#include "LatLonHgt.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "Hardware.hpp"
 
+//#include "MediaCorrectionInterface.hpp"
 
 class STATION_API GroundStation : public GroundstationInterface
 {
@@ -78,11 +88,15 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
-   // made changes by Tuan Nguyen
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
+
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label, const Real value);
 
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
@@ -104,13 +118,20 @@ public:
 
    virtual bool         Initialize();
 
-//   virtual Integer         GetEstimationParameterID(const std::string &param);
+//   virtual Integer      GetEstimationParameterID(const std::string &param);
 //   virtual Integer         SetEstimationParameter(const std::string &param);
-   virtual bool            IsEstimationParameterValid(const Integer id);
-   virtual Integer         GetEstimationParameterSize(const Integer id);
-   virtual Real*           GetEstimationParameterValue(const Integer id);
+   virtual bool         IsEstimationParameterValid(const Integer id);
+   virtual Integer      GetEstimationParameterSize(const Integer id);
+   virtual Real*        GetEstimationParameterValue(const Integer id);
 
-   virtual bool            IsValidID(const std::string &id);
+   virtual bool         IsValidID(const std::string &id);
+
+
+   virtual Real*        IsValidElevationAngle(const Rvector6 &state_sez);
+
+   virtual bool         CreateErrorModelForSignalPath(std::string spacecraftName);
+   virtual std::map<std::string,ObjectArray>& 
+                        GetErrorModelMap();
 
    DEFAULT_TO_NO_CLONES
 
@@ -118,17 +139,48 @@ protected:
    /// Ground station ID
    std::string          stationId;
 
-   // Added hardware of the ground station
-   StringArray	         hardwareNames;       // made changes by Tuan Nguyen
-   ObjectArray          hardwareList;        // made changes by Tuan Nguyen
-	
-	
+   /// Added hardware of the ground station
+   StringArray          hardwareNames;
+   ObjectArray          hardwareList;
+
+   /// Add ionosphere and troposphere correction modes
+   std::string ionosphereModel;
+   std::string troposphereModel;
+
+   /// Parameters needed for Troposphere correction
+   Real                 temperature;                     // unit: Kelvin
+   Real                 pressure;                        // unit: hPa
+   Real                 humidity;                        // unit: percentage
+   std::string          dataSource;                      // specify data source for parameters needed for Troposphere correction: "Constant" or "FromFile"
+
+   /// Parameters needed for verifying measurement feasibility
+   Real minElevationAngle;               // unit: degree
+   /// Visibility vector
+   Real az_el_visible[3];
+
+   /// Error models used for measurements in this gound station
+   StringArray     errorModelNames;
+   ObjectArray     errorModels;
+
+   /// Containing all clones of ErrorModels associated with a signal path.
+   // The first element containing name of spacecraft in uplink signal. 
+   // The second element is an object array containing error model clones.
+   std::map<std::string,ObjectArray>     errorModelMap;
+
 public:
    /// Published parameters for ground stations
    enum
    {
       STATION_ID = BodyFixedPointParamCount,
-      ADD_HARDWARE,								// made changes by Tuan Nguyen
+      ADD_HARDWARE,
+      IONOSPHERE_MODEL,
+      TROPOSPHERE_MODEL,
+      DATA_SOURCE,                  // When DataSource is 'Constant', that means temperature, pressure, and humidity are read from script, otherwise they are read from a data base 
+      TEMPERATURE,                  // temperature (in K) at ground station. It is used for Troposphere correction
+      PRESSURE,                     // pressure (in hPa) at ground station. It is used for Troposphere correction
+      HUMIDITY,                     // humidity (in %) at ground station. It is used for Troposphere correction
+      MINIMUM_ELEVATION_ANGLE,      // It is needed for verifying measurement feasibility
+      ERROR_MODELS,                 // ErrorModel contains all information about noise sigma, bias for given measurement types. Therefore, the following parameters have to be removed
       GroundStationParamCount,
    };
 
@@ -138,7 +190,7 @@ public:
       PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount];
 
 private:
-   bool 		        VerifyAddHardware();			// made changes by Tuan Nguyen
+   bool               VerifyAddHardware();
 };
 
 #endif /*GroundStation_hpp*/

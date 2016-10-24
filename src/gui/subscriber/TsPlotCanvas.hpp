@@ -40,7 +40,7 @@ public:
       ID_TOGGLE_LEGEND,
       ID_PLOT_DETAILS,
       ID_PLOT_SAVE,
-	  ID_PLOT_SAVEIMAGE
+      ID_PLOT_SAVEIMAGE
    };
 
 public:
@@ -51,14 +51,15 @@ public:
                 const wxString& name = "");
 
    virtual void OnPaint(wxPaintEvent& ev);
+   virtual void OnRefresh(wxFocusEvent& ev);
    virtual void OnSize(wxSizeEvent& ev);
    void OnMouseEvent(wxMouseEvent& event);
    
    void Refresh(wxDC &dc, bool drawAll);
 
    void DumpData(const std::string &fn);
-   void SetLabel(const std::string &dataName, const PlotComponents which);
-   void SetDataName(const std::string &dataName);
+   void SetLabel(const wxString &dataName, const PlotComponents which);
+   void SetDataName(const wxString &dataName);
    void AddData(TsPlotCurve *curve, wxColour startColor = *wxWHITE);
    void DataUpdate(bool tf = true);
    int  GetCurveCount();
@@ -92,8 +93,11 @@ public:
    int  GetTickCount(bool isXAxis = true);
    void SetMinorTickCount(int count, bool isXAxis = true);
    int  GetMinorTickCount(bool isXAxis = true);
-      
+   void AlwaysDraw(bool tf);
+
 protected:
+   /// Run state
+   int runState;
    /// borders
    int left, right, top, bottom;
    /// fonts
@@ -112,12 +116,11 @@ protected:
    
    wxPen *plotPens;
    std::vector <int> *plotDependent;
-   std::vector <std::string> names;
-   std::string xDataName;
+   std::vector <wxString> names;
    std::string filename;
-   std::string plotTitle;
-   std::string xLabel;
-   std::string yLabel;
+   wxString plotTitle;
+   wxString xLabel;
+   wxString yLabel;
    double plotXMin;
    double plotXMax;
    double plotYMin;
@@ -182,6 +185,7 @@ protected:
    bool hasLegend;
    bool allowPlotOptions;
    bool initializeLegendLoc;
+   bool alwaysDraw;
 
    long zoomLeft, zoomTop, zoomWidth, zoomHeight;
    int  xLabelPrecision, yLabelPrecision;
@@ -225,6 +229,10 @@ protected:
    wxRect  legendRect;
    /// Number of columns in the legend (0 to make it 1 row)
    int legendColumns;
+   /// Flag triggered by a size event
+   bool resized;
+   /// Counter for drawall calls used when repainting a hidden window
+   int drawAllCounter;
 
 //private:
    DECLARE_EVENT_TABLE()

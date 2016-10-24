@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -23,6 +33,10 @@
 #include "Covariance.hpp"
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
+
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_ACCESS
+
 
 Covariance::Covariance(GmatBase *owner) :
    covarianceOwner   (owner),
@@ -116,7 +130,9 @@ void Covariance::AddCovarianceElement(const std::string &name,
       {
          if (name == elementNames[i])
          {
-            if (elementOwners[i] == owner)
+            // if (elementOwners[i] == owner)
+            // It needs to compare 2 objects by name in order to avoid cloned object
+            if (elementOwners[i]->GetName() == owner->GetName())
             {
                index = i;
                break;
@@ -131,6 +147,9 @@ void Covariance::AddCovarianceElement(const std::string &name,
          elementSizes.push_back(covSize);
          elementOwners.push_back(owner);
          dimension += covSize;
+
+         // It needs to set dimension for Rmatrix before using it
+         theCovariance.SetSize(dimension, dimension, true);
       }
    }
    else
@@ -262,18 +281,105 @@ void Covariance::SetDimension(Integer size)
 }
 
 
+//---------------------------------------------------------------------------
+// Integer GetDimension()
+//---------------------------------------------------------------------------
+/**
+* Get dimension of covariance matrix
+*
+* @return     Dimension of covariance matrix
+*/
+//---------------------------------------------------------------------------
 Integer Covariance::GetDimension()
 {
    return dimension;
 }
 
 
+//---------------------------------------------------------------------------
+// Rmatrix* GetCovariance()
+//---------------------------------------------------------------------------
+/**
+* Get covariance matrix
+*
+* @return     Covariance matrix
+*/
+//---------------------------------------------------------------------------
 Rmatrix *Covariance::GetCovariance()
 {
    return &theCovariance;
 }
 
 
+//----------------------------------------------------------------------------
+// Integer GetSubMatrixLocationStart(Integer forParameterID)
+//----------------------------------------------------------------------------
+/**
+* Get the start index of a submatrix which is covariance of a given parameter.
+*
+* @param forParameterID    the ID of the parameter which needs to specified
+*                          the start index of submatrix
+*
+* @return                  The start index of a submatrix to be covariance of 
+*                          the given parameter
+*/
+//----------------------------------------------------------------------------
+Integer Covariance::GetSubMatrixLocationStart(Integer forParameterID)
+{
+   Integer locationStart = 0;
+   for (Integer i = 0; i < elementIndices.size(); ++i)
+   {
+      if (elementIndices[i] == forParameterID)
+         break;
+      locationStart += elementSizes[i];
+   }
+
+   return locationStart;
+}
+
+
+//----------------------------------------------------------------------------
+// Integer GetSubMatrixLocationStart(const std::string paramName)
+//----------------------------------------------------------------------------
+/**
+* Get the start index of a submatrix which is covariance of a given parameter.
+*
+* @param paramName    name of the parameter which needs to specified
+*                     the start index of submatrix
+*
+* @return             The start index of a submatrix to be covariance of the 
+*                     given parameter
+*/
+//----------------------------------------------------------------------------
+Integer  Covariance::GetSubMatrixLocationStart(const std::string paramName)
+{
+   Integer index = 0;
+   Integer locationStart = 0;
+   for (; index < elementNames.size(); ++index)
+   {
+      if (elementNames[index] == paramName)
+         break;
+      locationStart += elementSizes[index];
+   }
+   if (index == elementNames.size())
+      throw GmatBaseException("Error: cannot find covariance sub matrix for parameter " + paramName + ".\n");
+
+   return locationStart;
+}
+
+
+//----------------------------------------------------------------------------
+// Rmatrix* GetCovariance(Integer forParameterID)
+//----------------------------------------------------------------------------
+/**
+* Get covariance matrix associated with a given parameter.
+*
+* @param forParameterID    the ID of the parameter which needs to specified
+*                          covariance matrix
+*
+* @return                  the covariance matrix for the parameter
+*/
+//----------------------------------------------------------------------------
 Rmatrix *Covariance::GetCovariance(Integer forParameterID)
 {
    // Find the covariance elements that match up with the input ID

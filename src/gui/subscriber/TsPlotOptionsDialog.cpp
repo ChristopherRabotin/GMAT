@@ -25,8 +25,8 @@ BEGIN_EVENT_TABLE(TsPlotOptionsDialog, wxDialog)
 END_EVENT_TABLE()
 
 
-TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel, 
-                                     const std::string yLabel, 
+TsPlotOptionsDialog::TsPlotOptionsDialog(const wxString &xLabel, 
+                                     const wxString &yLabel, 
                                      wxWindow* parent, wxWindowID id, 
                                      const wxString& title, const wxPoint& pos, 
                                      const wxSize& size, long style, 
@@ -65,8 +65,8 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel,
    // Set up the plot labels   
    wxBoxSizer *titleBox = new wxBoxSizer(wxHORIZONTAL);
 
-   std::string xLabelStr = xName + " Label:";
-   std::string yLabelStr = yName + " Label:";
+   wxString xLabelStr = xName + " Label:";
+   wxString yLabelStr = yName + " Label:";
    long int w, h, wid;
 
    wxClientDC dc(this);
@@ -85,7 +85,7 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel,
       wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
    //titleBox->AddStretchSpacer();
-   plotTitle = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
+   plotTitle = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,-1));
    titleBox->Add(plotTitle, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *xlabelBox = new wxBoxSizer(wxHORIZONTAL);
@@ -93,7 +93,7 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel,
       wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
    //xlabelBox->AddStretchSpacer();
-   xAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
+   xAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,-1));
    xlabelBox->Add(xAxisLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *ylabelBox = new wxBoxSizer(wxHORIZONTAL);
@@ -101,7 +101,7 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel,
       wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
    //ylabelBox->AddStretchSpacer();
-   yAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
+   yAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,-1));
    ylabelBox->Add(yAxisLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    labelSizer->Add(titleBox, 0, wxALL, 5);
@@ -265,34 +265,34 @@ void TsPlotOptionsDialog::UpdateLabels()
 {
 }
 
-std::string TsPlotOptionsDialog::GetPlotTitle()
+wxString TsPlotOptionsDialog::GetPlotTitle()
 {
-   return plotTitle->GetValue().c_str();
+   return plotTitle->GetValue();
 }
 
-std::string TsPlotOptionsDialog::GetXLabel()
+wxString TsPlotOptionsDialog::GetXLabel()
 {
-   return xAxisLabel->GetValue().c_str();
+   return xAxisLabel->GetValue();
 }
 
-std::string TsPlotOptionsDialog::GetYLabel()
+wxString TsPlotOptionsDialog::GetYLabel()
 {
-   return yAxisLabel->GetValue().c_str();
+   return yAxisLabel->GetValue();
 }
 
-void TsPlotOptionsDialog::SetPlotTitle(const std::string &str)
+void TsPlotOptionsDialog::SetPlotTitle(const wxString &str)
 {
-   plotTitle->SetValue(str.c_str());
+   plotTitle->SetValue(str);
 }
 
-void TsPlotOptionsDialog::SetXLabel(const std::string &str)
+void TsPlotOptionsDialog::SetXLabel(const wxString &str)
 {
-   xAxisLabel->SetValue(str.c_str());
+   xAxisLabel->SetValue(str);
 }
 
-void TsPlotOptionsDialog::SetYLabel(const std::string &str)
+void TsPlotOptionsDialog::SetYLabel(const wxString &str)
 {
-   yAxisLabel->SetValue(str.c_str());
+   yAxisLabel->SetValue(str);
 }
 
 int TsPlotOptionsDialog::GetWidth()
@@ -450,12 +450,12 @@ void TsPlotOptionsDialog::SetYMax(double st)
    yMaximum->SetValue(str.str().c_str());
 }
 
-void TsPlotOptionsDialog::SetXName(std::string nomme)
+void TsPlotOptionsDialog::SetXName(const wxString &nomme)
 {
    xName = nomme;
 }
 
-void TsPlotOptionsDialog::SetYName(std::string nomme)
+void TsPlotOptionsDialog::SetYName(const wxString &nomme)
 {
    yName = nomme;
 }

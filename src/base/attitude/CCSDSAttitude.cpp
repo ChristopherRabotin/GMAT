@@ -1,12 +1,22 @@
-//$Id:$
+//$Id$
 //------------------------------------------------------------------------------
 //                               CCSDSAttitude
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan/GSFC
 // Created: 2013.11.26
@@ -26,6 +36,7 @@
 #include "AttitudeConversionUtility.hpp"
 
 //#define DEBUG_CCSDS_ATTITUDE
+//#define DEBUG_CCSDS_ATTITUDE_INIT
 //#define DEBUG_CCSDS_ATTITUDE_GET_SET
 
 //------------------------------------------------------------------------------
@@ -73,7 +84,10 @@ CCSDSAttitude::CCSDSAttitude(const std::string &attName) :
 CCSDSAttitude::CCSDSAttitude(const CCSDSAttitude& att) :
    Attitude(att)
 {
-   reader = (att.reader)->Clone();
+   if (att.reader)
+      reader = (att.reader)->Clone();
+   else
+      reader = new CCSDSAEMReader();
 }
 
 //------------------------------------------------------------------------------
@@ -94,7 +108,10 @@ CCSDSAttitude& CCSDSAttitude::operator=(const CCSDSAttitude& att)
       return *this;
    Attitude::operator=(att);
    if (reader) delete reader;
-   reader = (att.reader)->Clone();
+   if (att.reader)
+      reader = (att.reader)->Clone();
+   else
+      reader = new CCSDSAEMReader();
    return *this;
 }
 
@@ -123,21 +140,31 @@ CCSDSAttitude::~CCSDSAttitude()
 //---------------------------------------------------------------------------
 bool CCSDSAttitude::Initialize()
 {
-   #ifdef DEBUG_CCSDS_ATTITUDE
+   #ifdef DEBUG_CCSDS_ATTITUDE_INIT
       MessageInterface::ShowMessage("Entering CCSDSAttitude::Initialize\n");
    #endif
    bool isOK = Attitude::Initialize();
    if (!isOK) return false;
 
-   if (aemFile == "")
+   // Changed to use aemFileFullPath (LOJ: 2014.06.26)
+   //if (aemFile == "")
+   if (aemFileFullPath == "")
    {
       std::string errmsg = "Error - AEM file name not set on CCSDS-AEM object.\n";
       throw AttitudeException(errmsg);
    }
-
-   reader->SetFile(aemFile);
+   
+   #ifdef DEBUG_CCSDS_ATTITUDE_INIT
+      MessageInterface::ShowMessage("In CCSDSAttitude::Initialize, about to call reader which is %sNULL\n",
+            (reader? "NOT " : ""));
+   #endif
+   //reader->SetFile(aemFile);
+   reader->SetFile(aemFileFullPath);
    reader->Initialize();
-
+   #ifdef DEBUG_CCSDS_ATTITUDE_INIT
+      MessageInterface::ShowMessage("EXITing CCSDSAttitude::Initialize\n");
+   #endif
+   
    return true;
 }
 
@@ -173,10 +200,16 @@ GmatBase* CCSDSAttitude::Clone() const
 //------------------------------------------------------------------------------
 void CCSDSAttitude::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 {
+   #ifdef DEBUG_CCSDS_ATTITUDE
+      MessageInterface::ShowMessage("Entering CCSDSAttitude::Compute\n");
+   #endif
    if (!isInitialized || needsReinit)  Initialize();
 
    dcm = reader->GetState(atTime);
    // Currently, no angular velocity is computed for this attitude
+   #ifdef DEBUG_CCSDS_ATTITUDE
+      MessageInterface::ShowMessage("EXITing CCSDSAttitude::Compute\n");
+   #endif
 }
 
 

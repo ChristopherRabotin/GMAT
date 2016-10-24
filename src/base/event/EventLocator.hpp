@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under NASA Prime
 // Contract NNG10CP02C, Task Order 28
@@ -23,19 +33,31 @@
 #ifndef EventLocator_hpp
 #define EventLocator_hpp
 
+#include <fstream>
 
 #include "GmatBase.hpp"
-#include "LocatedEventTable.hpp"
-#include "EventFunction.hpp"
+#include "Spacecraft.hpp"
+#include "CelestialBody.hpp"
+#include "LocatedEvent.hpp"
+//#include "EphemManager.hpp"
 
+//#include "LocatedEventTable.hpp"  // may need this
 
+class EphemManager;
+
+///**
+// * Base class for the event locators.
+// *
+// * EventLocators are container classes that collect together a set of event
+// * functions defining a specific type of location process.  For example, the
+// * EclipseLocator class collects together Penumbra, Umbra, and Antumbra event
+// * functions.
+// */
 /**
  * Base class for the event locators.
  *
- * EventLocators are container classes that collect together a set of event
- * functions defining a specific type of location process.  For example, the
- * EclipseLocator class collects together Penumbra, Umbra, and Antumbra event
- * functions.
+ * EventLocators are classes determine event times and durations of a
+ * specified type (e.g. eclipses)
  */
 class GMAT_API EventLocator: public GmatBase
 {
@@ -55,43 +77,14 @@ public:
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
 
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
-   virtual Real         GetRealParameter(const Integer id,
-                                         const Integer index) const;
-   virtual Real         GetRealParameter(const Integer id, const Integer row,
-                                         const Integer col) const;
-   virtual Real         SetRealParameter(const Integer id,
-                                         const Real value,
-                                         const Integer index);
-   virtual Real         SetRealParameter(const Integer id, const Real value,
-                                         const Integer row, const Integer col);
    virtual Real         GetRealParameter(const std::string &label) const;
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value);
-   virtual Real         GetRealParameter(const std::string &label,
-                                         const Integer index) const;
-   virtual Real         SetRealParameter(const std::string &label,
-                                         const Real value,
-                                         const Integer index);
-   virtual Real         GetRealParameter(const std::string &label,
-                                         const Integer row,
-                                         const Integer col) const;
-   virtual Real         SetRealParameter(const std::string &label,
-                                         const Real value, const Integer row,
-                                         const Integer col);
-
-   virtual const Rvector&
-                        GetRvectorParameter(const Integer id) const;
-   virtual const Rvector&
-                        SetRvectorParameter(const Integer id,
-                                            const Rvector &value);
-   virtual const Rvector&
-                        GetRvectorParameter(const std::string &label) const;
-   virtual const Rvector&
-                        SetRvectorParameter(const std::string &label,
-                                            const Rvector &value);
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -123,32 +116,29 @@ public:
    virtual bool         GetBooleanParameter(const Integer id) const;
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value);
-   virtual bool         GetBooleanParameter(const Integer id,
-                                            const Integer index) const;
-   virtual bool         SetBooleanParameter(const Integer id,
-                                            const bool value,
-                                            const Integer index);
    virtual bool         GetBooleanParameter(const std::string &label) const;
    virtual bool         SetBooleanParameter(const std::string &label,
                                             const bool value);
-   virtual bool         GetBooleanParameter(const std::string &label,
-                                            const Integer index) const;
-   virtual bool         SetBooleanParameter(const std::string &label,
-                                            const bool value,
-                                            const Integer index);
 
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
    virtual const ObjectTypeArray& GetTypesForList(const Integer id);
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
 
-
+   virtual void         SetEpoch(const std::string &ep, Integer id);
+   virtual std::string  GetEpochString(const std::string &whichOne = "INITIAL",
+                        const std::string &outFormat = "UTCGregorian") const;
+   virtual void         SetAppend(bool appendIt);
 
    virtual void         SetSolarSystem(SolarSystem *ss);
-   virtual bool         SetOrigin(SpacePoint *bod, 
-                              const std::string &forObject = "");
-//   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
-//   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual bool         HasRefObjectTypeArray();
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -157,91 +147,111 @@ public:
                                         const std::string &oldName,
                                         const std::string &newName);
 
-   // Accessors for the owned subscribers
-   virtual Integer      GetOwnedObjectCount();
-   virtual GmatBase*    GetOwnedObject(Integer whichOne);
+//   // Accessors for the owned subscribers
+//   virtual Integer      GetOwnedObjectCount();
+//   virtual GmatBase*    GetOwnedObject(Integer whichOne);
 
    virtual bool         Initialize();
-   virtual Real         GetTolerance();
-
-   virtual Real         *Evaluate(GmatEpoch atEpoch = -1.0,
-                                  Real *forState = NULL);
-
-   UnsignedInt GetFunctionCount();
-   void BufferEvent(Integer forEventFunction = 0);
-   void BufferEvent(Real epoch, std::string type, bool isStart);
-   void ReportEventData(const std::string &reportNotice = "");
-   virtual bool FileWasWritten();
-   void ReportEventStatistics();
-   Real *GetEventData(std::string type, Integer whichOne = 0);
-   void UpdateEventTable(SortStyle how);
-   virtual GmatEpoch GetLastEpoch(Integer index);
-   virtual void SetFoundEventBrackets(Integer index,
-         GmatEpoch early, GmatEpoch late);
-
-   // Methods used in integration
-   virtual bool HasAssociatedStateObjects();
-   virtual std::string GetAssociateName(UnsignedInt val = 0);
-   std::string GetTarget(UnsignedInt forFunction);
-   StringArray GetDefaultPropItems();
-   Integer SetPropItem(const std::string &propItem);
-   Integer GetPropItemSize(const Integer item);
-   void SetStateIndices(UnsignedInt forFunction, Integer index,
-         Integer associate);
+   virtual bool         ReportEventData(const std::string &reportNotice = "");
+   virtual void         LocateEvents(const std::string &reportNotice = "");
+   virtual bool         FileWasWritten();
+   virtual bool         IsInAutomaticMode();
 
 protected:
-   /// The collection of event functions used by the EventLocator.
-   std::vector<EventFunction*> eventFunctions;
-   /// Earliest time bracket for last event boundary found
-   Real *earlyBound;
-   /// Latest time bracket for last event boundary found
-   Real *lateBound;
-//   /// The longest event duration encountered by the EventLocator.
-//   std::vector<Real> maxSpan;
-//   /// The most recent event duration encountered by the EventLocator.
-//   std::vector<Real> lastSpan;
-   /// The LocatedEventTable for the EventLocator.
-   LocatedEventTable eventTable;
-   /// Name of the event data file
-   std::string filename;
-   /// The number of event functions to be processed
-   UnsignedInt efCount;
-   /// The last data set computed
-   Real *lastData;
-   /// Epochs of the last events located
-   GmatEpoch *lastEpochs;
-   /// Flag used to turn the locator on or off (default is on)
-   bool isActive;
-   /// Flag used to show or hide plot of the data
-   bool showPlot;
-   /// Flag set when a run writes data to the event report
-   bool fileWasWritten;
+   /// We need to store vector of Events
+   typedef std::vector<LocatedEvent*>    EventList;
 
-   /// Names of the "target" spacecraft in the location
-   StringArray satNames;
-   /// Pointers to the sats -- using SpaceObject so Formations can be supported
-   std::vector<SpaceObject*> targets;
-   /// Event location tolerance
-   Real eventTolerance;
+   /// Name of the event data file
+   std::string                 filename;
+   /// Flag set when a run writes data to the event report
+   bool                        fileWasWritten;
+
+   /// Use the light time delay (true = use it; false = instantaneous geometry)
+   bool                        useLightTimeDelay;
+   /// Use the stellar aberration?
+   bool                        useStellarAberration;
+   /// Write the report or not?
+   bool                        writeReport;
+   /// Should we do location at the end, when commanded to do so, or not at all?
+   std::string                 runMode;
+   /// String to write when the locator is running
+   std::string                 locatingString;
+   /// Use the entire time interval (true  - use the entire interval; false,
+   /// use the input start and stop epochs)
+   bool                        useEntireInterval;
+   /// Append to the report or not (appends if true; creates new report,
+   /// renaming existing report, if false)
+   bool                        appendReport;
+   /// The format of the input epoch
+   std::string                 epochFormat;
+   /// First epoch to search for events (as input)
+   std::string                 initialEpoch;
+   /// Last epoch to search for events (as input)
+   std::string                 finalEpoch;
+   /// Step size - roughly equal to minimum-duration event found
+   Real                        stepSize;
+   /// First epoch to search for events (as Real)
+   Real                        initialEp;
+   /// Last epoch to search for events (as Real)
+   Real                        finalEp;
+   /// The start epoch of the interval (depends on useEntireInterval flag)
+   Real                        fromEpoch;
+   /// The end epoch of the interval (depends on useEntireInterval flag)
+   Real                        toEpoch;
+   /// the start time of the current FindEvents
+   Real        findStart;
+   /// the stop time of the current FindEvents
+   Real        findStop;
+   /// The start (spacecraft) time
+   Real        scStart;
+   /// The current (spacecraft) time
+   Real        scNow;
+
+//   /// The number of events found in the current specified time range
+//   Integer                     numEventsFound;
+
+//   /// Names of the "target" spacecraft in the location  <future>
+//   StringArray satNames;
+   /// Name of the target spacecraft for the locator
+   std::string                 satName;
+//   /// Pointers to the sats -- using SpaceObject so Formations can be supported  <future>
+//   std::vector<SpaceObject*> targets;
+   /// Pointer to the target spacecraft
+   Spacecraft                  *sat;
    /// The space environment
-   SolarSystem *solarSys;
-   /// Indices for values/derivatives in the state/derivative vectors
-   std::vector<Integer> stateIndices;
-   /// Start indices for the associated state data
-   std::vector<Integer> associateIndices;
-   /// Vector of event function values used in integration
-   Rvector functionValues;
+   SolarSystem                 *solarSys;
+   /// The occulting body names
+   StringArray                 occultingBodyNames;
+   /// The occulting bodies
+   std::vector<CelestialBody*> occultingBodies;
+   /// The file stream
+   std::fstream                theReport;
+   /// the default occulting bodies (if none are set)
+   // names of the default bodies to use
+   StringArray                 defaultOccultingBodies;
+   /// pointer ot the EphemManager for the spacecraft/target
+   EphemManager                *em;
+   /// Has the initial epoch been set?
+   bool                        initialEpochSet;
+   /// Has the final epoch been set?
+   bool                        finalEpochSet;
 
    /// Published parameters for event locators
     enum
     {
-       SATNAMES = GmatBaseParamCount,
-       TOLERANCE,
+//       SATNAMES = GmatBaseParamCount,  // future?
+       SATNAME = GmatBaseParamCount,
        EVENT_FILENAME,
-       IS_ACTIVE,
-       SHOW_PLOT,
-       EPOCH,
-       EVENT_FUNCTION,
+       OCCULTING_BODIES,
+       INPUT_EPOCH_FORMAT,
+       INITIAL_EPOCH,
+       STEP_SIZE,
+       FINAL_EPOCH,
+       USE_LIGHT_TIME_DELAY,
+       USE_STELLAR_ABERRATION,
+       WRITE_REPORT,
+       RUN_MODE,
+       USE_ENTIRE_INTERVAL,
        EventLocatorParamCount
     };
 
@@ -251,6 +261,21 @@ protected:
     /// burn parameter types
     static const Gmat::ParameterType
        PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount];
+    static const std::string RUN_MODES[3];
+    static const Integer numModes;
+    static const std::string defaultFormat;
+    static const Real        defaultInitialEpoch;
+    static const Real        defaultFinalEpoch;
+
+    static const Real STEP_MULTIPLE;
+
+    Real                   EpochToReal(const std::string &ep);
+    bool                   OpenReportFile(bool renameOld = true);
+    virtual std::string    GetAbcorrString();
+    virtual CelestialBody* GetCelestialBody(const std::string &withName);
+    virtual std::string    GetNoEventsString(const std::string &forType);
+    virtual void           SetLocatingString(const std::string &forType);
+    virtual void           FindEvents() = 0;
 };
 
 #endif /* EventLocator_hpp */

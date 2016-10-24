@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -260,11 +270,17 @@ void MathTree::SetMathWrappers(std::map<std::string, ElementWrapper*> *wrapperMa
    
    #ifdef DEBUG_MATH_WRAPPERS
    MessageInterface::ShowMessage
-      ("MathTree::SetMathWrappers() theWrapperMap=%p, theTopNode=%s, %s\n",
+      ("MathTree::SetMathWrappers() entered, theWrapperMap=%p, theTopNode=%s, %s\n",
        theWrapperMap, theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
    #endif
    
    SetMathElementWrappers(theTopNode);
+   
+   #ifdef DEBUG_MATH_WRAPPERS
+   MessageInterface::ShowMessage
+      ("MathTree::SetMathWrappers() leaving, theWrapperMap=%p, theTopNode=%s, %s\n",
+       theWrapperMap, theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -306,10 +322,14 @@ bool MathTree::Validate(std::string &msg)
             MessageInterface::ShowMessage("   wrapper type = %d\n", wrapperType);
             #endif
             
-            // Check for invalid wrapper type
-            if (wrapperType == Gmat::STRING_WT || wrapperType == Gmat::STRING_OBJECT_WT ||
-                wrapperType == Gmat::OBJECT_WT || wrapperType == Gmat::BOOLEAN_WT ||
-                wrapperType == Gmat::ON_OFF_WT || wrapperType == Gmat::UNKNOWN_WRAPPER_TYPE)
+            // Check for invalid wrapper type (Allow Object type since GmatFunction can take
+            // Object and return some value. LOJ: 2015.06.05)
+            // if (wrapperType == Gmat::STRING_WT || wrapperType == Gmat::STRING_OBJECT_WT ||
+            //     //wrapperType == Gmat::OBJECT_WT ||
+            //     wrapperType == Gmat::BOOLEAN_WT ||
+            //     wrapperType == Gmat::ON_OFF_WT || wrapperType == Gmat::UNKNOWN_WRAPPER_TYPE)
+            // Just check for UNKNOWN_WRAPPER_TYPE (LOJ: 2015.09.21)
+            if (wrapperType == Gmat::UNKNOWN_WRAPPER_TYPE)
             {
                #ifdef DEBUG_VALIDATE
                MessageInterface::ShowMessage
@@ -329,6 +349,9 @@ bool MathTree::Validate(std::string &msg)
       // Remove last , from the errmsg
       errmsg = GmatStringUtil::RemoveLastString(errmsg, ", ");
       msg = errmsg + " in a math equation.";
+      // [] is no longer required for single output, so commented out (LOJ: 2015.09.21)
+      // msg = errmsg + " in a math equation. If it is a GMAT function call, currently "
+      //    "[] is required on the left hand side of equal sign.";
    }
    
    #ifdef DEBUG_VALIDATE
@@ -639,6 +662,17 @@ const StringArray& MathTree::GetRefObjectNameArray(const Gmat::ObjectType type)
    return theAllParamArray;
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray(bool completeSet = false)
+//------------------------------------------------------------------------------
+const StringArray& MathTree::GetWrapperObjectNameArray(bool completeSet)
+{
+   theWrapperNames.clear();
+   if (theTopNode)
+      return theTopNode->GetWrapperObjectNameArray(completeSet);
+   else
+      return theWrapperNames;
+}
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
@@ -792,6 +826,12 @@ void MathTree::FinalizeFunctionRunner(MathNode *node)
 //------------------------------------------------------------------------------
 void MathTree::SetMathElementWrappers(MathNode *node)
 {
+   #ifdef DEBUG_MATH_WRAPPERS
+   MessageInterface::ShowMessage
+      ("MathTree::SetMathElementWrappers() entered, node=<%s>\n",
+       node ? node->GetName().c_str() : "NULL");
+   #endif
+   
    if (node == NULL)
       return;
    
@@ -809,11 +849,23 @@ void MathTree::SetMathElementWrappers(MathNode *node)
    }
    else
    {
-      MathNode *left = node->GetLeft();
-      SetMathElementWrappers(left);
-      
-      MathNode *right = node->GetRight();
-      SetMathElementWrappers(right);
+      if (node->IsOfType("BuiltinFunction"))
+      {
+         #ifdef DEBUG_MATH_WRAPPERS
+         MessageInterface::ShowMessage
+            ("   Setting wrappers to '%s'\n", node->GetName().c_str());
+         #endif
+         
+         node->SetMathWrappers(theWrapperMap);
+      }
+      else
+      {
+         MathNode *left = node->GetLeft();
+         SetMathElementWrappers(left);
+         
+         MathNode *right = node->GetRight();
+         SetMathElementWrappers(right);
+      }
    }
 }
 

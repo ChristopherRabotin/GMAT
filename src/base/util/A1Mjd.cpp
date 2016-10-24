@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -27,6 +37,9 @@
 #include "TimeTypes.hpp"           // for TimeConst::, UtcMjd
 #include "RealUtilities.hpp"       // for Round(), IsEqual(), Floor()
 #include "MessageInterface.hpp"
+
+//#define DEBUG_LEAP_SECONDS
+//#define DEBUG_TOA1DATE
 
 using namespace GmatTimeUtil;
 using namespace GmatTimeConstants;
@@ -392,20 +405,20 @@ UtcDate A1Mjd::ToUtcDate()
 }
 
 //------------------------------------------------------------------------------
-// A1Date ToA1Date()
+// A1Date ToA1Date(bool handleLeapSecond = false)
 //------------------------------------------------------------------------------
 /**
  * Converts from a A1 modified Julian date to A1Date (no leap seconds)
  */
 //------------------------------------------------------------------------------
-A1Date A1Mjd::ToA1Date()
+A1Date A1Mjd::ToA1Date(bool handleLeapSecond)
 {
    CalDate calDate;
-   calDate = UtcMjdToCalDate(mMjd); // No leap seconds applied
+   calDate = UtcMjdToCalDate(mMjd, handleLeapSecond); // No leap seconds applied
    #ifdef DEBUG_TOA1DATE
    MessageInterface::ShowMessage
-      ("year=%d, month=%d, day=%d, hour=%d, minute=%d, second=%f\n", calDate.year,
-       calDate.month, calDate.day, calDate.hour, calDate.minute, calDate.second);
+      ("year=%d, month=%d, day=%d, hour=%d, minute=%d, second=%f, handleLeapSecond = %s\n", calDate.year,
+       calDate.month, calDate.day, calDate.hour, calDate.minute, calDate.second, (handleLeapSecond? "true" : "false"));
    #endif
    return A1Date(calDate);
 }
@@ -594,7 +607,7 @@ CalDate A1Mjd::A1MjdToCalDate(const A1Mjd &a1mjd)
 }
 
 //------------------------------------------------------------------------------
-// CalDate UtcMjdToCalDate(const UtcMjd &utcmjd)
+// CalDate UtcMjdToCalDate(const UtcMjd &utcmjd, bool handleLeapSecond = false)
 //------------------------------------------------------------------------------
 // modification:
 //    2003/09/24 Linda Jun - Modified Swingby utcmjd_to_time_array() to return
@@ -617,7 +630,7 @@ CalDate A1Mjd::A1MjdToCalDate(const A1Mjd &a1mjd)
  *       modified julian date covers the entire day.
  */
 //------------------------------------------------------------------------------
-CalDate A1Mjd::UtcMjdToCalDate(const UtcMjd &utcmjd)
+CalDate A1Mjd::UtcMjdToCalDate(const UtcMjd &utcmjd, bool handleLeapSecond)
 {
    Real timeArray[6];
    Real seconds, modjul;
@@ -632,17 +645,33 @@ CalDate A1Mjd::UtcMjdToCalDate(const UtcMjd &utcmjd)
    static const Real MJDSEC_TO_WHOLE_NUM = 1.0e3;
    
    // add a half day (julian to gregorian) offset to the input utcmjd
-   modjul = utcmjd + 0.50;
+   if (handleLeapSecond)
+      modjul = (utcmjd + 0.50) - 1.0/SECS_PER_DAY;
+   else
+      modjul = (utcmjd + 0.50);
    
    // obtain the offset modified number of julian days
    mjd = (long)modjul;
-   
+
+#ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage("In UtcMjdToCalDate ... utcmjd = %12.10f\n", utcmjd);
+   MessageInterface::ShowMessage("                       modjul = %12.10f\n", modjul);
+   MessageInterface::ShowMessage("                       mjd    = %12.10f\n", mjd);
+   MessageInterface::ShowMessage("                       handleLeapSecond = %s\n", (handleLeapSecond? "true" : "false"));
+#endif
    // convert fractional part of day to seconds
    seconds = (modjul - (Real)mjd) * SECS_PER_DAY;
    
+#ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage("                       seconds = %12.10f\n", seconds);
+#endif
    // round fractional seconds at their accuracy limit to
    // prevent truncation errors during decomposition
    seconds = (NearestInt(seconds * MJDSEC_TO_WHOLE_NUM)) / MJDSEC_TO_WHOLE_NUM;
+#ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage("                       seconds (adjusted) = %12.10f\n", seconds);
+   MessageInterface::ShowMessage(" NOW checking for seconds >= SECS_PER_DAY(%12.10f)\n", SECS_PER_DAY);
+#endif
    
    // if modjul is negative (pre 1/5/1941) and seconds are negative
    // (measured backwards from the end of the day); turn them around.
@@ -654,6 +683,10 @@ CalDate A1Mjd::UtcMjdToCalDate(const UtcMjd &utcmjd)
    {
       seconds -= SECS_PER_DAY;
       mjd += 1;
+#ifdef DEBUG_LEAP_SECONDS
+      MessageInterface::ShowMessage(" **** setting seconds = %12.10f\n", seconds);
+      MessageInterface::ShowMessage("      setting mjd     = %12.10f\n", mjd);
+#endif
    }
    
    // divide hours out of total seconds
@@ -683,6 +716,18 @@ CalDate A1Mjd::UtcMjdToCalDate(const UtcMjd &utcmjd)
    timeArray[1] = j + 2 - 12 * l;
    timeArray[0] = 100 * (n - 49) + i + l;
    
+   if (handleLeapSecond)
+      timeArray[5] += 1.0;
+
+#ifdef DEBUG_LEAP_SECONDS
+   MessageInterface::ShowMessage(" Resulting time:\n");
+   MessageInterface::ShowMessage("   year:    %12.10f\n", timeArray[0]);
+   MessageInterface::ShowMessage("   month:   %12.10f\n", timeArray[1]);
+   MessageInterface::ShowMessage("   day:     %12.10f\n", timeArray[2]);
+   MessageInterface::ShowMessage("   hour:    %12.10f\n", timeArray[3]);
+   MessageInterface::ShowMessage("   minute:  %12.10f\n", timeArray[4]);
+   MessageInterface::ShowMessage("   seconds: %12.10f\n", timeArray[5]);
+#endif
    return CalDate((YearNumber)timeArray[0], (MonthOfYear)timeArray[1],
                   (DayOfMonth)timeArray[2], (HourOfDay)timeArray[3],
                   (MinuteOfHour)timeArray[4], timeArray[5]);

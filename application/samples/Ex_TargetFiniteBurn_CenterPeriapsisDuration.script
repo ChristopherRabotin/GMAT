@@ -1,0 +1,290 @@
+%  Script Mission - Finite Burn Examples  
+%
+%  This script demonstrates how to set up tanks and thrusters, and use them
+%  in a finite maneuver sequence.  
+%
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+% -------------------------------------------------------------------------
+% --------------------------- Create Objects ------------------------------
+% -------------------------------------------------------------------------
+
+%  Create a default spacecraft
+Create Spacecraft Sc;
+GMAT Sc.DateFormat = TAIModJulian;
+GMAT Sc.Epoch = '21545';
+GMAT Sc.CoordinateSystem = EarthMJ2000Eq;
+GMAT Sc.DisplayStateType = Keplerian;
+GMAT Sc.SMA = 7191.938817629013;
+GMAT Sc.ECC = 0.1000000000000002;
+GMAT Sc.INC = 12.850080056581;
+GMAT Sc.RAAN = 306.6148021947984;
+GMAT Sc.AOP = 314.1905515359921;
+GMAT Sc.TA = 99.88774933204881;
+GMAT Sc.DryMass = 850;
+GMAT Sc.Cd = 2.2;
+GMAT Sc.Cr = 1.8;
+GMAT Sc.DragArea = 15;
+GMAT Sc.SRPArea = 1;
+GMAT Sc.Tanks = {tank1};
+GMAT Sc.Thrusters = {engine1};
+GMAT Sc.NAIFId = -123456789;
+GMAT Sc.NAIFIdReferenceFrame = -123456789;
+GMAT Sc.OrbitColor = Green;
+GMAT Sc.TargetColor = Teal;
+GMAT Sc.Id = 'SatId';
+GMAT Sc.Attitude = CoordinateSystemFixed;
+GMAT Sc.SPADSRPScaleFactor = 1;
+GMAT Sc.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sc.ModelOffsetX = 0;
+GMAT Sc.ModelOffsetY = 0;
+GMAT Sc.ModelOffsetZ = 0;
+GMAT Sc.ModelRotationX = 0;
+GMAT Sc.ModelRotationY = 0;
+GMAT Sc.ModelRotationZ = 0;
+GMAT Sc.ModelScale = 3;
+GMAT Sc.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sc.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sc.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT Sc.EulerAngleSequence = '321';
+
+%----------------------------------------
+%---------- Hardware Components
+%----------------------------------------
+
+%  Create a fuel tank and name it tank1
+%          Here we create a fuel tank and set up its physical properties
+%          including Temperature, Fuel Mass, Fuel Density etc.
+Create ChemicalTank tank1;
+GMAT tank1.AllowNegativeFuelMass = false;
+GMAT tank1.FuelMass = 725;
+GMAT tank1.Pressure = 1200;
+GMAT tank1.Temperature = 20;
+GMAT tank1.RefTemperature = 12;
+GMAT tank1.Volume = 0.8;
+GMAT tank1.FuelDensity = 1029;
+GMAT tank1.PressureModel = PressureRegulated;
+
+%  Create a thruster
+%         Here we create a thruster and tell the thruster which tank to
+%         draw fuel from.  We also set up the direction of the thruster.
+%         Currently, you specify the thruster orientation with respect to
+%         the spacecraft VNB or EarthMJ2000Eq systems.  This will change
+%         when attitude capabilities are added to GMAT.
+Create ChemicalThruster engine1;
+GMAT engine1.CoordinateSystem = Local;
+GMAT engine1.Origin = Earth;
+GMAT engine1.Axes = VNB;
+GMAT engine1.ThrustDirection1 = 1;
+GMAT engine1.ThrustDirection2 = 0;
+GMAT engine1.ThrustDirection3 = 0;
+GMAT engine1.DutyCycle = 1;
+GMAT engine1.ThrustScaleFactor = 1;
+GMAT engine1.DecrementMass = false;
+GMAT engine1.Tank = {tank1};
+GMAT engine1.MixRatio = [1];
+GMAT engine1.GravitationalAccel = 9.810000000000001;
+GMAT engine1.C1 = 500;
+GMAT engine1.C2 = 0;
+GMAT engine1.C3 = 0;
+GMAT engine1.C4 = 0;
+GMAT engine1.C5 = 0;
+GMAT engine1.C6 = 0;
+GMAT engine1.C7 = 0;
+GMAT engine1.C8 = 0;
+GMAT engine1.C9 = 0;
+GMAT engine1.C10 = 0;
+GMAT engine1.C11 = 0;
+GMAT engine1.C12 = 0;
+GMAT engine1.C13 = 0;
+GMAT engine1.C14 = 0;
+GMAT engine1.C15 = 0;
+GMAT engine1.C16 = 0;
+GMAT engine1.K1 = 300;
+GMAT engine1.K2 = 0;
+GMAT engine1.K3 = 0;
+GMAT engine1.K4 = 0;
+GMAT engine1.K5 = 0;
+GMAT engine1.K6 = 0;
+GMAT engine1.K7 = 0;
+GMAT engine1.K8 = 0;
+GMAT engine1.K9 = 0;
+GMAT engine1.K10 = 0;
+GMAT engine1.K11 = 0;
+GMAT engine1.K12 = 0;
+GMAT engine1.K13 = 0;
+GMAT engine1.K14 = 0;
+GMAT engine1.K15 = 0;
+GMAT engine1.K16 = 0;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+%  Create a force model
+Create ForceModel fm;
+GMAT fm.CentralBody = Earth;
+GMAT fm.PointMasses = {Earth};
+GMAT fm.Drag = None;
+GMAT fm.SRP = Off;
+GMAT fm.RelativisticCorrection = Off;
+GMAT fm.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+%  Create a propagator
+Create Propagator prop;
+GMAT prop.FM = fm;
+GMAT prop.Type = RungeKutta89;
+GMAT prop.InitialStepSize = 60;
+GMAT prop.Accuracy = 9.999999999999999e-012;
+GMAT prop.MinStep = 0.001;
+GMAT prop.MaxStep = 2700;
+GMAT prop.MaxStepAttempts = 50;
+GMAT prop.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+%  Create a thruster
+%         Here we create a finite maneuver.  We create the maneuver and
+%         give it a name first.  We need to tell the maneuver which
+%         thrusters to use, and which tank to draw from.  Currently you can
+%         have multiple thrusters, but only one tank, from which both
+%         thrusters draw fuel.  We can also apply a burn scale factor.  The
+%         thrust from each thruster is added together, and the sum is
+%         multiplied by BurnScaleFactor.
+Create FiniteBurn fb;
+GMAT fb.Thrusters = {engine1};
+GMAT fb.ThrottleLogicAlgorithm = 'MaxNumberOfThrusters';
+
+Create ImpulsiveBurn DefaultIB;
+GMAT DefaultIB.CoordinateSystem = Local;
+GMAT DefaultIB.Origin = Earth;
+GMAT DefaultIB.Axes = VNB;
+GMAT DefaultIB.Element1 = 0;
+GMAT DefaultIB.Element2 = 0;
+GMAT DefaultIB.Element3 = 0;
+GMAT DefaultIB.DecrementMass = false;
+GMAT DefaultIB.Isp = 300;
+GMAT DefaultIB.GravitationalAccel = 9.810000000000001;
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+
+Create DifferentialCorrector DC1;
+GMAT DC1.ShowProgress = true;
+GMAT DC1.ReportStyle = Normal;
+GMAT DC1.ReportFile = 'DifferentialCorrectorDC1.data';
+GMAT DC1.MaximumIterations = 25;
+GMAT DC1.DerivativeMethod = ForwardDifference;
+GMAT DC1.Algorithm = NewtonRaphson;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create XYPlot SMAvsTime;
+GMAT SMAvsTime.SolverIterations = Current;
+GMAT SMAvsTime.UpperLeft = [ 0.3443396226415094 0.5654911838790933 ];
+GMAT SMAvsTime.Size = [ 0.5632075471698114 0.4080604534005038 ];
+GMAT SMAvsTime.RelativeZOrder = 135;
+GMAT SMAvsTime.Maximized = false;
+GMAT SMAvsTime.XVariable = Sc.A1ModJulian;
+GMAT SMAvsTime.YVariables = {Sc.SMA};
+GMAT SMAvsTime.ShowGrid = true;
+GMAT SMAvsTime.ShowPlot = true;
+
+%  Create an OpenGL Plot  
+Create OrbitView SatOpenGL;
+GMAT SatOpenGL.SolverIterations = Current;
+GMAT SatOpenGL.UpperLeft = [ 0.3528301886792453 0.05289672544080604 ];
+GMAT SatOpenGL.Size = [ 0.5254716981132076 0.4874055415617128 ];
+GMAT SatOpenGL.RelativeZOrder = 140;
+GMAT SatOpenGL.Maximized = false;
+GMAT SatOpenGL.Add = {Sc, Earth};
+GMAT SatOpenGL.CoordinateSystem = EarthMJ2000Eq;
+GMAT SatOpenGL.DrawObject = [ true true ];
+GMAT SatOpenGL.DataCollectFrequency = 1;
+GMAT SatOpenGL.UpdatePlotFrequency = 50;
+GMAT SatOpenGL.NumPointsToRedraw = 0;
+GMAT SatOpenGL.ShowPlot = true;
+GMAT SatOpenGL.ShowLabels = true;
+GMAT SatOpenGL.ViewPointReference = Earth;
+GMAT SatOpenGL.ViewPointVector = [ 10000 10000 10000 ];
+GMAT SatOpenGL.ViewDirection = Earth;
+GMAT SatOpenGL.ViewScaleFactor = 5;
+GMAT SatOpenGL.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT SatOpenGL.ViewUpAxis = Z;
+GMAT SatOpenGL.EclipticPlane = Off;
+GMAT SatOpenGL.XYPlane = On;
+GMAT SatOpenGL.WireFrame = Off;
+GMAT SatOpenGL.Axes = On;
+GMAT SatOpenGL.Grid = Off;
+GMAT SatOpenGL.SunLine = Off;
+GMAT SatOpenGL.UseInitialView = On;
+GMAT SatOpenGL.StarCount = 7000;
+GMAT SatOpenGL.EnableStars = On;
+GMAT SatOpenGL.EnableConstellations = On;
+
+Create ReportFile DefaultReportFile;
+GMAT DefaultReportFile.SolverIterations = Current;
+GMAT DefaultReportFile.UpperLeft = [ 0.3433962264150943 0.01259445843828715 ];
+GMAT DefaultReportFile.Size = [ 0.5962264150943396 0.7947103274559194 ];
+GMAT DefaultReportFile.RelativeZOrder = 146;
+GMAT DefaultReportFile.Maximized = false;
+GMAT DefaultReportFile.Filename = 'DefaultReportFile.txt';
+GMAT DefaultReportFile.Precision = 16;
+GMAT DefaultReportFile.WriteHeaders = true;
+GMAT DefaultReportFile.LeftJustify = On;
+GMAT DefaultReportFile.ZeroFill = Off;
+GMAT DefaultReportFile.FixedWidth = true;
+GMAT DefaultReportFile.Delimiter = ' ';
+GMAT DefaultReportFile.ColumnWidth = 20;
+GMAT DefaultReportFile.WriteReport = true;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable halfBurnDuration timeToWait backPropDuration;
+GMAT halfBurnDuration = 500;
+GMAT timeToWait = 600;
+GMAT backPropDuration = 0;
+
+% -------------------------------------------------------------------------
+% --------------------------- Mission Sequence ----------------------------
+% -------------------------------------------------------------------------
+BeginMissionSequence;
+%  Propagate for 1/10 of a day, without thrusters on.
+Propagate 'Prop to Periapsis' prop(Sc) {Sc.Earth.Periapsis};
+Target 'Center The Burn' DC1 {SolveMode = Solve, ExitMode = DiscardAndContinue, ShowProgressWindow = true};
+   Vary 'Vary Burn Duration' DC1(halfBurnDuration = 300, {Perturbation = 0.0001, Lower = 0.0, Upper = 3000, MaxStep = 100, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 1.0});
+   BeginScript 'Compute Prop Time'
+      GMAT backPropDuration = - halfBurnDuration;
+   EndScript;
+   Propagate 'Back prop for Duration' BackProp prop(Sc) {Sc.ElapsedSecs = backPropDuration};
+   BeginFiniteBurn 'Turn On Thrusters' fb(Sc);
+   Propagate 'Prop Half Duration' prop(Sc) {Sc.ElapsedSecs = halfBurnDuration, OrbitColor = Red};
+   Propagate 'Prop Half Duration' prop(Sc) {Sc.ElapsedSecs = halfBurnDuration, OrbitColor = Red};
+   EndFiniteBurn 'Turn Off Thrusters' fb(Sc);
+   Propagate 'Prop to Apogee' prop(Sc) {Sc.Earth.Apoapsis};
+   Achieve 'Achieve RadApo' DC1(Sc.Earth.RMAG = 12000, {Tolerance = 0.1});
+EndTarget;  % For targeter DC1
+
+%  Propagate for 5 days
+Propagate 'Prop 1 Day' prop(Sc) {Sc.ElapsedDays = 1};
+Report DefaultReportFile halfBurnDuration;
+
+
+
+
+
+

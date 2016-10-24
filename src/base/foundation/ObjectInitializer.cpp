@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CCA54C
@@ -32,6 +42,7 @@
 #include "GmatBaseException.hpp"
 #include "SubscriberException.hpp"
 #include "Publisher.hpp"
+#include <algorithm>               // for find()
 
 //#define DEBUG_OBJECT_INITIALIZER
 //#define DEBUG_OBJECT_INITIALIZER_DETAILED
@@ -39,6 +50,7 @@
 //#define DEBUG_INITIALIZE_OBJ
 //#define DEBUG_INITIALIZE_CS
 //#define DEBUG_BUILD_ASSOCIATIONS
+//#define DEBUG_FIND_OBJ
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_Z_ORDER
 
@@ -177,12 +189,19 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    callCount++;
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== ObjectInitializer::InitializeObjects() entered, Count = %d\n",
-       callCount);
+      (">>>>> CALL TRACE: ObjectInitializer::InitializeObjects() entered, Count = %d, objType = %d\n",
+       callCount, objType);
+   #endif
+   
+   #ifdef DEBUG_INITIALIZE_OBJ
+   MessageInterface::ShowMessage
+      ("ObjectInitializer::InitializeObjects() entered, registerSubs = %s, "
+       "objType = %d, objTypeStr = '%s', inFunction = %d\n", registerSubs ? "true" : "false",
+       objType, GmatBase::GetObjectTypeString(objType).c_str(), inFunction);
    #endif
    
    #ifdef DEBUG_OBJECT_MAP
-   ShowObjectMaps("In InitializeObjects");
+   ShowObjectMaps("In ObjectInitializer::InitializeObjects()");
    #endif
    
    // First check for NULL object pointer in the map to avoid crash down the road
@@ -206,12 +225,6 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    std::map<std::string, GmatBase *>::iterator omi;
    std::string oName;
    std::string j2kName;
-   
-   #ifdef DEBUG_INITIALIZE_OBJ
-   MessageInterface::ShowMessage
-      ("ObjectInitializer::InitializeObjects() entered, registerSubs = %s\n",
-       registerSubs ? "true" : "false");
-   #endif
    
    if (objType == Gmat::UNKNOWN_OBJECT)
    {
@@ -258,11 +271,13 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //  NOTE: Measurement participant pointers must initialize before models.
    //        In the current code, that means spacecraft and ground stations, but
    //        the list might grow
-   //  3. Measurement Models
-   //  4. System Parameters
-   //  5. Parameters
-   //  6. Subscribers
-   //  7. Remaining Objects
+   //  3. Error Models
+   //  4. Data Filters
+   //  5. Measurement Models
+   //  6. System Parameters
+   //  7. Parameters
+   //  8. Subscribers
+   //  9. Remaining Objects
       
    // Coordinate Systems
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::COORDINATE_SYSTEM)
@@ -281,7 +296,41 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
-   // Spacecraft
+   // Calculated Points
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::CALCULATED_POINT)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize CalculatedPoints in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::CALCULATED_POINT);
+      
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize CalculatedPoints in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::CALCULATED_POINT, true, unusedGOL);
+      }
+   }
+   
+   // Burns
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::BURN)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize Burns in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::BURN);
+      
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize Burns in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::BURN, true, unusedGOL);
+      }
+   }
+   
+   // Spacecrafts
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::SPACECRAFT ||
        objType == Gmat::GROUND_STATION)
    {
@@ -299,7 +348,43 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
          InitializeObjectsInTheMap(GOS, Gmat::GROUND_STATION);
       }
    }
-   
+
+   // ErrorModel
+   // Handle ErrorModel objects
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::ERROR_MODEL)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize ErrorModel in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::ERROR_MODEL);
+
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize ErrorModel in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::ERROR_MODEL);
+      }
+   }
+
+   // DataFilter
+   // Handle DataFilter objects
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::DATA_FILTER)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize DataFilter in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::DATA_FILTER);
+
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize DataFilter in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::DATA_FILTER);
+      }
+   }
+
    // MeasurementModel
    // Measurement Models must init before the Estimators/Simulator, so do next
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::MEASUREMENT_MODEL)
@@ -410,7 +495,6 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       #ifdef DEBUG_INITIALIZE_OBJ
       MessageInterface::ShowMessage("--- Initialize Subscriber in LOS\n");
       #endif
-      //InitializeObjectsInTheMap(LOS, Gmat::SUBSCRIBER);
       InitializeSubscribers(LOS);
       
       if (includeGOS)
@@ -418,7 +502,6 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
          #ifdef DEBUG_INITIALIZE_OBJ
          MessageInterface::ShowMessage("--- Initialize Subscriber in GOS\n");
          #endif
-         //InitializeObjectsInTheMap(GOS, Gmat::SUBSCRIBER);
          InitializeSubscribers(GOS);
       }
    }
@@ -447,8 +530,8 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    #ifdef DEBUG_TRACE
    clock_t t2 = clock();
    MessageInterface::ShowMessage
-      ("=== ObjectInitializer::InitializeObjects() Count = %d, Run Time: %f seconds\n",
-       callCount, (Real)(t2-t1)/CLOCKS_PER_SEC);
+      (">>>>> CALL TRACE: ObjectInitializer::InitializeObjects() leaving, Count = %d, "
+       "Run Time: %f seconds\n", callCount, (Real)(t2-t1)/CLOCKS_PER_SEC);
    #endif
    
    return true;
@@ -491,7 +574,7 @@ void ObjectInitializer::SetObjectJ2000Body(ObjectMap *objMap)
 
 
 //------------------------------------------------------------------------------
-// void InitializeObjectsInTheMap(ObjectMap *objMap, Gmat::ObjectType objType)
+// void InitializeObjectsInTheMap(ObjectMap *objMap, Gmat::ObjectType objType, ...)
 //------------------------------------------------------------------------------
 /*
  * Initializes specific types of objects in the map. If objType is UNDEFINED_OBJECT,
@@ -523,6 +606,12 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
       {
          GmatBase *obj = omi->second;
          
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage
+            ("   obj = <%p>[%s]'%s'\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+             obj ? obj->GetName().c_str() : "NULL");
+         #endif
+         
          if (obj == NULL)
             throw GmatBaseException
                ("Cannot initialize NULL pointer of \"" + omi->first + "\" object");
@@ -535,7 +624,7 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
             {
                #ifdef DEBUG_OBJECT_INITIALIZER
                MessageInterface::ShowMessage
-                  ("Initializing <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+                  ("Initializing <%p>[%s]'%s'\n", obj, obj->GetTypeName().c_str(),
                    obj->GetName().c_str());
                #endif
                if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
@@ -548,9 +637,32 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
                {
                   BuildReferences(obj);
                   
-                  // Setup spacecraft hardware
-                  BuildAssociations(obj);
-                  obj->Initialize();
+                  // Put this in try/catch block for function (LOJ: 2015.02.25)
+                  // When a spacecraft which already has all the hardware
+                  // assocation is passed to function, associated hardware may
+                  // not be in the function map, so it can be ignored during
+                  // function object initialization
+                  try
+                  {
+                     // Setup spacecraft hardware
+                     BuildAssociations(obj);
+                     obj->Initialize();
+                  }
+                  catch (BaseException &be)
+                  {
+                     if (inFunction)
+                     {
+                        #ifdef DEBUG_INITIALIZE_OBJ
+                        // ignore error
+                        MessageInterface::ShowMessage
+                           ("===> %s\n===> Ignoring error for function\n", be.GetFullMessage().c_str());
+                        #endif
+                     }
+                     else
+                     {
+                        throw;
+                     }
+                  }
                }
                else
                {
@@ -570,6 +682,12 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
             }
             else if (obj->IsOfType(objTypeStr))
             {
+               #ifdef DEBUG_INITIALIZE_OBJ
+               // ignore error
+               MessageInterface::ShowMessage
+                  ("Calling BuildReferencesAndInitialize() for <%p>[%s]'%s'\n",
+                   obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
+               #endif
                BuildReferencesAndInitialize(obj);
             }
          }
@@ -577,6 +695,10 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
    }
    catch (BaseException &be)
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+      MessageInterface::ShowMessage
+         ("==> InitializeObjectsInTheMap() caught an exception '%s'\n", be.GetFullMessage().c_str());
+      #endif
       // Check if undefined ref objects can be ignored
       if (usingGOS && unusedGOL != NULL)
       {
@@ -600,6 +722,13 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
          throw;
       }
    }
+   
+   #ifdef DEBUG_INITIALIZE_OBJ
+   MessageInterface::ShowMessage
+      ("InitializeObjectsInTheMap() leaving, objMap=<%p>, objType=%d, "
+       "objTypeStr='%s', inFunction=%d\n", objMap, objType, objTypeStr.c_str(),
+       inFunction);
+   #endif
 }
 
 
@@ -644,18 +773,24 @@ void ObjectInitializer::InitializeSystemParameters(ObjectMap *objMap)
 void ObjectInitializer::InitializeSubscribers(ObjectMap *objMap)
 {
    #ifdef DEBUG_SUBSCRIBER
-   MessageInterface::ShowMessage("ObjectInitializer::InitializeSubscribers() entered\n");
+   MessageInterface::ShowMessage
+      ("ObjectInitializer::InitializeSubscribers() entered, registerSubscribers = %d\n",
+       registerSubscribers);
    #endif
-      
+   
    std::list<Subscriber*>::iterator subiter;
    std::list<Subscriber*> subList = publisher->GetSubscriberList();
    /// Initialize in z-order here, if relative z-order values have been saved from a previous run
    std::list<Subscriber*> orderedList = GetSubscribersInZOrder(subList);
-
+   std::map<std::string, GmatBase *>::iterator omi;
+   
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage("   Number of configured substribers is %d\n", subList.size());
+   #endif
+   
    for (subiter = orderedList.begin(); subiter != orderedList.end(); ++subiter)
    {
       std::string subName = (*subiter)->GetName();      
-      std::map<std::string, GmatBase *>::iterator omi;
       for (omi = objMap->begin(); omi != objMap->end(); ++omi)
       {
          GmatBase *obj = omi->second;
@@ -672,12 +807,67 @@ void ObjectInitializer::InitializeSubscribers(ObjectMap *objMap)
             {
                #if defined(DEBUG_OBJECT_INITIALIZER) || defined(DEBUG_SUBSCRIBER)
                MessageInterface::ShowMessage
-                  ("ObjectInitializer::Initialize objTypeName = %s, objName = %s\n",
-                   obj->GetTypeName().c_str(), obj->GetName().c_str());
+                  ("   Calling BuildReferencesAndInitialize() for <%p>[%s]'%s'\n",
+                   obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
                #endif
                
                BuildReferencesAndInitialize(obj);
             }
+         }
+      }
+   }
+   
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage
+      ("   Checking if function subscribers needs to be initialized and registered\n");
+   #endif
+   // Check if we need to initialize and register function subscribers to the publisher
+   // (Fix for GMT-1552 LOJ: 2015.06.24)
+   for (omi = objMap->begin(); omi != objMap->end(); ++omi)
+   {
+      GmatBase *obj = omi->second;
+      std::string objName = obj->GetName(); // obj pointer is already checked above
+      
+      // Current status on plots inside a function:
+      // OrbieView, GroundTrackPlot, XyPlot: Draws plots but they get deleted when function run finishes
+      // (Plot behavior inside a function has not been specified as of 2015.07.09)
+      
+      // If we only allow local ReportFile or EphemerisFile inside a function
+      // uncomment this line(LOJ: 2015.07.09)
+      //if (obj->IsOfType(Gmat::SUBSCRIBER) && obj->IsOfType("FileOutput"))
+      if (obj->IsOfType(Gmat::SUBSCRIBER))
+      {
+         Subscriber *sub = (Subscriber*)obj;
+         
+         // If name not found from the ordered list, then assumed it is a function subscriber
+         if (find(orderedList.begin(), orderedList.end(), sub) == orderedList.end())
+         {
+            #if defined(DEBUG_OBJECT_INITIALIZER) || defined(DEBUG_SUBSCRIBER)
+            MessageInterface::ShowMessage
+               ("   Calling BuildReferencesAndInitialize() for subscriber <%p>[%s]'%s'\n",
+                obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
+            #endif
+            
+            BuildReferencesAndInitialize(obj);
+            
+            if (registerSubscribers)
+            {
+               #ifdef DEBUG_SUBSCRIBER
+               MessageInterface::ShowMessage
+                  ("   About to register a function subscriber <%p>[%s]'%s'\n", obj,
+                   obj->GetTypeName().c_str(), obj->GetName().c_str());
+               #endif
+               
+               publisher->Subscribe((Subscriber*)obj);
+            }
+         }
+         else
+         {
+            #ifdef DEBUG_SUBSCRIBER
+            MessageInterface::ShowMessage
+               ("Skipping configured subscriber '%s', building and initialization "
+                "is already handled\n", objName.c_str());
+            #endif
          }
       }
    }
@@ -779,7 +969,7 @@ void ObjectInitializer::InitializeInternalObjects()
    ss->Initialize();
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage
-      ("--- The object <%p><%s>'%s' initialized\n",  ss, ss->GetTypeName().c_str(),
+      ("--- The object <%p>[%s]'%s' initialized\n",  ss, ss->GetTypeName().c_str(),
        ss->GetName().c_str());
    #endif
    #ifdef DEBUG_OBJECT_INITIALIZER
@@ -837,7 +1027,7 @@ void ObjectInitializer::InitializeInternalObjects()
    internalCS->Initialize();
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage
-      ("--- The object <%p><%s>'%s' initialized\n",  internalCS,
+      ("--- The object <%p>[%s]'%s' initialized\n",  internalCS,
        internalCS->GetTypeName().c_str(), internalCS->GetName().c_str());
    #endif
 }
@@ -854,7 +1044,7 @@ void ObjectInitializer::InitializeCoordinateSystem(GmatBase *obj)
 {
    #ifdef DEBUG_INITIALIZE_CS
    MessageInterface::ShowMessage
-      ("Entering ObjectInitializer::InitializeCoordinateSystem(), obj=<%p><%s>'%s'\n",
+      ("Entering ObjectInitializer::InitializeCoordinateSystem(), obj=<%p>[%s]'%s'\n",
        obj, obj->GetTypeName().c_str(), obj->GetName().c_str() );
    #endif
    
@@ -921,12 +1111,13 @@ void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
 {   
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage
-		("--- Calling BuildReferences(), obj = <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
-		 obj->GetName().c_str());
+		("BuildReferencesAndInitialize() entered, obj = <%p>[%s]'%s'\n",
+       obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
+   MessageInterface::ShowMessage("--- Calling BuildReferences()\n");
 	#endif
 	
    BuildReferences(obj);
-
+   
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage("--- Calling '%s'->Initialize()\n", obj->GetName().c_str());
 	#endif
@@ -935,8 +1126,11 @@ void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
    
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage
-      ("--- The object <%p><%s>'%s' initialized\n",  obj,
+      ("--- The object <%p>[%s]'%s' initialized\n",  obj,
        obj->GetTypeName().c_str(), obj->GetName().c_str());
+   MessageInterface::ShowMessage
+		("BuildReferencesAndInitialize() leaving, obj = <%p>[%s]'%s'\n",
+       obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
 }
 
@@ -952,8 +1146,8 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
 {
    #ifdef DEBUG_OBJECT_INITIALIZER
       MessageInterface::ShowMessage
-         ("Entering ObjectInitializer::BuildReferences, object type = '%s'\n",
-          obj->GetTypeName().c_str());
+         ("Entering ObjectInitializer::BuildReferences, object type = '%s', name = '%s'\n",
+          obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
    std::string oName;
    
@@ -1046,11 +1240,11 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
                fixedCS->Initialize();
                #ifdef DEBUG_INITIALIZE_OBJ
                MessageInterface::ShowMessage
-                  ("--- The object <%p><%s>'%s' initialized\n",  internalCS,
+                  ("--- The object <%p>[%s]'%s' initialized\n",  internalCS,
                    internalCS->GetTypeName().c_str(), internalCS->GetName().c_str());
                #endif
                // if things have already been moved to the globalObjectStore, put it there
-               if ((GOS->size() > 0) && (fixedCS->GetIsGlobal()))
+               if ((GOS->size() > 0) && (fixedCS->IsGlobal()))
                   (*GOS)[*i] = fixedCS;
                // otherwise, put it in the Sandbox object map - it will be moved to the GOS later
                else
@@ -1159,6 +1353,11 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
    }
    catch (SubscriberException &ex)
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER_DETAILED
+      MessageInterface::ShowMessage
+         ("Caught SubscriberException while setting individual reference "
+          "objects and rethrowing %s\n", ex.GetFullMessage().c_str());
+      #endif
       throw ex;
    }
    catch (GmatBaseException &ex) // ************
@@ -1188,6 +1387,9 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
    // Next handle the array version
    try
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+      MessageInterface::ShowMessage("Attempting to set reference object arrays...\n");
+      #endif
       StringArray oNameArray = obj->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
       for (StringArray::iterator i = oNameArray.begin();
            i != oNameArray.end(); ++i)
@@ -1212,10 +1414,17 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
                   "RefObjectName " + oName + " not found; ignoring " +
                   ex.GetFullMessage() + "\n");
             #endif
-            //throw ex;
+            
+            if (ex.IsFatal())
+               throw ex;
          }
          catch (SubscriberException &ex)
          {
+            #ifdef DEBUG_OBJECT_INITIALIZER_DETAILED
+            MessageInterface::ShowMessage
+               ("Caught SubscriberException while setting reference "
+                "object arrays and rethrowing %s\n", ex.GetFullMessage().c_str());
+            #endif
             throw ex;
          }
          catch (BaseException &ex)
@@ -1242,7 +1451,9 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
             "RefObjectNameArray not found; ignoring " +
             ex.GetFullMessage() + "\n");
       #endif
-      //throw ex;
+      
+      if (ex.IsFatal())
+         throw ex;
    }
    catch (SubscriberException &ex)
    {
@@ -1288,6 +1499,9 @@ void ObjectInitializer::SetRefFromName(GmatBase *obj, const std::string &oName)
    
    if ((refObj = FindObject(oName)) != NULL)
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+         MessageInterface::ShowMessage("FindObject found %s\n", oName.c_str());
+      #endif
       // Do not set if object and its associated hardware in function
       if (refObj->IsOfType(Gmat::HARDWARE) && obj->IsLocal() && refObj->IsLocal())
       {
@@ -1299,11 +1513,17 @@ void ObjectInitializer::SetRefFromName(GmatBase *obj, const std::string &oName)
       }
       else
       {
+         #ifdef DEBUG_OBJECT_INITIALIZER
+            MessageInterface::ShowMessage("Calling SetRefObject .... \n");
+         #endif
          obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
       }
    }
    else
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+         MessageInterface::ShowMessage("FindObject did NOT find %s\n", oName.c_str());
+      #endif
       // look in the SolarSystem
       refObj = FindSpacePoint(oName);
       
@@ -1343,7 +1563,7 @@ void ObjectInitializer::BuildAssociations(GmatBase * obj)
    
    #ifdef DEBUG_BUILD_ASSOCIATIONS
    MessageInterface::ShowMessage
-      ("ObjectInitializer::BuildAssociations() entered, obj=<%p><%s>'%s', "
+      ("ObjectInitializer::BuildAssociations() entered, obj=<%p>[%s]'%s', "
        "inFunction=%d\n", obj, objType.c_str(), objName.c_str(), inFunction);
    #endif
    
@@ -1362,12 +1582,15 @@ void ObjectInitializer::BuildAssociations(GmatBase * obj)
          GmatBase *elem = NULL;
          if ((elem = FindObject(*i)) == NULL)
             throw GmatBaseException("ObjectInitializer::BuildAssociations: Cannot find "
-                                    "hardware element \"" + (*i) + "\"\n");
+                                    "hardware element \"" + (*i) + "\"");
          
          // To handle Spacecraft hardware setting inside the function,
          // all hardware are cloned in the Spacecraft::SetRefObject() method. (LOJ: 2009.07.24)
          GmatBase *newElem = elem;
          
+         // Now a function is parsed in two-modes (resource and command), so we don't
+         // need to check this (LOJ: 2015.02.06)
+         #if 0
          // If hardware is local object inside a function then skip
          if (inFunction && obj->IsLocal() && newElem->IsLocal())
          {
@@ -1378,6 +1601,7 @@ void ObjectInitializer::BuildAssociations(GmatBase * obj)
             #endif
             continue;
          }
+         #endif
          
          // now set Hardware to Spacecraft
          if (!obj->SetRefObject(newElem, newElem->GetType(), newElem->GetName()))
@@ -1491,9 +1715,23 @@ SpacePoint * ObjectInitializer::FindSpacePoint(const std::string &spName)
 //------------------------------------------------------------------------------
 GmatBase* ObjectInitializer::FindObject(const std::string &name)
 {
+   #ifdef DEBUG_FIND_OBJ
+   MessageInterface::ShowMessage
+      ("ObjectInitializer::FindObject() entered, name='%s'\n", name.c_str());
+   #endif
+   
    // Check for special object not in LOS or GOS first (for Bug 2358 fix)
    if (name == "InternalEarthMJ2000Eq")
+   {
+      #ifdef DEBUG_FIND_OBJ
+      MessageInterface::ShowMessage
+         ("ObjectInitializer::FindObject() returning <%p>'%s', it is InternalEarthMJ2000Eq\n",
+          internalCS, internalCS ? internalCS->GetName().c_str() : "NULL");
+      #endif
       return internalCS;
+   }
+   
+   GmatBase *objFound = NULL;
    
    if (LOS->find(name) == LOS->end())
    {
@@ -1501,13 +1739,22 @@ GmatBase* ObjectInitializer::FindObject(const std::string &name)
       if (includeGOS)
       {
          if (GOS->find(name) == GOS->end())
-            return NULL;
-         else return (*GOS)[name];
+            objFound = NULL;
+         else
+            objFound = (*GOS)[name];
       }
-      else return NULL;
+      else
+         objFound = NULL;
    }
    else
-      return (*LOS)[name];
+      objFound = (*LOS)[name];
+   
+   #ifdef DEBUG_FIND_OBJ
+   MessageInterface::ShowMessage
+      ("ObjectInitializer::FindObject() returning <%p>'%s'\n",
+       objFound, objFound ? objFound->GetName().c_str() : "NULL");
+   #endif
+   return objFound;
 }
 
 
@@ -1525,6 +1772,7 @@ void ObjectInitializer::ShowObjectMaps(const std::string &str)
    if (LOS)
    {
       MessageInterface::ShowMessage("Here is the local object map \n");
+      MessageInterface::ShowMessage("There are %d objects\n");
       for (std::map<std::string, GmatBase *>::iterator i = LOS->begin();
            i != LOS->end(); ++i)
          MessageInterface::ShowMessage
@@ -1534,6 +1782,7 @@ void ObjectInitializer::ShowObjectMaps(const std::string &str)
    if (GOS)
    {
       MessageInterface::ShowMessage("Here is the global object map\n");
+      MessageInterface::ShowMessage("There are %d objects\n");
       for (std::map<std::string, GmatBase *>::iterator i = GOS->begin();
            i != GOS->end(); ++i)
          MessageInterface::ShowMessage

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -191,17 +201,51 @@ bool Divide::ValidateInputs()
        "type2=%d, row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
    #endif
    
+   bool leftNumeric  = (type1 == Gmat::REAL_TYPE) || (type1 == Gmat::RMATRIX_TYPE);
+   bool rightNumeric = (type2 == Gmat::REAL_TYPE) || (type2 == Gmat::RMATRIX_TYPE);
+
+   if (!leftNumeric && (!rightNumeric))
+   {
+      std::string errmsg = "Invalid operand types (";
+      errmsg += PARAM_TYPE_STRING[type1] + ", ";
+      errmsg += PARAM_TYPE_STRING[type2] + ") for division operator.\n";
+      throw MathException(errmsg);
+   }
+   else if (!leftNumeric)
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type1] + ") for division operator.\n";
+      throw MathException(errmsg);
+   }
+   else if (!rightNumeric)
+   {
+      std::string errmsg = "Invalid operand type (";
+      errmsg += PARAM_TYPE_STRING[type2] + ") for division operator.\n";
+      throw MathException(errmsg);
+   }
+
    if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::REAL_TYPE))
       retval = true;
    else if ((type1 == Gmat::RMATRIX_TYPE) && (type2 == Gmat::RMATRIX_TYPE))
+   {
       if ((row1 == row2) && (col1 == col2))
          retval = true;
       else if ((row1 == 1 && col1 == 1) || (row2 == 1 && col2 == 1))
          retval = true;
       else
          retval = false; 
+   }
+   else if ((type1 == Gmat::RMATRIX_TYPE) && (type2 == Gmat::REAL_TYPE))
+      return true;
+   else if ((type1 == Gmat::REAL_TYPE) && (type2 == Gmat::RMATRIX_TYPE))
+   {
+      if ((row2 == 1) && (col2 == 1))
+         retval = true;
+      else
+         throw MathException("Cannot divide a scalar by a matrix.\n");
+   }
    else
-      retval = true;
+      retval = false;
    
    #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage

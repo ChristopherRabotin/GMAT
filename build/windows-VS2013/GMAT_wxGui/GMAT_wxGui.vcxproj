@@ -1,0 +1,727 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-wx3-unicode|Win32">
+      <Configuration>Debug-wx3-unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3.0|Win32">
+      <Configuration>Release-wx3.0</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{36C53016-AAAF-4579-993D-B10F668CBD44}</ProjectGuid>
+    <RootNamespace>GMAT_wxGui</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\..\application\bin\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\..\application\bin64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>GMAT</TargetName>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>GMAT</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\..\application\debug\</OutDir>
+    <TargetName>GMAT</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <OutDir>..\..\..\application\debug\</OutDir>
+    <TargetName>GMAT</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\..\..\application\bin64\debug64\</OutDir>
+    <TargetName>GMAT_D</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <OutDir>..\..\..\application\bin64\debug64\</OutDir>
+    <TargetName>GMAT_D</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <GenerateManifest>true</GenerateManifest>
+    <OutDir>..\..\..\application\bin\</OutDir>
+    <TargetName>GMAT</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_DYNAMICLINK;WXUSINGDLL;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;wxmsw28_netutils.lib;wxmsw28_stc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_DYNAMICLINK;WXUSINGDLL;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\lib\vc_dll;..\..\..\..\Gmat3rdParty\wxWidgets\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets64\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_DYNAMICLINK;WXUSINGDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets64\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_DYNAMICLINK;WXUSINGDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_DYNAMICLINK;WXUSINGDLL;__USE_STC_EDITOR__;__ENABLE_EMAIL__;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;wxmsw28_netutils.lib;wxmsw28_stc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Version>2014b</Version>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets64\include;..\..\..\..\Gmat3rdParty\wxWidgets64\contrib\include;..\..\..\..\Gmat3rdParty\cspice64\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_DYNAMICLINK;WXUSINGDLL;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Version>2011a</Version>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;WXUSINGDLL;__USE_STC_EDITOR__;__DISABLE_EMAIL__;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <Version>
+      </Version>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\gui\app\AboutDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\CompareFilesDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\CompareTextDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatApp.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatAppData.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatConnection.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatMainFrame.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatMenuBar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatNotebook.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatServer.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatToolBar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GmatTreeItemData.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GuiInterpreter.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GuiMessageReceiver.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\GuiPlotReceiver.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\InteractiveMatlabDialog.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\MissionTreeItemData.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\ResourceTree.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\RunScriptFolderDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\ScriptPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\SetPathDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\TextEphemFileDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\app\WelcomePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\asset\GroundStationPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\burn\FiniteBurnSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\burn\ImpulsiveBurnSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\AchievePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\AssignmentPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\BeginFiniteBurnPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\CallFunctionPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\EndFiniteBurnPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\FindEventsPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\GmatCommandPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\ManageObjectPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\ManeuverPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\MinimizePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\NonlinearConstraintPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\OptimizePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\PropagatePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\ReportPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\ScriptEventPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\TargetPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\TogglePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\VaryPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\controllogic\ConditionPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\controllogic\ForPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\forcemodel\DragInputsDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatColorPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatSavePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GmatStaticBoxSizer.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\GuiItemManager.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\MultiPathSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterCreateDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterSelectDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ParameterSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ShowScriptDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\ShowSummaryDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\SinglePathSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\foundation\UserInputValidator.cpp" />
+    <ClCompile Include="..\..\..\src\gui\function\FunctionSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp" />
+    <ClCompile Include="..\..\..\src\gui\mission\MissionTree.cpp" />
+    <ClCompile Include="..\..\..\src\gui\mission\MissionTreeToolBar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\mission\TreeViewOptionDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\mission\UndockedMissionPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\output\CompareReportPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\output\EventFilePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp" />
+    <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\propagator\PropagationConfigPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\propagator\PropagatorSelectDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\Camera.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\GLStars.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\Light.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\ModelManager.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\ModelObject.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\Rendering.cpp" />
+    <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\BarycenterPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\LibrationPointPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\UniversePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solver\DCSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solver\SolverCreatePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solver\SolverGoalsPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solver\SolverSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solver\SolverVariablesPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solver\SQPSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\AttitudePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\BallisticsMassPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\FormationSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\TankPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\ThrusterPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\VisualModelCanvas.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\VisualModelPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTrajFrame.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiGlPlotData.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiTsPlotData.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\OpenGlOptionDialog.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\OpenGlPlotSetupPanel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\ReportFileSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotCanvas.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotCurve.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotOptionsDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\ViewCanvas.cpp" />
+    <ClCompile Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPreferences.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPrintout.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\FindReplaceDialog.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ViewTextDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\view\ViewTextFrame.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\gui\app\AboutDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\CompareFilesDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\CompareTextDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatApp.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatAppData.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatConnection.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatMainFrame.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatMenuBar.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatNotebook.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatServer.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GmatTreeItemData.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GuiInterpreter.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GuiMessageReceiver.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\GuiPlotReceiver.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\InteractiveMatlabDialog.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\MissionTreeItemData.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\ResourceTree.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\RunScriptFolderDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\ScriptPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\SetPathDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\TextEphemFileDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\app\WelcomePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\asset\GroundStationPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\burn\FiniteBurnSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\burn\ImpulsiveBurnSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\AchievePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\AssignmentPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\BeginFiniteBurnPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\CallFunctionPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\EndFiniteBurnPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\FindEventsPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\GmatCommandPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\ManageObjectPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\ManeuverPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\MinimizePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\NonlinearConstraintPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\OptimizePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\PropagatePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\ReportPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\ScriptEventPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\TargetPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\TogglePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\VaryPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\controllogic\ConditionPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\controllogic\ForPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\forcemodel\DragInputsDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatBaseSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatColorPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatMdiChildFrame.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatSavePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GmatStaticBoxSizer.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\GuiItemManager.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\MultiPathSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterCreateDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterSelectDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ParameterSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ShowScriptDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\ShowSummaryDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\SinglePathSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\foundation\UserInputValidator.hpp" />
+    <ClInclude Include="..\..\..\src\gui\function\FunctionSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\include\ddesetup.hpp" />
+    <ClInclude Include="..\..\..\src\gui\include\gmatwxdefs.hpp" />
+    <ClInclude Include="..\..\..\src\gui\include\gmatwxrcs.hpp" />
+    <ClInclude Include="..\..\..\src\gui\mission\DecoratedTree.hpp" />
+    <ClInclude Include="..\..\..\src\gui\mission\MissionTree.hpp" />
+    <ClInclude Include="..\..\..\src\gui\mission\MissionTreeToolBar.hpp" />
+    <ClInclude Include="..\..\..\src\gui\mission\TreeViewOptionDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\mission\UndockedMissionPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\output\CompareReportPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\output\EventFilePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp" />
+    <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\propagator\PropagationConfigPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\propagator\PropagatorSelectDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\Camera.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\GLStars.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\GmatOpenGLSupport.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\Light.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\ModelManager.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\ModelObject.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\Rendering.hpp" />
+    <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\BarycenterPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelesBodySelectDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrbitPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\LibrationPointPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\UniversePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solver\DCSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solver\SolverCreatePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solver\SolverGoalsPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solver\SolverSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solver\SolverVariablesPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solver\SQPSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\AttitudePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\BallisticsMassPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\FormationSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\TankPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\ThrusterPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\VisualModelCanvas.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\VisualModelPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\EphemerisFilePanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackPlotPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChild3DViewFrame.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildGroundTrackFrame.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTrajFrame.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildViewFrame.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiGlPlotData.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiTsPlotData.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\OpenGlOptionDialog.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\OpenGlPlotSetupPanel.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\PlotTypes.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\ReportFileSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\SubscriberSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotCanvas.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotCurve.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotDefs.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotOptionsDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\ViewCanvas.hpp" />
+    <ClInclude Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPreferences.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPrintout.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\FindReplaceDialog.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ViewTextDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\view\ViewTextFrame.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\gui\resource\GMAT.ico" />
+    <None Include="..\..\..\src\gui\resource\GMATIcon.icns" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\src\gui\resource\GmatIcon.rc" />
+    <ResourceCompile Include="..\..\..\src\gui\resource\GmatRc.rc" />
+    <ResourceCompile Include="..\..\..\src\gui\resource\TrajectoryPlot.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libGmatBase\libGmatBase.vcxproj">
+      <Project>{cfa43e77-32c5-4ea9-a878-9a55f91bd4a6}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

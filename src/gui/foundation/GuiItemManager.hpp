@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/02/06
@@ -85,6 +95,7 @@ public:
    void UpdateFunction(bool updateObjectArray = true);
    void UpdateFuelTank(bool updateObjectArray = true);
    void UpdateThruster(bool updateObjectArray = true);
+   void UpdatePowerSystem(bool updateObjectArray = true);
    void UpdateSensor(bool updateObjectArray = true);
    void UpdateParameter(bool updateObjectArray = true);
    void UpdatePropagator(bool updateObjectArray = true);
@@ -117,6 +128,8 @@ public:
    int GetNumThruster() { return theNumThruster; }
    int GetNumSensor() { return theNumSensor; }
    int GetNumAntenna() { return theNumAntenna; }
+   int GetNumPowerSystem() { return theNumPowerSystem; }
+   int GetNumLocator() { return theNumLocator; }
    int GetNumConfigBody() { return theNumCelesBody; }
    int GetNumCoordSystem() { return theNumCoordSys; }
    int GetNumFunction() { return theNumFunction; }
@@ -161,7 +174,7 @@ public:
    
    //-----------------------------------------------------------------
    //Note: To enables automatic updates when new object is added to
-   //      resrouce, the following function automatically registers
+   //      resource, the following function automatically registers
    //      components. If caller calls any of the following methods
    //      to get a component, the caller needs to unregister
    //      components by calling appropriate Unregister*() methods
@@ -217,6 +230,10 @@ public:
                                  const wxSize &size);
    wxComboBox* GetAntennaComboBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size);
+   wxComboBox* GetPowerSystemComboBox(wxWindow *parent, wxWindowID id,
+                                      const wxSize &size);
+   wxComboBox* GetLocatorComboBox(wxWindow *parent, wxWindowID id,
+                                  const wxSize &size);
    
    wxComboBox* GetSubscriberComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
@@ -250,6 +267,9 @@ public:
    wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
                                              const wxSize &size,
                                              wxArrayString *excList = NULL);      
+   wxCheckListBox* GetGroundStationCheckListBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size,
+                                                wxArrayString *excList = NULL);
    wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
                                             const wxSize &size,
 														  bool includeAutoGlobal = true,
@@ -286,6 +306,11 @@ public:
                                 const wxSize &size,
                                 wxArrayString *excList = NULL,
                                 bool multiSelect = false);
+   
+   wxListBox* GetFiniteBurnListBox(wxWindow *parent, wxWindowID id,
+                                   const wxSize &size,
+                                   wxArrayString *excList = NULL,
+                                   bool multiSelect = false);
    
    wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                  const wxSize &size,
@@ -398,6 +423,7 @@ private:
    void UpdateThrusterList();
    void UpdateSensorList();
    void UpdateAntennaList();
+   void UpdatePowerSystemList();
    void UpdateFunctionList();
    void UpdateSubscriberList();
    void UpdateXyPlotList();
@@ -430,10 +456,12 @@ private:
    std::vector<wxListBox*> mSpaceObjectLBList;
    std::vector<wxListBox*> mSpacecraftLBList;
    std::vector<wxListBox*> mImpBurnLBList;
+   std::vector<wxListBox*> mFiniteBurnLBList;
    std::vector<wxCheckListBox*> mSubscriberCLBList;
    std::vector<wxCheckListBox*> mXyPlotCLBList;
    std::vector<wxCheckListBox*> mSpacePointCLBList;
    std::vector<wxCheckListBox*> mSpacecraftCLBList;
+   std::vector<wxCheckListBox*> mGroundStationCLBList;
    std::vector<wxCheckListBox*> mAllObjectCLBList;
    std::vector<wxListBox*> mHardwareLBList;
    std::vector<wxListBox*> mFuelTankLBList;
@@ -451,6 +479,8 @@ private:
    std::vector<wxComboBox*> mThrusterCBList;
    std::vector<wxComboBox*> mSensorCBList;
    std::vector<wxComboBox*> mAntennaCBList;
+   std::vector<wxComboBox*> mPowerSystemCBList;
+   std::vector<wxComboBox*> mLocatorCBList;
    std::vector<wxComboBox*> mSubscriberCBList;
    std::vector<wxComboBox*> mReportFileCBList;
    std::vector<wxComboBox*> mSolverCBList;
@@ -462,12 +492,15 @@ private:
    std::vector<wxArrayString*> mSpacePointExcList;
    std::vector<wxArrayString*> mSpaceObjectExcList;
    std::vector<wxArrayString*> mSpacecraftExcList;
+   std::vector<wxArrayString*> mGroundStationExcList;
    std::vector<wxArrayString*> mImpBurnExcList;
+   std::vector<wxArrayString*> mFiniteBurnExcList;
    std::vector<wxArrayString*> mAllObjectExcList;
    std::vector<wxArrayString*> mFuelTankExcList;
    std::vector<wxArrayString*> mThrusterExcList;
    std::vector<wxArrayString*> mSensorExcList;
    std::vector<wxArrayString*> mAntennaExcList;
+   std::vector<wxArrayString*> mPowerSystemExcList;
    std::vector<wxArrayString*> mSubscriberExcList;
    std::vector<wxArrayString*> mReportFileExcList;
    std::vector<wxArrayString*> mXyPlotExcList;
@@ -516,7 +549,11 @@ private:
    int theNumThruster;
    int theNumSensor;
    int theNumAntenna;
+   int theNumPowerSystem;
    
+   // EventLocator
+   int theNumLocator;
+
    // Function
    int theNumFunction;
    
@@ -533,9 +570,6 @@ private:
    int theNumUserArray;
    int theNumUserParam;
    
-   // EventLocator
-   int theNumLocator;
-
    // Spacecraft Properties
    wxArrayString theScPropertyList;
    // Spacecraft Attached Object Properties
@@ -591,7 +625,11 @@ private:
    wxArrayString theThrusterList;
    wxArrayString theSensorList;
    wxArrayString theAntennaList;
+   wxArrayString thePowerSystemList;
    
+   // EventLocator
+   wxArrayString theLocatorList;
+
    // Parameter
    wxArrayString thePlottableParamList;
    wxArrayString theSystemParamList;
@@ -600,8 +638,6 @@ private:
    wxArrayString theUserArrayList;
    wxArrayString theUserParamList;
    
-   // EventLocator
-   wxArrayString theLocatorList;
 };
 
 #endif // GuiItemManager_hpp

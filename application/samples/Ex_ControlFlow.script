@@ -1,19 +1,8 @@
-%  Script Mission - Control Flow Examples  
-%
-%  This script demonstrates how to use basic control flow in GMAT.
-%  The control flow used are For, While, and If statements.
-%
-
 
 %----------------------------------------
 %---------- Spacecraft
 %----------------------------------------
-%
-% -------------------------------------------------------------------------
-% --------------------------- Create Objects ------------------------------
-% -------------------------------------------------------------------------
 
-% Create Sat and define its orbit
 Create Spacecraft Sat;
 GMAT Sat.DateFormat = UTCGregorian;
 GMAT Sat.Epoch = '22 Jul 2014 11:29:10.811';
@@ -25,96 +14,36 @@ GMAT Sat.INC = 12.4606;
 GMAT Sat.RAAN = 112.8362;
 GMAT Sat.AOP = 218.9805;
 GMAT Sat.TA = 180;
-GMAT Sat.DryMass = 850;
-GMAT Sat.Cd = 2.2;
-GMAT Sat.Cr = 1.8;
-GMAT Sat.DragArea = 15;
-GMAT Sat.SRPArea = 1;
-GMAT Sat.NAIFId = -123456789;
-GMAT Sat.NAIFIdReferenceFrame = -123456789;
-GMAT Sat.Id = 'SatId';
-GMAT Sat.Attitude = CoordinateSystemFixed;
-GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT Sat.ModelOffsetX = 0;
-GMAT Sat.ModelOffsetY = 0;
-GMAT Sat.ModelOffsetZ = 0;
-GMAT Sat.ModelRotationX = 0;
-GMAT Sat.ModelRotationY = 0;
-GMAT Sat.ModelRotationZ = 0;
-GMAT Sat.ModelScale = 3;
-GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
-GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
-
-%----------------------------------------
-%---------- ForceModels
-%----------------------------------------
-
-Create ForceModel FM;
-GMAT FM.CentralBody = Earth;
-GMAT FM.PointMasses = {Earth};
-GMAT FM.Drag = None;
-GMAT FM.SRP = Off;
-GMAT FM.RelativisticCorrection = Off;
-GMAT FM.ErrorControl = RSSStep;
 
 %----------------------------------------
 %---------- Propagators
 %----------------------------------------
 
-% Create propgator with point mass only
+Create ForceModel FM;
+
 Create Propagator EarthPointMass;
 GMAT EarthPointMass.FM = FM;
-GMAT EarthPointMass.Type = PrinceDormand78;
-GMAT EarthPointMass.InitialStepSize = 30;
-GMAT EarthPointMass.Accuracy = 1e-012;
-GMAT EarthPointMass.MinStep = 0;
-GMAT EarthPointMass.MaxStep = 86400;
-GMAT EarthPointMass.MaxStepAttempts = 50;
-GMAT EarthPointMass.StopIfAccuracyIsViolated = false;
 
 %----------------------------------------
 %---------- Arrays, Variables, Strings
 %----------------------------------------
 
-%  Create Variables and Arrays
 Create Variable I;
-
 
 %----------------------------------------
 %---------- Subscribers
 %----------------------------------------
 
-%  Create 
 Create OrbitView EarthView;
 GMAT EarthView.SolverIterations = Current;
 GMAT EarthView.UpperLeft = [ 0.3685770750988142 0.01259445843828715 ];
 GMAT EarthView.Size = [ 0.5573122529644269 0.8501259445843828 ];
 GMAT EarthView.RelativeZOrder = 183;
 GMAT EarthView.Add = {Sat, Earth};
-GMAT EarthView.CoordinateSystem = EarthMJ2000Eq;
 GMAT EarthView.DrawObject = [ true true ];
-GMAT EarthView.DataCollectFrequency = 1;
-GMAT EarthView.UpdatePlotFrequency = 50;
-GMAT EarthView.NumPointsToRedraw = 0;
-GMAT EarthView.ShowPlot = true;
-GMAT EarthView.ViewPointReference = Earth;
 GMAT EarthView.ViewPointVector = [ 0 0 30000 ];
-GMAT EarthView.ViewDirection = Earth;
 GMAT EarthView.ViewScaleFactor = 2.5;
 GMAT EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq;
-GMAT EarthView.ViewUpAxis = X;
-GMAT EarthView.EclipticPlane = Off;
-GMAT EarthView.XYPlane = On;
-GMAT EarthView.WireFrame = Off;
-GMAT EarthView.Axes = On;
-GMAT EarthView.Grid = Off;
-GMAT EarthView.SunLine = Off;
-GMAT EarthView.UseInitialView = On;
-GMAT EarthView.StarCount = 7000;
-GMAT EarthView.EnableStars = On;
-GMAT EarthView.EnableConstellations = On;
-
 
 % -------------------------------------------------------------------------
 % ---------------------------  Begin Mission Sequence ---------------------
@@ -144,7 +73,7 @@ If 'If Sat.TA > 178' Sat.TA > 178
 EndIf;
 
 % =========================================================================
-%  Example:  If TA is < 90 do prop to periapsis, otherwise, prop to apoapsis
+%  Example:  If TA is < 90 prop to periapsis, otherwise, prop to apoapsis
 % =========================================================================
 If 'If Sat.TA > 90' Sat.TA > 90
    Propagate 'Prop to Periapsis' EarthPointMass(Sat) {Sat.Periapsis};

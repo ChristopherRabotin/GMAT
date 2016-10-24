@@ -206,10 +206,15 @@ data\planetary_ephem/spk\de421.bsp</code></programlisting>
       <para>Absolute paths are passed to the underlying operating system
       as-is, aside from normalizing the slashes.</para>
 
-      <para>Relative paths are considered relative to a location defined by
-      each resource type separately, and usually defined in the GMAT startup
-      file. For details, see the reference documentation for each resource
-      type.</para>
+      <para>For input files, relative paths are first considered relative to
+      the script file, then to a location defined by each resource type
+      separately, and usually defined in the GMAT startup file. For details,
+      see the reference documentation for each resource type.</para>
+
+      <para>For output files, relative paths are considered relative to the
+      script file. If only a filename is specified, the file is placed into
+      the output location defined in the GMAT startup file (usually GMAT's
+      <filename>output</filename> folder).</para>
 
       <para>File paths are written as string literals (see <xref
       linkend="ScriptLanguage_Strings" xrefstyle="select:title"/> under <xref
@@ -420,6 +425,13 @@ data\planetary_ephem/spk\de421.bsp</code></programlisting>
         case-sensitive name, the first <guilabel>Create</guilabel> statement
         in the script with that name is executed and all subsequent ones are
         ignored. The conflict is noted in a warning message.</para>
+
+        <caution>
+          <para>GMAT does not test to ensure that
+          <guilabel>Resource</guilabel> names and function names are unique.
+          Care should be taken to use unique names for user-defined GMAT,
+          MATLAB, and Python functions to avoid name clashes. </para>
+        </caution>
 
         <para>Command names and keywords are reserved. They cannot be used as
         resource names. See the <xref linkend="ScriptLanguage_Keywords"

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // *** File Name : ODEModel.hpp
 // *** Created   : October 1, 2002
@@ -69,10 +79,6 @@
 #include <string.h>
 
 #include <fstream>            // Used for streams in debugging methods
-
-
-class PropagationStateManager;
-
 
 
 /**
@@ -212,6 +218,8 @@ public:
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
    virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
+   virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    
    virtual std::string  GetOnOffParameter(const Integer id) const;
@@ -245,7 +253,7 @@ public:
    void                 UpdateInitialData(bool dynamicOnly = false);
    void                 ReportEpochData();
    
-   void                 SetPropStateManager(PropagationStateManager *sm);
+
    void                 SetState(GmatState *gms);
 
    virtual bool         HasLocalClones();
@@ -256,6 +264,7 @@ public:
 
    // Interface added for the C Interface to force epoch updates
    bool                 SetEpoch(const GmatEpoch newEpoch); 
+   virtual void         SetPropStateManager(PropagationStateManager *sm);
 
 protected:
    /// Count of the number of forces in the model
@@ -266,8 +275,6 @@ protected:
    Integer stateSize;
    /// The state that the model uses; set by a StateManager
    GmatState *state;
-   /// Associated Prop State Manager
-   PropagationStateManager *psm;
    
 //   /// List of spacecraft and formations that get propagated
 //   std::vector<SpaceObject *> spacecraft;
@@ -309,6 +316,12 @@ protected:
    
    /// Parameter IDs on spacecraft needed to access the parms during integration
    Integer satIds[7];
+
+   /// Internal flag used to relax constraint for Cd
+   bool constrainCd;
+   /// Internal flag used to relax constraint for Cr
+   bool constrainCr;
+
 
    /// ID for CartesianState start for processing dynamic state data
    Integer stateStart;
@@ -382,7 +395,8 @@ protected:
 
    bool                      BuildModelElement(Gmat::StateElementId id, 
                                                Integer start, 
-                                               Integer objectCount);
+                                               Integer objectCount,
+                                               Integer size);
    bool                      PrepareDerivativeArray();
    bool                      CompleteDerivativeCalculations(Real *state);
    
@@ -391,6 +405,8 @@ protected:
    
    /// map of mu values for SpacePoints
    std::map<std::string, Real>    muMap;
+   /// Toggles for error control
+   BooleanArray applyErrorControl;
 
    enum
    {

@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: LaMont Ruley
 // Created: 2003/12/01
@@ -32,6 +42,7 @@ BEGIN_EVENT_TABLE(ManeuverPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_COMBOBOX(ID_BURN_COMBOBOX, ManeuverPanel::OnBurnComboBoxChange)
    EVT_COMBOBOX(ID_SAT_COMBOBOX, ManeuverPanel::OnSatComboBoxChange)
+   EVT_CHECKBOX(ID_BACKPROP_CHECKBOX, ManeuverPanel::OnBackpropCheckBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -93,6 +104,15 @@ void ManeuverPanel::OnSatComboBoxChange(wxCommandEvent& event)
    EnableUpdate(true);
 }
 
+
+//------------------------------------------------------------------------------
+// void OnCheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ManeuverPanel::OnBackpropCheckBoxChange(wxCommandEvent& event)
+{
+   EnableUpdate(true);
+}
+
 //----------------------------------
 // methods inherited from GmatPanel
 //----------------------------------
@@ -150,6 +170,14 @@ void ManeuverPanel::Create()
    // create spacecraft combo box
    satCB = theGuiManager->GetSpacecraftComboBox(this, ID_SAT_COMBOBOX, wxSize(150,-1));
    
+   //----------------------------------------------------------------------
+   // Backprop
+   //----------------------------------------------------------------------
+   backpropCheckBox =
+      new wxCheckBox(this, ID_BACKPROP_CHECKBOX, gmatwxT(GUI_ACCEL_KEY"Backprop"),
+      wxDefaultPosition, wxSize(-1, -1), bsize);
+   backpropCheckBox->SetToolTip(_T("Apply maneuver backwards in time"));
+
    // add burn label and combobox to burn sizer
    pageFlexGridSizer->Add( burnLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    pageFlexGridSizer->Add( burnCB, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -157,7 +185,10 @@ void ManeuverPanel::Create()
    // add spacecraft label and combobox to spacecraft sizer
    pageFlexGridSizer->Add( spacecraftLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    pageFlexGridSizer->Add( satCB, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-    
+
+   // Add the backprop toggle
+   pageFlexGridSizer->Add(backpropCheckBox, 0, wxGROW | wxALIGN_LEFT | wxALL, bsize);
+
    // add to middle sizer
    theMiddleSizer->Add(pageFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, 5);     
     
@@ -232,7 +263,7 @@ void ManeuverPanel::LoadData()
           satCB->SetStringSelection("");
    }
    
-
+   backpropCheckBox->SetValue(theCommand->GetBooleanParameter("BackProp"));
 }
 
 //------------------------------------------------------------------------------
@@ -260,6 +291,12 @@ void ManeuverPanel::SaveData()
            id = theCommand->GetParameterID("Spacecraft");
            std::string spacecraft = std::string (satString.c_str());
            theCommand->SetStringParameter(id, spacecraft);
+
+           if (backpropCheckBox->IsChecked())
+              theCommand->SetBooleanParameter("BackProp", true);
+           else
+              theCommand->SetBooleanParameter("BackProp", false);
+
    }
    catch (BaseException &e)
    {

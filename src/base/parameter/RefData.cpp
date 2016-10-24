@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -24,29 +34,35 @@
 #include "StringUtil.hpp"          // for ParseParameter()
 #include "MessageInterface.hpp"
 
+//#define DEBUG_REFDATA_CREATE
 //#define DEBUG_REFDATA_OBJECT 2
-//#define DEBUG_REFDATA_OBJECT_GET 2
-//#define DEBUG_REFDATA_OBJECT_SET 2
+//#define DEBUG_REF_OBJECT 2
 //#define DEBUG_REFDATA_FIND 1
 //#define DEBUG_REFDATA_ADD 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_CLONE 1
-//#define DEBUG_REFDATA
 
 //---------------------------------
 // public methods
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// RefData(const std::string &name = "", Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT)
+// RefData(const std::string &name = "", const std::string &typeName = "",
+//         Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
+RefData::RefData(const std::string &name, const std::string &typeName,
+                 const Gmat::ObjectType paramOwnerType,
                  GmatParam::DepObject depObj, bool isSettable)
 {
+   #ifdef DEBUG_REFDATA_CREATE
+   MessageInterface::ShowMessage
+      ("RefData(%s) constructor entered, depObj=%d, isSettable=%d\n", name.c_str(),
+       depObj, isSettable);
+   #endif
    mParameter = NULL;
    mActualParamName = name;
    GmatStringUtil::ParseParameter(name, mParamTypeName, mParamOwnerName, mParamDepName);
@@ -55,10 +71,16 @@ RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
    mIsParamSettable = isSettable;
    mRefObjList.clear();
    mNumRefObjects = 0;
-   #ifdef DEBUG_REFDATA
+
+   if (mParamTypeName == "")
+      mParamTypeName = typeName;
+   
+   #ifdef DEBUG_REFDATA_CREATE
    MessageInterface::ShowMessage
-      ("RefData(%s) constructor leaving, mParamOwnerType = %d, mParamTypeName=%s, mParamOwnerName=%s, mParamDepName=%s\n",
-       name.c_str(), mParamOwnerType, mParamTypeName.c_str(), mParamOwnerName.c_str(), mParamDepName.c_str());
+      ("RefData(%s) constructor leaving, mActualParamName='%s', mParamOwnerType=%d, "
+       "mParamTypeName='%s', mParamOwnerName='%s', mParamDepName='%s'\n", name.c_str(),
+       mActualParamName.c_str(), mParamOwnerType, mParamTypeName.c_str(),
+       mParamOwnerName.c_str(), mParamDepName.c_str());
    #endif
 }
 
@@ -74,7 +96,9 @@ RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
 //------------------------------------------------------------------------------
 RefData::RefData(const RefData &copy)
 {
-   mParameter = NULL; // This will be set during initialization
+   // Copy mParameter here for GmatFunction to work (LOJ: 2015.07.28)
+   //mParameter = NULL; // This will be set during initialization
+   mParameter = copy.mParameter;
    mActualParamName = copy.mActualParamName;
    mParamOwnerName = copy.mParamOwnerName;
    mParamDepName = copy.mParamDepName;
@@ -139,6 +163,11 @@ RefData::~RefData()
 //------------------------------------------------------------------------------
 void RefData::SetParameter(Parameter *param)
 {
+   #ifdef DEBUG_PARAM
+   MessageInterface::ShowMessage
+      ("RefData::SetParameter() <%p>'%s' entered, param=<%p>'%s'\n", this,
+       mActualParamName.c_str(), param, param ? param->GetName().c_str() : "NULL");
+   #endif
    mParameter = param;
 }
 
@@ -235,17 +264,17 @@ GmatBase* RefData::GetParameterOwner()
 std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
 {
    #if DEBUG_REFDATA_OBJECT > 1
-   MessageInterface::ShowMessage("RefData::GetRefObjectName() entered, type=%d\n",
-         type);
-   MessageInterface::ShowMessage(" ... number of ref objects = %d\n", mNumRefObjects);
+   MessageInterface::ShowMessage
+      ("RefData::GetRefObjectName() entered, type=%d\n", type);
+   MessageInterface::ShowMessage("   number of ref objects = %d\n", mNumRefObjects);
    #endif
-
+   
    for (int i=0; i<mNumRefObjects; i++)
    {
       #if DEBUG_REFDATA_OBJECT > 1
       MessageInterface::ShowMessage
-         ("   mRefObjList[%d].objType=%d, %s\n", i,
-               mRefObjList[i].objType, mRefObjList[i].objName.c_str());
+         ("   mRefObjList[%d].objType=%d, obj=<%p>, %s\n", i, mRefObjList[i].objType,
+          mRefObjList[i].obj, mRefObjList[i].objName.c_str());
       #endif
       
       if (mRefObjList[i].objType == type)
@@ -259,16 +288,34 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
          
          return mRefObjList[i].objName; 
       }
+      else
+      {
+         if (mRefObjList[i].obj != NULL && mRefObjList[i].obj->IsOfType(type))
+         {
+            //Notes: will return first object name.
+            #if DEBUG_REFDATA_OBJECT > 1
+            MessageInterface::ShowMessage
+               ("RefData::GetRefObjectName() type=%d returning: %s\n", type,
+                mRefObjList[i].objName.c_str());
+            #endif
+            
+            return mRefObjList[i].objName; 
+         }
+      }
    }
    
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
       ("RefData::GetRefObjectName() '%s', type=%d, throwing exception "
-       "INVALID_OBJECT_TYPE\n", mActualParamName.c_str(), type);
+       "Unknown Ref Object Type, ref. object of this type never set.\n",
+       mActualParamName.c_str(), type);
    #endif
    
-   //return "RefData::GetRefObjectName(): INVALID_OBJECT_TYPE";
-   throw ParameterException("RefData::GetRefObjectName(): INVALID_OBJECT_TYPE");
+   std::stringstream errmsg;
+   errmsg << "*** INTERNAL ERROR: RefData::GetRefObjectName(): The type " << type <<
+      " is unknown ref object type for " << mActualParamName << "' or " <<
+      "ref object never set to this Parameter in the Moderator.";
+   throw ParameterException(errmsg.str());
 }
 
 
@@ -287,7 +334,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllRefObjectNames.clear();
 
-   #if DEBUG_REFDATA_OBJECT_GET
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
       ("RefData::GetRefObjectNameArray() '%s', type=%d\n   there are %d ref "
        "objects\n", mActualParamName.c_str(), type, mNumRefObjects);
@@ -336,16 +383,17 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 {
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
-      ("RefData::SetRefObjectName() '%s' entered, type=%d(%s), name=%s\n",
-       mActualParamName.c_str(), type,  GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(), name.c_str());
+      ("RefData::SetRefObjectName() '%s' entered, type=%d(%s), name='%s', "
+       "mParamOwnerName='%s'\n", mActualParamName.c_str(), type,
+       GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(), name.c_str(),
+       mParamOwnerName.c_str());
    #endif
    
    if (FindFirstObjectName(type) != "")
    {
       #if DEBUG_REFDATA_OBJECT
       MessageInterface::ShowMessage
-         ("RefData::SetRefObjectName() '%s' entered, first of type %d is %s\n",
-          mActualParamName.c_str(), type, (FindFirstObjectName(type)).c_str());
+         ("   First object name of type %d is %s\n", type, (FindFirstObjectName(type)).c_str());
       #endif
       for (int i=0; i<mNumRefObjects; i++)
       {
@@ -353,17 +401,37 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
          {
             #if DEBUG_REFDATA_OBJECT
             MessageInterface::ShowMessage
-               ("in RefData::SetRefObjectName() setting object of type %d at position %d with old name \"%s\" to new name \"%s\"\n",
+               ("   Setting object of type %d at position %d with old name \"%s\" to new name \"%s\"\n",
                 (Integer) type, (Integer) i, mRefObjList[i].objName.c_str(), name.c_str());
             #endif
             mRefObjList[i].objName = name;
+            #if DEBUG_REFDATA_OBJECT
+            MessageInterface::ShowMessage
+               ("RefData::SetRefObjectName() '%s' returning true\n", mActualParamName.c_str());
+            #endif
             return true;
          }
       }
    }
    
-   return AddRefObject(type, name);
+   if (mParamOwnerName == "")
+   {
+      if (type == mParamOwnerType)
+         mParamOwnerName = name;
+   }
    
+   #if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage
+      ("   mActualParamName='%s', mParamOwnerType=%d, mParamTypeName='%s', "
+       "mParamOwnerName='%s', mParamDepName='%s'\n", mActualParamName.c_str(),
+       mParamOwnerType, mParamTypeName.c_str(), mParamOwnerName.c_str(),
+       mParamDepName.c_str());
+   MessageInterface::ShowMessage
+      ("RefData::SetRefObjectName() '%s' returning AddRefObject(type, name)\n",
+       mActualParamName.c_str());
+   #endif
+   
+   return AddRefObject(type, name);
 }
 
 
@@ -374,21 +442,42 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
                                 const std::string &name)
 {
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::GetRefObject() <%p>'%s' entered, type=%d, name='%s', mNumRefObjects=%d\n",
+       this, mActualParamName.c_str(), type, name.c_str(), mNumRefObjects);
+   #endif
+   
+   GmatBase *refObj = NULL;
+   
    for (int i=0; i<mNumRefObjects; i++)
    {
       if (mRefObjList[i].objType == type)
       {
          if (name == "") //if name is "", return first object
-            return mRefObjList[i].obj;
+         {
+            //return mRefObjList[i].obj;
+            refObj = mRefObjList[i].obj;
+            break;
+         }
          
          if (mRefObjList[i].objName == name)
          {
-            return mRefObjList[i].obj;
+            //return mRefObjList[i].obj;
+            refObj = mRefObjList[i].obj;
+            break;
          }
       }
    }
    
-   return NULL;
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::GetRefObject() <%p>'%s' returning %s\n", this, mActualParamName.c_str(),
+       GmatBase::WriteObjectInfo("", refObj).c_str());
+   #endif
+   
+   //return NULL;
+   return refObj;
 }
 
 
@@ -406,7 +495,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                            const std::string &name)
 {
    bool status = false;
-   #if DEBUG_REFDATA_OBJECT_SET
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
       ("RefData::SetRefObject() <%p>'%s' entered\n   numRefObjects=%d, type=%d, "
        "obj=<%p>'%s'\n", this, mActualParamName.c_str(), mNumRefObjects, type, obj, name.c_str());
@@ -421,14 +510,33 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    
    for (int i=0; i<mNumRefObjects; i++)
    {
-      if (mRefObjList[i].objType == actualType)
+      #if DEBUG_REF_OBJECT > 1
+      MessageInterface::ShowMessage
+         ("   type=%d, obj=<%p>, name='%s'\n", mRefObjList[i].objType,
+          mRefObjList[i].obj, mRefObjList[i].objName.c_str());
+      #endif
+      
+      // Check for the name first and use SPACE_POINT type to set object pointer
+      // if input type is SPACECRAFT for GMAT function work (LOJ: 2015.03.03)
+      if (mRefObjList[i].objName == name)
       {
-         if (mRefObjList[i].objName == name)
+         if (mRefObjList[i].objType == actualType)
          {
             mRefObjList[i].obj = obj;
-            #if DEBUG_REFDATA_OBJECT_SET > 1
+            #if DEBUG_REF_OBJECT > 1
             MessageInterface::ShowMessage
-               ("   The object pointer <%p> set to '%s'\n", obj, name.c_str());
+               ("   1 The object pointer <%p> set to '%s'\n", obj, name.c_str());
+            #endif
+            status = true;
+            break;
+         }
+         else if (actualType == Gmat::SPACECRAFT &&
+                  mRefObjList[i].objType == Gmat::SPACE_POINT)
+         {
+            mRefObjList[i].obj = obj;
+            #if DEBUG_REF_OBJECT > 1
+            MessageInterface::ShowMessage
+               ("   2 The object pointer <%p> set to '%s'\n", obj, name.c_str());
             #endif
             status = true;
             break;
@@ -436,25 +544,16 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
    }
    
-   #if DEBUG_REFDATA_OBJECT_SET > 1
-   for (int i=0; i<mNumRefObjects; i++)
-   {
-      MessageInterface::ShowMessage
-         ("   type=%d, obj=<%p>, name='%s'\n", mRefObjList[i].objType,
-          mRefObjList[i].obj, mRefObjList[i].objName.c_str());
-   }   
-   #endif
-   
    if (!status)
    {
-      #if DEBUG_REFDATA_OBJECT_SET
+      #if DEBUG_REF_OBJECT
       MessageInterface::ShowMessage
          ("*** WARNING *** RefData::SetRefObject() Cannot find '%s' of type '%s'\n",
           name.c_str(), GmatBase::GetObjectTypeString(actualType).c_str());
       #endif
    }
    
-   #if DEBUG_REFDATA_OBJECT_SET
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
       ("RefData::SetRefObject() <%p>'%s' returning %d\n", this, mActualParamName.c_str(), status);
    #endif
@@ -487,7 +586,8 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
    // Check for allowed object types for rename
    if (type != Gmat::SPACECRAFT       && type != Gmat::COORDINATE_SYSTEM &&
        type != Gmat::CALCULATED_POINT && type != Gmat::BURN              &&
-       type != Gmat::IMPULSIVE_BURN   && type != Gmat::HARDWARE          &&
+       type != Gmat::IMPULSIVE_BURN   && type != Gmat::FINITE_BURN       &&
+       type != Gmat::HARDWARE         &&
        type != Gmat::THRUSTER         && type != Gmat::FUEL_TANK         &&
        type != Gmat::BARYCENTER       && type != Gmat::LIBRATION_POINT   &&
        type != Gmat::BODY_FIXED_POINT && type != Gmat::GROUND_STATION    &&
@@ -579,15 +679,15 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
 {
    #if DEBUG_REFDATA_ADD
    MessageInterface::ShowMessage
-      ("==> RefData::AddRefObject() '%s' entered, mNumRefObjects=%d, type=%d, "
-       "name=%s, obj=%p, replaceName=%d\n", mActualParamName.c_str(), mNumRefObjects, type,
-       name.c_str(), obj, replaceName);
+      ("RefData::AddRefObject() '%s' entered, mNumRefObjects=%d, type=%d, "
+       "name='%s', obj=<%p>, replaceName=%d\n", mActualParamName.c_str(), mNumRefObjects,
+       type, name.c_str(), obj, replaceName);
    #endif
    
    Gmat::ObjectType actualType = type;
    if (type == Gmat::CELESTIAL_BODY)
       actualType = Gmat::SPACE_POINT;
-
+   
    if (IsValidObjectType(actualType))
    {
       if (FindFirstObjectName(actualType) == "")
@@ -595,6 +695,10 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
          RefObjType newObj(actualType, name, obj);
          mRefObjList.push_back(newObj);
          mNumRefObjects = mRefObjList.size();
+         #if DEBUG_REFDATA_ADD
+         MessageInterface::ShowMessage
+            ("RefData::AddRefObject() '%s' returning true\n", mActualParamName.c_str());
+         #endif
          return true;        
       }
       else
@@ -604,6 +708,10 @@ bool RefData::AddRefObject(const Gmat::ObjectType type, const std::string &name,
          else
             SetRefObject(obj, actualType, name);
          
+         #if DEBUG_REFDATA_ADD
+         MessageInterface::ShowMessage
+            ("RefData::AddRefObject() '%s' returning true\n", mActualParamName.c_str());
+         #endif
          return true;
       }
    }
@@ -758,6 +866,19 @@ GmatBase* RefData::FindFirstObject(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
+// std::string FindFirstObjectName(const std::string &typeName) const
+//------------------------------------------------------------------------------
+/**
+ * @return first object name found for given object type name.
+ */
+//------------------------------------------------------------------------------
+std::string RefData::FindFirstObjectName(const std::string &typeName) const
+{   
+   return FindFirstObjectName(GmatBase::GetObjectType(typeName));
+}
+
+
+//------------------------------------------------------------------------------
 // std::string FindFirstObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
 /**
@@ -766,18 +887,32 @@ GmatBase* RefData::FindFirstObject(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
 std::string RefData::FindFirstObjectName(const Gmat::ObjectType type) const
 {
+   #if DEBUG_REFDATA_OBJECT > 1
+   MessageInterface::ShowMessage
+      ("RefData::FindFirstObjectName() entered, type=%d\n", type);
+   #endif
    for (int i=0; i<mNumRefObjects; i++)
    {
       #if DEBUG_REFDATA_OBJECT > 1
       MessageInterface::ShowMessage
-         ("RefData::FindFirstObjectName() mRefObjList[%d].objType=%d, objName=%s\n",
-          i, mRefObjList[i].objType, mRefObjList[i].objName.c_str());
+         ("   mRefObjList[%d].objType=%d, objName=%s\n", i, mRefObjList[i].objType,
+          mRefObjList[i].objName.c_str());
       #endif
       
       if (mRefObjList[i].objType == type)
+      {
+         #if DEBUG_REFDATA_OBJECT > 1
+         MessageInterface::ShowMessage
+            ("RefData::FindFirstObjectName() returnig '%s'\n", mRefObjList[i].objName.c_str());
+         #endif
          return mRefObjList[i].objName;
+      }
    }
    
+   #if DEBUG_REFDATA_OBJECT > 1
+   MessageInterface::ShowMessage
+      ("RefData::FindFirstObjectName() returnig '', no name of given type found\n");
+   #endif
    return "";
 }
 

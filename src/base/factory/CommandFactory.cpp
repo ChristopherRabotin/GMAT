@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -42,8 +52,10 @@
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Report.hpp"         // for Report command
 #include "SaveMission.hpp"    // for SaveMission command  
-#include "Stop.hpp"           // for Stop command  
+#include "Stop.hpp"           // for Stop command
+#include "FindEvents.hpp"     // forFindEvents command
 //#include "CallGmatFunction.hpp"   // for CallGmatFunction command
+#include "CallBuiltinGmatFunction.hpp"
 #include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
 #include "EndFiniteBurn.hpp"  // for EndFiniteBurn command
 #include "BeginScript.hpp"    // for BeginScript command
@@ -57,8 +69,9 @@
 #include "PenUp.hpp"          // for PenUp command
 #include "PenDown.hpp"        // for PenDown command
 #include "MarkPoint.hpp"      // for MarkPoint command
-//#include "Global.hpp"         // for Global command
+//#include "Global.hpp"       // for Global command
 #include "Create.hpp"         // for Create command
+#include "Write.hpp"          // for Write command
 
 //******************************************************************************
 // ElseIf does not work yet. (2008.08.29)
@@ -141,6 +154,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
     //   return new CallFunction;
 //    else if (ofType == "CallGmatFunction")
 //        return new CallGmatFunction;
+    else if (ofType == "CallBuiltinGmatFunction")
+       return new CallBuiltinGmatFunction;
     else if (ofType == "BeginFiniteBurn")
         return new BeginFiniteBurn;
     else if (ofType == "EndFiniteBurn")
@@ -151,6 +166,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
          return new EndScript;
     else if (ofType == "Stop")
         return new Stop;
+    else if (ofType == "FindEvents")
+        return new FindEvents;
     else if (ofType == "Optimize")
         return new Optimize;
     else if (ofType == "EndOptimize")
@@ -171,6 +188,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
 //        return new Global;
     else if (ofType == "Create")
         return new Create;
+    else if (ofType == "Write")
+        return new Write;
    // add more here .......
    else 
    {
@@ -201,9 +220,11 @@ CommandFactory::CommandFactory() :
       sequenceStarters.push_back("BeginMissionSequence");
       creatables.push_back("BeginScript");
       creatables.push_back("CallFunction");
+      creatables.push_back("CallBuiltinGmatFunction");
 //      creatables.push_back("CallGmatFunction");
       creatables.push_back("ClearPlot");
       creatables.push_back("Create");
+      creatables.push_back("Write");
       creatables.push_back("Else");
 #ifdef __INCLUDE_ELSEIF__
       creatables.push_back("ElseIf");
@@ -233,6 +254,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("SaveMission");
       creatables.push_back("ScriptEvent");
       creatables.push_back("Stop");
+      creatables.push_back("FindEvents");
       creatables.push_back("Target");
       creatables.push_back("Toggle");
       creatables.push_back("Vary");
@@ -256,6 +278,9 @@ CommandFactory::CommandFactory() :
       
       // These commands only works in object setup mode and inside a GmatFunction
       unviewables.push_back("Create");
+
+      // Commented out. If this breaks lots of GUI testing uncomment this
+      //unviewables.push_back("Write");
       
       // CallFunction is parent command of CallGmatFunction and CallMatlabFunction
       unviewables.push_back("CallFunction");

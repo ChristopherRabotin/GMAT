@@ -1,12 +1,22 @@
-//$Id: MeasurementModelFactory.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: MeasurementModelFactory.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                         MeasurementModelFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -22,6 +32,8 @@
 
 #include "MeasurementModelFactory.hpp"
 #include "MeasurementModel.hpp"
+#include "TrackingFileSet.hpp"
+#include "MessageInterface.hpp"
 
 
 //---------------------------------
@@ -44,10 +56,21 @@
  * added later.
  */
 //------------------------------------------------------------------------------
-MeasurementModel* MeasurementModelFactory::CreateMeasurementModel(
+MeasurementModelBase* MeasurementModelFactory::CreateMeasurementModel(
       const std::string & ofType, const std::string & withName)
 {
-   return new MeasurementModel(withName);
+   Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+   //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+   if (runmode == GmatGlobal::TESTING)
+   {
+      if (ofType == "MeasurementModel")
+         return new MeasurementModel(withName);
+   }
+
+   if (ofType == "TrackingFileSet")
+      return new TrackingFileSet(withName);
+
+   return NULL;
 }
 
 
@@ -64,7 +87,12 @@ MeasurementModelFactory::MeasurementModelFactory() :
 {
    if (creatables.empty())
    {
-      creatables.push_back("MeasurementModel");
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
+         creatables.push_back("MeasurementModel");
+
+      creatables.push_back("TrackingFileSet");
    }
 }
 
@@ -95,7 +123,12 @@ MeasurementModelFactory::MeasurementModelFactory(StringArray createList) :
 {
    if (creatables.empty())
    {
-      creatables.push_back("MeasurementModel");
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
+         creatables.push_back("MeasurementModel");
+
+      creatables.push_back("TrackingFileSet");
    }
 }
 
@@ -115,7 +148,12 @@ MeasurementModelFactory::MeasurementModelFactory(const MeasurementModelFactory &
 {
    if (creatables.empty())
    {
-      creatables.push_back("MeasurementModel");
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
+         creatables.push_back("MeasurementModel");
+
+      creatables.push_back("TrackingFileSet");
    }
 }
 
@@ -138,7 +176,12 @@ MeasurementModelFactory&
    Factory::operator=(fact);
    if (creatables.empty())
    {
-      creatables.push_back("MeasurementModel");
+      Integer runmode = GmatGlobal::Instance()->GetRunModeStartUp();
+      //if ((runmode == GmatGlobal::TESTING) || (runmode == GmatGlobal::TESTING_NO_PLOTS))
+      if (runmode == GmatGlobal::TESTING)
+         creatables.push_back("MeasurementModel");
+
+      creatables.push_back("TrackingFileSet");
    }
    return *this;
 }

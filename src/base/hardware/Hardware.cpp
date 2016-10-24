@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Darrel J. Conway
 // Created: 2004/11/08
@@ -23,6 +33,8 @@
 #include "Hardware.hpp"
 #include "HardwareException.hpp"
 #include <string.h>
+
+//#define DEBUG_HW_SET
 
 
 //---------------------------------
@@ -281,7 +293,12 @@ Real Hardware::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Hardware::SetRealParameter(const Integer id, const Real value)
 {
-   switch (id) {
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("In HW::SetReal, id = %d (%s), value = %12.10f\n",
+            id, GetParameterText(id).c_str(), value);
+   #endif
+   switch (id)
+   {
       case DIRECTION_X:
          return direction[0] = value;
          
@@ -338,6 +355,53 @@ Real Hardware::SetRealParameter(const std::string &label, const Real value)
    return SetRealParameter(GetParameterID(label), value);
 }
 
+
+Real Hardware::GetRealParameter(const Integer id,
+                                      const Integer index) const
+{
+   return GmatBase::GetRealParameter(id, index);
+}
+
+Real Hardware::SetRealParameter(const Integer id, const Real value,
+                                      const Integer index)
+{
+   return GmatBase::SetRealParameter(id, value, index);
+}
+
+Real Hardware::GetRealParameter(const std::string &label,
+                                      const Integer index) const
+{
+   return GetRealParameter(GetParameterID(label), index);
+}
+
+Real Hardware::SetRealParameter(const std::string &label,
+                                      const Real value,
+                                      const Integer index)
+{
+   return SetRealParameter(GetParameterID(label), value, index);
+}
+
+const Rvector& Hardware::GetRvectorParameter(const Integer id) const
+{
+   return GmatBase::GetRvectorParameter(id);
+}
+
+const Rvector& Hardware::SetRvectorParameter(const Integer id,
+                                         const Rvector &value)
+{
+   return GmatBase::SetRvectorParameter(id, value);
+}
+
+const Rvector& Hardware::GetRvectorParameter(const std::string &label) const
+{
+   return GetRvectorParameter(GetParameterID(label));
+}
+
+const Rvector& Hardware::SetRvectorParameter(const std::string &label,
+                                         const Rvector &value)
+{
+   return SetRvectorParameter(GetParameterID(label), value);
+}
 
 
 //------------------------------------------------------------------------

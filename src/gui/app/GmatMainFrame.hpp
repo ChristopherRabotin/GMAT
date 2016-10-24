@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2003/08/05
@@ -102,7 +112,8 @@ public:
    void CloseActiveChild();
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          bool closeReports = true, bool closeUndockedMissionTree = true,
-                         bool closingGmat = false);
+                         bool closingGmat = false, bool closeWelcomePanel = true,
+                         bool closeSolverWindows = true);
    void MinimizeChildren();
    void ComputeReportPositionAndSize(const wxString &name, Integer &x,
                                      Integer &y, Integer &w, Integer &h,
@@ -115,7 +126,8 @@ public:
    bool InterpretScript(const wxString &filename,
                         Integer scriptOpenOpt = GmatGui::OPEN_SCRIPT_ON_ERROR,
                         bool closeScript = false, bool readBack = false,
-                        const wxString &savePath = "", bool multScripts = false);
+                        const wxString &savePath = "", bool multScripts = false,
+                        bool closeWelcomePanel = true);
    bool BuildScript(const wxString &filename, bool addToResourceTree = false);
    Integer RunCurrentScript();
    Integer BuildAndRunScript(const wxString &filename, bool addToResourceTree = false);
@@ -156,13 +168,14 @@ public:
    void OnHelpTutorial(wxCommandEvent &event);
    void OnHelpForum(wxCommandEvent &event);
    void OnHelpIssue(wxCommandEvent &event);
+   void OnHelpUpdate(wxCommandEvent &event);
    void OnHelpFeedback(wxCommandEvent &event);
    void OnHyperLinkClick(wxHyperlinkEvent &event);
    
    void OnNewScript(wxCommandEvent &event);
    void OnOpenScript(wxCommandEvent &event);
    void OpenRecentScript(size_t index, wxCommandEvent &event);
-   void OpenRecentScript(wxString filename, wxCommandEvent &event);
+   void OpenRecentScript(wxString filename, wxCommandEvent &event, bool closeWelcomePanel = true);
    void OnOpenRecentScript1(wxCommandEvent &event);  // I know this is retarded but the event returns the MDI frame
    void OnOpenRecentScript2(wxCommandEvent &event);  // as its event object.  There doesn't seem to be a way
    void OnOpenRecentScript3(wxCommandEvent &event);  // to figure out which menu item called an event handler
@@ -224,12 +237,14 @@ public:
    void OnScriptRun(wxCommandEvent& WXUNUSED(event));
    void OnCloseAll(wxCommandEvent &event);
    void OnCloseActive(wxCommandEvent &event);
-
+   
+   bool SetScriptFileName(const char *filename);
    bool SetScriptFileName(const std::string &filename);
    bool IsActiveScriptModified();
    void RefreshActiveScript(const wxString &filename, bool reloadFile = true);
    std::string GetActiveScriptFileName();
    void UpdateGuiScriptSyncStatus(int guiStatus, int scriptStatus);
+   void UpdateAdvancedGuiMode(int status);
    
    virtual bool Show(bool show = true);
    
@@ -251,6 +266,8 @@ private:
    bool mExitWithoutConfirm;
    bool mUndockedMissionTreePresized;
    Integer mRunStatus;
+
+   bool useChildDelete;
    
    GmatServer *mMatlabServer;
    std::string mScriptFilename;

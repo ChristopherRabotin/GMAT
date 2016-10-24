@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2004/02/25
@@ -286,7 +296,9 @@ void ParameterSelectDialog::Create()
 void ParameterSelectDialog::LoadData()
 {   
    #ifdef DEBUG_LOAD
-      MessageInterface::ShowMessage("\nParameterSelectDialog::LoadData() entered.\n");
+   MessageInterface::ShowMessage
+      ("\nParameterSelectDialog::LoadData() entered, mShowOption=%d, mAllowSysParam=%d, "
+       "mAllowMultiSelect=%d\n", mShowOption, mAllowSysParam, mAllowMultiSelect);
    #endif
    
    if (mShowOption == GuiItemManager::SHOW_WHOLE_OBJECT_ONLY)
@@ -298,7 +310,9 @@ void ParameterSelectDialog::LoadData()
       {
          mPropertyListBox->SetSelection(0);
          
-         if (mObjectType == "ImpulsiveBurn" || mAllowMultiSelect)
+         //if (mObjectType == "ImpulsiveBurn" || mAllowMultiSelect)
+         if (mAllowMultiSelect ||
+             mObjectType == "ImpulsiveBurn" || mObjectType == "FiniteBurn")
          {
             mCoordSysLabel->Hide();
             mCoordSysComboBox->SetValue("");
@@ -317,6 +331,8 @@ void ParameterSelectDialog::LoadData()
             ShowCoordSystem(false);
          }
       }
+      else
+		  ShowCoordSystem(false);
    }
    
    // Hide array element
@@ -580,7 +596,8 @@ void ParameterSelectDialog::OnListBoxSelect(wxCommandEvent& event)
       
       // Show coordinate system or central body
       wxString objType = mObjectTypeComboBox->GetValue();
-      bool objIsBurn = (objType == "ImpulsiveBurn");
+      //bool objIsBurn = (objType == "ImpulsiveBurn");
+      bool objIsBurn = (objType == "ImpulsiveBurn" || objType == "FiniteBurn");
       ShowCoordSystem(objIsBurn);
    }
    
@@ -678,6 +695,8 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
          ShowSpacePoints();
       else if (objType == "ImpulsiveBurn")
          ShowImpulsiveBurns();
+      else if (objType == "FiniteBurn")
+         ShowFiniteBurns();
       else if (objType == "Variable")
          ShowVariables();
       else if (objType == "Array")
@@ -780,8 +799,8 @@ void ParameterSelectDialog::OnCheckBoxChange(wxCommandEvent& event)
          mObjectListBox->SetWindowStyle(wxLB_SINGLE);
          if (mObjectTypeComboBox->GetValue() == "Array")
             ShowArrayIndex(true);
-         else if ((objType == "Spacecraft") || objType == "ImpulsiveBurn" ||
-                  (objType == "SpacePoint"))
+         else if ((objType == "Spacecraft")    || (objType == "SpacePoint") ||
+                  (objType == "ImpulsiveBurn") || (objType == "FiniteBurn"))
          {
             ShowObjectProperties();
             if (objType == "Spacecraft")
@@ -1316,6 +1335,35 @@ void ParameterSelectDialog::ShowImpulsiveBurns()
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void ShowFiniteBurns()
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::ShowFiniteBurns()
+{
+   #ifdef DEBUG_SHOW_BURNS
+   MessageInterface::ShowMessage("ShowFiniteBurns() entered\n");
+   #endif
+   
+   // Show or hide entire object option
+   mEntireObjectCheckBox->Hide();
+   mAllowWholeObject = false;
+   if (mShowObjectOption == 1)
+   {
+      mEntireObjectCheckBox->Show();
+      mAllowWholeObject = mEntireObjectCheckBox->IsChecked();
+   }
+   
+   // Show FiniteBurn objects
+   mObjectListBox->InsertItems(theGuiManager->GetFiniteBurnList(), 0);
+   mObjectListBox->SetToolTip(mConfig->Read(_T("FiniteBurnListHint")));
+   mObjectListBox->SetSelection(0);
+   
+   ShowObjectProperties();
+   
+   #ifdef DEBUG_SHOW_BURNS
+   MessageInterface::ShowMessage("ShowFiniteBurns() leaving\n");
+   #endif
+}
 
 //------------------------------------------------------------------------------
 // void ShowArrays()
@@ -1502,8 +1550,13 @@ void ParameterSelectDialog::ShowObjectProperties()
       wxString objTypeSelect = mObjectTypeComboBox->GetValue();
       if ((objTypeSelect == "Spacecraft")    ||
           (objTypeSelect == "ImpulsiveBurn") ||
+          (objTypeSelect == "FiniteBurn")    ||
           (objTypeSelect == "SpacePoint"))
-         ShowCoordSystem(objTypeSelect == "ImpulsiveBurn");
+      {
+         bool showBlank = (objTypeSelect == "ImpulsiveBurn" ||
+                           objTypeSelect == "FiniteBurn");
+         ShowCoordSystem(showBlank);
+      }
    }
 }
 
@@ -1517,7 +1570,7 @@ void ParameterSelectDialog::ShowHardwareProperties(const wxString &scName,
    #ifdef DEBUG_SHOW_HARDWARE
    MessageInterface::ShowMessage
       ("ShowHardwareProperties() entered, scName='%s', hwName='%s'\n",
-       scName.c_str(), hwName.c_str());
+       scName.WX_TO_C_STRING, hwName.WX_TO_C_STRING);
    #endif
    
    mPropertyListBox->Clear();   
@@ -1530,7 +1583,7 @@ void ParameterSelectDialog::ShowHardwareProperties(const wxString &scName,
    #ifdef DEBUG_SHOW_HARDWARE
    MessageInterface::ShowMessage
       ("ShowHardwareProperties() leaving, scName='%s', hwName='%s'\n",
-       scName.c_str(), hwName.c_str());
+       scName.WX_TO_C_STRING, hwName.WX_TO_C_STRING);
    #endif
 }
 
@@ -1544,13 +1597,22 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
    MessageInterface::ShowMessage("ShowCoordSystem() entered\n");
    #endif
    
-   std::string property = GetPropertySelection().c_str();
+   std::string property = GetPropertySelection().WX_TO_STD_STRING;
    
    if (property == "")
    {
       #ifdef DEBUG_CS
       MessageInterface::ShowMessage("ShowCoordSystem() property is empty, so just return\n");
       #endif
+      mCoordSysSizer->Detach(mCentralBodyComboBox);
+      mCoordSysSizer->Detach(mCoordSysComboBox);
+      mCoordSysSizer->Detach(mODEModelComboBox);
+      mCoordSysLabel->Hide();
+      mCoordSysComboBox->Hide();
+      mCentralBodyComboBox->Hide();
+      mODEModelComboBox->Hide();
+      mCoordSysSizer->Layout();
+      mParameterSizer->Layout();
       return;
    }
    
@@ -1564,7 +1626,7 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
    if (depObj == GmatParam::COORD_SYS)
    {
       mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Coordinate "GUI_ACCEL_KEY"System");
+      mCoordSysLabel->SetLabel("Coordinate " GUI_ACCEL_KEY "System");
       
       if (showBlank)
       {
@@ -1661,7 +1723,7 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
    else if (depObj == GmatParam::ORIGIN)
    {
       mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Central "GUI_ACCEL_KEY"Body");
+      mCoordSysLabel->SetLabel("Central " GUI_ACCEL_KEY "Body");
       
       // I had to remove mCoordSysComboBox first and then mCentralBodyComboBox,
       // otherwise, mCentralBodyComboBox shows too far to right
@@ -1678,7 +1740,7 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
    else if (depObj == GmatParam::ODE_MODEL)
    {
       mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("ODE"GUI_ACCEL_KEY"Model");
+      mCoordSysLabel->SetLabel("ODE" GUI_ACCEL_KEY "Model");
       
       mCoordSysSizer->Detach(mCoordSysComboBox);
       mCoordSysSizer->Detach(mCentralBodyComboBox);
@@ -2008,7 +2070,7 @@ wxString ParameterSelectDialog::FormArrayElement()
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Row index \"%s\" is out of range.\n"
-          "Valid range is between 1 and %d\n", rowStr.c_str(), mNumRow);
+          "Valid range is between 1 and %d\n", rowStr.WX_TO_C_STRING, mNumRow);
       valid = false;
    }
    
@@ -2017,7 +2079,7 @@ wxString ParameterSelectDialog::FormArrayElement()
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Column index \"%s\" is out of range.\n"
-          "Valid range is between 1 and %d\n", colStr.c_str(), mNumCol);
+          "Valid range is between 1 and %d\n", colStr.WX_TO_C_STRING, mNumCol);
       valid = false;
    }
    
@@ -2164,6 +2226,8 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
          param->SetRefObjectName(Gmat::SPACECRAFT, objName);
       else if (objTypeName == "ImpulsiveBurn")
          param->SetRefObjectName(Gmat::IMPULSIVE_BURN, objName);
+      else if (objTypeName == "FiniteBurn")
+         param->SetRefObjectName(Gmat::FINITE_BURN, objName);
       else if (objTypeName == "SpacePoint")
          param->SetRefObjectName(Gmat::SPACE_POINT, objName);
       else
@@ -2194,6 +2258,6 @@ void ParameterSelectDialog::DisplayWarning(const wxString &arg1, const wxString 
    if (arg2 == "")
       MessageInterface::PopupMessage(Gmat::WARNING_, arg1.c_str());
    else
-      MessageInterface::PopupMessage(Gmat::WARNING_, arg1.c_str(), arg2.c_str());
+      MessageInterface::PopupMessage(Gmat::WARNING_, arg1.WX_TO_C_STRING, arg2.WX_TO_C_STRING);
 }
 

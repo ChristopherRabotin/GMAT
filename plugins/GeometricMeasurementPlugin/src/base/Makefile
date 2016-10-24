@@ -1,4 +1,3 @@
-# $Id: Makefile 1343 2011-03-31 18:47:39Z wshoan@NDC $
 # Makefile for GMAT's OD Plugin
 # This is the base level makefile 
 #
@@ -22,7 +21,7 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup \
                    -L$(GMAT_Code_Location)/base/$(GMAT_LIB_DIR) -l$(BASE_LIBRARY) \
                     $(MAC_CPP_FLAGS) $(ARCHITECTURE_FLAGS) $(LINK_FLAGS)
                    
-# -reexport-lGmatBaseNoMatlab -dylib -dynamiclib -Wl -two_levelnamespace -undefined dynamic_lookup
+# -reexport-lGmatBaseNoMatlab -dylib -dynamiclib -Wl -undefined dynamic_lookup
 
 else
 SHARED_EXTENSION = .so

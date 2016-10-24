@@ -1,0 +1,184 @@
+# copy the Gmatbase library and all of the necessary dynamic wx libraries into the Frameworks directory.
+# Note: pcre is currently unused
+LOC=$1
+BASE_LOC=$2
+BASE_LIB_NAME=$3
+BIN_LOC=$4
+WX_LIB_LOC=$5
+# copy the wx libraries (maintaining the soft links) into the bundle
+#cp -R $WX_LIB_LOC/libwx*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_baseu-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_baseu_net-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_baseu_xml-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_adv-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_aui-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_core-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_gl-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_html-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+#cp -R $WX_LIB_LOC/libwx_osx_cocoau_media-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+#cp -R $WX_LIB_LOC/libwx_osx_cocoau_propgrid-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_qa-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+#cp -R $WX_LIB_LOC/libwx_osx_cocoau_ribbon-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_richtext-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_stc-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_webview-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx_osx_cocoau_xrc-3*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+# copy the GmatBase library into the bundle
+cp $BASE_LOC/$BASE_LIB_NAME.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+
+# tell the libraries they are now inside the bundle
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu_net-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu_net-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu_net-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu_net-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu_net-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu_net-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu_xml-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu_xml-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu_xml-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu_xml-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_baseu_xml-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu_xml-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_adv-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_adv-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_aui-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_aui-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_aui-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_aui-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_aui-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_aui-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_core-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_core-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_gl-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_gl-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_gl-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_gl-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_gl-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_gl-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_html-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_html-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_html-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_html-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_html-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_html-3.0.0.2.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_media-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_media-3.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_media-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_media-3.0.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_media-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_media-3.0.0.2.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_propgrid-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_propgrid-3.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_propgrid-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_propgrid-3.0.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_propgrid-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_propgrid-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_qa-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_qa-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_qa-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_qa-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_qa-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_qa-3.0.0.2.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_ribbon-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_ribbon-3.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_ribbon-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_ribbon-3.0.0.dylib
+#install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_ribbon-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_ribbon-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_richtext-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_richtext-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_richtext-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_richtext-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_stc-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_stc-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_stc-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_stc-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_stc-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_stc-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_webview-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_webview-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_webview-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_webview-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_webview-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_webview-3.0.0.2.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_xrc-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_xrc-3.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_xrc-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_xrc-3.0.0.dylib
+install_name_tool -id @executable_path/../Frameworks/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib
+
+install_name_tool -id @executable_path/../Frameworks/$BASE_LIB_NAME.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/$BASE_LIB_NAME.dylib
+
+# tell the application that the libraries are now inside the bundle
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_net-3.0.dylib @executable_path/../Frameworks/libwx_baseu_net-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_net-3.0.0.dylib @executable_path/../Frameworks/libwx_baseu_net-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_net-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu_net-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_xml-3.0.dylib @executable_path/../Frameworks/libwx_baseu_xml-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_xml-3.0.0.dylib @executable_path/../Frameworks/libwx_baseu_xml-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_xml-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu_xml-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_adv-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_adv-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_adv-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_aui-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_aui-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_aui-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_aui-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_aui-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_aui-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_gl-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_gl-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_gl-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_gl-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_gl-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_gl-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_html-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_html-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_html-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_html-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_html-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_html-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_media-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_media-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_media-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_media-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_media-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_media-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_propgrid-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_propgrid-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_propgrid-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_propgrid-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_propgrid-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_propgrid-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_qa-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_qa-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_qa-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_qa-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_qa-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_qa-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_ribbon-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_ribbon-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_ribbon-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_ribbon-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_ribbon-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_ribbon-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_richtext-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_richtext-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_richtext-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_richtext-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_stc-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_stc-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_stc-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_stc-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_stc-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_stc-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_webview-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_webview-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_webview-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_webview-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_webview-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_webview-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_xrc-3.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_xrc-3.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_xrc-3.0.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_xrc-3.0.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+
+install_name_tool -change lib/$BASE_LIB_NAME.dylib @executable_path/../Frameworks/$BASE_LIB_NAME.dylib ../../application/$BIN_LOC/$LOC.app/Contents/MacOS/GMAT
+
+# tell the wx libraries where to find the other wx libraries they need
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu_net-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_baseu_xml-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_aui-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_aui-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_adv-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_aui-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_gl-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_gl-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_html-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_html-3.0.0.2.0.dylib"
+
+#install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_media-3.0.0.2.0.dylib"
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_media-3.0.0.2.0.dylib"
+
+#install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_propgrid-3.0.0.2.0.dylib"
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_propgrid-3.0.0.2.0.dylib"
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_adv-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_propgrid-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_qa-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_qa-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_xml-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu_xml-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_qa-3.0.0.2.0.dylib"
+
+#install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_ribbon-3.0.0.2.0.dylib"
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_ribbon-3.0.0.2.0.dylib"
+#install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_adv-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_ribbon-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_xml-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu_xml-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_adv-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_html-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_html-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_richtext-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_stc-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_stc-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_webview-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_webview-3.0.0.2.0.dylib"
+
+install_name_tool -change $WX_LIB_LOC/libwx_baseu-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_core-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_core-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_baseu_xml-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_baseu_xml-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_adv-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_adv-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib"
+install_name_tool -change $WX_LIB_LOC/libwx_osx_cocoau_html-3.0.0.2.0.dylib @executable_path/../Frameworks/libwx_osx_cocoau_html-3.0.0.2.0.dylib "../../application/$BIN_LOC/$LOC.app/Contents/Frameworks/libwx_osx_cocoau_xrc-3.0.0.2.0.dylib"

@@ -29,6 +29,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\console\PrintUtility.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\console\ConsoleAppException.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -36,9 +39,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\console\driver.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\console\PrintUtility.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

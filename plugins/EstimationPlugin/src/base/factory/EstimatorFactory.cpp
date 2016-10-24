@@ -1,12 +1,22 @@
-//$Id: EstimatorFactory.cpp 1398 2011-04-21 20:39:37Z ljun@NDC $
+//$Id: EstimatorFactory.cpp 1398 2011-04-21 20:39:37Z  $
 //------------------------------------------------------------------------------
 //                            EstimatorFactory
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed by Dr. Matthew P. Wilkins, Schafer Corporation
 //
@@ -77,10 +87,14 @@ Solver* EstimatorFactory::CreateSolver(const std::string &ofType,
       return new Simulator(withName);
    if (ofType == "BatchEstimatorInv")
       return new BatchEstimatorInv(withName);
+
+#ifdef ENABLE_UNFINISHED_FEATURES
    if (ofType == "BatchEstimatorSVD")
       return new BatchEstimatorSVD(withName);
+
    if (ofType == "ExtendedKalmanInv")
       return new ExtendedKalmanInv(withName);
+#endif
 
    // Here's a list of other potential estimators:
    //if (ofType == "BatchLeastSquares")
@@ -128,8 +142,11 @@ EstimatorFactory::EstimatorFactory() :
    {
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
+
+#ifdef ENABLE_UNFINISHED_FEATURES
       creatables.push_back("BatchEstimatorSVD");
       creatables.push_back("ExtendedKalmanInv");
+#endif
 
       //creatables.push_back("BatchLeastSquares");
       //creatables.push_back("SequentialLeastSquares");
@@ -182,8 +199,11 @@ EstimatorFactory::EstimatorFactory(const EstimatorFactory& fact) :
    {
       creatables.push_back("Simulator");
       creatables.push_back("BatchEstimatorInv");
+
+#ifdef ENABLE_UNFINISHED_FEATURES
       creatables.push_back("BatchEstimatorSVD");
       creatables.push_back("ExtendedKalmanInv");
+#endif
 
       //creatables.push_back("BatchLeastSquares");
       //creatables.push_back("SequentialLeastSquares");
@@ -262,9 +282,12 @@ bool EstimatorFactory::DoesObjectTypeMatchSubtype(const std::string &theType,
          retval = true;
    }
 
-   if ((theType == "BatchEstimatorInv") ||
-//       (theType == "BatchEstimatorSVD") ||  // Not yet implemented; leave off menu
-       (theType == "ExtendedKalmanInv"))
+   if ((theType == "BatchEstimatorInv")
+#ifdef ENABLE_UNFINISHED_FEATURES
+       ||(theType == "BatchEstimatorSVD")  // Not yet implemented; leave off menu
+       || (theType == "ExtendedKalmanInv")
+#endif
+       )
    {
       if (theSubtype == "Estimator")
          retval = true;

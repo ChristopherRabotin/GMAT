@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // *** File Name : PhysicalModel.cpp
 // *** Created   : October 1, 2002
@@ -93,6 +103,7 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 #include "TimeTypes.hpp"
+#include "PropagationStateManager.hpp"
 
 
 //#define PHYSICAL_MODEL_DEBUG_INIT
@@ -156,6 +167,7 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    bodyName                    ("Earth"),
    dimension                   (1),
    stateChanged                (false),
+   psm                         (NULL),
    theState                    (NULL),
    modelState                  (NULL),
    rawState                    (NULL),
@@ -171,6 +183,7 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    fillSTM                     (false),
    stmStart                    (-1),
    stmCount                    (0),
+   stmRowCount                 (6),
    fillAMatrix                 (false),
    aMatrixStart                (-1),
    aMatrixCount                (0)
@@ -243,7 +256,9 @@ PhysicalModel::~PhysicalModel()
 // PhysicalModel::PhysicalModel(const PhysicalModel& pm)
 //------------------------------------------------------------------------------
 /**
- * The copy constructor for the physical model
+ * The copy constructor for the physical model.
+ *
+ * @param pm The model copied here
  */
 //------------------------------------------------------------------------------
 PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
@@ -254,6 +269,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    bodyName                    (pm.bodyName),
    dimension                   (pm.dimension),
    stateChanged                (pm.stateChanged),
+   psm                         (NULL),
    theState                    (NULL),
    modelState                  (NULL),
    rawState                    (NULL),
@@ -271,6 +287,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    fillSTM                     (pm.fillSTM),
    stmStart                    (pm.stmStart),
    stmCount                    (pm.stmCount),
+   stmRowCount                 (pm.stmRowCount),
    fillAMatrix                 (pm.fillAMatrix),
    aMatrixStart                (pm.aMatrixStart),
    aMatrixCount                (pm.aMatrixCount)
@@ -298,18 +315,6 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       else
          isInitialized = false;
    }
-   else
-   {
-      if (modelState != NULL)
-      {
-         #ifdef DEBUG_STATE_ALLOCATION
-            MessageInterface::ShowMessage("Deleting modelState at %p\n",
-                  modelState);
-         #endif
-         delete [] modelState;
-         modelState = NULL;
-      }
-   }
    rawState = modelState;
    
    if (pm.deriv != NULL) 
@@ -325,10 +330,6 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
       else
          isInitialized = false;
    }
-   else
-      deriv = NULL;
-
-   parameterCount = PhysicalModelParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -336,6 +337,10 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
 //------------------------------------------------------------------------------
 /**
  * The assignment operator for the physical model
+ *
+ * @param pm The model copied into this one.
+ *
+ * @retval This PhysicalModel. configured to match pm.
  */
 //------------------------------------------------------------------------------
 PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
@@ -370,6 +375,7 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    fillSTM        = pm.fillSTM;
    stmStart       = pm.stmStart;
    stmCount       = pm.stmCount;
+   stmRowCount    = pm.stmRowCount;
    fillAMatrix    = pm.fillAMatrix;
    aMatrixStart   = pm.aMatrixStart;
    aMatrixCount   = pm.aMatrixCount;
@@ -408,6 +414,18 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    
       stateChanged = pm.stateChanged;
    }
+   else
+   {
+      if (modelState != NULL)
+      {
+         #ifdef DEBUG_STATE_ALLOCATION
+            MessageInterface::ShowMessage("Deleting modelState at %p\n",
+                  modelState);
+         #endif
+         delete [] modelState;
+         modelState = NULL;
+      }
+   }
 
    rawState = modelState;
    
@@ -435,6 +453,14 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
          memcpy(deriv, pm.deriv, dimension * sizeof(Real));
       else
          isInitialized = false;
+   }
+   else
+   {
+      if (deriv)
+      {
+         delete [] deriv;
+         deriv = NULL;
+      }
    }
    
    return *this;
@@ -473,18 +499,21 @@ std::string PhysicalModel::GetBodyName()
 //------------------------------------------------------------------------------
 void PhysicalModel::SetBody(CelestialBody *theBody)
 {  
-   if (theBody != NULL)
-   {
-      if (body != NULL)
-      {
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (deriv, "deriv", "PhysicalModel::SetBody()",
-             "deleting deriv", this);
-         #endif
-         delete body;
-      }
-   }
+   // Comments: delete body may cause crash when body is a celestial body in solar system. 
+   // For example, if Earth object is deleted, GMAT will crash due to other part of 
+   // GMAT code is used Earth object for calculation.
+   //if (theBody != NULL)
+   //{
+   //   if (body != NULL)
+   //   {
+   //      #ifdef DEBUG_MEMORY
+   //      MemoryTracker::Instance()->Remove
+   //         (deriv, "deriv", "PhysicalModel::SetBody()",
+   //          "deleting deriv", this);
+   //      #endif
+   //      delete body;
+   //   }
+   //}
    
    body = theBody;
    bodyName = body->GetName();
@@ -496,6 +525,13 @@ void PhysicalModel::SetForceOrigin(CelestialBody* toBody)
 {
     forceOrigin = toBody;
 }
+
+
+CelestialBody* PhysicalModel::GetForceOrigin()
+{
+   return forceOrigin;
+}
+   
 
 //------------------------------------------------------------------------------
 // bool PhysicalModel::Initialize()
@@ -517,7 +553,7 @@ bool PhysicalModel::Initialize()
             "PhysicalModel::Initialize() entered for %s; dimension = %d\n",
             typeName.c_str(), dimension);
    #endif
-      
+   
    if ((rawState != NULL) && (rawState != modelState))
    {
       #ifdef DEBUG_MEMORY
@@ -598,6 +634,9 @@ bool PhysicalModel::Initialize()
       else
          isInitialized = false;
    }
+   else
+      isInitialized = false;
+
    rawState = modelState;
    
    return isInitialized;
@@ -1313,15 +1352,52 @@ bool PhysicalModel::SupportsDerivative(Gmat::StateElementId id)
  * @param id State Element ID for the derivative type
  * @param index Starting index in the state vector for this type of derivative
  * @param quantity Number of objects that supply this type of data
+ * @param sizeOfType For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of rows or columns in the STM
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::SetStart(Gmat::StateElementId id, Integer index,
-      Integer quantity)
+      Integer quantity, Integer sizeOfType)
 {
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// bool SetStmRowId(Integer rowNumber, Integer rowId)
+//------------------------------------------------------------------------------
+/**
+ * Sets up the mapping the the STM rows/columns
+ *
+ * @param rowNumber The row number for the ID
+ * @param rowId The parameter ID for that row
+ *
+ * @return true if the ID was saved/updated, false if it was discarded
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::SetStmRowId(Integer rowNumber, Integer rowId)
+{
+   bool retval = false;
+
+   if (stmRowId.size() > rowNumber)
+   {
+      stmRowId[rowNumber] = rowId;
+      retval = true;
+   }
+   else if (stmRowId.size() == rowNumber)
+   {
+      stmRowId.push_back(rowId);
+      retval = true;
+   }
+   else
+      throw ODEModelException("State Transition Matrix array index out of "
+            "bounds in PhysicalModel::SetStmRowId");
+
+   return retval;
+}
+
 
 //---------------------------------
 // inherited methods from GmatBase
@@ -1620,14 +1696,14 @@ const StringArray& PhysicalModel::GetRefObjectNameArray(
    if (type == Gmat::UNKNOWN_OBJECT)
    {
       static StringArray refs;
-      
-         refs.push_back(bodyName);
-      
-         #ifdef DEBUG_REFERENCE_SETTING
-            MessageInterface::ShowMessage("+++ReferenceObjects:\n");
-            for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
-               MessageInterface::ShowMessage("   %s\n", i->c_str());
-         #endif
+      refs.clear();
+      refs.push_back(bodyName);
+
+      #ifdef DEBUG_REFERENCE_SETTING
+         MessageInterface::ShowMessage("+++ReferenceObjects:\n");
+         for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->c_str());
+      #endif
       
       return refs;
    }
@@ -1748,6 +1824,25 @@ const StringArray&  PhysicalModel::GetSupportedDerivativeNames()
    return derivativeNames;
 }
 
+
+//------------------------------------------------------------------------------
+// void SetPropStateManager(PropagationStateManager *sm)
+//------------------------------------------------------------------------------
+/**
+ * Sets the ProagationStateManager pointer
+ *
+ * @note Method moved here from ODEModel to facilitate access to STM internal
+ * references that are held in the PSM.
+ *
+ * @param sm The PSM that the ODEModel uses
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetPropStateManager(PropagationStateManager *sm)
+{
+   psm = sm;
+}
+
+
 //------------------------------------------------------------------------------
 // bool BuildModelState(GmatEpoch now, Real* state, Real* j2kState,
 //       Integer dimension)
@@ -1764,7 +1859,7 @@ const StringArray&  PhysicalModel::GetSupportedDerivativeNames()
  *                  velocity sextuplets to be processed in a single call.  If
  *                  dimension is not a multiple of 6, an exception is thrown.
  *
- * @return true is teh transformation succeeded, false if it failed.
+ * @return true if the transformation succeeded, false if it failed.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::BuildModelState(GmatEpoch now, Real* state, Real* j2kState,

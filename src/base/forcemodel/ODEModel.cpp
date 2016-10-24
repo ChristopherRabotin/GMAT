@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // *** File Name : ODEModel.cpp
 // *** Created   : October 1, 2002
@@ -88,11 +98,17 @@
 //#define DEBUG_DERIVATIVES_FOR_SPACECRAFT
 //#define DEBUG_SATELLITE_PARAMETER_UPDATES
 //#define DEBUG_FORMATION_PROPERTIES
+//#define DEBUG_NAN_CONDITIONS
+//#define DEBUG_AMATRIX
+//#define DEBUG_RANGECHECK_TOGGLES
 
+ 
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DUMP_TOTAL_DERIVATIVE
 //#define DUMP_INITIAL_STATE_DERIVATIVES_ONLY
 
+#define TEMPORARILY_DISABLE_CR_RANGE_CHECK
+#define TEMPORARILY_DISABLE_CD_RANGE_CHECK
 
 
 //#ifndef DEBUG_MEMORY
@@ -251,7 +267,6 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    PhysicalModel     (Gmat::ODE_MODEL, typeName, modelName),
 //   previousState     (NULL),
    state             (NULL),
-   psm               (NULL),
    estimationMethod  (ESTIMATE_STEP),     // Should this be removed?
    normType          (L2_DIFFERENCES),
    parametersSetOnce (false),
@@ -259,6 +274,8 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    coverageStartDetermined (false),
    forceMembersNotInitialized (true),
    satCount          (0),
+   constrainCd       (true),
+   constrainCr       (true),
    stateStart        (-1),
    stateEnd          (-1),
    cartStateSize     (0),
@@ -346,7 +363,6 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    PhysicalModel              (fdf),
 //   previousState              (fdf.previousState),
    state                      (NULL),
-   psm                        (NULL),
    estimationMethod           (fdf.estimationMethod),
    normType                   (fdf.normType),
    parametersSetOnce          (false),
@@ -354,6 +370,8 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    coverageStartDetermined    (fdf.coverageStartDetermined),
    forceMembersNotInitialized (true),
    satCount                   (0),
+   constrainCd                (fdf.constrainCd),
+   constrainCr                (fdf.constrainCr),
    stateStart                 (fdf.stateStart),
    stateEnd                   (fdf.stateEnd),
    cartStateSize              (0),
@@ -441,8 +459,10 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    satIds[5] = satIds[6] = -1;
    
    state = NULL;
-   psm   = NULL;
    satCount = 0;
+   constrainCd = fdf.constrainCd;
+   constrainCr = fdf.constrainCr;
+
    stateStart = fdf.stateStart;
    stateEnd   = fdf.stateEnd;
 
@@ -551,15 +571,6 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
                (pPhysicalModel->GetRefObjectNameArray(Gmat::SPACECRAFT))[0].c_str());
    #endif
 
-
-	#ifdef DEBUG_EVENTLOCATION
-      if (pPhysicalModel->IsOfType("EventModel"))
-      {
-         MessageInterface::ShowMessage("Adding an EventModel at \n");
-         MessageInterface::ShowMessage("                        <%p>\n",
-            pPhysicalModel);
-      }
-   #endif
 
    pPhysicalModel->SetDimension(dimension);
    isInitialized = false;
@@ -721,12 +732,12 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
             ++transientCount;
 
          // Temporary code: prevent multiple finite burns in single force model
-         if (transientCount > 1)
-            throw ODEModelException("Multiple Finite burns are not allowed in "
-                  "a single propagator; try breaking commands of the form"
-                  "\"Propagate prop(sat1, sat2)\" into two synchronized "
-                  "propagators; e.g. \"Propagate Synchronized prop(sat1) "
-                  "prop(sat2)\"\nexiting");
+//         if (transientCount > 1)
+//            throw ODEModelException("Multiple Finite burns are not allowed in "
+//                  "a single propagator; try breaking commands of the form"
+//                  "\"Propagate prop(sat1, sat2)\" into two synchronized "
+//                  "propagators; e.g. \"Propagate Synchronized prop(sat1) "
+//                  "prop(sat2)\"\nexiting");
       }
 
       // Full field models come first to facilitate setting their parameters
@@ -1104,8 +1115,8 @@ void ODEModel::UpdateFromSpaceObject()
    memcpy(rawState, state->GetState(), state->GetSize() * sizeof(Real));
 
     // Transform to the force model origin
-    // MoveToOrigin();					// made changes by TUAN NGUYEN: Notice that: without epoch, it will get wrong state of center body
-   MoveToOrigin(state->GetEpoch());		// made changes by TUAN NGUYEN
+    // MoveToOrigin();					   // Notice that: without epoch, it will get wrong state of center body
+   MoveToOrigin(state->GetEpoch());
 }
 
 
@@ -1204,6 +1215,10 @@ bool ODEModel::BuildModelFromMap()
       MessageInterface::ShowMessage("ODEModel map has %d entries\n",
             map->size());
    #endif
+
+   applyErrorControl.clear();
+   bool ecActive = true;
+
    for (UnsignedInt index = 0; index < map->size(); ++index)
    {
       if ((*map)[index]->dynamicObjectProperty)
@@ -1222,7 +1237,8 @@ bool ODEModel::BuildModelFromMap()
          if (objectCount > 0)
          {
             // Build the derivative model piece for this element
-            retval = BuildModelElement(id, start, objectCount);
+            retval = BuildModelElement(id, start, objectCount,
+                  (index - start) / objectCount);
             if (retval == false)
             {
 //               throw ODEModelException(
@@ -1238,7 +1254,13 @@ bool ODEModel::BuildModelFromMap()
          objectCount = 0;
          start = index;
          currentObject = NULL;
+
+         // Disable error control in STM propagation
+         ecActive = ((id == Gmat::ORBIT_A_MATRIX) ||
+               (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX) ? false : true);
       }
+
+      applyErrorControl.push_back(ecActive);
 
       // Increment the count for each new object
       if (currentObject != (*map)[index]->object)
@@ -1259,7 +1281,8 @@ bool ODEModel::BuildModelFromMap()
    // Catch the last element
    if (objectCount > 0)
    {
-      retval = BuildModelElement(id, start, objectCount);
+      retval = BuildModelElement(id, start, objectCount,
+            (map->size() - start) / objectCount);
       if (retval == false)
       {
          // throw ODEModelException(
@@ -1324,7 +1347,7 @@ bool ODEModel::BuildModelFromMap()
  */
 //------------------------------------------------------------------------------
 bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
-      Integer objectCount)
+      Integer objectCount, Integer size)
 {
    bool retval = false, tf;
    Integer modelsUsed = 0;
@@ -1346,7 +1369,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    {
       if ((*i)->SupportsDerivative(id))
       {
-         tf = (*i)->SetStart(id, start, objectCount);
+         tf = (*i)->SetStart(id, start, objectCount, size);
          if (tf == false)
             MessageInterface::ShowMessage("PhysicalModel %s was not set, even "
                   "though it registered support for derivatives of type %d\n",
@@ -1370,7 +1393,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    /// @todo Check this piece again for 6DoF
    if (id == Gmat::CARTESIAN_STATE)
    {
-      cartesianCount   = objectCount;
+      cartesianCount = objectCount;
       cartesianStart = start;
       cartStateSize  = objectCount * 6;
    }
@@ -1381,6 +1404,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (stmStart == -1)
          stmStart = start;
       stmCount = objectCount;
+      stmRowCount = Integer(sqrt((Real)size));
    }
 
    if (id == Gmat::ORBIT_A_MATRIX)
@@ -1389,16 +1413,17 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (aMatrixStart == -1)
          aMatrixStart = start;
       ++aMatrixCount;
-   }
-
-   if (id == Gmat::EVENT_FUNCTION_STATE)
-   {
-      // todo Fill this in?
+      stmRowCount = Integer(sqrt((Real)size));
    }
 
    #ifdef DEBUG_BUILDING_MODELS
       MessageInterface::ShowMessage(
             "ODEModel is using %d components for element %d\n", modelsUsed, id);
+      if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+      {
+         MessageInterface::ShowMessage("STM row count(s):\n");
+         MessageInterface::ShowMessage("   %d rows\n", stmRowCount);
+      }
    #endif
    
    return retval;
@@ -1570,7 +1595,7 @@ bool ODEModel::Initialize()
       
       (*current)->SetDimension(dimension);
       (*current)->SetState(state);
-      
+
       // Only initialize the spacecraft independent pieces once
       if (forceMembersNotInitialized)
       {
@@ -1846,11 +1871,12 @@ void ODEModel::SetInternalCoordinateSystem(const std::string csId,
             centralBodyName);
          internalCoordinateSystems.push_back(cs);
 
-         #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Add
-               (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
-                "cs = earthFixed->Clone()", this);
-         #endif
+         // The pointers are added in CoordinateSystem::CreateLocalCoordinateSystem()
+         // #ifdef DEBUG_MEMORY
+         //    MemoryTracker::Instance()->Add
+         //       (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
+         //        "cs = earthFixed->Clone()", this);
+         // #endif
 
          #ifdef DEBUG_ODEMODEL_INIT
             MessageInterface::ShowMessage("Created %s with description\n\n%s\n", 
@@ -2227,9 +2253,11 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                
                // ... Coefficient of drag ...
                parm = sat->GetRealParameter(satIds[3]);
-               if (parm < 0)
+#ifndef TEMPORARILY_DISABLE_CD_RANGE_CHECK
+               if ((parm < 0) && constrainCd)
                   throw ODEModelException("Drag coefficient (Cd) is less than zero for Spacecraft \"" +
                                     sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
+#endif
                pm->SetSatelliteParameter(i, "Cd", parm, satIds[3]);
                
                // ... Drag area ...
@@ -2248,9 +2276,11 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                
                // ... and Coefficient of reflectivity
                parm = sat->GetRealParameter(satIds[6]);
-               if (parm < 0)
+#ifndef TEMPORARILY_DISABLE_CR_RANGE_CHECK
+               if ((parm < 0) && constrainCr)
                   throw ODEModelException("SRP coefficient (Cr) is less than zero for Spacecraft \"" +
                                     sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
+#endif
                pm->SetSatelliteParameter(i, "Cr", parm, satIds[6]);
                
                ((SpaceObject*)sat)->ParametersHaveChanged(false);
@@ -2330,26 +2360,48 @@ Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
                    (parametersSetOnce ? "true" : "false"));
             #endif
 
-               // ... Mass ...
-               parm = sat->GetRealParameter(satIds[2]);
-               if (parm <= 0)
-                  throw ODEModelException("Mass parameter unphysical on object " +
-                     sat->GetName());
-               pm->SetSatelliteParameter(i, satIds[2], parm);
+            // ... Mass ...
+            parm = sat->GetRealParameter(satIds[2]);
+            if (parm <= 0)
+               throw ODEModelException("Mass parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[2], parm);
 
-               // ... Drag area ...
-               parm = sat->GetRealParameter(satIds[4]);
-               if (parm < 0)
-                  throw ODEModelException("Drag Area parameter unphysical on object " +
-                     sat->GetName());
-               pm->SetSatelliteParameter(i, satIds[4], parm);
+            // ... Drag area ...
+            parm = sat->GetRealParameter(satIds[4]);
+            if (parm < 0)
+               throw ODEModelException("Drag Area parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[4], parm);
 
-               // ... SRP area ...
-               parm = sat->GetRealParameter(satIds[5]);
-               if (parm < 0)
-                  throw ODEModelException("SRP Area parameter unphysical on object " +
-                     sat->GetName());
-               pm->SetSatelliteParameter(i, satIds[5], parm);
+            // ... SRP area ...
+            parm = sat->GetRealParameter(satIds[5]);
+            if (parm < 0)
+               throw ODEModelException("SRP Area parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[5], parm);
+
+            // ... Cd ...
+            parm = sat->GetRealParameter(satIds[3]);
+#ifndef TEMPORARILY_DISABLE_CD_RANGE_CHECK
+            if ((parm < 0) && constrainCd)
+               throw ODEModelException("Cd parameter unphysical on object " +
+                  sat->GetName());
+#endif
+            pm->SetSatelliteParameter(i, satIds[3], parm);
+
+            // ... Cr ...
+            parm = sat->GetRealParameter(satIds[6]);
+#ifndef TEMPORARILY_DISABLE_CR_RANGE_CHECK
+            if ((parm < 0) && constrainCr)
+            {
+               char addy[32];
+               sprintf(addy, "%p", this);
+               throw ODEModelException("Cr parameter unphysical on object " +
+                  sat->GetName() + " at address " + addy);
+            }
+#endif
+            pm->SetSatelliteParameter(i, satIds[6], parm);
          }
          else if (sat->GetType() == Gmat::FORMATION)
          {
@@ -2548,8 +2600,9 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
             MessageInterface::ShowMessage("Derivative %s failed\n",
                   ((*i)->GetTypeName()).c_str());
          #endif
-         return false;
+         throw ODEModelException("Derivative " + (*i)->GetTypeName() + " failed\n");
 
+         return false;
       }
       
       #ifdef DEBUG_ODEMODEL_EXE
@@ -2565,6 +2618,14 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       #endif
       for (Integer j = 0; j < dimension; ++j)
       {
+         #ifdef DEBUG_NAN_CONDITIONS
+            if (GmatMathUtil::IsNaN(ddt[j]))
+               MessageInterface::ShowMessage("NAN found in derivative for %s "
+                     "force element %d, Value is %lf\n",
+                     (*i)->GetTypeName().c_str(), j, ddt[j]);
+
+         #endif
+
          deriv[j] += ddt[j];
          #ifdef DEBUG_ODEMODEL_EXE
             MessageInterface::ShowMessage(" %16.14le ", ddt[j]);
@@ -2661,14 +2722,20 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
    #ifdef DEBUG_STM_AMATRIX_DERIVS
       MessageInterface::ShowMessage("Final dv array:\n");
 
+      /// @todo Add handling for multiple STMs of differing sizes
+      Integer stmDim = stmRowCount;
+
+      // Cartesian state piece
       for (Integer i = 0; i < 6; ++i)
       {
          MessageInterface::ShowMessage("  %lf  ", deriv[i]);
       }
       MessageInterface::ShowMessage("\n");
-      for (Integer i = 6; i < dimension; i += 6)
+
+      // STM
+      for (Integer i = 6; i < dimension; i += stmDim)
       {
-         for (Integer j = 0; j < 6; ++j)
+         for (Integer j = 0; j < stmDim; ++j)
             MessageInterface::ShowMessage("  %le  ", deriv[i+j]);
          MessageInterface::ShowMessage("\n");
       }
@@ -2712,6 +2779,7 @@ bool ODEModel::PrepareDerivativeArray()
 
    #ifdef DEBUG_STM_AMATRIX_DERIVS
       static bool eins = false;
+      MessageInterface::ShowMessage("Derivative initializes non-zero:\n");
    #endif
 
    const std::vector<ListItem*> *smap = psm->GetStateMap();
@@ -2721,7 +2789,7 @@ bool ODEModel::PrepareDerivativeArray()
    {
       #ifdef DEBUG_STM_AMATRIX_DERIVS
          if (eins == false)
-            MessageInterface::ShowMessage("Mapping [%d] %s\n", i,
+            MessageInterface::ShowMessage("   Mapping [%d] %s\n", i,
                   ((*smap)[i]->nonzeroInit == true ? "true" : "false"));
       #endif
 
@@ -2738,14 +2806,20 @@ bool ODEModel::PrepareDerivativeArray()
       {
          MessageInterface::ShowMessage("Initial dv array:\n");
 
+         /// @todo Add handling for multiple STMs of varying sizes
+         Integer stmDim = stmRowCount;
+
+         // Cartesian state element
          for (Integer i = 0; i < 6; ++i)
          {
             MessageInterface::ShowMessage("  %lf  ", deriv[i]);
          }
+
+         /// STM
          MessageInterface::ShowMessage("\n");
-         for (Integer i = 6; i < dimension; i += 6)
+         for (Integer i = 6; i < dimension; i += stmDim)
          {
-            for (Integer j = 0; j < 6; ++j)
+            for (Integer j = 0; j < stmDim; ++j)
                MessageInterface::ShowMessage("  %lf  ", deriv[i+j]);
             MessageInterface::ShowMessage("\n");
          }
@@ -2779,32 +2853,61 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
 
    bool retval = true;
 
+   Integer stmRows = stmRowCount;
+   Integer stmDim = stmRows*stmRows;
+
    for (Integer i = 0; i < stmCount; ++i)
    {
-      Integer i6 = stmStart + i * 36;
+      /// @todo Add handling for multiple STMs of varying sizes
+      Integer i6 = stmStart + i * stmDim;
 
       // Build aTilde
-      Real aTilde[36];
-      for (Integer m = 0; m < 36; ++m)
+      Integer stmSize = stmRowCount * stmRowCount;
+      Real *aTilde;
+      aTilde = new Real[stmSize];
+//MessageInterface::ShowMessage("STM_Size = %d...", stmSize);
+      for (Integer m = 0; m < stmDim; ++m)
          aTilde[m] = deriv[i6+m];
+
+      #ifdef DEBUG_AMATRIX
+         MessageInterface::ShowMessage("A matrix last column: [");
+         for (Integer j = 0; j < stmRowCount; ++j)
+            MessageInterface::ShowMessage("%15lf", aTilde[i6 + j*stmRows + stmRowCount - 1]);
+         MessageInterface::ShowMessage("]^T\n");
+      #endif
+
+      #ifdef SHOW_AMATRIX
+         MessageInterface::ShowMessage("ODE Model A matrix:\n");
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            MessageInterface::ShowMessage("%3d   [", j);
+            for (Integer k = 0; k < stmRowCount; ++k)
+               MessageInterface::ShowMessage(" %15le ", aTilde[j*stmRows + k]);
+            MessageInterface::ShowMessage("]\n");
+         }
+      #endif
 
       if (fillSTM)
       {
          // Convert A to Phi dot for STM pieces
          // \Phi\dot = A\tilde \Phi
-         for (Integer j = 0; j < 6; ++j)
+         for (Integer j = 0; j < stmRows; ++j)
          {
-            for (Integer k = 0; k < 6; ++k)
+            for (Integer k = 0; k < stmRows; ++k)
             {
-               Integer element = j * 6 + k;
+               Integer element = j * stmRows + k;
                deriv[i6+element] = 0.0;
-               for (Integer l = 0; l < 6; ++l)
+               for (Integer l = 0; l < stmRows; ++l)
                {
-                  deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
+                  deriv[i6+element] += aTilde[j*stmRows+l] * state[i6+l*stmRows+k];
                }
             }
          }
       }
+
+//      MessageInterface::ShowMessage("   Deleting...\n");
+      delete [] aTilde;
+//      MessageInterface::ShowMessage("   Deleted!\n");
    }
    return retval;
 }
@@ -2968,19 +3071,24 @@ Real ODEModel::EstimateError(Real *diffs, Real *answer) const
    // Handle non-Cartesian state elements as an L1 norm
    for (int i = cartesianStart + cartStateSize; i < dimension; ++i)
    {
-      // L1 norm
-      mag = fabs(answer[ i ] - modelState[ i ]);
-      err = fabs(diffs[i]);
-      if (mag >relativeErrorThreshold)
-         err = err / mag;
-
-      #ifdef DEBUG_ERROR_ESTIMATE
-         MessageInterface::ShowMessage("   {%d EstErr = %le} ", i, err);
-      #endif
-
-      if (err > retval)
+      // Error control type by type -- actually on an element level -- so it
+      // can be toggled off when necessary
+      if (applyErrorControl[i])
       {
-         retval = err;
+         // L1 norm
+         mag = fabs(answer[ i ] - modelState[ i ]);
+         err = fabs(diffs[i]);
+         if (mag >relativeErrorThreshold)
+            err = err / mag;
+
+         #ifdef DEBUG_ERROR_ESTIMATE
+            MessageInterface::ShowMessage("   {%d EstErr = %le} ", i, err);
+         #endif
+
+         if (err > retval)
+         {
+            retval = err;
+         }
       }
    }
 
@@ -3060,6 +3168,28 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
          // deleting it
          delete deleteList[i];
       }
+   }
+
+   if (action == "UpdateSpacecraftParameters")
+   {
+      UpdateDynamicSpacecraftData(&stateObjects, 0);
+      UpdateDynamicSpacecraftData(&stateObjects, 0);
+   }
+
+   if (action == "SolveForCd")
+   {
+      #ifdef DEBUG_RANGECHECK_TOGGLES
+         MessageInterface::ShowMessage("Cd on %p is no longer constrained\n", this);
+      #endif
+      constrainCd = false;
+   }
+
+   if (action == "SolveForCr")
+   {
+      #ifdef DEBUG_RANGECHECK_TOGGLES
+         MessageInterface::ShowMessage("Cr on %p is no longer constrained\n", this);
+      #endif
+      constrainCr = false;
    }
 
    return true;
@@ -4026,12 +4156,20 @@ bool ODEModel::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //------------------------------------------------------------------------------
-// bool SetStringParameter(const std::string &label,const std::string &value)
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool ODEModel::SetStringParameter(const std::string &label, const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 bool ODEModel::SetStringParameter(const std::string &label,
-                                    const std::string &value)
+                                  const std::string &value)
 {
-    return SetStringParameter(GetParameterID(label), value);
+   return SetStringParameter(GetParameterID(label), value);
 }
 
 //---------------------------------------------------------------------------
@@ -4163,6 +4301,22 @@ bool ODEModel::SetEpoch(const GmatEpoch newEpoch)
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// void ODEModel::SetPropStateManager(PropagationStateManager *sm)
+//------------------------------------------------------------------------------
+/**
+ * Populates the PSM pointer in the force model
+ *
+ * @param sm The propagation state manager
+ */
+//------------------------------------------------------------------------------
+void ODEModel::SetPropStateManager(PropagationStateManager *sm)
+{
+   PhysicalModel::SetPropStateManager(sm);
+   for (UnsignedInt i = 0; i < forceList.size(); ++i)
+      forceList[i]->SetPropStateManager(psm);
+}
 
 
 //---------------------------------------------------------------------------
@@ -4719,24 +4873,6 @@ void ODEModel::ReportEpochData()
             epoch, elapsedTime);
 }
 
-
-//------------------------------------------------------------------------------
-// void SetPropStateManager(PropagationStateManager *sm)
-//------------------------------------------------------------------------------
-/**
- * Sets the ProagationStateManager pointer
- *
- * @param sm The PSM that the ODEModel uses
- */
-//------------------------------------------------------------------------------
-void ODEModel::SetPropStateManager(PropagationStateManager *sm)
-{
-   #ifdef DEBUG_OBJECT_SETTING
-      MessageInterface::ShowMessage("Setting the PSM on %s\n",
-            instanceName.c_str());
-   #endif
-   psm = sm;
-}
 
 //------------------------------------------------------------------------------
 // void SetState(GmatState *gms)

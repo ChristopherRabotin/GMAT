@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Wendy C. Shoan
 // Created: 2004/01/29
@@ -24,6 +34,7 @@
 #include "Moon.hpp"
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
+#include "FileManager.hpp"
 #include "RealUtilities.hpp"
 #include "AngleUtil.hpp"
 #include "StringUtil.hpp"
@@ -73,21 +84,13 @@ Moon::Moon(std::string name) :
    if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_405_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
    
-//   // defaults for now ...
-//   Rmatrix s(5,5,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0);
-//   Rmatrix c(5,5,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0,
-//         0.0, 0.0,             0.0,             0.0,             0.0);
-//   sij = s;
-//   cij = c;
+
+   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK and FK for now
+   {
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      attitudeSpiceKernelNames.push_back(path+"moon_pa_de421_1900-2050.bpc");
+      frameSpiceKernelNames.push_back(path+"moon_080317.tf");
+   }
 
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
@@ -117,6 +120,13 @@ Moon::Moon(std::string name, const std::string &cBody) :
    referenceBodyNumber = 3;
    if (name == SolarSystem::MOON_NAME) rotationSrc         = Gmat::DE_405_FILE;
    else                                rotationSrc         = Gmat::IAU_SIMPLIFIED;
+
+   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK and FK for now
+   {
+      std::string path = FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+      attitudeSpiceKernelNames.push_back(path+"moon_pa_de421_1900-2050.bpc");
+      frameSpiceKernelNames.push_back(path+"moon_080317.tf");
+   }
 
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();

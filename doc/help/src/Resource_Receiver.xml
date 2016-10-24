@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="Receiver"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Receiver</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>Receiver</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Receiver</refname>
+
+    <refpurpose>Hardware that receives an RF signal.</refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>A <guilabel>GroundStation</guilabel> or
+    <guilabel>Spacecraft</guilabel> resource needs a <guilabel>Receiver.
+    </guilabel>A <guilabel>GroundStation</guilabel> resource, for example,
+    needs to receive the RF signal from ground station user spacecraft. A
+    <guilabel>Receiver</guilabel> is assigned on the
+    <guilabel>AddHardware</guilabel> list of an instance of a
+    <guilabel>GroundStation</guilabel> or
+    <guilabel>Spacecraft</guilabel>.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="GroundStation"/>, <xref linkend="Antenna"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="1.0*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>PrimaryAntenna</guilabel></entry>
+
+            <entry><para><guilabel>Antenna</guilabel> resource used by
+            <guilabel>Receiver</guilabel> or <guilabel>Spacecraft</guilabel>
+            resource to receive a signal</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para><guilabel>Antenna</guilabel> Object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any valid <guilabel>Antenna</guilabel> object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>None</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>Create and configure a <guilabel>Receiver</guilabel> object and
+      attach it to a <guilabel>GroundStation</guilabel>.</para>
+
+      <programlisting>Create Antenna DSNReceiverAntenna;
+Create Receiver Receiver1;
+
+Receiver1.PrimaryAntenna = DSNReceiverAntenna;
+
+Create GroundStation DSN
+DSN.AddHardware = {Receiver1};
+BeginMissionSequence;</programlisting>
+    </informalexample>
+  </refsection>
+</refentry>

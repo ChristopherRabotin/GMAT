@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. 
 //
@@ -18,7 +28,8 @@
  *    FuelTank: FuelMass, Pressure, Temperature, RefTemperature, Volume,
  *              FuelDensity,
  *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
- *              K1-K16, ThrustDirections
+ *              K1-K16, ThrustDirections, ThrustMagnitude, Isp, MassFlowRate
+ *    PowerSystem: TotalPowerAvailable, RequiredBusPower, ThrustPowerAvailable
  */
 //------------------------------------------------------------------------------
 #ifndef HardwareParameters_hpp
@@ -274,6 +285,136 @@ public:
 protected:
    Integer mThrustDirectionId;
    
+};
+
+
+class GMAT_API ThrustMagnitude : public HardwareReal
+{
+public:
+
+   ThrustMagnitude(const std::string &name = "", GmatBase *obj = NULL);
+   ThrustMagnitude(const ThrustMagnitude &copy);
+   ThrustMagnitude& operator=(const ThrustMagnitude &right);
+   virtual ~ThrustMagnitude();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+class GMAT_API Isp : public HardwareReal
+{
+public:
+
+   Isp(const std::string &name = "", GmatBase *obj = NULL);
+   Isp(const Isp &copy);
+   Isp& operator=(const Isp &right);
+   virtual ~Isp();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+class GMAT_API MassFlowRate : public HardwareReal
+{
+public:
+
+   MassFlowRate(const std::string &name = "", GmatBase *obj = NULL);
+   MassFlowRate(const MassFlowRate &copy);
+   MassFlowRate& operator=(const MassFlowRate &right);
+   virtual ~MassFlowRate();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+class GMAT_API TotalPowerAvailable : public HardwareReal
+{
+public:
+
+   TotalPowerAvailable(const std::string &name = "",
+                       GmatBase *obj = NULL);
+   TotalPowerAvailable(const TotalPowerAvailable &copy);
+   TotalPowerAvailable& operator=(const TotalPowerAvailable &right);
+   virtual ~TotalPowerAvailable();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+   Integer mTotalPowerId;
+
+};
+
+class GMAT_API RequiredBusPower : public HardwareReal
+{
+public:
+
+   RequiredBusPower(const std::string &name = "",
+                    GmatBase *obj = NULL);
+   RequiredBusPower(const RequiredBusPower &copy);
+   RequiredBusPower& operator=(const RequiredBusPower &right);
+   virtual ~RequiredBusPower();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+   Integer mRequiredBusPowerId;
+
+};
+
+class GMAT_API ThrustPowerAvailable : public HardwareReal
+{
+public:
+
+   ThrustPowerAvailable(const std::string &name = "",
+                        GmatBase *obj = NULL);
+   ThrustPowerAvailable(const ThrustPowerAvailable &copy);
+   ThrustPowerAvailable& operator=(const ThrustPowerAvailable &right);
+   virtual ~ThrustPowerAvailable();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+   Integer mThrustPowerId;
+
 };
 
 #endif //HardwareParameters_hpp

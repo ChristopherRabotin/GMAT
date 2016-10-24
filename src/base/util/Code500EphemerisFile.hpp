@@ -7,6 +7,7 @@
 
 #include "gmatdefs.hpp"       // For type Byte
 #include "A1Mjd.hpp"
+#include "Rvector6.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -39,6 +40,11 @@ public:
    bool ReadDataAt(int dataRecNumber, int logOption = 0);
    bool ReadDataRecords(int numRecordsToRead = -999, int logOption = 0);
    
+   bool GetInitialAndFinalStates(Real &initialEpoch, Real &finalEpoch,
+                                 Rvector6 &initialState, Rvector6 &finalState,
+                                 std::string &centralBody, std::string &coordSystem,
+                                 Integer &coordSysIndicator);
+   
    void SetCentralBodyMu(double mu);
    void SetTimeIntervalBetweenPoints(double secs);
    void SetInitialEpoch(const A1Mjd &a1Mjd);
@@ -61,6 +67,9 @@ public:
    void ConvertAsciiToEbcdic(char *ascii, char *ebcdic, int numChars);
    void ConvertEbcdicToAscii(char *ebcdic, char *ascii, int numChars);
    
+   Real GetTimeSystem();
+   std::string GetCentralBody();
+
 protected:
    static const int    RECORD_SIZE = 2800;
    static const int    NUM_STATES_PER_RECORD = 50;
@@ -164,6 +173,7 @@ protected:
       char   harmonicsWithTitles2[2800];              // 1-2800
    };
    
+public:                        // Public so C500 propagator sees this struct
    struct GMAT_API EphemData
    {
       double dateOfFirstEphemPoint_YYYMMDD;           // 1-8
@@ -178,7 +188,11 @@ protected:
       char   spares1[344];                            // 2457-2800
    };
    
-   // For swaping endianness
+   void GetStartAndEndEpochs(GmatEpoch &startEpoch, GmatEpoch &endEpoch,
+         std::vector<EphemData> **records);
+
+protected:
+   // For swapping endianness
    struct DoubleByteType
    {
       unsigned byte1 : 8;
@@ -222,9 +236,9 @@ protected:
    std::string    mProductId;
    std::string    mTapeId;
    std::string    mSourceId;
-   std::string    mCentralBody;
+   std::string    mCentralBody;      // Earth, Luna, Sun, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Mercury, Venus
    std::string    mTimeSystem;
-   std::string    mCoordSystem;
+   std::string    mCoordSystem;      // "2000" for J2000
    
    // Header and data records
    EphemHeader1   mEphemHeader1;
@@ -233,6 +247,10 @@ protected:
    int            mDataRecWriteCounter;
    int            mLastDataRecRead;
    int            mLastStateIndexRead;
+   int            mNumberOfRecordsInFile;
+   int            mCoordSystemIndicator; // 2 = Mean of 1950, 3 = True of reference, 4 = J2000
+   Rvector6       mInitialState;
+   Rvector6       mFinalState;
    std::string    mLastDataRecStartGreg;
    std::string    mLastDataRecEndGreg;
    
@@ -253,8 +271,15 @@ protected:
    double mTimeIntervalBetweenPointsSecs;
    double mLeapSecsStartOutput;
    double mLeapSecsEndOutput;
+   double mStartUtcMjd;
+   double mEndUtcMjd;
    double mLeapSecsInput;
    
+   // Data used in propagation
+   GmatEpoch a1StartEpoch;
+   GmatEpoch a1EndEpoch;
+   std::vector<EphemData> ephemRecords;
+
    // For cartesian to keplerian state conversion
    double mCentralBodyMu;
    
@@ -298,6 +323,8 @@ protected:
    void WriteDoubleField(double *field, double value);
    void WriteIntegerField(int *field, int value);
    
+   // Propagation
+
    // Data buffering
    void ClearBuffer();
    

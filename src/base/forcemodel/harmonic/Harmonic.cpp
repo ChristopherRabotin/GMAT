@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: John P. Downing/GSFC/595
 // Created: 2010.10.28
@@ -26,6 +36,8 @@
 //#define DEBUG_GRADIENT
 //#define DEBUG_ALLOCATION
 //#define DEBUG_CALCULATE_FIELD
+
+#define GRADIENT_MAX 100
 
 //------------------------------------------------------------------------------
 // static data
@@ -156,7 +168,7 @@ Real Harmonic::GetFactor() const
 }
 
 //------------------------------------------------------------------------------
-void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Integer& nn,
+void Harmonic::CalculateField1(const Real& jday,  const Real pos[3], const Integer& nn,
                               const Integer& mm, const bool& fillgradient,
                               Real  acc[3],      Rmatrix33& gradient) const
 {
@@ -250,25 +262,30 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
          // Truncate the gradient at 20x20, if calculated
          if (fillgradient)
          {
-            if ((m < 21) && (n < 21))
+            if ((m < GRADIENT_MAX + 1) && (n < GRADIENT_MAX + 1))
             {
                // Pines Equation 27 (Part of)
-               Real G = m<=2 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
-               Real H = m<=2 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
+               // 2015.09.18 GMT-5295 m<=2  -> m<=1
+               Real G = m<=1 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
+               Real H = m<=1 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
                // Correct for normalization
 
-               Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
-               Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
-               Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
-               if (m==0)
-               {
-                  VR02 /= sqrt(Real(2));
-                  VR12 /= sqrt(Real(2));
-                  VR22 /= sqrt(Real(2));
-               }
-               Real Avv02 = VR02 * A[n][m+2];
-               Real Avv12 = VR12 * A[n+1][m+2];
-               Real Avv22 = VR22 * A[n+2][m+2];
+               //Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+               //Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
+               //Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+               //if (m==0)
+               //{
+               //   VR02 /= sqrt(Real(2));
+               //   VR12 /= sqrt(Real(2));
+               //   VR22 /= sqrt(Real(2));
+               //}
+               //Real Avv02 = VR02 * A[n][m+2];
+               //Real Avv12 = VR12 * A[n+1][m+2];
+               //Real Avv22 = VR22 * A[n+2][m+2];
+               Real Avv02 = VR02[n][m] * A[n][m+2];
+               Real Avv12 = VR12[n][m] * A[n+1][m+2];
+               Real Avv22 = VR22[n][m] * A[n+2][m+2];
+
                //Real Vnm = V[n][m];
                //Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
                //Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
@@ -306,7 +323,7 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
                   MessageInterface::ShowMessage("*** WARNING *** Gradient data "
                         "for the state transition matrix and A-matrix "
                         "computations are truncated at degree and order "
-                        "<= 20.\n");
+                        "<= %d.\n", GRADIENT_MAX);
                   matrixTruncationWasPosted = true;
                }
             }
@@ -367,6 +384,41 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
    #endif
 }
 
+void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Integer& nn,
+                              const Integer& mm, const bool& fillgradient,
+                              Real  acc[3],      Rmatrix33& gradient) const
+{
+   // Calculate acceleration at location pos
+   CalculateField1(jday, pos, nn, mm, fillgradient, acc, gradient);
+
+   //if (fillgradient)
+   //{
+   //   Real delta = 1.0e-3;
+   //   Real newAcc[3];
+   //   Real posVec[3];
+
+   //   // Specify gradient by using finite difference
+   //   for(UnsignedInt col = 0; col < 3; ++col)
+   //   {
+   //      posVec[0] = pos[0]; posVec[1] = pos[1]; posVec[2] = pos[2];
+   //      posVec[col] += delta;
+
+   //      // Calculate acceleration at location pos + delta
+   //      CalculateField1(jday, posVec, nn, mm, fillgradient, newAcc, gradient);
+   //      for(UnsignedInt row = 0; row < 3; ++row)
+   //      {
+   //         gradient(row,col) = (newAcc[row] - acc[row])/ delta;
+   //      }
+   //   }
+   //}
+
+   //#ifdef DEBUG_GRADIENT
+   //   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+   //   MessageInterface::ShowMessage("gradientHarmonic = %s\n", gradient.ToString().c_str());
+   //#endif
+}
+
+
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
@@ -392,7 +444,7 @@ void Harmonic::Allocate()
    for (Integer n=0;  n<=NN+2;  ++n)
    {
       V[n][0] = sqrt(Real(2*(2*n+1)));   // Temporary, to make following loop work
-    for (Integer m=1;  m<=n+2 && m<=MM+2;  ++m)
+      for (Integer m=1;  m<=n+2 && m<=MM+2;  ++m)
       {
          V[n][m] = V[n][m-1] / sqrt(Real((n+m)*(n-m+1)));
       }
@@ -411,13 +463,23 @@ void Harmonic::Allocate()
       {
          //VR01[n][m] = V[n][m] / V[n][m+1];
          //VR11[n][m] = V[n][m] / V[n+1][m+1];
-		 VR01[n][m] = sqrt(Real((n-m)*(n+m+1)));
+		   VR01[n][m] = sqrt(Real((n-m)*(n+m+1)));
          VR11[n][m] = sqrt(Real((2*n+1)*(n+m+2)*(n+m+1))/Real((2*n+3)));
-		 if (m==0) 
-		 {
-			 VR01[n][m] /= sqrt(Real(2));
-			 VR11[n][m] /= sqrt(Real(2));
-		 }
+		   if (m==0) 
+		   {
+			   VR01[n][m] /= sqrt(Real(2));
+			   VR11[n][m] /= sqrt(Real(2));
+		   }
+
+         VR02[n][m] = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+         VR12[n][m] = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
+         VR22[n][m] = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+         if (m == 0)
+         {
+            VR02[n][m] /= sqrt(Real(2));
+            VR12[n][m] /= sqrt(Real(2));
+            VR22[n][m] /= sqrt(Real(2));
+         }
       }
 
 

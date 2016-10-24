@@ -1,40 +1,77 @@
-:: Author: 		Jfisher
-:: Project:		Gmat
-:: Title:		configure.bat
-:: Purpose:		This script allows developers to quickly and easily 
-::				configure the gmat development environment on windows.
+REM Author: 		Jfisher
+REM Project:		Gmat
+REM Title:		configure.bat
+REM Purpose:		This script allows developers to quickly and easily 
+REM 			configure the GMAT software dependencies on Windows.
+REM Updates: Feb-Apr 2015: Ravi Mathur: Heavy updates for new CMake
+REM              Jul 2016: Ravi Mathur: Updates for Xerces and Python
+REM Use:
+REM   This script can be used via standard double-click or in the Windows
+REM   command prompt. Command prompt usage is:
+REM    depends.bat [-vsversion (9|10|11|12)] [-x86 | -x64]
+REM    -vsversion (9|10|11|[12]|14) : Visual Studio version (default 12)
+REM    -x86 | -x64 : Build 32 (x86) or 64 (x64) bit dependencies (default x64)
+REM   Note that VisualStudio versions are:
+REM    14 = VS2015 (not yet supported by wxWidgets)
+REM    12 = VS2013
+REM    11 = VS2012
+REM    10 = VS2010
+REM     9 = VS2008
 
-:: Turn off output and clear the screen
+REM Turn off output and clear the screen
 @echo off
+cls
 
-:: Set default variables
-set gmat_path=..
-set visualstudio_version=10.0
-set vs_path="C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
-set sdk_path="C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.Cmd"
+REM Set default variables
+set vs_version=12
+set use_64bit=1
+set depends_dir=%cd%
+set run_curl=%depends_dir%\bin\curl\curl.exe
+set run_7za=%depends_dir%\bin\7za\7za.exe
 
-:: ***********************************
-:: Input System
-:: ***********************************
+REM ***********************************
+REM Input System
+REM ***********************************
 :initial
 if "%1"=="-vsversion" goto vsversion
-if "%1"=="-vspath" goto vspath
-if "%1"=="" goto main
+if "%1"=="-x64" goto vs64
+if "%1"=="-x86" goto vs32 
+if "%1"=="" goto gettype
 goto error
 
 :vsversion
 shift
-set visualstudio_version=%1
+set vs_version=%1
 goto lreturn
 
-:vspath
-shift
-set vs_path=%1
+:vs64
+set use_64bit=1
+goto lreturn
+
+:vs32
+set use_64bit=0
 goto lreturn
 
 :lreturn
 shift
+if "%1"=="" goto main
 goto initial
+
+:gettype
+set /p user_bit="Use 32/64 bit? [32/(64)]: " || set user_bit="64"
+if "%user_bit%"=="32" (
+	set use_64bit=0
+) else (
+	set use_64bit=1
+)
+
+set /p user_vs="VisualStudio Version? [2008/2010/2012/[2013]]: " || set user_vs="2013"
+if "%user_vs%"=="2008" (set vs_version=9)
+if "%user_vs%"=="2010" (set vs_version=10)
+if "%user_vs%"=="2012" (set vs_version=11)
+if "%user_vs%"=="2013" (set vs_version=12)
+if "%user_vs%"=="2015" (set vs_version=14)
+goto main
 
 :error
 echo %0 usage error
@@ -42,183 +79,207 @@ goto end
 
 :main
 
-:: ***********************************
-:: Configure Paths
-:: ***********************************
-
-:: Set ms visual studio location based on architecture
-IF %processor_architecture% == x86 (
-	set vs_p1="C:\Program Files\Microsoft Visual Studio %visualstudio_version%\VC\vcvarsall.bat"
+IF %use_64bit% EQU 1 (
+	echo ********** Setting up GMAT 64-bit dependencies for VisualStudio %vs_version%.0 **********
 ) ELSE (
-	set vs_p1="C:\Program Files (x86)\Microsoft Visual Studio %visualstudio_version%\VC\vcvarsall.bat"
+	echo ********** Setting up GMAT 32-bit dependencies for VisualStudio %vs_version%.0 **********
 )
 
-:: Validate/Configure visual studio path
-set p0=%vs_path%
-set p1=%vs_p1%
-IF NOT EXIST %p0% (
-	IF NOT EXIST %p1% (
-		IF NOT EXIST %sdk_path% (
-			ECHO ...............................................
-			ECHO Dependency software is not installed. Please
-			ECHO consult the documentation for the required
-			ECHO software prerequisites for this script.
-			ECHO ...............................................
-			ECHO.
-		) ELSE (
-			set vs_path=%p1%
-		)
-	) ELSE (
-		set vs_path=%p1%
-	)
+set logs_dir=%depends_dir%\logs
+IF NOT EXIST %logs_dir% (
+	mkdir %logs_dir%
 )
 
+REM Add Visual Studio tools to command line path
+IF %use_64bit% EQU 1 (
+	set vs_arch=x86_amd64
+) ELSE (
+	set vs_arch=x86
+)
+set vs_envvar=vs%vs_version%0comntools
+setlocal enabledelayedexpansion
+for /F %%a in ("%vs_envvar%") do set vs_path=!%%a!
+IF "%vs_path%" == "" (
+	echo ***Visual Studio %vs_version%.0 NOT FOUND! Environment variable %vs_envvar% missing. ***
+	echo Please enter full path to Microsoft Visual Studio %vs_version%.0 folder
+	set /p vs_base_path="Path: "
+	set vs_path=!vs_base_path!\Microsoft Visual Studio %vs_version%.0\Common7\Tools\
+)
+endlocal & set vs_path=%vs_path%
+call "%vs_path%\..\..\VC\vcvarsall.bat" %vs_arch%
 
-:: ***********************************
-:: Download Library Dependencies
-:: ***********************************
+echo.
+echo ********** Configuring CSPICE **********
 
-:: Check if dependency libraries already exists
-set cspice_path=cspice
-set wxWidgets_path=wxWidgets
+set cspice_path=cspice\windows
+IF %use_64bit% EQU 1 (
+	set cspice_dir=cspice64
+	set cspice_type=64bit
+) ELSE (
+	set cspice_dir=cspice32
+	set cspice_type=32bit
+)
 
-:: Create directories and download cspice if it does not already exist.
-IF NOT EXIST %cspice_path% (
-
-	:: Create Directories
+REM Create directories and download CSPICE if it does not already exist
+IF NOT EXIST %cspice_path%\%cspice_dir% (
+	REM Create Directories
 	mkdir %cspice_path%
 	
-	:: Change to cspice directory
+	REM Change to cspice directory
 	cd %cspice_path%
 	
-	:: - Download and extract Spice (32 and 64), finally remove archive
-	ftp -s:..\bin\cspice\cspice32-ftp.txt
-	..\bin\unzip\unzip cspice.zip
-	ren cspice cspice32
-	DEL cspice.zip
+	REM Download and extract CSPICE
+	echo -- Downloading CSPICE
+	"%run_curl%" http://naif.jpl.nasa.gov/pub/naif/toolkit/C/PC_Windows_VisualC_%cspice_type%/packages/cspice.zip > cspice.zip
 	
-	ftp -s:..\bin\cspice\cspice64-ftp.txt
-	..\bin\unzip\unzip cspice.zip
-	ren cspice cspice64
+	"%run_7za%" x cspice.zip > nul
+	REN cspice %cspice_dir%
 	DEL cspice.zip
-        
-        cd ..
+
+	REM Change back to depends directory
+	cd "%depends_dir%"
 )
 
-:: Create directories and download wxwidgets if it does not already exist.
-IF NOT EXIST %wxWidgets_path% (
-	
-	:: Create Directories
+REM Compile CSPICE
+IF NOT EXIST %cspice_path%\%cspice_dir%\lib\cspiced.lib (
+	REM Compile debug CSPICE. See GMT-5044
+	echo.
+	echo -- Compiling debug CSPICE. This could take a while...
+	cd %cspice_path%\%cspice_dir%\src\cspice
+	cl /c /DEBUG /Z7 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c > %logs_dir%\cspice_build_debug.log 2>&1
+	link -lib /out:..\..\lib\cspiced.lib *.obj >> %logs_dir%\cspice_build_debug.log 2>&1
+	del *.obj
+
+	REM Compile release CSPICE. See GMT-5044
+	echo.
+	echo -- Compiling release CSPICE. This could take a while...
+	cl /c /O2 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c > %logs_dir%\cspice_build_release.log 2>&1
+	link -lib /out:..\..\lib\cspice.lib *.obj >> %logs_dir%\cspice_build_release.log 2>&1
+	del *.obj
+        
+	REM Change back to depends directory
+	cd "%depends_dir%"
+) ELSE (
+	echo -- CSPICE already configured
+)
+
+set wxver=3.0.2
+echo.
+echo ********** Configuring wxWidgets %wxver% **********
+
+IF %use_64bit% EQU 1 (
+	set wxtype=_x64_
+) ELSE (
+	set wxtype=_
+)
+set wxhdr=wxWidgets-%wxver%_headers.7z
+set wxdev=wxMSW-%wxver%_vc%vs_version%0%wxtype%%Dev.7z
+set wxrel=wxMSW-%wxver%_vc%vs_version%0%wxtype%%ReleaseDLL.7z
+set wxWidgets_path=wxWidgets\wxMSW-%wxver%
+
+REM Create directories and download wxWidgets if it does not already exist.
+IF NOT EXIST %wxWidgets_path%\lib\vc%wxtype%dll (
+	REM Create Directories
 	mkdir %wxWidgets_path%
 	
-	:: Change to wxwidgets directory
+	REM Change to wxWidgets directory
 	cd %wxWidgets_path%
 	
-	:: - Download wxWidgets
-        ftp -s:..\bin\wx\wx-ftp.txt
-	
-	:: - Unzip wxWidgets
-        ..\bin\unzip\unzip wxMSW-2.8.12.zip
-	
-	:: Copy modified wxWidget setup.h file to downloaded source path (Preconfigured to use
-	:: ODBC and GLCanvas
-	copy "..\bin\wx\setup.h" "wxMSW-2.8.12\include\wx\msw\setup.h" /Y
-	copy "..\bin\wx\setup.h" "wxMSW-2.8.12\include\wx\msw\setup0.h" /Y
+	REM Download wxWidgets headers and binaries
+	echo -- Downloading wxWidgets headers
+	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxhdr% > %wxhdr%
 
-        cd ..
-)
+	echo.
+	echo -- Downloading wxWidgets debug libraries
+	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxdev% > %wxdev%
 
-:: ***********************************
-:: Build Library Dependencies
-:: ***********************************
+	echo.
+	echo -- Downloading wxWidgets release libraries
+	%run_curl% -Lk https://github.com/wxWidgets/wxWidgets/releases/download/v%wxver%/%wxrel% > %wxrel%
 
-:: Set build path based on version
-set wx_build_path=wxWidgets\wxMSW-2.8.12\build\msw
-
-:: Check if dependencies have already been built
-set depend_x86_path="wxWidgets\wxMSW-2.8.12\lib\vc_dll\wxmsw28_core_vc_custom.dll"
-set depend_amd64_path="wxWidgets\wxMSW-2.8.12\lib\vc_amd64_dll\wxmsw28_core_vc_custom.dll"
-
-cd %wx_build_path%
-
-IF NOT EXIST %depend_x86_path% (
-
-	:: Launch MS Build environmental variables for build process
-	IF EXIST %sdk_path% (
-		call %sdk_path% /Release /x86 /xp
-	) ELSE (
-		call %vs_path% x86
+	REM Extract wxWidgets
+	IF NOT EXIST include (
+		%run_7za% x %wxhdr% > nul
 	)
+	%run_7za% x %wxdev% > nul
+	%run_7za% x %wxrel% > nul
 
-	:: - Compile 32bit wxWidget source (Clean, static, dynamic)
-	nmake -f makefile.vc clean SHARED=0 USE_OPENGL=1 USE_ODBC=1 BUILD=release
-	nmake -f makefile.vc all SHARED=0 USE_OPENGL=1 USE_ODBC=1 BUILD=release
-	nmake -f makefile.vc clean SHARED=1 USE_OPENGL=1 USE_ODBC=1 BUILD=release
-	nmake -f makefile.vc all SHARED=1 USE_OPENGL=1 USE_ODBC=1 BUILD=release
-	
-	:: - Change to contrib directory
-	cd ../../contrib/build/net/
+	DEL %wxhdr%
+	DEL %wxdev%
+	DEL %wxrel%
 
-	:: - Compile 32 bit wxWidget contrib/net source (Clean, static, dynamic)
-	nmake -f makefile.vc clean SHARED=0 BUILD=release
-	nmake -f makefile.vc all SHARED=0 BUILD=release
-	nmake -f makefile.vc clean SHARED=1 BUILD=release
-	nmake -f makefile.vc all SHARED=1 BUILD=release
-	
-	:: - Compile 32bit wxWidget contrib/stc source (Clean, static, dynamic)
-	cd ../stc
-	nmake -f makefile.vc clean SHARED=0 BUILD=release
-	nmake -f makefile.vc all SHARED=0 BUILD=release
-	nmake -f makefile.vc clean SHARED=1 BUILD=release
-	nmake -f makefile.vc all SHARED=1 BUILD=release	
+	REM Change dll folder name
+	cd lib
+	REN vc%vs_version%0%wxtype%dll vc%wxtype%dll
 
+	REM Change back to depends directory
+        cd "%depends_dir%"
+) ELSE (
+	echo -- wxWidgets already configured
 )
 
-IF NOT EXIST %depend_amd64_path% (
+set xercesver=3.1.4
+echo.
+echo ********** Configuring Xerces-C++ %xercesver% **********
 
-	cd %wx_build_path%
-
-	:: Launch MS Build environmental variables for build process
-	IF EXIST %sdk_path% (
-		call %sdk_path% /Release /x64 /xp
-	) ELSE (
-		IF %processor_architecture% == x86 (
-			call %vs_path% x86_amd64
-		) ELSE (
-			call %vs_path% amd64
-		)
-	)
-
-	:: - Compile 64bit wxWidget source (Clean, static, dynamic)
-	nmake -f makefile.vc clean SHARED=0 USE_OPENGL=1 USE_ODBC=1 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc all SHARED=0 USE_OPENGL=1 USE_ODBC=1 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc clean SHARED=1 USE_OPENGL=1 USE_ODBC=1 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc all SHARED=1 USE_OPENGL=1 USE_ODBC=1 BUILD=release TARGET_CPU=AMD64
-	
-	:: - Change to contrib directory
-	cd ../../contrib/build/net/
-	
-	:: - Compile 64bit wxWidget contrib/net source (Clean, static, dynamic)
-	nmake -f makefile.vc clean SHARED=0 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc all SHARED=0 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc clean SHARED=1 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc all SHARED=1 BUILD=release TARGET_CPU=AMD64
-	
-	:: - Compile 64bit wxWidget contrib/stc source (Clean, static, dynamic)
-	cd ../stc
-	nmake -f makefile.vc clean SHARED=0 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc all SHARED=0 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc clean SHARED=1 BUILD=release TARGET_CPU=AMD64
-	nmake -f makefile.vc all SHARED=1 BUILD=release TARGET_CPU=AMD64
-	
+set xerces_path=xerces
+IF %use_64bit% EQU 1 (
+	set xerces_outdir=%xerces_path%\Build\Win64
+	set xerces_arch=x64
+) ELSE (
+	set xerces_outdir=%xerces_path%\Build\Win32
+	set xerces_arch=Win32
 )
 
-:: Move back to default path
-cd %gmat_path%
+REM Download Xerces if it doesn't exist
+IF NOT EXIST %xerces_path% (
+	REM Download and extract Xerces
+	echo -- Downloading Xerces
+	"%run_curl%" http://archive.apache.org/dist/xerces/c/3/sources/xerces-c-%xercesver%.tar.gz > xerces.tar.gz
+	"%run_7za%" x xerces.tar.gz > nul
+	"%run_7za%" x xerces.tar > nul
+	DEL xerces.tar.gz
+	DEL xerces.tar
+	REN xerces-c-%xercesver% %xerces_path%
 
-:: ***********************************
-:: End of script
-:: ***********************************
+	REM Change back to depends directory
+	cd "%depends_dir%"
+)
+
+REM Compile Xerces
+IF NOT EXIST %xerces_outdir% (
+	REM Compile debug Xerces
+	REM XercesLibOverride is needed because the Xerces Runtime Library cannot be directly changed with an msbuild flag
+	echo.
+	echo -- Compiling debug Xerces. This could take a while...
+	cd %xerces_path%\projects\Win32\VC%vs_version%\xerces-all\XercesLib
+	msbuild /m ^
+		/property:Configuration="Static Debug";Platform=%xerces_arch% ^
+		/property:TargetName=xerces-c_3D ^
+		/property:ForceImportBeforeCppTargets="%depends_dir%\bin\xerces\XercesLibOverride.prop" ^
+		XercesLib.vcxproj > %logs_dir%\xerces_build_debug.log 2>&1
+
+	REM Compile release Xerces
+	echo.
+	echo -- Compiling release Xerces. This could take a while...
+	msbuild /m ^
+		/property:Configuration="Static Release";Platform=%xerces_arch% ^
+		/property:TargetName=xerces-c_3 ^
+		/property:ForceImportBeforeCppTargets="%depends_dir%\bin\xerces\XercesLibOverride.prop" ^
+		XercesLib.vcxproj > %logs_dir%\xerces_build_release.log 2>&1
+
+	REM Change back to depends directory
+	cd "%depends_dir%"
+) ELSE (
+	echo -- Xerces already configured
+)
+
+echo.
 echo Dependency Configuration Complete!
-:end
+echo.
 
+REM ***********************************
+REM End of script
+REM ***********************************
+:end
+pause

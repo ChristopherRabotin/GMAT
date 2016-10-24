@@ -30,6 +30,7 @@
 #include "DataInterfaceCommandFactory.hpp"
 #include "DataInterfaceFactory.hpp"
 #include "ReaderFactory.hpp"
+#include "NewParameterFactory.hpp"
 
 #ifdef __USE_MATLAB__
 #include "MatlabInterfaceFactory.hpp"
@@ -56,6 +57,7 @@ void ForStaticLinkBuild::RegisterBuiltinPluginFactories(FactoryManager *factoryM
    factoryManager->RegisterFactory(new DataInterfaceCommandFactory());
    factoryManager->RegisterFactory(new DataInterfaceFactory());
    factoryManager->RegisterFactory(new ReaderFactory());
+   factoryManager->RegisterFactory(new NewParameterFactory());
    
    #ifdef __USE_MATLAB__
    factoryManager->RegisterFactory(new MatlabInterfaceFactory());

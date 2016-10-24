@@ -4,11 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Linda Jun
 // Created: 2008/11/13
@@ -23,6 +31,7 @@
 #include "FileUtil.hpp"           // for DoesDirectoryExist()
 #include "FileManager.hpp"        // for GetFullPathname()
 #include "MessageInterface.hpp"
+#include <wx/config.h>
 
 #include "bitmaps/NewScript.xpm"
 #include "bitmaps/OpenScript.xpm"
@@ -46,7 +55,7 @@
 #include "bitmaps/SlowerAnimation.xpm"
 #include "bitmaps/screenshot.xpm"
 
-//#define DEBUG_TOOLBAR
+//#define DEBUG_CREATE_TOOLBAR
 //#define DEBUG_LOAD_ICON
 //#define DEBUG_SYNC_STATUS
 
@@ -66,6 +75,7 @@ GmatToolBar::GmatToolBar(wxWindow* parent, long style, wxWindowID id,
    CreateToolBar(this);
    AddAnimationTools(this);
    AddGuiScriptSyncStatus(this);
+   AddAdvancedStatusField(this);
 }
 
 
@@ -74,7 +84,7 @@ GmatToolBar::GmatToolBar(wxWindow* parent, long style, wxWindowID id,
 //------------------------------------------------------------------------------
 void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
 {
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("GmatToolBar::CreateToolBar() entered\n");
    #endif
    
@@ -88,6 +98,9 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    
    // Do not change the order, this order is how it appears in the toolbar
    
+   #ifdef DEBUG_CREATE_TOOLBAR
+   MessageInterface::ShowMessage("   Loading icons\n");
+   #endif
    guiManager->LoadIcon("NewScript", bitmapType, &bitmaps[0], NewScript_xpm);
    guiManager->LoadIcon("OpenScript", bitmapType, &bitmaps[1], OpenScript_xpm);
    guiManager->LoadIcon("SaveMission", bitmapType, &bitmaps[2], SaveMission_xpm);
@@ -107,9 +120,10 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    guiManager->LoadIcon("screenshot", bitmapType, &bitmaps[16], screenshot_xpm);
    
    // Changed from wxSize(18, 15) (LOJ: 2011.02.04)
-   toolBar->SetToolBitmapSize(wxSize(16, 16));
+   // Changed from wxSize(16, 16) to accomodate large fonts (TGG: 2015.05.08)
+   toolBar->SetToolBitmapSize(wxSize(25, 25));
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding mission tools\n");
    #endif
    
@@ -124,7 +138,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
                     _T("New Mission"));
    toolBar->AddSeparator();
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding edit tools\n");
    #endif
    
@@ -140,7 +154,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    toolBar->AddSeparator();
    #endif
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding run tools\n");
    #endif
    
@@ -151,7 +165,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    toolBar->AddTool(TOOL_SCREENSHOT, _T("Screenshot"), *bitmaps[16], _T("Screenshot (F10)"));
    toolBar->AddSeparator();
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding window tools\n");
    #endif
    
@@ -161,16 +175,17 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
                     _T("Close"));
    toolBar->AddSeparator();
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding help tools\n");
    #endif
    
    // add help tool
    toolBar->AddTool(MENU_HELP_ABOUT, _T("About GMAT"), *bitmaps[7], _T("About GMAT"));
    toolBar->AddTool(MENU_HELP_CONTENTS, _T("Help"), *bitmaps[15], _T("Help"));
-   
+
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
-   toolBar->Realize();
+   //toolBar->Realize();
    
    // disable tools
    toolBar->EnableTool(MENU_EDIT_COPY, FALSE);
@@ -188,7 +203,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    for (int i = 0; i < NUM_ICONS; i++)
       delete bitmaps[i];
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("GmatToolBar::CreateToolBar() exiting\n");
    #endif
 }
@@ -205,7 +220,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
 //------------------------------------------------------------------------------
 void GmatToolBar::AddAnimationTools(wxToolBar* toolBar)
 {
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("GmatToolBar::AddAnimationTools() entered\n");
    #endif
    
@@ -261,8 +276,9 @@ void GmatToolBar::AddAnimationTools(wxToolBar* toolBar)
                     _T("Show Animation Options"));
    #endif
    
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
-   toolBar->Realize();
+   //toolBar->Realize();
    
    // disable tools
    toolBar->EnableTool(TOOL_ANIMATION_PLAY, FALSE);
@@ -290,10 +306,10 @@ void GmatToolBar::AddGuiScriptSyncStatus(wxToolBar* toolBar)
    // Add GUI/Script status text
    wxStaticText *syncLabel = new wxStaticText(this, -1, wxT("GUI/Script Sync Status: "));
    theSyncStatus = new wxStaticText
-      (this, -1, wxT(" Synchronized "), wxDefaultPosition, wxSize(120, 20), wxALIGN_CENTRE);
+      (this, -1, wxT(" Synchronized "), wxDefaultPosition, wxSize(120, -1), wxALIGN_CENTRE);
 #else
    theSyncStatus = new wxStaticText
-      (this, -1, wxT("S"), wxDefaultPosition, wxSize(20, 20), wxALIGN_CENTRE);
+      (this, -1, wxT("S"), wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTRE);
 #endif
 
    // Make font bold face
@@ -309,12 +325,68 @@ void GmatToolBar::AddGuiScriptSyncStatus(wxToolBar* toolBar)
    theSyncStatus->SetBackgroundColour(bgcolor);
    theSyncStatus->SetForegroundColour(*wxGREEN);
    
-   toolBar->AddSeparator();
+   //toolBar->AddSeparator();
    
 #ifndef __WXMAC__
    toolBar->AddControl(syncLabel);
 #endif
    toolBar->AddControl(theSyncStatus);
+
+   // now realize to make tools appear
+   toolBar->Realize();
+}
+
+//------------------------------------------------------------------------------
+// void AddAdvancedStatusField(wxToolBar* toolBar)
+//------------------------------------------------------------------------------
+/**
+ * Adds GUI and Script file synchronization status to tool bar.
+ *
+ * @param <toolBar> input tool bar.
+ */
+//------------------------------------------------------------------------------
+void GmatToolBar::AddAdvancedStatusField(wxToolBar* toolBar)
+{
+   // Set blank initially
+#ifndef __WXMAC__
+   // Add GUI/Script status text
+   wxStaticText *advancedLabel = new wxStaticText(this, -1, wxT(""));
+   theAdvancedField = new wxStaticText
+      (this, -1, wxT(""), wxDefaultPosition, wxSize(120, -1), wxALIGN_CENTRE);
+#else
+   theAdvancedField = new wxStaticText
+      (this, -1, wxT(""), wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTRE);
+#endif
+
+   // Set tool tip
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   pConfig->SetPath(wxT("/Advanced Mode"));
+   wxString hint = pConfig->Read("NonSavableGUIModeHint");
+   #ifdef DEBUG_ADVANCED_FIELD
+   MessageInterface::ShowMessage
+      ("In GmatToolBar::AddAdvancedStatusField() hint = '%s'\n", hint.WX_TO_C_STRING);
+   #endif
+   theAdvancedField->SetToolTip(hint);
+   
+   // Make font bold face
+   wxFont font = theAdvancedField->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   // Make font size little bigger
+   int fontSize = font.GetPointSize();
+   font.SetPointSize(fontSize + 1);
+   theAdvancedField->SetFont(font);
+   
+   // Set color
+   //theAdvancedField->SetBackgroundColour(wxTheColourDatabase->Find("THISTLE"));
+   theAdvancedField->SetForegroundColour(wxTheColourDatabase->Find("ORANGE"));
+   
+   //toolBar->AddSeparator();
+   
+#ifndef __WXMAC__
+   toolBar->AddControl(advancedLabel);
+#endif
+   toolBar->AddControl(theAdvancedField);
    
    // now realize to make tools appear
    toolBar->Realize();
@@ -437,6 +509,23 @@ void GmatToolBar::UpdateGuiScriptSyncStatus(wxToolBar* toolBar, int guiStat,
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void UpdateAdvancedField(wxToolBar* toolBar, int status)
+//------------------------------------------------------------------------------
+void GmatToolBar::UpdateAdvancedField(wxToolBar* toolBar, int status)
+{
+   wxString statusText = "";
+#ifndef __WXMAC__
+   statusText = "Non-Savable GUI Mode";
+#else
+   statusText = "NS";
+#endif
+   
+   if (status == 1)
+      theAdvancedField->SetLabel("");
+   else if (status == 2)
+      theAdvancedField->SetLabel(statusText);
+}
 
 //------------------------------------------------------------------------------
 // void LoadIcon(const wxString &filename, long bitmapType, wxBitmap *bitmap, const char* xpm[]

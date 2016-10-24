@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{de21fca8-a218-4d92-9d11-df23bb14aca5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\command">
+      <UniqueIdentifier>{bcb8d44d-5263-45f8-aaf6-a12a53b3d172}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\datainterface">
+      <UniqueIdentifier>{435f82c8-2e5f-46dd-94db-9369fdebef13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\datareader">
+      <UniqueIdentifier>{6ac03797-a92d-42cd-b3c5-49988d48c767}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\factory">
+      <UniqueIdentifier>{38af5c0e-3c1c-4c93-ba5d-703c15bb8ba9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{d2c78db9-437c-4bb0-94ed-4cefaebab05e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\base\include\DataInterfaceDefs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\command\Set.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datainterface\DataInterface.hpp">
+      <Filter>Source Files\datainterface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datainterface\FileInterface.hpp">
+      <Filter>Source Files\datainterface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datareader\DataReader.hpp">
+      <Filter>Source Files\datareader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datareader\FileReader.hpp">
+      <Filter>Source Files\datareader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datareader\TcopsVHFAscii.hpp">
+      <Filter>Source Files\datareader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datareader\TcopsVHFData.hpp">
+      <Filter>Source Files\datareader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\DataInterfaceCommandFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\DataInterfaceFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\ReaderFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\base\command\Set.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datainterface\DataInterface.cpp">
+      <Filter>Source Files\datainterface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datainterface\FileInterface.cpp">
+      <Filter>Source Files\datainterface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datareader\DataReader.cpp">
+      <Filter>Source Files\datareader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datareader\FileReader.cpp">
+      <Filter>Source Files\datareader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datareader\TcopsVHFAscii.cpp">
+      <Filter>Source Files\datareader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datareader\TcopsVHFData.cpp">
+      <Filter>Source Files\datareader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\DataInterfaceCommandFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\DataInterfaceFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\ReaderFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

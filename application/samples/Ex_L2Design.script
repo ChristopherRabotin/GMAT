@@ -13,12 +13,6 @@ GMAT EarthMoonL2.Point = L2;
 %----------------------------------------
 %---------- Spacecraft
 %----------------------------------------
-% -------------------------------------------------------------------------
-% --------------------------- Create Objects ------------------------------
-% -------------------------------------------------------------------------
-
-
-% ----------------------Spacecraft/Propagators-----------------------------
 
 Create Spacecraft Sat;
 GMAT Sat.DateFormat = TAIModJulian;
@@ -36,21 +30,6 @@ GMAT Sat.Cd = 2.2;
 GMAT Sat.Cr = 1.8;
 GMAT Sat.DragArea = 15;
 GMAT Sat.SRPArea = 1;
-GMAT Sat.NAIFId = -123456789;
-GMAT Sat.NAIFIdReferenceFrame = -123456789;
-GMAT Sat.Id = 'SatId';
-GMAT Sat.Attitude = CoordinateSystemFixed;
-GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
-GMAT Sat.ModelOffsetX = 0;
-GMAT Sat.ModelOffsetY = 0;
-GMAT Sat.ModelOffsetZ = 0;
-GMAT Sat.ModelRotationX = 0;
-GMAT Sat.ModelRotationY = 0;
-GMAT Sat.ModelRotationZ = 0;
-GMAT Sat.ModelScale = 3;
-GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
-GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
 
 %----------------------------------------
 %---------- ForceModels
@@ -116,13 +95,9 @@ GMAT dV.GravitationalAccel = 9.810000000000001;
 %----------------------------------------
 Create Variable I J;
 
-
-
 %----------------------------------------
 %---------- Coordinate Systems
 %----------------------------------------
-
-% ------------------------------Coordinate Systems-------------------------
 
 Create CoordinateSystem CSEarthMoonRot;
 GMAT CSEarthMoonRot.Origin = Earth;
@@ -155,8 +130,6 @@ GMAT DC.DerivativeMethod = ForwardDifference;
 %---------- Subscribers
 %----------------------------------------
 
-% ------------------------------OrbitView Plots--------------------------------------
-
 Create OrbitView ViewEarthMoonRot;
 GMAT ViewEarthMoonRot.SolverIterations = Current;
 GMAT ViewEarthMoonRot.UpperLeft = [ 0.3858490566037736 0.003778337531486146 ];
@@ -165,26 +138,9 @@ GMAT ViewEarthMoonRot.RelativeZOrder = 196;
 GMAT ViewEarthMoonRot.Add = {Earth, Luna, Sun, Sat, EarthMoonL2};
 GMAT ViewEarthMoonRot.CoordinateSystem = L2Centered;
 GMAT ViewEarthMoonRot.DrawObject = [ true true true true true ];
-GMAT ViewEarthMoonRot.DataCollectFrequency = 1;
-GMAT ViewEarthMoonRot.UpdatePlotFrequency = 50;
-GMAT ViewEarthMoonRot.NumPointsToRedraw = 0;
-GMAT ViewEarthMoonRot.ShowPlot = true;
 GMAT ViewEarthMoonRot.ViewPointReference = EarthMoonL2;
-GMAT ViewEarthMoonRot.ViewPointVector = [ 0 0 30000 ];
 GMAT ViewEarthMoonRot.ViewDirection = EarthMoonL2;
 GMAT ViewEarthMoonRot.ViewScaleFactor = 10;
-GMAT ViewEarthMoonRot.ViewUpCoordinateSystem = EarthMJ2000Eq;
-GMAT ViewEarthMoonRot.ViewUpAxis = Z;
-GMAT ViewEarthMoonRot.EclipticPlane = Off;
-GMAT ViewEarthMoonRot.XYPlane = On;
-GMAT ViewEarthMoonRot.WireFrame = Off;
-GMAT ViewEarthMoonRot.Axes = On;
-GMAT ViewEarthMoonRot.Grid = Off;
-GMAT ViewEarthMoonRot.SunLine = Off;
-GMAT ViewEarthMoonRot.UseInitialView = On;
-GMAT ViewEarthMoonRot.StarCount = 7000;
-GMAT ViewEarthMoonRot.EnableStars = On;
-GMAT ViewEarthMoonRot.EnableConstellations = On;
 
 Create OrbitView EarthMJ2K;
 GMAT EarthMJ2K.SolverIterations = Current;
@@ -194,34 +150,12 @@ GMAT EarthMJ2K.RelativeZOrder = 200;
 GMAT EarthMJ2K.Add = {Sat, Earth, Luna};
 GMAT EarthMJ2K.CoordinateSystem = EarthMJ2000Eq;
 GMAT EarthMJ2K.DrawObject = [ true true true ];
-GMAT EarthMJ2K.DataCollectFrequency = 1;
-GMAT EarthMJ2K.UpdatePlotFrequency = 50;
-GMAT EarthMJ2K.NumPointsToRedraw = 0;
-GMAT EarthMJ2K.ShowPlot = true;
-GMAT EarthMJ2K.ViewPointReference = Earth;
-GMAT EarthMJ2K.ViewPointVector = [ 0 0 30000 ];
-GMAT EarthMJ2K.ViewDirection = Earth;
 GMAT EarthMJ2K.ViewScaleFactor = 45;
-GMAT EarthMJ2K.ViewUpCoordinateSystem = EarthMJ2000Eq;
-GMAT EarthMJ2K.ViewUpAxis = X;
-GMAT EarthMJ2K.EclipticPlane = Off;
-GMAT EarthMJ2K.XYPlane = On;
-GMAT EarthMJ2K.WireFrame = Off;
-GMAT EarthMJ2K.Axes = On;
-GMAT EarthMJ2K.Grid = Off;
-GMAT EarthMJ2K.SunLine = Off;
-GMAT EarthMJ2K.UseInitialView = On;
-GMAT EarthMJ2K.StarCount = 7000;
-GMAT EarthMJ2K.EnableStars = On;
-GMAT EarthMJ2K.EnableConstellations = On;
-
-
-% ------------------------------ Reports --------------------------------------
-
 
 % -------------------------------------------------------------------------
 % --------------------------- Mission Sequence-----------------------------
 % -------------------------------------------------------------------------
+
 BeginMissionSequence;
 
 

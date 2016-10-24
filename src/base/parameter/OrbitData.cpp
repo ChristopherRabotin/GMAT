@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -37,6 +47,7 @@
 
 //#define DEBUG_ORBITDATA_SET
 //#define DEBUG_ORBITDATA_GET
+//#define DEBUG_REF_OBJECT
 //#define DEBUG_ORBITDATA_INIT
 //#define DEBUG_ORBITDATA_CONVERT
 //#define DEBUG_ORBITDATA_RUN
@@ -46,6 +57,7 @@
 //#define DEBUG_ORBITDATA_OBJREF_EPOCH
 //#define DEBUG_ORBITDATA_OBJNAME
 //#define DEBUG_BROUWER_LONG
+//#define DEBUG_FULL_STM
 
 using namespace GmatMathUtil;
 
@@ -101,9 +113,10 @@ const std::string OrbitData::VALID_OTHER_ORBIT_PARAM_NAMES[ENERGY - MM + 1] =
  * Constructor.
  */
 //------------------------------------------------------------------------------
-OrbitData::OrbitData(const std::string &name, Gmat::ObjectType paramOwnerType,
+OrbitData::OrbitData(const std::string &name, const std::string &typeName,
+                     Gmat::ObjectType paramOwnerType,
                      GmatParam::DepObject depObj, bool isSettable)
-   : RefData(name, paramOwnerType, depObj, isSettable),
+   : RefData(name, typeName, paramOwnerType, depObj, isSettable),
    stateTypeId (-1)
 {
    mCartEpoch     = 0.0;
@@ -564,6 +577,22 @@ Rvector6 OrbitData::GetCartState()
       if ((mParameterCS->AreAxesOfType("ObjectReferencedAxes")) && !firstTimeEpochWarning)
       {
          GmatBase *objRefOrigin = mParameterCS->GetOrigin();
+         if (objRefOrigin == NULL)
+         {
+            std::string errmsg = "OrbitData::GetCartState() Failed to convert to " ;
+            errmsg += mParameterCS->GetName() + " coordinate system. \n";
+            errmsg += "The origin of " + mParameterCS->GetName() + " is NULL\n";
+            ParameterException pe(errmsg);
+            pe.SetFatal(true);
+            throw pe;
+         }
+         
+         #ifdef DEBUG_ORBITDATA_CONVERT
+         MessageInterface::ShowMessage
+            ("   Origin of '%s' is '%s'\n", mParameterCS->GetName().c_str(),
+             objRefOrigin->GetName().c_str());
+         #endif
+         
          if (objRefOrigin->IsOfType("Spacecraft"))
          {
             std::string objRefScName = ((Spacecraft*) objRefOrigin)->GetName();
@@ -606,13 +635,17 @@ Rvector6 OrbitData::GetCartState()
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() Failed to convert to %s coordinate system.\n   %s\n",
-             mParameterCS->GetName().c_str(), e.GetFullMessage().c_str());
+         // MessageInterface::ShowMessage
+         //    ("OrbitData::GetCartState() Failed to convert to %s coordinate system.\n   %s\n",
+         //     mParameterCS->GetName().c_str(), e.GetFullMessage().c_str());
          std::string errmsg = "OrbitData::GetCartState() Failed to convert to " ;
          errmsg += mParameterCS->GetName() + " coordinate system.\n";
          errmsg += "Message: " + e.GetFullMessage() + "\n";
-         throw ParameterException(errmsg);
+         // Set fatal to true so that caller can handle fatal exception (LOJ: 2015.01.06)
+         //throw ParameterException(errmsg);
+         ParameterException pe(errmsg);
+         pe.SetFatal(true);
+         throw pe;
       }
    }
    
@@ -1703,7 +1736,22 @@ const Rmatrix66& OrbitData::GetStmRmat66(Integer item)
    {
    case ORBIT_STM:
       {
-         mSTM = mSpacecraft->GetRmatrixParameter("OrbitSTM");
+         Rmatrix fullSTM(mSpacecraft->GetRmatrixParameter("OrbitSTM"));
+
+         #ifdef DEBUG_FULL_STM
+            MessageInterface::ShowMessage("Full Spacecraft STM:\n%s\n",
+                  fullSTM.ToString(17).c_str());
+         #endif
+
+         for (Integer i = 0; i < 6; ++i)
+         {
+            mSTM(i,i) = fullSTM(i,i);
+            for (Integer j = i+1; j < 6; ++j)
+            {
+               mSTM(i,j) = fullSTM(i,j);
+               mSTM(j,i) = fullSTM(j,i);
+            }
+         }
          return mSTM;
       }
    default:
@@ -1727,21 +1775,53 @@ const Rmatrix33& OrbitData::GetStmRmat33(Integer item)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
    
-   mSTM = mSpacecraft->GetRmatrixParameter("OrbitSTM");
+   Rmatrix fullSTM(mSpacecraft->GetRmatrixParameter("OrbitSTM"));
    
    switch (item)
    {
    case ORBIT_STM_A:
-      mSTMSubset = mSTM.UpperLeft();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i,i);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i,j);
+            mSTMSubset(j,i) = fullSTM(j,i);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_B:
-      mSTMSubset = mSTM.UpperRight();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i,i+3);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i,j+3);
+            mSTMSubset(j,i) = fullSTM(j,i+3);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_C:
-      mSTMSubset = mSTM.LowerLeft();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i+3,i);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i+3,j);
+            mSTMSubset(j,i) = fullSTM(j+3,i);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_D:
-      mSTMSubset = mSTM.LowerRight();
+      for (Integer i = 3; i < 6; ++i)
+      {
+         mSTMSubset(i-3,i-3) = fullSTM(i,i);
+         for (Integer j = i+1; j < 6; ++j)
+         {
+            mSTMSubset(i-3,j-3) = fullSTM(i,j);
+            mSTMSubset(j-3,i-3) = fullSTM(j,i);
+         }
+      }
       return mSTMSubset;
    default:
       // otherwise, there is an error   
@@ -1787,6 +1867,9 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
 }
 
 // The inherited methods from RefData
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
 std::string OrbitData::GetRefObjectName(const Gmat::ObjectType type) const
 {
    try
@@ -1823,6 +1906,9 @@ std::string OrbitData::GetRefObjectName(const Gmat::ObjectType type) const
    }
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
 const StringArray& OrbitData::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    RefData::GetRefObjectNameArray(type);
@@ -1864,12 +1950,26 @@ bool OrbitData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
 GmatBase* OrbitData::GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   #ifdef DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("OrbitData::GetRefObject() <%p>'%s' entered, type=%d, name='%s'\n", this,
+       mActualParamName.c_str(), type, name.c_str());
+   #endif
+   
    try
    {
       GmatBase* theObj = RefData::GetRefObject(type, name);
+      #ifdef DEBUG_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("OrbitData::GetRefObject() <%p>'%s' returning %s\n", this, mActualParamName.c_str(),
+          GmatBase::WriteObjectInfo("", theObj).c_str());
+      #endif
       return theObj;
    }
    catch (ParameterException &pe)
@@ -1878,28 +1978,45 @@ GmatBase* OrbitData::GetRefObject(const Gmat::ObjectType type,
       // list (or vice versa?), since we are looking for a Spacecraft
       // and a Spacecraft is a SpacePoint
       Gmat::ObjectType altType = type;
+      GmatBase *refObj = NULL;
       if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;
       for (int i=0; i<mNumRefObjects; i++)
       {
          if (mRefObjList[i].objType == altType)
          {
             if (name == "") //if name is "", return first object
-               return mRefObjList[i].obj;
-
+            {
+               refObj = mRefObjList[i].obj;
+               #ifdef DEBUG_REF_OBJECT
+               MessageInterface::ShowMessage
+                  ("OrbitData::GetRefObject() <%p>'%s' returning %s\n", this,
+                   mActualParamName.c_str(),
+                   GmatBase::WriteObjectInfo("", refObj).c_str());
+               #endif
+               //return mRefObjList[i].obj;
+               return refObj;
+            }
+            
             if ((name == "" || mRefObjList[i].objName == name) &&
                 (mRefObjList[i].obj)->IsOfType("Spacecraft"))
             {
                //Notes: will return first object name.
-               #ifdef DEBUG_ORBITDATA_OBJNAME
+               #ifdef DEBUG_REF_OBJECT
                MessageInterface::ShowMessage
-                  ("---> OrbitData::GetRefObject() altType=%d returning: %s\n", altType,
-                   mRefObjList[i].objName.c_str());
+                  ("---> OrbitData::GetRefObject() <%p>'%s' altType=%d returning: %s\n",
+                   this, mActualParamName.c_str(), altType, mRefObjList[i].objName.c_str());
                #endif
                return mRefObjList[i].obj;
             }
          }
       }
-
+      
+      #ifdef DEBUG_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("OrbitData::GetRefObject() <%p>'%s' rethrowing exception: %s\n",
+          this, mActualParamName.c_str(), pe.GetFullMessage().c_str());
+      #endif
+      
       throw;
    }
 }
@@ -1917,13 +2034,21 @@ GmatBase* OrbitData::GetRefObject(const Gmat::ObjectType type,
 bool OrbitData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name)
 {
+   #ifdef DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("OrbitData::SetRefObject() <%p>'%s' entered, obj=<%p>[%s]'%s', type=%d, "
+       "name='%s'\n", this, mActualParamName.c_str(), obj,
+       obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
+   #endif
+   
    // We need to be able to handle SpacePoints, not just Spacecraft
    Gmat::ObjectType useType = type;
    if ((type == Gmat::GROUND_STATION)   || (type == Gmat::BODY_FIXED_POINT) ||
        (type == Gmat::CALCULATED_POINT) || (type == Gmat::LIBRATION_POINT)  ||
        (type == Gmat::BARYCENTER)       || (type == Gmat::CELESTIAL_BODY))
       useType = Gmat::SPACE_POINT;
-
+   
    return RefData::SetRefObject(obj, useType, name);
 }
 
@@ -2091,13 +2216,18 @@ void OrbitData::InitializeRefObjects()
       {
          #ifdef DEBUG_ORBITDATA_INIT
          MessageInterface::ShowMessage
-            ("OrbitData::InitializeRefObjects() origin not found: " +
-             mParameterCS->GetOriginName() + "\n");
+            ("OrbitData::InitializeRefObjects() The origin '%s' of CS '%s' is NULL, "
+             "so try to find it again...\n",
+             mParameterCS->GetOriginName().c_str(), mParameterCS->GetName().c_str());
          #endif
-      
-         throw ParameterException
-            ("OrbitData::InitializeRefObjects() The origin of CoordinateSystem \"" +
-             mParameterCS->GetOriginName() + "\" is NULL");
+         
+         // Try to find origin again for GmatFunction (LOJ: 2014.01.12)
+         mOrigin = (SpacePoint*)FindObject(Gmat::SPACE_POINT, mParameterCS->GetOriginName());
+         
+         if (!mOrigin)
+            throw ParameterException
+               ("OrbitData::InitializeRefObjects() The origin of CoordinateSystem \"" +
+                mParameterCS->GetOriginName() + "\" is NULL");
       }
       
       // get gravity constant if out coord system origin is CelestialBody

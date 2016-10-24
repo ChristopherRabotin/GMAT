@@ -1,0 +1,1336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="BatchEstimatorInv"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>BatchEstimatorInv</primary>
+  </indexterm>
+
+  <refmeta>
+    <refentrytitle>BatchEstimatorInv</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>BatchEstimatorInv</refname>
+
+    <refpurpose>A batch least squares estimator</refpurpose>
+  </refnamediv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>A batch least squares estimator is a method for obtaining an
+    estimate for a parameter vector, x0, such that a performance index, which
+    is a function of that parameter, J = J(x0), is minimized. For our
+    application, x0 typically includes the spacecraft position and velocity at
+    a specific epoch and the performance index is a weighted sum of the square
+    of the measurement residuals.</para>
+
+    <para><phrase role="ref_seealso">See Also</phrase>: <xref
+    linkend="TrackingFileSet"/>, <xref linkend="RunEstimator"/></para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <informaltable colsep="0" frame="topbot">
+      <tgroup cols="2">
+        <colspec colnum="1" colwidth="1.0*"/>
+
+        <colspec colnum="2" colwidth="3*"/>
+
+        <thead>
+          <row>
+            <entry>Field</entry>
+
+            <entry>Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><guilabel>AbsoluteTol</guilabel></entry>
+
+            <entry><para>Absolute Weighted RMS convergence criteria tolerance
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0.001</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EstimationEpoch</guilabel></entry>
+
+            <entry><para>Estimation Epoch. This is the epoch associated with
+            the "solve-fors." For release R2016A, this epoch comes from the
+            participants defined in the <guilabel>Measurements</guilabel>
+            field. In later releases, additional options will be allowed.
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>'FromParticipants'</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>'FromParticipants'</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>EstimationEpochFormat</guilabel></entry>
+
+            <entry><para>Estimation Epoch format. This is the desired input
+            format for the <guilabel>EstimationEpoch</guilabel> field. For
+            release R2016A, the only allowed value is 'FromParticipants' which
+            means that the <guilabel>EstimationEpoch</guilabel> comes from the
+            participants defined in the <guilabel>Measurements</guilabel>
+            field. In later releases, additional options will be allowed.
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>'FromParticipants'</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>'FromParticipants'</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>InverseAlgorithm</guilabel></entry>
+
+            <entry><para>Algorithm used to invert the normal equations</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Internal, Cholesky, Schur</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>Internal</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MatlabFile</guilabel></entry>
+
+            <entry><para>File name for the output MATLAB file. A value of
+            <code>None</code> means that no MATLAB file will be output.
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any valid file name.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>None</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MaxConsecutiveDivergences</guilabel></entry>
+
+            <entry><para>Specifies maximum number of consecutive diverging
+            iterations allowed before batch estimation processing is
+            stopped</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>integer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any positive integer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>3</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>MaximumIterations</guilabel></entry>
+
+            <entry><para>Specifies maximum number of iterations allowed for
+            batch estimation</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>integer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any positive integer</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>15</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Measurements</guilabel></entry>
+
+            <entry><para>Specifies a list of measurements used for batch
+            estimation</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>ObjectArray</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>valid <guilabel>TrackingFileSet</guilabel>
+                    object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>empty list</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel> OLSEAdditiveConstant</guilabel></entry>
+
+            <entry><para>Additive constant used for outer loop sigma editing
+            (OLSE)</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>any real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0.0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>OLSEInitialRMSSigma</guilabel></entry>
+
+            <entry><para>Initial predicted root-mean-square value used for
+            outer loop sigma editing (OLSE)</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0.0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>3000.0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>OLSEMultiplicativeConstant </guilabel></entry>
+
+            <entry><para>Multiplicative constant used for outer loop sigma
+            editing (OLSE)</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0.0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>3.0</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>Propagator</guilabel></entry>
+
+            <entry><para><guilabel>Propagator</guilabel> object used for batch
+            estimation</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>valid <guilabel>Propagator</guilabel> object</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>None</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>RelativeTol</guilabel></entry>
+
+            <entry><para>Relative Weighted RMS convergence criteria tolerance
+            </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Real</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Real &gt; 0</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>0.0001</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>dimensionless</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ReportFile</guilabel></entry>
+
+            <entry><para>Specifies the name of estimation report file</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>string containing a valid file name</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>'BatchEstimatorInv' + instancename +
+                      '.data'</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ReportStyle</guilabel></entry>
+
+            <entry><para>Specifies the type of estimation report. The
+            <code>Normal</code> style excludes reporting of observation TAI,
+            partials, and frequency information. For GMAT version R2016A, for
+            normal GMAT operation, only the <code>Normal</code> style is an
+            allowed choice. </para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Normal</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>Normal</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ResetBestRMSIfDiverging</guilabel></entry>
+
+            <entry><para>If set true and the estimation process has diverged,
+            then the Best RMS is reset to the current RMS.
+            </para><variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>true/false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true or false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para><guilabel>false</guilabel></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ShowAllResiduals</guilabel></entry>
+
+            <entry><para>Allows residuals plots to be shown</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>On/Off</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>On or Off</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>On</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>ShowProgress</guilabel></entry>
+
+            <entry><para>Allows detailed output of the batch estimator to be
+            shown in the message window</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>true/false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true or false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>true</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>UseInitialCovariance</guilabel></entry>
+
+            <entry><para>If set true, <emphasis>a priori</emphasis> error
+            covariance term is added to the estimation cost function.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>true/false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>true or false</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <guilabel>false</guilabel>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </refsection>
+
+  <refsection>
+    <title>Remarks</title>
+
+    <refsection>
+      <title>Behavior of Convergence Criteria</title>
+
+      <para>GMAT has four input fields, <guilabel>RelativeTol</guilabel>,
+      <guilabel>AbsoluteTol</guilabel>,
+      <guilabel>MaximumIterations</guilabel>, and
+      <guilabel>MaxConsecutiveDivergences</guilabel> that are used to
+      determine if the estimator has converged after each new iteration.
+      Associated with these input fields are the two convergence tests shown
+      below:</para>
+
+      <para><emphasis role="bold">Absolute Weighted RMS convergence criteria
+      </emphasis></para>
+
+      <para>        Weighted RMScurrent ≤ AbsoluteTol</para>
+
+      <para><emphasis role="bold">Relative Weighted Root Mean Square (RMS)
+      convergence criteria</emphasis></para>
+
+      <para>        |RMSP – RMSB|/ RMSB ≤ RelativeTol</para>
+
+      <para>where</para>
+
+      <para>        RMSB = smallest Weighted RMS achieved during the current
+      and previous iterations</para>
+
+      <para>        RMSP = predicted Weighted RMS of next iteration</para>
+
+      <para>Batch estimation is considered to have converged when either or
+      both of the above criteria is met within
+      <guilabel>MaximumIterations</guilabel> iterations or less.</para>
+
+      <para>Batch estimation is considered to have diverged when number of
+      consecutive diverging iterations is equal to or greater than
+      <guilabel>MaxConsecutiveDivergences</guilabel> or the number of
+      iterations exceeds <guilabel>MaximumIterations</guilabel>.</para>
+    </refsection>
+
+    <refsection>
+      <title>Behavior of Outer Loop Sigma Editing (OLSE)</title>
+
+      <para>GMAT has three input fields,
+      <guilabel>OLSEMultiplicativeConstant</guilabel>,
+      <guilabel>OLSEAdditiveConstant</guilabel>, and
+      <guilabel>OLSEInitialRMSSigma</guilabel>, that are used to 'edit' (i.e.,
+      reject or throw away) bad measurement data. There are plans to have both
+      an inner loop and and outer loop iteration editing procedure. Currently,
+      only the outer loop iteration editing procedure is implemented. This
+      editing procedure is done on a per iteration basis. Data that is edited
+      is not used to calculate the state vector estimate for the current
+      iteration but the data is available as a candidate measurement for
+      subsequent iterations. On the first outer loop iteration, data is edited
+      if</para>
+
+      <para>        |Weighted Measurement Residual| &gt;
+      <guilabel>OLSEInitialRMSSigma</guilabel></para>
+
+      <para>where the Weighted Measurement Residual for a single given
+      measurement is given by</para>
+
+      <para>        (O-C)/<guilabel>NoiseSigma</guilabel></para>
+
+      <para>and where <guilabel>NoiseSigma</guilabel> is the input noise (one
+      sigma) for the measurement type associated with the given measurement.
+      On subsequent outer loop iterations, data is edited if</para>
+
+      <para>        |Weighted Measurement Residual| &gt;
+      <guilabel>OLSEMultiplicativeConstant</guilabel> * WRMSP +
+      <guilabel>OLSEAdditiveConstan</guilabel>t</para>
+
+      <para>where WRMSP is the predicted weighted RMS calculated at the end of
+      the previous iteration.</para>
+    </refsection>
+
+    <refsection>
+      <title>Propagator Settings</title>
+
+      <para>The <guilabel>BatchEstimatorInv</guilabel> resource has a
+      <guilabel>Propagator</guilabel> field containing the name of the
+      <guilabel>Propagator</guilabel> resource that will be used during the
+      estimation process. It is recommended that if the
+      <guilabel>ForceModel</guilabel> resource associated with your propagator
+      is using relative step control, i.e., <code>ErrorControl =
+      RSSStep</code>, then the minimum step size,
+      <guilabel>MinStep</guilabel>, of your propagator should be set to
+      0.</para>
+    </refsection>
+
+    <refsection>
+      <title>Interactions</title>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="2">
+          <colspec colwidth=".5*"/>
+
+          <colspec colwidth="3*"/>
+
+          <thead>
+            <row>
+              <entry>Resource</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>TrackingFileSet resource</guilabel></entry>
+
+              <entry><para> Must be created in order to tell the
+              <guilabel>BatchEstimatorInv</guilabel> resource which data will
+              be processed</para></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Propagator resource</guilabel></entry>
+
+              <entry>Used by GMAT to generate the predicted orbit</entry>
+            </row>
+
+            <row>
+              <entry><guilabel>RunEstimator command</guilabel></entry>
+
+              <entry><para> Must use the <guilabel>RunEstimator</guilabel>
+              command to actually process the data defined by the
+              <guilabel>BatchEstimatorInv</guilabel> resource</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <informalexample>
+      <para>Below is an example of a configured batch estimator instance. In
+      this example, <guilabel>estData</guilabel> is an instance of a
+      <guilabel>TrackingFileSet</guilabel> and <guilabel>ODProp</guilabel> is
+      an instance of <guilabel>Propagator</guilabel>.</para>
+
+      <programlisting>Create BatchEstimatorInv bat;
+
+bat.ShowProgress               = true;
+bat.Measurements               = {estData} 
+bat.AbsoluteTol                = 0.000001;
+bat.RelativeTol                = 0.001;
+bat.MaximumIterations          = 10;
+bat.MaxConsecutiveDivergences  = 3;
+bat.Propagator                 = ODProp;
+bat.ShowAllResiduals           = On;
+bat.OLSEInitialRMSSigma        = 3000;
+bat.OLSEMultiplicativeConstant = 3;
+bat.OLSEAdditiveConstant       = 0;
+bat.InversionAlgorithm         = 'Internal';
+bat.EstimationEpochFormat      = 'FromParticipants';
+bat.EstimationEpoch            = 'FromParticipants'; 
+bat.ReportStyle                = 'Normal';
+bat.ReportFile                 = 'BatchEstimator_Report.txt';
+
+BeginMissionSequence;</programlisting>
+    </informalexample>
+
+    <informalexample>
+      <para>For a comprehensive example of reading in measurements and running
+      the estimator, see the <xref
+      linkend="Orbit_Estimation_using_DSN_Range_and_Doppler_Data"/>
+      tutorial.</para>
+    </informalexample>
+  </refsection>
+</refentry>

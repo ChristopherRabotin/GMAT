@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -38,7 +48,7 @@
 //------------------------------------------------------------------------------
 Interpolator::Interpolator(const std::string &name, const std::string &typestr,
                            Integer dim) :
-   GmatBase           (Gmat::INTERPOLATOR, typestr, name),
+//   GmatBase           (Gmat::INTERPOLATOR, typestr, name),
    independent        (NULL),
    dependent          (NULL),
    previousX          (-9.9999e65),
@@ -49,7 +59,8 @@ Interpolator::Interpolator(const std::string &name, const std::string &typestr,
    latestPoint        (-1),
    rangeCalculated    (false),
    dataIncreases      (true),
-   forceInterpolation (true)
+   forceInterpolation (true),
+   instanceName       (name)
 {
    range[0] = range[1] = 0.0;
 }
@@ -78,7 +89,7 @@ Interpolator::~Interpolator()
  */
 //------------------------------------------------------------------------------
 Interpolator::Interpolator(const Interpolator &i) :
-   GmatBase           (i),
+//   GmatBase           (i),
    previousX          (i.previousX),
    dimension          (i.dimension),
    requiredPoints     (i.requiredPoints),
@@ -87,7 +98,8 @@ Interpolator::Interpolator(const Interpolator &i) :
    latestPoint        (i.latestPoint),
    rangeCalculated    (i.rangeCalculated),
    dataIncreases      (i.dataIncreases),
-   forceInterpolation (i.forceInterpolation)
+   forceInterpolation (i.forceInterpolation),
+   instanceName       (i.instanceName)
 {
    if (i.independent)
       CopyArrays(i);
@@ -121,7 +133,7 @@ Interpolator& Interpolator::operator=(const Interpolator &i)
    if (&i == this)
       return *this;
    
-   GmatBase::operator=(i);
+//   GmatBase::operator=(i);
    
    // Free any allocated memory
    if (independent)
@@ -147,6 +159,7 @@ Interpolator& Interpolator::operator=(const Interpolator &i)
    
    dataIncreases      = i.dataIncreases;
    forceInterpolation = i.forceInterpolation;
+   instanceName       = i.instanceName;
    
    return *this;
 }
@@ -268,6 +281,51 @@ void Interpolator::Clear()
 
 
 //------------------------------------------------------------------------------
+//  Integer GetBufferSize()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the bufferSize parameter.
+ *
+ * @return  The buffer size.
+ */
+//------------------------------------------------------------------------------
+Integer Interpolator::GetBufferSize()
+{
+   return bufferSize;
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer GetPointCount()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the pointCount parameter.
+ *
+ * @return  The buffer size.
+ */
+//------------------------------------------------------------------------------
+Integer Interpolator::GetPointCount()
+{
+   return pointCount;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name assigned to this interpolator
+ *
+ * @return The instance name
+ */
+//------------------------------------------------------------------------------
+std::string Interpolator::GetName()
+{
+   return instanceName;
+}
+
+
+//------------------------------------------------------------------------------
 //  void AllocateArrays()
 //------------------------------------------------------------------------------
 /**
@@ -364,34 +422,4 @@ void Interpolator::SetRange()
    }
    
    rangeCalculated = true;
-}
-
-
-//------------------------------------------------------------------------------
-//  Integer GetBufferSize()
-//------------------------------------------------------------------------------
-/**
- * Access method for the bufferSize parameter.
- * 
- * @return  The buffer size.
- */
-//------------------------------------------------------------------------------
-Integer Interpolator::GetBufferSize()
-{
-   return bufferSize;
-}
-
-
-//------------------------------------------------------------------------------
-//  Integer GetPointCount()
-//------------------------------------------------------------------------------
-/**
- * Access method for the pointCount parameter.
- * 
- * @return  The buffer size.
- */
-//------------------------------------------------------------------------------
-Integer Interpolator::GetPointCount()
-{
-   return pointCount;
 }

@@ -13,9 +13,19 @@
 // Modification History      : 5/20/2003 - D. Conway, Thinking Systems, Inc.
 //                             Original delivery
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 //                           : 2003/09/16 - W. Shoan/GSFC/583
 //                             added ObjectTypes enum type in namespace Gmat
@@ -175,6 +185,15 @@ namespace Gmat
       FUEL_TANK,
       THRUSTER,
       
+      CHEMICAL_THRUSTER,
+      ELECTRIC_THRUSTER,
+      CHEMICAL_FUEL_TANK,
+      ELECTRIC_FUEL_TANK,
+
+      POWER_SYSTEM,        // for PowerSystems
+      SOLAR_POWER_SYSTEM,
+      NUCLEAR_POWER_SYSTEM,
+
       HARDWARE,            // Tanks, Thrusters, Antennae, Sensors, etc.
       COORDINATE_SYSTEM,
       AXIS_SYSTEM,
@@ -190,18 +209,26 @@ namespace Gmat
       // Estimation types
       MEASUREMENT_MODEL,   // May be replaced by TrackingSystem
       CORE_MEASUREMENT,    // For the measurement primitives
+      ERROR_MODEL,         // Error model used in a measurement
       
       TRACKING_DATA,
       TRACKING_SYSTEM,
       DATASTREAM,          // For DataFile container objects      
       DATA_FILE,           // For DataFile objects
       OBTYPE,              // For the specific observation types
+
+      // Data filters
+      DATA_FILTER,         // for data filter
       
       INTERFACE,           // MatlabInterface and other Interfaces
       MEDIA_CORRECTION,    // For media correction model
       SENSOR,              // For RFHardwares and Antennas
       RF_HARDWARE,
       ANTENNA,
+      
+      GENERIC_OBJECT,      // Used for user defined objects that do not fall 
+                           // into any of the above categories, and for 
+                           // internal objects that users don't access
       
       UNKNOWN_OBJECT
    };
@@ -280,6 +307,7 @@ namespace Gmat
       EPHEM_HEADER,
       NO_COMMENTS,
       GUI_EDITOR,
+      OBJECT_EXPORT
    };
    
    enum StateElementId 
@@ -287,10 +315,9 @@ namespace Gmat
       UNKNOWN_STATE = -1,
       CARTESIAN_STATE = 3700,          // Integrable state representations
       EQUINOCTIAL_STATE,
-      ORBIT_STATE_TRANSITION_MATRIX,   // 6x6 STM for the orbit
+      ORBIT_STATE_TRANSITION_MATRIX,   // STM for the orbit
       ORBIT_A_MATRIX,
       MASS_FLOW,                       // m dot
-      EVENT_FUNCTION_STATE,            // For event location
       PREDEFINED_STATE_MAX,
       USER_DEFINED_BEGIN = 3800,
       USER_DEFINED_END = 3999          // Allow up to 200 dynamic entries

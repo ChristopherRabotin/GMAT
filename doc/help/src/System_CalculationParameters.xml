@@ -92,12 +92,12 @@
 
     <para>Attached-hardware parameters have no dependencies, but are
     themselves dependent on being attached to a
-    <guilabel>Spacecraft</guilabel>. <guilabel>FuelTank</guilabel> and
-    <guilabel>Thruster</guilabel> parameters are examples of this. The
-    <guilabel>FuelMass</guilabel> parameter of <guilabel>FuelTank</guilabel>
-    cannot be referenced without first attaching the
-    <guilabel>FuelTank</guilabel> to a <guilabel>Spacecraft</guilabel>. Then,
-    the parameter can be referenced as:
+    <guilabel>Spacecraft</guilabel>. <guilabel>ChemicalTank</guilabel> and
+    <guilabel>ChemicalThruster</guilabel> parameters are examples of this. The
+    <guilabel>FuelMass</guilabel> parameter of
+    <guilabel>ChemicalTank</guilabel> cannot be referenced without first
+    attaching the <guilabel>ChemicalTank</guilabel> to a
+    <guilabel>Spacecraft</guilabel>. Then, the parameter can be referenced as:
     <literal><replaceable>Spacecraft</replaceable>.FuelTank.FuelMass</literal>.</para>
 
     <para>The individual parameters are resource-specific, and are documented
@@ -107,9 +107,9 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Array"/>, <xref linkend="FuelTank"/>, <xref
-    linkend="ImpulsiveBurn"/>, <xref linkend="Spacecraft"/>, <xref
-    linkend="String"/>, <xref linkend="Thruster"/>, <xref
-    linkend="Variable"/></para>
+    linkend="ImpulsiveBurn"/>, <xref linkend="FiniteBurn"/>, <xref
+    linkend="Spacecraft"/>, <xref linkend="String"/>, <xref
+    linkend="Thruster"/>, <xref linkend="Variable"/></para>
   </refsection>
 
   <refsection>
@@ -149,8 +149,9 @@
 
       <para>The first step in choosing a parameter is to select the object (or
       resource) type from the <guilabel>Object Type</guilabel> list in the
-      upper left. Five types can appear in this list:
-      <guilabel>Spacecraft</guilabel>, <guilabel>ImpulsiveBurn</guilabel>,
+      upper left. Seven types can appear in this list:
+      <guilabel>Spacecraft</guilabel>, <guilabel>SpacePoint</guilabel>,
+      <guilabel>ImpulsiveBurn</guilabel>, <guilabel>FiniteBurn</guilabel>,
       <guilabel>Variable</guilabel>, <guilabel>Array</guilabel>, and
       <guilabel>String</guilabel>.</para>
 
@@ -161,12 +162,14 @@
       <para>If the <guilabel>Spacecraft</guilabel> type is selected, the
       <guilabel>Attached Hardware List</guilabel> appears below the
       <guilabel>Object List</guilabel>. This list displays any hardware (such
-      as <guilabel>FuelTank</guilabel> resources) attached to the selected
-      <guilabel>Spacecraft</guilabel>. If the <guilabel>Array</guilabel> type
-      is selected, <guilabel>Row</guilabel> and <guilabel>Col</guilabel> boxes
-      appear. Use these to specify a row and column to select an individual
-      array element, or check <guilabel>Select Entire Object</guilabel> to
-      choose the entire array.</para>
+      as <guilabel>ChemicalTank</guilabel> or
+      <guilabel>ChemicalThruster</guilabel> resources) attached to the
+      selected <guilabel>Spacecraft</guilabel>. If the
+      <guilabel>Array</guilabel> type is selected, <guilabel>Row</guilabel>
+      and <guilabel>Col</guilabel> boxes appear. Use these to specify a row
+      and column to select an individual array element, or check
+      <guilabel>Select Entire Object</guilabel> to choose the entire
+      array.</para>
 
       <para>Once a resource is selected, the <guilabel>Object
       Properties</guilabel> list is populated with all available parameters
@@ -5614,7 +5617,7 @@
               <entry>Y</entry>
 
               <entry><para>Total mass, including fuel mass from attached
-              <guilabel>FuelTank</guilabel> resources.</para><variablelist>
+              <guilabel>ChemicalTank</guilabel> resources.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6109,15 +6112,15 @@
     <refsection>
       <title>FuelTank</title>
 
-      <para><guilabel>FuelTank</guilabel> parameters are accessible only after
-      attaching the <guilabel>FuelTank</guilabel> resource to a
+      <para><guilabel>ChemicalTank</guilabel> parameters are accessible only
+      after attaching the <guilabel>ChemicalTank</guilabel> resource to a
       <guilabel>Spacecraft</guilabel>, like so:<programlisting><code>Create FuelTank aTank
 Create Spacecraft aSat
 aSat.Tanks = {aTank}</code></programlisting></para>
 
-      <para>Then, <guilabel>FuelTank</guilabel> parameters are accessible by
-      specifying the <guilabel>FuelTank</guilabel> name as the parameter
-      dependency:<programlisting><code>Create ReportFile aReport
+      <para>Then, <guilabel>ChemicalTank</guilabel> parameters are accessible
+      by specifying the <guilabel>ChemicalTank</guilabel> name as the
+      parameter dependency:<programlisting><code>Create ReportFile aReport
 aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
 
       <informaltable colsep="0" frame="topbot">
@@ -6151,7 +6154,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>FuelDensity</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>FuelDensity</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6186,7 +6189,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>FuelMass</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>FuelMass</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6221,7 +6224,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>Pressure</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>Pressure</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6256,7 +6259,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>RefTemperature</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>RefTemperature</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6291,7 +6294,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>Temperature</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>Temperature</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6326,7 +6329,7 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="FuelTank"><guilabel>FuelTank</guilabel>.<guilabel>Volume</guilabel></link></para><variablelist>
+              linkend="FuelTank"><guilabel>ChemicalTank</guilabel>.<guilabel>Volume</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -6396,9 +6399,13 @@ aReport.Add = {aSat.aTank.FuelMass}</code></programlisting></para>
         </listitem>
       </itemizedlist>
 
-      <para>Note that to use these parameters, you must first set the epoch of
-      the Resource to the desired epoch at which you want the data. See the
-      following example:</para>
+      <warning>
+        <para>Note that to use these parameters, you must first set the epoch
+        of the Resource to the desired epoch at which you want the data.
+        Additionally, the epoch should be set after the
+        <guilabel>BeginMissionSequence</guilabel> Command. See the following
+        example.</para>
+      </warning>
 
       <programlisting><code>Create ReportFile rf
 
@@ -7024,16 +7031,18 @@ Report rf Luna.EarthMJ2000Eq.X Luna.EarthMJ2000Eq.Y Luna.EarthMJ2000Eq.Z ...
     <refsection>
       <title>Thruster</title>
 
-      <para><guilabel>Thruster</guilabel> parameters are accessible only after
-      attaching the <guilabel>Thruster</guilabel> resource to a
-      <guilabel>Spacecraft</guilabel>, like so:<programlisting><code>Create Thruster aThruster
+      <para><guilabel>ChemicalThruster</guilabel> parameters are accessible
+      only after attaching the <guilabel>ChemicalThruster</guilabel> resource
+      to a <guilabel>Spacecraft</guilabel>, like so:<programlisting><code>Create Thruster aThruster
 Create Spacecraft aSat
 aSat.Thrusters = {aThruster}</code></programlisting></para>
 
-      <para>Then, <guilabel>Thruster</guilabel> parameters are accessible by
-      specifying the <guilabel>Thruster</guilabel> name as the parameter
-      dependency:<programlisting><code>Create ReportFile aReport
+      <para>Then, <guilabel>ChemicalThruster</guilabel> parameters are
+      accessible by specifying the <guilabel>ChemicalThruster</guilabel> name
+      as the parameter dependency:<programlisting><code>Create ReportFile aReport
 aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
+
+      <para>The table below shows reportable thruster based parameters:</para>
 
       <informaltable colsep="0" frame="topbot">
         <tgroup cols="4">
@@ -7066,7 +7075,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C1</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C1</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7101,7 +7110,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C2</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C2</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7136,7 +7145,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C3</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C3</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7171,7 +7180,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C4</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C4</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7206,7 +7215,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C5</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C5</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7241,7 +7250,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C6</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C6</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7276,7 +7285,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C7</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C7</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7311,7 +7320,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C8</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C8</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7346,7 +7355,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C9</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C9</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7381,7 +7390,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C10</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C10</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7416,7 +7425,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C11</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C11</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7451,7 +7460,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C12</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C12</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7486,7 +7495,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C13</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C13</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7521,7 +7530,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C14</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C14</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7556,7 +7565,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C15</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C15</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7591,7 +7600,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C16</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>C16</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7626,7 +7635,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>DutyCycle</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>DutyCycle</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7661,7 +7670,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>GravitationalAccel</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>GravitationalAccel</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7689,6 +7698,42 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
             </row>
 
             <row>
+              <entry><guilabel>Isp</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Specific impulse of an individual thruster. When
+              thruster(s) is not turned on, GMAT will report zeros to a report
+              file. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>K1</guilabel></entry>
 
               <entry>Y</entry>
@@ -7696,7 +7741,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K1</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K1</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7731,7 +7776,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K2</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K2</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7766,7 +7811,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K3</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K3</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7801,7 +7846,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K4</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K4</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7836,7 +7881,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K5</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K5</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7871,7 +7916,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K6</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K6</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7906,7 +7951,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K7</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K7</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7941,7 +7986,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K8</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K8</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -7976,7 +8021,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K9</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K9</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8011,7 +8056,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K10</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K10</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8046,7 +8091,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K11</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K11</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8081,7 +8126,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K12</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K12</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8116,7 +8161,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K13</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K13</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8151,7 +8196,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K14</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K14</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8186,7 +8231,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K15</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K15</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8221,7 +8266,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K16</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>K16</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8249,6 +8294,42 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
             </row>
 
             <row>
+              <entry><guilabel>MassFlowRate</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Mass flow rate from an individual thruster. When
+              thruster(s) is not turned on, GMAT will report zeros to a report
+              file. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>kg/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>ThrustDirection1</guilabel></entry>
 
               <entry>Y</entry>
@@ -8256,7 +8337,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>ThrustDirection1</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>ThrustDirection1</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8291,7 +8372,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>ThrustDirection2</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>ThrustDirection2</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8326,7 +8407,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>ThrustDirection3</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>ThrustDirection3</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8354,6 +8435,42 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
             </row>
 
             <row>
+              <entry><guilabel>ThrustMagnitude</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Magnitude of the thrust from an individual
+              thruster. When thruster(s) is not turned on, GMAT will report
+              zeros to a report file. </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>Newtons</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>ThrustScaleFactor</guilabel></entry>
 
               <entry>Y</entry>
@@ -8361,7 +8478,7 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>ThrustScaleFactor</guilabel></link></para><variablelist>
+              linkend="Thruster"><guilabel>ChemicalThruster</guilabel>.<guilabel>ThrustScaleFactor</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -8650,6 +8767,305 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
 
                     <listitem>
                       <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>FiniteBurn</title>
+
+      <para>To compute <guilabel>FiniteBurn</guilabel> parameters, GMAT
+      requires that a <guilabel>FiniteBurn</guilabel> has been executed using
+      a <guilabel>BeginFiniteBurn</guilabel> command like this:</para>
+
+      <para><programlisting><code>BeginFiniteBurn Maneuver myFiniteBurn(mySat)  </code></programlisting></para>
+
+      <para>In the case that a <guilabel>FiniteBurn</guilabel> has not been
+      applied, GMAT will output zeros for all reportable
+      <guilabel>FiniteBurn</guilabel> parameters to a report file. All finite
+      burn parameters will report zeros whenever a finite burn is not turned
+      on. The table below shows reportable finite burn parameters:</para>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="4">
+          <colspec colnum="1" colwidth="1.5in"/>
+
+          <colspec colnum="2" colwidth="0.75in"/>
+
+          <colspec colnum="3" colwidth="0.75in"/>
+
+          <colspec colnum="4"/>
+
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+
+              <entry>Settable</entry>
+
+              <entry>Plottable</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>TotalAcceleration1</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>First component of the total acceleration from all
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>Km/s<superscript>2</superscript></para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TotalAcceleration2</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Second component of the total acceleration from all
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>Km/s<superscript>2</superscript></para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TotalAcceleration3</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Third component of the total acceleration from all
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>Km/s<superscript>2</superscript></para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TotalMassFlowRate</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Total mass flow rate from all thrusters. Zero is
+              reported whenever thruster is not turned on </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>Kg/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TotalThrust1</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>First component of the total thrust from all
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>Newtons</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TotalThrust2</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Second component of the total thrust from all
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>Newtons</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TotalThrust3</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Third component of the total thrust from all
+              thrusters in the three coordinate directions of a J2000 system.
+              Zero is reported whenever thruster is not turned on
+              </para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>Newtons</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>

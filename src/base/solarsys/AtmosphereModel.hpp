@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -23,7 +33,7 @@
 #define AtmosphereModel_hpp
 
 #include "GmatBase.hpp"
-#include "SolarFluxFileReader.hpp"
+#include "SolarFluxReader.hpp"
 #include "AtmosphereException.hpp"
 #include "TimeTypes.hpp"
 
@@ -68,21 +78,29 @@ public:
    virtual bool Density(Real *position, Real *density, Real epoch = GmatTimeConstants::MJD_OF_J2000,
                         Integer count = 1) = 0;
 
+   virtual bool Initialize();
    void         SetSunVector(Real *sv);
    void         SetCentralBodyVector(Real *cv);
    virtual void SetSolarSystem(SolarSystem *ss);
    virtual void SetCentralBody(CelestialBody *cb);
-   std::string  GetCentralBodyName();						// made changes by TUAN NGUYEN
+   std::string  GetCentralBodyName();
 
    void         SetUpdateParameters(Real interval, GmatEpoch epoch = -1.0);
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void SetCbJ2000CoordinateSystem(CoordinateSystem *cs);
+   virtual CoordinateSystem *
+                GetCbJ2000CoordinateSystem();                           // made changes for bug GMT-5282
    void         SetFixedCoordinateSystem(CoordinateSystem *cs);
    Real*        GetAngularVelocity(const Real GmatEpoch = -1.0);
    void         BuildAngularVelocity(const Real GmatEpoch);
    void         UpdateAngularVelocity(const Real GmatEpoch);
    void         SetKpApConversionMethod(Integer method);
    Real         ConvertKpToAp(const Real kp);
+
+   void         SetInputSource(const std::string &historical = "ConstantFluxAndGeoMag",
+                               const std::string &predicted = "ConstantFluxAndGeoMag");
+   void         SetSchattenFlags(const std::string &timing,
+                               const std::string &magnitude);
 
    // Extra methods some models may support
    virtual bool HasWindModel();
@@ -112,26 +130,39 @@ public:
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value);
 
-   // Flux file methods
-   void SetSolarFluxFile(const std::string &file);
-   void SetNewFileFlag(bool flag);
-   void SetOpenFileFlag(bool flag);
-   void CloseFile();
+   virtual Real        GetRealParameter(const Integer id,
+                                        const Integer index) const;
+   virtual Real        SetRealParameter(const Integer id,
+                                        const Real value,
+                                        const Integer index);
+
+
+   virtual bool SetStringParameter(const Integer id,
+                                          const std::string &value);
+   virtual bool SetStringParameter(const std::string &label,
+                                  const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+
+   SolarFluxReader*     GetFluxReader();
+   SolarFluxReader::FluxData GetFluxData(GmatEpoch epoch = -1.0);
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   /// Solar flux binary file reader
-   SolarFluxFileReader     *fileReader;
+   /// Solar flux file reader
+   SolarFluxReader         *fluxReader;
+   /// Buffer used for flux data while moving from raw data to massaged data
+   SolarFluxReader::FluxData fDbuffer;
    /// The solarsystem
    SolarSystem             *solarSystem;
    /// The central body
    CelestialBody           *mCentralBody;
-   /// Pointer to the binary file
-   FILE                    *solarFluxFile;
-   /// Solar flux file name
-   std::string             fileName;
+   /// CSSI Solar flux file name
+   std::string             obsFileName;
+   /// Schatten Solar flux file name
+   std::string             predictFileName;
    /// Vector from the central body to the sun
    Real                    *sunVector;
    /// Name of the central body
@@ -142,11 +173,9 @@ protected:
    Real                    cbRadius;
    /// Central body flattening factor
    Real                    cbFlattening;
-   /// Flag indicating that the flux file name is set to a new value
-   bool                    newFile;
-   /// Flag indicating that the flux file has been opened and read once already
-   bool                    fileRead;
-    
+   /// SolarFlux files are loaded ?
+   bool                    fluxReaderLoaded;
+
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.
    Real                    nominalF107;
@@ -158,6 +187,10 @@ protected:
    Real                    nominalAp;
    /// Index used to select Kp/Ap conversion method.  Default is a table lookup
    Integer                 kpApConversion;
+   /// Indicator of the source for historical data: 0 for constants, 1 for CSSI
+   Integer                 historicalDataSource;
+   /// Indicator of the source for predicted data: 0 for constants, 1 for CSSI, 2 for Schatten
+   Integer                 predictedDataSource;
    /// Internal coordinate system used for conversions
    CoordinateSystem        *mInternalCoordSystem;
    /// MJ2000 CS for the central body
@@ -176,13 +209,42 @@ protected:
    Real                    geoLat;
    /// Most recent geodetic longitude calculated
    Real                    geoLong;
-   /// Specify geodetic coordinate system or gecentric to be used for calculation		// made changes by TUAN NGUYEN
-   bool                    useGeodetic;													// made changes by TUAN NGUYEN
+   /// Specify geodetic coordinate system or gecentric to be used for calculation
+   bool                    useGeodetic;
    /// Most recent GHA calculated
    Real                    gha;
    /// GHA epoch
    Real                    ghaEpoch;
 
+   /// Start of the historic data when using file based history data
+   GmatEpoch historicStart;
+   /// End of the historic data when using file based history data
+   GmatEpoch historicEnd;
+      /// Start of the predict data when using file based predicted data
+   GmatEpoch predictStart;
+   /// End of the predict data when using file based predicted data
+   GmatEpoch predictEnd;
+   /// Schatten timing model to use
+   Integer schattenTimingModel;
+   /// Schatten error model to use
+   Integer schattenErrorModel;
+
+   // Fields used when retrieving data from a flux file
+
+   /// Second of day
+   Real                    sod;
+   /// Year + Day of year, in the form YYYYDDD
+   Integer                 yd;
+   /// Value of F10.7 to use
+   Real                    f107;
+   /// 3 month average of the F10.7 data
+   Real                    f107a;
+   /// Geomagnetic index (Ap, not Kp)
+   Real                    ap[7];
+
+
+   // Input method shared by all MSISE models
+   void                    GetInputs(GmatEpoch epoch);
    
    Real                    CalculateGeodetics(Real *position,
                                  GmatEpoch when = -1.0,
@@ -197,6 +259,8 @@ protected:
       NOMINAL_FLUX = GmatBaseParamCount,
       NOMINAL_AVERAGE_FLUX,
       NOMINAL_MAGNETIC_INDEX,
+      CSSI_WEATHER_FILE,
+      SCHATTEN_WEATHER_FILE,
       AtmosphereModelParamCount
    };
    

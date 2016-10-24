@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CCA54C
@@ -85,6 +95,7 @@ public:
    virtual bool         Execute(FunctionManager *callingFM = NULL);
    virtual Real         Evaluate(FunctionManager *callingFM = NULL);
    virtual Rmatrix      MatrixEvaluate(FunctionManager *callingFM = NULL);
+   virtual GmatBase*    EvaluateObject(FunctionManager *callingFM = NULL);
    virtual void         Finalize();
    bool                 IsFinalized();
    
@@ -113,9 +124,9 @@ protected:
    std::vector<PhysicalModel *> 
                         *forces;
    /// Name of the function this FunctionManager manages
-   std::string          fName;
+   std::string          functionName;
    /// the function that this FunctionManager manages
-   Function             *f;
+   Function             *currentFunction;
    /// the list of passing input strings for this call of the function
    StringArray          passedIns;
    /// the list of passing output strings for this call of the function
@@ -143,6 +154,8 @@ protected:
    Real                 realResult;
    /// Rmatrix value output
    Rmatrix              matResult;
+   /// Object output
+   GmatBase             *objectResult;
    /// Flag indicating whether or not there is one nameless result (i.e. called from FunctionRunner)
    bool                 blankResult;
    /// Which type of output was saved last - real or rmatrix?
@@ -153,8 +166,6 @@ protected:
    CoordinateSystem     *internalCS;
    /// pointer to the function's function control sequence
    GmatCommand          *fcs;
-   /// current command being executed
-   GmatCommand          *current;
    /// Call stack of FOSs for nested/recursive function calls
    ObjectMapStack       callStack;
    /// Call stack of LOSs for nested/recursive function calls
@@ -171,6 +182,10 @@ protected:
    void                 RefreshFormalInputObjects();
    GmatBase*            FindObject(const std::string &name, bool arrayElementsAllowed = false);
    GmatBase*            CreateObject(const std::string &fromString);
+   GmatBase*            CreateObjectForBuiltinGmatFunction(
+                           const std::string &outName,
+                           Gmat::WrapperDataType wType, 
+                           Integer numRows, Integer numCols);
    void                 AssignResult();
    bool                 HandleCallStack();
    void                 SaveLastResult();

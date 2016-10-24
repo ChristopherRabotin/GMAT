@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -26,14 +36,15 @@
 #include "Vary.hpp"                // For SetInitialValue() method
 #include "Subscriber.hpp"
 #include "MessageInterface.hpp"
-#include "EventLocator.hpp"
 #include "FormationInterface.hpp"
+#include "ListenerManagerInterface.hpp"
+#include "StringUtil.hpp"
 
 #include <sstream>                 // for <<
 
 //#define DEBUG_PARSING
 //#define DEBUG_OPTIONS
-
+//#define DEBUG_SOLVERBRANCHCOMMAND_INIT
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
 //#endif
@@ -58,6 +69,7 @@ SolverBranchCommand::SolverBranchCommand(const std::string &typeStr) :
    theSolver      (NULL),
    startMode      (RUN_AND_SOLVE),
    exitMode       (DISCARD_AND_CONTINUE),
+   showProgressWindow(true),
    specialState   (Solver::INITIALIZING)
 {
    parameterCount = SolverBranchCommandParamCount;
@@ -83,6 +95,8 @@ SolverBranchCommand::SolverBranchCommand(const std::string &typeStr) :
 //------------------------------------------------------------------------------
 SolverBranchCommand::~SolverBranchCommand()
 {
+   // Remove listener
+   ClearListeners();
    if (theSolver)
    {
       #ifdef DEBUG_MEMORY
@@ -110,6 +124,7 @@ SolverBranchCommand::SolverBranchCommand(const SolverBranchCommand& sbc) :
    theSolver      (NULL),
    startMode      (sbc.startMode),
    exitMode       (sbc.exitMode),
+   showProgressWindow (sbc.showProgressWindow),
    specialState   (Solver::INITIALIZING)
 {
 }
@@ -135,11 +150,48 @@ SolverBranchCommand& SolverBranchCommand::operator=(
       theSolver    = NULL;
       startMode    = sbc.startMode;
       exitMode     = sbc.exitMode;
+      showProgressWindow = sbc.showProgressWindow;
       specialState = Solver::INITIALIZING;
    }
    
    return *this;
 }
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs the initialization needed to run the BranchCommand command.
+ *
+ * @return true if the GmatCommand is initialized, false if an error occurs.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::Initialize()
+{
+   #ifdef DEBUG_SOLVERBRANCHCOMMAND_INIT
+   ShowCommand("SolverBranchCommand::Initialize() entered ", "this=", this);
+   #endif
+   
+   BranchCommand::Initialize();
+
+   if (showProgressWindow) 
+   {
+      // THIS IS IDIOTIC BUT SINCE INITIALIZE IS CALLED TWICE, JUST DON'T CREATE NO NEW LISTENERS
+      // AFTER THE FIRST ONE (Grubb.T 2015-10-09)
+      if (listeners.size() == 0)
+      {
+         ISolverListener* aListener = ListenerManagerInterface::CreateSolverListener(GetGeneratingString(Gmat::NO_COMMENTS), "", 0, 0, 0, 0, false);
+         if (aListener != NULL)
+            AddListener( aListener );
+      }
+   }
+   #ifdef DEBUG_SOLVERBRANCHCOMMAND_INIT
+   ShowCommand("SolverBranchCommand::Initialize() exited ", "this=", this);
+   #endif
+   return true;
+
+}
+
 
 //------------------------------------------------------------------------------
 //  GmatCommand* GetNext()
@@ -148,7 +200,7 @@ SolverBranchCommand& SolverBranchCommand::operator=(
  * Access the next command in the mission sequence.
  *
  * For SolverBranchCommands, this method returns its own pointer while the child
- * commands are executingm, and it tells the Publisher about a state change after
+ * commands are executing, and it tells the Publisher about a state change after
  * the Solver has finished its work.
  *
  * @return The next command, or NULL if the sequence has finished executing.
@@ -258,19 +310,6 @@ void SolverBranchCommand::StoreLoopData()
          
          localStore.push_back(form);
       }
-      if (obj->GetType() == Gmat::EVENT_LOCATOR)
-      {
-         EventLocator *orig = (EventLocator*)(obj);
-         EventLocator *el  = (EventLocator*)orig->Clone();
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Add
-            ((GmatBase*)el, "cloned local eventLocator",
-             "SolverBranchCommand::StoreLoopData()",
-             "EventLocator *el  = new EventLocator(*orig)");
-         #endif
-
-         localStore.push_back(el);
-      }
       ++pair;
    }
    // Check the Global Object Store next
@@ -318,19 +357,6 @@ void SolverBranchCommand::StoreLoopData()
          #endif
          localStore.push_back(form);
       }
-      if (obj->GetType() == Gmat::EVENT_LOCATOR)
-      {
-         EventLocator *orig = (EventLocator*)(obj);
-         EventLocator *el  = (EventLocator*)orig->Clone();
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Add
-            ((GmatBase*)el, "cloned local eventLocator",
-             "SolverBranchCommand::StoreLoopData()",
-             "EventLocator *el  = new EventLocator(*orig)");
-         #endif
-
-         localStore.push_back(el);
-      }
       ++globalPair;
    }
 }
@@ -347,7 +373,6 @@ void SolverBranchCommand::ResetLoopData()
 {
    Spacecraft *sc;
    FormationInterface *fm;
-   EventLocator *el;
    std::string name;
     
    for (std::vector<GmatBase *>::iterator i = localStore.begin();
@@ -367,11 +392,6 @@ void SolverBranchCommand::ResetLoopData()
             fm = (FormationInterface*)gb;
             *fm = *((FormationInterface*)(*i));
          }
-         else if (gb->GetType() == Gmat::EVENT_LOCATOR)
-         {
-            el = (EventLocator*)gb;
-            *el = *((EventLocator*)(*i));
-         }
       }
    }
    // Reset the propagators so that propagations run identically loop to loop
@@ -388,6 +408,23 @@ void SolverBranchCommand::ResetLoopData()
 
 }
 
+
+//------------------------------------------------------------------------------
+//  void RunComplete()
+//------------------------------------------------------------------------------
+/**
+ * Tells the sequence that the run was ended, possibly before reaching the end.
+ *
+ * BranchCommands clear the "current" pointer and call RunComplete on their
+ * branches, ensuring that the command sequence has reset the branches to an
+ * idle state.
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::RunComplete()
+{
+   BranchCommand::RunComplete();
+   ClearListeners();
+}
 
 //------------------------------------------------------------------------------
 // void FreeLoopData()
@@ -483,8 +520,8 @@ bool SolverBranchCommand::InterpretAction()
             typeName.c_str(), generatingString.c_str(), typeName.c_str());
       MessageInterface::ShowMessage("   Solver name:     \"%s\"\n", 
             solverName.c_str());
-      MessageInterface::ShowMessage("   SolveMode:       %d\n", startMode);
-      MessageInterface::ShowMessage("   ExitMode:        %d\n", exitMode);
+      MessageInterface::ShowMessage("   SolveMode:          %d\n", startMode);
+      MessageInterface::ShowMessage("   ExitMode:           %d\n", exitMode);
    #endif
    
    return true;
@@ -623,6 +660,24 @@ void SolverBranchCommand::CheckForOptions(std::string &opts)
                   "\nAllowed values are \"DiscardAndContinue\", "
                   "\"SaveAndContinue\", and \"Stop\"\n");
       }
+      else if (option[0] == "ShowProgressWindow")
+      {
+         #ifdef DEBUG_EXITMODE
+            MessageInterface::ShowMessage("Setting ShowProgressWindow to %s\n",
+                  option[1].c_str());
+         #endif
+         std::string opt1 = GmatStringUtil::ToUpper(option[1]);
+         if (opt1 == "TRUE")
+            showProgressWindow = true;
+         else if (opt1 == "FALSE")
+            showProgressWindow = false;
+         else
+            throw CommandException(typeName + "::InterpretAction() Solver "
+                  "ShowProgressWindow option " + option[1] + 
+                  " is not a recognized value on line\n" + generatingString +
+                  "\nAllowed values are \"true\", "
+                  "\"false\"\n");
+      }
       else
       {
          throw CommandException(typeName + 
@@ -646,6 +701,11 @@ std::string SolverBranchCommand::GetSolverOptionText()
    optionString += GetStringParameter(SOLVER_SOLVE_MODE);
    optionString += ", ExitMode = ";
    optionString += GetStringParameter(SOLVER_EXIT_MODE);
+   optionString += ", ShowProgressWindow = ";
+   if (showProgressWindow)
+      optionString += "true";
+   else
+      optionString += "false";
    optionString += "}";
 
    #ifdef DEBUG_OPTIONS
@@ -759,6 +819,8 @@ std::string SolverBranchCommand::GetParameterText(const Integer id) const
       return "SolverName";
    if (id == SOLVER_SOLVE_MODE)
       return "SolveMode";
+   if (id == SOLVER_SHOW_PROGRESS)
+      return "ShowProgressWindow";
     
    return BranchCommand::GetParameterText(id);
 }
@@ -787,6 +849,8 @@ Integer SolverBranchCommand::GetParameterID(const std::string &str) const
       return SOLVER_SOLVE_MODE_OPTIONS;
    if (str == "ExitModeOptions")
       return SOLVER_EXIT_MODE_OPTIONS;
+   if (str == "ShowProgressWindow")
+      return SOLVER_SHOW_PROGRESS;
     
    return BranchCommand::GetParameterID(str);
 }
@@ -809,6 +873,8 @@ Gmat::ParameterType SolverBranchCommand::GetParameterType(const Integer id) cons
       return Gmat::STRING_TYPE;
    if (id == SOLVER_SOLVE_MODE)
       return Gmat::STRING_TYPE;
+   if (id == SOLVER_SHOW_PROGRESS)
+      return Gmat::BOOLEAN_TYPE;
    if (id == SOLVER_SOLVE_MODE_OPTIONS)
       return Gmat::STRINGARRAY_TYPE;
     
@@ -833,6 +899,8 @@ std::string SolverBranchCommand::GetParameterTypeString(const Integer id) const
       return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
    if (id == SOLVER_SOLVE_MODE)
       return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+   if (id == SOLVER_SHOW_PROGRESS)
+      return PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
    if (id == SOLVER_SOLVE_MODE_OPTIONS)
       return PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
     
@@ -947,6 +1015,89 @@ const StringArray& SolverBranchCommand::GetStringArrayParameter(const std::strin
 
 
 //------------------------------------------------------------------------------
+//  bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ *
+ * @return the boolean value for this parameter, or throw an exception if the
+ *         parameter access in invalid.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::GetBooleanParameter(const Integer id) const
+{
+   if (id == SOLVER_SHOW_PROGRESS)
+      return showProgressWindow;
+   
+   return BranchCommand::GetBooleanParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new value.
+ * 
+ * @return the boolean value for this parameter, or throw an exception if the 
+ *         parameter is invalid or not boolean.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == SOLVER_SHOW_PROGRESS)
+   {
+      showProgressWindow = value;
+      return showProgressWindow;
+   }
+   
+   return BranchCommand::SetBooleanParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+//  bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::GetBooleanParameter(const std::string &label) const
+{
+   Integer id = GetParameterID(label);
+   return GetBooleanParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::SetBooleanParameter(const std::string &label, const bool value)
+{
+   Integer id = GetParameterID(label);
+   return SetBooleanParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
 // bool NeedsServerStartup()
 //------------------------------------------------------------------------------
 /**
@@ -967,10 +1118,12 @@ bool SolverBranchCommand::NeedsServerStartup()
       throw CommandException("The Solver pointer is not set in command\n" +
                GetGeneratingString());
    
-   if (theSolver->IsSolverInternal())
-      return false;
+   //if (theSolver->IsSolverInternal())
+   //   return false;
+   if (theSolver->NeedsServerStartup())
+      return true;
    
-   return true;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -1312,3 +1465,44 @@ void SolverBranchCommand::ChangeRunState(Gmat::RunState newState)
          current->SetRunState(currentRunState);
    }
 }
+
+
+void SolverBranchCommand::AddListener( ISolverListener* listener )
+{
+   listeners.push_back( listener );
+}
+
+void SolverBranchCommand::RemoveListener( ISolverListener* listener )
+{
+   listeners.remove( listener );
+}
+
+void SolverBranchCommand::ClearListeners()
+{
+   listeners.clear();
+}
+
+void SolverBranchCommand::NotifyVariabledChanged(std::string name, Real value)
+{
+   for (std::list<ISolverListener *>::iterator it = listeners.begin(); it != listeners.end(); it++)
+   {
+      (*it)->VariabledChanged(name, value);
+   }
+}
+
+void SolverBranchCommand::NotifyVariabledChanged(std::string name, std::string &value)
+{
+   for (std::list<ISolverListener *>::iterator it = listeners.begin(); it != listeners.end(); it++)
+   {
+      (*it)->VariabledChanged(name, value);
+   }
+}
+
+void SolverBranchCommand::NotifyConstraintChanged(std::string name, Real desiredValue, Real value)
+{
+   for (std::list<ISolverListener *>::iterator it = listeners.begin(); it != listeners.end(); it++)
+   {
+      (*it)->ConstraintChanged(name, desiredValue, value);
+   }
+}
+

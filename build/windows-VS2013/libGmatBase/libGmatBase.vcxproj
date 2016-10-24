@@ -1,0 +1,1205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-wx3-unicode|Win32">
+      <Configuration>Debug-wx3-unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3-win64|Win32">
+      <Configuration>Release-wx3-win64</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3.0|Win32">
+      <Configuration>Release-wx3.0</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}</ProjectGuid>
+    <RootNamespace>libGmatBase</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <CharacterSet>Unicode</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3-win64|Win32'" Label="Configuration">
+    <CharacterSet>Unicode</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetExt>.dll</TargetExt>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\..\application\bin64\debug64</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <TargetExt>.dll</TargetExt>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\..\application\bin64\debug64</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\application\bin\</OutDir>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetExt>.dll</TargetExt>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\..\application\bin64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <OutDir>..\..\..\application\bin\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3-win64|Win32'">
+    <OutDir>..\..\..\application\bin\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3-win64|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\cspice\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\cspice\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__SKIP_MSISE90__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Version>2011a</Version>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__SKIP_MSISE90__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Version>2011a</Version>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <Version>2011a</Version>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\cspice\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice64\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <Version>2011a</Version>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\cspice64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3-win64|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3-win64|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <Version>
+      </Version>
+    </Link>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\cspice\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3-win64|Win32'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <Version>2015a</Version>
+    </Link>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\cspice\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\base\asset\AssetException.cpp" />
+    <ClCompile Include="..\..\..\src\base\asset\BodyFixedPoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\asset\GroundstationInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\AttitudeException.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\CCSDSAttitude.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\CSFixed.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\Kinematic.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\NadirPointing.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\PrecessingSpinner.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\SpiceAttitude.cpp" />
+    <ClCompile Include="..\..\..\src\base\attitude\Spinner.cpp" />
+    <ClCompile Include="..\..\..\src\base\burn\Burn.cpp" />
+    <ClCompile Include="..\..\..\src\base\burn\BurnException.cpp" />
+    <ClCompile Include="..\..\..\src\base\burn\FiniteBurn.cpp" />
+    <ClCompile Include="..\..\..\src\base\burn\ImpulsiveBurn.cpp" />
+    <ClCompile Include="..\..\..\src\base\burn\InertialManeuverFrame.cpp" />
+    <ClCompile Include="..\..\..\src\base\burn\ManeuverFrame.cpp" />
+    <ClCompile Include="..\..\..\src\base\burn\ManeuverFrameManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\burn\VnbManeuverFrame.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Achieve.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Assignment.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\BeginFiniteBurn.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\BeginFunction.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\BeginMissionSequence.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\BeginScript.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\BranchCommand.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\CallFunction.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\ClearPlot.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\CommandException.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\CommandUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\ConditionalBranch.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Create.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Else.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\ElseIf.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\EndFiniteBurn.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\EndFor.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\EndFunction.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\EndIf.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\EndOptimize.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\EndScript.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\EndTarget.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\EndWhile.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\For.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\GmatCommand.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\If.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\ManageObject.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Maneuver.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\MarkPoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Minimize.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\NonlinearConstraint.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\NoOp.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Optimize.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\PenDown.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\PenUp.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\PlotCommand.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Propagate.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\PropagationEnabledCommand.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Report.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\RunSolver.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\SaveMission.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\SolverBranchCommand.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\SolverSequenceCommand.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Stop.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Target.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Toggle.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\Vary.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\While.cpp" />
+    <ClCompile Include="..\..\..\src\base\configs\ConfigManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\configs\ConfigManagerException.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\AxisSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodyFixedAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodyInertialAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateBase.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateConverter.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\CoordinateSystemException.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\DynamicAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\EquatorAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\GeocentricSolarEclipticAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\GeocentricSolarMagneticAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\IAUFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\ICRFAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\ICRFFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\InertialAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\ITRFAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\MODEcAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\MODEqAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\MOEEcAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\MOEEqAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\ObjectReferencedAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\TODEcAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\TODEqAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\TOEEcAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\TOEEqAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\TopocentricAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\EventException.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\Moderator.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\PlotInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\PlotReceiver.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\Publisher.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\PublisherException.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\Sandbox.cpp" />
+    <ClCompile Include="..\..\..\src\base\executive\SandboxException.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\AtmosphereFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\AttitudeFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\AxisSystemFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\BurnFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\CalculatedPointFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\CelestialBodyFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\CommandFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\CoordinateSystemFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\Factory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\FactoryException.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\FactoryManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\HardwareFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\InterfaceFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\MathFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\ODEModelFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\ParameterFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\PhysicalModelFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\PropagatorFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\PropSetupFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\SolarSystemFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\SolverFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\SpacecraftFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\StopConditionFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\SubscriberFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\HarmonicField.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\ODEModel.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\ODEModelException.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\PhysicalModel.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\PointMassForce.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\RelativisticCorrection.cpp" />
+    <ClCompile Include="..\..\..\src\base\forcemodel\SolarRadiationPressure.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\Covariance.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\ElementWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\GmatBase.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\GmatBaseException.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\GmatState.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\ObjectInitializer.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\SpacePoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\StateManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\foundation\TriggerManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\function\Function.cpp" />
+    <ClCompile Include="..\..\..\src\base\function\FunctionException.cpp" />
+    <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalTank.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalThruster.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricTank.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\FuelTank.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\Hardware.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\HardwareException.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\Thruster.cpp" />
+    <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\interface\Interface.cpp" />
+    <ClCompile Include="..\..\..\src\base\interface\InterfaceException.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpolator\BrentDekkerZero.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpolator\CubicSplineInterpolator.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpolator\Interpolator.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpolator\InterpolatorException.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpolator\LagrangeInterpolator.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpolator\LinearInterpolator.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpolator\NotAKnotInterpolator.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpreter\Interpreter.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpreter\InterpreterException.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpreter\MathParser.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpreter\MathTree.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpreter\ScriptInterpreter.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpreter\ScriptReadWriter.cpp" />
+    <ClCompile Include="..\..\..\src\base\interpreter\Validator.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Abs.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Acos.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Acosh.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Add.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Asin.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Asinh.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Atan.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Atan2.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Cos.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Cosh.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\DegToRad.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Determinant.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Divide.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Exp.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\FunctionRunner.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Inverse.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Log.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Log10.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\MathElement.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\MathException.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\MathFunction.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\MathNode.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Multiply.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Negate.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Norm.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Power.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\RadToDeg.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Sin.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Sinh.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Sqrt.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Subtract.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Tan.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Tanh.cpp" />
+    <ClCompile Include="..\..\..\src\base\math\Transpose.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AngularParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\Array.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ArrayElementWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ArrayWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BallisticMassParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BallisticMassReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BooleanWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BplaneData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BplaneParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BplaneReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BurnData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BurnParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\BurnReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\CartesianParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\DelaunayParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\EnvData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\EnvParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\EnvReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\EquinoctialParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ExpressionParser.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\HardwareParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\HardwareReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\KeplerianParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ModEquinoctialParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\NumberWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ObjectPropertyWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ObjectWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OnOffWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitalParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitRmat33.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitRmat66.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitRvec6.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OrbitStmParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\Parameter.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ParameterDatabase.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ParameterInfo.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\ParameterWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetodeticParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\PlanetReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\RealVar.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\RefData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\Rmat33Var.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\Rmat66Var.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\Rvec6Var.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\SpacecraftData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\SphericalParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\StringObjectWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\StringVar.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\StringWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\TimeData.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\TimeParameters.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\TimeReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\TimeString.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\Variable.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\VariableWrapper.cpp" />
+    <ClCompile Include="..\..\..\src\base\plugin\DynamicLibrary.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\Integrator.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\PredictorCorrector.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\PrinceDormand45.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\PrinceDormand78.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\PropagationStateManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\Propagator.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\PropSetup.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\RungeKutta.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\RungeKutta89.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\RungeKuttaFehlberg56.cpp" />
+    <ClCompile Include="..\..\..\src\base\propagator\RungeKuttaNystrom.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\Asteroid.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\AtmosphereModel.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\Barycenter.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\CalculatedPoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\CelestialBody.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\Comet.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\DeFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\LibrationPoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\Moon.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\Msise90Atmosphere.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\msise90_sub.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4244;4996;4251;4244</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4244;4996;4251</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">4244;4996;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\Planet.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphem.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphemException.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarSystemException.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\Star.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\DerivativeModel.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\DifferentialCorrector.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\ExternalOptimizer.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\Gradient.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\InternalOptimizer.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\Jacobian.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\LineSearch.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\Optimizer.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\Solver.cpp" />
+    <ClCompile Include="..\..\..\src\base\solver\SteepestDescent.cpp" />
+    <ClCompile Include="..\..\..\src\base\spacecraft\FormationInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\spacecraft\Spacecraft.cpp" />
+    <ClCompile Include="..\..\..\src\base\spacecraft\SpaceObject.cpp" />
+    <ClCompile Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\stopcond\StopCondition.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemerisFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\MessageWindow.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\OrbitPlot.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\OrbitView.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\OwnedPlot.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\ReportFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\Subscriber.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\TextEphemFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\subscriber\XyPlot.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\A1Date.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\A1Mjd.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\AngleUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\AttitudeConversionUtility.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\AttitudeUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\BaseException.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\BodyFixedStateConverter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CalculationUtilities.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMSegment.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Code500EphemerisFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Date.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\DateUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\ElapsedTime.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\EopFile.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\FileManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\FileUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Frozen.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\GravityFileUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Linear.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\MemoryTracker.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\MessageInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\MessageReceiver.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\OrbitDesignerTime.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\RealUtilities.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\RepeatGroundTrack.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\RepeatSunSync.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\RgbColor.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Rmatrix.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Rmatrix33.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Rmatrix66.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Rvector.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Rvector3.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\Rvector6.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceKernelReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceKernelWriter.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceOrbitKernelReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\StringUtil.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SunSync.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\TextParser.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\TimeSystemConverter.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\TimeTypes.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\UtcDate.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\base\asset\AssetException.hpp" />
+    <ClInclude Include="..\..\..\src\base\asset\BodyFixedPoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\asset\GroundstationInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\AttitudeException.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\CCSDSAttitude.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\CSFixed.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\Kinematic.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\NadirPointing.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\PrecessingSpinner.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\SpiceAttitude.hpp" />
+    <ClInclude Include="..\..\..\src\base\attitude\Spinner.hpp" />
+    <ClInclude Include="..\..\..\src\base\burn\Burn.hpp" />
+    <ClInclude Include="..\..\..\src\base\burn\BurnException.hpp" />
+    <ClInclude Include="..\..\..\src\base\burn\FiniteBurn.hpp" />
+    <ClInclude Include="..\..\..\src\base\burn\ImpulsiveBurn.hpp" />
+    <ClInclude Include="..\..\..\src\base\burn\InertialManeuverFrame.hpp" />
+    <ClInclude Include="..\..\..\src\base\burn\ManeuverFrame.hpp" />
+    <ClInclude Include="..\..\..\src\base\burn\ManeuverFrameManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\burn\VnbManeuverFrame.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Achieve.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Assignment.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\BeginFiniteBurn.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\BeginFunction.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\BeginMissionSequence.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\BeginScript.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\BranchCommand.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\CallFunction.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\ClearPlot.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\CommandException.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\CommandUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\ConditionalBranch.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Create.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Else.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\ElseIf.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\EndFiniteBurn.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\EndFor.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\EndFunction.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\EndIf.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\EndOptimize.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\EndScript.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\EndTarget.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\EndWhile.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\For.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\GmatCommand.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\If.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\ManageObject.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Maneuver.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\MarkPoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Minimize.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\NonlinearConstraint.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\NoOp.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Optimize.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\PenDown.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\PenUp.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\PlotCommand.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Propagate.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\PropagationEnabledCommand.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Report.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\RunSolver.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\SaveMission.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\SolverBranchCommand.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\SolverSequenceCommand.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Stop.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Target.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Toggle.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\Vary.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\While.hpp" />
+    <ClInclude Include="..\..\..\src\base\configs\ConfigManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\configs\ConfigManagerException.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\AxisSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodyFixedAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodyInertialAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\BodySpinSunAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateBase.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateConverter.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\CoordinateSystemException.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\DynamicAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\EquatorAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\GeocentricSolarEclipticAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\GeocentricSolarMagneticAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\IAUFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\ICRFAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\ICRFFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\InertialAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\ITRFAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\ItrfCoefficientsFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\LocalAlignedConstrainedAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\MeanOfDateAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EcAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\MJ2000EqAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\MODEcAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\MODEqAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\MOEEcAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\MOEEqAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\ObjectReferencedAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\TODEcAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\TODEqAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\TOEEcAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\TOEEqAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\TopocentricAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\EventException.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\Moderator.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\PlotInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\PlotReceiver.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\Publisher.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\PublisherException.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\Sandbox.hpp" />
+    <ClInclude Include="..\..\..\src\base\executive\SandboxException.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\AtmosphereFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\AttitudeFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\AxisSystemFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\BurnFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\CalculatedPointFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\CelestialBodyFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\CommandFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\CoordinateSystemFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\Factory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\FactoryException.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\FactoryManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\HardwareFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\InterfaceFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\MathFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\ODEModelFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\ParameterFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\PhysicalModelFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\PropagatorFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\PropSetupFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\SolarSystemFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\SolverFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\SpacecraftFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\StopConditionFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\SubscriberFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\HarmonicField.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\Harmonic.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravity.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityCof.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\ODEModel.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\ODEModelException.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\PhysicalModel.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\PointMassForce.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\RelativisticCorrection.hpp" />
+    <ClInclude Include="..\..\..\src\base\forcemodel\SolarRadiationPressure.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\Covariance.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\ElementWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\GmatBase.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\GmatBaseException.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\GmatState.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\ObjectInitializer.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\SpacePoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\StateManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\foundation\TriggerManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\function\Function.hpp" />
+    <ClInclude Include="..\..\..\src\base\function\FunctionException.hpp" />
+    <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalTank.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalThruster.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricTank.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\FuelTank.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\Hardware.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\HardwareException.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\Thruster.hpp" />
+    <ClInclude Include="..\..\..\src\base\include\gmatdefs.hpp" />
+    <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\interface\Interface.hpp" />
+    <ClInclude Include="..\..\..\src\base\interface\InterfaceException.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpolator\BrentDekkerZero.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpolator\CubicSplineInterpolator.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpolator\Interpolator.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpolator\InterpolatorException.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpolator\LagrangeInterpolator.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpolator\LinearInterpolator.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpolator\NotAKnotInterpolator.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpreter\Interpreter.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpreter\InterpreterException.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpreter\MathParser.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpreter\MathTree.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpreter\ScriptInterpreter.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpreter\ScriptReadWriter.hpp" />
+    <ClInclude Include="..\..\..\src\base\interpreter\Validator.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Abs.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Acos.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Acosh.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Add.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Asin.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Asinh.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Atan.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Atan2.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Cos.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Cosh.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\DegToRad.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Determinant.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Divide.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Exp.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\FunctionRunner.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Inverse.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Log.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Log10.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\MathElement.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\MathException.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\MathFunction.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\MathNode.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Multiply.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Negate.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Norm.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Power.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\RadToDeg.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Sin.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Sinh.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Sqrt.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Subtract.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Tan.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Tanh.hpp" />
+    <ClInclude Include="..\..\..\src\base\math\Transpose.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AngularParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\Array.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ArrayElementWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ArrayWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BallisticMassParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BallisticMassReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BooleanWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BplaneData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BplaneParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BplaneReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BurnData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BurnParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\BurnReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\CartesianParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\DelaunayParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\EnvData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\EnvParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\EnvReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\EquinoctialParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ExpressionParser.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\HardwareParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\HardwareReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\KeplerianParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ModEquinoctialParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\NumberWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ObjectPropertyWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ObjectWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OnOffWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitalParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitRmat33.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitRmat66.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitRvec6.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OrbitStmParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\paramdefs.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\Parameter.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterDatabase.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterDatabaseException.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterException.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterInfo.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\ParameterWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetodeticParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\PlanetReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\RealVar.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\RefData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\Rmat33Var.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\Rmat66Var.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\Rvec6Var.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\SpacecraftData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\SphericalParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\StringObjectWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\StringVar.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\StringWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\TimeData.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\TimeParameters.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\TimeReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\TimeString.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\Variable.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\VariableWrapper.hpp" />
+    <ClInclude Include="..\..\..\src\base\plugin\DynamicLibrary.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\AdamsBashforthMoulton.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\DormandElMikkawyPrince68.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\Integrator.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\PredictorCorrector.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\PrinceDormand45.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\PrinceDormand78.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\PropagationStateManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\Propagator.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\PropagatorException.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\PropSetup.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\PropSetupException.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\RungeKutta.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\RungeKutta89.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\RungeKuttaFehlberg56.hpp" />
+    <ClInclude Include="..\..\..\src\base\propagator\RungeKuttaNystrom.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\Asteroid.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereException.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\AtmosphereModel.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\Barycenter.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\CalculatedPoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\CelestialBody.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\Comet.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\DeFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\ExponentialAtmosphere.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\JacchiaRobertsAtmosphere.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\LibrationPoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\Moon.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\Msise90Atmosphere.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphem.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphemException.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarSystemException.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\Star.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\DerivativeModel.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\DifferentialCorrector.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\ExternalOptimizer.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\Gradient.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\InternalOptimizer.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\Jacobian.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\LineSearch.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\Optimizer.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\Solver.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\SolverException.hpp" />
+    <ClInclude Include="..\..\..\src\base\solver\SteepestDescent.hpp" />
+    <ClInclude Include="..\..\..\src\base\spacecraft\FormationInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\spacecraft\Spacecraft.hpp" />
+    <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObject.hpp" />
+    <ClInclude Include="..\..\..\src\base\spacecraft\SpaceObjectException.hpp" />
+    <ClInclude Include="..\..\..\src\base\spacecraft\StateVectorException.hpp" />
+    <ClInclude Include="..\..\..\src\base\spacecraft\TextTrajectoryFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\stopcond\StopCondition.hpp" />
+    <ClInclude Include="..\..\..\src\base\stopcond\StopConditionException.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemerisFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\MessageWindow.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\OrbitPlot.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\OrbitView.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\OwnedPlot.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\ReportFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\Subscriber.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\SubscriberException.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\TextEphemFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\subscriber\XyPlot.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\A1Date.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\A1Mjd.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\AngleUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\ArrayTemplate.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\AttitudeConversionUtility.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\AttitudeUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\BaseException.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\BodyFixedStateConverter.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CalculationUtilities.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMSegment.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Code500EphemerisFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\ColorTypes.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Date.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\DateUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\ElapsedTime.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\EopFile.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\FileManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\FileTypes.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\FileUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Frozen.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\GmatConstants.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\GravityFileUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Linear.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\MemoryTracker.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\MessageInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\MessageReceiver.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\OrbitDesignerTime.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\OrbitTypes.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\RealTypes.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\RealUtilities.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\RepeatGroundTrack.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\RepeatSunSync.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\RgbColor.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Rmatrix.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Rmatrix33.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Rmatrix66.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Rvector.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Rvector3.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\Rvector6.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceKernelReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceKernelWriter.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SpiceOrbitKernelWriter.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\StringUtil.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SunSync.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\TableTemplate.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\TextParser.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\TimeSystemConverter.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\TimeTypes.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\UtcDate.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\UtilityException.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\base\solarsys\msise90_sub.for">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
+    </None>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

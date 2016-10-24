@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -38,6 +48,7 @@
 #endif
 
 //#define DEBUG_SET_ICON
+//#define DEBUG_GUI_CONFIG
 
 GmatAppData* GmatAppData::theGmatAppData = NULL;
 
@@ -120,19 +131,56 @@ ResourceTree* GmatAppData::GetResourceTree()
 //------------------------------------------------------------------------------
 wxConfigBase* GmatAppData::GetPersonalizationConfig()
 {
+   #ifdef DEBUG_GUI_CONFIG
+   MessageInterface::ShowMessage
+      ("GmatAppData::GetPersonalizationConfig() entered, thePersonalizationConfig = <%p>\n",
+       thePersonalizationConfig);
+   #endif
+   
    if (thePersonalizationConfig == NULL)
    {
-	  std::string pfile = FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE);
-	  // fix crash for invalid filename
-	  if (!FileManager::Instance()->DoesDirectoryExist(pfile))
-	  {
-		  MessageInterface::PopupMessage( Gmat::WARNING_, "Invalid personalization file specified: \n%s\n",
-                                 pfile.c_str() );
-		  pfile = "";
-	  }
+      // Find personalization file from the search path (LOJ: 2014.07.02)
+      //std::string pfile = FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE);
+      std::string pfile = FileManager::Instance()->FindPath("", "PERSONALIZATION_FILE", true, false, false);
+      #ifdef DEBUG_GUI_CONFIG
+      MessageInterface::ShowMessage("   pfile = '%s'\n", pfile.c_str());
+      #endif
+      
+      // fix crash for invalid filename
+      //if (!FileManager::Instance()->DoesDirectoryExist(pfile))
+      if (pfile == "")
+      {
+         // Show actual cross-platform home directory in the message
+         if (GmatGlobal::Instance()->IsWritingFilePathInfo())
+         {
+            MessageInterface::ShowMessage
+               ( "*** WARNING *** Invalid personalization file specified: '%s',\n"
+                 "   so creating local configuration file 'GMAT.ini' in the user's home directory.",
+                 pfile.c_str() );
+         }
+         
+         // Make blank pfile so that default local configureation file can be written
+         // to user's home directory 
+         // If it is changed to use GMAT.ini it will update GMAT.ini in bin directory
+         // which we don't want it to happen. (LOJ: 2014.07.08)
+         pfile = "";
+         //pfile = "GMAT.ini";
+      }
+      
+      //Excerpt from wxConfigBase (http://docs.wxwidgets.org/2.8/wx_wxconfigbase.html#wxconfigbasector)
+      /*On non-VMS Unix systems, the default local configuration file is ~/.appname.  However, this path may be also used as user data directory (see wxStandardPaths::GetUserDataDir) if the application has several data files. In this case wxCONFIG_USE_SUBDIR flag, which changes the default local configuration file to ~/.appname/appname should be used. Notice that this flag is ignored on non-Unix system, including VMS, or if a non-default localFilename is provided. This function is new since wxWidgets version 2.8.2
+       */
+      // Currently it is created in home directory such as C:\Users\ljun\GMAT.ini
+      
       thePersonalizationConfig = new wxFileConfig(wxEmptyString, wxEmptyString, pfile.c_str(),
-              wxEmptyString, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_RELATIVE_PATH);
+         wxEmptyString, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_RELATIVE_PATH);
    }
+   
+   #ifdef DEBUG_GUI_CONFIG
+   MessageInterface::ShowMessage
+      ("GmatAppData::GetPersonalizationConfig() returning <%p>\n   path = '%s'\n",
+       thePersonalizationConfig, thePersonalizationConfig->GetPath().c_str());
+   #endif
    return thePersonalizationConfig;
 }
 
@@ -235,13 +283,60 @@ void GmatAppData::SetFont(wxFont font)
    theFont = font;
 }
 
-
 //------------------------------------------------------------------------------
 // wxFont GetFont()
 //------------------------------------------------------------------------------
 wxFont GmatAppData::GetFont()
 {
    return theFont;
+}
+
+//------------------------------------------------------------------------------
+// void SetScriptFont(wxFont font)
+//------------------------------------------------------------------------------
+void GmatAppData::SetScriptFont(wxFont font)
+{
+   theScriptFont = font;
+}
+
+//------------------------------------------------------------------------------
+// wxFont GetScriptFont()
+//------------------------------------------------------------------------------
+wxFont GmatAppData::GetScriptFont()
+{
+   return theScriptFont;
+}
+
+//------------------------------------------------------------------------------
+// void SetFontSize(Integer size)
+//------------------------------------------------------------------------------
+void GmatAppData::SetFontSize(Integer size)
+{
+   theFontSize = size;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetFontSize()
+//------------------------------------------------------------------------------
+Integer GmatAppData::GetFontSize()
+{
+   return theFontSize;
+}
+
+//------------------------------------------------------------------------------
+// void SetScriptFontSize(Integer size)
+//------------------------------------------------------------------------------
+void GmatAppData::SetScriptFontSize(Integer size)
+{
+   theScriptFontSize = size;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetScriptFontSize()
+//------------------------------------------------------------------------------
+Integer GmatAppData::GetScriptFontSize()
+{
+   return theScriptFontSize;
 }
 
 
@@ -278,88 +373,96 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
 {
    #ifdef DEBUG_SET_ICON
    MessageInterface::ShowMessage
-      ("GmatAppData::SetIcon() entered, called from '%s' named '%s'\n",
-       calledFrom.c_str(), topWindow->GetName().c_str());
+      ("GmatAppData::SetIcon() entered, called from '%s' named '%s'\n   "
+       "theIconFile = '%s', theIconFileSet = %d\n", calledFrom.c_str(), topWindow->GetName().WX_TO_C_STRING,
+       theIconFile.WX_TO_C_STRING, theIconFileSet);
    #endif
    
-   bool retval = true;
+   // Write non-existent icon file warning per GMAT session
+   // Changed to write no warning (LOJ: 2014.09.19)
+   static bool writeWarning = false;
+   FileManager *fm = FileManager::Instance();
    
    if (theIconFile == "")
    {
-      // Set icon if icon file is in the start up file
-      FileManager *fm = FileManager::Instance();
-      theIconFile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+      // Set icon if icon file can be located
+      //theIconFile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+      theIconFile = fm->FindMainIconFile(writeWarning || theIconFileSet).c_str();
+      
       #ifdef DEBUG_SET_ICON
-      MessageInterface::ShowMessage("   theIconFile = '%s'\n", theIconFile.c_str());
+      if (theIconFile != "")
+         MessageInterface::ShowMessage("   theIconFile = '%s'\n", theIconFile.WX_TO_C_STRING);
       #endif
-   }
-   
-   try
-   {
-      if (GmatFileUtil::DoesFileExist(theIconFile.c_str()))
+      
+      // Write warning message if it is still blank
+      if (theIconFile == "")
       {
-         #if defined __WXMSW__
-            topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_ICO));
-         #elif defined __WXGTK__
-            topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_XPM));
-         #elif defined __WXMAC__
-            topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_PICT_RESOURCE));
-         #endif
-      }
-      else
-      {
-         if (theIconFile.Len() > 1)
-         {
-            if (theIconFile[0] == '.')
-            {
-               FileManager *fm = FileManager::Instance();
-               // Used bin directory from the FileManager(for GMT-4408 LOJ: 2014.04.09)
-               //wxString absIconDir = fm->GetWorkingDirectory().c_str();
-               wxString absIconDir = fm->GetBinDirectory().c_str();
-               wxString pathSep = fm->GetPathSeparator().c_str();
-               wxString absIconFile = absIconDir + pathSep + theIconFile;
-               MessageInterface::ShowMessage
-                  ("*** WARNING *** The icon file \"%s\" does not exist for window '%s' named '%s', "
-                   "so trying with abs path \"%s\"\n", theIconFile.c_str(), calledFrom.c_str(),
-                   topWindow->GetName().c_str(), absIconFile.c_str());
-               if (GmatFileUtil::DoesFileExist(absIconFile.c_str()))
-               {
-                  MessageInterface::ShowMessage
-                     ("*** WARNING *** The icon file \"%s\" does not exist for window '%s' named '%s'\n",
-                      absIconFile.c_str(), calledFrom.c_str(), topWindow->GetName().c_str());
-                  retval = false;
-               }
-            }
-         }
-         else
+         if (writeWarning)
          {
             MessageInterface::ShowMessage
-               ("*** WARNING *** The icon file \"%s\" does not exist for window '%s' named '%s'\n",
-                theIconFile.c_str(), calledFrom.c_str(), topWindow->GetName().c_str());
-            retval = false;
+               ("*** WARNING *** Error setting icon for window '%s' named '%s'\n   "
+                "Cannot find the icon file '%s'.  This warning message will be written only once.\n",
+                calledFrom.c_str(), topWindow->GetName().WX_TO_C_STRING,
+                fm->GetFilename("MAIN_ICON_FILE").c_str());
+            writeWarning = false;
          }
+         
+         #ifdef DEBUG_SET_ICON
+         MessageInterface::ShowMessage("GmatAppData::SetIcon() returning false\n");
+         #endif
+         return false;
       }
    }
-   catch (GmatBaseException &e)
-   {
-      MessageInterface::ShowMessage
-         ("*** WARNING *** error setting icon for window '%s' named '%s'\n   The message is '%s'\n",
-          calledFrom.c_str(), topWindow->GetName().c_str(), e.GetFullMessage().c_str());
-      retval = false;
-   }
    
-   #ifdef DEBUG_SET_ICON
-   MessageInterface::ShowMessage("GmatAppData::SetIcon() returning %d\n", retval);
+   // Set icon
+   #if defined __WXMSW__
+      topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_ICO));
+   #elif defined __WXGTK__
+      topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_XPM));
+   #elif defined __WXMAC__
+//      This causes an error with wx3.0 any time a new window is brought up.
+//      Removing the wxBitmap type from the call fixes the issue.
+//      topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_PICT_RESOURCE));
+      topWindow->SetIcon(wxIcon(theIconFile));
    #endif
    
-   return retval;
+   #ifdef DEBUG_SET_ICON
+      MessageInterface::ShowMessage("GmatAppData::SetIcon() returning true\n");
+   #endif
+      
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// void ResetIconFile()
+//------------------------------------------------------------------------------
+/**
+ * Resets icon file and set flag.  This method is usually called from the Moderator
+ * when new script is read.
+ */
+//------------------------------------------------------------------------------
+void GmatAppData::ResetIconFile()
+{
+   #ifdef DEBUG_SET_ICON
+   MessageInterface::ShowMessage("GmatAppData::ResetIconFile() entered\n");
+   #endif
+   
+   theIconFileSet = false;
+   theIconFile = "";
+   
+   SetIconFile();
+   
+   #ifdef DEBUG_SET_ICON
+   MessageInterface::ShowMessage("GmatAppData::ResetIconFile() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
 // void SetIconFile()
 //------------------------------------------------------------------------------
 /**
- * Sets icon file from the GMAT startup file. This method needs to be called
+ * Sets icon file from the search path. It will look in the GMAT working directory
+ * and then path specified in the GMAT startup file. This method needs to be called
  * after startup file is read.
  */
 //------------------------------------------------------------------------------
@@ -369,13 +472,16 @@ void GmatAppData::SetIconFile()
    MessageInterface::ShowMessage("GmatAppData::SetIconFile() entered\n");
    #endif
    
-   // Set icon file from the startup file
+   // Set icon file from the search path (LOJ: 2014.07.02)
    FileManager *fm = FileManager::Instance();
-   theIconFile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+   theIconFile = fm->FindMainIconFile().c_str();
+   
+   if (theIconFile != "")
+      theIconFileSet = true;
    
    #ifdef DEBUG_SET_ICON
    MessageInterface::ShowMessage
-      ("GmatAppData::SetIconFile() leaving, theIconFile = '%s'\n", theIconFile.c_str());
+      ("GmatAppData::SetIconFile() leaving\n   theIconFile = '%s'\n", theIconFile.WX_TO_C_STRING);
    #endif
 }
 
@@ -404,15 +510,19 @@ GmatAppData::GmatAppData()
    theMessageWindow = NULL;
    theCompareWindow = NULL;
    theMessageTextCtrl = NULL;
+   theFontSize = 8;
+   theScriptFontSize = 9;
    theTempScriptName = "$gmattempscript$.script";
    thePersonalizationConfig = NULL;
+   theIconFileSet = false;
    
    #ifdef __USE_EDITOR__
    thePageSetupDialogData = NULL;
    #endif
    
    // Set font
-   theFont = wxFont(10, wxMODERN, wxNORMAL, wxNORMAL);
+   theFont = wxFont(theFontSize, wxMODERN, wxNORMAL, wxNORMAL);
+   theScriptFont = wxFont(theScriptFontSize, wxMODERN, wxNORMAL, wxNORMAL);
    
    // Set the global wx config, read from local directory (GMAT.ini)
    wxFileConfig *pConfig = new wxFileConfig(wxEmptyString, wxEmptyString, "GMAT.ini", 

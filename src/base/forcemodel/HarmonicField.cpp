@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -84,6 +94,7 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - GravityBaseParamCount] =
    "Degree",
    "Order",
    "PotentialFile",
+   "PotentialFileFullPath",
    "InputCoordinateSystem",
    "FixedCoordinateSystem",
    "TargetCoordinateSystem",
@@ -96,7 +107,8 @@ HarmonicField::PARAMETER_TYPE[HarmonicFieldParamCount - GravityBaseParamCount] =
    Gmat::INTEGER_TYPE,   // "MaxOrder",
    Gmat::INTEGER_TYPE,   // "Degree",
    Gmat::INTEGER_TYPE,   // "Order",
-   Gmat::STRING_TYPE,    // "PotentialFile",
+   Gmat::FILENAME_TYPE,  // "PotentialFile",
+   Gmat::FILENAME_TYPE,  // "potentialFileFullPath",
    Gmat::STRING_TYPE,    // "InputCoordinateSystem",
    Gmat::STRING_TYPE,    // "FixedCoordinateSystem",
    Gmat::STRING_TYPE,    // "TargetCoordinateSystem",
@@ -127,6 +139,7 @@ maxOrder                (maxOrd),
 degree                  (4),
 order                   (4),
 filename                (""),
+filenameFullPath        (""),
 fileRead                (false),
 usingDefaultFile        (false),
 isFirstTimeDefault      (true),
@@ -145,7 +158,10 @@ eop                     (NULL)
    
    FileManager *fm = FileManager::Instance();
    potPath = fm->GetAbsPathname(bodyName + "_POT_PATH");
-   
+   #ifdef DEBUG_EOP_FILE
+   MessageInterface::ShowMessage
+      ("HarmonicField() constructor, this=<%p>, name='%s'\n", this, name.c_str());
+   #endif
 }
 
 
@@ -184,6 +200,7 @@ s                       (0.0),
 t                       (0.0),
 u                       (0.0),
 filename                (hf.filename),
+filenameFullPath        (hf.filenameFullPath),
 fileRead                (false),
 usingDefaultFile        (hf.usingDefaultFile),
 isFirstTimeDefault      (hf.isFirstTimeDefault),
@@ -196,6 +213,10 @@ fixedCS                 (NULL),
 targetCS                (NULL),
 eop                     (hf.eop)
 {
+   #ifdef DEBUG_EOP_FILE
+   MessageInterface::ShowMessage
+      ("HarmonicField() copy constructor, this=<%p>, eop=<%p>\n", this, eop);
+   #endif
 }
 
 
@@ -224,6 +245,7 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    t              = 0.0;     // or hf.t?
    u              = 0.0;     // or hf.u?
    filename       = hf.filename;
+   filenameFullPath = hf.filenameFullPath;
    fileRead       = false;
    usingDefaultFile   = hf.usingDefaultFile;
    isFirstTimeDefault = hf.isFirstTimeDefault;
@@ -235,6 +257,10 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    fixedCS        = hf.fixedCS;
    targetCS       = hf.targetCS;
    eop            = hf.eop;
+   #ifdef DEBUG_EOP_FILE
+   MessageInterface::ShowMessage
+      ("HarmonicField() operator=, this=<%p>, eop=<%p>\n", eop, this);
+   #endif
    return *this;
 }
 
@@ -249,6 +275,13 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
 //------------------------------------------------------------------------------
 bool HarmonicField::Initialize()
 {
+   // Write default file message per GMAT session (LOJ: 2014.12.23)
+   static bool writeDefaultFileMessage = true;
+   
+   #ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage
+      ("HarmonicField::Initialize() entered, this=<%p>, eop=<%p>\n", this, eop);
+   #endif
    if (!GravityBase::Initialize())
       return false;
 
@@ -271,12 +304,20 @@ bool HarmonicField::Initialize()
              "EOP file is undefined for Harmonic Field " + instanceName);
 
    hMinitialized = true;
-   if (usingDefaultFile && isFirstTimeDefault)
+   //if (usingDefaultFile && isFirstTimeDefault)
+   if (writeDefaultFileMessage && usingDefaultFile && isFirstTimeDefault)
    {
-      MessageInterface::ShowMessage("Using default potential file \"%s\" for GravityField object \"%s\"\n",
-            filename.c_str(), instanceName.c_str());
+      MessageInterface::ShowMessage
+         ("Using default potential file \"%s\" for GravityField object \"%s\"\n",
+          //filename.c_str(), instanceName.c_str());
+          filenameFullPath.c_str(), instanceName.c_str());
       isFirstTimeDefault = false;
+      writeDefaultFileMessage = false;
    }
+   #ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage
+      ("HarmonicField::Initialize() returning true, this=<%p>, eop=<%p>\n", this, eop);
+   #endif
    return true;
 }
 
@@ -349,7 +390,7 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
 
 
 //------------------------------------------------------------------------------
-//  bool SetFilename(const std::string &fn)
+//  bool SetFilename(const std::string &fn, bool validateOnly = false)
 //------------------------------------------------------------------------------
 /**
  * This method sets the filename for this HarmonicField object.
@@ -359,12 +400,13 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
  * @return flag indicating success of the operation.
  */
 //------------------------------------------------------------------------------
-bool HarmonicField::SetFilename(const std::string &fn)
+bool HarmonicField::SetFilename(const std::string &fn, bool validateOnly)
 {
    #ifdef DEBUG_HARMONIC_FIELD_FILENAME
    MessageInterface::ShowMessage
-      ("HarmonicField::SetFilename() for %s\n   filename = %s\n   newname  = %s\n",
-       bodyName.c_str(), filename.c_str(), fn.c_str());
+      ("HarmonicField::SetFilename() entered for %s\n   filenameFullPath = %s\n   "
+       "filename = %s\n   newname  = %s\n   validateOnly = %s\n", bodyName.c_str(),
+       filenameFullPath.c_str(), filename.c_str(), fn.c_str(), validateOnly ? "true" : "false");
    MessageInterface::ShowMessage("   potPath  = %s\n", potPath.c_str());
    #endif
    
@@ -388,37 +430,60 @@ bool HarmonicField::SetFilename(const std::string &fn)
           (hasDefaultIndicator? "true" : "false"), newfn.c_str());
       MessageInterface::ShowMessage("   potPath  = %s\n", potPath.c_str());
       #endif
-      // Add default pathname if none specified
-      if (newfn.find("/") == newfn.npos && newfn.find("\\") == newfn.npos)
+      
+      // Changed to use GmatBase::GetFullPathFileName() (LOJ: 2014.06.25)
+      
+      // // Add default pathname if none specified
+      // if (newfn.find("/") == newfn.npos && newfn.find("\\") == newfn.npos)
+      // {
+      //    try
+      //    {
+      //       filename = potPath + newfn;
+      //    }
+      //    catch (GmatBaseException &e)
+      //    {
+      //       filename = newfn;
+      //       MessageInterface::ShowMessage(e.GetFullMessage());
+      //    }
+      // }
+      // else
+      // {
+      //    filename = newfn;
+      // }
+      
+      std::string newFile = newfn;
+      std::string fullPath;
+      std::string potFileType = GmatStringUtil::ToUpper(GetBodyName()) + "_POT_PATH";
+      
+      // Do not write informational file location message if default file (LOJ: 2014.06.25)
+      fullPath =
+         GmatBase::GetFullPathFileName(newFile, GetName(), newfn, potFileType,
+                                       true, "", false, !hasDefaultIndicator);
+      
+      // std::ifstream potfile(filename.c_str());
+      //std::ifstream potfile(filenameFullPath.c_str());
+      //if (!potfile) 
+      if (fullPath == "") 
       {
-         try
-         {
-            filename = potPath + newfn;
-         }
-         catch (GmatBaseException &e)
-         {
-            filename = newfn;
-            MessageInterface::ShowMessage(e.GetFullMessage());
-         }
+         lastErrorMessage = "The file name \"" + newFile + "\" does not exist";
+         if (!validateOnly)
+            throw ODEModelException(lastErrorMessage);
       }
-      else
+      
+      if (!validateOnly)
       {
          filename = newfn;
+         filenameFullPath = fullPath;
+         if (body != NULL)
+            //body->SetPotentialFilename(filename);
+            body->SetPotentialFilename(filenameFullPath);
       }
-      
-      std::ifstream potfile(filename.c_str());
-      if (!potfile) 
-      {
-         throw ODEModelException
-            ("The file name \"" + filename + "\" does not exist.");
-      }
-      
-      if (body != NULL)
-         body->SetPotentialFilename(filename);
    }
    
    #ifdef DEBUG_HARMONIC_FIELD_FILENAME
-   MessageInterface::ShowMessage("   filename = %s\n", filename.c_str());
+   MessageInterface::ShowMessage
+      ("HarmonicField::SetFilename() returning true, filename = %s\n   "
+       "filenameFullPath = '%s'\n", filename.c_str(), filenameFullPath.c_str());
    #endif
    
    fileRead = false;
@@ -611,23 +676,29 @@ std::string HarmonicField::GetStringParameter(const Integer id) const
 {
    if (id == FILENAME)
    {
-      //return filename;
-      std::string::size_type index = filename.find_last_of("/\\");
+      // Just return filename since filenameFullPath has path info (LOJ: 2014.06.30)
+      return filename;
       
-      // if path not found, just write filename
-      if (index == filename.npos)
-         return filename;
-      else
-      {
-         // if actual pathname is the same as the default path, write only name part
-         std::string actualPath = filename.substr(0, index+1);
-         std::string fname = filename;
-         if (potPath == actualPath)
-            fname = filename.substr(index+1);
+      // //return filename;
+      // std::string::size_type index = filename.find_last_of("/\\");
+      
+      // // if path not found, just write filename
+      // if (index == filename.npos)
+      //    return filename;
+      // else
+      // {
+      //    // if actual pathname is the same as the default path, write only name part
+      //    std::string actualPath = filename.substr(0, index+1);
+      //    std::string fname = filename;
+      //    if (potPath == actualPath)
+      //       fname = filename.substr(index+1);
          
-         return fname;
-      }
+      //    return fname;
+      // }
    }
+   
+   if (id == POT_FILE_FULLPATH)
+      return filenameFullPath;
    
    if (id == INPUT_COORD_SYSTEM)  return inputCSName;
    if (id == FIXED_COORD_SYSTEM)  return fixedCSName;
@@ -658,7 +729,12 @@ bool HarmonicField::SetStringParameter(const Integer id,
          throw ome;
       }
 
+      #ifdef DEBUG_HARMONIC_FIELD_FILENAME
+      MessageInterface::ShowMessage
+         ("HarmonicField::SetStringParameter() new PotentialFile = '%s'\n", value.c_str());
+      #endif
       std::string newValue = value;
+      
       // if value has no file extension, add .cof as default (loj: 2008.10.14)
       if (value.find(".") == value.npos)
          newValue = value + ".cof";
@@ -716,8 +792,8 @@ bool HarmonicField::SetStringParameter(const Integer id,
          }
          catch (BaseException &ex)
          {
-//            MessageInterface::ShowMessage("**** WARNING ****: %s\n",
-//                  ex.GetFullMessage().c_str());
+            //MessageInterface::ShowMessage("**** WARNING ****: %s\n",
+            //      ex.GetFullMessage().c_str());
             ; // ignore this for now - GMT-2873
          }
          
@@ -952,6 +1028,10 @@ void HarmonicField::SetForceOrigin(CelestialBody* toBody)
 //------------------------------------------------------------------------------
 void HarmonicField::SetEopFile(EopFile *eopF)
 {
+   #ifdef DEBUG_EOP_FILE
+   MessageInterface::ShowMessage
+      ("HarmonicField::SetEopFile() entered, this=<%p>, eopF=<%p>\n", this, eopF);
+   #endif
    eop = eopF;
 }
 
@@ -981,8 +1061,58 @@ bool HarmonicField::IsParameterReadOnly(const Integer id) const
    if ((id == DEGREE) || (id == ORDER) || (id == FILENAME))
       return false;
    
+   if (id == POT_FILE_FULLPATH)
+      return true;
+   
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool HarmonicField::IsParameterValid(const Integer id,
+                                     const std::string &value)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("HarmonicField::IsParameterValid() entered, id=%d, value='%s'\n", id, value.c_str());
+   #endif
+   
+   bool retval = true;
+   if (id == FILENAME)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("   Validating FILE_NAME\n");
+      #endif
+      if (!SetFilename(value, true))
+         retval = false;
+   }
+   
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsParameterValid() returning %d\n", retval);
+   #endif
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool HarmonicField::IsParameterValid(const std::string &label,
+                                     const std::string &value)
+{
+   return IsParameterValid(GetParameterID(label), value);
+}
+
 
 //---------------------------------
 // protected methods

@@ -1,12 +1,22 @@
-//$Id: Sensor.cpp 67 2010-06-08 21:56:16Z tdnguye2@NDC $
+//$Id: Sensor.cpp 67 2010-06-08 21:56:16Z  $
 //------------------------------------------------------------------------------
 //                         Sensor
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
+// Copyright (c) 2002 - 2015 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Author: Tuan Dang Nguyen
 // Created: June 8, 2010
@@ -26,8 +36,8 @@
 //------------------------------------------------------------------------------
 Signal::Signal()
 {
-	epoch = 0;
-	value = 0;
+   epoch = 0;
+   value = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -52,8 +62,8 @@ Signal::~Signal()
  */
 //-----------------------------------------------------------------------------
 Signal::Signal(const Signal & sig) :
-	epoch		(sig.epoch),
-	value		(sig.value)
+   epoch      (sig.epoch),
+   value      (sig.value)
 {
 }
 
@@ -73,8 +83,8 @@ Signal & Signal::operator=(const Signal & sig)
 {
    if (this != &sig)
    {
-   	epoch = sig.epoch;
-   	value = sig.value;
+      epoch = sig.epoch;
+      value = sig.value;
    }
 
    return *this;
@@ -91,7 +101,7 @@ Signal & Signal::operator=(const Signal & sig)
 //------------------------------------------------------------------------------
 void Signal::SetEpoch(GmatEpoch ep)
 {
-	epoch = ep;
+   epoch = ep;
 }
 
 //------------------------------------------------------------------------------
@@ -103,7 +113,7 @@ void Signal::SetEpoch(GmatEpoch ep)
 //------------------------------------------------------------------------------
 GmatEpoch Signal::GetEpoch()
 {
-	return epoch;
+   return epoch;
 }
 
 
@@ -116,8 +126,8 @@ GmatEpoch Signal::GetEpoch()
 //------------------------------------------------------------------------------
 bool Signal::SetValue(Real v)
 {
-	value = v;
-	return true;
+   value = v;
+   return true;
 }
 
 
@@ -130,5 +140,5 @@ bool Signal::SetValue(Real v)
 //------------------------------------------------------------------------------
 Real Signal::GetValue()
 {
-	return value;
+   return value;
 }

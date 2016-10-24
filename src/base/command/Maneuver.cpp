@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -23,6 +33,7 @@
 #include "Maneuver.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>                 // for <<
+#include "StringUtil.hpp"
 
 //#define DEBUG_MANEUVER 1
 //#define DEBUG_MANEUVER_PARSE
@@ -38,6 +49,7 @@ const std::string
    {
       "Burn",
       "Spacecraft",
+      "BackProp",
    };
 
 
@@ -46,6 +58,7 @@ const Gmat::ParameterType
    {
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
+      Gmat::BOOLEAN_TYPE,
    };
 
 
@@ -58,19 +71,20 @@ const Gmat::ParameterType
  */
 //------------------------------------------------------------------------------
 Maneuver::Maneuver() :
-   GmatCommand ("Maneuver"),
-   burnName    (""),
-   burn        (NULL),
-   satName     (""),
-   sat         (NULL),
-   firedOnce   (false),
-   localCS     (false),
-   scNameM     (""),
-   csNameM     (""),
-   originNameM (""),
-   axesNameM   (""),
-   decMassM    (false),
-   elementIspMassData (NULL)
+   GmatCommand          ("Maneuver"),
+   burnName             (""),
+   burn                 (NULL),
+   satName              (""),
+   sat                  (NULL),
+   firedOnce            (false),
+   localCS              (false),
+   scNameM              (""),
+   csNameM              (""),
+   originNameM          (""),
+   axesNameM            (""),
+   decMassM             (false),
+   maneuverBackwards    (false),
+   elementIspMassData   (NULL)
 {
    objectTypeNames.push_back("BurnCommand");
    parameterCount      = ManeuverCommandParamCount;
@@ -119,6 +133,7 @@ Maneuver::Maneuver(const Maneuver& m) :
    originNameM          (m.originNameM),
    axesNameM            (m.axesNameM),
    decMassM             (m.decMassM),
+   maneuverBackwards    (m.maneuverBackwards),
    elementIspMassData   (NULL)
 {
    parameterCount = ManeuverCommandParamCount;
@@ -156,6 +171,7 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
    axesNameM          = m.axesNameM;
    decMassM           = m.decMassM;
    elementIspMassData = NULL;
+   maneuverBackwards = m.maneuverBackwards;
    tankNamesM.clear();
 
    return *this;
@@ -244,6 +260,8 @@ const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
                                                  const std::string &useName)
 {
    generatingString = prefix + "Maneuver ";
+   if (maneuverBackwards)
+      generatingString += "BackProp ";
    generatingString += burnName + "(" + satName + ");";
    
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
@@ -490,6 +508,34 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
    return GmatCommand::SetStringParameter(id, value);
 }
 
+bool Maneuver::GetBooleanParameter(const Integer id) const
+{
+   if (id == backPropID)
+      return maneuverBackwards;
+
+   return GmatCommand::GetBooleanParameter(id);
+}
+
+bool Maneuver::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == backPropID)
+   {
+      maneuverBackwards = value;
+      return maneuverBackwards;
+   }
+
+   return GmatCommand::SetBooleanParameter(id, value);
+}
+
+bool Maneuver::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool Maneuver::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
 
 //------------------------------------------------------------------------------
 //  bool InterpretAction()
@@ -514,8 +560,37 @@ bool Maneuver::InterpretAction()
 {
    StringArray chunks = InterpretPreface();
 
+   #ifdef DEBUG_MANEUVER_PARSE
+      MessageInterface::ShowMessage("Maneuver command chunks:\n");
+      for (UnsignedInt i = 0; i < chunks.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", chunks[i].c_str());
+   #endif
+
+      StringArray subchunks = parser.SeparateSpaces(chunks[1]);
+
+   #ifdef DEBUG_MANEUVER_PARSE
+      MessageInterface::ShowMessage("Maneuver command subchunks:\n");
+      for (UnsignedInt i = 0; i < subchunks.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", subchunks[i].c_str());
+   #endif
+
+   std::string burnChunk = chunks[1];
+   if (subchunks.size() == 2)
+   {
+      if (subchunks[0] == "BackProp")
+      {
+         maneuverBackwards = true;
+         burnChunk = subchunks[1];
+      }
+   }
+   else if (subchunks.size() != 1)
+      throw CommandException("Maneuver command is malformed; expecting "
+                             "\"Maneuver ImpulsiveBurnName(SpacecraftName)\" or"
+                             " \"Maneuver BackProp ImpulsiveBurnName"
+                             "(SpacecraftName)\"\n");
+
    // Find and set the burn object name ...
-   StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
+   StringArray currentChunks = parser.Decompose(burnChunk, "()", false);
 
    if (currentChunks.size() < 2)
       throw CommandException("Missing Maneuver parameter. Expecting "
@@ -527,7 +602,7 @@ bool Maneuver::InterpretAction()
       MessageInterface::ShowMessage("In Maneuver, after Decompose, "
             "currentChunks = \n");
       for (unsigned int ii=0; ii<currentChunks.size(); ii++)
-         MessageInterface::ShowMessage("    %s\n",currentChunks.at(ii).c_str());
+         MessageInterface::ShowMessage("    %s\n", currentChunks.at(ii).c_str());
    #endif
 
    // ... and the spacecraft that is maneuvered
@@ -648,7 +723,7 @@ bool Maneuver::Execute()
    // Set maneuvering to Publisher so that any subscriber can do its own action
    publisher->SetManeuvering(this, true, epoch, satName, "ImpulsiveBurn");
    
-   bool retval = burn->Fire(NULL, epoch);
+   bool retval = burn->Fire(NULL, epoch, maneuverBackwards);
    
    // Reset maneuvering to Publisher so that any subscriber can do its action
    publisher->SetManeuvering(this, false, epoch, satName, "ImpulsiveBurn");
@@ -804,11 +879,11 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
 
       data << "\n        Delta V Vector:"
            << "\n           Element 1:  "
-           << BuildNumber(elementIspMassData[0]) << " km/s"
+           << GmatStringUtil::BuildNumber(elementIspMassData[0]) << " km/s"
            << "\n           Element 2:  "
-           << BuildNumber(elementIspMassData[1]) << " km/s"
+           << GmatStringUtil::BuildNumber(elementIspMassData[1]) << " km/s"
            << "\n           Element 3:  "
-           << BuildNumber(elementIspMassData[2]) << " km/s\n";
+           << GmatStringUtil::BuildNumber(elementIspMassData[2]) << " km/s\n";
 
       if (decMassM)
       {
@@ -836,11 +911,11 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
 
          data << "\n        Mass depletion from " << tanklist <<":  "
               << "\n           Delta V:      "
-              << BuildNumber(thrust) << " km/s"
+              << GmatStringUtil::BuildNumber(thrust) << " km/s"
               << "\n           Isp:          "
-              << BuildNumber(elementIspMassData[3]) << " s"
+              << GmatStringUtil::BuildNumber(elementIspMassData[3]) << " s"
               << "\n           Mass change:  "
-              << BuildNumber(elementIspMassData[4]) << " kg"
+              << GmatStringUtil::BuildNumber(elementIspMassData[4]) << " kg"
               << "\n";
 		 data << "\n";
 

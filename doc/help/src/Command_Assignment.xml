@@ -20,8 +20,6 @@
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
-
-
     <refmiscinfo class="manual">Commands</refmiscinfo>
   </refmeta>
 
@@ -115,7 +113,7 @@
           <listitem>
             <para>resource parameter (e.g.
             <guilabel>Spacecraft</guilabel>.<guilabel>X</guilabel>,
-            <guilabel>Thruster</guilabel>.<guilabel>K1</guilabel>)</para>
+            <guilabel>ChemicalThruster</guilabel>.<guilabel>K1</guilabel>)</para>
           </listitem>
 
           <listitem>
@@ -262,7 +260,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
             <listitem>
               <para>gettable resource parameters (e.g.
               <guilabel>Spacecraft</guilabel>.<guilabel>X</guilabel>,
-              <guilabel>Thruster</guilabel>.<guilabel>K1</guilabel>)</para>
+              <guilabel>ChemicalThruster</guilabel>.<guilabel>K1</guilabel>)</para>
             </listitem>
 
             <listitem>
@@ -429,9 +427,10 @@ aSat2.X = aSat1.X</code>        </programlisting>
         <title>Built-in Functions</title>
 
         <para>GMAT supports the following built-in functions in mathematical
-        expressions. Such functions are either scalar, meaning they accept a
-        single value only, or are matrix functions that operate on an entire
-        matrix or vector.</para>
+        expressions. Supported functions include common scalar functions,
+        meaning they accept a single value only, such as sin and cos, matrix
+        functions that operate on an entire matrix or vector, and string
+        functions.</para>
 
         <informaltable colsep="0" frame="topbot">
           <tgroup cols="2">
@@ -441,7 +440,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
 
             <tbody>
               <row>
-                <entry><guilabel>Scalar functions</guilabel></entry>
+                <entry><guilabel>Scalar Math Functions</guilabel></entry>
 
                 <entry><variablelist>
                     <varlistentry>
@@ -476,7 +475,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <literal>Y</literal> is the tangent of the angle
                         <literal>X</literal>. <literal>X</literal> must be in
                         radians. The tangent function is undefined at angles
-                        that normalize to π/2 or -π/2.</para>
+                        that normalize to p/2 or -p/2.</para>
                       </listitem>
                     </varlistentry>
 
@@ -488,7 +487,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <literal>Y</literal> is the arcsine of
                         <literal>X</literal>. <literal>X</literal> must be in
                         the range [-1, 1], and <literal>Y</literal> will be in
-                        the range [-π/2, π/2].</para>
+                        the range [-p/2, p/2].</para>
                       </listitem>
                     </varlistentry>
 
@@ -500,7 +499,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <literal>Y</literal> is the arccosine of
                         <literal>X</literal>. <literal>X</literal> must be in
                         the range [-1, 1], and <literal>Y</literal> will be in
-                        the range [0, π].</para>
+                        the range [0, p].</para>
                       </listitem>
                     </varlistentry>
 
@@ -511,7 +510,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <para>Arctangent. In <literal>Y = atan(X)</literal>,
                         <literal>Y</literal> is the arctangent of
                         <literal>X</literal>. <literal>Y</literal> will be in
-                        the range (-π/2, π/2).</para>
+                        the range (-p/2, p/2).</para>
                       </listitem>
                     </varlistentry>
 
@@ -522,7 +521,7 @@ aSat2.X = aSat1.X</code>        </programlisting>
                         <para>Four-quadrant arctangent. In <literal>A =
                         atan2(Y, X)</literal>, <literal>A</literal> is the
                         arctangent of <literal>Y/X</literal>.
-                        <literal>A</literal> will be in the range (-π, π].
+                        <literal>A</literal> will be in the range (-p, p].
                         <literal>atan2(Y, X)</literal> is equivalent to
                         <literal>atan(Y/X)</literal> except for the expanded
                         range.</para>
@@ -608,9 +607,141 @@ aSat2.X = aSat1.X</code>        </programlisting>
                     </varlistentry>
                   </variablelist></entry>
               </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
 
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth="1.0*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
               <row>
-                <entry><guilabel>Matrix functions</guilabel></entry>
+                <entry><guilabel>Numeric Manipulation
+                Functions</guilabel></entry>
+
+                <entry><variablelist>
+                    <varlistentry>
+                      <term><literal>mod</literal></term>
+
+                      <listitem>
+                        <para>Modulus after division. <literal>
+                        mod(x,y)</literal> returns <literal>x - n*y</literal>,
+                        where <literal>n = floor(x/y)</literal> if <literal>y
+                        ~= 0</literal>. By convention,
+                        <literal>mod(x,x)</literal> is
+                        <literal>x</literal>.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>ceil</literal></term>
+
+                      <listitem>
+                        <para>Round towards plus infinity. <literal>
+                        ceil(X)</literal> rounds <literal>X</literal> to the
+                        nearest integer towards plus infinity.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>floor</literal></term>
+
+                      <listitem>
+                        <para>Round towards minus infinity. <literal>
+                        floor(X)</literal> rounds <literal>X</literal> to the
+                        nearest integer towards minus infinity.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>fix</literal></term>
+
+                      <listitem>
+                        <para>Round towards zero. <literal> fix(X)</literal>
+                        rounds <literal>X</literal> to the nearest integer
+                        towards zero.</para>
+                      </listitem>
+                    </varlistentry>
+                  </variablelist></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth=".5*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
+              <row>
+                <entry><guilabel>Random Number Functions</guilabel></entry>
+
+                <entry><variablelist>
+                    <varlistentry>
+                      <term><literal>randn</literal></term>
+
+                      <listitem>
+                        <para>Normally distributed pseudorandom numbers.
+                        <literal> R = randn(N)</literal> returns an
+                        <literal>N</literal>-by-<literal>N</literal> matrix
+                        containing pseudorandom values drawn from the standard
+                        normal distribution. <literal> R = randn()</literal>
+                        returns a single random number.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>rand</literal></term>
+
+                      <listitem>
+                        <para>Uniformly distributed pseudorandom numbers.
+                        <literal> R = rand(N)</literal> returns an
+                        <literal>N</literal>-by-<literal>N</literal> matrix
+                        containing pseudorandom values drawn from the standard
+                        uniform distribution on the open interval
+                        <literal>(0,1)</literal>. <literal>R =
+                        rand()</literal> returns a single random
+                        number.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>SetSeed</literal></term>
+
+                      <listitem>
+                        <para>Set seed for random number generation. <literal>
+                        SetSeed(X)</literal>sets the seed for the random
+                        number generator where <literal>X</literal> must b a
+                        postive real number. Note: <literal>SetSeed</literal>
+                        calls through to the C++ 11 random number generator
+                        seed algorithm that requires an unsigned integer.
+                        Since the GMAT script language only supports real
+                        numbers, casting is performed by the compiler which
+                        rounds the real number down to the nearest integer. We
+                        recommend passing in real numbers with zero mantissa
+                        (i.e "1.0" or "198.0").</para>
+                      </listitem>
+                    </varlistentry>
+                  </variablelist></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth=".5*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
+              <row>
+                <entry><guilabel>Matrix Functions</guilabel></entry>
 
                 <entry><variablelist>
                     <varlistentry>
@@ -631,15 +762,26 @@ aSat2.X = aSat1.X</code>        </programlisting>
 
                       <listitem>
                         <para>Determinant. In <literal>Y = det(X)</literal>,
-                        <literal>Y</literal> is the determinant of
-                        <literal>X</literal>. <literal>X</literal> must be a
-                        matrix or a scalar. If <literal>X</literal> is a
-                        matrix, the number of rows must equal the number of
-                        columns. If <literal>X</literal> is a scalar,
-                        <literal>Y</literal> is equal to <literal>X</literal>.
-                        For efficiency, GMAT’s implementation of the
-                        determinant is currently limited to matrices 9×9 or
-                        smaller.</para>
+                        <literal>Y</literal> is tthe cross product of the
+                        vectors <literal>A</literal> and <literal>B</literal>.
+                        If <literal>X</literal> is a matrix, the number of
+                        rows must equal the number of columns. If
+                        <literal>X</literal> is a scalar, <literal>Y</literal>
+                        is equal to <literal>X</literal>. For efficiency,
+                        GMAT’s implementation of the determinant is currently
+                        limited to matrices 9×9 or smaller.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>cross</literal></term>
+
+                      <listitem>
+                        <para>Vector cross product. In <literal>C =
+                        cross(A,B)</literal>, <literal>C</literal> is the
+                        vector cross product of <literal>A</literal> and
+                        <literal>B</literal> . <literal>A</literal> and
+                        <literal>B</literal> must be 3 element arrays.</para>
                       </listitem>
                     </varlistentry>
 
@@ -661,6 +803,317 @@ aSat2.X = aSat1.X</code>        </programlisting>
             </tbody>
           </tgroup>
         </informaltable>
+
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth="1.0*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
+              <row>
+                <entry><guilabel>String Manipulation
+                Functions</guilabel></entry>
+
+                <entry><variablelist>
+                    <varlistentry>
+                      <term><literal>strcat</literal></term>
+
+                      <listitem>
+                        <para>String concatenation. <literal>STROUT =
+                        strcat(S1, S2, ..., SN)</literal>concatenates strings.
+                        Inputs can be combinations of string variables and
+                        string literals.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>strfind</literal></term>
+
+                      <listitem>
+                        <para>String find. <literal>INDEX =
+                        strfind(TEXT,PATTERN)</literal> returns the starting
+                        index of the first instance of
+                        <literal>PATTERN</literal> in <literal>TEXT</literal>.
+                        If <literal>PATTERN</literal> is not found,
+                        <literal>INDEX = -1</literal>.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>strrep</literal></term>
+
+                      <listitem>
+                        <para>String replace. <literal>NEWSTR =
+                        strrep(OLDSTR,OLDSUBSTR,NEWSUBSTR)</literal> replaces
+                        all occurrences of the string
+                        <literal>OLDSUBSTR</literal> within string
+                        <literal>OLDSTR</literal> with the string
+                        <literal>NEWSUBSTR</literal>.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>strcmp</literal></term>
+
+                      <listitem>
+                        <para>String compare. <literal>FLAG =
+                        strcmp(S1,S2)</literal> compares the strings
+                        <literal>S1</literal> and <literal>S2</literal> and
+                        returns logical 1 (true) if they are identical, and
+                        returns logical 0 (false) otherwise.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>sprintf</literal></term>
+
+                      <listitem>
+                        <para>Write formatted data to a string.
+                        <literal>STRING = sprintf(FORMATSPEC, A,
+                        ...)</literal> formats data in
+                        <literal>A,...</literal> according to
+                        <literal>FORMATSPEC</literal> which is a C-style
+                        format spec.</para>
+
+                        <para>Note: The GMAT <code>sprintf</code> function
+                        calls through to the sprintf function in the c-library
+                        <code>iostream</code>. Additionally, the GMAT script
+                        language does not support an integer data type, only
+                        doubles.</para>
+
+                        <para>A format spec follows this prototype:</para>
+
+                        <para><literal>%[flags][width][.precision][length]specifier</literal></para>
+                      </listitem>
+                    </varlistentry>
+                  </variablelist></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <informaltable colsep="0" frame="topbot">
+          <tgroup cols="2">
+            <colspec colnum="1" colwidth=".5*"/>
+
+            <colspec colnum="2" colwidth="3*"/>
+
+            <tbody>
+              <row>
+                <entry><guilabel>Specifiers</guilabel></entry>
+
+                <entry><variablelist>
+                    <varlistentry>
+                      <term><literal>a</literal></term>
+
+                      <listitem>
+                        <para>Hexadecimal floating point, lowercase.</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>A</literal></term>
+
+                      <listitem>
+                        <para>Hexadecimal floating point, uppercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>e</literal></term>
+
+                      <listitem>
+                        <para>Scientific notation (mantissa/exponent),
+                        lowercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>E</literal></term>
+
+                      <listitem>
+                        <para>Scientific notation (mantissa/exponent),
+                        uppercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>f</literal></term>
+
+                      <listitem>
+                        <para>Decimal floating point, lowercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>F</literal></term>
+
+                      <listitem>
+                        <para>Decimal floating point, uppercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>g</literal></term>
+
+                      <listitem>
+                        <para>Use the shortest representation: %e or %f</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>G</literal></term>
+
+                      <listitem>
+                        <para>Use the shortest representation: %E or %F</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>o</literal></term>
+
+                      <listitem>
+                        <para>Unsigned octal</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>x</literal></term>
+
+                      <listitem>
+                        <para>Unsigned hexadecimal integer, lowercase</para>
+                      </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                      <term><literal>X</literal></term>
+
+                      <listitem>
+                        <para>Unsigned hexadecimal integer, uppercase</para>
+                      </listitem>
+                    </varlistentry>
+                  </variablelist></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+
+        <para><informaltable colsep="0" frame="topbot">
+            <tgroup cols="2">
+              <colspec colnum="1" colwidth=".5*"/>
+
+              <colspec colnum="2" colwidth="3*"/>
+
+              <tbody>
+                <row>
+                  <entry><guilabel>Flags</guilabel></entry>
+
+                  <entry><variablelist>
+                      <varlistentry>
+                        <term><literal>+</literal></term>
+
+                        <listitem>
+                          <para>Forces to preceed the result with a plus or
+                          minus sign (+ or -) even for positive numbers. By
+                          default, only negative numbers are preceded with a -
+                          sign.</para>
+                        </listitem>
+                      </varlistentry>
+
+                      <varlistentry>
+                        <term><literal>-</literal></term>
+
+                        <listitem>
+                          <para>Left-justify within the given field width;
+                          Right justification is the default (see width
+                          sub-specifier).</para>
+                        </listitem>
+                      </varlistentry>
+
+                      <varlistentry>
+                        <term><literal>#</literal></term>
+
+                        <listitem>
+                          <para>Used with o, x or X specifiers the value is
+                          preceeded with 0, 0x or 0X respectively for values
+                          different than zero. Used with a, A, e, E, f, F, g
+                          or G it forces the written output to contain a
+                          decimal point even if no more digits follow. By
+                          default, if no digits follow, no decimal point is
+                          written.</para>
+                        </listitem>
+                      </varlistentry>
+
+                      <varlistentry>
+                        <term><literal>0</literal></term>
+
+                        <listitem>
+                          <para>Left-pads the number with zeroes (0) instead
+                          of spaces when padding is specified (see width
+                          sub-specifier).</para>
+                        </listitem>
+                      </varlistentry>
+
+                      <varlistentry>
+                        <term><literal>(space)</literal></term>
+
+                        <listitem>
+                          <para>If no sign is going to be written, a blank
+                          space is inserted before the value.</para>
+                        </listitem>
+                      </varlistentry>
+                    </variablelist></entry>
+                </row>
+
+                <row>
+                  <entry><guilabel>Width</guilabel></entry>
+
+                  <entry><variablelist>
+                      <varlistentry>
+                        <term><literal/></term>
+
+                        <listitem>
+                          <para>Minimum number of characters to be printed. If
+                          the value to be printed is shorter than this number,
+                          the result is padded with blank spaces. The value is
+                          not truncated even if the result is larger.</para>
+                        </listitem>
+                      </varlistentry>
+                    </variablelist></entry>
+                </row>
+
+                <row>
+                  <entry><guilabel>Precision</guilabel></entry>
+
+                  <entry><variablelist>
+                      <varlistentry>
+                        <term><literal/></term>
+
+                        <listitem>
+                          <para>For a, A, e, E, f and F specifiers: this is
+                          the number of digits to be printed after the decimal
+                          point (by default, this is 6).</para>
+
+                          <para>For g and G specifiers: This is the maximum
+                          number of significant digits to be printed.</para>
+
+                          <para>For s: this is the maximum number of
+                          characters to be printed. By default all characters
+                          are printed until the ending null character is
+                          encountered. If the period is specified without an
+                          explicit value for precision, 0 is assumed.</para>
+
+                          <para>Integer specifiers are not supported as GMAT
+                          does not have an integer data type in the script
+                          language.</para>
+                        </listitem>
+                      </varlistentry>
+                    </variablelist></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable></para>
       </refsection>
     </refsection>
   </refsection>

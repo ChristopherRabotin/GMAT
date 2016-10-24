@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -83,6 +93,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("SpacePoint");
    mObjectTypeList.Add("ImpulsiveBurn");
+   mObjectTypeList.Add("FiniteBurn");
    
    Create();
    Show();
@@ -278,22 +289,22 @@ void XyPlotSetupPanel::Create()
    // plot option
    //------------------------------------------------------
    showPlotCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Show "GUI_ACCEL_KEY"Plot"),
-                     wxDefaultPosition, wxSize(100, -1), 0);
+      new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show " GUI_ACCEL_KEY "Plot"),
+                     wxDefaultPosition, wxDefaultSize, 0);
    showPlotCheckBox->SetToolTip(pConfig->Read(_T("ShowPlotHint")));
    
    showGridCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Show "GUI_ACCEL_KEY"Grid"),
-                     wxDefaultPosition, wxSize(100, -1), 0);
+      new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show " GUI_ACCEL_KEY "Grid"),
+                     wxDefaultPosition, wxDefaultSize, 0);
    showGridCheckBox->SetToolTip(pConfig->Read(_T("ShowGridHint")));
    
    //----- Solver Iteration ComboBox
    wxStaticText *solverIterLabel =
-      new wxStaticText(this, -1, wxT(GUI_ACCEL_KEY"Solver Iterations"),
+      new wxStaticText(this, -1, gmatwxT(GUI_ACCEL_KEY"Solver Iterations"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1),
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize,
                      emptyList, wxCB_READONLY);
    mSolverIterComboBox->SetToolTip(pConfig->Read(_T("SolverIterationsHint")));
    
@@ -325,14 +336,14 @@ void XyPlotSetupPanel::Create()
                     emptyList, wxLB_SINGLE|wxLB_HSCROLL);
    mXSelectedListBox->SetToolTip(pConfig->Read(_T("SelectedXHint")));
    
-   mViewXButton = new wxButton(this, ID_BUTTON, "Edit "GUI_ACCEL_KEY"X",
+   mViewXButton = new wxButton(this, ID_BUTTON, "Edit " GUI_ACCEL_KEY "X",
                                wxDefaultPosition, wxDefaultSize, 0);
    mViewXButton->SetToolTip(pConfig->Read(_T("SelectXHint")));
    
    GmatStaticBoxSizer *xSelectedBoxSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Selected X");
    
-   xSelectedBoxSizer->Add(mXSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   xSelectedBoxSizer->Add(mXSelectedListBox, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    xSelectedBoxSizer->Add(mViewXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
@@ -343,31 +354,31 @@ void XyPlotSetupPanel::Create()
                     emptyList, wxLB_SINGLE|wxLB_HSCROLL);
    mYSelectedListBox->SetToolTip(pConfig->Read(_T("SelectedYHint")));
    
-   mViewYButton = new wxButton(this, ID_BUTTON, "Edit "GUI_ACCEL_KEY"Y",
+   mViewYButton = new wxButton(this, ID_BUTTON, "Edit " GUI_ACCEL_KEY "Y",
                                wxDefaultPosition, wxDefaultSize, 0);
    mViewYButton->SetToolTip(pConfig->Read(_T("SelectYHint")));
    
    GmatStaticBoxSizer *ySelectedBoxSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Selected Y");
    
-   ySelectedBoxSizer->Add(mYSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   ySelectedBoxSizer->Add(mYSelectedListBox, 1, wxALIGN_CENTRE| wxEXPAND |wxALL, bsize);
    ySelectedBoxSizer->Add(mViewYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------
-   wxFlexGridSizer *plotSizer = new wxFlexGridSizer(3, 0, 0);
+   wxBoxSizer *plotSizer = new wxBoxSizer(wxHORIZONTAL);
    plotSizer->Add(optionSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   plotSizer->Add(xSelectedBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   plotSizer->Add(ySelectedBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   plotSizer->Add(xSelectedBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   plotSizer->Add(ySelectedBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   pageBoxSizer->Add(plotSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(plotSizer, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(pageBoxSizer, 1, wxALIGN_CENTRE | wxEXPAND | wxALL, bsize);
    
 }
 
@@ -474,7 +485,7 @@ void XyPlotSetupPanel::SaveData()
       clonedObj->Activate(showPlotCheckBox->IsChecked());
       clonedObj->SetBooleanParameter(XyPlot::SHOW_GRID, showGridCheckBox->IsChecked());
       clonedObj->SetStringParameter(Subscriber::SOLVER_ITERATIONS,
-                                  mSolverIterComboBox->GetValue().c_str());
+                                    mSolverIterComboBox->GetValue().c_str());
       
       // set X parameter
       if (mXParamChanged)

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -981,9 +981,6 @@
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
@@ -1100,9 +1097,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.cpp">
       <Filter>Source Files\base\forcemodel\harmonic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
-      <Filter>Source Files\base\forcemodel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp">
       <Filter>Source Files\base\subscriber</Filter>
@@ -1268,6 +1262,93 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\parameter\PlanetodeticParameters.cpp">
       <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\AttitudeConversionUtility.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\attitude\CCSDSAttitude.cpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalTank.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalThruster.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricTank.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\ColorDatabase.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSAEMSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMReader.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\CCSDSEMSegment.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2195,9 +2276,6 @@
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
@@ -2329,9 +2407,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.hpp">
       <Filter>Source Files\base\forcemodel\harmonic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
-      <Filter>Source Files\base\forcemodel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp">
       <Filter>Source Files\base\subscriber</Filter>
@@ -2497,6 +2572,93 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\PlanetodeticParameters.hpp">
       <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\AttitudeConversionUtility.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\attitude\CCSDSAttitude.hpp">
+      <Filter>Source Files\base\attitude</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMEulerAngleSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMQuaternionSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalTank.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalThruster.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricTank.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanLongParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\BrouwerMeanShortParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\IncomingAsymptoteParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\ColorDatabase.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp">
+      <Filter>Source Files\base\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSAEMSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMReader.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\CCSDSEMSegment.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp">
+      <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

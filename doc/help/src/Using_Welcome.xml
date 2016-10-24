@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="WelcomeToGmat"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -9,16 +9,13 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title xml:id="Welcome">Welcome to GMAT</title>
 
-  <para>Do you want to go Mars but don't know when to leave or how much to
-  bring? Do you want to study Earth protection by planning a mission to a
-  near-Earth asteroid? The General Mission Analysis Tool (GMAT) is an
-  open-source space mission design tool to answer just those types of
-  questions. GMAT is designed to model and optimize spacecraft trajectories in
-  flight regimes ranging from low Earth orbit to lunar, libration point , and
-  deep space missions. GMAT is developed by a team of NASA, private industry,
-  public, and private contributors and is used for real-world engineering
-  studies, as a tool for education and public engagement, and as of  R2013b released in Nov. 
-  2013, to fly operational spacecraft.</para>
+  <para>The General Mission Analysis Tool (GMAT) is the world’s only
+  enterprise, multi-mission, open source software system for space mission
+  design, optimization, and navigation. The system supports missions in flight
+  regimes ranging from low Earth orbit to lunar, libration point, and deep
+  space missions. GMAT is developed by a team of NASA, private industry,
+  public, and private contributors and is used for real-world mission support,
+  engineering studies, as a tool for education, and public engagement.</para>
 
   <section>
     <title>Features Overview</title>
@@ -30,6 +27,13 @@
     GMAT can be driven from a fully featured, interactive GUI or from a custom
     script language. Here are some of GMAT’s key features broken down by
     feature group.</para>
+
+    <para>Release R2016a is the first version of GMAT to contain production
+    navigation functionality. We've also added the ability to read and export
+    script snippets from external files, the ability to write STK .e ephem
+    files, and added many new built-in math functions. See the <link
+    linkend="ReleaseNotesR2016a">R2016a Release Notes</link> for other
+    additions and bug fixes.</para>
 
     <section>
       <title>Dynamics and Environment Modelling</title>
@@ -53,8 +57,8 @@
         </listitem>
 
         <listitem>
-          <para>Propulsion system modeling including tanks and
-          thrusters</para>
+          <para>Propulsion system modeling including chemical and electric
+          system</para>
         </listitem>
 
         <listitem>
@@ -96,6 +100,10 @@
 
         <listitem>
           <para>CCSDS, SPK, and Code-500 ephemeris generation</para>
+        </listitem>
+
+        <listitem>
+          <para>Eclipse and station contact location</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -150,8 +158,51 @@
         </listitem>
 
         <listitem>
+          <para>Python interface</para>
+        </listitem>
+
+        <listitem>
+          <para>User-defined functions (sub-routines)</para>
+        </listitem>
+
+        <listitem>
           <para>Built in parameters and calculations in multiple coordinate
           systems</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Orbit Determination Infrastructure</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Batch estimator</para>
+        </listitem>
+
+        <listitem>
+          <para>Extensive statistical results reporting</para>
+        </listitem>
+
+        <listitem>
+          <para>DSN data types</para>
+        </listitem>
+
+        <listitem>
+          <para>Beta SN and GN data types (turned off but can be turned on for
+          experimentation)</para>
+        </listitem>
+
+        <listitem>
+          <para>Measurement data editing</para>
+        </listitem>
+
+        <listitem>
+          <para>Media corrections</para>
+        </listitem>
+
+        <listitem>
+          <para>Error modeling</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -175,16 +226,33 @@
           calculations</para>
         </listitem>
 
-		<listitem>
-          <para>File interface for the TCOPS Vector Hold File format, for
-		  loading of initial spacecraft data</para>
+        <listitem>
+          <para>Python interface for custom external simulations and
+          calculations</para>
         </listitem>
-		
+
+        <listitem>
+          <para>File interface for the TCOPS Vector Hold File format, for
+          loading of initial spacecraft data</para>
+        </listitem>
+
         <listitem>
           <para>Command line interface for batch analysis</para>
         </listitem>
       </itemizedlist>
     </section>
+  </section>
+
+  <section>
+    <title>Heritage</title>
+
+    <para>GMAT has enabled and enhanced missions in nearly every NASA flight
+    regime including enabling new mission types, extending the life of
+    existing missions, and enabling new science observations. GMAT has
+    supported 8 NASA missions and 10+ NASA proposal efforts. The system has
+    experienced broad application and adoption around the world. To date, GMAT
+    has been used by over 30 organizations, with 15 universities and 12
+    commercial firms publishing results in the open literature.</para>
   </section>
 
   <section>
@@ -197,14 +265,15 @@
     <title>Platform Support</title>
 
     <para>GMAT has been rigorously tested on the Windows 7 platform and we
-    perform nightly regression tests running almost 12,000 test cases for the
-    script engine and over 4000 test cases for the GUI interface.</para>
+    perform nightly regression tests running almost 13,000 test cases for the
+    system core and over 4000 test cases for the GUI interface.</para>
 
-    <para>While the system is routinely built on Mac and Linux, we consider
-    the software to be in alpha form on those plaforms. For release R2014a, we
-    have only addressed issues on Mac and Linux that also occur on the Windows
-    7 platform. Part of our planning effort for the next release will be to
-    assess the future of GMAT on Mac and Linux.</para>
+    <para>For release R2016a, we have addressed issues on Windows including
+    the GUI, and the Mac and Linux console (GUI is provided but is in alpha
+    form on Mac and Linux).</para>
+
+    <para>Note that this is the last 32-bit version of GMAT on Windows. Future
+    versions will be 64-bit on all platforms.</para>
   </section>
 
   <section>
@@ -215,8 +284,10 @@
     most phases of the development process including requirements, algorithms,
     design, and testing. The Ground Software Systems Branch performs design,
     implementation, and integration testing. External particpants contribute
-    to design, implementation, testing and documentation. External
-    participants for R2014a include:</para>
+    to design, implementation, testing and documentation. We use a
+    collaborative development model that enables innovation and actively
+    involves the public and private sector having seen contributions from 12
+    commercial firms. External participants for R2015a include:</para>
 
     <itemizedlist>
       <listitem>
@@ -225,21 +296,25 @@
       </listitem>
 
       <listitem>
-        <para>a.i. solutions (testing)</para>
+        <para>Omitron, Inc (testing, requirements, specifications)</para>
       </listitem>
-      
+
       <listitem>
-        <para>Korean Aerospace Research Institute</para>
+        <para>Emergent Space Technologies, Inc.</para>
       </listitem>
-      
+
+      <listitem>
+        <para>Korea Aerospace Research Institute</para>
+      </listitem>
+
       <listitem>
         <para>Chonbuk National University, South Korea</para>
       </listitem>
-      
+
       <listitem>
         <para>Korea Advanced Institute of Science and Technology</para>
       </listitem>
-      
+
       <listitem>
         <para>Yonsei University, South Korea</para>
       </listitem>

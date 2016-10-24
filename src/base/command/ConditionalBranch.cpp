@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -442,13 +452,49 @@ bool ConditionalBranch::Initialize()
    // Set references for the wrappers   
    #ifdef DEBUG_CONDITIONS_INIT
    MessageInterface::ShowMessage
-      ("ConditionalBranch::Initialize() this='%s', Setting refs for %d lhs wrappers\n",
-       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), lhsWrappers.size());
+      ("\nConditionalBranch::Initialize() this='%s' entered, Setting refs for "
+       "%d lhs wrappers\n", GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       lhsWrappers.size());
    #endif
    #ifdef DEBUG_OBJECT_MAP
    ShowObjectMaps();
    #endif
    
+   // Handle LHS references to clones
+   for (std::vector<ElementWrapper*>::iterator i = lhsWrappers.begin();
+        i < lhsWrappers.end(); i++)
+   {
+      std::string wrapperDesc = (*i)->GetDescription();
+      #ifdef DEBUG_CONDITIONS_INIT
+      MessageInterface::ShowMessage("   wrapper desc = '%s'\n", wrapperDesc.c_str());
+      #endif
+      Gmat::WrapperDataType wrapperType = (*i)->GetWrapperType();
+      
+      if (wrapperType == Gmat::PARAMETER_WT)
+      {
+         GmatBase *mapObj = FindObject(wrapperDesc);
+         if (mapObj == NULL)
+         {
+            std::string msg = "Object named \"" + wrapperDesc +
+               "\" cannot be found for the command '" +
+               GetGeneratingString(Gmat::NO_COMMENTS) + "'";
+            #ifdef DEBUG_CONDITIONS_INIT
+            MessageInterface::ShowMessage("**** ERROR **** %s\n", msg.c_str());
+            #endif
+            throw CommandException(msg);
+         }
+         
+         if (!mapObj->IsOfType("Parameter"))
+            throw CommandException("Parameter type mismatch for " + mapObj->GetName());
+         
+         Parameter *param = (Parameter *)mapObj;
+         
+         if (param->NeedExternalClone())
+            HandleReferencesToClones(param);
+      }
+   }
+   
+   // Now set LHS wrapper references
    for (std::vector<ElementWrapper*>::iterator i = lhsWrappers.begin();
         i < lhsWrappers.end(); i++)
    {
@@ -469,6 +515,41 @@ bool ConditionalBranch::Initialize()
        rhsWrappers.size());
    #endif
    
+   // Handle RHS references to clones
+   for (std::vector<ElementWrapper*>::iterator i = rhsWrappers.begin();
+        i < rhsWrappers.end(); i++)
+   {
+      std::string wrapperDesc = (*i)->GetDescription();
+      #ifdef DEBUG_CONDITIONS_INIT
+      MessageInterface::ShowMessage("   wrapper desc = '%s'\n", wrapperDesc.c_str());
+      #endif
+      Gmat::WrapperDataType wrapperType = (*i)->GetWrapperType();
+      
+      if (wrapperType == Gmat::PARAMETER_WT)
+      {
+         GmatBase *mapObj = FindObject(wrapperDesc);
+         if (mapObj == NULL)
+         {
+            std::string msg = "Object named \"" + wrapperDesc +
+               "\" cannot be found for the command '" +
+               GetGeneratingString(Gmat::NO_COMMENTS) + "'";
+            #ifdef DEBUG_CONDITIONS_INIT
+            MessageInterface::ShowMessage("**** ERROR **** %s\n", msg.c_str());
+            #endif
+            throw CommandException(msg);
+         }
+         
+         if (!mapObj->IsOfType("Parameter"))
+            throw CommandException("Parameter type mismatch for " + mapObj->GetName());
+         
+         Parameter *param = (Parameter *)mapObj;
+         
+         if (param->NeedExternalClone())
+            HandleReferencesToClones(param);
+      }
+   }
+   
+   // Set RHS wrapper refererences
    for (std::vector<ElementWrapper*>::iterator j = rhsWrappers.begin();
         j < rhsWrappers.end(); j++)
    {
@@ -1049,12 +1130,12 @@ const StringArray& ConditionalBranch::GetWrapperObjectNameArray(bool completeSet
          wrapperObjectNames.push_back((*j));
    }
    
-   #ifdef DEBUG_WRAPPERS
+   #ifdef DEBUG_WRAPPER_CODE
       MessageInterface::ShowMessage
          ("ConditionalBranch::GetWrapperObjectNameArray() %s wrapper names are:\n",
-          cmd->GetTypeName().c_str());
-      for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
-         MessageInterface::ShowMessage("      %s\n", wrapperNames[ii].c_str());
+          GetTypeName().c_str());
+      for (Integer ii=0; ii < (Integer) wrapperObjectNames.size(); ii++)
+         MessageInterface::ShowMessage("      %s\n", wrapperObjectNames[ii].c_str());
    #endif
       
    return wrapperObjectNames;

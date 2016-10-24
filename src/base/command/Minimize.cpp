@@ -4,9 +4,19 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2014 United States Government as represented by the
-// Administrator of The National Aeronautics and Space Administration.
+// Copyright (c) 2002 - 2015 United States Government as represented by the
+// Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// You may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0. 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+// express or implied.   See the License for the specific language
+// governing permissions and limitations under the License.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P
@@ -819,12 +829,12 @@ bool Minimize::Execute()
 {
    #ifdef DEBUG_MINIMIZE_EXEC // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
    MessageInterface::ShowMessage
-      ("Minimize::Execute() optimizerDataFinalized=%d\n, optimizer=%s, objective=%p\n", 
+      ("Minimize::Execute() optimizerDataFinalized=%d\n   optimizer=%p, objective=%p\n", 
        optimizerDataFinalized, optimizer, objective);
    MessageInterface::ShowMessage
       ("   objectiveName=%s\n", objectiveName.c_str());
    if (objective)
-      MessageInterface::ShowMessage("   objective=%s\n", objective->GetName().c_str());
+      MessageInterface::ShowMessage("   objective=%s\n", objective->GetDescription().c_str());
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    
    bool retval = true;
@@ -847,9 +857,9 @@ bool Minimize::Execute()
       val = objective->EvaluateReal();
       #ifdef DEBUG_MINIMIZE_EXEC // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
          MessageInterface::ShowMessage
-            ("   objective=%s, %p\n", objective->GetTypeName().c_str(), objective);
+            ("   objective=%s, %p\n", objective->GetDescription().c_str(), objective);
          MessageInterface::ShowMessage("   Parameter target: %s val = %lf\n",
-            objective->GetTypeName().c_str(), val);
+            objective->GetDescription().c_str(), val);
       #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
       optimizer->SetResultValue(objId, val, "Objective");
    }
