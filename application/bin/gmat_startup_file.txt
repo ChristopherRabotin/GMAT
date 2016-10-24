@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# General Mission Analysis Tool (GMAT) startup file
+# General Mission Analysis Tool (GMAT) startup file 
 #-------------------------------------------------------------------------------
 # Comment lines start with #
 #
